@@ -20,7 +20,7 @@ class TestSubtyping
       T.assert_type!(nil, T.all(SameArityChild[Integer], Parent[String])) # error: argument does not have asserted type T.all(SameArityChild[Integer], Parent[String])
       parent = T.cast(nil, Parent[Integer])
       if parent.is_a?(DifferentArityChild)
-        T.assert_type!(parent, DifferentArityChild[Integer, String])
+        T.assert_type!(parent, DifferentArityChild[Integer])
       end
     end
   end

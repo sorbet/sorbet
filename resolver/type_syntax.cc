@@ -229,25 +229,12 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::Context ctx, unique_ptr<a
                  // TODO: reduce this^^^ set.
                  auto sym = i->symbol.data(ctx).dealias(ctx);
                  if (sym.data(ctx).isClass()) {
-                     if (sym.data(ctx).typeMembers().empty()) {
-                         result = make_shared<core::ClassType>(sym);
-                     } else {
-                         std::vector<shared_ptr<core::Type>> targs;
-                         for (auto &UNUSED(arg) : sym.data(ctx).typeMembers()) {
-                             targs.emplace_back(core::Types::dynamic());
-                         }
-                         if (sym == core::Symbols::Hash()) {
-                             while (targs.size() < 3) {
-                                 targs.emplace_back(core::Types::dynamic());
-                             }
-                         }
-                         result = make_shared<core::AppliedType>(sym, targs);
-                         if (!silenceGenericError) {
-                             ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                             "Malformed type declaration. Generic class without type arguments {}",
-                                             i->toString(ctx));
-                         }
+                     if (sym.data(ctx).typeArity(ctx) > 0 && !silenceGenericError) {
+                         ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                         "Malformed type declaration. Generic class without type arguments {}",
+                                         i->toString(ctx));
                      }
+                     result = sym.data(ctx).externalType(ctx);
                  } else if (sym.data(ctx).isTypeMember()) {
                      result = make_shared<core::LambdaParam>(sym);
                  } else {
@@ -320,59 +307,28 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::Context ctx, unique_ptr<a
                                      "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
                  }
 
-                 if (recvi->symbol == core::Symbols::T_Array()) {
-                     if (s->args.size() != 1) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed T::Array[]: Expected 1 type argument");
-                         result = core::Types::dynamic();
-                         return;
-                     }
-                     auto elem = getResultType(ctx, s->args[0]);
-                     std::vector<shared_ptr<core::Type>> targs;
-                     targs.emplace_back(move(elem));
-                     result = make_shared<core::AppliedType>(core::Symbols::Array(), move(targs));
-                 } else if (recvi->symbol == core::Symbols::T_Hash()) {
-                     if (s->args.size() != 2) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed T::Hash[]: Expected 2 type arguments");
-                         result = core::Types::dynamic();
-                         return;
-                     }
-                     auto key = getResultType(ctx, s->args[0]);
-                     auto value = getResultType(ctx, s->args[1]);
-                     std::vector<shared_ptr<core::Type>> targs;
-
-                     targs.emplace_back(move(key));
-                     targs.emplace_back(move(value));
-                     targs.emplace_back(core::Types::dynamic());
-                     result = make_shared<core::AppliedType>(core::Symbols::Hash(), move(targs));
-                 } else if (recvi->symbol == core::Symbols::T_Enumerable()) {
-                     if (s->args.size() != 1) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed T::Enumerable[]: Expected 1 type argument");
-                         result = core::Types::dynamic();
-                         return;
-                     }
-                     auto elem = getResultType(ctx, s->args[0]);
-                     std::vector<shared_ptr<core::Type>> targs;
-                     targs.emplace_back(move(elem));
-                     result = make_shared<core::AppliedType>(core::Symbols::Enumerable(), move(targs));
-                 } else {
-                     auto &data = recvi->symbol.data(ctx);
-                     if (s->args.size() != data.typeMembers().size()) {
-                         ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                         "Malformed {}[]: Expected {} type arguments, got {}", data.name.toString(ctx),
-                                         data.typeMembers().size(), s->args.size());
-                         result = core::Types::dynamic();
-                         return;
-                     }
-                     std::vector<shared_ptr<core::Type>> targs;
-                     for (auto &arg : s->args) {
-                         auto elem = getResultType(ctx, arg);
-                         targs.emplace_back(move(elem));
-                     }
-                     result = make_shared<core::AppliedType>(recvi->symbol, move(targs));
+                 std::vector<core::TypeAndOrigins> targs;
+                 for (auto &arg : s->args) {
+                     core::TypeAndOrigins ty;
+                     ty.origins.emplace_back(arg->loc);
+                     ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg));
+                     targs.emplace_back(ty);
                  }
+                 auto ctype = make_shared<core::ClassType>(recvi->symbol.data(ctx).singletonClass(ctx));
+                 auto out = ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, targs, ctype, nullptr);
+
+                 if (out->isDynamic()) {
+                     result = out;
+                     return;
+                 }
+                 if (auto *mt = core::cast_type<core::MetaType>(out.get())) {
+                     result = mt->wrapped;
+                     return;
+                 }
+
+                 ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                 "Illegal type expression. Unknown type {}", out->toString(ctx));
+                 result = core::Types::dynamic();
              },
              [&](ast::Self *slf) {
                  core::SymbolRef klass = ctx.owner.data(ctx).enclosingClass(ctx);

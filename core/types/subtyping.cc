@@ -923,6 +923,11 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
         return false;
+    } else if (isa_type<MetaType>(t1.get()) || isa_type<MetaType>(t2.get())) {
+        // MetaTypes are not a subclass of anything and nothing is a subclass of
+        // them. Correct code should never reach this point, but erroneous code
+        // can (e.g. `puts(T::Array[String])`).
+        return false;
     } else {
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
             if (auto *c2 = cast_type<ClassType>(t2.get())) {
@@ -1023,7 +1028,7 @@ std::string MetaType::toString(const GlobalState &gs, int tabs) {
 }
 
 std::string MetaType::show(const GlobalState &gs) {
-    Error::raise("should never happen");
+    return "<Type: " + wrapped->show(gs) + ">";
 }
 
 std::string MetaType::typeName() {

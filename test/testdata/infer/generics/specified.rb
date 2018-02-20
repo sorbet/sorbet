@@ -64,6 +64,9 @@ end
 class FullChild < HalfChild
   K = type_member(fixed: Integer)
   V = type_member(fixed: String)
+
+  sig(f: FullChild).returns(FullChild[])
+  def f(f); f; end
 end
 
 class ParentEnumerable

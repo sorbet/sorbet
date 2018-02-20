@@ -518,6 +518,11 @@ public:
                             if (key && key->name == core::Names::fixed()) {
                                 // Leave it in the tree for the resolver to chew on.
                                 sym.data(ctx).setFixed();
+
+                                // TODO(nelhage): This creates an order
+                                // dependency in the resolver. See RUBYPLAT-520
+                                sym.data(ctx).resultType = core::Types::dynamic();
+
                                 asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
                                 return asgn;
                             }

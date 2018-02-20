@@ -337,15 +337,18 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 attachedClass = core::Symbols::Enumerable();
             }
 
+            auto arity = attachedClass.data(ctx).typeArity(ctx);
+            if (attachedClass == core::Symbols::Hash()) {
+                arity = 2;
+            }
             if (attachedClass.data(ctx).typeMembers().empty()) {
                 return nullptr;
             }
 
-            auto arity = attachedClass.data(ctx).typeArity(ctx);
             if (args.size() != arity) {
                 ctx.state.error(callLoc, core::errors::Infer::GenericArgumentCountMismatch,
                                 "Wrong number of type parameters for {}. Expected {}, got {}",
-                                attachedClass.data(ctx).fullName(ctx), arity, targs.size());
+                                attachedClass.data(ctx).fullName(ctx), arity, args.size());
             }
 
             vector<shared_ptr<core::Type>> targs;

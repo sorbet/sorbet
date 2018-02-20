@@ -725,6 +725,1459 @@ module Warning
 end
 class ZeroDivisionError < StandardError
 end
+class CSV
+  extend T::Generic
+  Elem = type_member(fixed: T::Array[String])
+
+  sig(
+      path: T.any(String, File),
+      options: T::Hash[Symbol, BasicObject],
+      blk: T.proc(arg0: T::Array[String]).returns(BasicObject),
+  )
+  .returns(NilClass)
+  def self.foreach(path, options=_, &blk); end
+
+  sig.returns(CSV)
+  def clone(); end
+
+  sig.returns(CSV)
+  def dup(); end
+
+  sig.returns(CSV)
+  def freeze(); end
+
+  sig.returns(CSV)
+  def taint(); end
+
+  sig.returns(CSV)
+  def trust(); end
+
+  sig.returns(CSV)
+  def untaint(); end
+
+  sig.returns(CSV)
+  def untrust(); end
+end
+
+class Dir
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
+  sig(
+      arg0: T.any(String, Pathname),
+  )
+  .returns(Integer)
+  sig(
+      arg0: T.any(String, Pathname),
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.chdir(arg0=_, &blk); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def self.chroot(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def self.delete(arg0); end
+
+  sig(
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(T::Array[String])
+  def self.entries(arg0, arg1=_); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.exist?(file); end
+
+  sig(
+      dir: String,
+      arg0: Encoding,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      dir: String,
+      arg0: Encoding,
+  )
+  .returns(Enumerator[String])
+  def self.foreach(dir, arg0=_, &blk); end
+
+  sig.returns(String)
+  def self.getwd(); end
+
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+  )
+  .returns(T::Array[String])
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  def self.glob(pattern, flags=_, &blk); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  def self.home(arg0=_); end
+
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(Integer)
+  def self.mkdir(arg0, arg1=_); end
+
+  sig(
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(Dir)
+  sig(
+      arg0: String,
+      arg1: Encoding,
+      blk: T.proc(arg0: Dir).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.open(arg0, arg1=_, &blk); end
+
+  sig.returns(String)
+  def self.pwd(); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def self.rmdir(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def self.unlink(arg0); end
+
+  sig.returns(Dir)
+  def clone(); end
+
+  sig.returns(NilClass)
+  def close(); end
+
+  sig.returns(Dir)
+  def dup(); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(Dir)
+  sig.returns(Enumerator[String])
+  def each(&blk); end
+
+  sig.returns(Integer)
+  def fileno(); end
+
+  sig.returns(Dir)
+  def freeze(); end
+
+  sig(
+      arg0: String,
+      arg1: Encoding,
+  )
+  .returns(Object)
+  def initialize(arg0, arg1=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(T.any(String, NilClass))
+  def path(); end
+
+  sig.returns(Integer)
+  def pos(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def pos=(arg0); end
+
+  sig.returns(T.any(String, NilClass))
+  def read(); end
+
+  sig.returns(Dir)
+  def rewind(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Dir)
+  def seek(arg0); end
+
+  sig.returns(Dir)
+  def taint(); end
+
+  sig.returns(Integer)
+  def tell(); end
+
+  sig.returns(T.any(String, NilClass))
+  def to_path(); end
+
+  sig.returns(Dir)
+  def trust(); end
+
+  sig.returns(Dir)
+  def untaint(); end
+
+  sig.returns(Dir)
+  def untrust(); end
+
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+  )
+  .returns(T::Array[String])
+  sig(
+      pattern: T.any(String, T::Array[String]),
+      flags: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  def self.[](pattern, flags=_, &blk); end
+end
+
+class File
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
+  sig(
+      file: String,
+      dir: String,
+  )
+  .returns(String)
+  def self.absolute_path(file, dir=_); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.atime(file); end
+
+  sig(
+      file: String,
+      suffix: String,
+  )
+  .returns(String)
+  def self.basename(file, suffix=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(String)
+  sig(
+      arg0: String,
+      arg1: Integer,
+  )
+  .returns(String)
+  sig(
+      arg0: String,
+      arg1: Integer,
+      arg2: Integer,
+  )
+  .returns(String)
+  def self.binread(arg0, arg1=_, arg2=_); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.birthtime(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.blockdev?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.chardev?(file); end
+
+  sig(
+      mode: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.chmod(mode, *files); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.chown(owner, group, *files); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.ctime(file); end
+
+  sig(
+      files: String,
+  )
+  .returns(Integer)
+  def self.delete(*files); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.directory?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(String)
+  def self.dirname(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.executable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.executable_real?(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.exist?(file); end
+
+  sig(
+      file: BasicObject,
+      dir: BasicObject,
+  )
+  .returns(String)
+  def self.expand_path(file, dir=_); end
+
+  sig(
+      path: String,
+  )
+  .returns(String)
+  def self.extname(path); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.file?(file); end
+
+  sig(
+      pattern: String,
+      path: String,
+      flags: Integer,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.fnmatch(pattern, path, flags=_); end
+
+  sig(
+      file: String,
+  )
+  .returns(String)
+  def self.ftype(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.grpowned?(file); end
+
+  sig(
+      file_1: T.any(String, IO),
+      file_2: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.identical?(file_1, file_2); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(String)
+  def self.join(*arg0); end
+
+  sig(
+      mode: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.lchmod(mode, *files); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+      files: String,
+  )
+  .returns(Integer)
+  def self.lchown(owner, group, *files); end
+
+  sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.link(old, new); end
+
+  sig(
+      file: String,
+  )
+  .returns(File::Stat)
+  def self.lstat(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(Time)
+  def self.mtime(file); end
+
+  sig(
+      file: String,
+      perm: String,
+      opt: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+  )
+  .returns(File)
+  sig(
+      file: BasicObject,
+      mode: String,
+      perm: String,
+      opt: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      blk: T.proc(arg0: File).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.open(file=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.owned?(file); end
+
+  sig(
+      path: String,
+  )
+  .returns(String)
+  def self.path(path); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.pipe?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.readable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.readable_real?(file); end
+
+  sig(
+      link: String,
+  )
+  .returns(String)
+  def self.readlink(link); end
+
+  sig(
+      pathname: String,
+      dir: String,
+  )
+  .returns(String)
+  def self.realdirpath(pathname, dir=_); end
+
+  sig(
+      pathname: String,
+      dir: String,
+  )
+  .returns(String)
+  def self.realpath(pathname, dir=_); end
+
+  sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.rename(old, new); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.setgid?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.setuid?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(Integer)
+  def self.size(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.size?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.socket?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns([String, String])
+  def self.split(file); end
+
+  sig(
+      file: BasicObject,
+  )
+  .returns(File::Stat)
+  def self.stat(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.sticky?(file); end
+
+  sig(
+      old: String,
+      new: String,
+  )
+  .returns(Integer)
+  def self.symlink(old, new); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.symlink?(file); end
+
+  sig(
+      file: String,
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.truncate(file, arg0); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def self.umask(arg0=_); end
+
+  sig(
+      atime: Time,
+      mtime: Time,
+      files: String,
+  )
+  .returns(Integer)
+  def self.utime(atime, mtime, *files); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.world_readable?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.world_writable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.writable?(file); end
+
+  sig(
+      file: String,
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.writable_real?(file); end
+
+  sig(
+      file: T.any(String, IO),
+  )
+  .returns(T.any(Integer, NilClass))
+  def self.zero?(file); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(File)
+  def <<(arg0); end
+
+  sig.returns(Time)
+  def atime(); end
+
+  sig.returns(File)
+  def binmode(); end
+
+  sig.returns(Time)
+  def birthtime(); end
+
+  sig(
+      mode: Integer,
+  )
+  .returns(Integer)
+  def chmod(mode); end
+
+  sig(
+      owner: Integer,
+      group: Integer,
+  )
+  .returns(Integer)
+  def chown(owner, group); end
+
+  sig.returns(File)
+  def clone(); end
+
+  sig.returns(Time)
+  def ctime(); end
+
+  sig.returns(File)
+  def dup(); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(File)
+  def each(sep=_, limit=_, &blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(File)
+  def each_byte(&blk); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(File)
+  def each_char(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(File)
+  def each_codepoint(&blk); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(Integer, TrueClass, FalseClass))
+  def flock(arg0); end
+
+  sig.returns(File)
+  def flush(); end
+
+  sig.returns(File)
+  def freeze(); end
+
+  sig(
+      file: String,
+      mode: String,
+      perm: String,
+      opt: Integer,
+  )
+  .returns(Object)
+  def initialize(file, mode=_, perm=_, opt=_); end
+
+  sig.returns(File::Stat)
+  def lstat(); end
+
+  sig.returns(Time)
+  def mtime(); end
+
+  sig.returns(String)
+  def path(); end
+
+  sig(
+      ext_or_ext_int_enc: T.any(String, Encoding),
+  )
+  .returns(File)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
+  )
+  .returns(File)
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+
+  sig.returns(Integer)
+  def size(); end
+
+  sig.returns(File)
+  def taint(); end
+
+  sig.returns(File)
+  def to_io(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def truncate(arg0); end
+
+  sig.returns(File)
+  def trust(); end
+
+  sig.returns(File)
+  def untaint(); end
+
+  sig.returns(File)
+  def untrust(); end
+
+  sig(
+      pattern: String,
+      path: String,
+      flags: Integer,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def self.fnmatch?(pattern, path, flags=_); end
+
+  sig(
+      files: String,
+  )
+  .returns(Integer)
+  def self.unlink(*files); end
+
+  sig.returns(String)
+  def to_path(); end
+end
+
+class IO
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(IO)
+  def <<(arg0); end
+
+  sig(
+      arg0: Symbol,
+      offset: Integer,
+      len: Integer,
+  )
+  .returns(NilClass)
+  def advise(arg0, offset=_, len=_); end
+
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def autoclose=(arg0); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def autoclose?(); end
+
+  sig.returns(IO)
+  def binmode(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def binmode?(); end
+
+  sig.returns(IO)
+  def clone(); end
+
+  sig.returns(NilClass)
+  def close(); end
+
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def close_on_exec=(arg0); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def close_on_exec?(); end
+
+  sig.returns(NilClass)
+  def close_read(); end
+
+  sig.returns(NilClass)
+  def close_write(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def closed?(); end
+
+  sig.returns(IO)
+  def dup(); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(IO)
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(Enumerator[String])
+  def each(sep=_, limit=_, &blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def each_byte(&blk); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[String])
+  def each_char(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def each_codepoint(&blk); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def eof(); end
+
+  sig(
+      integer_cmd: Integer,
+      arg: T.any(String, Integer),
+  )
+  .returns(Integer)
+  def fcntl(integer_cmd, arg); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def fdatasync(); end
+
+  sig.returns(Integer)
+  def fileno(); end
+
+  sig.returns(IO)
+  def flush(); end
+
+  sig.returns(IO)
+  def freeze(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def fsync(); end
+
+  sig.returns(T.any(Integer, NilClass))
+  def getbyte(); end
+
+  sig.returns(T.any(String, NilClass))
+  def getc(); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  def gets(sep=_, limit=_); end
+
+  sig(
+      fd: Integer,
+      mode: Integer,
+      opt: Integer,
+  )
+  .returns(Object)
+  def initialize(fd, mode=_, opt=_); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig.returns(Encoding)
+  def internal_encoding(); end
+
+  sig(
+      integer_cmd: Integer,
+      arg: T.any(String, Integer),
+  )
+  .returns(Integer)
+  def ioctl(integer_cmd, arg); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def isatty(); end
+
+  sig.returns(Integer)
+  def lineno(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def lineno=(arg0); end
+
+  sig.returns(Integer)
+  def pid(); end
+
+  sig.returns(Integer)
+  def pos(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  def pos=(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def print(*arg0); end
+
+  sig(
+      format_string: String,
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def printf(format_string, *arg0); end
+
+  sig(
+      arg0: T.any(Numeric, String),
+  )
+  .returns(T.untyped)
+  def putc(arg0); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(NilClass)
+  def puts(*arg0); end
+
+  sig(
+      length: Integer,
+      outbuf: String,
+  )
+  .returns(T.any(String, NilClass))
+  def read(length=_, outbuf=_); end
+
+  sig(
+      len: Integer,
+  )
+  .returns(String)
+  sig(
+      len: Integer,
+      buf: String,
+  )
+  .returns(String)
+  def read_nonblock(len, buf=_); end
+
+  sig.returns(Integer)
+  def readbyte(); end
+
+  sig.returns(String)
+  def readchar(); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(String)
+  def readline(sep=_, limit=_); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(T::Array[String])
+  def readlines(sep=_, limit=_); end
+
+  sig(
+      maxlen: Integer,
+  )
+  .returns(String)
+  sig(
+      maxlen: Integer,
+      outbuf: String,
+  )
+  .returns(String)
+  def readpartial(maxlen, outbuf=_); end
+
+  sig(
+      other_IO: IO,
+  )
+  .returns(IO)
+  sig(
+      path: String,
+      mode_str: String,
+  )
+  .returns(IO)
+  def reopen(other_IO, mode_str=_); end
+
+  sig.returns(Integer)
+  def rewind(); end
+
+  sig(
+      amount: Integer,
+      whence: Integer,
+  )
+  .returns(Integer)
+  def seek(amount, whence=_); end
+
+  sig(
+      ext_or_ext_int_enc: T.any(String, Encoding),
+  )
+  .returns(IO)
+  sig(
+      ext_enc: T.any(String, Encoding),
+      int_enc: T.any(String, Encoding),
+  )
+  .returns(IO)
+  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+
+  sig.returns(File::Stat)
+  def stat(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def sync(); end
+
+  sig(
+      arg0: T.any(TrueClass, FalseClass),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def sync=(arg0); end
+
+  sig(
+      maxlen: Integer,
+      outbuf: String,
+  )
+  .returns(String)
+  def sysread(maxlen, outbuf); end
+
+  sig(
+      amount: Integer,
+      whence: Integer,
+  )
+  .returns(Integer)
+  def sysseek(amount, whence=_); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def syswrite(arg0); end
+
+  sig.returns(IO)
+  def taint(); end
+
+  sig.returns(Integer)
+  def tell(); end
+
+  sig.returns(IO)
+  def to_io(); end
+
+  sig.returns(IO)
+  def trust(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def tty?(); end
+
+  sig(
+      arg0: T.any(String, Integer),
+  )
+  .returns(NilClass)
+  def ungetbyte(arg0); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(NilClass)
+  def ungetc(arg0); end
+
+  sig.returns(IO)
+  def untaint(); end
+
+  sig.returns(IO)
+  def untrust(); end
+
+  sig(
+      arg0: String,
+  )
+  .returns(Integer)
+  def write(arg0); end
+
+  sig(
+      name: String,
+      length: Integer,
+      offset: Integer,
+  )
+  .returns(String)
+  def self.binread(name, length=_, offset=_); end
+
+  sig(
+      name: String,
+      arg0: String,
+      offset: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(Integer)
+  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+
+  sig(
+      src: T.any(String, IO),
+      dst: T.any(String, IO),
+      copy_length: Integer,
+      src_offset: Integer,
+  )
+  .returns(Integer)
+  def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
+
+  sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(NilClass)
+  sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(Enumerator[String])
+  def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+
+  sig(
+      fd: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(IO)
+  sig(
+      fd: Integer,
+      mode: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: IO).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+
+  sig(
+      ext_or_ext_int_enc: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns([IO, IO])
+  sig(
+      ext_enc: String,
+      int_enc: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns([IO, IO])
+  sig(
+      ext_or_ext_int_enc: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  sig(
+      ext_enc: String,
+      int_enc: String,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
+  )
+  .returns(T.untyped)
+  def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+
+  sig(
+      name: String,
+      length: Integer,
+      offset: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(String)
+  def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+
+  sig(
+      name: String,
+      sep: String,
+      limit: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(T::Array[String])
+  def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+
+  sig(
+      read_array: T::Array[IO],
+      write_array: T::Array[IO],
+      error_array: T::Array[IO],
+      timeout: Integer,
+  )
+  .returns(T.any(T::Array[IO], NilClass))
+  def self.select(read_array, write_array=_, error_array=_, timeout=_); end
+
+  sig(
+      path: String,
+      mode: String,
+      perm: String,
+  )
+  .returns(Integer)
+  def self.sysopen(path, mode=_, perm=_); end
+
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.any(IO, NilClass))
+  def self.try_convert(arg0); end
+
+  sig(
+      name: String,
+      arg0: String,
+      offset: Integer,
+      external_encoding: String,
+      internal_encoding: String,
+      encoding: String,
+      textmode: BasicObject,
+      binmode: BasicObject,
+      autoclose: BasicObject,
+      mode: String,
+  )
+  .returns(Integer)
+  def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+
+  sig(
+      fd: Integer,
+      mode: Integer,
+      opt: Integer,
+  )
+  .returns(IO)
+  def self.for_fd(fd, mode=_, opt=_); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def bytes(&blk); end
+
+  sig(
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[String])
+  def chars(&blk); end
+
+  sig(
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(IO)
+  sig.returns(Enumerator[Integer])
+  def codepoints(&blk); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(IO)
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(Enumerator[String])
+  def each_line(sep=_, limit=_, &blk); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def eof?(); end
+
+  sig(
+      sep: String,
+      limit: Integer,
+      blk: T.proc(arg0: String).returns(BasicObject),
+  )
+  .returns(IO)
+  sig(
+      sep: String,
+      limit: Integer,
+  )
+  .returns(Enumerator[String])
+  def lines(sep=_, limit=_, &blk); end
+
+  sig.returns(Integer)
+  def to_i(); end
+end
+
+class StringIO
+  extend T::Generic
+  Elem = type_member(fixed: String)
+
+  sig.returns(StringIO)
+  def clone(); end
+
+  sig.returns(StringIO)
+  def dup(); end
+
+  sig.returns(StringIO)
+  def freeze(); end
+
+  sig.returns(StringIO)
+  def taint(); end
+
+  sig.returns(StringIO)
+  def trust(); end
+
+  sig.returns(StringIO)
+  def untaint(); end
+
+  sig.returns(StringIO)
+  def untrust(); end
+end
+
+class Struct
+  extend T::Generic
+  Elem = type_member(fixed: T.untyped)
+
+  sig.returns(Struct)
+  def clone(); end
+
+  sig.returns(Struct)
+  def dup(); end
+
+  sig.returns(Struct)
+  def freeze(); end
+
+  sig.returns(Struct)
+  def taint(); end
+
+  sig.returns(Struct)
+  def trust(); end
+
+  sig.returns(Struct)
+  def untaint(); end
+
+  sig.returns(Struct)
+  def untrust(); end
+end
+
 module Abbrev
   sig(
       words: T::Array[String],
@@ -2084,40 +3537,6 @@ class Binding
   def untrust(); end
 end
 
-class CSV
-  extend T::Generic
-  Elem = type_member(fixed: T::Array[String])
-
-  sig(
-      path: T.any(String, File),
-      options: T::Hash[Symbol, BasicObject],
-      blk: T.proc(arg0: T::Array[String]).returns(BasicObject),
-  )
-  .returns(NilClass)
-  def self.foreach(path, options=_, &blk); end
-
-  sig.returns(CSV)
-  def clone(); end
-
-  sig.returns(CSV)
-  def dup(); end
-
-  sig.returns(CSV)
-  def freeze(); end
-
-  sig.returns(CSV)
-  def taint(); end
-
-  sig.returns(CSV)
-  def trust(); end
-
-  sig.returns(CSV)
-  def untaint(); end
-
-  sig.returns(CSV)
-  def untrust(); end
-end
-
 class Class
   sig.returns(T.untyped)
   def allocate(); end
@@ -2588,204 +4007,6 @@ class DateTime
 
   sig.returns(DateTime)
   def untrust(); end
-end
-
-class Dir
-  extend T::Generic
-  Elem = type_member(fixed: String)
-
-  sig(
-      arg0: T.any(String, Pathname),
-  )
-  .returns(Integer)
-  sig(
-      arg0: T.any(String, Pathname),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.chdir(arg0=_, &blk); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.chroot(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.delete(arg0); end
-
-  sig(
-      arg0: String,
-      arg1: Encoding,
-  )
-  .returns(T::Array[String])
-  def self.entries(arg0, arg1=_); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.exist?(file); end
-
-  sig(
-      dir: String,
-      arg0: Encoding,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  sig(
-      dir: String,
-      arg0: Encoding,
-  )
-  .returns(Enumerator[String])
-  def self.foreach(dir, arg0=_, &blk); end
-
-  sig.returns(String)
-  def self.getwd(); end
-
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-  )
-  .returns(T::Array[String])
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  def self.glob(pattern, flags=_, &blk); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def self.home(arg0=_); end
-
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(Integer)
-  def self.mkdir(arg0, arg1=_); end
-
-  sig(
-      arg0: String,
-      arg1: Encoding,
-  )
-  .returns(Dir)
-  sig(
-      arg0: String,
-      arg1: Encoding,
-      blk: T.proc(arg0: Dir).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.open(arg0, arg1=_, &blk); end
-
-  sig.returns(String)
-  def self.pwd(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.rmdir(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def self.unlink(arg0); end
-
-  sig.returns(Dir)
-  def clone(); end
-
-  sig.returns(NilClass)
-  def close(); end
-
-  sig.returns(Dir)
-  def dup(); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(Dir)
-  sig.returns(Enumerator[String])
-  def each(&blk); end
-
-  sig.returns(Integer)
-  def fileno(); end
-
-  sig.returns(Dir)
-  def freeze(); end
-
-  sig(
-      arg0: String,
-      arg1: Encoding,
-  )
-  .returns(Object)
-  def initialize(arg0, arg1=_); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(T.any(String, NilClass))
-  def path(); end
-
-  sig.returns(Integer)
-  def pos(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def pos=(arg0); end
-
-  sig.returns(T.any(String, NilClass))
-  def read(); end
-
-  sig.returns(Dir)
-  def rewind(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Dir)
-  def seek(arg0); end
-
-  sig.returns(Dir)
-  def taint(); end
-
-  sig.returns(Integer)
-  def tell(); end
-
-  sig.returns(T.any(String, NilClass))
-  def to_path(); end
-
-  sig.returns(Dir)
-  def trust(); end
-
-  sig.returns(Dir)
-  def untaint(); end
-
-  sig.returns(Dir)
-  def untrust(); end
-
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-  )
-  .returns(T::Array[String])
-  sig(
-      pattern: T.any(String, T::Array[String]),
-      flags: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  def self.[](pattern, flags=_, &blk); end
 end
 
 class EOFError
@@ -3551,553 +4772,6 @@ class FiberError
 
   sig.returns(FiberError)
   def untrust(); end
-end
-
-class File
-  extend T::Generic
-  Elem = type_member(fixed: String)
-
-  sig(
-      file: String,
-      dir: String,
-  )
-  .returns(String)
-  def self.absolute_path(file, dir=_); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.atime(file); end
-
-  sig(
-      file: String,
-      suffix: String,
-  )
-  .returns(String)
-  def self.basename(file, suffix=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  sig(
-      arg0: String,
-      arg1: Integer,
-      arg2: Integer,
-  )
-  .returns(String)
-  def self.binread(arg0, arg1=_, arg2=_); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.birthtime(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.blockdev?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.chardev?(file); end
-
-  sig(
-      mode: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.chmod(mode, *files); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.chown(owner, group, *files); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.ctime(file); end
-
-  sig(
-      files: String,
-  )
-  .returns(Integer)
-  def self.delete(*files); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.directory?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(String)
-  def self.dirname(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.executable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.executable_real?(file); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.exist?(file); end
-
-  sig(
-      file: BasicObject,
-      dir: BasicObject,
-  )
-  .returns(String)
-  def self.expand_path(file, dir=_); end
-
-  sig(
-      path: String,
-  )
-  .returns(String)
-  def self.extname(path); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.file?(file); end
-
-  sig(
-      pattern: String,
-      path: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.fnmatch(pattern, path, flags=_); end
-
-  sig(
-      file: String,
-  )
-  .returns(String)
-  def self.ftype(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.grpowned?(file); end
-
-  sig(
-      file_1: T.any(String, IO),
-      file_2: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.identical?(file_1, file_2); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(String)
-  def self.join(*arg0); end
-
-  sig(
-      mode: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.lchmod(mode, *files); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
-  )
-  .returns(Integer)
-  def self.lchown(owner, group, *files); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.link(old, new); end
-
-  sig(
-      file: String,
-  )
-  .returns(File::Stat)
-  def self.lstat(file); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(Time)
-  def self.mtime(file); end
-
-  sig(
-      file: String,
-      perm: String,
-      opt: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-  )
-  .returns(File)
-  sig(
-      file: BasicObject,
-      mode: String,
-      perm: String,
-      opt: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      blk: T.proc(arg0: File).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.open(file=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.owned?(file); end
-
-  sig(
-      path: String,
-  )
-  .returns(String)
-  def self.path(path); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.pipe?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.readable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.readable_real?(file); end
-
-  sig(
-      link: String,
-  )
-  .returns(String)
-  def self.readlink(link); end
-
-  sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
-  def self.realdirpath(pathname, dir=_); end
-
-  sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
-  def self.realpath(pathname, dir=_); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.rename(old, new); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.setgid?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.setuid?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(Integer)
-  def self.size(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.size?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.socket?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns([String, String])
-  def self.split(file); end
-
-  sig(
-      file: BasicObject,
-  )
-  .returns(File::Stat)
-  def self.stat(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.sticky?(file); end
-
-  sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
-  def self.symlink(old, new); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.symlink?(file); end
-
-  sig(
-      file: String,
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.truncate(file, arg0); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def self.umask(arg0=_); end
-
-  sig(
-      atime: Time,
-      mtime: Time,
-      files: String,
-  )
-  .returns(Integer)
-  def self.utime(atime, mtime, *files); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.world_readable?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.world_writable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.writable?(file); end
-
-  sig(
-      file: String,
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.writable_real?(file); end
-
-  sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(Integer, NilClass))
-  def self.zero?(file); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(File)
-  def <<(arg0); end
-
-  sig.returns(Time)
-  def atime(); end
-
-  sig.returns(File)
-  def binmode(); end
-
-  sig.returns(Time)
-  def birthtime(); end
-
-  sig(
-      mode: Integer,
-  )
-  .returns(Integer)
-  def chmod(mode); end
-
-  sig(
-      owner: Integer,
-      group: Integer,
-  )
-  .returns(Integer)
-  def chown(owner, group); end
-
-  sig.returns(File)
-  def clone(); end
-
-  sig.returns(Time)
-  def ctime(); end
-
-  sig.returns(File)
-  def dup(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(File)
-  def each(sep=_, limit=_, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(File)
-  def each_byte(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(File)
-  def each_char(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(File)
-  def each_codepoint(&blk); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, TrueClass, FalseClass))
-  def flock(arg0); end
-
-  sig.returns(File)
-  def flush(); end
-
-  sig.returns(File)
-  def freeze(); end
-
-  sig(
-      file: String,
-      mode: String,
-      perm: String,
-      opt: Integer,
-  )
-  .returns(Object)
-  def initialize(file, mode=_, perm=_, opt=_); end
-
-  sig.returns(File::Stat)
-  def lstat(); end
-
-  sig.returns(Time)
-  def mtime(); end
-
-  sig.returns(String)
-  def path(); end
-
-  sig(
-      ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  sig(
-      ext_enc: T.any(String, Encoding),
-      int_enc: T.any(String, Encoding),
-  )
-  .returns(File)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
-
-  sig.returns(Integer)
-  def size(); end
-
-  sig.returns(File)
-  def taint(); end
-
-  sig.returns(File)
-  def to_io(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def truncate(arg0); end
-
-  sig.returns(File)
-  def trust(); end
-
-  sig.returns(File)
-  def untaint(); end
-
-  sig.returns(File)
-  def untrust(); end
-
-  sig(
-      pattern: String,
-      path: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def self.fnmatch?(pattern, path, flags=_); end
-
-  sig(
-      files: String,
-  )
-  .returns(Integer)
-  def self.unlink(*files); end
-
-  sig.returns(String)
-  def to_path(); end
 end
 
 class File::Stat
@@ -5091,628 +5765,6 @@ class Hash
   )
   .returns(T::Array[V])
   def values_at(*arg0); end
-end
-
-class IO
-  extend T::Generic
-  Elem = type_member(fixed: String)
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(IO)
-  def <<(arg0); end
-
-  sig(
-      arg0: Symbol,
-      offset: Integer,
-      len: Integer,
-  )
-  .returns(NilClass)
-  def advise(arg0, offset=_, len=_); end
-
-  sig(
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def autoclose=(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def autoclose?(); end
-
-  sig.returns(IO)
-  def binmode(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def binmode?(); end
-
-  sig.returns(IO)
-  def clone(); end
-
-  sig.returns(NilClass)
-  def close(); end
-
-  sig(
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def close_on_exec=(arg0); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def close_on_exec?(); end
-
-  sig.returns(NilClass)
-  def close_read(); end
-
-  sig.returns(NilClass)
-  def close_write(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def closed?(); end
-
-  sig.returns(IO)
-  def dup(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(Enumerator[String])
-  def each(sep=_, limit=_, &blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def each_byte(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[String])
-  def each_char(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def each_codepoint(&blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def eof(); end
-
-  sig(
-      integer_cmd: Integer,
-      arg: T.any(String, Integer),
-  )
-  .returns(Integer)
-  def fcntl(integer_cmd, arg); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def fdatasync(); end
-
-  sig.returns(Integer)
-  def fileno(); end
-
-  sig.returns(IO)
-  def flush(); end
-
-  sig.returns(IO)
-  def freeze(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def fsync(); end
-
-  sig.returns(T.any(Integer, NilClass))
-  def getbyte(); end
-
-  sig.returns(T.any(String, NilClass))
-  def getc(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(T.any(String, NilClass))
-  def gets(sep=_, limit=_); end
-
-  sig(
-      fd: Integer,
-      mode: Integer,
-      opt: Integer,
-  )
-  .returns(Object)
-  def initialize(fd, mode=_, opt=_); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig.returns(Encoding)
-  def internal_encoding(); end
-
-  sig(
-      integer_cmd: Integer,
-      arg: T.any(String, Integer),
-  )
-  .returns(Integer)
-  def ioctl(integer_cmd, arg); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def isatty(); end
-
-  sig.returns(Integer)
-  def lineno(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def lineno=(arg0); end
-
-  sig.returns(Integer)
-  def pid(); end
-
-  sig.returns(Integer)
-  def pos(); end
-
-  sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
-  def pos=(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def print(*arg0); end
-
-  sig(
-      format_string: String,
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def printf(format_string, *arg0); end
-
-  sig(
-      arg0: T.any(Numeric, String),
-  )
-  .returns(T.untyped)
-  def putc(arg0); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(NilClass)
-  def puts(*arg0); end
-
-  sig(
-      length: Integer,
-      outbuf: String,
-  )
-  .returns(T.any(String, NilClass))
-  def read(length=_, outbuf=_); end
-
-  sig(
-      len: Integer,
-  )
-  .returns(String)
-  sig(
-      len: Integer,
-      buf: String,
-  )
-  .returns(String)
-  def read_nonblock(len, buf=_); end
-
-  sig.returns(Integer)
-  def readbyte(); end
-
-  sig.returns(String)
-  def readchar(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(String)
-  def readline(sep=_, limit=_); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(T::Array[String])
-  def readlines(sep=_, limit=_); end
-
-  sig(
-      maxlen: Integer,
-  )
-  .returns(String)
-  sig(
-      maxlen: Integer,
-      outbuf: String,
-  )
-  .returns(String)
-  def readpartial(maxlen, outbuf=_); end
-
-  sig(
-      other_IO: IO,
-  )
-  .returns(IO)
-  sig(
-      path: String,
-      mode_str: String,
-  )
-  .returns(IO)
-  def reopen(other_IO, mode_str=_); end
-
-  sig.returns(Integer)
-  def rewind(); end
-
-  sig(
-      amount: Integer,
-      whence: Integer,
-  )
-  .returns(Integer)
-  def seek(amount, whence=_); end
-
-  sig(
-      ext_or_ext_int_enc: T.any(String, Encoding),
-  )
-  .returns(IO)
-  sig(
-      ext_enc: T.any(String, Encoding),
-      int_enc: T.any(String, Encoding),
-  )
-  .returns(IO)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
-
-  sig.returns(File::Stat)
-  def stat(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def sync(); end
-
-  sig(
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def sync=(arg0); end
-
-  sig(
-      maxlen: Integer,
-      outbuf: String,
-  )
-  .returns(String)
-  def sysread(maxlen, outbuf); end
-
-  sig(
-      amount: Integer,
-      whence: Integer,
-  )
-  .returns(Integer)
-  def sysseek(amount, whence=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def syswrite(arg0); end
-
-  sig.returns(IO)
-  def taint(); end
-
-  sig.returns(Integer)
-  def tell(); end
-
-  sig.returns(IO)
-  def to_io(); end
-
-  sig.returns(IO)
-  def trust(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def tty?(); end
-
-  sig(
-      arg0: T.any(String, Integer),
-  )
-  .returns(NilClass)
-  def ungetbyte(arg0); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(NilClass)
-  def ungetc(arg0); end
-
-  sig.returns(IO)
-  def untaint(); end
-
-  sig.returns(IO)
-  def untrust(); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(Integer)
-  def write(arg0); end
-
-  sig(
-      name: String,
-      length: Integer,
-      offset: Integer,
-  )
-  .returns(String)
-  def self.binread(name, length=_, offset=_); end
-
-  sig(
-      name: String,
-      arg0: String,
-      offset: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Integer)
-  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      src: T.any(String, IO),
-      dst: T.any(String, IO),
-      copy_length: Integer,
-      src_offset: Integer,
-  )
-  .returns(Integer)
-  def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
-
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Enumerator[String])
-  def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
-
-  sig(
-      fd: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(IO)
-  sig(
-      fd: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: IO).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
-
-  sig(
-      ext_or_ext_int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns([IO, IO])
-  sig(
-      ext_enc: String,
-      int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns([IO, IO])
-  sig(
-      ext_or_ext_int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  sig(
-      ext_enc: String,
-      int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
-  )
-  .returns(T.untyped)
-  def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
-
-  sig(
-      name: String,
-      length: Integer,
-      offset: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(String)
-  def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(T::Array[String])
-  def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      read_array: T::Array[IO],
-      write_array: T::Array[IO],
-      error_array: T::Array[IO],
-      timeout: Integer,
-  )
-  .returns(T.any(T::Array[IO], NilClass))
-  def self.select(read_array, write_array=_, error_array=_, timeout=_); end
-
-  sig(
-      path: String,
-      mode: String,
-      perm: String,
-  )
-  .returns(Integer)
-  def self.sysopen(path, mode=_, perm=_); end
-
-  sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(IO, NilClass))
-  def self.try_convert(arg0); end
-
-  sig(
-      name: String,
-      arg0: String,
-      offset: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Integer)
-  def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
-
-  sig(
-      fd: Integer,
-      mode: Integer,
-      opt: Integer,
-  )
-  .returns(IO)
-  def self.for_fd(fd, mode=_, opt=_); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def bytes(&blk); end
-
-  sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[String])
-  def chars(&blk); end
-
-  sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(IO)
-  sig.returns(Enumerator[Integer])
-  def codepoints(&blk); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(Enumerator[String])
-  def each_line(sep=_, limit=_, &blk); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def eof?(); end
-
-  sig(
-      sep: String,
-      limit: Integer,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(IO)
-  sig(
-      sep: String,
-      limit: Integer,
-  )
-  .returns(Enumerator[String])
-  def lines(sep=_, limit=_, &blk); end
-
-  sig.returns(Integer)
-  def to_i(); end
 end
 
 class IOError
@@ -11516,32 +11568,6 @@ class String
   def slice(arg0, arg1=_); end
 end
 
-class StringIO
-  extend T::Generic
-  Elem = type_member(fixed: String)
-
-  sig.returns(StringIO)
-  def clone(); end
-
-  sig.returns(StringIO)
-  def dup(); end
-
-  sig.returns(StringIO)
-  def freeze(); end
-
-  sig.returns(StringIO)
-  def taint(); end
-
-  sig.returns(StringIO)
-  def trust(); end
-
-  sig.returns(StringIO)
-  def untaint(); end
-
-  sig.returns(StringIO)
-  def untrust(); end
-end
-
 class StringScanner
   sig(
       arg0: String,
@@ -11561,32 +11587,6 @@ class StringScanner
   )
   .returns(String)
   def scan(arg0); end
-end
-
-class Struct
-  extend T::Generic
-  Elem = type_member(fixed: T.untyped)
-
-  sig.returns(Struct)
-  def clone(); end
-
-  sig.returns(Struct)
-  def dup(); end
-
-  sig.returns(Struct)
-  def freeze(); end
-
-  sig.returns(Struct)
-  def taint(); end
-
-  sig.returns(Struct)
-  def trust(); end
-
-  sig.returns(Struct)
-  def untaint(); end
-
-  sig.returns(Struct)
-  def untrust(); end
 end
 
 class Symbol
