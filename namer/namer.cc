@@ -89,40 +89,47 @@ class NameInserter {
     vector<LocalFrame> scopeStack;
     u4 scopeId;
 
-    unique_ptr<ast::Expression> addAncestor(core::MutableContext ctx, ast::ClassDef *klass,
-                                            unique_ptr<ast::Expression> &node) {
+    bool addAncestor(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
-            return nullptr;
+            return false;
         }
 
-        if (send->fun != core::Names::include()) {
-            return nullptr;
+        ast::ClassDef::ANCESTORS_store *dest;
+        if (send->fun == core::Names::include()) {
+            dest = &klass->ancestors;
+        } else if (send->fun == core::Names::extend()) {
+            dest = &klass->singleton_ancestors;
+        } else {
+            return false;
         }
         if (!ast::isa_tree<ast::Self>(send->recv.get())) {
             // ignore `something.include`
-            return nullptr;
+            return false;
         }
 
         if (send->args.size() != 1) {
             ctx.state.error(send->loc, core::errors::Namer::IncludeMutipleParam,
-                            "`include` should only be passed a single constant. You passed {} parameters.",
-                            send->args.size());
-            return nullptr;
+                            "`{}` should only be passed a single constant. You passed {} parameters.",
+                            send->fun.data(ctx).show(ctx), send->args.size());
+            return false;
         }
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
             ctx.state.error(send->loc, core::errors::Namer::IncludeNotConstant,
-                            "`include` must be passed a constant literal. You passed a {}.", send->args[0]->nodeName());
-            return nullptr;
+                            "`{}` must be passed a constant literal. You passed a {}.", send->fun.data(ctx).show(ctx),
+                            send->args[0]->nodeName());
+            return false;
         }
         if (send->block != nullptr) {
-            ctx.state.error(send->loc, core::errors::Namer::IncludePassedBlock, "`include` can not be passed a block.");
-            return nullptr;
+            ctx.state.error(send->loc, core::errors::Namer::IncludePassedBlock, "`{}` can not be passed a block.",
+                            send->fun.data(ctx).show(ctx));
+            return false;
         }
-        // TODO check that send->block is empty
-        return move(send->args[0]);
+
+        dest->emplace_back(move(send->args[0]));
+        return true;
     }
 
     void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
@@ -180,14 +187,8 @@ public:
         }
 
         auto toRemove =
-            remove_if(klass->rhs.begin(), klass->rhs.end(), [this, ctx, klass](unique_ptr<ast::Expression> &line) {
-                auto newAncestor = addAncestor(ctx, klass, line);
-                if (newAncestor) {
-                    klass->ancestors.emplace_back(move(newAncestor));
-                    return true;
-                }
-                return false;
-            });
+            remove_if(klass->rhs.begin(), klass->rhs.end(),
+                      [this, ctx, klass](unique_ptr<ast::Expression> &line) { return addAncestor(ctx, klass, line); });
         klass->symbol.data(ctx).definitionLoc = klass->loc;
         klass->symbol.data(ctx).resultType = make_unique<core::ClassType>(klass->symbol.data(ctx).singletonClass(ctx));
         klass->rhs.erase(toRemove, klass->rhs.end());

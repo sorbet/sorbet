@@ -85,6 +85,7 @@ NameDef names[] = {
     // end CFG temporaries
 
     {"include", Namer | Resolver},
+    {"extend", Namer | Resolver},
     {"currentFile", "__FILE__", Desugar},
     {"merge", Desugar},
 

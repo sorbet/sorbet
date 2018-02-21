@@ -150,7 +150,7 @@ public:
     u4 flags;
 
     /*
-     * mixins and superclasses: `superClass`A is *not* included in the
+     * mixins and superclasses: `superClass` is *not* included in the
      *   `argumentsOrMixins` list. `superClass` may not exist even if
      *   `isClass()`, which implies that this symbol is either a module or one
      *   of our magic synthetic classes. During parsing+naming, `superClass ==

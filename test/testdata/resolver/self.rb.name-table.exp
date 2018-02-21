@@ -4,7 +4,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument s<> -> TestSelf
     method pass () -> TestSelf
   class <constant:TestSelfGeneric>[<constant:Elem>] < ::<constant:Object> () -> <Class:TestSelfGeneric>
-    method <static-init> ()
     method good1 (s) -> AppliedType {
       klass = ::<constant:TestSelfGeneric>
       targs = [
@@ -25,6 +24,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     }
     typeMember(=) <constant:Elem>
   class <singleton class:<constant:TestSelf>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:TestSelfGeneric>> < ::<singleton class:<constant:Object>> ()
+  class <singleton class:<constant:TestSelfGeneric>> < ::<singleton class:<constant:Object>> (<constant:Generic>)
   method <static-init>$8 ()
 

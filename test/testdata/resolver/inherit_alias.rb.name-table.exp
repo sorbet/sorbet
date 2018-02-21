@@ -1,0 +1,9 @@
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:NS> (<constant:BasicObject>) -> <Class:NS>
+    class <constant:C1> < ::<constant:Object> () -> <Class:NS::C1>
+    class <constant:Dest> < ::<constant:Object> () -> <Class:NS::Dest>
+    class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> ()
+    class <singleton class:<constant:Dest>> < ::<singleton class:<constant:Object>> ()
+    static-field <constant:Alias> -> AliasType { symbol = ::<constant:NS>::<constant:Dest> }
+  class <singleton class:<constant:NS>> < ::<constant:Module> ()
+

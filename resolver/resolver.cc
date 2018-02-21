@@ -90,6 +90,28 @@ private:
         return nullptr;
     }
 
+    core::SymbolRef resolveAncestor(core::MutableContext ctx, core::SymbolRef klass,
+                                    unique_ptr<ast::Expression> &tree) {
+        if (auto resolved = maybeResolve(ctx, tree.get())) {
+            tree.swap(resolved);
+        }
+
+        ast::Ident *id = ast::cast_tree<ast::Ident>(tree.get());
+        if (id == nullptr || !id->symbol.data(ctx).isClass()) {
+            ctx.state.error(tree->loc, core::errors::Resolver::DynamicSuperclass,
+                            "Superclasses and mixins must be statically resolved.");
+            return core::Symbols::noSymbol();
+        }
+        if (id->symbol == klass || id->symbol.data(ctx).derivesFrom(ctx, klass)) {
+            ctx.state.error(id->loc, core::errors::Resolver::CircularDependency,
+                            "Circular dependency: {} and {} are declared as parents of each other",
+                            klass.data(ctx).name.toString(ctx), id->symbol.data(ctx).name.toString(ctx));
+            return core::Symbols::noSymbol();
+        }
+
+        return id->symbol;
+    }
+
 public:
     ResolveConstantsWalk(core::MutableContext ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
@@ -100,43 +122,38 @@ public:
     ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
         nesting_ = move(nesting_->parent);
 
-        for (auto &ancst : original->ancestors) {
-            if (auto resolved = maybeResolve(ctx, ancst.get())) {
-                ancst.swap(resolved);
-            }
+        core::SymbolRef klass = original->symbol;
+        if (original->kind == ast::Module && klass.data(ctx).mixins(ctx).empty()) {
+            klass.data(ctx).mixins(ctx).emplace_back(core::Symbols::BasicObject());
         }
-        core::Symbol &data = original->symbol.data(ctx);
-        if (original->kind == ast::Module && data.mixins(ctx).empty()) {
-            data.mixins(ctx).emplace_back(core::Symbols::BasicObject());
-        }
-        for (auto &ancst : original->ancestors) {
-            ast::Ident *id = ast::cast_tree<ast::Ident>(ancst.get());
-            if (id == nullptr || !id->symbol.data(ctx).isClass()) {
-                ctx.state.error(ancst->loc, core::errors::Resolver::DynamicSuperclass,
-                                "Superclasses and mixins must be statically resolved.");
-                continue;
-            }
-            if (id->symbol == original->symbol || id->symbol.data(ctx).derivesFrom(ctx, original->symbol)) {
-                ctx.state.error(id->loc, core::errors::Resolver::CircularDependency,
-                                "Circular dependency: {} and {} are declared as parents of each other",
-                                original->symbol.data(ctx).name.toString(ctx), id->symbol.data(ctx).name.toString(ctx));
-                continue;
-            }
 
+        for (auto &ancst : original->ancestors) {
+            auto sym = resolveAncestor(ctx, klass, ancst);
+            if (!sym.exists()) {
+                continue;
+            }
             if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
-                if (id->symbol == core::Symbols::todo()) {
-                    continue;
-                }
-                if (!data.superClass.exists() || data.superClass == core::Symbols::todo() ||
-                    data.superClass == id->symbol) {
-                    data.superClass = id->symbol;
+                // Don't emplace the superclass onto the `mixins` list; See the
+                // comment on Symbol::argumentsOrMixins for some context.
+                if (sym == core::Symbols::todo()) {
+                    // No superclass specified
+                } else if (!klass.data(ctx).superClass.exists() ||
+                           klass.data(ctx).superClass == core::Symbols::todo() || klass.data(ctx).superClass == sym) {
+                    klass.data(ctx).superClass = sym;
                 } else {
-                    ctx.state.error(id->loc, core::errors::Resolver::RedefinitionOfParents,
-                                    "Class parents redefined for class {}",
-                                    original->symbol.data(ctx).name.toString(ctx));
+                    ctx.state.error(ancst->loc, core::errors::Resolver::RedefinitionOfParents,
+                                    "Class parents redefined for class {}", original->symbol.data(ctx).show(ctx));
                 }
             } else {
-                data.argumentsOrMixins.emplace_back(id->symbol);
+                klass.data(ctx).mixins(ctx).emplace_back(sym);
+            }
+        }
+
+        auto singleton = klass.data(ctx).singletonClass(ctx);
+        for (auto &ancst : original->singleton_ancestors) {
+            auto sym = resolveAncestor(ctx, singleton, ancst);
+            if (sym.exists()) {
+                singleton.data(ctx).mixins(ctx).emplace_back(sym);
             }
         }
 

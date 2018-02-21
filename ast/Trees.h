@@ -70,6 +70,7 @@ public:
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ANCESTORS_COUNT> ANCESTORS_store;
 
     ANCESTORS_store ancestors;
+    ANCESTORS_store singleton_ancestors;
     ClassDefKind kind;
 
     ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store ancestors,

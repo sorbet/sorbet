@@ -1,0 +1,11 @@
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:C> < ::<constant:Object> () -> <Class:C>
+  class <constant:Mixin1> (<constant:BasicObject>) -> <Class:Mixin1>
+    method say_hello ()
+  class <constant:Mixin2> (<constant:BasicObject>) -> <Class:Mixin2>
+    method say_goodbye ()
+  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> (<constant:Mixin1>, <constant:Mixin2>)
+  class <singleton class:<constant:Mixin1>> < ::<constant:Module> ()
+  class <singleton class:<constant:Mixin2>> < ::<constant:Module> ()
+  method <static-init>$8 ()
+
