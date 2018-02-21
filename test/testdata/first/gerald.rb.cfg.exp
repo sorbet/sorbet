@@ -48,10 +48,10 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#initialize_0" [label = "block[id=0]()
 @rule_token$7 = alias @rule_token : untyped
-<selfMethodTemp>$3 = self : MatchTimeout
+<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeout
 message = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
 rule_token = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped
-<statTemp>$5 = self : MatchTimeout
+<statTemp>$5 = self : Opus::CIBot::Gerald::MatchTimeout
 <statTemp>$4 = <statTemp>$5.super(message) : untyped
 @rule_token$7 = rule_token : untyped
 <finalReturn> = return @rule_token$7 : <bottom>
@@ -129,7 +129,7 @@ outerLoops: 1
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#initialize_8" [label = "block[id=8](<statTemp>$29)
 <statTemp>$34 = , : String(\",\")
 invalid_rule_ids = <statTemp>$29.join(<statTemp>$34) : untyped
-<statTemp>$36 = self : Matcher
+<statTemp>$36 = self : Opus::CIBot::Gerald::Matcher
 <statTemp>$35 = <statTemp>$36.log() : untyped
 <statTemp>$38 = Gerald skipping invalid rules:  : String(\"Gerald skipping invalid rules: \")
 <statTemp>$37 = <statTemp>$38.+(invalid_rule_ids) : String
@@ -162,8 +162,8 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:<Magic>>$27 = alias <constant:<Magic>> : <Magic>
 <constant:MAX_AFFECTED_FILES>$12 = alias <constant:MAX_AFFECTED_FILES> : Integer
 @rules$32 = alias @rules : untyped
-<constant:MatchTimeBudget>$30 = alias <constant:MatchTimeBudget> : <Class:MatchTimeBudget>
-<selfMethodTemp>$4 = self : Matcher
+<constant:MatchTimeBudget>$30 = alias <constant:MatchTimeBudget> : <Class:Opus::CIBot::Gerald::MatchTimeBudget>
+<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Matcher
 match_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped
 <statTemp>$9 = match_context.diff() : untyped
 <statTemp>$8 = <statTemp>$9.affected_files() : untyped
@@ -179,7 +179,7 @@ match_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_2" [label = "block[id=2](<constant:<Magic>>$27, match_context)
-<statTemp>$15 = self : Matcher
+<statTemp>$15 = self : Opus::CIBot::Gerald::Matcher
 <statTemp>$14 = <statTemp>$15.log() : untyped
 <statTemp>$19 = Gerald skipping large PR with  : String(\"Gerald skipping large PR with \")
 <statTemp>$23 = match_context.diff() : untyped
@@ -198,7 +198,7 @@ match_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#match_3" [label = "block[id=3](@rules$32, match_context, <constant:MatchTimeBudget>$30)
-budget = <constant:MatchTimeBudget>$30.new() : MatchTimeBudget
+budget = <constant:MatchTimeBudget>$30.new() : Opus::CIBot::Gerald::MatchTimeBudget
 <returnMethodTemp>$3 = @rules$32.select() : untyped
 <unconditional>"];
 
@@ -403,7 +403,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 @title$15 = alias @title : untyped
 @diff$17 = alias @diff : untyped
 @openapi_diff$18 = alias @openapi_diff : untyped
-<selfMethodTemp>$3 = self : MatchContext
+<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchContext
 repo = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
 assignee = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped
 gh_user = load_arg(<selfMethodTemp>$3#initialize, 2) : untyped
@@ -479,7 +479,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_0" [label = "block[id=0](<constant:MatchTimeout>$19, <constant:TOTAL_TIME_MS>$15)
 <constant:Time>$8 = alias <constant:Time> : <Class:Time>
-<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <Class:MatchTimeout>
+<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>
 <constant:TOTAL_TIME_MS>$15 = alias <constant:TOTAL_TIME_MS> : Integer
 @start$10 = alias @start : untyped
 <statTemp>$6 = <constant:Time>$8.now() : Time
@@ -497,14 +497,14 @@ dur_ms = <statTemp>$5.*(<statTemp>$11) : Float
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" [label = "block[id=2](<constant:MatchTimeout>$19, <constant:TOTAL_TIME_MS>$15)
-<statTemp>$16 = self : MatchTimeBudget
+<statTemp>$16 = self : Opus::CIBot::Gerald::MatchTimeBudget
 <statTemp>$23 = Gerald match time budged exceeded  : String(\"Gerald match time budged exceeded \")
 <statTemp>$24 = <constant:TOTAL_TIME_MS>$15.to_s() : String
 <statTemp>$22 = <statTemp>$23.concat(<statTemp>$24) : String
 <statTemp>$26 = ms : String(\"ms\")
 <statTemp>$21 = <statTemp>$22.concat(<statTemp>$26) : String
 <statTemp>$20 = <statTemp>$21.to_s() : String
-<statTemp>$17 = <constant:MatchTimeout>$19.new(<statTemp>$20) : MatchTimeout
+<statTemp>$17 = <constant:MatchTimeout>$19.new(<statTemp>$20) : Opus::CIBot::Gerald::MatchTimeout
 <returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : NilClass
 <unconditional>"];
 
@@ -525,9 +525,9 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_0" [label = "block[id=0](<constant:<Magic>>$48, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20)
 <constant:<Magic>>$48 = alias <constant:<Magic>> : <Magic>
 <constant:Time>$6 = alias <constant:Time> : <Class:Time>
-<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <Class:MatchTimeout>
+<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>
 <constant:PER_RULE_MS>$20 = alias <constant:PER_RULE_MS> : Integer
-<selfMethodTemp>$3 = self : MatchTimeBudget
+<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeBudget
 rule = load_arg(<selfMethodTemp>$3#time_rule, 0) : untyped
 <blk> = load_arg(<selfMethodTemp>$3#time_rule, 1) : untyped
 rule_start = <constant:Time>$6.now() : Time
@@ -547,7 +547,7 @@ dur_ms = <statTemp>$11.*(<statTemp>$15) : Float
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" [label = "block[id=2](<constant:<Magic>>$48, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20, dur_ms, rule, res)
-<statTemp>$21 = self : MatchTimeBudget
+<statTemp>$21 = self : Opus::CIBot::Gerald::MatchTimeBudget
 <statTemp>$32 = Gerald rule \' : String(\"Gerald rule \'\")
 <statTemp>$34 = rule.token() : untyped
 <statTemp>$33 = <statTemp>$34.to_s() : untyped
@@ -569,13 +569,13 @@ dur_ms = <statTemp>$11.*(<statTemp>$15) : Float
 <statTemp>$44 = <constant:<Magic>>$48.<build-hash>(<hashTemp>$45, <hashTemp>$46) : ShapeType {
   Symbol(:\"rule_token\") => untyped
 }
-<statTemp>$22 = <constant:MatchTimeout>$24.new(<statTemp>$25, <statTemp>$44) : MatchTimeout
+<statTemp>$22 = <constant:MatchTimeout>$24.new(<statTemp>$25, <statTemp>$44) : Opus::CIBot::Gerald::MatchTimeout
 <statTemp>$16 = <statTemp>$21.raise(<statTemp>$22) : NilClass
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" [label = "block[id=4](res)
-<statTemp>$50 = self : MatchTimeBudget
+<statTemp>$50 = self : Opus::CIBot::Gerald::MatchTimeBudget
 <statTemp>$49 = <statTemp>$50.check!() : untyped
 <finalReturn> = return res : <bottom>
 <unconditional>"];
@@ -592,10 +592,10 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#initialize_0" [label = "block[id=0]()
 @raw$5 = alias @raw : untyped
 @parsed$6 = alias @parsed : untyped
-<selfMethodTemp>$3 = self : Diff
+<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::Diff
 raw_diff = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
 @raw$5 = raw_diff : untyped
-<statTemp>$7 = self : Diff
+<statTemp>$7 = self : Opus::CIBot::Gerald::Diff
 @parsed$6 = <statTemp>$7.parse(raw_diff) : untyped
 <finalReturn> = return @parsed$6 : <bottom>
 <unconditional>"];
@@ -614,12 +614,12 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#affected_files_0" [label = "block[id=0]()
-<statTemp>$6 = self : Diff
+<statTemp>$6 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$5 = <statTemp>$6.added_files() : untyped
-<statTemp>$8 = self : Diff
+<statTemp>$8 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$7 = <statTemp>$8.deleted_files() : untyped
 <statTemp>$4 = <statTemp>$5.+(<statTemp>$7) : untyped
-<statTemp>$10 = self : Diff
+<statTemp>$10 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$9 = <statTemp>$10.changed_files() : untyped
 <returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$9) : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
@@ -906,9 +906,9 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_1" [shape = parallelogram];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_lines_0" [label = "block[id=0]()
-<statTemp>$5 = self : Diff
+<statTemp>$5 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$4 = <statTemp>$5.added_lines() : untyped
-<statTemp>$7 = self : Diff
+<statTemp>$7 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$6 = <statTemp>$7.removed_lines() : untyped
 <returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$6) : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
@@ -929,7 +929,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#changed_openapi?_0" [label = "block[id=0]()
 <constant:SPEC_PATH>$7 = alias <constant:SPEC_PATH> : untyped
-<statTemp>$5 = self : Diff
+<statTemp>$5 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$4 = <statTemp>$5.changed_files() : untyped
 <returnMethodTemp>$2 = <statTemp>$4.include?(<constant:SPEC_PATH>$7) : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
@@ -953,7 +953,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:Range>$17 = alias <constant:Range> : <Class:Range>
 <constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>
 <constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>
-<selfMethodTemp>$4 = self : Diff
+<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff
 diff = load_arg(<selfMethodTemp>$4#parse, 0) : untyped
 <statTemp>$11 = ^diff [^\\n]*\\n : String(\"^diff [^\\n]*\\n\")
 <statTemp>$13 = 0 : Integer(0)

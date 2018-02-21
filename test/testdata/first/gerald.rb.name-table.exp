@@ -1,14 +1,14 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:Opus> () -> <Class:Opus>
     class <constant:AutogenLoader> () -> untyped
-    class <constant:CIBot> () -> <Class:CIBot>
+    class <constant:CIBot> () -> <Class:Opus::CIBot>
       class <constant:Actions> () -> untyped
         class <constant:OpenAPI> () -> untyped
           class <constant:SPEC_PATH> () -> untyped
-      class <constant:Gerald> (<constant:BasicObject>) -> <Class:Gerald>
+      class <constant:Gerald> (<constant:BasicObject>) -> <Class:Opus::CIBot::Gerald>
         class <constant:Chalk> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
           class <constant:Log> () -> untyped
-        class <constant:Diff> < ::<constant:Object> () -> <Class:Diff>
+        class <constant:Diff> < ::<constant:Object> () -> <Class:Opus::CIBot::Gerald::Diff>
           field @parsed -> untyped
           field @raw -> untyped
           method added_files ()
@@ -43,7 +43,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
           method removed_lines ()
             method <block>$2 (part)
               argument part<>
-        class <constant:MatchContext> < ::<constant:Object> () -> <Class:MatchContext>
+        class <constant:MatchContext> < ::<constant:Object> () -> <Class:Opus::CIBot::Gerald::MatchContext>
           field @assignee -> untyped
           field @body -> untyped
           field @diff -> untyped
@@ -70,7 +70,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
           method repo ()
           method title ()
           method user_stripe_suffix? ()
-        class <constant:MatchTimeBudget> < ::<constant:Object> () -> <Class:MatchTimeBudget>
+        class <constant:MatchTimeBudget> < ::<constant:Object> () -> <Class:Opus::CIBot::Gerald::MatchTimeBudget>
           field @start -> untyped
           method check! ()
           method initialize ()
@@ -79,13 +79,13 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
             argument rule<>
           static-field <constant:PER_RULE_MS> -> Integer
           static-field <constant:TOTAL_TIME_MS> -> Integer
-        class <constant:MatchTimeout> < ::<constant:StandardError> () -> <Class:MatchTimeout>
+        class <constant:MatchTimeout> < ::<constant:StandardError> () -> <Class:Opus::CIBot::Gerald::MatchTimeout>
           field @rule_token -> untyped
           method initialize (message, rule_token)
             argument message<>
             argument rule_token<optional, keyword>
           method rule_token ()
-        class <constant:Matcher> < ::<constant:Object> (<constant:Log>) -> <Class:Matcher>
+        class <constant:Matcher> < ::<constant:Object> (<constant:Log>) -> <Class:Opus::CIBot::Gerald::Matcher>
           field @rules -> untyped
           method initialize ()
             method <block>$2 (<block-pass>$2)

@@ -1,15 +1,15 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:Outer1> < ::<constant:Object> () -> <Class:Outer1>
   class <constant:Outer2> < ::<constant:Object> () -> <Class:Outer2>
-    class <constant:C> < ::<constant:Object> () -> <Class:C>
-    class <constant:Inner1> < ::<constant:Object> () -> <Class:Inner1>
-      class <constant:A> < ::<constant:Object> () -> <Class:A>
-      class <constant:Inner2> < ::<constant:Object> () -> <Class:Inner2>
+    class <constant:C> < ::<constant:Object> () -> <Class:Outer2::C>
+    class <constant:Inner1> < ::<constant:Object> () -> <Class:Outer2::Inner1>
+      class <constant:A> < ::<constant:Object> () -> <Class:Outer2::Inner1::A>
+      class <constant:Inner2> < ::<constant:Object> () -> <Class:Outer2::Inner1::Inner2>
         class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
         method <static-init> ()
       class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
       class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> ()
-    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <Class:Other>
+    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <Class:Outer2::Other>
     class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> ()

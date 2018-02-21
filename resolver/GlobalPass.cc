@@ -17,7 +17,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         } else {
             gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
                      "Type {} declared by parent {} should be declared again", name.toString(gs),
-                     parent.data(gs).fullName(gs));
+                     parent.data(gs).show(gs));
             return false;
         }
     }
@@ -31,7 +31,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
         gs.error(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
-                 "Type variance mismatch with parent {}", parent.data(gs).fullName(gs));
+                 "Type variance mismatch with parent {}", parent.data(gs).show(gs));
         return true;
     }
     inSym.typeAliases.emplace_back(parentTypeMember, my);

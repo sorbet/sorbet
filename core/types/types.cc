@@ -177,25 +177,12 @@ ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : sym
     ENFORCE(symbol.exists());
 }
 
-namespace {
-string classNameToString(const GlobalState &gs, core::NameRef nm) {
-    const core::Name &name = nm.data(gs);
-    if (name.kind == core::CONSTANT) {
-        return name.cnst.original.toString(gs);
-    } else {
-        ENFORCE(name.kind == core::UNIQUE);
-        ENFORCE(name.unique.uniqueNameKind == core::Singleton);
-        return "<Class:" + classNameToString(gs, name.unique.original) + ">";
-    }
-}
-}; // namespace
-
 string ruby_typer::core::ClassType::toString(const GlobalState &gs, int tabs) {
-    return classNameToString(gs, this->symbol.data(gs).name);
+    return this->symbol.data(gs).show(gs);
 }
 
 string ruby_typer::core::ClassType::show(const GlobalState &gs) {
-    return classNameToString(gs, this->symbol.data(gs).name);
+    return this->symbol.data(gs).show(gs);
 }
 
 string ruby_typer::core::ClassType::typeName() {
@@ -865,7 +852,7 @@ std::string AppliedType::show(const GlobalState &gs) {
     } else if (this->klass == core::Symbols::Hash()) {
         buf << "T::Hash";
     } else {
-        buf << classNameToString(gs, this->klass.data(gs).name);
+        buf << this->klass.data(gs).show(gs);
     }
     buf << "[";
 
@@ -969,7 +956,7 @@ std::string LambdaParam::toString(const GlobalState &gs, int tabs) {
 }
 
 std::string LambdaParam::show(const GlobalState &gs) {
-    return classNameToString(gs, this->definition.data(gs).name);
+    return this->definition.data(gs).show(gs);
 }
 
 std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
@@ -977,7 +964,7 @@ std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
 }
 
 std::string SelfTypeParam::show(const GlobalState &gs) {
-    return classNameToString(gs, this->definition.data(gs).name);
+    return this->definition.data(gs).show(gs);
 }
 
 std::string LambdaParam::typeName() {

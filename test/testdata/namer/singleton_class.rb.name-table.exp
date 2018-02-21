@@ -1,7 +1,7 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:A> () -> <Class:A>
-    class <constant:B> () -> <Class:B>
-      class <constant:C> < ::<constant:Object> () -> <Class:C>
+    class <constant:B> () -> <Class:A::B>
+      class <constant:C> < ::<constant:Object> () -> <Class:A::B::C>
       class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:B>> < ::<constant:Module> ()
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>

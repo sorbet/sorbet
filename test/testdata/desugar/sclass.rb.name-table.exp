@@ -27,7 +27,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method g ()
     method inner ()
   class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>>
-    class <constant:H2> < ::<constant:Object> () -> <Class:H2>
+    class <constant:H2> < ::<constant:Object> () -> <Class:<Class:H>::H2>
     class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> ()
       method h ()
   class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> ()

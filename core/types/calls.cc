@@ -348,7 +348,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             if (args.size() != arity) {
                 ctx.state.error(callLoc, core::errors::Infer::GenericArgumentCountMismatch,
                                 "Wrong number of type parameters for {}. Expected {}, got {}",
-                                attachedClass.data(ctx).fullName(ctx), arity, args.size());
+                                attachedClass.data(ctx).show(ctx), arity, args.size());
             }
 
             vector<shared_ptr<core::Type>> targs;

@@ -314,6 +314,29 @@ string Symbol::fullName(const GlobalState &gs) const {
     }
 }
 
+string Symbol::show(const GlobalState &gs) const {
+    string owner_str;
+
+    if (this->isClass() && this->name.data(gs).kind == UNIQUE &&
+        this->name.data(gs).unique.uniqueNameKind == UniqueNameKind::Singleton) {
+        auto attached = this->attachedClass(gs);
+        if (attached.exists()) {
+            return "<Class:" + attached.data(gs).show(gs) + ">";
+        }
+    }
+
+    if (this->owner.exists() && this->owner != core::Symbols::root()) {
+        owner_str = this->owner.data(gs).show(gs);
+        if (this->isClass()) {
+            owner_str = owner_str + "::";
+        } else {
+            owner_str = owner_str + "#";
+        }
+    }
+
+    return owner_str + this->name.data(gs).show(gs);
+}
+
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
     ENFORCE(this->isClass());
     ENFORCE(this->name.data(gs).isClassName(gs));
