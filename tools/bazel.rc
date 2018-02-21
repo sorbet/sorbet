@@ -26,14 +26,20 @@ build --cxxopt=-Wno-macro-redefined
 
 build:dbg --copt=-O0
 build:dbg --cxxopt=-O0
-build:dbg --copt=-g3
-build:dbg --cxxopt=-g3
-build:dbg --linkopt=-g3
-build:dbg --linkopt=-fno-pie
-build:dbg --copt=-fno-pie
-build:dbg --cxxopt=-fno-pie
+build:dbg --compilation_mode=dbg
+build:dbg --config=debugsymbols
+build:dbg --config=nopie
+
+# release version: optimized, with debug symbols and version information
+build:release --compilation_mode=opt
+build:release --config=debugsymbols
+build:release --config=nopie
+build:release --config=lto
+build:release --stamp
+
 
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
+# intentionally does not reuse --config=debugsymbols because we want to have a sandboxed build
 build:ci --copt=-DFORCE_DEBUG
 build:ci --copt=-g3
 build:ci --cxxopt=-DFORCE_DEBUG
@@ -46,9 +52,7 @@ build --workspace_status_command=tools/buildstamp/get_workspace_status
 build:lto --copt=-flto=thin
 build:lto --cxxopt=-flto=thin
 build:lto --linkopt=-flto=thin
-build:lto --linkopt=-fno-pie
-build:lto --copt=-fno-pie
-build:lto --cxxopt=-fno-pie
+build:lto --config=nopie
 
 # It's useful to be able to write `config_setting` rules for "this is
 # an unsanitized build", but we can't express "copt does not contain
@@ -79,9 +83,15 @@ build:size --cxxopt=-Os
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
 # See https://github.com/bazelbuild/bazel/issues/2537
-build:dbg --spawn_strategy=standalone
-build:dbg --genrule_strategy=standalone
-build:dbg --compilation_mode=dbg
+build:debugsymbols --copt=-g3
+build:debugsymbols --cxxopt=-g3
+build:debugsymbols --linkopt=-g3
+build:debugsymbols --spawn_strategy=standalone
+build:debugsymbols --genrule_strategy=standalone
+
+build:nopie --linkopt=-fno-pie
+build:nopie --copt=-fno-pie
+build:nopie --cxxopt=-fno-pie
 
 build --strip=never
 
