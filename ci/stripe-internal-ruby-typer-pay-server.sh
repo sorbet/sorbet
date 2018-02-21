@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eux
 
+. /usr/stripe/bin/docker/stripe-init-build
+
 DIR=./pay-server
 
 export TIME='cmd: "%C"
@@ -31,6 +33,10 @@ if [ ! -f "../ci/stripe-internal-ruby-typer-pay-server-sha" ]; then
 fi
 PAY_SERVER_SHA="$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
 git checkout "$PAY_SERVER_SHA"
+
+eval "$(rbenv init -)"
+stripe-deps-ruby  --without monster ci_ignore test_ui
+rbenv exec bundle exec rake build:FileListStep
 
 # Make sure these specific files are typed
 while IFS= read -r f; do
