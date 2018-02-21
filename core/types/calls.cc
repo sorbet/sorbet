@@ -11,10 +11,10 @@ using namespace ruby_typer::core;
 using namespace std;
 
 shared_ptr<Type> ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                         shared_ptr<Type> *block) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "proxytype");
-    return underlying->dispatchCall(ctx, name, callLoc, args, fullType, block);
+    return underlying->dispatchCall(ctx, name, callLoc, args, underlying, fullType, block);
 }
 
 shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -22,12 +22,12 @@ shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef
 }
 
 shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                      vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
+                                      vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                       shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "ortype");
     shared_ptr<Type> lblock, rblock;
-    auto leftRet = left->dispatchCall(ctx, name, callLoc, args, fullType, block == nullptr ? nullptr : &lblock);
-    auto rightRet = left->dispatchCall(ctx, name, callLoc, args, fullType, block == nullptr ? nullptr : &rblock);
+    auto leftRet = left->dispatchCall(ctx, name, callLoc, args, left, fullType, block == nullptr ? nullptr : &lblock);
+    auto rightRet = left->dispatchCall(ctx, name, callLoc, args, right, fullType, block == nullptr ? nullptr : &rblock);
     if (block != nullptr) {
         if (lblock == nullptr && rblock == nullptr) {
             *block = Types::dynamic();
@@ -47,30 +47,30 @@ shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef na
 }
 
 shared_ptr<Type> AppliedType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                           vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                           shared_ptr<Type> *block) {
+                                           vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                           shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "appliedType");
     ClassType ct(this->klass);
     return ct.dispatchCallWithTargs(ctx, name, callLoc, args, fullType, this->targs, block);
 }
 
 shared_ptr<Type> TypeVar::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                       shared_ptr<Type> *block) {
+                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                       shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     ENFORCE(isInstantiated);
-    return instantiation->dispatchCall(ctx, name, callLoc, args, fullType, block);
+    return instantiation->dispatchCall(ctx, name, callLoc, args, instantiation, fullType, block);
 }
 
 shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                       shared_ptr<Type> *block) {
+                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                       shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "andtype");
     // "AppliedType {\n      klass = ::<constant:Hash>\n      targs = [\n        0 = untyped\n        0 = untyped\n
     // ]\n    } & BasicObject" this type should not have been constructed.
     // TODO: was constructed for lib/db/model/mixins/ipm_derived.rb ,
     // lib/db/model/middleware/enforce_durable_write_middleware.rb fail silently.
 
-    return this->left->dispatchCall(ctx, name, callLoc, args, fullType, block);
+    return this->left->dispatchCall(ctx, name, callLoc, args, this->left, fullType, block);
 }
 
 shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -78,15 +78,36 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
 }
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                         shared_ptr<Type> *block) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "shapetype");
-    return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType, block);
+    switch (fun._id) {
+        case Names::freeze()._id: {
+            return selfRef;
+        }
+        default:
+            break;
+    }
+    return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
+}
+
+std::shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                              shared_ptr<Type> fullType, std::shared_ptr<Type> *block) {
+    categoryCounterInc("dispatch_call", "tupletype");
+    switch (fun._id) {
+        case Names::freeze()._id: {
+            return selfRef;
+        }
+        default:
+            break;
+    }
+    return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
 shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                         shared_ptr<Type> *block) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     categoryCounterInc("dispatch_call", "magictype");
     switch (fun._id) {
         case Names::buildHash()._id: {
@@ -100,7 +121,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
                     return core::Types::hashOfUntyped();
                 }
 
-                keys.push_back(shared_ptr<LiteralType>(args[1].type, key));
+                keys.push_back(shared_ptr<LiteralType>(args[i].type, key));
                 values.push_back(args[i + 1].type);
             }
             return make_unique<ShapeType>(keys, values);
@@ -114,7 +135,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             return make_unique<TupleType>(elems);
         }
         default:
-            return ProxyType::dispatchCall(ctx, fun, callLoc, args, fullType, block);
+            return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
     }
 }
 
@@ -306,7 +327,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             }
 
             auto instanceTy = attachedClass.data(ctx).externalType(ctx);
-            instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, block);
+            instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, instanceTy, block);
             return instanceTy;
         }
 
@@ -600,8 +621,8 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 }
 
 shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                         shared_ptr<Type> *block) {
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     vector<shared_ptr<Type>> empty;
     return dispatchCallWithTargs(ctx, fun, callLoc, args, fullType, empty, block);
 }
@@ -630,8 +651,8 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
 }
 
 std::shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                              shared_ptr<Type> *block) {
+                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                              shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     Error::raise("AliasType::dispatchCall");
 }
 
@@ -640,11 +661,11 @@ std::shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::Na
 }
 
 std::shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                             std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                             shared_ptr<Type> *block) {
+                                             std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                             std::shared_ptr<Type> fullType, shared_ptr<Type> *block) {
     switch (name._id) {
         case core::Names::new_()._id: {
-            wrapped->dispatchCall(ctx, core::Names::initialize(), callLoc, args, wrapped, block);
+            wrapped->dispatchCall(ctx, core::Names::initialize(), callLoc, args, wrapped, wrapped, block);
             return wrapped;
         }
         default: {

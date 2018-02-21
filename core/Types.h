@@ -104,8 +104,8 @@ public:
     // the caller is not passing a block; If populated, `dispatchCall` will set
     // to the type of the block argument to the called method, if any.
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *blockType) = 0;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *blockType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
     virtual void _sanityCheck(core::Context ctx) = 0;
@@ -141,8 +141,8 @@ public:
     ProxyType(std::shared_ptr<Type> underlying);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) override;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) override;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) override;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) override;
 
@@ -159,8 +159,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     std::shared_ptr<Type> dispatchCallWithTargs(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                                 std::vector<std::shared_ptr<Type>> &targs,
@@ -188,8 +188,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
@@ -235,8 +235,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
 
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
@@ -293,8 +293,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -308,15 +308,18 @@ public:
     std::vector<std::shared_ptr<Type>> elems;
     TupleType(std::vector<std::shared_ptr<Type>> &elems);
 
-    virtual std::string toString(const GlobalState &gs, int tabs = 0);
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) override;
     virtual std::string show(const GlobalState &gs) final;
-    virtual std::string typeName();
+    virtual std::string typeName() override;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                              const std::vector<std::shared_ptr<Type>> &targs);
+                                              const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) override;
 };
 
 // MagicType is the type of the built-in core::Symbols::Magic()
@@ -330,8 +333,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -352,8 +355,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
@@ -375,8 +378,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -410,8 +413,8 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -433,8 +436,8 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -456,8 +459,8 @@ public:
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -474,8 +477,8 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
-                                               std::shared_ptr<Type> *block) final;
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
     virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
 

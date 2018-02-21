@@ -191,6 +191,9 @@ NameDef names[] = {
     {"kind_of", "kind_of?", Infer},
     {"eqeq", "==", Infer},
 
+    // methods that are known by tuple and\or shape types
+    {"freeze", Core},
+
     {"staticInit", "<static-init>", Resolver},
 };
 

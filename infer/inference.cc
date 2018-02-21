@@ -686,7 +686,8 @@ public:
                         if (send->block.exists()) {
                             blockTy = &this->blockTypes[send->block];
                         }
-                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, blockTy);
+                        tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
+                                                              recvType.type, blockTy);
                     }
                     tp.origins.push_back(bind.loc);
                 },
