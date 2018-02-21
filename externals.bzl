@@ -82,6 +82,14 @@ def externals():
         build_file="//:cxxopts.BUILD",
     )
 
+    native.new_http_archive(
+        name="rang",
+        url = "https://github.com/agauniyal/rang/archive/v3.1.0.zip",
+        sha256="658adeb8a36d36981d4339fc839f2deedc0e75cb421db1982041d8a0a255835d",
+        build_file = "rang.BUILD",
+        strip_prefix = "rang-3.1.0",
+    )
+
     git_repository(
             name="com_google_absl",
             remote="https://github.com/abseil/abseil-cpp.git",

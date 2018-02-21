@@ -1,5 +1,6 @@
 #include "Loc.h"
 #include "Context.h"
+#include "rang.hpp"
 
 #include <algorithm>
 #include <iterator>
@@ -75,9 +76,11 @@ string Loc::toString(const core::GlobalState &gs, int tabs) {
         for (p = 1; p < pos.first.column; p++) {
             buf << " ";
         }
+        buf << rang::style::italic;
         for (; p < pos.second.column; p++) {
             buf << "^";
         }
+        buf << rang::style::reset;
     }
     return buf.str();
 }

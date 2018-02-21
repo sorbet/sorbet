@@ -18,6 +18,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
+#include "rang.hpp"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "spdlog/spdlog.h"
@@ -63,12 +64,14 @@ struct Options {
     std::vector<string> configatronDirs;
     std::vector<string> configatronFiles;
 };
+
 shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
     color_sink->set_color(spd::level::info, color_sink->white);
     color_sink->set_color(spd::level::debug, color_sink->magenta);
     return color_sink;
 }
+
 shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr_color_sink();
 
 shared_ptr<spd::logger> make_tracer() {
@@ -537,6 +540,7 @@ public:
         argc = args.size();
         argv = args.data();
     }
+
     ~FileFlatMapper() {
         argc = origArgc;
         argv = origArgv;
@@ -557,6 +561,8 @@ cxxopts::Options buildOptions() {
     options.add_options()("v,verbose", "Verbosity level [0-3]");
     options.add_options()("h,help", "Show long help");
     options.add_options()("version", "Show version");
+    options.add_options()("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
+                          "{always,never,[auto]}");
 
     stringstream all_prints;
     all_prints << "Print: [";
@@ -753,6 +759,16 @@ int realmain(int argc, char **argv) {
         console_err->error("`--typed-source " + opts.typedSource +
                            "` and `-p typed-source` are incompatible. Either print out one file or all files.");
         return 1;
+    }
+
+    if (options["color"].as<string>() == "auto") {
+        if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
+            rang::setControlMode(rang::control::Force);
+        }
+    } else if (options["color"].as<string>() == "always") {
+        rang::setControlMode(rang::control::Force);
+    } else if (options["color"].as<string>() == "never") {
+        rang::setControlMode(rang::control::Off);
     }
 
     WorkerPool workers(opts.threads, tracer);

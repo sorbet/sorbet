@@ -1,6 +1,7 @@
 #include "core/errors/errors.h"
 #include "Context.h"
 #include "ErrorQueue.h"
+#include "rang.hpp"
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
@@ -33,7 +34,8 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
 
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << filePosToString(gs, loc) << " " << formatted << " [" << what.code << "]" << endl;
+    buf << rang::style::reset << rang::style::bold << rang::fg::red << filePosToString(gs, loc) << " " << formatted
+        << " [" << what.code << "]" << rang::style::reset << rang::fg::reset << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs);
     }
@@ -54,7 +56,7 @@ string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     if (!this->header.empty()) {
-        buf << indent << this->header << endl;
+        buf << rang::fg::yellow << indent << this->header << rang::fg::reset << endl;
     }
     for (auto &line : this->messages) {
         buf << indent << line.toString(gs) << endl;
