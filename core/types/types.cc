@@ -84,6 +84,11 @@ std::shared_ptr<Type> Types::procClass() {
     return res;
 }
 
+std::shared_ptr<Type> Types::classClass() {
+    static auto res = make_shared<ClassType>(core::Symbols::Class());
+    return res;
+}
+
 std::shared_ptr<Type> Types::String() {
     static auto res = make_shared<ClassType>(core::Symbols::String());
     return res;

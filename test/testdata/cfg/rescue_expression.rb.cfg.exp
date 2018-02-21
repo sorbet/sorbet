@@ -40,7 +40,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_3" [label = "block[id=3](<rescueTemp$4, <constant:MyException>$8)
 <statTemp>$11 = <constant:MyException>$8.new() : MyException
-<rescueTemp$10 = <statTemp>$11.class() : Class
+<rescueTemp$10 = <statTemp>$11.class() : <Class:MyException>
 <rescueTemp$13 = <rescueTemp$4.is_a?(<rescueTemp$10) : untyped
 <rescueTemp$13"];
 

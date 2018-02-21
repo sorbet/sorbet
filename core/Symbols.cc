@@ -338,18 +338,11 @@ string Symbol::show(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {
-    ENFORCE(this->isClass());
-    ENFORCE(this->name.data(gs).isClassName(gs));
-
-    SymbolRef selfRef = this->ref(gs);
-    if (selfRef == Symbols::untyped()) {
-        return Symbols::untyped();
-    }
-
-    SymbolRef singleton = findMember(gs, Names::singleton());
+    auto singleton = lookupSingletonClass(gs);
     if (singleton.exists()) {
         return singleton;
     }
+    SymbolRef selfRef = this->ref(gs);
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
@@ -362,6 +355,18 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
 
     selfRef.data(gs).members.push_back(make_pair(Names::singleton(), singleton));
     return singleton;
+}
+
+SymbolRef Symbol::lookupSingletonClass(const GlobalState &gs) const {
+    ENFORCE(this->isClass());
+    ENFORCE(this->name.data(gs).isClassName(gs));
+
+    SymbolRef selfRef = this->ref(gs);
+    if (selfRef == Symbols::untyped()) {
+        return Symbols::untyped();
+    }
+
+    return findMember(gs, Names::singleton());
 }
 
 SymbolRef Symbol::attachedClass(const GlobalState &gs) const {

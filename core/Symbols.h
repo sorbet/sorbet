@@ -463,6 +463,9 @@ public:
     // doesn't exist.
     SymbolRef singletonClass(GlobalState &gs);
 
+    // Returns the singleton class or noSymbol
+    SymbolRef lookupSingletonClass(const GlobalState &gs) const;
+
     // Returns attached class or noSymbol if it does not exist
     SymbolRef attachedClass(const GlobalState &gs) const;
 

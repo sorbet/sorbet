@@ -150,7 +150,7 @@ public:
     bool operator==(const Name &rhs) const;
 
     bool operator!=(const Name &rhs) const;
-    bool isClassName(GlobalState &gs) const;
+    bool isClassName(const GlobalState &gs) const;
 
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;

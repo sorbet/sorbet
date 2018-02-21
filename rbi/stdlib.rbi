@@ -3542,9 +3542,6 @@ class Class
   def allocate(); end
 
   sig.returns(Class)
-  def class(); end
-
-  sig.returns(Class)
   def clone(); end
 
   sig.returns(Class)
@@ -8311,9 +8308,6 @@ class Object
   )
   .returns(NilClass)
   def =~(other); end
-
-  sig.returns(Class)
-  def class(); end
 
   sig.returns(Object)
   def clone(); end

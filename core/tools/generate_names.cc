@@ -107,7 +107,8 @@ NameDef names[] = {
     {"Array", Infer},
     {"Hash", Infer},
     {"noreturn", Resolver},
-    {"singletonClass", "singleton_class", Resolver},
+    {"singletonClass", "singleton_class", Core | Resolver},
+    {"class_", "class", Core},
     {"classOf", "class_of", Resolver},
     {"declareVariables", "declare_variables", Desugar | DSL | Resolver},
 

@@ -110,7 +110,7 @@ NameRef Name::ref(const GlobalState &gs) const {
     return NameRef(gs, distance);
 }
 
-bool Name::isClassName(GlobalState &gs) const {
+bool Name::isClassName(const GlobalState &gs) const {
     switch (this->kind) {
         case UTF8:
             return false;

@@ -410,6 +410,20 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 return make_shared<core::MetaType>(res);
             }
 
+        case core::Names::class_()._id:
+        case core::Names::singletonClass()._id: {
+            /*
+             * x : Integer
+             * =>
+             * x.class = Integer
+             * x.class : Integer.singleton_class
+             */
+            auto singleton = this->symbol.data(ctx).lookupSingletonClass(ctx);
+            if (singleton.exists()) {
+                return make_shared<ClassType>(singleton);
+            }
+            return core::Types::classClass();
+        }
         default:
             return nullptr;
     }
