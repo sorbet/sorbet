@@ -97,7 +97,7 @@ mkdir -p $BUILD_DIR
 
 ( # Opens a subshell
   set -e
-  echo "Building Bazel, this will take ~2mins"
+  echo "Building Bazel, this will take ~40mins"
 
   cd $BUILD_DIR
   ZIP_NAME="bazel-${BAZEL_VERSION}-dist.zip"

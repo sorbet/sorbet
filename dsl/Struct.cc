@@ -25,7 +25,7 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     return ast::MK::Constant(node->loc, move(newScope), cnst->cnst);
 }
 
-vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::Context ctx, ast::Assign *asgn) {
+vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
     auto lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());

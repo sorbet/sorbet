@@ -28,7 +28,7 @@ struct Nesting {
 
 class ResolveConstantsWalk {
 private:
-    core::SymbolRef resolveLhs(core::Context ctx, core::NameRef name) {
+    core::SymbolRef resolveLhs(core::MutableContext ctx, core::NameRef name) {
         Nesting *scope = nesting_.get();
         while (scope != nullptr) {
             auto lookup = scope->scope.data(ctx).findMember(ctx, name);
@@ -40,7 +40,7 @@ private:
         return core::Symbols::noSymbol();
     }
 
-    core::SymbolRef resolveConstant(core::Context ctx, ast::ConstantLit *c) {
+    core::SymbolRef resolveConstant(core::MutableContext ctx, ast::ConstantLit *c) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
@@ -80,7 +80,7 @@ private:
         }
     }
 
-    unique_ptr<ast::Expression> maybeResolve(core::Context ctx, ast::Expression *expr) {
+    unique_ptr<ast::Expression> maybeResolve(core::MutableContext ctx, ast::Expression *expr) {
         if (ast::ConstantLit *cnst = ast::cast_tree<ast::ConstantLit>(expr)) {
             core::SymbolRef resolved = resolveConstant(ctx, cnst);
             if (resolved.exists()) {
@@ -91,13 +91,13 @@ private:
     }
 
 public:
-    ResolveConstantsWalk(core::Context ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
+    ResolveConstantsWalk(core::MutableContext ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
-    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
         return original;
     }
-    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
         nesting_ = move(nesting_->parent);
 
         for (auto &ancst : original->ancestors) {
@@ -143,7 +143,7 @@ public:
         return original;
     }
 
-    ast::Expression *postTransformConstantLit(core::Context ctx, ast::ConstantLit *c) {
+    ast::Expression *postTransformConstantLit(core::MutableContext ctx, ast::ConstantLit *c) {
         core::SymbolRef resolved = resolveConstant(ctx, c);
         if (!resolved.exists()) {
             string str = c->toString(ctx);
@@ -153,7 +153,7 @@ public:
         return new ast::Ident(c->loc, resolved);
     }
 
-    ast::Expression *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+    ast::Expression *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr || !id->symbol.data(ctx).isStaticField()) {
             return asgn;
@@ -173,7 +173,7 @@ public:
 
 class ResolveSignaturesWalk {
 private:
-    void processDeclareVariables(core::Context ctx, ast::Send *send) {
+    void processDeclareVariables(core::MutableContext ctx, ast::Send *send) {
         if (send->block != nullptr) {
             ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
                             "Malformed `declare_variables'");
@@ -234,7 +234,7 @@ private:
         }
     }
 
-    void fillInInfoFromSig(core::Context ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
+    void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
         auto &methodInfo = method.data(ctx);
 
@@ -288,7 +288,7 @@ private:
         }
     }
 
-    void processClassBody(core::Context ctx, ast::ClassDef *klass) {
+    void processClassBody(core::MutableContext ctx, ast::ClassDef *klass) {
         InlinedVector<unique_ptr<ast::Expression>, 1> lastSig;
         for (auto &stat : klass->rhs) {
             typecase(stat.get(),
@@ -384,7 +384,7 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    shared_ptr<core::Type> resolveConstantType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+    shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
         typecase(expr.get(), [&](ast::SymbolLit *) { result = core::Types::Symbol(); },
                  [&](ast::FloatLit *) { result = core::Types::Float(); },
@@ -409,7 +409,7 @@ private:
     }
 
 public:
-    ast::Assign *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+    ast::Assign *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr) {
             return asgn;
@@ -452,12 +452,12 @@ public:
         return asgn;
     }
 
-    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
         processClassBody(ctx.withOwner(original->symbol), original);
         return original;
     }
 
-    ast::Expression *postTransformSend(core::Context ctx, ast::Send *send) {
+    ast::Expression *postTransformSend(core::MutableContext ctx, ast::Send *send) {
         auto *id = ast::cast_tree<ast::Ident>(send->recv.get());
         if (id == nullptr) {
             return send;
@@ -490,7 +490,7 @@ public:
 
 class FlattenWalk {
 private:
-    bool isDefinition(core::Context ctx, const unique_ptr<ast::Expression> &what) {
+    bool isDefinition(core::MutableContext ctx, const unique_ptr<ast::Expression> &what) {
         if (ast::isa_tree<ast::MethodDef>(what.get())) {
             return true;
         }
@@ -504,7 +504,7 @@ private:
         return false;
     }
 
-    unique_ptr<ast::Expression> extractClassInit(core::Context ctx, ast::ClassDef *klass) {
+    unique_ptr<ast::Expression> extractClassInit(core::MutableContext ctx, ast::ClassDef *klass) {
         ast::InsSeq::STATS_store inits;
 
         for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
@@ -535,7 +535,7 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
         newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
@@ -564,7 +564,7 @@ public:
         return classDef;
     }
 
-    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
@@ -576,14 +576,14 @@ public:
         return new ast::EmptyTree(classDef->loc);
     };
 
-    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
+    ast::MethodDef *preTransformMethodDef(core::MutableContext ctx, ast::MethodDef *methodDef) {
         auto &methods = curMethodSet();
         methods.stack.emplace_back(methods.methods.size());
         methods.methods.emplace_back();
         return methodDef;
     }
 
-    ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *methodDef) {
+    ast::Expression *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *methodDef) {
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
         ENFORCE(methods.methods.size() > methods.stack.back());
@@ -596,7 +596,7 @@ public:
         return new ast::EmptyTree(methodDef->loc);
     };
 
-    std::unique_ptr<ast::Expression> addClasses(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
+    std::unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
             ENFORCE(sortedClasses().empty());
             return tree;
@@ -620,7 +620,7 @@ public:
         return tree;
     }
 
-    std::unique_ptr<ast::Expression> addMethods(core::Context ctx, std::unique_ptr<ast::Expression> tree) {
+    std::unique_ptr<ast::Expression> addMethods(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -654,7 +654,7 @@ private:
         return ret;
     }
 
-    ast::ClassDef::RHS_store addMethods(core::Context ctx, ast::ClassDef::RHS_store rhs) {
+    ast::ClassDef::RHS_store addMethods(core::MutableContext ctx, ast::ClassDef::RHS_store rhs) {
         if (curMethodSet().methods.size() == 1 && rhs.size() == 1 &&
             (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
@@ -711,7 +711,7 @@ private:
 
 class ResolveVariablesWalk {
 public:
-    ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *id) {
+    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *id) {
         core::SymbolRef klass;
 
         switch (id->kind) {
@@ -744,51 +744,51 @@ public:
 
 class ResolveSanityCheckWalk {
 public:
-    ast::Expression *postTransformClassDef(core::Context ctx, ast::ClassDef *original) {
+    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformMethodDef(core::Context ctx, ast::MethodDef *original) {
+    ast::Expression *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformConstDef(core::Context ctx, ast::ConstDef *original) {
+    ast::Expression *postTransformConstDef(core::MutableContext ctx, ast::ConstDef *original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformIdent(core::Context ctx, ast::Ident *original) {
+    ast::Expression *postTransformIdent(core::MutableContext ctx, ast::Ident *original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *original) {
+    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *original) {
         Error::raise("These should have all been removed");
     }
-    ast::Expression *postTransformSelf(core::Context ctx, ast::Self *original) {
+    ast::Expression *postTransformSelf(core::MutableContext ctx, ast::Self *original) {
         ENFORCE(original->claz != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformBlock(core::Context ctx, ast::Block *original) {
+    ast::Expression *postTransformBlock(core::MutableContext ctx, ast::Block *original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
 };
 
-std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context ctx,
+std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx,
                                                             std::vector<std::unique_ptr<ast::Expression>> trees) {
     ResolveConstantsWalk constants(ctx);
     for (auto &tree : trees) {
-        tree = ast::TreeMap<ResolveConstantsWalk>::apply(ctx, constants, move(tree));
+        tree = ast::TreeMap<ResolveConstantsWalk, core::MutableContext>::apply(ctx, constants, move(tree));
     }
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
 
     for (auto &tree : trees) {
-        tree = ast::TreeMap<ResolveSignaturesWalk>::apply(ctx, sigs, move(tree));
-        tree = ast::TreeMap<ResolveVariablesWalk>::apply(ctx, vars, move(tree));
+        tree = ast::TreeMap<ResolveSignaturesWalk, core::MutableContext>::apply(ctx, sigs, move(tree));
+        tree = ast::TreeMap<ResolveVariablesWalk, core::MutableContext>::apply(ctx, vars, move(tree));
 
         // declared in here since it holds onto state
         FlattenWalk flatten;
-        tree = ast::TreeMap<FlattenWalk>::apply(ctx, flatten, move(tree));
+        tree = ast::TreeMap<FlattenWalk, core::MutableContext>::apply(ctx, flatten, move(tree));
         tree = flatten.addClasses(ctx, move(tree));
         tree = flatten.addMethods(ctx, move(tree));
     }
@@ -798,7 +798,7 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::Context ctx,
     if (debug_mode) {
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            tree = ast::TreeMap<ResolveSanityCheckWalk>::apply(ctx, sanity, move(tree));
+            tree = ast::TreeMap<ResolveSanityCheckWalk, core::MutableContext>::apply(ctx, sanity, move(tree));
         }
     }
 

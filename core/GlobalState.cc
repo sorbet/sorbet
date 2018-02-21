@@ -584,6 +584,30 @@ void GlobalState::expandNames() {
     names_by_hash.swap(new_names_by_hash);
 }
 
+NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const {
+    ENFORCE(num > 0, "num == 0, name overflow");
+    const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
+    unsigned int hashTableSize = names_by_hash.size();
+    unsigned int mask = hashTableSize - 1;
+    auto bucketId = hs & mask;
+    unsigned int probe_count = 1;
+
+    while (names_by_hash[bucketId].second != 0 && probe_count < hashTableSize) {
+        auto &bucket = names_by_hash[bucketId];
+        if (bucket.first == hs) {
+            auto &nm2 = names[bucket.second];
+            if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
+                nm2.unique.original == original) {
+                counterInc("names.unique.hit");
+                return nm2.ref(*this);
+            }
+        }
+        bucketId = (bucketId + probe_count) & mask;
+        probe_count++;
+    }
+    Error::raise("should never happen");
+}
+
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
     ENFORCE(num > 0, "num == 0, name overflow");
     const auto hs = _hash_mix_unique((u2)uniqueNameKind, UNIQUE, num, original.id());
@@ -732,8 +756,8 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNam
     }
 }
 
-LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) {
-    Symbol &data = owner.data(*this);
+LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) const {
+    const Symbol &data = owner.data(*this);
     ENFORCE(data.isMethod(), "entering temporary outside of a method");
     int id = ++(data.uniqueCounter);
 

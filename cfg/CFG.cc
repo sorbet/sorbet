@@ -103,7 +103,7 @@ void CFG::sanityCheck(core::Context ctx) {
     }
 }
 
-string CFG::toString(const core::Context ctx) {
+string CFG::toString(core::Context ctx) {
     stringstream buf;
     string symbolName = this->symbol.data(ctx).fullName(ctx);
     buf << "subgraph \"cluster_" << symbolName << "\" {" << endl;
@@ -137,7 +137,7 @@ string CFG::toString(const core::Context ctx) {
     return buf.str();
 }
 
-string BasicBlock::toString(const core::Context ctx) {
+string BasicBlock::toString(core::Context ctx) {
     stringstream buf;
     buf << "block[id=" << this->id << "](";
     bool first = true;

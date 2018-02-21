@@ -8,9 +8,9 @@ namespace core {
 
 using namespace std;
 
-shared_ptr<ruby_typer::core::Type> lubGround(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(const core::Context ctx, shared_ptr<Type> t1,
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> t1,
                                                                 shared_ptr<Type> t2) {
     auto ret = _lub(ctx, t1, t2);
     ret->sanityCheck(ctx);
@@ -28,7 +28,7 @@ shared_ptr<ruby_typer::core::Type> underlying(shared_ptr<Type> t1) {
     return t1;
 }
 
-shared_ptr<ruby_typer::core::Type> lubDistributeOr(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     OrType *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
@@ -60,7 +60,7 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(const core::Context ctx, shar
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
-shared_ptr<ruby_typer::core::Type> glbDistributeAnd(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     AndType *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
     shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
@@ -94,8 +94,7 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(const core::Context ctx, sha
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
-shared_ptr<ruby_typer::core::Type> dropLubComponents(const core::Context ctx, shared_ptr<Type> t1,
-                                                     shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (AndType *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
@@ -109,7 +108,7 @@ shared_ptr<ruby_typer::core::Type> dropLubComponents(const core::Context ctx, sh
     return t1;
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Context ctx, shared_ptr<Type> t1,
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                                                                  shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
@@ -336,7 +335,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(const core::Con
     return lubGround(ctx, t1, t2);
 }
 
-shared_ptr<ruby_typer::core::Type> lubGround(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -383,7 +382,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(const core::Context ctx, shared_ptr
     }
 }
 
-shared_ptr<ruby_typer::core::Type> glbGround(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -432,7 +431,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(const core::Context ctx, shared_ptr
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(const core::Context ctx, shared_ptr<Type> t1,
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> t1,
                                                                 shared_ptr<Type> t2) {
     auto ret = _glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
@@ -446,7 +445,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(const core::Cont
     return ret;
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Context ctx, shared_ptr<Type> t1,
+shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
                                                                  shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
@@ -716,7 +715,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(const core::Con
     return glbGround(ctx, t1, t2);
 }
 
-bool classSymbolIsAsGoodAs(const core::Context ctx, core::SymbolRef c1, core::SymbolRef c2) {
+bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRef c2) {
     ENFORCE(c1.data(ctx).isClass());
     ENFORCE(c2.data(ctx).isClass());
     return c1 == c2 || c1.data(ctx).derivesFrom(ctx, c2);
@@ -724,7 +723,7 @@ bool classSymbolIsAsGoodAs(const core::Context ctx, core::SymbolRef c1, core::Sy
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -938,7 +937,7 @@ bool isSubTypeSingle(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Ty
     }
 }
 
-bool ruby_typer::core::Types::isSubType(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -987,38 +986,38 @@ bool ruby_typer::core::Types::isSubType(const core::Context ctx, shared_ptr<Type
     return isSubTypeSingle(ctx, t1, t2); // 1
 }
 
-bool ruby_typer::core::Types::equiv(const core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ProxyType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool ProxyType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return underlying->derivesFrom(ctx, klass);
 }
 
-bool ClassType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool ClassType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     if (symbol == core::Symbols::untyped() || symbol == klass) {
         return true;
     }
     return symbol.data(ctx).derivesFrom(ctx, klass);
 }
 
-bool OrType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool OrType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return left->derivesFrom(ctx, klass) && right->derivesFrom(ctx, klass);
 }
 
-bool AndType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
 }
 
-bool AliasType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     Error::raise("AliasType.derivesfrom");
 }
 
-void AliasType::_sanityCheck(const core::Context ctx) {
+void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::instantiate(const core::Context ctx, std::vector<SymbolRef> params,
+std::shared_ptr<Type> AliasType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
@@ -1035,7 +1034,7 @@ std::string MetaType::typeName() {
     return "MetaType";
 }
 
-void MetaType::_sanityCheck(const core::Context ctx) {
+void MetaType::_sanityCheck(core::Context ctx) {
     this->wrapped->sanityCheck(ctx);
 }
 
@@ -1043,11 +1042,11 @@ bool MetaType::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
-bool MetaType::derivesFrom(const core::Context ctx, core::SymbolRef klass) {
+bool MetaType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> MetaType::instantiate(const core::Context ctx, std::vector<SymbolRef> params,
+std::shared_ptr<Type> MetaType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                             const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }

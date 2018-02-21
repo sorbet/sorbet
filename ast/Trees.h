@@ -50,11 +50,11 @@ enum ClassDefKind : u1 { Module, Class };
 
 class ClassDef final : public Declaration {
 public:
-    inline core::SymbolRef parent(core::Context ctx) {
+    inline core::SymbolRef parent(core::MutableContext ctx) {
         return symbol.data(ctx).parent(ctx);
     }
 
-    inline std::vector<core::SymbolRef> &mixins(core::Context ctx) {
+    inline std::vector<core::SymbolRef> &mixins(core::MutableContext ctx) {
         return symbol.data(ctx).mixins(ctx);
     }
 

@@ -29,7 +29,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     ruby_typer::core::UnfreezeNameTable nt(gs);
     ruby_typer::core::UnfreezeSymbolTable st(gs);
     ruby_typer::core::UnfreezeFileTable ft(gs);
-    ruby_typer::core::Context ctx(gs, core::Symbols::root());
+    ruby_typer::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ruby_typer::parser::Parser::run(gs, "<test input>", "a");
 
     try {

@@ -13,7 +13,7 @@ class DSLReplacer {
     friend class DSL;
 
 public:
-    ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *classDef) {
+    ast::ClassDef *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
         unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
@@ -66,11 +66,11 @@ private:
     DSLReplacer() {}
 };
 
-unique_ptr<ast::Expression> DSL::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     auto ast = move(tree);
 
     DSLReplacer dslReplacer;
-    ast = ast::TreeMap<DSLReplacer>::apply(ctx, dslReplacer, move(ast));
+    ast = ast::TreeMap<DSLReplacer, core::MutableContext>::apply(ctx, dslReplacer, move(ast));
 
     return ast;
 }

@@ -21,7 +21,7 @@ namespace namer {
  */
 class NameInserter {
     friend class Namer;
-    core::SymbolRef squashNames(core::Context ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
+    core::SymbolRef squashNames(core::MutableContext ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) {
             ENFORCE(node.get() != nullptr);
@@ -38,7 +38,7 @@ class NameInserter {
         return sym;
     }
 
-    core::SymbolRef arg2Symbol(core::Context ctx, ast::Expression *arg) {
+    core::SymbolRef arg2Symbol(core::MutableContext ctx, ast::Expression *arg) {
         auto loc = arg->loc;
         bool optional = false, keyword = false, block = false, repeated = false;
 
@@ -89,7 +89,7 @@ class NameInserter {
     vector<LocalFrame> scopeStack;
     u4 scopeId;
 
-    unique_ptr<ast::Expression> addAncestor(core::Context ctx, ast::ClassDef *klass,
+    unique_ptr<ast::Expression> addAncestor(core::MutableContext ctx, ast::ClassDef *klass,
                                             unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
@@ -125,17 +125,17 @@ class NameInserter {
         return move(send->args[0]);
     }
 
-    void aliasMethod(core::Context ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
+    void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
         core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx).definitionLoc, owner, newName);
         alias.data(ctx).resultType = make_shared<core::AliasType>(method);
     }
 
-    void aliasModuleFunction(core::Context ctx, core::SymbolRef method) {
+    void aliasModuleFunction(core::MutableContext ctx, core::SymbolRef method) {
         core::SymbolRef owner = method.data(ctx).owner;
         aliasMethod(ctx, owner.data(ctx).singletonClass(ctx), method.data(ctx).name, method);
     }
 
-    core::SymbolRef methodOwner(core::Context ctx) {
+    core::SymbolRef methodOwner(core::MutableContext ctx) {
         core::SymbolRef owner = ctx.owner.data(ctx).enclosingClass(ctx);
         if (owner == core::Symbols::noSymbol()) {
             // Root methods end up going on object
@@ -145,7 +145,7 @@ class NameInserter {
     }
 
 public:
-    ast::ClassDef *preTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
+    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *klass) {
         if (klass->symbol == core::Symbols::todo()) {
             klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         } else {
@@ -172,7 +172,7 @@ public:
         return klass;
     }
 
-    ast::ClassDef *postTransformClassDef(core::Context ctx, ast::ClassDef *klass) {
+    ast::ClassDef *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
@@ -194,14 +194,14 @@ public:
         return klass;
     }
 
-    core::LocalVariable enterLocal(core::Context ctx, core::NameRef name) {
+    core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
         if (!ctx.owner.data(ctx).isBlockSymbol(ctx)) {
             return core::LocalVariable(name, 0);
         }
         return core::LocalVariable(name, scopeId);
     }
 
-    void fillInArgs(core::Context ctx, ast::MethodDef::ARGS_store &args) {
+    void fillInArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &args) {
         bool inShadows = false;
 
         for (auto &arg : args) {
@@ -227,7 +227,7 @@ public:
         }
     }
 
-    ast::Expression *postTransformSend(core::Context ctx, ast::Send *original) {
+    ast::Expression *postTransformSend(core::MutableContext ctx, ast::Send *original) {
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
             core::SymbolRef method = ctx.owner.data(ctx).enclosingMethod(ctx);
@@ -320,7 +320,7 @@ public:
         return original;
     }
 
-    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
+    ast::MethodDef *preTransformMethodDef(core::MutableContext ctx, ast::MethodDef *method) {
         scopeStack.emplace_back();
         ++scopeId;
         core::SymbolRef owner = methodOwner(ctx);
@@ -357,7 +357,7 @@ public:
         return method;
     }
 
-    ast::MethodDef *postTransformMethodDef(core::Context ctx, ast::MethodDef *method) {
+    ast::MethodDef *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *method) {
         method->args = popEnclosingArgs();
         ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size());
         scopeStack.pop_back();
@@ -371,7 +371,7 @@ public:
         return method;
     }
 
-    ast::Block *preTransformBlock(core::Context ctx, ast::Block *blk) {
+    ast::Block *preTransformBlock(core::MutableContext ctx, ast::Block *blk) {
         core::SymbolRef owner = ctx.owner;
         if (owner == core::Symbols::noSymbol()) {
             // Root methods end up going on object
@@ -401,13 +401,13 @@ public:
         return blk;
     }
 
-    ast::Block *postTransformBlock(core::Context ctx, ast::Block *blk) {
+    ast::Block *postTransformBlock(core::MutableContext ctx, ast::Block *blk) {
         blk->args = popEnclosingArgs();
         scopeStack.pop_back();
         return blk;
     }
 
-    ast::Expression *postTransformUnresolvedIdent(core::Context ctx, ast::UnresolvedIdent *nm) {
+    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *nm) {
         switch (nm->kind) {
             case ast::UnresolvedIdent::Local: {
                 auto &frame = scopeStack.back();
@@ -431,12 +431,12 @@ public:
         }
     }
 
-    ast::Self *postTransformSelf(core::Context ctx, ast::Self *self) {
+    ast::Self *postTransformSelf(core::MutableContext ctx, ast::Self *self) {
         self->claz = ctx.selfClass();
         return self;
     }
 
-    ast::Assign *fillAssign(core::Context ctx, ast::ConstantLit *lhs, ast::Assign *asgn) {
+    ast::Assign *fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, ast::Assign *asgn) {
         // TODO(nelhage): forbid dynamic constant definition
         core::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
@@ -445,7 +445,7 @@ public:
         return asgn;
     }
 
-    ast::Expression *postTransformAssign(core::Context ctx, ast::Assign *asgn) {
+    ast::Expression *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
         ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
             return asgn;
@@ -538,7 +538,7 @@ public:
         }
     }
 
-    ast::Expression *postTransformYield(core::Context ctx, ast::Yield *yield) {
+    ast::Expression *postTransformYield(core::MutableContext ctx, ast::Yield *yield) {
         auto method = ctx.owner.data(ctx).enclosingMethod(ctx);
         core::SymbolRef blockArg;
         for (auto arg : method.data(ctx).arguments()) {
@@ -591,9 +591,9 @@ private:
     }
 }; // namespace namer
 
-unique_ptr<ast::Expression> Namer::run(core::Context ctx, unique_ptr<ast::Expression> tree) {
+unique_ptr<ast::Expression> Namer::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     NameInserter nameInserter;
-    return ast::TreeMap<NameInserter>::apply(ctx, nameInserter, move(tree));
+    return ast::TreeMap<NameInserter, core::MutableContext>::apply(ctx, nameInserter, move(tree));
 }
 
 } // namespace namer

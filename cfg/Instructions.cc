@@ -12,7 +12,7 @@ Return::Return(core::LocalVariable what) : what(what) {
     categoryCounterInc("cfg", "return");
 }
 
-string Return::toString(const core::Context ctx) {
+string Return::toString(core::Context ctx) {
     return "return " + this->what.toString(ctx);
 }
 
@@ -34,7 +34,7 @@ FloatLit::FloatLit(double value) : value(value) {
     categoryCounterInc("cfg", "floatlit");
 }
 
-string FloatLit::toString(const core::Context ctx) {
+string FloatLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
@@ -42,7 +42,7 @@ IntLit::IntLit(int64_t value) : value(value) {
     categoryCounterInc("cfg", "intlit");
 }
 
-string IntLit::toString(const core::Context ctx) {
+string IntLit::toString(core::Context ctx) {
     return to_string(this->value);
 }
 
@@ -54,15 +54,15 @@ Alias::Alias(core::SymbolRef what) : what(what) {
     categoryCounterInc("cfg", "alias");
 }
 
-string Ident::toString(const core::Context ctx) {
+string Ident::toString(core::Context ctx) {
     return this->what.toString(ctx);
 }
 
-string Alias::toString(const core::Context ctx) {
+string Alias::toString(core::Context ctx) {
     return "alias " + this->what.data(ctx).name.data(ctx).toString(ctx);
 }
 
-string Send::toString(const core::Context ctx) {
+string Send::toString(core::Context ctx) {
     stringstream buf;
     buf << this->recv.toString(ctx) << "." << this->fun.data(ctx).toString(ctx) << "(";
     bool isFirst = true;
@@ -77,15 +77,15 @@ string Send::toString(const core::Context ctx) {
     return buf.str();
 }
 
-string StringLit::toString(const core::Context ctx) {
+string StringLit::toString(core::Context ctx) {
     return this->value.data(ctx).toString(ctx);
 }
 
-string SymbolLit::toString(const core::Context ctx) {
+string SymbolLit::toString(core::Context ctx) {
     return "<symbol:" + this->value.data(ctx).toString(ctx) + ">";
 }
 
-string BoolLit::toString(const core::Context ctx) {
+string BoolLit::toString(core::Context ctx) {
     if (value) {
         return "true";
     } else {
@@ -93,19 +93,19 @@ string BoolLit::toString(const core::Context ctx) {
     }
 }
 
-string Self::toString(const core::Context ctx) {
+string Self::toString(core::Context ctx) {
     return "self";
 }
 
-string HashSplat::toString(const core::Context ctx) {
+string HashSplat::toString(core::Context ctx) {
     Error::notImplemented();
 }
 
-string ArraySplat::toString(const core::Context ctx) {
+string ArraySplat::toString(core::Context ctx) {
     Error::notImplemented();
 }
 
-string LoadArg::toString(const core::Context ctx) {
+string LoadArg::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_arg(";
     buf << this->receiver.toString(ctx);
@@ -115,7 +115,7 @@ string LoadArg::toString(const core::Context ctx) {
     return buf.str();
 }
 
-string LoadYieldParam::toString(const core::Context ctx) {
+string LoadYieldParam::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_yield_param(";
     buf << this->block.data(ctx).fullName(ctx);
@@ -123,15 +123,15 @@ string LoadYieldParam::toString(const core::Context ctx) {
     return buf.str();
 }
 
-string Unanalyzable::toString(const core::Context ctx) {
+string Unanalyzable::toString(core::Context ctx) {
     return "<unanalyzable>";
 }
 
-string NotSupported::toString(const core::Context ctx) {
+string NotSupported::toString(core::Context ctx) {
     return "NotSupported(" + why + ")";
 }
 
-string Cast::toString(const core::Context ctx) {
+string Cast::toString(core::Context ctx) {
     stringstream buf;
     buf << "cast(";
     buf << this->value.toString(ctx);
@@ -141,7 +141,7 @@ string Cast::toString(const core::Context ctx) {
     return buf.str();
 }
 
-string DebugEnvironment::toString(const core::Context ctx) {
+string DebugEnvironment::toString(core::Context ctx) {
     return str;
 }
 

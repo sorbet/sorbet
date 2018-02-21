@@ -30,9 +30,9 @@ struct ParsedSig {
 
 class TypeSyntax {
 public:
-    static bool isSig(core::Context ctx, ast::Send *send);
-    static ParsedSig parseSig(core::Context ctx, ast::Send *send);
-    static std::shared_ptr<core::Type> getResultType(core::Context ctx, std::unique_ptr<ast::Expression> &expr);
+    static bool isSig(core::MutableContext ctx, ast::Send *send);
+    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send);
+    static std::shared_ptr<core::Type> getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr);
 
     TypeSyntax() = delete;
 };

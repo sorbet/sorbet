@@ -62,8 +62,7 @@ public:
     static bool canBeTruthy(core::Context ctx, std::shared_ptr<Type> what);
     static bool canBeFalsy(core::Context ctx, std::shared_ptr<Type> what);
     enum Combinator { OR, AND };
-    static std::shared_ptr<Type> dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
-                                                 core::NameRef refiningName);
+
     static std::shared_ptr<Type> resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
                                                       const std::vector<std::shared_ptr<Type>> &targs);
 
@@ -252,8 +251,7 @@ private:
 
     friend class ruby_typer::core::GlobalSubstitution;
     friend class ruby_typer::core::serialize::GlobalStateSerializer;
-    friend std::shared_ptr<Type> Types::dropRefinements(core::Context ctx, std::shared_ptr<Type> onWhat,
-                                                        core::NameRef refiningName);
+
     friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);

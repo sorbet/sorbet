@@ -21,7 +21,7 @@ class KnowledgeFilter {
     unordered_set<core::LocalVariable> used_vars;
 
 public:
-    KnowledgeFilter(const core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
+    KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
         for (auto &bb : cfg->basicBlocks) {
             if (bb->bexit.cond != core::LocalVariable::noVariable() &&
                 bb->bexit.cond != core::LocalVariable::blockCall()) {
@@ -93,7 +93,7 @@ struct KnowledgeFact {
     InlinedVector<std::pair<core::LocalVariable, shared_ptr<core::Type>>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
-    void min(const core::Context ctx, const KnowledgeFact &other) {
+    void min(core::Context ctx, const KnowledgeFact &other) {
         for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
             auto &entry = *it;
             core::LocalVariable local = entry.first;
@@ -122,7 +122,7 @@ struct KnowledgeFact {
 
     /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
      */
-    static KnowledgeRef under(const core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
+    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
                               cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
 
     void sanityCheck() const {
@@ -137,7 +137,7 @@ struct KnowledgeFact {
         }
     }
 
-    string toString(const core::Context ctx) const {
+    string toString(core::Context ctx) const {
         stringstream buf;
 
         for (auto &el : yesTypeTests) {
@@ -157,7 +157,7 @@ shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
     return tp;
 }
 
-shared_ptr<core::Type> dropConstructor(const core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
+shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isDynamic()) {
             ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
@@ -204,7 +204,7 @@ public:
     bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
     bool seenFalsyOption;  // Same for falsy
 
-    string toString(const core::Context ctx) {
+    string toString(core::Context ctx) {
         stringstream buf;
         if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
             buf << "  Being truthy entails:" << endl;
@@ -247,7 +247,7 @@ public:
     vector<TestedKnowledge> knowledge;
     unordered_map<core::SymbolRef, shared_ptr<core::Type>> blockTypes;
 
-    string toString(const core::Context ctx) {
+    string toString(core::Context ctx) {
         stringstream buf;
         if (isDead) {
             buf << "dead=" << isDead << endl;
@@ -264,7 +264,7 @@ public:
         return buf.str();
     }
 
-    core::TypeAndOrigins getTypeAndOrigin(const core::Context ctx, core::LocalVariable symbol) const {
+    core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             core::TypeAndOrigins ret;
@@ -276,7 +276,7 @@ public:
         return types[fnd - vars.begin()];
     }
 
-    core::TypeAndOrigins getOrCreateTypeAndOrigin(const core::Context ctx, core::LocalVariable symbol) {
+    core::TypeAndOrigins getOrCreateTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             core::TypeAndOrigins ret;
@@ -307,7 +307,7 @@ public:
     }
 
     /* propagate knowledge on `to = from` */
-    void propagateKnowledge(const core::Context ctx, core::LocalVariable to, core::LocalVariable from,
+    void propagateKnowledge(core::Context ctx, core::LocalVariable to, core::LocalVariable from,
                             KnowledgeFilter &knowledgeFilter) {
         if (knowledgeFilter.isNeeded(to) && knowledgeFilter.isNeeded(from)) {
             getKnowledge(to) = getKnowledge(from);
@@ -321,7 +321,7 @@ public:
     }
 
     /* variable was reasigned. Forget everything about previous value */
-    void clearKnowledge(const core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter) {
+    void clearKnowledge(core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter) {
         int i = -1;
         for (auto &k : knowledge) {
             i++;
@@ -346,7 +346,7 @@ public:
     }
 
     /* Special case sources of knowledge */
-    void updateKnowledge(const core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
+    void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter) {
         if (send->fun == core::Names::bang()) {
             if (!knowledgeFilter.isNeeded(local)) {
@@ -657,7 +657,7 @@ public:
         return applied->targs.front();
     }
 
-    shared_ptr<core::Type> processBinding(const core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
+    shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
                                           KnowledgeFilter &knowledgeFilter) {
         try {
             core::TypeAndOrigins tp;
@@ -895,8 +895,8 @@ public:
         }
     }
 
-    void ensureGoodCondition(const core::Context ctx, core::LocalVariable cond) {}
-    void ensureGoodAssignTarget(const core::Context ctx, core::LocalVariable target) {}
+    void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
+    void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
 
     void cloneFrom(const Environment &rhs) {
         *this = rhs;
@@ -906,8 +906,8 @@ private:
     Environment &operator=(const Environment &rhs) = default;
 };
 
-KnowledgeRef KnowledgeFact::under(const core::Context ctx, const KnowledgeRef &what, const Environment &env,
-                                  core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded) {
+KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
+                                  cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded) {
     if (what->yesTypeTests.empty() && !isNeeded) {
         return what;
     }
@@ -965,7 +965,7 @@ KnowledgeRef KnowledgeFact::under(const core::Context ctx, const KnowledgeRef &w
     }
     return copy;
 }
-bool isSyntheticReturn(const core::Context ctx, cfg::Binding &bind) {
+bool isSyntheticReturn(core::Context ctx, cfg::Binding &bind) {
     if (bind.bind._name == core::Names::finalReturn()) {
         if (auto *ret = dynamic_cast<cfg::Return *>(bind.value.get())) {
             return ret->what.isSyntheticTemporary(ctx) ||
@@ -976,7 +976,7 @@ bool isSyntheticReturn(const core::Context ctx, cfg::Binding &bind) {
     return false;
 }
 
-unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(const core::Context ctx, unique_ptr<cfg::CFG> cfg) {
+unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     counterInc("infer.methods_typechecked");
     const int startErrorCount = ctx.state.totalErrors();
     vector<Environment> outEnvironments;

@@ -72,7 +72,7 @@ ast::Expression *getHashValue(ast::Hash *hash, core::NameRef name) {
     return nullptr;
 }
 
-vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::Context ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     bool isOptional = false;  // Can the setter be passed nil?
     bool isImmutable = false; // Are there no setters?
     bool isNilable = true;    // Can the getter return nil?

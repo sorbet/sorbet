@@ -641,7 +641,7 @@ std::vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::S
 
 std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
                                                   const std::vector<std::shared_ptr<Type>> &targs) {
-    core::Symbol &original = what.data(ctx);
+    const core::Symbol &original = what.data(ctx);
     core::SymbolRef originalOwner = what.data(ctx).enclosingClass(ctx);
 
     if (originalOwner.data(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
@@ -939,7 +939,7 @@ std::shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::
     core::SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
 
     if (method.exists()) {
-        core::Symbol &data = method.data(ctx);
+        const core::Symbol &data = method.data(ctx);
 
         if (data.arguments().size() > i) { // todo: this should become actual argument matching
             shared_ptr<Type> resultType =

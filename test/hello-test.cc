@@ -36,111 +36,111 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     class Counter {
     public:
         int count = 0;
-        ClassDef *preTransformClassDef(core::Context ctx, ClassDef *original) {
+        ClassDef *preTransformClassDef(core::MutableContext ctx, ClassDef *original) {
             count++;
             return original;
         }
-        MethodDef *preTransformMethodDef(core::Context ctx, MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        If *preTransformIf(core::Context ctx, If *original) {
+        MethodDef *preTransformMethodDef(core::MutableContext ctx, MethodDef *original) {
             count++;
             return original;
         }
 
-        While *preTransformWhile(core::Context ctx, While *original) {
+        If *preTransformIf(core::MutableContext ctx, If *original) {
             count++;
             return original;
         }
 
-        Break *postTransformBreak(core::Context ctx, Break *original) {
+        While *preTransformWhile(core::MutableContext ctx, While *original) {
             count++;
             return original;
         }
 
-        Next *postTransformNext(core::Context ctx, Next *original) {
+        Break *postTransformBreak(core::MutableContext ctx, Break *original) {
             count++;
             return original;
         }
 
-        Return *preTransformReturn(core::Context ctx, Return *original) {
+        Next *postTransformNext(core::MutableContext ctx, Next *original) {
             count++;
             return original;
         }
 
-        Rescue *preTransformRescue(core::Context ctx, Rescue *original) {
+        Return *preTransformReturn(core::MutableContext ctx, Return *original) {
             count++;
             return original;
         }
 
-        Ident *postTransformIdent(core::Context ctx, Ident *original) {
+        Rescue *preTransformRescue(core::MutableContext ctx, Rescue *original) {
             count++;
             return original;
         }
 
-        Assign *preTransformAssign(core::Context ctx, Assign *original) {
+        Ident *postTransformIdent(core::MutableContext ctx, Ident *original) {
             count++;
             return original;
         }
 
-        Send *preTransformSend(core::Context ctx, Send *original) {
+        Assign *preTransformAssign(core::MutableContext ctx, Assign *original) {
             count++;
             return original;
         }
 
-        Hash *preTransformHash(core::Context ctx, Hash *original) {
+        Send *preTransformSend(core::MutableContext ctx, Send *original) {
             count++;
             return original;
         }
 
-        Array *preTransformArray(core::Context ctx, Array *original) {
+        Hash *preTransformHash(core::MutableContext ctx, Hash *original) {
             count++;
             return original;
         }
 
-        FloatLit *postTransformFloatLit(core::Context ctx, FloatLit *original) {
+        Array *preTransformArray(core::MutableContext ctx, Array *original) {
             count++;
             return original;
         }
 
-        IntLit *postTransformIntLit(core::Context ctx, IntLit *original) {
+        FloatLit *postTransformFloatLit(core::MutableContext ctx, FloatLit *original) {
             count++;
             return original;
         }
 
-        StringLit *postTransformStringLit(core::Context ctx, StringLit *original) {
+        IntLit *postTransformIntLit(core::MutableContext ctx, IntLit *original) {
             count++;
             return original;
         }
 
-        ConstantLit *postTransformConstantLit(core::Context ctx, ConstantLit *original) {
+        StringLit *postTransformStringLit(core::MutableContext ctx, StringLit *original) {
             count++;
             return original;
         }
 
-        ArraySplat *preTransformArraySplat(core::Context ctx, ArraySplat *original) {
+        ConstantLit *postTransformConstantLit(core::MutableContext ctx, ConstantLit *original) {
             count++;
             return original;
         }
 
-        HashSplat *preTransformHashSplat(core::Context ctx, HashSplat *original) {
+        ArraySplat *preTransformArraySplat(core::MutableContext ctx, ArraySplat *original) {
             count++;
             return original;
         }
 
-        Self *postTransformSelf(core::Context ctx, Self *original) {
+        HashSplat *preTransformHashSplat(core::MutableContext ctx, HashSplat *original) {
             count++;
             return original;
         }
 
-        Block *preTransformBlock(core::Context ctx, Block *original) {
+        Self *postTransformSelf(core::MutableContext ctx, Self *original) {
             count++;
             return original;
         }
 
-        InsSeq *preTransformInsSeq(core::Context ctx, InsSeq *original) {
+        Block *preTransformBlock(core::MutableContext ctx, Block *original) {
+            count++;
+            return original;
+        }
+
+        InsSeq *preTransformInsSeq(core::MutableContext ctx, InsSeq *original) {
             count++;
             return original;
         }
@@ -148,7 +148,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     ruby_typer::core::GlobalState cb(errorQueue);
     cb.initEmpty();
-    ruby_typer::core::Context ctx(cb, core::Symbols::root());
+    ruby_typer::core::MutableContext ctx(cb, core::Symbols::root());
     static const char *foo_str = "Foo";
     ruby_typer::core::Loc loc(ruby_typer::core::FileRef(), 42, 91);
     ruby_typer::core::UnfreezeNameTable nt(ctx);
@@ -175,7 +175,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
         new ClassDef(loc, classSym, move(cnst), ClassDef::ANCESTORS_store(), move(classrhs), ClassDefKind::Class));
     Counter c;
 
-    auto r = TreeMap<Counter>::apply(ctx, c, move(tree));
+    auto r = TreeMap<Counter, core::MutableContext>::apply(ctx, c, move(tree));
     EXPECT_EQ(c.count, 3);
 }
 } // namespace ruby_typer

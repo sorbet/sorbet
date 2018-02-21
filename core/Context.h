@@ -8,14 +8,11 @@
 namespace ruby_typer {
 namespace core {
 
-class Context final {
+class Context {
 public:
-    GlobalState &state;
+    const GlobalState &state;
     SymbolRef owner;
     bool frozenConstraint = false;
-    operator GlobalState &() {
-        return state;
-    }
 
     operator const GlobalState &() const {
         return state;
@@ -23,9 +20,10 @@ public:
 
     Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
     Context(const Context &other) : state(other.state), owner(other.owner) {}
+    Context(const MutableContext &other);
 
     // Returns a SymbolRef corresponding to the class `self.class` for code
-    // executed in this Context, or, if `self` is a class,
+    // executed in this MutableContext, or, if `self` is a class,
     // `self.singleton_class` (We model classes as being normal instances of
     // their singleton classes for most purposes)
     SymbolRef selfClass();
@@ -43,8 +41,50 @@ public:
         return r;
     }
 
-    Context withFrozenConstraint() {
+    Context withFrozenConstraint() const {
         Context r = Context(*this);
+        r.frozenConstraint = true;
+        return r;
+    }
+};
+
+class MutableContext final {
+public:
+    GlobalState &state;
+    SymbolRef owner;
+    bool frozenConstraint = false;
+    operator GlobalState &() {
+        return state;
+    }
+
+    operator const GlobalState &() const {
+        return state;
+    }
+
+    MutableContext(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
+    MutableContext(const MutableContext &other) : state(other.state), owner(other.owner) {}
+
+    // Returns a SymbolRef corresponding to the class `self.class` for code
+    // executed in this MutableContext, or, if `self` is a class,
+    // `self.singleton_class` (We model classes as being normal instances of
+    // their singleton classes for most purposes)
+    SymbolRef selfClass();
+
+    bool permitOverloadDefinitions() const;
+
+    // Returns the SymbolRef corresponding to the class `self.class`, unless the
+    // context is a class, in which case return it. This class is most notably
+    // the class in which to look up class variables.
+    SymbolRef contextClass() const;
+
+    MutableContext withOwner(SymbolRef sym) const {
+        MutableContext r = MutableContext(*this);
+        r.owner = sym;
+        return r;
+    }
+
+    MutableContext withFrozenConstraint() {
+        MutableContext r = MutableContext(*this);
         r.frozenConstraint = true;
         return r;
     }

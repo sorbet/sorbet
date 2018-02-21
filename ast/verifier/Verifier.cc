@@ -6,7 +6,7 @@ namespace ast {
 
 class VerifierWalker {
 public:
-    Expression *preTransformExpression(core::Context ctx, Expression *original) {
+    Expression *preTransformExpression(core::MutableContext ctx, Expression *original) {
         if (!isa_tree<EmptyTree>(original)) {
             ENFORCE(!original->loc.is_none(), "location is unset");
         }
@@ -17,12 +17,12 @@ public:
     }
 };
 
-std::unique_ptr<Expression> Verifier::run(core::Context ctx, std::unique_ptr<Expression> node) {
+std::unique_ptr<Expression> Verifier::run(core::MutableContext ctx, std::unique_ptr<Expression> node) {
     if (!debug_mode) {
         return node;
     }
     VerifierWalker vw;
-    return TreeMap<VerifierWalker>::apply(ctx, vw, move(node));
+    return TreeMap<VerifierWalker, core::MutableContext>::apply(ctx, vw, move(node));
 }
 
 } // namespace ast

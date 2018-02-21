@@ -37,7 +37,7 @@ namespace dsl {
  */
 class ChalkODMProp final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::Context ctx, ast::Send *send);
+    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::Send *send);
 
     ChalkODMProp() = delete;
 };

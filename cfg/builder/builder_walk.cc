@@ -59,7 +59,7 @@ core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &i
                                  std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
-        core::Symbol &data = what.data(ctx);
+        const core::Symbol &data = what.data(ctx);
         alias = ctx.state.newTemporary(data.name, inWhat.symbol);
     }
     return alias;

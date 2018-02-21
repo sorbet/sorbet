@@ -26,8 +26,8 @@ public:
         ctxPtr = make_unique<core::GlobalState>(errorQueue);
         ctxPtr->initEmpty();
     }
-    core::Context getCtx() {
-        return core::Context(*ctxPtr, core::Symbols::root());
+    core::MutableContext getCtx() {
+        return core::MutableContext(*ctxPtr, core::Symbols::root());
     }
 
 private:
@@ -41,7 +41,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto tree = parser::Parser::run(gs, "<test>", str);
     tree->loc.file.data(gs).source_type = core::File::Typed;
-    ruby_typer::core::Context ctx(gs, core::Symbols::root());
+    ruby_typer::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
     ast = dsl::DSL::run(ctx, move(ast));
     return ast;

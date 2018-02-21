@@ -56,10 +56,11 @@ public:
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
 
-    LocalVariable newTemporary(NameRef name, SymbolRef owner);
+    LocalVariable newTemporary(NameRef name, SymbolRef owner) const;
 
     NameRef enterNameUTF8(absl::string_view nm);
 
+    NameRef getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
 
     NameRef enterNameConstant(NameRef original);

@@ -10,7 +10,7 @@ using namespace std;
 namespace ruby_typer {
 namespace cfg {
 
-void CFGBuilder::simplify(const core::Context ctx, CFG &cfg) {
+void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
     sanityCheck(ctx, cfg);
     bool changed = true;
     while (changed) {
@@ -98,7 +98,7 @@ void CFGBuilder::simplify(const core::Context ctx, CFG &cfg) {
     }
 }
 
-void CFGBuilder::sanityCheck(const core::Context ctx, CFG &cfg) {
+void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
     if (!debug_mode) {
         return;
     }
@@ -203,7 +203,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     }
 }
 
-void CFGBuilder::markLoopHeaders(const core::Context ctx, CFG &cfg) {
+void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
     for (unique_ptr<BasicBlock> &bb : cfg.basicBlocks) {
         for (auto *parent : bb->backEdges) {
             if (parent->outerLoops < bb->outerLoops) {
@@ -213,7 +213,7 @@ void CFGBuilder::markLoopHeaders(const core::Context ctx, CFG &cfg) {
         }
     }
 }
-void CFGBuilder::removeDeadAssigns(const core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
@@ -247,7 +247,7 @@ void CFGBuilder::removeDeadAssigns(const core::Context ctx, const CFG::ReadsAndW
     }
 }
 
-void CFGBuilder::computeMinMaxLoops(const core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (auto &pair : RnW.reads) {
         core::LocalVariable what = pair.first;
         const unordered_set<BasicBlock *> &where = pair.second;
@@ -278,7 +278,7 @@ void CFGBuilder::computeMinMaxLoops(const core::Context ctx, const CFG::ReadsAnd
     }
 }
 
-void CFGBuilder::fillInBlockArguments(const core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg) {
+void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg) {
     // Dmitry's algorithm for adding basic block arguments
     // I don't remember this version being described in any book.
     //

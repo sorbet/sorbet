@@ -13,7 +13,7 @@ namespace core {
 class Symbol;
 class GlobalState;
 class Type;
-class Context;
+class MutableContext;
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
@@ -145,7 +145,8 @@ public:
 
     SymbolRef owner;
     Loc definitionLoc;
-    u4 uniqueCounter = 1;
+    mutable u4 uniqueCounter =
+        1; // used as a counter for local variables inside CFG. not shared by design TODO: check that is actually isn't
     u4 flags;
 
     /*

@@ -8,7 +8,7 @@ using namespace std;
 namespace ruby_typer {
 namespace resolver {
 
-shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
     shared_ptr<core::Type> result;
     typecase(expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
              [&](ast::FloatLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
@@ -24,7 +24,7 @@ shared_ptr<core::Type> getResultLiteral(core::Context ctx, unique_ptr<ast::Expre
     return result;
 }
 
-bool isTProc(core::Context ctx, ast::Send *send) {
+bool isTProc(core::MutableContext ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
             if (auto *rcv = ast::cast_tree<ast::Ident>(send->recv.get())) {
@@ -38,7 +38,7 @@ bool isTProc(core::Context ctx, ast::Send *send) {
     return false;
 }
 
-bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
+bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::sig() && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
             return true;
@@ -48,7 +48,7 @@ bool TypeSyntax::isSig(core::Context ctx, ast::Send *send) {
     return false;
 }
 
-ParsedSig TypeSyntax::parseSig(core::Context ctx, ast::Send *send) {
+ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
     ParsedSig sig;
 
     while (send != nullptr) {
@@ -131,7 +131,7 @@ ParsedSig TypeSyntax::parseSig(core::Context ctx, ast::Send *send) {
     return sig;
 }
 
-shared_ptr<core::Type> interpretTCombinator(core::Context ctx, ast::Send *send) {
+shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
             return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0]), core::Types::nil());
@@ -212,7 +212,7 @@ shared_ptr<core::Type> interpretTCombinator(core::Context ctx, ast::Send *send) 
     }
 }
 
-shared_ptr<core::Type> TypeSyntax::getResultType(core::Context ctx, unique_ptr<ast::Expression> &expr) {
+shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
     shared_ptr<core::Type> result;
     typecase(expr.get(),
              [&](ast::Array *arr) {

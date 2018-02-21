@@ -8,7 +8,7 @@ namespace ruby_typer {
 namespace ast {
 class Substitute {
 public:
-    static std::unique_ptr<Expression> run(core::Context ctx, const core::GlobalSubstitution &subst,
+    static std::unique_ptr<Expression> run(core::MutableContext ctx, const core::GlobalSubstitution &subst,
                                            std::unique_ptr<Expression> what);
 };
 } // namespace ast

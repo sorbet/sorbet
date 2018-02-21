@@ -13,21 +13,21 @@ public:
 
 private:
     static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
-    static void fillInTopoSorts(const core::Context ctx, CFG &cfg);
-    static void dealias(const core::Context ctx, CFG &cfg);
-    static void simplify(const core::Context ctx, CFG &cfg);
-    static void sanityCheck(const core::Context ctx, CFG &cfg);
-    static void fillInBlockArguments(const core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg);
-    static void computeMinMaxLoops(const core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
-    static void removeDeadAssigns(const core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
-    static void markLoopHeaders(const core::Context ctx, CFG &cfg);
+    static void fillInTopoSorts(core::Context ctx, CFG &cfg);
+    static void dealias(core::Context ctx, CFG &cfg);
+    static void simplify(core::Context ctx, CFG &cfg);
+    static void sanityCheck(core::Context ctx, CFG &cfg);
+    static void fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static void computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static void removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg);
+    static void markLoopHeaders(core::Context ctx, CFG &cfg);
     static int topoSortFwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
     static int topoSortBwd(std::vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB);
 };
 
 class CFGContext {
 public:
-    const core::Context ctx;
+    core::Context ctx;
     CFG &inWhat;
     core::LocalVariable target;
     int loops;
@@ -42,7 +42,7 @@ public:
                              core::SymbolRef rubyBlock = core::Symbols::noSymbol());
 
 private:
-    friend std::unique_ptr<CFG> CFGBuilder::buildFor(const core::Context ctx, ast::MethodDef &md);
+    friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope,
                std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases)

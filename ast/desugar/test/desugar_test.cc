@@ -22,6 +22,6 @@ TEST(DesugarTest, SimpleDesugar) { // NOLINT
     ruby_typer::core::UnfreezeFileTable ft(gs);
 
     auto ast = ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    ruby_typer::core::Context ctx(gs, ruby_typer::core::Symbols::root());
+    ruby_typer::core::MutableContext ctx(gs, ruby_typer::core::Symbols::root());
     auto o1 = ruby_typer::ast::desugar::node2Tree(ctx, move(ast));
 }

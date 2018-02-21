@@ -133,7 +133,7 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(const Printers &print) : print(print){};
 
-    ast::MethodDef *preTransformMethodDef(const core::Context ctx, ast::MethodDef *m) {
+    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
         if (m->loc.file.data(ctx).source_type == core::File::Untyped) {
             return m;
         }
@@ -176,7 +176,7 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
             cout << nodes->toJSON(lgs, 0) << endl;
         }
 
-        core::Context ctx(lgs, core::Symbols::root());
+        core::MutableContext ctx(lgs, core::Symbols::root());
         std::unique_ptr<ast::Expression> ast;
         {
             tracer->trace("Desugaring: {}", file.data(lgs).path());
@@ -311,7 +311,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                     core::GlobalSubstitution substitution(*threadResult.gs, gs);
                     tracer->trace("Consuming counters");
                     counterConsume(move(threadResult.counters));
-                    core::Context ctx(gs, core::Symbols::root());
+                    core::MutableContext ctx(gs, core::Symbols::root());
                     tracer->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
                         trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
@@ -342,7 +342,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             try {
                 unique_ptr<ast::Expression> ast;
                 {
-                    core::Context ctx(gs, core::Symbols::root());
+                    core::MutableContext ctx(gs, core::Symbols::root());
                     tracer->trace("Naming: {}", file.data(gs).path());
                     core::ErrorRegion errs(gs, file, silenceErrors);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
@@ -362,7 +362,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     return result;
 }
 
-unique_ptr<ast::Expression> typecheckFile(const core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts,
+unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts,
                                           bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
@@ -375,7 +375,7 @@ unique_ptr<ast::Expression> typecheckFile(const core::Context ctx, unique_ptr<as
         {
             tracer->trace("CFG+Infer: {}", f.data(ctx).path());
             core::ErrorRegion errs(ctx, f, silenceErrors);
-            result = ast::TreeMap<CFG_Collector_and_Typer>::apply(ctx, collector, move(resolved));
+            result = ast::TreeMap<CFG_Collector_and_Typer, core::Context>::apply(ctx, collector, move(resolved));
         }
         if (opts.print.TypedSource) {
             cout << ctx.state.showAnnotatedSource(f);
@@ -403,7 +403,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 
     try {
-        core::Context ctx(*gs, core::Symbols::root());
+        core::MutableContext ctx(*gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
             Timer timeit(console_err, "Resolving");
@@ -434,7 +434,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq =
         make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
 
-    const core::Context ctx(*gs, core::Symbols::root());
+    core::Context ctx(*gs, core::Symbols::root());
     for (auto &resolved : what) {
         tracer->trace("enqueue-typer {}", resolved->loc.file.data(*gs).path());
         fileq->push(move(resolved), 1);

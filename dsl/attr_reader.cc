@@ -12,11 +12,11 @@ using namespace std;
 namespace ruby_typer {
 namespace dsl {
 
-unique_ptr<ast::Expression> mkTUntyped(core::Context ctx, core::Loc loc) {
+unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) {
     return ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
 }
 
-core::NameRef getName(core::Context ctx, ast::Expression *name) {
+core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
     if (auto sym = ast::cast_tree<ast::SymbolLit>(name)) {
         return sym->name;
     } else if (auto str = ast::cast_tree<ast::StringLit>(name)) {
@@ -26,7 +26,7 @@ core::NameRef getName(core::Context ctx, ast::Expression *name) {
     return core::NameRef::noName();
 }
 
-vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::Context ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     bool makeReader = false;

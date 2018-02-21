@@ -8,7 +8,7 @@ namespace dsl {
 
 class DSL final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree);
 
     DSL() = delete;
 };

@@ -18,7 +18,7 @@ using namespace std;
 namespace ruby_typer {
 namespace core {
 
-SymbolRef Context::selfClass() {
+SymbolRef MutableContext::selfClass() {
     Symbol &data = this->owner.data(this->state);
     if (data.isClass()) {
         return data.singletonClass(this->state);
@@ -35,6 +35,11 @@ bool Context::permitOverloadDefinitions() const {
     return file.isStdLib() || ::ruby_typer::File::getFileName(file.path()) == whitelistedTest;
 }
 
+bool MutableContext::permitOverloadDefinitions() const {
+    Context self(*this);
+    return self.permitOverloadDefinitions();
+}
+
 SymbolRef Context::contextClass() const {
     SymbolRef owner = this->owner;
     while (!owner.data(this->state, false).isClass()) {
@@ -42,6 +47,13 @@ SymbolRef Context::contextClass() const {
         owner = owner.data(this->state).owner;
     }
     return owner;
+}
+
+Context::Context(const MutableContext &other) : state(other.state), owner(other.owner) {}
+
+SymbolRef MutableContext::contextClass() const {
+    Context self(*this);
+    return self.contextClass();
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to) {

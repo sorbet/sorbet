@@ -9,7 +9,7 @@ namespace resolver {
 
 class Resolver final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> run(core::Context ctx,
+    static std::vector<std::unique_ptr<ast::Expression>> run(core::MutableContext ctx,
                                                              std::vector<std::unique_ptr<ast::Expression>> trees);
     Resolver() = delete;
 

@@ -17,9 +17,9 @@ using namespace std;
 
 namespace {
 
-unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter);
+unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter);
 
-pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Context ctx, core::Loc loc,
+pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::MutableContext ctx, core::Loc loc,
                                                                        unique_ptr<parser::Node> &argnode,
                                                                        unique_ptr<parser::Node> &bodynode,
                                                                        u2 &uniqueCounter) {
@@ -59,7 +59,8 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Con
     return make_pair(move(args), move(body));
 }
 
-unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::NodeVec nodes, u2 &uniqueCounter) {
+unique_ptr<Expression> desugarDString(core::MutableContext ctx, core::Loc loc, parser::NodeVec nodes,
+                                      u2 &uniqueCounter) {
     if (nodes.empty()) {
         return make_unique<StringLit>(loc, core::Names::empty());
     }
@@ -87,14 +88,14 @@ unique_ptr<Expression> desugarDString(core::Context ctx, core::Loc loc, parser::
     return res;
 }
 
-unique_ptr<MethodDef> buildMethod(core::Context ctx, core::Loc loc, core::NameRef name,
+unique_ptr<MethodDef> buildMethod(core::MutableContext ctx, core::Loc loc, core::NameRef name,
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body,
                                   u2 &uniqueCounter) {
     auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body, uniqueCounter);
     return MK::Method(loc, name, move(argsAndBody.first), move(argsAndBody.second));
 }
 
-unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node, u2 &uniqueCounter) {
+unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> node, u2 &uniqueCounter) {
     if (node == nullptr) {
         return nullptr;
     }
@@ -122,7 +123,7 @@ unique_ptr<Block> node2Proc(core::Context ctx, unique_ptr<parser::Node> node, u2
     return make_unique<Block>(loc, move(args), move(body));
 }
 
-unique_ptr<Expression> unsupportedNode(core::Context ctx, parser::Node *node) {
+unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {
     ctx.state.error(node->loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}", node->nodeName());
     return MK::EmptyTree(node->loc);
 }
@@ -138,8 +139,8 @@ unique_ptr<Expression> unsupportedNode(core::Context ctx, parser::Node *node) {
 //     element
 //  - If `rhs` is not an array, we index into it anyways, instead of
 //    `nil`-padding.
-unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlhs *lhs, unique_ptr<Expression> rhs,
-                                   u2 &uniqueCounter) {
+unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, parser::Mlhs *lhs,
+                                   unique_ptr<Expression> rhs, u2 &uniqueCounter) {
     InsSeq::STATS_store stats;
 
     core::NameRef tempName =
@@ -190,7 +191,7 @@ unique_ptr<Expression> desugarMlhs(core::Context ctx, core::Loc loc, parser::Mlh
 
 bool locReported = false;
 
-ClassDef::RHS_store scopeNodeToBody(core::Context ctx, unique_ptr<parser::Node> node) {
+ClassDef::RHS_store scopeNodeToBody(core::MutableContext ctx, unique_ptr<parser::Node> node) {
     ClassDef::RHS_store body;
     u2 uniqueCounter = 1;
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
@@ -204,7 +205,7 @@ ClassDef::RHS_store scopeNodeToBody(core::Context ctx, unique_ptr<parser::Node> 
     return body;
 }
 
-unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter) {
+unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser::Node> what, u2 &uniqueCounter) {
     try {
         if (what.get() == nullptr) {
             return MK::EmptyTree(core::Loc::none());
@@ -1273,7 +1274,7 @@ unique_ptr<Expression> node2TreeImpl(core::Context ctx, unique_ptr<parser::Node>
     }
 }
 
-unique_ptr<Expression> liftTopLevel(core::Context ctx, unique_ptr<Expression> what) {
+unique_ptr<Expression> liftTopLevel(core::MutableContext ctx, unique_ptr<Expression> what) {
     if (isa_tree<ClassDef>(what.get())) {
         return what;
     }
@@ -1287,7 +1288,7 @@ unique_ptr<Expression> liftTopLevel(core::Context ctx, unique_ptr<Expression> wh
 }
 } // namespace
 
-unique_ptr<Expression> node2Tree(core::Context ctx, unique_ptr<parser::Node> what) {
+unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what) {
     try {
         u2 uniqueCounter = 1;
         auto result = node2TreeImpl(ctx, move(what), uniqueCounter);

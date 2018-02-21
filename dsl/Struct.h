@@ -27,7 +27,7 @@ namespace dsl {
  */
 class Struct final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::Context ctx, ast::Assign *asgn);
+    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::Assign *asgn);
 
     Struct() = delete;
 };

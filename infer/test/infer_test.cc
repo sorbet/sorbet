@@ -29,8 +29,8 @@ public:
         ctxPtr = make_unique<core::GlobalState>(errorQueue);
         ctxPtr->initEmpty();
     }
-    core::Context getCtx() {
-        return core::Context(*ctxPtr, core::Symbols::root());
+    core::MutableContext getCtx() {
+        return core::MutableContext(*ctxPtr, core::Symbols::root());
     }
 
 private:
@@ -42,7 +42,7 @@ void processSource(core::GlobalState &cb, string str) {
     ruby_typer::core::UnfreezeSymbolTable st(cb);
     ruby_typer::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
-    ruby_typer::core::Context ctx(cb, core::Symbols::root());
+    ruby_typer::core::MutableContext ctx(cb, core::Symbols::root());
     auto tree = ast::desugar::node2Tree(ctx, move(ast));
     tree = dsl::DSL::run(ctx, move(tree));
     tree = namer::Namer::run(ctx, move(tree));

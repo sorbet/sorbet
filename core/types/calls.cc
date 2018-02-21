@@ -120,7 +120,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
 
 namespace {
 void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass, core::SymbolRef method,
-                  TypeAndOrigins &argTpe, core::Symbol &argSym, shared_ptr<core::Type> &fullType,
+                  TypeAndOrigins &argTpe, const core::Symbol &argSym, shared_ptr<core::Type> &fullType,
                   vector<shared_ptr<Type>> &targs) {
     shared_ptr<Type> expectedType = core::Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
@@ -177,7 +177,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
         while (current.data(ctx).isOverloaded()) {
             i++;
             core::NameRef overloadName =
-                ctx.state.freshNameUnique(core::UniqueNameKind::Overload, primary.data(ctx).name, i);
+                ctx.state.getNameUnique(core::UniqueNameKind::Overload, primary.data(ctx).name, i);
             core::SymbolRef overload = primary.data(ctx).owner.data(ctx).findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
@@ -273,7 +273,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
     return fallback;
 }
 
-shared_ptr<Type> unwrapType(const Context ctx, Loc loc, shared_ptr<Type> tp) {
+shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
     if (auto *tc = cast_type<MetaType>(tp.get())) {
         return tc->wrapped;
     }
@@ -431,7 +431,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                                                  fullType, targs, block != nullptr)
                                  : mayBeOverloaded;
 
-    core::Symbol &data = method.data(ctx);
+    const core::Symbol &data = method.data(ctx);
 
     bool hasKwargs = std::any_of(data.arguments().begin(), data.arguments().end(),
                                  [&ctx](core::SymbolRef arg) { return arg.data(ctx).isKeyword(); });
@@ -447,7 +447,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     auto aend = args.end();
 
     while (pit != pend && ait != aend) {
-        core::Symbol &spec = pit->data(ctx);
+        const core::Symbol &spec = pit->data(ctx);
         auto &arg = *ait;
         if (spec.isKeyword()) {
             break;
@@ -497,7 +497,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             --aend;
 
             while (kwit != data.arguments().end()) {
-                core::Symbol &spec = kwit->data(ctx);
+                const core::Symbol &spec = kwit->data(ctx);
                 if (spec.isBlockArgument()) {
                     break;
                 } else if (spec.isRepeated()) {
@@ -613,7 +613,7 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
     if (method.exists()) {
-        core::Symbol &data = method.data(ctx);
+        const core::Symbol &data = method.data(ctx);
 
         if (data.arguments().size() > i) { // todo: this should become actual argument matching
             shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
@@ -639,7 +639,7 @@ std::shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::Na
     Error::raise("AliasType::getCallArgumentType");
 }
 
-std::shared_ptr<Type> MetaType::dispatchCall(const core::Context ctx, core::NameRef name, core::Loc callLoc,
+std::shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> fullType,
                                              shared_ptr<Type> *block) {
     switch (name._id) {
@@ -654,6 +654,6 @@ std::shared_ptr<Type> MetaType::dispatchCall(const core::Context ctx, core::Name
     }
 }
 
-std::shared_ptr<Type> MetaType::getCallArgumentType(const core::Context ctx, core::NameRef name, int i) {
+std::shared_ptr<Type> MetaType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("should never happen");
 }
