@@ -17,7 +17,7 @@ In order to build the production version please run `./bazel build //main:ruby-t
 The resulting executable will be in `bazel-bin/main/ruby-typer`.
 It should be statically linked and have no dependencies, so feel free to copy it.
 
-In order to build a release version please run `./bazel build //main:ruby-typer -c opt --config=lto --stamp`.
+In order to build a release version please run `./bazel build //main:ruby-typer --config=release`.
 # Security concerns
 Note that in order to speed up startup time, `ruby-typer` preloads some ruby code into itself.
 Please do not spread those executables outside of Stripe.

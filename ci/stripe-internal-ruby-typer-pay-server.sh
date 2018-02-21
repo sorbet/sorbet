@@ -13,7 +13,7 @@ maxrss: %M
 '
 
 # This is what we'll ship to our users
-bazel build main:ruby-typer -c opt --config=lto --stamp
+bazel build main:ruby-typer --config=release
 
 mkdir -p /build/bin
 cp bazel-bin/main/ruby-typer /build/bin
