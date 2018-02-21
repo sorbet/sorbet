@@ -43,6 +43,8 @@ class AdvancedODM
     const :const, String, default: ""
 
     prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, default: ""
+
+    prop :enum_prop, enum: ["hello", "goodbye"]
 end
 
 class PropHelpers
@@ -94,6 +96,9 @@ def main
 
     T.assert_type!(AdvancedODM.new.no_class_arg, T.nilable(T::Array[String]))
     AdvancedODM.new.no_class_arg = ['b'] # error: Method no_class_arg= does not exist on AdvancedODM
+
+    T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn)
+    AdvancedODM.new.enum_prop = "hello" # error: Argument arg0 does not match expected type
 
     T.assert_type!(PropHelpers.new.token, String)
     PropHelpers.new.token = "tok_token"

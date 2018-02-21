@@ -234,6 +234,18 @@ class <emptyTree><<constant:<root>>> < ()
       def no_class_arg<<constant:<todo sym>>>()
         ::<constant:T>.cast(::<constant:nil>, <emptyTree>::<constant:Array>)
       end
+
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.noreturn())
+
+      def enum_prop<<constant:<todo sym>>>()
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>.noreturn())
+      end
+
+      self(<constant:<todo sym>>).sig({:arg0 => ::<constant:T>.noreturn()}).returns(::<constant:T>.noreturn())
+
+      def enum_prop=<<constant:<todo sym>>>(arg0)
+        ::<constant:T>.cast(::<constant:nil>, ::<constant:T>.noreturn())
+      end
     end
     class <emptyTree>::<constant:PropHelpers><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       self(<constant:<todo sym>>).sig({}).returns(::<constant:String>)
@@ -312,6 +324,8 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:AdvancedODM>.new().const=("b")
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().no_class_arg(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)))
         <emptyTree>::<constant:AdvancedODM>.new().no_class_arg=(["b"])
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().enum_prop(), <emptyTree>::<constant:T>.noreturn())
+        <emptyTree>::<constant:AdvancedODM>.new().enum_prop=("hello")
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers>.new().token(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:PropHelpers>.new().token=("tok_token")
         <emptyTree>::<constant:PropHelpers>.new().token=(::<constant:nil>)

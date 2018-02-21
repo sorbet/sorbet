@@ -123,20 +123,25 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (!send->args.empty()) {
         rules = ast::cast_tree<ast::Hash>(send->args.back().get());
     }
-    if (send->args.size() == 3 && !rules) {
+    if (rules == nullptr && (send->args.size() == 3 || type == nullptr)) {
         return empty;
     }
+
     if (type == nullptr) {
-        if (rules == nullptr) {
-            return empty;
-        }
         type = dupType(getHashValue(rules, core::Names::type()));
     }
 
     if (type == nullptr) {
-        if (rules == nullptr) {
-            return empty;
+        if (getHashValue(rules, core::Names::enum_()) != nullptr) {
+            // Handle enum: by setting the type to bottom, so that we'll parse
+            // the declaration but won't allow use of this prop in typechecked
+            // code.
+            type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::noreturn());
+            isNilable = false;
         }
+    }
+
+    if (type == nullptr) {
         auto arrayType = dupType(getHashValue(rules, core::Names::array()));
         if (arrayType) {
             type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),

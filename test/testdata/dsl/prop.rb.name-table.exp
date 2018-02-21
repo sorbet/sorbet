@@ -59,6 +59,9 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method default () -> String
     method default= (arg0) -> String
       argument arg0<> -> String
+    method enum_prop () -> <bottom>
+    method enum_prop= (arg0) -> <bottom>
+      argument arg0<> -> <bottom>
     method factory () -> String
     method factory= (arg0) -> String
       argument arg0<> -> String
