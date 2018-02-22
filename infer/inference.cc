@@ -761,6 +761,9 @@ public:
                             ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
                             ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx));
                     }
+                    tp.type = core::Types::bottom();
+                    tp.origins.push_back(bind.loc);
+
                     auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                     if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
                         ctx.state.error(core::ComplexError(
@@ -776,8 +779,6 @@ public:
                              core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                 typeAndOrigin.origins2Explanations(ctx))}));
                     }
-                    tp.type = core::Types::bottom();
-                    tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::BlockReturn *i) {
                     auto it = this->blockTypes.find(i->block);
@@ -988,6 +989,9 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
     KnowledgeFilter knowledgeFilter(ctx, cfg);
+    if (!cfg->basicBlocks.empty()) {
+        ENFORCE(!cfg->symbol.data(ctx).isAbstract());
+    }
     for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
         if (bb == cfg->deadBlock()) {
             continue;
