@@ -16,8 +16,9 @@ build --host_copt=-O0
 build --host_cxxopt=-DFORCE_DEBUG
 build --host_copt=-DFORCE_DEBUG
 
-# fix build on mac. For some reason path stopped being propagated.
-build --action_env PATH
+# We shell out to homebrew and ruby. Hardcode the most likely places
+# to find them on both Linux and OS X
+build --action_env PATH=/usr/local/bin:/usr/local/opt/bison/bin:/usr/bin:/bin
 
 # The MacOS CROSSTOOL in bazel defines _FORTIFY_SOURCE both on
 # <command line>:1:9: and <built-in>:355:9: so sadly we turn them all off
