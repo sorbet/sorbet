@@ -1342,9 +1342,14 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:Job> < ::<constant:Object> () -> <Class:Benchmark::Job>
     class <constant:Report> < ::<constant:Object> () -> <Class:Benchmark::Report>
     class <constant:Tms> < ::<constant:Object> () -> <Class:Benchmark::Tms>
+      static-field <constant:CAPTION> -> String
+      static-field <constant:FORMAT> -> String
     class <singleton class:<constant:Job>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Report>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Tms>> < ::<singleton class:<constant:Object>> ()
+    static-field <constant:BENCHMARK_VERSION> -> String
+    static-field <constant:CAPTION> -> String
+    static-field <constant:FORMAT> -> String
   class <constant:BigDecimal> < ::<constant:Numeric> () -> <Class:BigDecimal>
     method % (arg0) -> BigDecimal
       argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex
@@ -1566,6 +1571,28 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> BigDecimal
     method untrust () -> BigDecimal
     method zero? () -> TrueClass | FalseClass
+    static-field <constant:BASE> -> Integer
+    static-field <constant:EXCEPTION_ALL> -> Integer
+    static-field <constant:EXCEPTION_INFINITY> -> Integer
+    static-field <constant:EXCEPTION_OVERFLOW> -> Integer
+    static-field <constant:EXCEPTION_UNDERFLOW> -> Integer
+    static-field <constant:EXCEPTION_ZERODIVIDE> -> Integer
+    static-field <constant:INFINITY> -> BigDecimal
+    static-field <constant:NAN> -> BigDecimal
+    static-field <constant:ROUND_CEILING> -> Integer
+    static-field <constant:ROUND_DOWN> -> Integer
+    static-field <constant:ROUND_FLOOR> -> Integer
+    static-field <constant:ROUND_HALF_DOWN> -> Integer
+    static-field <constant:ROUND_HALF_EVEN> -> Integer
+    static-field <constant:ROUND_HALF_UP> -> Integer
+    static-field <constant:ROUND_MODE> -> Integer
+    static-field <constant:ROUND_UP> -> Integer
+    static-field <constant:SIGN_NEGATIVE_FINITE> -> Integer
+    static-field <constant:SIGN_NEGATIVE_INFINITE> -> Integer
+    static-field <constant:SIGN_NEGATIVE_ZERO> -> Integer
+    static-field <constant:SIGN_POSITIVE_FINITE> -> Integer
+    static-field <constant:SIGN_POSITIVE_INFINITE> -> Integer
+    static-field <constant:SIGN_POSITIVE_ZERO> -> Integer
   class <constant:BigMath> (<constant:BasicObject>) -> <Class:BigMath>
     method E (prec) -> BigDecimal
       argument prec<> -> Integer
@@ -1680,6 +1707,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
           }
       ]
     }
+    static-field <constant:DEFAULT_OPTIONS> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:VERSION> -> String
     typeMember(=) <constant:Elem> -> AppliedType {
       klass = ::<constant:Array>
       targs = [
@@ -1849,6 +1885,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> Complex
     method untrust () -> Complex
     method zero? () -> TrueClass | FalseClass
+    static-field <constant:I> -> Complex
   class <constant:Coverage> (<constant:BasicObject>) -> <Class:Coverage>
   class <constant:Data> < ::<constant:Object> () -> <Class:Data>
     method clone () -> Data
@@ -2027,18 +2064,67 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method xmlschema (arg0) -> untyped
       argument arg0<repeated> -> untyped
     method zone () -> untyped
+    static-field <constant:ABBR_DAYNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:ABBR_MONTHNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:DAYNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:ENGLAND> -> Integer
+    static-field <constant:GREGORIAN> -> Float
+    static-field <constant:ITALY> -> Integer
+    static-field <constant:JULIAN> -> Float
+    static-field <constant:MONTHNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:DidYouMean> (<constant:BasicObject>) -> <Class:DidYouMean>
     class <constant:ClassNameChecker> < ::<constant:Object> () -> <Class:DidYouMean::ClassNameChecker>
+      class <constant:ClassName> () -> <Class:DidYouMean::ClassNameChecker::ClassName>
+        static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor
+      class <singleton class:<constant:ClassName>> < ::<constant:Module> ()
     class <constant:Correctable> (<constant:BasicObject>) -> <Class:DidYouMean::Correctable>
     class <constant:Formatter> < ::<constant:Object> () -> <Class:DidYouMean::Formatter>
     class <constant:Jaro> (<constant:BasicObject>) -> <Class:DidYouMean::Jaro>
     class <constant:JaroWinkler> (<constant:BasicObject>) -> <Class:DidYouMean::JaroWinkler>
+      static-field <constant:THRESHOLD> -> Float
+      static-field <constant:WEIGHT> -> Float
     class <constant:Levenshtein> (<constant:BasicObject>) -> <Class:DidYouMean::Levenshtein>
     class <constant:MethodNameChecker> < ::<constant:Object> () -> <Class:DidYouMean::MethodNameChecker>
+      static-field <constant:NAMES_TO_EXCLUDE> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:NameErrorCheckers> (<constant:BasicObject>) -> <Class:DidYouMean::NameErrorCheckers>
     class <constant:NullChecker> < ::<constant:Object> () -> <Class:DidYouMean::NullChecker>
     class <constant:SpellChecker> < ::<constant:Object> () -> <Class:DidYouMean::SpellChecker>
     class <constant:VariableNameChecker> < ::<constant:Object> () -> <Class:DidYouMean::VariableNameChecker>
+      static-field <constant:NAMES_TO_EXCLUDE> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <singleton class:<constant:ClassNameChecker>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Correctable>> < ::<constant:Module> ()
     class <singleton class:<constant:Formatter>> < ::<singleton class:<constant:Object>> ()
@@ -2050,6 +2136,21 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <singleton class:<constant:NullChecker>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:SpellChecker>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:VariableNameChecker>> < ::<singleton class:<constant:Object>> ()
+    static-field <constant:IGNORED_CALLERS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:SPELL_CHECKERS> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:VERSION> -> String
   class <constant:Dir>[<constant:Elem>] < ::<constant:Object> (<constant:Enumerable>) -> <Class:Dir>
     method <overload N.1 : each> () -> AppliedType {
       klass = ::<constant:Enumerator>
@@ -2151,6 +2252,19 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:Encoding> < ::<constant:Object> () -> <Class:Encoding>
     class <constant:CompatibilityError> < ::<constant:EncodingError> () -> <Class:Encoding::CompatibilityError>
     class <constant:Converter> < ::<constant:Data> () -> <Class:Encoding::Converter>
+      static-field <constant:AFTER_OUTPUT> -> Integer
+      static-field <constant:CRLF_NEWLINE_DECORATOR> -> Integer
+      static-field <constant:CR_NEWLINE_DECORATOR> -> Integer
+      static-field <constant:INVALID_MASK> -> Integer
+      static-field <constant:INVALID_REPLACE> -> Integer
+      static-field <constant:PARTIAL_INPUT> -> Integer
+      static-field <constant:UNDEF_HEX_CHARREF> -> Integer
+      static-field <constant:UNDEF_MASK> -> Integer
+      static-field <constant:UNDEF_REPLACE> -> Integer
+      static-field <constant:UNIVERSAL_NEWLINE_DECORATOR> -> Integer
+      static-field <constant:XML_ATTR_CONTENT_DECORATOR> -> Integer
+      static-field <constant:XML_ATTR_QUOTE_DECORATOR> -> Integer
+      static-field <constant:XML_TEXT_DECORATOR> -> Integer
     class <constant:ConverterNotFoundError> < ::<constant:EncodingError> () -> <Class:Encoding::ConverterNotFoundError>
     class <constant:InvalidByteSequenceError> < ::<constant:EncodingError> () -> <Class:Encoding::InvalidByteSequenceError>
     class <constant:UndefinedConversionError> < ::<constant:EncodingError> () -> <Class:Encoding::UndefinedConversionError>
@@ -2179,6 +2293,173 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method trust () -> Encoding
     method untaint () -> Encoding
     method untrust () -> Encoding
+    static-field <constant:ANSI_X3_4_1968> -> Encoding
+    static-field <constant:ASCII> -> Encoding
+    static-field <constant:ASCII_8BIT> -> Encoding
+    static-field <constant:BIG5> -> Encoding
+    static-field <constant:BIG5_HKSCS> -> Encoding
+    static-field <constant:BIG5_HKSCS_2008> -> Encoding
+    static-field <constant:BIG5_UAO> -> Encoding
+    static-field <constant:BINARY> -> Encoding
+    static-field <constant:CP1250> -> Encoding
+    static-field <constant:CP1251> -> Encoding
+    static-field <constant:CP1252> -> Encoding
+    static-field <constant:CP1253> -> Encoding
+    static-field <constant:CP1254> -> Encoding
+    static-field <constant:CP1255> -> Encoding
+    static-field <constant:CP1256> -> Encoding
+    static-field <constant:CP1257> -> Encoding
+    static-field <constant:CP1258> -> Encoding
+    static-field <constant:CP437> -> Encoding
+    static-field <constant:CP50220> -> Encoding
+    static-field <constant:CP50221> -> Encoding
+    static-field <constant:CP51932> -> Encoding
+    static-field <constant:CP65000> -> Encoding
+    static-field <constant:CP65001> -> Encoding
+    static-field <constant:CP737> -> Encoding
+    static-field <constant:CP775> -> Encoding
+    static-field <constant:CP850> -> Encoding
+    static-field <constant:CP852> -> Encoding
+    static-field <constant:CP855> -> Encoding
+    static-field <constant:CP857> -> Encoding
+    static-field <constant:CP860> -> Encoding
+    static-field <constant:CP861> -> Encoding
+    static-field <constant:CP862> -> Encoding
+    static-field <constant:CP863> -> Encoding
+    static-field <constant:CP864> -> Encoding
+    static-field <constant:CP865> -> Encoding
+    static-field <constant:CP866> -> Encoding
+    static-field <constant:CP869> -> Encoding
+    static-field <constant:CP874> -> Encoding
+    static-field <constant:CP878> -> Encoding
+    static-field <constant:CP932> -> Encoding
+    static-field <constant:CP936> -> Encoding
+    static-field <constant:CP949> -> Encoding
+    static-field <constant:CP950> -> Encoding
+    static-field <constant:CP951> -> Encoding
+    static-field <constant:CSWINDOWS31J> -> Encoding
+    static-field <constant:EBCDIC_CP_US> -> Encoding
+    static-field <constant:EMACS_MULE> -> Encoding
+    static-field <constant:EUCCN> -> Encoding
+    static-field <constant:EUCJP> -> Encoding
+    static-field <constant:EUCJP_MS> -> Encoding
+    static-field <constant:EUCKR> -> Encoding
+    static-field <constant:EUCTW> -> Encoding
+    static-field <constant:EUC_CN> -> Encoding
+    static-field <constant:EUC_JISX0213> -> Encoding
+    static-field <constant:EUC_JIS_2004> -> Encoding
+    static-field <constant:EUC_JP> -> Encoding
+    static-field <constant:EUC_JP_MS> -> Encoding
+    static-field <constant:EUC_KR> -> Encoding
+    static-field <constant:EUC_TW> -> Encoding
+    static-field <constant:GB12345> -> Encoding
+    static-field <constant:GB18030> -> Encoding
+    static-field <constant:GB1988> -> Encoding
+    static-field <constant:GB2312> -> Encoding
+    static-field <constant:GBK> -> Encoding
+    static-field <constant:IBM037> -> Encoding
+    static-field <constant:IBM437> -> Encoding
+    static-field <constant:IBM737> -> Encoding
+    static-field <constant:IBM775> -> Encoding
+    static-field <constant:IBM850> -> Encoding
+    static-field <constant:IBM852> -> Encoding
+    static-field <constant:IBM855> -> Encoding
+    static-field <constant:IBM857> -> Encoding
+    static-field <constant:IBM860> -> Encoding
+    static-field <constant:IBM861> -> Encoding
+    static-field <constant:IBM862> -> Encoding
+    static-field <constant:IBM863> -> Encoding
+    static-field <constant:IBM864> -> Encoding
+    static-field <constant:IBM865> -> Encoding
+    static-field <constant:IBM866> -> Encoding
+    static-field <constant:IBM869> -> Encoding
+    static-field <constant:ISO2022_JP2> -> Encoding
+    static-field <constant:ISO2022_JP> -> Encoding
+    static-field <constant:ISO8859_10> -> Encoding
+    static-field <constant:ISO8859_11> -> Encoding
+    static-field <constant:ISO8859_13> -> Encoding
+    static-field <constant:ISO8859_14> -> Encoding
+    static-field <constant:ISO8859_15> -> Encoding
+    static-field <constant:ISO8859_16> -> Encoding
+    static-field <constant:ISO8859_1> -> Encoding
+    static-field <constant:ISO8859_2> -> Encoding
+    static-field <constant:ISO8859_3> -> Encoding
+    static-field <constant:ISO8859_4> -> Encoding
+    static-field <constant:ISO8859_5> -> Encoding
+    static-field <constant:ISO8859_6> -> Encoding
+    static-field <constant:ISO8859_7> -> Encoding
+    static-field <constant:ISO8859_8> -> Encoding
+    static-field <constant:ISO8859_9> -> Encoding
+    static-field <constant:ISO_2022_JP> -> Encoding
+    static-field <constant:ISO_2022_JP_2> -> Encoding
+    static-field <constant:ISO_2022_JP_KDDI> -> Encoding
+    static-field <constant:ISO_8859_10> -> Encoding
+    static-field <constant:ISO_8859_11> -> Encoding
+    static-field <constant:ISO_8859_13> -> Encoding
+    static-field <constant:ISO_8859_14> -> Encoding
+    static-field <constant:ISO_8859_15> -> Encoding
+    static-field <constant:ISO_8859_16> -> Encoding
+    static-field <constant:ISO_8859_1> -> Encoding
+    static-field <constant:ISO_8859_2> -> Encoding
+    static-field <constant:ISO_8859_3> -> Encoding
+    static-field <constant:ISO_8859_4> -> Encoding
+    static-field <constant:ISO_8859_5> -> Encoding
+    static-field <constant:ISO_8859_6> -> Encoding
+    static-field <constant:ISO_8859_7> -> Encoding
+    static-field <constant:ISO_8859_8> -> Encoding
+    static-field <constant:ISO_8859_9> -> Encoding
+    static-field <constant:KOI8_R> -> Encoding
+    static-field <constant:KOI8_U> -> Encoding
+    static-field <constant:MACCENTEURO> -> Encoding
+    static-field <constant:MACCROATIAN> -> Encoding
+    static-field <constant:MACCYRILLIC> -> Encoding
+    static-field <constant:MACGREEK> -> Encoding
+    static-field <constant:MACICELAND> -> Encoding
+    static-field <constant:MACJAPAN> -> Encoding
+    static-field <constant:MACJAPANESE> -> Encoding
+    static-field <constant:MACROMAN> -> Encoding
+    static-field <constant:MACROMANIA> -> Encoding
+    static-field <constant:MACTHAI> -> Encoding
+    static-field <constant:MACTURKISH> -> Encoding
+    static-field <constant:MACUKRAINE> -> Encoding
+    static-field <constant:PCK> -> Encoding
+    static-field <constant:SHIFT_JIS> -> Encoding
+    static-field <constant:SJIS> -> Encoding
+    static-field <constant:SJIS_DOCOMO> -> Encoding
+    static-field <constant:SJIS_KDDI> -> Encoding
+    static-field <constant:SJIS_SOFTBANK> -> Encoding
+    static-field <constant:STATELESS_ISO_2022_JP> -> Encoding
+    static-field <constant:STATELESS_ISO_2022_JP_KDDI> -> Encoding
+    static-field <constant:TIS_620> -> Encoding
+    static-field <constant:UCS_2BE> -> Encoding
+    static-field <constant:UCS_4BE> -> Encoding
+    static-field <constant:UCS_4LE> -> Encoding
+    static-field <constant:US_ASCII> -> Encoding
+    static-field <constant:UTF8_DOCOMO> -> Encoding
+    static-field <constant:UTF8_KDDI> -> Encoding
+    static-field <constant:UTF8_MAC> -> Encoding
+    static-field <constant:UTF8_SOFTBANK> -> Encoding
+    static-field <constant:UTF_16> -> Encoding
+    static-field <constant:UTF_16BE> -> Encoding
+    static-field <constant:UTF_16LE> -> Encoding
+    static-field <constant:UTF_32> -> Encoding
+    static-field <constant:UTF_32BE> -> Encoding
+    static-field <constant:UTF_32LE> -> Encoding
+    static-field <constant:UTF_7> -> Encoding
+    static-field <constant:UTF_8> -> Encoding
+    static-field <constant:UTF_8_HFS> -> Encoding
+    static-field <constant:UTF_8_MAC> -> Encoding
+    static-field <constant:WINDOWS_1250> -> Encoding
+    static-field <constant:WINDOWS_1251> -> Encoding
+    static-field <constant:WINDOWS_1252> -> Encoding
+    static-field <constant:WINDOWS_1253> -> Encoding
+    static-field <constant:WINDOWS_1254> -> Encoding
+    static-field <constant:WINDOWS_1255> -> Encoding
+    static-field <constant:WINDOWS_1256> -> Encoding
+    static-field <constant:WINDOWS_1257> -> Encoding
+    static-field <constant:WINDOWS_1258> -> Encoding
+    static-field <constant:WINDOWS_31J> -> Encoding
+    static-field <constant:WINDOWS_874> -> Encoding
   class <constant:EncodingError> < ::<constant:StandardError> () -> <Class:EncodingError>
     method clone () -> EncodingError
     method dup () -> EncodingError
@@ -3523,6 +3804,36 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untrust () -> FiberError
   class <constant:File>[<constant:Elem>] < ::<constant:IO> () -> <Class:File>
     class <constant:Constants> (<constant:BasicObject>) -> <Class:File::Constants>
+      static-field <constant:APPEND> -> Integer
+      static-field <constant:BINARY> -> Integer
+      static-field <constant:CREAT> -> Integer
+      static-field <constant:DIRECT> -> Integer
+      static-field <constant:DSYNC> -> Integer
+      static-field <constant:EXCL> -> Integer
+      static-field <constant:FNM_CASEFOLD> -> Integer
+      static-field <constant:FNM_DOTMATCH> -> Integer
+      static-field <constant:FNM_EXTGLOB> -> Integer
+      static-field <constant:FNM_NOESCAPE> -> Integer
+      static-field <constant:FNM_PATHNAME> -> Integer
+      static-field <constant:FNM_SHORTNAME> -> Integer
+      static-field <constant:FNM_SYSCASE> -> Integer
+      static-field <constant:LOCK_EX> -> Integer
+      static-field <constant:LOCK_NB> -> Integer
+      static-field <constant:LOCK_SH> -> Integer
+      static-field <constant:LOCK_UN> -> Integer
+      static-field <constant:NOATIME> -> Integer
+      static-field <constant:NOCTTY> -> Integer
+      static-field <constant:NOFOLLOW> -> Integer
+      static-field <constant:NONBLOCK> -> Integer
+      static-field <constant:NULL> -> String
+      static-field <constant:RDONLY> -> Integer
+      static-field <constant:RDWR> -> Integer
+      static-field <constant:RSYNC> -> Integer
+      static-field <constant:SHARE_DELETE> -> Integer
+      static-field <constant:SYNC> -> Integer
+      static-field <constant:TMPFILE> -> Integer
+      static-field <constant:TRUNC> -> Integer
+      static-field <constant:WRONLY> -> Integer
     class <constant:Stat> < ::<constant:Object> (<constant:Comparable>) -> <Class:File::Stat>
       method <=> (other) -> Integer | NilClass
         argument other<> -> File::Stat
@@ -3730,6 +4041,44 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
         <constant:Elem> = String
       ]
     }
+    static-field <constant:ALT_SEPARATOR> -> NilClass
+    static-field <constant:APPEND> -> Integer
+    static-field <constant:BINARY> -> Integer
+    static-field <constant:CREAT> -> Integer
+    static-field <constant:DIRECT> -> Integer
+    static-field <constant:DSYNC> -> Integer
+    static-field <constant:EXCL> -> Integer
+    static-field <constant:FNM_CASEFOLD> -> Integer
+    static-field <constant:FNM_DOTMATCH> -> Integer
+    static-field <constant:FNM_EXTGLOB> -> Integer
+    static-field <constant:FNM_NOESCAPE> -> Integer
+    static-field <constant:FNM_PATHNAME> -> Integer
+    static-field <constant:FNM_SHORTNAME> -> Integer
+    static-field <constant:FNM_SYSCASE> -> Integer
+    static-field <constant:LOCK_EX> -> Integer
+    static-field <constant:LOCK_NB> -> Integer
+    static-field <constant:LOCK_SH> -> Integer
+    static-field <constant:LOCK_UN> -> Integer
+    static-field <constant:NOATIME> -> Integer
+    static-field <constant:NOCTTY> -> Integer
+    static-field <constant:NOFOLLOW> -> Integer
+    static-field <constant:NONBLOCK> -> Integer
+    static-field <constant:NULL> -> String
+    static-field <constant:PATH_SEPARATOR> -> String
+    static-field <constant:RDONLY> -> Integer
+    static-field <constant:RDWR> -> Integer
+    static-field <constant:RSYNC> -> Integer
+    static-field <constant:SEEK_CUR> -> Integer
+    static-field <constant:SEEK_DATA> -> Integer
+    static-field <constant:SEEK_END> -> Integer
+    static-field <constant:SEEK_HOLE> -> Integer
+    static-field <constant:SEEK_SET> -> Integer
+    static-field <constant:SEPARATOR> -> String
+    static-field <constant:SHARE_DELETE> -> Integer
+    static-field <constant:SYNC> -> Integer
+    static-field <constant:TMPFILE> -> Integer
+    static-field <constant:TRUNC> -> Integer
+    static-field <constant:WRONLY> -> Integer
     typeMember(=) <constant:Elem> -> String
   class <constant:FileTest> (<constant:BasicObject>) -> <Class:FileTest>
   class <constant:FileUtils> (<constant:BasicObject>) -> <Class:FileUtils>
@@ -3939,6 +4288,19 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> Float
     method untrust () -> Float
     method zero? () -> TrueClass | FalseClass
+    static-field <constant:DIG> -> Integer
+    static-field <constant:EPSILON> -> Float
+    static-field <constant:INFINITY> -> Float
+    static-field <constant:MANT_DIG> -> Integer
+    static-field <constant:MAX> -> Float
+    static-field <constant:MAX_10_EXP> -> Integer
+    static-field <constant:MAX_EXP> -> Integer
+    static-field <constant:MIN> -> Float
+    static-field <constant:MIN_10_EXP> -> Integer
+    static-field <constant:MIN_EXP> -> Integer
+    static-field <constant:NAN> -> Float
+    static-field <constant:RADIX> -> Integer
+    static-field <constant:ROUNDS> -> Integer
   class <constant:FloatDomainError> < ::<constant:RangeError> () -> <Class:FloatDomainError>
     method clone () -> FloatDomainError
     method dup () -> FloatDomainError
@@ -3948,15 +4310,37 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> FloatDomainError
     method untrust () -> FloatDomainError
   class <constant:Forwardable> (<constant:BasicObject>) -> <Class:Forwardable>
+    static-field <constant:FILTER_EXCEPTION> -> String
+    static-field <constant:FORWARDABLE_VERSION> -> String
   class <constant:GC> (<constant:BasicObject>) -> <Class:GC>
     class <constant:Profiler> (<constant:BasicObject>) -> <Class:GC::Profiler>
     class <singleton class:<constant:Profiler>> < ::<constant:Module> ()
+    static-field <constant:INTERNAL_CONSTANTS> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:OPTS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:Gem> (<constant:BasicObject>) -> <Class:Gem>
     class <constant:BasicSpecification> < ::<constant:Object> () -> <Class:Gem::BasicSpecification>
     class <constant:CommandLineError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::CommandLineError>
     class <constant:ConfigFile> () -> untyped
     class <constant:ConflictError> < ::<constant:Gem>::<constant:LoadError> () -> <Class:Gem::ConflictError>
     class <constant:Dependency> < ::<constant:Object> () -> <Class:Gem::Dependency>
+      static-field <constant:TYPES> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:DependencyError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::DependencyError>
     class <constant:DependencyRemovalException> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::DependencyRemovalException>
     class <constant:DependencyResolutionError> < ::<constant:Gem>::<constant:DependencyError> () -> <Class:Gem::DependencyResolutionError>
@@ -3980,6 +4364,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:OperationNotSupportedError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::OperationNotSupportedError>
     class <constant:PathSupport> < ::<constant:Object> () -> <Class:Gem::PathSupport>
     class <constant:Platform> < ::<constant:Object> () -> <Class:Gem::Platform>
+      static-field <constant:CURRENT> -> String
+      static-field <constant:RUBY> -> String
     class <constant:PlatformMismatch> < ::<constant:Gem>::<constant:ErrorReason> () -> <Class:Gem::PlatformMismatch>
     class <constant:RemoteError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::RemoteError>
     class <constant:RemoteInstallationCancelled> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::RemoteInstallationCancelled>
@@ -3988,17 +4374,81 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:Requirement> < ::<constant:Object> () -> <Class:Gem::Requirement>
       class <constant:BadRequirementError> < ::<constant:ArgumentError> () -> <Class:Gem::Requirement::BadRequirementError>
       class <singleton class:<constant:BadRequirementError>> < ::<singleton class:<constant:ArgumentError>> ()
+      static-field <constant:OPS> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:PATTERN> -> Regexp
+      static-field <constant:PATTERN_RAW> -> String
+      static-field <constant:SOURCE_SET_REQUIREMENT> -> Object
     class <constant:RubyVersionMismatch> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::RubyVersionMismatch>
     class <constant:SourceFetchProblem> < ::<constant:Gem>::<constant:ErrorReason> () -> <Class:Gem::SourceFetchProblem>
     class <constant:SpecificGemNotFoundException> < ::<constant:Gem>::<constant:GemNotFoundException> () -> <Class:Gem::SpecificGemNotFoundException>
     class <constant:Specification> < ::<constant:Gem>::<constant:BasicSpecification> () -> <Class:Gem::Specification>
+      static-field <constant:CURRENT_SPECIFICATION_VERSION> -> Integer
+      static-field <constant:EMPTY> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:MARSHAL_FIELDS> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:NONEXISTENT_SPECIFICATION_VERSION> -> Integer
+      static-field <constant:NOT_FOUND> -> Object
+      static-field <constant:SPECIFICATION_VERSION_HISTORY> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TODAY> -> Time
+      static-field <constant:VALID_NAME_PATTERN> -> Regexp
     class <constant:StubSpecification> < ::<constant:Gem>::<constant:BasicSpecification> () -> <Class:Gem::StubSpecification>
       class <constant:StubLine> < ::<constant:Object> () -> <Class:Gem::StubSpecification::StubLine>
+        static-field <constant:NO_EXTENSIONS> -> AppliedType {
+          klass = ::<constant:Array>
+          targs = [
+            <constant:Elem> = untyped
+          ]
+        }
+        static-field <constant:REQUIRE_PATHS> -> AppliedType {
+          klass = ::<constant:Hash>
+          targs = [
+            <constant:K> = untyped
+            <constant:V> = untyped
+            <constant:Elem> = untyped
+          ]
+        }
+        static-field <constant:REQUIRE_PATH_LIST> -> AppliedType {
+          klass = ::<constant:Hash>
+          targs = [
+            <constant:K> = untyped
+            <constant:V> = untyped
+            <constant:Elem> = untyped
+          ]
+        }
       class <singleton class:<constant:StubLine>> < ::<singleton class:<constant:Object>> ()
+      static-field <constant:OPEN_MODE> -> String
+      static-field <constant:PREFIX> -> String
     class <constant:SystemExitException> < ::<constant:SystemExit> () -> <Class:Gem::SystemExitException>
     class <constant:UnsatisfiableDependencyError> < ::<constant:Gem>::<constant:DependencyError> () -> <Class:Gem::UnsatisfiableDependencyError>
     class <constant:VerificationError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::VerificationError>
     class <constant:Version> < ::<constant:Object> (<constant:Comparable>) -> <Class:Gem::Version>
+      static-field <constant:ANCHORED_VERSION_PATTERN> -> Regexp
+      static-field <constant:VERSION_PATTERN> -> String
     class <singleton class:<constant:BasicSpecification>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:CommandLineError>> < ::<constant:Gem>::<singleton class:<constant:Exception>> ()
     class <singleton class:<constant:ConflictError>> < ::<constant:Gem>::<singleton class:<constant:LoadError>> ()
@@ -4040,6 +4490,48 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <singleton class:<constant:UnsatisfiableDependencyError>> < ::<constant:Gem>::<singleton class:<constant:DependencyError>> ()
     class <singleton class:<constant:VerificationError>> < ::<constant:Gem>::<singleton class:<constant:Exception>> ()
     class <singleton class:<constant:Version>> < ::<singleton class:<constant:Object>> ()
+    static-field <constant:DEFAULT_HOST> -> String
+    static-field <constant:GEM_DEP_FILES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:GEM_PRELUDE_SUCKAGE> -> NilClass
+    static-field <constant:LOADED_SPECS_MUTEX> -> Thread::Mutex
+    static-field <constant:MARSHAL_SPEC_DIR> -> String
+    static-field <constant:READ_BINARY_ERRORS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:REPOSITORY_DEFAULT_GEM_SUBDIRECTORIES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:REPOSITORY_SUBDIRECTORIES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:RUBYGEMS_DIR> -> String
+    static-field <constant:VERSION> -> String
+    static-field <constant:WIN_PATTERNS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:WRITE_BINARY_ERRORS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:Hash>[<constant:K>, <constant:V>, <constant:Elem>] < ::<constant:Object> (<constant:Enumerable>) -> <Class:Hash>
     method <overload N.1 : default> (arg0, blk) -> LambdaParam(::<constant:Hash>#<constant:V>)
       argument arg0<optional> -> LambdaParam(::<constant:Hash>#<constant:K>)
@@ -4946,6 +5438,41 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     }
     method write (arg0) -> Integer
       argument arg0<> -> String
+    static-field <constant:APPEND> -> Integer
+    static-field <constant:BINARY> -> Integer
+    static-field <constant:CREAT> -> Integer
+    static-field <constant:DIRECT> -> Integer
+    static-field <constant:DSYNC> -> Integer
+    static-field <constant:EXCL> -> Integer
+    static-field <constant:FNM_CASEFOLD> -> Integer
+    static-field <constant:FNM_DOTMATCH> -> Integer
+    static-field <constant:FNM_EXTGLOB> -> Integer
+    static-field <constant:FNM_NOESCAPE> -> Integer
+    static-field <constant:FNM_PATHNAME> -> Integer
+    static-field <constant:FNM_SHORTNAME> -> Integer
+    static-field <constant:FNM_SYSCASE> -> Integer
+    static-field <constant:LOCK_EX> -> Integer
+    static-field <constant:LOCK_NB> -> Integer
+    static-field <constant:LOCK_SH> -> Integer
+    static-field <constant:LOCK_UN> -> Integer
+    static-field <constant:NOATIME> -> Integer
+    static-field <constant:NOCTTY> -> Integer
+    static-field <constant:NOFOLLOW> -> Integer
+    static-field <constant:NONBLOCK> -> Integer
+    static-field <constant:NULL> -> String
+    static-field <constant:RDONLY> -> Integer
+    static-field <constant:RDWR> -> Integer
+    static-field <constant:RSYNC> -> Integer
+    static-field <constant:SEEK_CUR> -> Integer
+    static-field <constant:SEEK_DATA> -> Integer
+    static-field <constant:SEEK_END> -> Integer
+    static-field <constant:SEEK_HOLE> -> Integer
+    static-field <constant:SEEK_SET> -> Integer
+    static-field <constant:SHARE_DELETE> -> Integer
+    static-field <constant:SYNC> -> Integer
+    static-field <constant:TMPFILE> -> Integer
+    static-field <constant:TRUNC> -> Integer
+    static-field <constant:WRONLY> -> Integer
     typeMember(=) <constant:Elem> -> String
   class <constant:IOError> < ::<constant:StandardError> () -> <Class:IOError>
     method clone () -> IOError
@@ -5500,6 +6027,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method to_s () -> String
     method warn (msg) -> NilClass
       argument msg<repeated> -> String
+    static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor
   class <constant:KeyError> < ::<constant:IndexError> () -> <Class:KeyError>
     method clone () -> KeyError
     method dup () -> KeyError
@@ -5525,6 +6053,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> LocalJumpError
     method untrust () -> LocalJumpError
   class <constant:Marshal> (<constant:BasicObject>) -> <Class:Marshal>
+    static-field <constant:MAJOR_VERSION> -> Integer
+    static-field <constant:MINOR_VERSION> -> Integer
   class <constant:MatchData> < ::<constant:Object> () -> <Class:MatchData>
     method <overload N.1 : []> (length) -> AppliedType {
       klass = ::<constant:Array>
@@ -5607,6 +6137,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:Math> (<constant:BasicObject>) -> <Class:Math>
     class <constant:DomainError> < ::<constant:StandardError> () -> <Class:Math::DomainError>
     class <singleton class:<constant:DomainError>> < ::<singleton class:<constant:StandardError>> ()
+    static-field <constant:E> -> Float
+    static-field <constant:PI> -> Float
   class <constant:Method> < ::<constant:Object> () -> <Class:Method>
     method clone () -> Method
     method dup () -> Method
@@ -5834,6 +6366,46 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untrust () -> Module
     method using (arg0) -> Module
       argument arg0<> -> Module
+    static-field <constant:ARGF> -> Object
+    static-field <constant:ARGV> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:CROSS_COMPILING> -> NilClass
+    static-field <constant:ENV> -> Object
+    static-field <constant:FALSE> -> FalseClass
+    static-field <constant:NIL> -> NilClass
+    static-field <constant:RUBY_COPYRIGHT> -> String
+    static-field <constant:RUBY_DESCRIPTION> -> String
+    static-field <constant:RUBY_ENGINE> -> String
+    static-field <constant:RUBY_ENGINE_VERSION> -> String
+    static-field <constant:RUBY_PATCHLEVEL> -> Integer
+    static-field <constant:RUBY_PLATFORM> -> String
+    static-field <constant:RUBY_RELEASE_DATE> -> String
+    static-field <constant:RUBY_REVISION> -> Integer
+    static-field <constant:RUBY_VERSION> -> String
+    static-field <constant:STDERR> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:STDIN> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:STDOUT> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:TOPLEVEL_BINDING> -> Binding
+    static-field <constant:TRUE> -> TrueClass
   class <constant:Monitor> < ::<constant:Object> (<constant:MonitorMixin>) -> <Class:Monitor>
     method clone () -> Monitor
     method dup () -> Monitor
@@ -6151,6 +6723,47 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> Object
     method untrust () -> Object
     method untrusted? () -> TrueClass | FalseClass
+    static-field <constant:ARGF> -> Object
+    static-field <constant:ARGV> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:CROSS_COMPILING> -> NilClass
+    static-field <constant:ENV> -> Object
+    static-field <constant:FALSE> -> FalseClass
+    static-field <constant:NIL> -> NilClass
+    static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor
+    static-field <constant:RUBY_COPYRIGHT> -> String
+    static-field <constant:RUBY_DESCRIPTION> -> String
+    static-field <constant:RUBY_ENGINE> -> String
+    static-field <constant:RUBY_ENGINE_VERSION> -> String
+    static-field <constant:RUBY_PATCHLEVEL> -> Integer
+    static-field <constant:RUBY_PLATFORM> -> String
+    static-field <constant:RUBY_RELEASE_DATE> -> String
+    static-field <constant:RUBY_REVISION> -> Integer
+    static-field <constant:RUBY_VERSION> -> String
+    static-field <constant:STDERR> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:STDIN> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:STDOUT> -> AppliedType {
+      klass = ::<constant:IO>
+      targs = [
+        <constant:Elem> = String
+      ]
+    }
+    static-field <constant:TOPLEVEL_BINDING> -> Binding
+    static-field <constant:TRUE> -> TrueClass
   class <constant:ObjectSpace> (<constant:BasicObject>) -> <Class:ObjectSpace>
     class <constant:WeakMap>[<constant:Elem>] < ::<constant:Object> (<constant:Enumerable>) -> <Class:ObjectSpace::WeakMap>
       typeMember(=) <constant:Elem>
@@ -6744,6 +7357,39 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       method switch () -> Integer
         argument blk<block>
     class <singleton class:<constant:Waiter>> < ::<singleton class:<constant:Thread>> ()
+    static-field <constant:CLOCK_BOOTTIME> -> Integer
+    static-field <constant:CLOCK_BOOTTIME_ALARM> -> Integer
+    static-field <constant:CLOCK_MONOTONIC> -> Integer
+    static-field <constant:CLOCK_MONOTONIC_COARSE> -> Integer
+    static-field <constant:CLOCK_MONOTONIC_RAW> -> Integer
+    static-field <constant:CLOCK_PROCESS_CPUTIME_ID> -> Integer
+    static-field <constant:CLOCK_REALTIME> -> Integer
+    static-field <constant:CLOCK_REALTIME_ALARM> -> Integer
+    static-field <constant:CLOCK_REALTIME_COARSE> -> Integer
+    static-field <constant:CLOCK_THREAD_CPUTIME_ID> -> Integer
+    static-field <constant:PRIO_PGRP> -> Integer
+    static-field <constant:PRIO_PROCESS> -> Integer
+    static-field <constant:PRIO_USER> -> Integer
+    static-field <constant:RLIMIT_AS> -> Integer
+    static-field <constant:RLIMIT_CORE> -> Integer
+    static-field <constant:RLIMIT_CPU> -> Integer
+    static-field <constant:RLIMIT_DATA> -> Integer
+    static-field <constant:RLIMIT_FSIZE> -> Integer
+    static-field <constant:RLIMIT_MEMLOCK> -> Integer
+    static-field <constant:RLIMIT_MSGQUEUE> -> Integer
+    static-field <constant:RLIMIT_NICE> -> Integer
+    static-field <constant:RLIMIT_NOFILE> -> Integer
+    static-field <constant:RLIMIT_NPROC> -> Integer
+    static-field <constant:RLIMIT_RSS> -> Integer
+    static-field <constant:RLIMIT_RTPRIO> -> Integer
+    static-field <constant:RLIMIT_RTTIME> -> Integer
+    static-field <constant:RLIMIT_SIGPENDING> -> Integer
+    static-field <constant:RLIMIT_STACK> -> Integer
+    static-field <constant:RLIM_INFINITY> -> Integer
+    static-field <constant:RLIM_SAVED_CUR> -> Integer
+    static-field <constant:RLIM_SAVED_MAX> -> Integer
+    static-field <constant:WNOHANG> -> Integer
+    static-field <constant:WUNTRACED> -> Integer
   class <constant:Random> < ::<constant:Object> (<constant:Formatter>) -> <Class:Random>
     class <constant:Formatter> (<constant:BasicObject>) -> <Class:Random::Formatter>
     class <singleton class:<constant:Formatter>> < ::<constant:Module> ()
@@ -6775,6 +7421,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method trust () -> Random
     method untaint () -> Random
     method untrust () -> Random
+    static-field <constant:DEFAULT> -> Random
   class <constant:Range>[<constant:Elem>] < ::<constant:Object> (<constant:Enumerable>) -> <Class:Range>
     method <overload N.1 : each> () -> AppliedType {
       klass = ::<constant:Enumerator>
@@ -7205,6 +7852,24 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untrust () -> Rational
     method zero? () -> TrueClass | FalseClass
   class <constant:RbConfig> (<constant:BasicObject>) -> <Class:RbConfig>
+    static-field <constant:CONFIG> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:DESTDIR> -> String
+    static-field <constant:MAKEFILE_CONFIG> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:TOPDIR> -> String
   class <constant:Regexp> < ::<constant:Object> () -> <Class:Regexp>
     method <overload N.1 : initialize> (arg0) -> Object
       argument arg0<> -> Regexp
@@ -7260,6 +7925,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> Regexp
     method untrust () -> Regexp
     method ~ () -> Integer | NilClass
+    static-field <constant:EXTENDED> -> Integer
+    static-field <constant:FIXEDENCODING> -> Integer
+    static-field <constant:IGNORECASE> -> Integer
+    static-field <constant:MULTILINE> -> Integer
+    static-field <constant:NOENCODING> -> Integer
   class <constant:RegexpError> < ::<constant:StandardError> () -> <Class:RegexpError>
     method clone () -> RegexpError
     method dup () -> RegexpError
@@ -7291,6 +7961,26 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method trust () -> RubyVM
     method untaint () -> RubyVM
     method untrust () -> RubyVM
+    static-field <constant:DEFAULT_PARAMS> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:INSTRUCTION_NAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:OPTS> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:RuntimeError> < ::<constant:StandardError> () -> <Class:RuntimeError>
     method clone () -> RuntimeError
     method dup () -> RuntimeError
@@ -8640,19 +9330,459 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <constant:Error> < ::<constant:StandardError> () -> <Class:URI::Error>
     class <constant:Escape> (<constant:BasicObject>) -> <Class:URI::Escape>
     class <constant:FTP> < ::<constant:URI>::<constant:Generic> () -> <Class:URI::FTP>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> Integer
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TYPECODE> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TYPECODE_PREFIX> -> String
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:Generic> < ::<constant:Object> (<constant:URI>, <constant:RFC2396_REGEXP>) -> <Class:URI::Generic>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> NilClass
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:HTTP> < ::<constant:URI>::<constant:Generic> () -> <Class:URI::HTTP>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> Integer
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:HTTPS> < ::<constant:URI>::<constant:HTTP> () -> <Class:URI::HTTPS>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> Integer
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:InvalidComponentError> < ::<constant:URI>::<constant:Error> () -> <Class:URI::InvalidComponentError>
     class <constant:InvalidURIError> < ::<constant:URI>::<constant:Error> () -> <Class:URI::InvalidURIError>
     class <constant:LDAP> < ::<constant:URI>::<constant:Generic> () -> <Class:URI::LDAP>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> Integer
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:SCOPE> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:SCOPE_BASE> -> String
+      static-field <constant:SCOPE_ONE> -> String
+      static-field <constant:SCOPE_SUB> -> String
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:LDAPS> < ::<constant:URI>::<constant:LDAP> () -> <Class:URI::LDAPS>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> Integer
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:SCOPE> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:SCOPE_BASE> -> String
+      static-field <constant:SCOPE_ONE> -> String
+      static-field <constant:SCOPE_SUB> -> String
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:MailTo> < ::<constant:URI>::<constant:Generic> () -> <Class:URI::MailTo>
+      static-field <constant:ABS_PATH> -> Regexp
+      static-field <constant:ABS_URI> -> Regexp
+      static-field <constant:ABS_URI_REF> -> Regexp
+      static-field <constant:COMPONENT> -> AppliedType {
+        klass = ::<constant:Array>
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+      static-field <constant:DEFAULT_PORT> -> NilClass
+      static-field <constant:EMAIL_REGEXP> -> Regexp
+      static-field <constant:ESCAPED> -> Regexp
+      static-field <constant:FRAGMENT> -> Regexp
+      static-field <constant:HEADER_REGEXP> -> Regexp
+      static-field <constant:HOST> -> Regexp
+      static-field <constant:HTML5ASCIIINCOMPAT> -> String
+      static-field <constant:OPAQUE> -> Regexp
+      static-field <constant:PORT> -> Regexp
+      static-field <constant:QUERY> -> Regexp
+      static-field <constant:REGISTRY> -> Regexp
+      static-field <constant:REL_PATH> -> Regexp
+      static-field <constant:REL_URI> -> Regexp
+      static-field <constant:REL_URI_REF> -> Regexp
+      static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+      static-field <constant:SCHEME> -> Regexp
+      static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
+      static-field <constant:UNSAFE> -> Regexp
+      static-field <constant:URI_REF> -> Regexp
+      static-field <constant:USERINFO> -> Regexp
+      static-field <constant:USE_REGISTRY> -> FalseClass
+      static-field <constant:VERSION> -> String
+      static-field <constant:VERSION_CODE> -> String
+      static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+        klass = ::<constant:Hash>
+        targs = [
+          <constant:K> = untyped
+          <constant:V> = untyped
+          <constant:Elem> = untyped
+        ]
+      }
     class <constant:RFC2396_Parser> < ::<constant:Object> (<constant:RFC2396_REGEXP>) -> <Class:URI::RFC2396_Parser>
     class <constant:RFC2396_REGEXP> (<constant:BasicObject>) -> <Class:URI::RFC2396_REGEXP>
       class <constant:PATTERN> (<constant:BasicObject>) -> <Class:URI::RFC2396_REGEXP::PATTERN>
+        static-field <constant:ABS_PATH> -> String
+        static-field <constant:ABS_URI> -> String
+        static-field <constant:ALNUM> -> String
+        static-field <constant:ALPHA> -> String
+        static-field <constant:DOMLABEL> -> String
+        static-field <constant:ESCAPED> -> String
+        static-field <constant:FRAGMENT> -> String
+        static-field <constant:HEX> -> String
+        static-field <constant:HIER_PART> -> String
+        static-field <constant:HOST> -> String
+        static-field <constant:HOSTNAME> -> String
+        static-field <constant:HOSTPORT> -> String
+        static-field <constant:IPV4ADDR> -> String
+        static-field <constant:IPV6ADDR> -> String
+        static-field <constant:IPV6REF> -> String
+        static-field <constant:NET_PATH> -> String
+        static-field <constant:OPAQUE_PART> -> String
+        static-field <constant:PATH_SEGMENTS> -> String
+        static-field <constant:PORT> -> String
+        static-field <constant:QUERY> -> String
+        static-field <constant:REG_NAME> -> String
+        static-field <constant:REL_PATH> -> String
+        static-field <constant:REL_SEGMENT> -> String
+        static-field <constant:REL_URI> -> String
+        static-field <constant:RESERVED> -> String
+        static-field <constant:SCHEME> -> String
+        static-field <constant:TOPLABEL> -> String
+        static-field <constant:UNRESERVED> -> String
+        static-field <constant:URIC> -> String
+        static-field <constant:URIC_NO_SLASH> -> String
+        static-field <constant:URI_REF> -> String
+        static-field <constant:USERINFO> -> String
+        static-field <constant:X_ABS_URI> -> String
+        static-field <constant:X_REL_URI> -> String
       class <singleton class:<constant:PATTERN>> < ::<constant:Module> ()
     class <constant:RFC3986_Parser> < ::<constant:Object> () -> <Class:URI::RFC3986_Parser>
+      static-field <constant:RFC3986_URI> -> Regexp
     class <constant:Util> (<constant:BasicObject>) -> <Class:URI::Util>
     class <singleton class:<constant:BadURIError>> < ::<constant:URI>::<singleton class:<constant:Error>> ()
     class <singleton class:<constant:Error>> < ::<singleton class:<constant:StandardError>> ()
@@ -8670,6 +9800,52 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     class <singleton class:<constant:RFC2396_REGEXP>> < ::<constant:Module> ()
     class <singleton class:<constant:RFC3986_Parser>> < ::<singleton class:<constant:Object>> ()
     class <singleton class:<constant:Util>> < ::<constant:Module> ()
+    static-field <constant:ABS_PATH> -> Regexp
+    static-field <constant:ABS_URI> -> Regexp
+    static-field <constant:ABS_URI_REF> -> Regexp
+    static-field <constant:DEFAULT_PARSER> -> URI::RFC2396_Parser
+    static-field <constant:ESCAPED> -> Regexp
+    static-field <constant:FRAGMENT> -> Regexp
+    static-field <constant:HOST> -> Regexp
+    static-field <constant:HTML5ASCIIINCOMPAT> -> String
+    static-field <constant:OPAQUE> -> Regexp
+    static-field <constant:PORT> -> Regexp
+    static-field <constant:QUERY> -> Regexp
+    static-field <constant:REGISTRY> -> Regexp
+    static-field <constant:REL_PATH> -> Regexp
+    static-field <constant:REL_URI> -> Regexp
+    static-field <constant:REL_URI_REF> -> Regexp
+    static-field <constant:RFC3986_PARSER> -> URI::RFC3986_Parser
+    static-field <constant:SCHEME> -> Regexp
+    static-field <constant:TBLDECWWWCOMP_> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:TBLENCWWWCOMP_> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:UNSAFE> -> Regexp
+    static-field <constant:URI_REF> -> Regexp
+    static-field <constant:USERINFO> -> Regexp
+    static-field <constant:VERSION> -> String
+    static-field <constant:VERSION_CODE> -> String
+    static-field <constant:WEB_ENCODINGS_> -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = untyped
+        <constant:V> = untyped
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:UnboundMethod> < ::<constant:Object> () -> <Class:UnboundMethod>
     method clone () -> UnboundMethod
     method dup () -> UnboundMethod
