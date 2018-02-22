@@ -53,8 +53,19 @@ struct Printers {
     bool TypedSource = false;
 };
 
+enum Phase {
+    INIT,
+    PARSER,
+    DESUGARER,
+    DSL,
+    NAMER,
+    CFG,
+    INFERENCER,
+};
+
 struct Options {
     Printers print;
+    Phase stopAfterPhase;
     bool noStdlib = false;
     bool forceTyped = false;
     bool forceUntyped = false;
@@ -108,6 +119,14 @@ struct {
     {"typed-source", &Printers::TypedSource},
 };
 
+struct {
+    string option;
+    Phase flag;
+} stop_after_options[] = {
+    {"init", Phase::INIT},   {"parser", Phase::PARSER}, {"desugarer", Phase::DESUGARER},   {"dsl", Phase::DSL},
+    {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
+};
+
 long timespec_delta(struct timespec *start, struct timespec *stop) {
     return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
 }
@@ -131,19 +150,22 @@ private:
 };
 
 class CFG_Collector_and_Typer {
-    const Printers &print;
+    const Options &opts;
 
 public:
-    CFG_Collector_and_Typer(const Printers &print) : print(print){};
+    CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
         if (m->loc.file.data(ctx).source_type == core::File::Untyped) {
             return m;
         }
-
+        auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (print.CFGRaw || print.TypedSource) {
             cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
+        }
+        if (opts.stopAfterPhase == Phase::CFG) {
+            return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (print.CFG || print.CFGRaw) {
@@ -162,8 +184,9 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &lgs, core::FileRef file,
+unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
                                      bool silenceErrors = false) {
+    auto &print = opts.print;
     try {
         std::unique_ptr<parser::Node> nodes;
         {
@@ -178,6 +201,9 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         if (print.ParseTreeJSON) {
             cout << nodes->toJSON(lgs, 0) << endl;
         }
+        if (opts.stopAfterPhase == Phase::PARSER) {
+            return make_unique<ast::EmptyTree>(core::Loc::none(file));
+        }
 
         core::MutableContext ctx(lgs, core::Symbols::root());
         std::unique_ptr<ast::Expression> ast;
@@ -190,9 +216,11 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         if (print.Desugared) {
             cout << ast->toString(lgs, 0) << endl;
         }
-
         if (print.DesugaredRaw) {
             cout << ast->showRaw(lgs) << endl;
+        }
+        if (opts.stopAfterPhase == Phase::DESUGARER) {
+            return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
         {
@@ -203,9 +231,11 @@ unique_ptr<ast::Expression> indexOne(const Printers &print, core::GlobalState &l
         if (print.DSLTree) {
             cout << ast->toString(lgs, 0) << endl;
         }
-
         if (print.DSLTreeRaw) {
             cout << ast->showRaw(lgs) << endl;
+        }
+        if (opts.stopAfterPhase == Phase::DSL) {
+            return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
         return ast;
@@ -223,6 +253,10 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
     vector<unique_ptr<ast::Expression>> trees;
+
+    if (opts.stopAfterPhase == Phase::INIT) {
+        return empty;
+    }
 
     shared_ptr<ConcurrentBoundedQueue<std::pair<int, std::string>>> fileq =
         make_shared<ConcurrentBoundedQueue<std::pair<int, std::string>>>(frs.size());
@@ -288,7 +322,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
                         tracer->trace("{}", fileName);
 
-                        threadResult.trees.emplace_back(indexOne(opts.print, *lgs, file, silenceErrors));
+                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, silenceErrors));
                     }
                 }
             }
@@ -301,7 +335,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
         });
 
         for (auto f : mainThreadFiles) {
-            trees.emplace_back(indexOne(opts.print, gs, f, silenceErrors));
+            trees.emplace_back(indexOne(opts, gs, f, silenceErrors));
         }
 
         thread_result threadResult;
@@ -369,12 +403,15 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
                                           bool silenceErrors = false) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
+    if (opts.stopAfterPhase == Phase::NAMER) {
+        return make_unique<ast::EmptyTree>(core::Loc::none(f));
+    }
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "digraph \"" << File::getFileName(f.data(ctx).path()) << "\"{" << endl;
         }
-        CFG_Collector_and_Typer collector(opts.print);
+        CFG_Collector_and_Typer collector(opts);
         {
             tracer->trace("CFG+Infer: {}", f.data(ctx).path());
             core::ErrorRegion errs(ctx, f, silenceErrors);
@@ -574,6 +611,16 @@ cxxopts::Options buildOptions() {
     }
     all_prints << "]";
 
+    stringstream all_stop_after;
+    all_stop_after << "Stop After: [";
+    for (auto &pr : stop_after_options) {
+        if (&pr != &stop_after_options[0]) {
+            all_stop_after << ", ";
+        }
+        all_stop_after << pr.option;
+    }
+    all_stop_after << "]";
+
     // Advanced options
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
                                     cxxopts::value<vector<string>>(), "path");
@@ -582,6 +629,8 @@ cxxopts::Options buildOptions() {
 
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("stop-after", all_stop_after.str(),
+                               cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
@@ -676,6 +725,24 @@ bool extractPrinters(cxxopts::Options &opts, Printers &print) {
     return true;
 }
 
+Phase extractStopAfter(cxxopts::Options &opts) {
+    string opt = opts["stop-after"].as<string>();
+    for (auto &known : stop_after_options) {
+        if (known.option == opt) {
+            return known.flag;
+        }
+    }
+    stringstream all;
+    for (auto &known : stop_after_options) {
+        if (&known != &stop_after_options[0]) {
+            all << ", ";
+        }
+        all << known.option;
+    }
+    console_err->error("Unknown --stop-after option: {}\nValid values: {}", opt, all.str());
+    return Phase::INIT;
+}
+
 int realmain(int argc, char **argv) {
     FileFlatMapper flatMapper(argc, argv);
 
@@ -699,6 +766,7 @@ int realmain(int argc, char **argv) {
     if (!extractPrinters(options, opts.print)) {
         return 1;
     }
+    opts.stopAfterPhase = extractStopAfter(options);
     opts.noStdlib = options["no-stdlib"].as<bool>();
 
     opts.threads = min(options["max-threads"].as<int>(), int(files.size() / 2));

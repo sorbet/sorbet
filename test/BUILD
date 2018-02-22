@@ -111,6 +111,17 @@ sh_test(
 )
 
 sh_test(
+    name = "cli-test",
+    size = "small",
+    srcs = ["cli-test-diff.sh"],
+    data = [
+        "cli-test.out",
+        "cli-test.sh",
+        "//main:ruby-typer",
+    ],
+)
+
+sh_test(
     name = "dash-e-test",
     size = "small",
     srcs = ["dash-e-test.sh"],
