@@ -14,6 +14,10 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
+    if (res->symbol.data(ctx).isAbstract()) {
+        res->basicBlocks.clear();
+        return res;
+    }
     core::LocalVariable retSym = ctx.state.newTemporary(core::Names::returnMethodTemp(), md.symbol);
     core::LocalVariable selfSym = ctx.state.newTemporary(core::Names::selfMethodTemp(), md.symbol);
 

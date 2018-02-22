@@ -1,4 +1,5 @@
 #include "core/errors/resolver.h"
+#include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -265,6 +266,10 @@ private:
             }
         }
 
+        if (sig.seen.abstract) {
+            method.data(ctx).setAbstract();
+        }
+
         methodInfo.resultType = sig.returns;
 
         for (auto it = methodInfo.arguments().begin(); it != methodInfo.arguments().end(); /* nothing */) {
@@ -308,81 +313,87 @@ private:
     void processClassBody(core::MutableContext ctx, ast::ClassDef *klass) {
         InlinedVector<unique_ptr<ast::Expression>, 1> lastSig;
         for (auto &stat : klass->rhs) {
-            typecase(stat.get(),
+            typecase(
+                stat.get(),
 
-                     [&](ast::Send *send) {
-                         if (TypeSyntax::isSig(ctx, send)) {
-                             if (!lastSig.empty()) {
-                                 if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
-                                     ctx.state.error(core::ComplexError(
-                                         lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
-                                         "Unused type annotation. No method def before next annotation.",
-                                         core::ErrorLine(send->loc, "Type annotation that will be used instead.")));
-                                 }
-                             }
-                             lastSig.emplace_back(move(stat));
-                             return;
-                         }
+                [&](ast::Send *send) {
+                    if (TypeSyntax::isSig(ctx, send)) {
+                        if (!lastSig.empty()) {
+                            if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
+                                ctx.state.error(core::ComplexError(
+                                    lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
+                                    "Unused type annotation. No method def before next annotation.",
+                                    core::ErrorLine(send->loc, "Type annotation that will be used instead.")));
+                            }
+                        }
+                        lastSig.emplace_back(move(stat));
+                        return;
+                    }
 
-                         if (!ast::isa_tree<ast::Self>(send->recv.get())) {
-                             return;
-                         }
+                    if (!ast::isa_tree<ast::Self>(send->recv.get())) {
+                        return;
+                    }
 
-                         switch (send->fun._id) {
-                             case core::Names::declareVariables()._id:
-                                 processDeclareVariables(ctx.withOwner(klass->symbol), send);
-                                 break;
-                             default:
-                                 return;
-                         }
-                         stat.reset(nullptr);
-                     },
+                    switch (send->fun._id) {
+                        case core::Names::declareVariables()._id:
+                            processDeclareVariables(ctx.withOwner(klass->symbol), send);
+                            break;
+                        default:
+                            return;
+                    }
+                    stat.reset(nullptr);
+                },
 
-                     [&](ast::MethodDef *mdef) {
-                         if (!lastSig.empty()) {
-                             counterInc("types.sig.count");
+                [&](ast::MethodDef *mdef) {
+                    if (!lastSig.empty()) {
+                        counterInc("types.sig.count");
 
-                             bool isOverloaded =
-                                 lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();
+                        bool isOverloaded =
+                            lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();
 
-                             if (isOverloaded) {
-                                 mdef->symbol.data(ctx).setOverloaded();
-                                 int i = 1;
+                        if (isOverloaded) {
+                            mdef->symbol.data(ctx).setOverloaded();
+                            int i = 1;
 
-                                 while (i < lastSig.size()) {
-                                     auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
-                                     fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i].get()),
-                                                       isOverloaded);
-                                     if (i + 1 < lastSig.size()) {
-                                         overload.data(ctx).setOverloaded();
-                                     }
-                                     i++;
-                                 }
-                             }
+                            while (i < lastSig.size()) {
+                                auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
+                                fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i].get()),
+                                                  isOverloaded);
+                                if (i + 1 < lastSig.size()) {
+                                    overload.data(ctx).setOverloaded();
+                                }
+                                i++;
+                            }
+                        }
 
-                             fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()),
-                                               isOverloaded);
+                        fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()), isOverloaded);
 
-                             // OVERLOAD
-                             lastSig.clear();
-                         }
+                        if (mdef->symbol.data(ctx).isAbstract() && !ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
+                            ctx.state.error(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody,
+                                            "Abstract methods must not contain any code in their body.");
+                            mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
+                        }
 
-                     },
-                     [&](ast::ClassDef *cdef) {
-                         // Leave in place
-                     },
+                        // OVERLOAD
+                        lastSig.clear();
+                    }
 
-                     [&](ast::Assign *assgn) {
-                         if (ast::Ident *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
-                             if (id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
-                                 stat.reset(nullptr);
-                             }
-                         }
-                     },
+                },
+                [&](ast::ClassDef *cdef) {
+                    // Leave in place
+                },
 
-                     [&](ast::EmptyTree *e) { stat.reset(nullptr); },
+                [&](ast::Assign *assgn) {
+                    if (ast::Ident *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
+                        if (id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
+                            stat.reset(nullptr);
+                        }
+                    }
+                },
 
-                     [&](ast::Expression *e) {});
+                [&](ast::EmptyTree *e) { stat.reset(nullptr); },
+
+                [&](ast::Expression *e) {});
         }
 
         if (!lastSig.empty()) {
