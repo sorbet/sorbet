@@ -27,6 +27,10 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
 
     const core::File &file = source.data(gs);
     ENFORCE(off <= file.source().size(), "file offset out of bounds");
+    if (off >= file.source().size()) {
+        // parser generate positions out of file \facepalm.
+        off = file.source().size() - 1;
+    }
     auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
     if (it == file.line_breaks.begin()) {
         pos.line = 1;
@@ -34,7 +38,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
         return pos;
     }
     --it;
-    pos.line = (it - file.line_breaks.begin()) + 2;
+    pos.line = (it - file.line_breaks.begin()) + 1;
     pos.column = off - *it;
     return pos;
 }
@@ -53,34 +57,51 @@ void printTabs(stringstream &to, int count) {
     }
 }
 
+string leftPad(string s, int l) {
+    if (s.size() < l) {
+        string prefix(l - s.size(), ' ');
+        s = prefix + s;
+    } else {
+        s = s.substr(0, l);
+    }
+    return s;
+}
+
 string Loc::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    absl::string_view source = this->file.data(gs).source();
+    const File &filed = this->file.data(gs);
     auto pos = this->position(gs);
-    auto endstart = make_reverse_iterator(source.begin() + this->begin_pos);
-    auto beginstart = make_reverse_iterator(source.begin());
-    auto start = find(endstart, beginstart, '\n');
+    int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
-    auto end = find(source.begin() + this->end_pos, source.end(), '\n');
+    auto lineIt = pos.first.line - 1;
+    while (lineIt != pos.second.line) {
+        printTabs(buf, tabs);
+        buf << rang::fgB::black << leftPad(to_string(lineIt + 1), posWidth) << " |" << rang::style::reset;
+        auto endPos = filed.line_breaks[lineIt + 1];
+        if (filed.source()[endPos] == '\n') {
+            endPos -= 1;
+        }
+        buf.write(filed.source().data() + filed.line_breaks[lineIt] + 1, endPos - filed.line_breaks[lineIt]);
+        buf << '\n';
+        lineIt++;
+    }
 
-    auto offset1 = beginstart - start;
-    auto offset2 = end - source.begin();
-    string outline(source.begin() + (offset1), source.begin() + (offset2));
-    printTabs(buf, tabs);
-    buf << outline;
     if (pos.second.line == pos.first.line) {
         // add squigly
-        buf << endl;
         printTabs(buf, tabs);
+        for (int i = 0; i <= posWidth; i++) {
+            buf << ' ';
+        }
         int p;
-        for (p = 1; p < pos.first.column; p++) {
-            buf << " ";
+
+        for (p = 0; p < pos.first.column; p++) {
+            buf << ' ';
         }
-        buf << rang::style::italic;
+        buf << rang::fg::red;
         for (; p < pos.second.column; p++) {
-            buf << "^";
+            buf << '^';
         }
-        buf << rang::style::reset;
+        buf << rang::fg::reset;
     }
     return buf.str();
 }

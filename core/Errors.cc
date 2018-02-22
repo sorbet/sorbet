@@ -34,10 +34,10 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
 
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << rang::style::reset << rang::style::bold << rang::fg::red << filePosToString(gs, loc) << " " << formatted
-        << " [" << what.code << "]" << rang::style::reset << rang::fg::reset << endl;
+    buf << rang::style::reset << rang::style::bold << rang::fg::red << filePosToString(gs, loc) << rang::style::reset
+        << rang::fg::red << " " << formatted << " [" << what.code << "]" << rang::fg::reset << endl;
     if (!loc.is_none()) {
-        buf << loc.toString(gs);
+        buf << loc.toString(gs, 2);
     }
     return buf.str();
 }
@@ -45,9 +45,10 @@ string BasicError::toString(const GlobalState &gs) {
 string ErrorLine::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
-    buf << indent << BasicError::filePosToString(gs, loc) << " " << formattedMessage << endl;
+    buf << indent << rang::style::bold << BasicError::filePosToString(gs, loc) << rang::style::reset << " "
+        << formattedMessage << endl;
     if (!loc.is_none()) {
-        buf << loc.toString(gs);
+        buf << loc.toString(gs, 2);
     }
     return buf.str();
 }
@@ -56,10 +57,15 @@ string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     if (!this->header.empty()) {
-        buf << rang::fg::yellow << indent << this->header << rang::fg::reset << endl;
+        buf << rang::fg::yellow << indent << this->header << rang::fg::reset;
     }
+    bool first = true;
     for (auto &line : this->messages) {
-        buf << indent << line.toString(gs) << endl;
+        if (!first) {
+            buf << endl;
+        }
+        first = false;
+        buf << indent << line.toString(gs);
     }
     return buf.str();
 }
