@@ -90,10 +90,15 @@ public:
     std::string toString(core::Context ctx);
     void recordAnnotations(core::Context ctx);
 
-    static int FORWARD_TOPO_SORT_VISITED;
-    static int BACKWARD_TOPO_SORT_VISITED;
-    static int LOOP_HEADER;
-    static int WAS_JUMP_DESTINATION;
+    // Flags
+    static constexpr int FORWARD_TOPO_SORT_VISITED = 1 << 0;
+    static constexpr int BACKWARD_TOPO_SORT_VISITED = 1 << 1;
+    static constexpr int LOOP_HEADER = 1 << 2;
+    static constexpr int WAS_JUMP_DESTINATION = 1 << 3;
+
+    // special minLoops
+    static constexpr int MIN_LOOP_FIELD = -1;
+    static constexpr int MIN_LOOP_GLOBAL = -2;
     std::unordered_map<core::LocalVariable, int> minLoops;
     std::unordered_map<core::LocalVariable, int> maxLoopWrite;
 

@@ -48,8 +48,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         if (global.data(ctx).isMethodArgument()) {
             res->minLoops[local] = 0; // method arguments are pinned only in loops
         } else {
-            aliasesPrefix.emplace_back(local, md.symbol.data(ctx).definitionLoc, make_unique<Alias>(global));
-            res->minLoops[local] = -1; // globals are pinned always
+            aliasesPrefix.emplace_back(local, global.data(ctx).definitionLoc, make_unique<Alias>(global));
+            if (global.data(ctx).isField() || global.data(ctx).isStaticField()) {
+                res->minLoops[local] = CFG::MIN_LOOP_FIELD;
+            } else {
+                res->minLoops[local] = CFG::MIN_LOOP_GLOBAL;
+            }
         }
     }
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());

@@ -80,7 +80,6 @@ class Examples
     end
 
 
-    # <constant:nil>$10: NilClass
     def variables_and_loop(cond)
       if (true)
           # <constant:nil>$10: NilClass
@@ -207,7 +206,6 @@ class Examples
     end
 
 
-    # <constant:nil>$8: NilClass
     def variables_loop_if(cond)
                           # <constant:nil>$8: NilClass
                           #

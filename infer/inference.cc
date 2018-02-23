@@ -876,9 +876,23 @@ public:
                 setTypeAndOrigin(bind.bind, tp);
             } else {
                 if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
-                    ctx.state.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,
-                                    "Changing type of pinned argument, {} is not a subtype of {}", tp.type->show(ctx),
-                                    cur.type->show(ctx));
+                    switch (bindMinLoops) {
+                        case cfg::CFG::MIN_LOOP_FIELD:
+                            ctx.state.error(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch,
+                                            "Reassigning field with a value of wrong type: {} is not a subtype of {}",
+                                            tp.type->show(ctx), cur.type->show(ctx));
+                            break;
+                        case cfg::CFG::MIN_LOOP_GLOBAL:
+                            ctx.state.error(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch,
+                                            "Reassigning global with a value of wrong type: {} is not a subtype of {}",
+                                            tp.type->show(ctx), cur.type->show(ctx));
+                            break;
+                        default:
+                            ctx.state.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,
+                                            "Changing type of pinned argument, {} is not a subtype of {}",
+                                            tp.type->show(ctx), cur.type->show(ctx));
+                            break;
+                    }
                     tp.type = core::Types::dynamic();
                 }
                 clearKnowledge(ctx, bind.bind, knowledgeFilter);
