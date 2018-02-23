@@ -1,0 +1,29 @@
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
+  class <constant:Bad1> (<constant:BasicObject>) -> <Class:Bad1>
+  class <constant:Bad2> < ::<constant:Object> () -> <Class:Bad2>
+    class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Bad2::ClassMethods>
+    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> ()
+  class <constant:Bad3> (<constant:BasicObject>) -> <Class:Bad3>
+    class <constant:ClassMethods> < ::<constant:Object> () -> <Class:Bad3::ClassMethods>
+    class <singleton class:<constant:ClassMethods>> < ::<singleton class:<constant:Object>> ()
+  class <constant:Bad4> (<constant:BasicObject>) -> <Class:Bad4>
+    class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Bad4::ClassMethods>
+    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> ()
+  class <constant:Bad5> (<constant:BasicObject>) -> <Class:Bad5>
+  class <constant:Bad6> (<constant:BasicObject>) -> <Class:Bad6>
+  class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin>
+    class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Mixin::ClassMethods>
+      method mixin_class_method ()
+    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> ()
+    method mixin_method ()
+  class <constant:Test> < ::<constant:Object> (<constant:Mixin>) -> <Class:Test>
+  class <singleton class:<constant:Bad1>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Bad2>> < ::<singleton class:<constant:Object>> (<constant:Helpers>)
+  class <singleton class:<constant:Bad3>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Bad4>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Bad5>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Bad6>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Mixin>> < ::<constant:Module> (<constant:Helpers>)
+  class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> (<constant:ClassMethods>)
+  method <static-init>$8 ()
+
