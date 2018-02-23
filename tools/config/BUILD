@@ -24,3 +24,10 @@ config_setting(
     name = "fastbuild",
     values = {"compilation_mode": "fastbuild"},
 )
+
+config_setting(
+    name = "more-static",
+    values = {
+        "define": "more-static=true",
+    },
+)

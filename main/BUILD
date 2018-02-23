@@ -12,6 +12,10 @@ cc_binary(
         "main.cc",
     ],
     copts = ["--std=c++14"],
+    linkopts = select({
+        "//tools/config:more-static": ["-static"],
+        "//conditions:default": [],
+    }),
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,

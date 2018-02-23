@@ -36,6 +36,7 @@ build:release --compilation_mode=opt
 build:release --config=debugsymbols
 build:release --config=nopie
 build:release --config=lto
+build:release --config=more-static
 build:release --stamp
 
 
@@ -80,6 +81,9 @@ build:sanitize --define unsanitized=false
 build:size --linkopt=-Os
 build:size --copt=-Os
 build:size --cxxopt=-Os
+
+# Try to statically link as much as possible
+build:more-static --define more-static=true
 
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc

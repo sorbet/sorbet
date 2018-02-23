@@ -5,7 +5,7 @@ cc_library(
         "include/progressbar/*.h"
     ]),
     copts = ["-Iexternal/progressbar/include/progressbar/"],
-    linkopts = ["-lcurses"],
+    linkopts = ["-lcurses", "-ltermcap"],
     includes = ["include/"],
     visibility = ["//visibility:public"],
 )
