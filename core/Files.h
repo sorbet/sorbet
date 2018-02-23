@@ -50,7 +50,8 @@ private:
 class File final {
 public:
     enum Type {
-        Payload,
+        PayloadGeneration, // Files marked during --store-state
+        Payload,           // Files loaded from the binary payload
         Untyped,
         Typed,
         TombStone,

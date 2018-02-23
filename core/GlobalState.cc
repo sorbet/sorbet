@@ -991,7 +991,7 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
             break;
 
         default:
-            if (source_type == File::Untyped) {
+            if (source_type != File::Typed) {
                 return;
             }
     }

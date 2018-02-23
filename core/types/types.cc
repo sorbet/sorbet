@@ -891,7 +891,8 @@ std::string AppliedType::typeName() {
 void AppliedType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->klass.data(ctx).isClass());
     ENFORCE(this->klass.data(ctx).typeMembers().size() == this->targs.size() ||
-                (this->klass == Symbols::Hash() && (this->targs.size() == 3)),
+                (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
+                this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
             this->klass.data(ctx).name.toString(ctx));
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);

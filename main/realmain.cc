@@ -65,11 +65,12 @@ enum Phase {
 
 struct Options {
     Printers print;
-    Phase stopAfterPhase;
+    Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
     bool forceTyped = false;
     bool forceUntyped = false;
     bool showProgress = false;
+    bool storeState = false;
     int threads = 0;
     string typedSource = "";
     std::vector<string> configatronDirs;
@@ -166,7 +167,7 @@ public:
     CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
     ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
-        if (m->loc.file.data(ctx).source_type == core::File::Untyped) {
+        if (m->loc.file.data(ctx).source_type != core::File::Typed) {
             return m;
         }
         auto &print = opts.print;
@@ -328,6 +329,8 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                             file.data(*lgs).source_type = core::File::Typed;
                         } else if (opts.forceUntyped) {
                             file.data(*lgs).source_type = core::File::Untyped;
+                        } else if (opts.storeState) {
+                            file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
                         tracer->trace("{}", fileName);
@@ -694,7 +697,9 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Optio
         {
             core::UnfreezeFileTable fileTableAccess(*gs);
             for (auto &p : rbi::all()) {
-                payloadFiles.push_back(gs->enterFile(p.first, p.second));
+                auto file = gs->enterFile(p.first, p.second);
+                file.data(*gs).source_type = core::File::PayloadGeneration;
+                payloadFiles.push_back(move(file));
             }
         }
         Options emptyOpts;
@@ -833,6 +838,7 @@ int realmain(int argc, char **argv) {
     opts.showProgress = options.count("P") != 0;
     opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
     opts.configatronFiles = options["configatron-file"].as<vector<string>>();
+    opts.storeState = options.count("store-state") != 0;
     if (typed != "always" && typed != "never" && typed != "auto") {
         console->error("Invalid value for `--typed`: {}", typed);
     }
