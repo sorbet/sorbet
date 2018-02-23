@@ -165,13 +165,13 @@ public:
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
         } else {
-            switch (klass->kind) {
-                case ast::ClassDefKind::Class:
-                    klass->symbol.data(ctx).setIsModule(false);
-                    break;
-                case ast::ClassDefKind ::Module:
-                    klass->symbol.data(ctx).setIsModule(true);
-                    break;
+            bool isModule = klass->kind == ast::ClassDefKind::Module;
+            if (klass->symbol.data(ctx).isClassModuleSet() && isModule != klass->symbol.data(ctx).isClassModule()) {
+                ctx.state.error(klass->loc, core::errors::Namer::ModuleKindRedefinition,
+                                "{} was previously defined as a {}", klass->symbol.data(ctx).show(ctx),
+                                klass->symbol.data(ctx).isClassModule() ? "module" : "class");
+            } else {
+                klass->symbol.data(ctx).setIsModule(isModule);
             }
         }
         scopeStack.emplace_back();
