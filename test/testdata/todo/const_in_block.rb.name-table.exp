@@ -3,7 +3,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method <block>$2 ()
       class <constant:A> < ::<constant:Object> () -> <Class:Test#<block>::A>
       class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-      static-field <constant:B> -> Integer
     method <static-init> ()
+    static-field <constant:B> -> Integer
   class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> ()
 

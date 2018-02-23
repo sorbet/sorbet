@@ -439,7 +439,7 @@ public:
 
     ast::Assign *fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, ast::Assign *asgn) {
         // TODO(nelhage): forbid dynamic constant definition
-        core::SymbolRef scope = squashNames(ctx, ctx.owner, lhs->scope);
+        core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         auto loc = lhs->loc;
         asgn->lhs = make_unique<ast::Ident>(loc, cnst);
