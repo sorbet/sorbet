@@ -294,8 +294,10 @@ GENERATE_POSTPONE_POSTCLASS(Cast);
  * FUNC may maintain internal state.
  * @tparam tree transformer, see FUNC_EXAMPLE
  */
-template <class FUNC, class CTX> class TreeMap {
+template <class FUNC, class CTX> class TreeMapper {
 private:
+    friend class TreeMap;
+
     FUNC &func;
     bool locReported = false;
 
@@ -310,7 +312,7 @@ private:
     static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
 
-    TreeMap(FUNC &func) : func(func) {}
+    TreeMapper(FUNC &func) : func(func) {}
 
     Expression *mapIt(Expression *what, CTX ctx) {
         try {
@@ -865,11 +867,14 @@ private:
             throw;
         }
     }
+};
 
+class TreeMap {
 public:
+    template <typename CTX, typename FUNC>
     static unique_ptr<Expression> apply(CTX ctx, FUNC &func, unique_ptr<Expression> to) {
         Expression *underlying = to.get();
-        TreeMap walker(func);
+        TreeMapper<FUNC, CTX> walker(func);
         Expression *res = walker.mapIt(underlying, ctx);
 
         if (res == underlying) {

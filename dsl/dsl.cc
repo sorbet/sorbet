@@ -70,7 +70,7 @@ unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::E
     auto ast = move(tree);
 
     DSLReplacer dslReplacer;
-    ast = ast::TreeMap<DSLReplacer, core::MutableContext>::apply(ctx, dslReplacer, move(ast));
+    ast = ast::TreeMap::apply(ctx, dslReplacer, move(ast));
 
     return ast;
 }

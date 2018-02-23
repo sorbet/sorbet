@@ -14,7 +14,7 @@ private:
             if (ast::isa_tree<ast::EmptyTree>(node.get())) {
                 return node;
             }
-            return TreeMap<SubstWalk, core::MutableContext>::apply(ctx, *this, move(node));
+            return TreeMap::apply(ctx, *this, move(node));
         }
 
         auto scope = substClassName(ctx, move(constLit->scope));
@@ -26,18 +26,18 @@ private:
     unique_ptr<ast::Expression> substArg(core::MutableContext ctx, unique_ptr<ast::Expression> argp) {
         ast::Expression *arg = argp.get();
         while (arg != nullptr) {
-            typecase(
-                arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
-                [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
-                [&](ast::OptionalArg *opt) {
-                    opt->default_ = TreeMap<SubstWalk, core::MutableContext>::apply(ctx, *this, move(opt->default_));
-                    arg = opt->expr.get();
-                },
-                [&](ast::BlockArg *opt) { arg = opt->expr.get(); }, [&](ast::ShadowArg *opt) { arg = opt->expr.get(); },
-                [&](ast::UnresolvedIdent *nm) {
-                    nm->name = subst.substitute(nm->name);
-                    arg = nullptr;
-                });
+            typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
+                     [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
+                     [&](ast::OptionalArg *opt) {
+                         opt->default_ = TreeMap::apply(ctx, *this, move(opt->default_));
+                         arg = opt->expr.get();
+                     },
+                     [&](ast::BlockArg *opt) { arg = opt->expr.get(); },
+                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); },
+                     [&](ast::UnresolvedIdent *nm) {
+                         nm->name = subst.substitute(nm->name);
+                         arg = nullptr;
+                     });
         }
         return argp;
     }
@@ -95,6 +95,6 @@ std::unique_ptr<Expression> ruby_typer::ast::Substitute::run(core::MutableContex
                                                              const ruby_typer::core::GlobalSubstitution &subst,
                                                              std::unique_ptr<Expression> what) {
     SubstWalk walk(subst);
-    what = TreeMap<SubstWalk, core::MutableContext>::apply(ctx, walk, move(what));
+    what = TreeMap::apply(ctx, walk, move(what));
     return what;
 }

@@ -415,7 +415,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
         {
             tracer->trace("CFG+Infer: {}", f.data(ctx).path());
             core::ErrorRegion errs(ctx, f, silenceErrors);
-            result = ast::TreeMap<CFG_Collector_and_Typer, core::Context>::apply(ctx, collector, move(resolved));
+            result = ast::TreeMap::apply(ctx, collector, move(resolved));
         }
         if (opts.print.TypedSource) {
             cout << ctx.state.showAnnotatedSource(f);

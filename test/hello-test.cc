@@ -175,7 +175,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
         new ClassDef(loc, classSym, move(cnst), ClassDef::ANCESTORS_store(), move(classrhs), ClassDefKind::Class));
     Counter c;
 
-    auto r = TreeMap<Counter, core::MutableContext>::apply(ctx, c, move(tree));
+    auto r = TreeMap::apply(ctx, c, move(tree));
     EXPECT_EQ(c.count, 3);
 }
 } // namespace ruby_typer

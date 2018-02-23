@@ -845,18 +845,18 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
                                                             std::vector<std::unique_ptr<ast::Expression>> trees) {
     ResolveConstantsWalk constants(ctx);
     for (auto &tree : trees) {
-        tree = ast::TreeMap<ResolveConstantsWalk, core::MutableContext>::apply(ctx, constants, move(tree));
+        tree = ast::TreeMap::apply(ctx, constants, move(tree));
     }
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
 
     for (auto &tree : trees) {
-        tree = ast::TreeMap<ResolveSignaturesWalk, core::MutableContext>::apply(ctx, sigs, move(tree));
-        tree = ast::TreeMap<ResolveVariablesWalk, core::MutableContext>::apply(ctx, vars, move(tree));
+        tree = ast::TreeMap::apply(ctx, sigs, move(tree));
+        tree = ast::TreeMap::apply(ctx, vars, move(tree));
 
         // declared in here since it holds onto state
         FlattenWalk flatten;
-        tree = ast::TreeMap<FlattenWalk, core::MutableContext>::apply(ctx, flatten, move(tree));
+        tree = ast::TreeMap::apply(ctx, flatten, move(tree));
         tree = flatten.addClasses(ctx, move(tree));
         tree = flatten.addMethods(ctx, move(tree));
     }
@@ -866,7 +866,7 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
     if (debug_mode) {
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            tree = ast::TreeMap<ResolveSanityCheckWalk, core::MutableContext>::apply(ctx, sanity, move(tree));
+            tree = ast::TreeMap::apply(ctx, sanity, move(tree));
         }
     }
 

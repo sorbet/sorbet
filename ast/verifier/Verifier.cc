@@ -22,7 +22,7 @@ std::unique_ptr<Expression> Verifier::run(core::MutableContext ctx, std::unique_
         return node;
     }
     VerifierWalker vw;
-    return TreeMap<VerifierWalker, core::MutableContext>::apply(ctx, vw, move(node));
+    return TreeMap::apply(ctx, vw, move(node));
 }
 
 } // namespace ast

@@ -319,8 +319,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
-            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer, ruby_typer::core::Context>::apply(
-                ctx, collector, move(resolvedTree));
+            auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -340,8 +339,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
-            auto cfg = ruby_typer::ast::TreeMap<CFG_Collector_and_Typer, ruby_typer::core::Context>::apply(
-                ctx, collector, move(resolvedTree));
+            auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
@@ -361,8 +359,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
-            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer, ruby_typer::core::Context>::apply(ctx, collector,
-                                                                                                move(resolvedTree));
+            ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
@@ -376,8 +373,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("infer");
             CFG_Collector_and_Typer collector;
-            ruby_typer::ast::TreeMap<CFG_Collector_and_Typer, ruby_typer::core::Context>::apply(ctx, collector,
-                                                                                                move(resolvedTree));
+            ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
 
