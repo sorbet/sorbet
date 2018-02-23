@@ -18,7 +18,7 @@ BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
 string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
     stringstream buf;
     if (loc.is_none()) {
-        buf << "???:";
+        buf << "???";
     } else {
         auto pos = loc.position(gs);
         buf << loc.file.data(gs).path() << ":";
@@ -27,15 +27,15 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
             buf << "-";
             buf << pos.second.line;
         }
-        buf << ":";
     }
     return buf.str();
 }
 
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << rang::style::reset << rang::style::bold << rang::fg::red << filePosToString(gs, loc) << rang::style::reset
-        << rang::fg::red << " " << formatted << " [" << what.code << "]" << rang::fg::reset << endl;
+    buf << rang::style::reset << rang::style::underline << filePosToString(gs, loc) << rang::style::reset << ": "
+        << rang::fg::red << formatted << rang::fg::reset << rang::fgB::black << " [" << what.code << "]"
+        << rang::fg::reset << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }
@@ -45,7 +45,7 @@ string BasicError::toString(const GlobalState &gs) {
 string ErrorLine::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
-    buf << indent << rang::style::bold << BasicError::filePosToString(gs, loc) << rang::style::reset << " "
+    buf << indent << rang::style::underline << BasicError::filePosToString(gs, loc) << rang::style::reset << ": "
         << formattedMessage << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
@@ -57,7 +57,7 @@ string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     if (!this->header.empty()) {
-        buf << rang::fg::yellow << indent << this->header << rang::fg::reset;
+        buf << indent << rang::fg::yellow << this->header << rang::fg::reset;
     }
     bool first = true;
     for (auto &line : this->messages) {

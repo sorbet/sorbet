@@ -97,7 +97,7 @@ string Loc::toString(const core::GlobalState &gs, int tabs) {
         for (p = 0; p < pos.first.column; p++) {
             buf << ' ';
         }
-        buf << rang::fg::red;
+        buf << rang::fg::green;
         for (; p < pos.second.column; p++) {
             buf << '^';
         }
