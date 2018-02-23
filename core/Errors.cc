@@ -23,10 +23,7 @@ string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
         auto pos = loc.position(gs);
         buf << loc.file.data(gs).path() << ":";
         buf << pos.first.line;
-        if (pos.second.line != pos.first.line) {
-            buf << "-";
-            buf << pos.second.line;
-        }
+        // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
     }
     return buf.str();
 }
