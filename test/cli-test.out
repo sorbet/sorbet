@@ -10628,6 +10628,29 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:FloatDomainError>> < ::<singleton class:<constant:RangeError>> ()
   class <singleton class:<constant:Forwardable>> < ::<constant:Module> ()
   class <singleton class:<constant:GC>> < ::<constant:Module> ()
+    method count () -> Integer
+    method disable () -> TrueClass | FalseClass
+    method enable () -> TrueClass | FalseClass
+    method start (full_mark, immediate_sweep) -> NilClass
+      argument full_mark<optional, keyword> -> TrueClass | FalseClass
+      argument immediate_sweep<optional, keyword> -> TrueClass | FalseClass
+    method stat (arg0) -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = Symbol
+        <constant:V> = Integer
+        <constant:Elem> = untyped
+      ]
+    }
+      argument arg0<optional> -> AppliedType {
+            klass = ::<constant:Hash>
+            targs = [
+              <constant:K> = untyped
+              <constant:V> = untyped
+              <constant:Elem> = untyped
+            ]
+          } | Symbol
+    method stress () -> Integer | TrueClass | FalseClass
   class <singleton class:<constant:Gem>> < ::<constant:Module> ()
     method bin_path (name, args, requirements) -> String
       argument args<optional> -> String
