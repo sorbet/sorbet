@@ -165,6 +165,11 @@ NameDef names[] = {
     {"singleton", "<singleton class>", Core | Desugar | Namer},
     {"attached", "<attached class>", Core},
 
+    // This name is used as a key in SymbolInfo::members to store the module
+    // registered via the `mixes_in_class_method` name.
+    {"classMethods", "<class methods>", Core | Resolver},
+    {"mixesInClassMethods", "mixes_in_class_methods", Resolver},
+
     {"blockTemp", "<block>", Core | Namer | Resolver},
     {"blockPassTemp", "<block-pass>", Desugar},
     {"forTemp", Desugar},

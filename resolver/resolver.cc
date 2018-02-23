@@ -310,6 +310,43 @@ private:
         }
     }
 
+    void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
+        if (!ctx.owner.data(ctx).isClassModule()) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
+                            "{} can only be declared inside a module, not a class.", send->fun.data(ctx).show(ctx));
+            // Keep processing it anyways
+        }
+
+        if (send->args.size() != 1) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
+                            "Wrong number of arguments to {}: Expected 1", send->fun.data(ctx).show(ctx));
+            return;
+        }
+        auto *id = ast::cast_tree<ast::Ident>(send->args.front().get());
+        if (id == nullptr || !id->symbol.data(ctx).isClass()) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
+                            "Argument to {} must be statically resolvable to a module.", send->fun.data(ctx).show(ctx));
+            return;
+        }
+        if (id->symbol.data(ctx).isClassClass()) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
+                            "{} is a class, not a module; Only modules may be mixins.", id->symbol.data(ctx).show(ctx));
+            return;
+        }
+        if (id->symbol == ctx.owner) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration, "Must not pass your self to {}",
+                            send->fun.data(ctx).show(ctx));
+            return;
+        }
+        auto existing = ctx.owner.data(ctx).findMember(ctx, core::Names::classMethods());
+        if (existing.exists()) {
+            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
+                            "{} can only be declared once per module", send->fun.data(ctx).show(ctx));
+            return;
+        }
+        ctx.owner.data(ctx).members.emplace_back(core::Names::classMethods(), id->symbol);
+    }
+
     void processClassBody(core::MutableContext ctx, ast::ClassDef *klass) {
         InlinedVector<unique_ptr<ast::Expression>, 1> lastSig;
         for (auto &stat : klass->rhs) {
@@ -336,8 +373,11 @@ private:
 
                     switch (send->fun._id) {
                         case core::Names::declareVariables()._id:
-                            processDeclareVariables(ctx.withOwner(klass->symbol), send);
+                            processDeclareVariables(ctx, send);
                             break;
+                        case core::Names::mixesInClassMethods()._id: {
+                            processMixesInClassMethods(ctx, send);
+                        } break;
                         default:
                             return;
                     }

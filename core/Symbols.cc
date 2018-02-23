@@ -128,7 +128,8 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
     vector<string> children;
     children.reserve(members.size());
     for (auto pair : members) {
-        if (pair.first == Names::singleton() || pair.first == Names::attached()) {
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::classMethods()) {
             continue;
         }
 

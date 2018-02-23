@@ -1,3 +1,4 @@
+#include "core/Names/resolver.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
@@ -121,6 +122,25 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             }
         } else {
             data.superClass = core::Symbols::Object();
+        }
+    }
+
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto sym = core::SymbolRef(&gs, i);
+        if (!sym.data(gs).isClass()) {
+            continue;
+        }
+
+        core::SymbolRef singleton;
+        for (auto ancst : sym.data(gs).mixins(gs)) {
+            auto classMethods = ancst.data(gs).findMember(gs, core::Names::classMethods());
+            if (!classMethods.exists()) {
+                continue;
+            }
+            if (!singleton.exists()) {
+                singleton = sym.data(gs).singletonClass(gs);
+            }
+            singleton.data(gs).mixins(gs).emplace_back(classMethods);
         }
     }
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
