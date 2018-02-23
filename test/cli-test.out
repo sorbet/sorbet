@@ -11601,6 +11601,28 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method [] (ary) -> untyped
       argument ary<repeated> -> BasicObject
   class <singleton class:<constant:Signal>> < ::<constant:Module> ()
+    method <overload N.1 : trap> (arg0, blk) -> String | Proc
+      argument arg0<> -> Integer | String
+      argument blk<block> -> AppliedType {
+        klass = ::<constant:Proc1>
+        targs = [
+          <constant:Return> = BasicObject
+          <constant:Arg0> = Integer
+        ]
+      }
+    method list () -> AppliedType {
+      klass = ::<constant:Hash>
+      targs = [
+        <constant:K> = String
+        <constant:V> = Integer
+        <constant:Elem> = untyped
+      ]
+    }
+    method signame (arg0) -> String | NilClass
+      argument arg0<> -> Integer
+    method trap (arg0) -> String | Proc
+      argument arg0<> -> Integer | String
+      argument blk<block>
   class <singleton class:<constant:SignalException>> < ::<singleton class:<constant:Exception>> ()
   class <singleton class:<constant:SingleForwardable>> < ::<constant:Module> ()
   class <singleton class:<constant:SortedSet>> < ::<singleton class:<constant:Set>> (<constant:Generic>)

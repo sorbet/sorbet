@@ -10722,6 +10722,28 @@ class Set
   def union(enum); end
 end
 
+module Signal
+  sig.returns(T::Hash[String, Integer])
+  def self.list(); end
+
+  sig(
+      arg0: Integer,
+  )
+  .returns(T.any(String, NilClass))
+  def self.signame(arg0); end
+
+  sig(
+      arg0: T.any(Integer, String),
+  )
+  .returns(T.any(String, Proc))
+  sig(
+      arg0: T.any(Integer, String),
+      blk: T.proc(arg0: Integer).returns(BasicObject),
+  )
+  .returns(T.any(String, Proc))
+  def self.trap(arg0, &blk); end
+end
+
 class SignalException
   sig.returns(SignalException)
   def clone(); end
