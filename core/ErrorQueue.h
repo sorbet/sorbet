@@ -25,6 +25,7 @@ private:
 public:
     ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
     std::atomic<bool> hadCritical{false};
+    std::atomic<int> errorCount{0};
 
     ErrorQueue(spd::logger &logger);
     ~ErrorQueue();

@@ -1,3 +1,3 @@
 #!/bin/bash
 
-diff <(test/cli-test.sh) test/cli-test.out
+diff -u <(test/cli-test.sh) test/cli-test.out

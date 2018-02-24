@@ -968,7 +968,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
 }
 
 int GlobalState::totalErrors() const {
-    return errorQueue->queue.enqueuedEstimate();
+    return errorQueue->errorCount.load();
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
