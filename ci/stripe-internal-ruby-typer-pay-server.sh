@@ -85,7 +85,7 @@ env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_5_0_0_linux/b
     /usr/bin/time -o "$TIMEFILE2" \
     ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=always \
       --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
-      --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver. --metrics-repo=payserver --metrics-sha="$PAY_SERVER_SHA"
+      --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/pay-server --metrics-sha="$PAY_SERVER_SHA"
 
 cat "$TIMEFILE2"
 
@@ -94,6 +94,7 @@ if [ "$RECORD_STATS" ]; then
     t_wall="$(grep wall "$TIMEFILE2" | cut -d ' ' -f 2)"
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_wall"s -name ruby_typer.payserver.full_run.seconds
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.full_run.cpu_seconds
-    mkdir -p /log/persisted
-    cp metrics.json /log/persisted
+    LOG_DIR="/log/persisted/$(date "+%Y%m%d")/$PAY_SERVER_SHA/"
+    mkdir -p "$LOG_DIR"
+    cp metrics.json "$LOG_DIR"
 fi

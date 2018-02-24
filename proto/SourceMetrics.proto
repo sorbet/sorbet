@@ -23,6 +23,7 @@ message SourceMetrics {
     string status = 3; // good, failed
     string branch = 4;
     int64 timestamp = 5; // unix timestamp
+    string uuid = 6; // random identifier
 
     repeated SourceMetricEntry metrics = 10;
 }

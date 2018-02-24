@@ -2,6 +2,7 @@
 extern "C" {
 #include "statsd-client.h"
 }
+#include "Random.h"
 #include "absl/strings/str_cat.h"
 #include "proto/SourceMetrics.pb.h"
 #include <algorithm>
@@ -346,6 +347,18 @@ bool storeCountersToProtoFile(const std::string &fileName, const std::string &pr
     metrics.set_status(status);
     auto unix_timestamp = std::chrono::seconds(std::time(NULL));
     metrics.set_timestamp(unix_timestamp.count());
+
+    // UUID version 1 as specified in RFC 4122
+    string uuid =
+        strprintf("%lx-%x-%x-%x-%lx%x",
+                  Random::uniformU8(), // Generates a 64-bit Hex number
+                  Random::uniformU4(), // Generates a 32-bit Hex number
+                  Random::uniformU4(0, 0x0fff) |
+                      0x4000, // Generates a 32-bit Hex number of the form 4xxx (4 indicates the UUID version)
+                  Random::uniformU4(0, 0x3fff) | 0x8000, // Generates a 32-bit Hex number in the range [0x8000, 0xbfff]
+                  Random::uniformU8(), rand());          // Generates a 96-bit Hex number
+
+    metrics.set_uuid(uuid);
 
     auto canon = counterState.canonicalize();
     for (auto &cat : canon.counters_by_category) {

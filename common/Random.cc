@@ -1,0 +1,25 @@
+#include "Random.h"
+
+namespace ruby_typer {
+std::random_device Random::rd;
+
+std::default_random_engine Random::re(Random::rd());
+
+u4 Random::uniformU4() {
+    return uniformU4(0, (u4)0 - (u4)1);
+}
+
+u8 Random::uniformU8() {
+    return uniformU8(0, (u8)0 - (u8)1);
+}
+
+u4 Random::uniformU4(u4 from, u4 to) {
+    std::uniform_int_distribution<u4> uniform_dist(from, to);
+    return uniform_dist(re);
+}
+
+u8 Random::uniformU8(u8 from, u8 to) {
+    std::uniform_int_distribution<u8> uniform_dist(from, to);
+    return uniform_dist(re);
+}
+} // namespace ruby_typer
