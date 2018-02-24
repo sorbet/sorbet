@@ -637,6 +637,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
                                cxxopts::value<string>(), "file");
+    options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
     options.add_options("dev")("trace", "Trace phases");
 
     int defaultThreads = std::thread::hardware_concurrency();
@@ -909,7 +910,13 @@ int realmain(int argc, char **argv) {
     }
 
     // je_malloc_stats_print(NULL, NULL, NULL); // uncomment this to print jemalloc statistics
-    return gs->hadCriticalError() ? 10 : returnCode;
-};
+    if (gs->hadCriticalError()) {
+        returnCode = 10;
+    } else if (returnCode == 0 && gs->totalErrors() > 0 && !options.count("suppress-non-critical")) {
+        returnCode = 1;
+    }
+
+    return returnCode;
+}
 
 } // namespace ruby_typer

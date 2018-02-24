@@ -1,60 +1,28 @@
-Send {
-  receiver = Integer {
-    val = "1"
-  }
-  method = +
-  args = [
-    Integer {
-      val = "1"
-    }
-  ]
+Integer {
+  val = "1"
 }
 {
-  "type" : "Send",
-  "receiver" : {
-    "type" : "Integer",
-    "val" : "1"
-  },
-  "method" : "+",
-  "args" : [
-    {
-      "type" : "Integer",
-      "val" : "1"
-    }
-  ]
+  "type" : "Integer",
+  "val" : "1"
 }
 class <emptyTree><<constant:<root>>> < ()
-  1.+(1)
+  1
 end
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    Send{
-      recv = IntLit{ value = 1 }
-      name = +
-      block = nullptr
-      args = [
-        IntLit{ value = 1 }
-      ]
-    }
+    IntLit{ value = 1 }
   ]
 }
 class <emptyTree><<constant:<root>>> < ()
-  1.+(1)
+  1
 end
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    Send{
-      recv = IntLit{ value = 1 }
-      name = +
-      block = nullptr
-      args = [
-        IntLit{ value = 1 }
-      ]
-    }
+    IntLit{ value = 1 }
   ]
 }
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
@@ -11797,7 +11765,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
 
 class <emptyTree><<constant:<root>>> < ()
   def self.<static-init><<static-init>$8>()
-    1.+(1)
+    1
   end
 end
 ClassDef{
@@ -11808,14 +11776,7 @@ ClassDef{
       self = 1
       name = <static-init><<static-init>$8>
       args = []
-      rhs = Send{
-        recv = IntLit{ value = 1 }
-        name = +
-        block = nullptr
-        args = [
-          IntLit{ value = 1 }
-        ]
-      }
+      rhs = IntLit{ value = 1 }
     }
   ]
 }
@@ -11827,9 +11788,7 @@ subgraph "cluster_#<static-init>$8" {
     "bb#<static-init>$8_1" [shape = parallelogram];
 
     "bb#<static-init>$8_0" [label = "block[id=0]()
-<statTemp>$4 = 1 : Integer(1)
-<statTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$5) : Integer
+<returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
@@ -11850,15 +11809,9 @@ subgraph "cluster_#<static-init>$8" {
     "bb#<static-init>$8_1" [shape = parallelogram];
 
     "bb#<static-init>$8_0" [label = "block[id=0]()
-<statTemp>$4 = 1 : Integer(1)
-<statTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$5) : Integer
+<returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
-<statTemp>$4: Integer(1)
-
-<statTemp>$5: Integer(1)
-
-<returnMethodTemp>$2: Integer
+<returnMethodTemp>$2: Integer(1)
 
 <finalReturn>: <bottom>
 
@@ -11873,11 +11826,7 @@ subgraph "cluster_#<static-init>$8" {
 
 }
 
-1+1
-# <statTemp>$4: Integer(1)
-#
-# <statTemp>$5: Integer(1)
-#
-# <returnMethodTemp>$2: Integer
+1
+# <returnMethodTemp>$2: Integer(1)
 #
 # <finalReturn>: <bottom>

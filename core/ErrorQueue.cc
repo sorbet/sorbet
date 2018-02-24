@@ -44,6 +44,7 @@ void ErrorQueue::flushErrors(bool all) {
     ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
         if (msg.kind == ErrorQueueMessage::Kind::Error) {
+            this->errorCount.fetch_add(1);
             collected[msg.whatFile].emplace_back(std::move(msg));
         } else if (msg.kind == ErrorQueueMessage::Kind::Drop) {
             collected[msg.whatFile].clear();
