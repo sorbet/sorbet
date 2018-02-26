@@ -1914,11 +1914,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method gregorian? () -> untyped
     method hash () -> untyped
     method httpdate () -> untyped
-    method initialize (arg0, arg1, arg2, arg3) -> Object
-      argument arg0<optional> -> Integer
-      argument arg1<optional> -> Integer
-      argument arg2<optional> -> Integer
-      argument arg3<optional> -> Integer
+    method initialize (year, month, mday, start) -> Date
+      argument mday<optional> -> Integer
+      argument month<optional> -> Integer
+      argument start<optional> -> Integer
+      argument year<optional> -> Integer
     method inspect () -> untyped
     method iso8601 () -> untyped
     method italy () -> untyped
@@ -1962,9 +1962,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method start () -> untyped
     method step (arg0) -> untyped
       argument arg0<repeated> -> untyped
-    method strftime (arg0) -> String
-      argument arg0<> -> String
-    method strftime$1 (arg0) -> untyped
+    method strftime (arg0) -> untyped
       argument arg0<repeated> -> untyped
     method succ () -> untyped
     method sunday? () -> untyped
@@ -1986,14 +1984,34 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method xmlschema () -> untyped
     method yday () -> untyped
     method year () -> untyped
-    static-field <constant:ABBR_DAYNAMES> -> untyped
-    static-field <constant:ABBR_MONTHNAMES> -> untyped
-    static-field <constant:DAYNAMES> -> untyped
-    static-field <constant:ENGLAND> -> untyped
-    static-field <constant:GREGORIAN> -> untyped
-    static-field <constant:ITALY> -> untyped
-    static-field <constant:JULIAN> -> untyped
-    static-field <constant:MONTHNAMES> -> untyped
+    static-field <constant:ABBR_DAYNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:ABBR_MONTHNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:DAYNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:ENGLAND> -> Integer
+    static-field <constant:GREGORIAN> -> Float
+    static-field <constant:ITALY> -> Integer
+    static-field <constant:JULIAN> -> Float
+    static-field <constant:MONTHNAMES> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:DateTime> < ::<constant:Date> () -> <Class:DateTime>
     method blank? () -> untyped
     method clone () -> DateTime
@@ -10351,7 +10369,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument arg0<> -> String
       argument arg1<optional> -> Integer
       argument arg2<optional>
-    method <overload N.1 : open> (file, perm, opt, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, blk) -> untyped
+    method <overload N.1 : open> (file, modearg, perm, opt, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, blk) -> untyped
       argument autoclose<optional, keyword> -> BasicObject
       argument binmode<optional, keyword> -> BasicObject
       argument blk<block> -> AppliedType {
@@ -10368,9 +10386,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       }
       argument encoding<optional, keyword> -> String
       argument external_encoding<optional, keyword> -> String
-      argument file<optional> -> BasicObject
+      argument file<> -> BasicObject
       argument internal_encoding<optional, keyword> -> String
       argument mode<optional, keyword> -> String
+      argument modearg<optional> -> String
       argument opt<optional> -> Integer
       argument perm<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
@@ -10490,7 +10509,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument file<> -> String
     method mtime (file) -> Time
       argument file<> -> BasicObject
-    method open (file, perm, opt, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose) -> AppliedType {
+    method open (file, modearg, perm, opt, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose) -> AppliedType {
       klass = ::<constant:File>
       targs = [
         <constant:Elem> = String
@@ -10501,9 +10520,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument blk<block>
       argument encoding<optional, keyword> -> String
       argument external_encoding<optional, keyword> -> String
-      argument file<optional> -> String
+      argument file<> -> BasicObject
       argument internal_encoding<optional, keyword> -> String
       argument mode<optional, keyword> -> String
+      argument modearg<optional> -> String
       argument opt<optional> -> Integer
       argument perm<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
@@ -10732,7 +10752,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument name<> -> String
       argument sep<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
-    method <overload N.1 : open> (fd, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode, blk) -> untyped
+    method <overload N.1 : open> (fd, modearg, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode, blk) -> untyped
       argument autoclose<optional, keyword> -> BasicObject
       argument binmode<optional, keyword> -> BasicObject
       argument blk<block> -> AppliedType {
@@ -10752,6 +10772,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument fd<> -> Integer
       argument internal_encoding<optional, keyword> -> String
       argument mode<optional, keyword> -> String
+      argument modearg<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
     method <overload N.1 : pipe> (int_enc, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode) -> TupleType {
       0 = AppliedType {
@@ -10894,7 +10915,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument name<> -> String
       argument sep<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
-    method open (fd, mode, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode) -> AppliedType {
+    method open (fd, modearg, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode) -> AppliedType {
       klass = ::<constant:IO>
       targs = [
         <constant:Elem> = String
@@ -10908,6 +10929,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument fd<> -> Integer
       argument internal_encoding<optional, keyword> -> String
       argument mode<optional, keyword> -> String
+      argument modearg<optional> -> String
       argument textmode<optional, keyword> -> BasicObject
     method pipe (ext_or_ext_int_enc, external_encoding, internal_encoding, encoding, textmode, binmode, autoclose, mode) -> TupleType {
       0 = AppliedType {
@@ -11660,14 +11682,14 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:ThreadGroup>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:Time>> < ::<singleton class:<constant:Object>> ()
     method <overload N.1 : at> () -> Time
-      argument arg0<>
       argument microseconds_with_frac<optional>
-    method <overload N.2 : at> (microseconds_with_frac) -> Time
-      argument arg0<>
+      argument seconds<>
+    method <overload N.2 : at> (seconds, microseconds_with_frac) -> Time
       argument microseconds_with_frac<optional> -> Numeric
-    method at (arg0) -> Time
-      argument arg0<> -> Time
+      argument seconds<> -> Numeric
+    method at (seconds) -> Time
       argument microseconds_with_frac<optional>
+      argument seconds<> -> Time
     method gm (year, month, day, hour, min, sec, usec_with_frac) -> Time
       argument day<optional> -> Integer
       argument hour<optional> -> Integer

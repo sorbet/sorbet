@@ -1160,7 +1160,8 @@ class File
   def self.mtime(file); end
 
   sig(
-      file: String,
+      file: BasicObject,
+      modearg: String,
       perm: String,
       opt: Integer,
       mode: String,
@@ -1174,7 +1175,7 @@ class File
   .returns(File)
   sig(
       file: BasicObject,
-      mode: String,
+      modearg: String,
       perm: String,
       opt: Integer,
       mode: String,
@@ -1187,7 +1188,7 @@ class File
       blk: T.proc(arg0: File).returns(BasicObject),
   )
   .returns(T.untyped)
-  def self.open(file=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
+  def self.open(file, modearg=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
 
   sig(
       file: String,
@@ -1921,7 +1922,7 @@ class IO
 
   sig(
       fd: Integer,
-      mode: String,
+      modearg: String,
       external_encoding: String,
       internal_encoding: String,
       encoding: String,
@@ -1933,7 +1934,7 @@ class IO
   .returns(IO)
   sig(
       fd: Integer,
-      mode: String,
+      modearg: String,
       external_encoding: String,
       internal_encoding: String,
       encoding: String,
@@ -1944,7 +1945,7 @@ class IO
       blk: T.proc(arg0: IO).returns(BasicObject),
   )
   .returns(T.untyped)
-  def self.open(fd, mode=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
+  def self.open(fd, modearg=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
       ext_or_ext_int_enc: String,
@@ -3954,21 +3955,6 @@ class Date
 
   sig.returns(Date)
   def freeze(); end
-
-  sig(
-      arg0: Integer,
-      arg1: Integer,
-      arg2: Integer,
-      arg3: Integer,
-  )
-  .returns(Object)
-  def initialize(arg0=_, arg1=_, arg2=_, arg3=_); end
-
-  sig(
-      arg0: String,
-  )
-  .returns(String)
-  def strftime(arg0); end
 
   sig.returns(Date)
   def taint(); end
@@ -11926,7 +11912,7 @@ end
 
 class Time
   sig(
-      arg0: Time,
+      seconds: Time,
   )
   .returns(Time)
   sig(
@@ -11938,7 +11924,7 @@ class Time
       microseconds_with_frac: Numeric,
   )
   .returns(Time)
-  def self.at(arg0, microseconds_with_frac=_); end
+  def self.at(seconds, microseconds_with_frac=_); end
 
   sig(
       year: Integer,

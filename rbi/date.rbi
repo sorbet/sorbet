@@ -34,14 +34,13 @@ class Date::Infinity
 end
 
 class Date
-  ITALY = _
-  MONTHNAMES = _
-  ABBR_MONTHNAMES = _
-  DAYNAMES = _
-  ABBR_DAYNAMES = _
-  ENGLAND = _
-  JULIAN = _
-  GREGORIAN = _
+  sig(
+    year: Integer,
+    month: Integer,
+    mday: Integer,
+    start: Integer,
+  ).returns(Date)
+  def initialize(year=-4712, month=1, mday=1, start=Date::ITALY); end
 
   sig(arg0: T.untyped).returns(T.untyped)
   def upto(arg0); end

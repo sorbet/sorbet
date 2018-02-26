@@ -5,7 +5,7 @@ test/end-to-end-test-input.rb:12: Argument arg0 does not match expected type Str
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     rbi/stdlib.rbi:__LINE__: Method <overload N.1 : raise> has specified type of argument arg0 as String
-    7068 |      arg0: String,
+    7054 |      arg0: String,
                 ^^^^^
   Got Integer originating from:    test/end-to-end-test-input.rb:9: 
      9 |  sig(arg: Integer).returns(NilClass)
