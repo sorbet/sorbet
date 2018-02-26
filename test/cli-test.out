@@ -9269,6 +9269,18 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method yday () -> Integer
     method year () -> Integer
     method zone () -> String
+    static-field <constant:RFC2822_DAY_NAME> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
+    static-field <constant:RFC2822_MONTH_NAME> -> AppliedType {
+      klass = ::<constant:Array>
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    }
   class <constant:TracePoint> < ::<constant:Object> () -> <Class:TracePoint>
     method clone () -> TracePoint
     method dup () -> TracePoint
