@@ -131,6 +131,16 @@ long timespec_delta(struct timespec *start, struct timespec *stop) {
     return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
 }
 
+bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file) {
+    if (opts.print.TypedSource) {
+        return true;
+    }
+    if (opts.typedSource.empty()) {
+        return false;
+    }
+    return file.data(ctx).path().find(opts.typedSource) != string::npos;
+}
+
 class Timer {
 public:
     Timer(shared_ptr<spd::logger> log, const std::string &msg) : log(log), msg(msg) {
@@ -161,7 +171,10 @@ public:
         }
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
-        if (print.CFGRaw || print.TypedSource) {
+
+        bool printSrc = wantTypedSource(opts, ctx, m->loc.file);
+
+        if (print.CFGRaw || printSrc) {
             cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
         }
         if (opts.stopAfterPhase == Phase::CFG) {
@@ -171,7 +184,7 @@ public:
         if (print.CFG || print.CFGRaw) {
             cout << cfg->toString(ctx) << endl << endl;
         }
-        if (print.TypedSource) {
+        if (printSrc) {
             cfg->recordAnnotations(ctx);
         }
         return m;
@@ -417,7 +430,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
             core::ErrorRegion errs(ctx, f, silenceErrors);
             result = ast::TreeMap::apply(ctx, collector, move(resolved));
         }
-        if (opts.print.TypedSource) {
+        if (wantTypedSource(opts, ctx, f)) {
             cout << ctx.state.showAnnotatedSource(f);
         }
         if (opts.print.CFG || opts.print.CFGRaw) {
@@ -824,10 +837,18 @@ int realmain(int argc, char **argv) {
         console->error("Invalid value for `--typed`: {}", typed);
     }
     opts.typedSource = options["typed-source"].as<string>();
-    if (!opts.typedSource.empty() && opts.print.TypedSource) {
-        console_err->error("`--typed-source " + opts.typedSource +
-                           "` and `-p typed-source` are incompatible. Either print out one file or all files.");
-        return 1;
+    if (!opts.typedSource.empty()) {
+        if (opts.print.TypedSource) {
+            console_err->error("`--typed-source " + opts.typedSource +
+                               "` and `-p typed-source` are incompatible. Either print out one file or all files.");
+            return 1;
+        }
+        auto found = any_of(files.begin(), files.end(),
+                            [&](string &path) { return path.find(opts.typedSource) != string::npos; });
+        if (!found) {
+            console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
+            return 1;
+        }
     }
 
     if (options["color"].as<string>() == "auto") {
