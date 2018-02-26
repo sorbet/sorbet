@@ -1,6 +1,6 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <constant:A> < ::<constant:Object> () -> <Class:A>
-    method bad (a, b, c, d, e, f, g, h, i, j, k) -> T2
+    method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2
       argument a<> -> untyped
       argument b<> -> untyped
       argument c<> -> <bottom>
@@ -12,6 +12,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument i<> -> untyped
       argument j<> -> untyped
       argument k<> -> untyped
+      argument l<> -> ShapeType {
+      }
+      argument m<> -> ShapeType {
+        Symbol(:"foo") => untyped
+      }
     method f1 (x) -> T1
       argument x<> -> untyped
     method f2 (x) -> T2
@@ -19,7 +24,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method f3 () -> T1
     method f4 (y) -> T1
       argument y<> -> T1
-    method good (a, b, c, d, e, f, g, h, i, j, k, l, m, n) -> T2
+    method good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) -> T2
       argument a<> -> TupleType {
         0 = T1
         1 = T2
@@ -49,6 +54,12 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
       argument l<> -> <Class:T1>
       argument m<> -> <Class:T1>
       argument n<> -> <Class:M1>
+      argument o<> -> ShapeType {
+        Symbol(:"foo") => String
+        Symbol(:"bar") => Integer | NilClass
+      }
+      argument p<> -> ShapeType {
+      }
     method no_params () -> T1
     method noreturn () -> <bottom>
     method private : private (x) -> T1

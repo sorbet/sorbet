@@ -223,6 +223,24 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
             result = make_shared<core::TupleType>(elems);
         },
+        [&](ast::Hash *hash) {
+            vector<shared_ptr<core::LiteralType>> keys;
+            vector<shared_ptr<core::Type>> values;
+
+            for (auto &ktree : hash->keys) {
+                auto &vtree = hash->values[&ktree - &hash->keys.front()];
+                auto val = getResultType(ctx, vtree);
+                if (auto *sym = ast::cast_tree<ast::SymbolLit>(ktree.get())) {
+                    auto key = make_shared<core::LiteralType>(core::Symbols::Symbol(), sym->name);
+                    keys.emplace_back(key);
+                    values.emplace_back(val);
+                } else {
+                    ctx.state.error(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration,
+                                    "Malformed type declaration. Shape keys must be Symbol literals.");
+                }
+            }
+            result = make_shared<core::ShapeType>(keys, values);
+        },
         [&](ast::Ident *i) {
             bool silenceGenericError = i->symbol == core::Symbols::Hash() || i->symbol == core::Symbols::Array() ||
                                        i->symbol == core::Symbols::Set() || i->symbol == core::Symbols::Struct() ||
