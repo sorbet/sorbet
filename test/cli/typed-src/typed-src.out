@@ -1,0 +1,40 @@
+class A
+  sig(x: T.any(String, Integer), y: Integer).returns(Integer)
+  def a_method(x, y)
+    if x.is_a?(String)
+       # <constant:String>$8: <Class:String>
+       #
+       # <selfMethodTemp>$3: A
+       #
+       # x: String | Integer
+       #
+       # y: Integer
+       #
+       # <ifTemp>$5: TrueClass | FalseClass
+       #   Being truthy entails:
+       #     x to be String
+       #   Being falsy entails:
+       #     x NOT to be String
+          # x: String
+          #
+          # y: Integer
+      x = x.to_i
+          # x: Integer
+          #
+          # y: Integer
+          #
+          # <statTemp>$9: String
+    end
+    # x: Integer
+    #
+    # y: Integer
+    x + y
+    # x: Integer
+    #
+    # y: Integer
+    #
+    # <returnMethodTemp>$2: Integer
+    #
+    # <finalReturn>: <bottom>
+  end
+end

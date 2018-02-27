@@ -157,6 +157,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             ADD_FAILURE() << "Unknown pass: " << exp.first;
         }
     }
+    if (test.expectations.empty()) {
+        ADD_FAILURE_AT((test.folder + test.sourceFiles.front()).c_str(), 1)
+            << "No expectations found for: " << test.sourceFiles.front();
+    }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
     auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);

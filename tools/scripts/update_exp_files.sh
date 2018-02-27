@@ -38,6 +38,9 @@ for this_src in "${rb_src[@]}" DUMMY; do
     srcs=("$this_src")
 done
 
-bazel-bin/main/ruby-typer test/end-to-end-test-input.rb  --configatron-file=test/configatron.yaml 2>&1 | sed -e 's,\(rbi/stdlib.rbi:\)[0-9]*,\1__LINE__,' > test/end-to-end-test.out
-bazel-bin/main/ruby-typer -e 'class Foo; end' -p name-table > test/dash-e-test.out 2>&1
-test/cli-test.sh bazel-bin/main/ruby-typer > test/cli-test.out
+cli_tests=($(bazel query 'filter("run_", test/cli/...)'))
+for cli in "${cli_tests[@]}"; do
+    name=${cli#*:run_}
+    bazel run -c opt "$cli" | \
+        sed -e 's,\(rbi/stdlib.rbi:\)[0-9]*,\1__LINE__,' > "test/cli/$name/$name.out"
+done

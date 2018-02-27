@@ -13,6 +13,7 @@ class Main
 
     def main
         bar(Mixin)
-        bar(Foo)
+        bar(Foo) # error: does not match expected type
+                 # TODO: RUBYPLAT-504
     end
 end

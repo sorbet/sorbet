@@ -1,0 +1,6 @@
+Send {
+  receiver = NULL
+  method = j
+  args = [
+  ]
+}
