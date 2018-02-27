@@ -240,6 +240,7 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
     if (myInfo.resultType) {
         os << " -> " << myInfo.resultType->toString(gs, tabs);
     }
+    os << " @ " << myInfo.definitionLoc.filePosToString(gs);
     os << endl;
 
     sort(children.begin(), children.end());

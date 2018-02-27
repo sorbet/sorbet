@@ -43,7 +43,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
     return pos;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(const core::GlobalState &gs) {
+pair<Loc::Detail, Loc::Detail> Loc::position(const core::GlobalState &gs) const {
     Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
     Loc::Detail end(offset2Pos(this->file, end_pos, gs));
     return make_pair(begin, end);
@@ -67,7 +67,7 @@ string leftPad(string s, int l) {
     return s;
 }
 
-string Loc::toString(const core::GlobalState &gs, int tabs) {
+string Loc::toString(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &filed = this->file.data(gs);
     auto pos = this->position(gs);
@@ -102,6 +102,19 @@ string Loc::toString(const core::GlobalState &gs, int tabs) {
             buf << '^';
         }
         buf << rang::fg::reset;
+    }
+    return buf.str();
+}
+
+string Loc::filePosToString(const GlobalState &gs) const {
+    stringstream buf;
+    if (is_none()) {
+        buf << "???";
+    } else {
+        auto pos = position(gs);
+        buf << file.data(gs).path() << ":";
+        buf << pos.first.line;
+        // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
     }
     return buf.str();
 }

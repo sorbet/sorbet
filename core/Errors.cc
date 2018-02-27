@@ -15,22 +15,9 @@ BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
     ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
 }
 
-string BasicError::filePosToString(const GlobalState &gs, Loc loc) {
-    stringstream buf;
-    if (loc.is_none()) {
-        buf << "???";
-    } else {
-        auto pos = loc.position(gs);
-        buf << loc.file.data(gs).path() << ":";
-        buf << pos.first.line;
-        // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
-    }
-    return buf.str();
-}
-
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << rang::style::reset << rang::style::underline << filePosToString(gs, loc) << rang::style::reset << ": "
+    buf << rang::style::reset << rang::style::underline << loc.filePosToString(gs) << rang::style::reset << ": "
         << rang::fg::red << formatted << rang::fg::reset << rang::fgB::black << " [" << what.code << "]"
         << rang::fg::reset << endl;
     if (!loc.is_none()) {
@@ -42,8 +29,8 @@ string BasicError::toString(const GlobalState &gs) {
 string ErrorLine::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
-    buf << indent << rang::style::underline << BasicError::filePosToString(gs, loc) << rang::style::reset << ": "
-        << formattedMessage << endl;
+    buf << indent << rang::style::underline << loc.filePosToString(gs) << rang::style::reset << ": " << formattedMessage
+        << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }

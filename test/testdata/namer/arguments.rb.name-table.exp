@@ -1,20 +1,20 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <Class:A>
-    method take_arguments (a, b, c, d, e, f, g)
-      argument a<>
-      argument b<optional>
-      argument c<repeated>
-      argument d<keyword>
-      argument e<optional, keyword>
-      argument f<keyword, repeated>
-      argument g<block>
-      method <block>$2 (a, b, c, d, e, f, g)
-        argument a<>
-        argument b<optional>
-        argument c<repeated>
-        argument d<keyword>
-        argument e<optional, keyword>
-        argument f<keyword, repeated>
-        argument g<block>
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/namer/arguments.rb:2
+    method take_arguments (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:3
+      argument a<> @ test/testdata/namer/arguments.rb:3
+      argument b<optional> @ test/testdata/namer/arguments.rb:3
+      argument c<repeated> @ test/testdata/namer/arguments.rb:3
+      argument d<keyword> @ test/testdata/namer/arguments.rb:3
+      argument e<optional, keyword> @ test/testdata/namer/arguments.rb:3
+      argument f<keyword, repeated> @ test/testdata/namer/arguments.rb:3
+      argument g<block> @ test/testdata/namer/arguments.rb:3
+      method <block>$2 (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:6
+        argument a<> @ test/testdata/namer/arguments.rb:6
+        argument b<optional> @ test/testdata/namer/arguments.rb:6
+        argument c<repeated> @ test/testdata/namer/arguments.rb:6
+        argument d<keyword> @ test/testdata/namer/arguments.rb:6
+        argument e<optional, keyword> @ test/testdata/namer/arguments.rb:6
+        argument f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
+        argument g<block> @ test/testdata/namer/arguments.rb:6
+  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/arguments.rb:2
 

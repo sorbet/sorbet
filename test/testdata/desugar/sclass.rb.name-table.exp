@@ -1,43 +1,43 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <Class:A>
-  class <constant:B> < ::<constant:Object> () -> <Class:B>
-  class <constant:D> < ::<constant:Object> () -> <Class:D>
-  class <constant:E> < ::<constant:Object> () -> <Class:E>
-    method <static-init> ()
-  class <constant:F> < ::<constant:Object> () -> <Class:F>
-  class <constant:G> < ::<constant:Object> () -> <Class:G>
-    method wrapper ()
-  class <constant:H> < ::<constant:Object> () -> <Class:H>
-  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>
-    method declare_variables (a)
-      argument a<>
-    method main ()
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:B>>
-    method b ()
-  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:D>>
-  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:E>>
-    method e ()
-    method wrapper ()
-  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>>
-    field @f -> Integer
-    method f= (arg0) -> Integer
-      argument arg0<> -> Integer
-  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>>
-    method g ()
-    method inner ()
-  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>>
-    class <constant:H2> < ::<constant:Object> () -> <Class:<Class:H>::H2>
-    class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> ()
-      method h ()
-  class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <Class:<Class:<Class:D>>>
-    method d ()
-  class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<constant:G>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> ()
-  class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> ()
-  field $c
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/desugar/sclass.rb:2
+  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/desugar/sclass.rb:4
+  class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/desugar/sclass.rb:13
+  class <constant:D> < ::<constant:Object> () -> <Class:D> @ test/testdata/desugar/sclass.rb:28
+  class <constant:E> < ::<constant:Object> () -> <Class:E> @ test/testdata/desugar/sclass.rb:38
+    method <static-init> () @ test/testdata/desugar/sclass.rb:46
+  class <constant:F> < ::<constant:Object> () -> <Class:F> @ test/testdata/desugar/sclass.rb:49
+  class <constant:G> < ::<constant:Object> () -> <Class:G> @ test/testdata/desugar/sclass.rb:57
+    method wrapper () @ test/testdata/desugar/sclass.rb:58
+  class <constant:H> < ::<constant:Object> () -> <Class:H> @ test/testdata/desugar/sclass.rb:71
+  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ rbi/stdlib.rbi:8300
+    method declare_variables (a) @ test/testdata/desugar/sclass.rb:2
+      argument a<> @ test/testdata/desugar/sclass.rb:2
+    method main () @ test/testdata/desugar/sclass.rb:81
+  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:4
+  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:B>> @ test/testdata/desugar/sclass.rb:14
+    method b () @ test/testdata/desugar/sclass.rb:15
+  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:D>> @ test/testdata/desugar/sclass.rb:29
+  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:E>> @ test/testdata/desugar/sclass.rb:39
+    method e () @ test/testdata/desugar/sclass.rb:41
+    method wrapper () @ test/testdata/desugar/sclass.rb:40
+  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>> @ test/testdata/desugar/sclass.rb:50
+    field @f -> Integer @ test/testdata/desugar/sclass.rb:51
+    method f= (arg0) -> Integer @ test/testdata/desugar/sclass.rb:53
+      argument arg0<> -> Integer @ test/testdata/desugar/sclass.rb:52
+  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>> @ test/testdata/desugar/sclass.rb:59
+    method g () @ test/testdata/desugar/sclass.rb:66
+    method inner () @ test/testdata/desugar/sclass.rb:60
+  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>> @ test/testdata/desugar/sclass.rb:72
+    class <constant:H2> < ::<constant:Object> () -> <Class:<Class:H>::H2> @ test/testdata/desugar/sclass.rb:73
+    class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:73
+      method h () @ test/testdata/desugar/sclass.rb:74
+  class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:14
+  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <Class:<Class:<Class:D>>> @ test/testdata/desugar/sclass.rb:30
+    method d () @ test/testdata/desugar/sclass.rb:31
+  class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:39
+  class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:49
+  class <singleton class:<singleton class:<constant:G>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:59
+  class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:72
+  class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> () @ test/testdata/desugar/sclass.rb:30
+  field $c @ test/testdata/desugar/sclass.rb:21
+  method <static-init>$8 () @ test/testdata/desugar/sclass.rb:2
 

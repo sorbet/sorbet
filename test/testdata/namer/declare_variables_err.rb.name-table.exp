@@ -1,8 +1,8 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <Class:A>
-    field @foo -> Integer
-    field @llamas -> untyped
-    method <block>$2 ()
-    method <static-init> ()
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/namer/declare_variables_err.rb:2
+    field @foo -> Integer @ test/testdata/namer/declare_variables_err.rb:20
+    field @llamas -> untyped @ test/testdata/namer/declare_variables_err.rb:16
+    method <block>$2 () @ test/testdata/namer/declare_variables_err.rb:6
+    method <static-init> () @ test/testdata/namer/declare_variables_err.rb:3
+  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/declare_variables_err.rb:2
 

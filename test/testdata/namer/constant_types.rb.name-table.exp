@@ -1,20 +1,20 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Constants> (<constant:BasicObject>) -> <Class:Constants>
-    static-field <constant:A> -> Integer
-    static-field <constant:B> -> String
-    static-field <constant:C> -> Symbol
-    static-field <constant:D> -> Float
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:Constants> (<constant:BasicObject>) -> <Class:Constants> @ test/testdata/namer/constant_types.rb:2
+    static-field <constant:A> -> Integer @ test/testdata/namer/constant_types.rb:3
+    static-field <constant:B> -> String @ test/testdata/namer/constant_types.rb:4
+    static-field <constant:C> -> Symbol @ test/testdata/namer/constant_types.rb:5
+    static-field <constant:D> -> Float @ test/testdata/namer/constant_types.rb:6
     static-field <constant:E> -> AppliedType {
       klass = ::<constant:Array>
       targs = [
         <constant:Elem> = Integer
       ]
-    }
+    } @ test/testdata/namer/constant_types.rb:7
     static-field <constant:F> -> AppliedType {
       klass = ::<constant:Array>
       targs = [
         <constant:Elem> = String
       ]
-    }
-  class <singleton class:<constant:Constants>> < ::<constant:Module> ()
+    } @ test/testdata/namer/constant_types.rb:8
+  class <singleton class:<constant:Constants>> < ::<constant:Module> () @ test/testdata/namer/constant_types.rb:2
 

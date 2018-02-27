@@ -1,10 +1,10 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Test> < ::<constant:Object> () -> <Class:Test>
-    method some_method (array)
-      argument array<>
-  class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$8 ()
-  static-field <constant:A> -> untyped
-  static-field <constant:B> -> untyped
-  static-field <constant:C> -> untyped
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/desugar/multi_assign.rb:2
+  class <constant:Test> < ::<constant:Object> () -> <Class:Test> @ test/testdata/desugar/multi_assign.rb:4
+    method some_method (array) @ test/testdata/desugar/multi_assign.rb:5
+      argument array<> @ test/testdata/desugar/multi_assign.rb:5
+  class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/multi_assign.rb:4
+  method <static-init>$8 () @ test/testdata/desugar/multi_assign.rb:2
+  static-field <constant:A> -> untyped @ test/testdata/desugar/multi_assign.rb:2
+  static-field <constant:B> -> untyped @ test/testdata/desugar/multi_assign.rb:2
+  static-field <constant:C> -> untyped @ test/testdata/desugar/multi_assign.rb:2
 

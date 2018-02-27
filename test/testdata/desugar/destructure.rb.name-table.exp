@@ -1,9 +1,9 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Destructure> < ::<constant:Object> () -> <Class:Destructure>
-    method f (<destructure>$2, z)
-      argument <destructure>$2<>
-      argument z<>
-      method <block>$2 (<destructure>$4)
-        argument <destructure>$4<>
-  class <singleton class:<constant:Destructure>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:Destructure> < ::<constant:Object> () -> <Class:Destructure> @ test/testdata/desugar/destructure.rb:2
+    method f (<destructure>$2, z) @ test/testdata/desugar/destructure.rb:3
+      argument <destructure>$2<> @ test/testdata/desugar/destructure.rb:3
+      argument z<> @ test/testdata/desugar/destructure.rb:3
+      method <block>$2 (<destructure>$4) @ test/testdata/desugar/destructure.rb:6
+        argument <destructure>$4<> @ test/testdata/desugar/destructure.rb:6
+  class <singleton class:<constant:Destructure>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/destructure.rb:2
 

@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Foo> < ::<constant:Object> () -> <Class:Foo>
-    static-field <constant:BAR> -> Integer
-  class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:Foo> < ::<constant:Object> () -> <Class:Foo> @ test/testdata/desugar/constant_error.rb:2
+    static-field <constant:BAR> -> Integer @ test/testdata/desugar/constant_error.rb:3
+  class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/constant_error.rb:2
 

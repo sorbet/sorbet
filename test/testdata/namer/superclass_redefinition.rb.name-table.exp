@@ -1,7 +1,7 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:A> < ::<constant:Object> () -> <Class:A>
-  class <constant:B> < ::<constant:Object> () -> <Class:B>
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/superclass_redefinition.rb:2
+  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/namer/superclass_redefinition.rb:7
+  class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/namer/superclass_redefinition.rb:4
+  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/superclass_redefinition.rb:2
+  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/superclass_redefinition.rb:4
+  method <static-init>$8 () @ test/testdata/namer/superclass_redefinition.rb:2
 

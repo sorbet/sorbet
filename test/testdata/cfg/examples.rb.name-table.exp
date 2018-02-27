@@ -1,15 +1,15 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Examples> < ::<constant:Object> () -> <Class:Examples>
-    method i_like_exps ()
-    method i_like_ifs ()
-    method return_in_one_branch1 ()
-    method return_in_one_branch2 ()
-    method take_arguments (i)
-      argument i<>
-    method variables ()
-    method variables_and_loop (cond)
-      argument cond<>
-    method variables_loop_if (cond)
-      argument cond<>
-  class <singleton class:<constant:Examples>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:Examples> < ::<constant:Object> () -> <Class:Examples> @ test/testdata/cfg/examples.rb:2
+    method i_like_exps () @ test/testdata/cfg/examples.rb:11
+    method i_like_ifs () @ test/testdata/cfg/examples.rb:3
+    method return_in_one_branch1 () @ test/testdata/cfg/examples.rb:19
+    method return_in_one_branch2 () @ test/testdata/cfg/examples.rb:27
+    method take_arguments (i) @ test/testdata/cfg/examples.rb:84
+      argument i<> @ test/testdata/cfg/examples.rb:84
+    method variables () @ test/testdata/cfg/examples.rb:36
+    method variables_and_loop (cond) @ test/testdata/cfg/examples.rb:53
+      argument cond<> @ test/testdata/cfg/examples.rb:53
+    method variables_loop_if (cond) @ test/testdata/cfg/examples.rb:72
+      argument cond<> @ test/testdata/cfg/examples.rb:72
+  class <singleton class:<constant:Examples>> < ::<singleton class:<constant:Object>> () @ test/testdata/cfg/examples.rb:2
 

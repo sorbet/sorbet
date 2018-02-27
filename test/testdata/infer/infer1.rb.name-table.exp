@@ -1,15 +1,15 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object>
-    method baz1 ()
-    method baz2 ()
-    method baz3 ()
-    method baz4 ()
-    method baz5 (cond)
-      argument cond<>
-    method baz6 (cond)
-      argument cond<>
-    method baz7 (cond)
-      argument cond<>
-    method baz8 ()
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/infer/infer1.rb:2
+  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ rbi/stdlib.rbi:8300
+    method baz1 () @ test/testdata/infer/infer1.rb:2
+    method baz2 () @ test/testdata/infer/infer1.rb:7
+    method baz3 () @ test/testdata/infer/infer1.rb:12
+    method baz4 () @ test/testdata/infer/infer1.rb:16
+    method baz5 (cond) @ test/testdata/infer/infer1.rb:20
+      argument cond<> @ test/testdata/infer/infer1.rb:20
+    method baz6 (cond) @ test/testdata/infer/infer1.rb:29
+      argument cond<> @ test/testdata/infer/infer1.rb:29
+    method baz7 (cond) @ test/testdata/infer/infer1.rb:38
+      argument cond<> @ test/testdata/infer/infer1.rb:38
+    method baz8 () @ test/testdata/infer/infer1.rb:46
+  method <static-init>$8 () @ test/testdata/infer/infer1.rb:2
 

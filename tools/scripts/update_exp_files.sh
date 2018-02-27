@@ -10,7 +10,7 @@ rb_src=("$@")
 if [ -z "${rb_src[*]}" ]; then
     # shellcheck disable=SC2207
     rb_src=(
-        $(find ./test/testdata -name '*.rb' | sort)
+        $(find test/testdata -name '*.rb' | sort)
     )
 fi
 

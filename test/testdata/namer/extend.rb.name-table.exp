@@ -1,11 +1,11 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:C> < ::<constant:Object> () -> <Class:C>
-  class <constant:Mixin1> (<constant:BasicObject>) -> <Class:Mixin1>
-    method say_hello ()
-  class <constant:Mixin2> (<constant:BasicObject>) -> <Class:Mixin2>
-    method say_goodbye ()
-  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> (<constant:Mixin1>, <constant:Mixin2>)
-  class <singleton class:<constant:Mixin1>> < ::<constant:Module> ()
-  class <singleton class:<constant:Mixin2>> < ::<constant:Module> ()
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/extend.rb:2
+  class <constant:C> < ::<constant:Object> () -> <Class:C> @ test/testdata/namer/extend.rb:12
+  class <constant:Mixin1> (<constant:BasicObject>) -> <Class:Mixin1> @ test/testdata/namer/extend.rb:2
+    method say_hello () @ test/testdata/namer/extend.rb:3
+  class <constant:Mixin2> (<constant:BasicObject>) -> <Class:Mixin2> @ test/testdata/namer/extend.rb:7
+    method say_goodbye () @ test/testdata/namer/extend.rb:8
+  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> (<constant:Mixin1>, <constant:Mixin2>) @ test/testdata/namer/extend.rb:12
+  class <singleton class:<constant:Mixin1>> < ::<constant:Module> () @ test/testdata/namer/extend.rb:2
+  class <singleton class:<constant:Mixin2>> < ::<constant:Module> () @ test/testdata/namer/extend.rb:7
+  method <static-init>$8 () @ test/testdata/namer/extend.rb:2
 

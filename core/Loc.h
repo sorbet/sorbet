@@ -16,7 +16,7 @@ public:
         return Loc{file, (u4)-1, (u4)-1};
     }
 
-    bool is_none() {
+    bool is_none() const {
         return begin_pos == (u4)-1 && end_pos == (u4)-1;
     }
 
@@ -34,8 +34,9 @@ public:
         u4 line, column;
     };
 
-    std::pair<Detail, Detail> position(const core::GlobalState &gs);
-    std::string toString(const core::GlobalState &gs, int tabs = 0);
+    std::pair<Detail, Detail> position(const core::GlobalState &gs) const;
+    std::string toString(const core::GlobalState &gs, int tabs = 0) const;
+    std::string filePosToString(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
 

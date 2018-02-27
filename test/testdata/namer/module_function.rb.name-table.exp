@@ -1,18 +1,18 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <Class:C>
-    method test_calls ()
-  class <constant:Funcs> (<constant:BasicObject>) -> <Class:Funcs>
-    method <static-init> ()
-    method f (x) -> Integer
-      argument x<> -> Integer
-    method g (s) -> Symbol
-      argument s<> -> Symbol
-    method h (s) -> String
-      argument s<> -> String
-  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:Funcs>> < ::<constant:Module> ()
-    method f () -> AliasType { symbol = ::<constant:Funcs>#f }
-    method g () -> AliasType { symbol = ::<constant:Funcs>#g }
-    method h () -> AliasType { symbol = ::<constant:Funcs>#h }
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/module_function.rb:2
+  class <constant:C> < ::<constant:Object> (<constant:Funcs>) -> <Class:C> @ test/testdata/namer/module_function.rb:17
+    method test_calls () @ test/testdata/namer/module_function.rb:20
+  class <constant:Funcs> (<constant:BasicObject>) -> <Class:Funcs> @ test/testdata/namer/module_function.rb:2
+    method <static-init> () @ test/testdata/namer/module_function.rb:2
+    method f (x) -> Integer @ test/testdata/namer/module_function.rb:4
+      argument x<> -> Integer @ test/testdata/namer/module_function.rb:3
+    method g (s) -> Symbol @ test/testdata/namer/module_function.rb:9
+      argument s<> -> Symbol @ test/testdata/namer/module_function.rb:8
+    method h (s) -> String @ test/testdata/namer/module_function.rb:14
+      argument s<> -> String @ test/testdata/namer/module_function.rb:13
+  class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/module_function.rb:17
+  class <singleton class:<constant:Funcs>> < ::<constant:Module> () @ test/testdata/namer/module_function.rb:2
+    method f () -> AliasType { symbol = ::<constant:Funcs>#f } @ test/testdata/namer/module_function.rb:4
+    method g () -> AliasType { symbol = ::<constant:Funcs>#g } @ test/testdata/namer/module_function.rb:9
+    method h () -> AliasType { symbol = ::<constant:Funcs>#h } @ test/testdata/namer/module_function.rb:14
+  method <static-init>$8 () @ test/testdata/namer/module_function.rb:2
 

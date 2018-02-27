@@ -1,8 +1,8 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Alias> (<constant:BasicObject>) -> <Class:Alias>
-    method <static-init> ()
-    method f ()
-    method f_alias () -> AliasType { symbol = ::<constant:Alias>#f }
-    method f_alias_1 () -> AliasType { symbol = ::<constant:Alias>#f }
-  class <singleton class:<constant:Alias>> < ::<constant:Module> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:Alias> (<constant:BasicObject>) -> <Class:Alias> @ test/testdata/namer/alias_method.rb:2
+    method <static-init> () @ test/testdata/namer/alias_method.rb:2
+    method f () @ test/testdata/namer/alias_method.rb:3
+    method f_alias () -> AliasType { symbol = ::<constant:Alias>#f } @ test/testdata/namer/alias_method.rb:3
+    method f_alias_1 () -> AliasType { symbol = ::<constant:Alias>#f } @ test/testdata/namer/alias_method.rb:3
+  class <singleton class:<constant:Alias>> < ::<constant:Module> () @ test/testdata/namer/alias_method.rb:2
 

@@ -36,7 +36,6 @@ struct BasicError {
 
     virtual std::string toString(const GlobalState &gs);
     virtual ~BasicError() = default;
-    static std::string filePosToString(const GlobalState &gs, Loc loc);
 };
 
 struct ErrorLine {

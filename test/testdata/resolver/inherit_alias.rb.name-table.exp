@@ -1,9 +1,9 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:NS> (<constant:BasicObject>) -> <Class:NS>
-    class <constant:C1> < ::<constant:Object> () -> <Class:NS::C1>
-    class <constant:Dest> < ::<constant:Object> () -> <Class:NS::Dest>
-    class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> ()
-    class <singleton class:<constant:Dest>> < ::<singleton class:<constant:Object>> ()
-    static-field <constant:Alias> -> AliasType { symbol = ::<constant:NS>::<constant:Dest> }
-  class <singleton class:<constant:NS>> < ::<constant:Module> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:NS> (<constant:BasicObject>) -> <Class:NS> @ test/testdata/resolver/inherit_alias.rb:2
+    class <constant:C1> < ::<constant:Object> () -> <Class:NS::C1> @ test/testdata/resolver/inherit_alias.rb:3
+    class <constant:Dest> < ::<constant:Object> () -> <Class:NS::Dest> @ test/testdata/resolver/inherit_alias.rb:6
+    class <singleton class:<constant:C1>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/inherit_alias.rb:3
+    class <singleton class:<constant:Dest>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/inherit_alias.rb:6
+    static-field <constant:Alias> -> AliasType { symbol = ::<constant:NS>::<constant:Dest> } @ test/testdata/resolver/inherit_alias.rb:9
+  class <singleton class:<constant:NS>> < ::<constant:Module> () @ test/testdata/resolver/inherit_alias.rb:2
 

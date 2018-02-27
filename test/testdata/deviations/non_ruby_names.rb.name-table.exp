@@ -1,11 +1,11 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:A> (<constant:BasicObject>) -> <Class:A>
-    class <constant:B> () -> <Class:A::B>
-      class <constant:C> < ::<constant:Object> () -> <Class:A::B::C>
-      class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
-    class <singleton class:<constant:B>> < ::<constant:Module> ()
-  class <constant:B> (<constant:BasicObject>) -> <Class:B>
-  class <singleton class:<constant:A>> < ::<constant:Module> ()
-  class <singleton class:<constant:B>> < ::<constant:Module> ()
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/deviations/non_ruby_names.rb:2
+  class <constant:A> (<constant:BasicObject>) -> <Class:A> @ test/testdata/deviations/non_ruby_names.rb:5
+    class <constant:B> () -> <Class:A::B> @ test/testdata/deviations/non_ruby_names.rb:7
+      class <constant:C> < ::<constant:Object> () -> <Class:A::B::C> @ test/testdata/deviations/non_ruby_names.rb:7
+      class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> () @ test/testdata/deviations/non_ruby_names.rb:7
+    class <singleton class:<constant:B>> < ::<constant:Module> () @ test/testdata/deviations/non_ruby_names.rb:7
+  class <constant:B> (<constant:BasicObject>) -> <Class:B> @ test/testdata/deviations/non_ruby_names.rb:2
+  class <singleton class:<constant:A>> < ::<constant:Module> () @ test/testdata/deviations/non_ruby_names.rb:5
+  class <singleton class:<constant:B>> < ::<constant:Module> () @ test/testdata/deviations/non_ruby_names.rb:2
+  method <static-init>$8 () @ test/testdata/deviations/non_ruby_names.rb:2
 

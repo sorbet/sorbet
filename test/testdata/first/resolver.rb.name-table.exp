@@ -1,19 +1,19 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:Outer1> < ::<constant:Object> () -> <Class:Outer1>
-  class <constant:Outer2> < ::<constant:Object> () -> <Class:Outer2>
-    class <constant:C> < ::<constant:Object> () -> <Class:Outer2::C>
-    class <constant:Inner1> < ::<constant:Object> () -> <Class:Outer2::Inner1>
-      class <constant:A> < ::<constant:Object> () -> <Class:Outer2::Inner1::A>
-      class <constant:Inner2> < ::<constant:Object> () -> <Class:Outer2::Inner1::Inner2>
-        class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped
-        method <static-init> ()
-      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> ()
-      class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> ()
-    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <Class:Outer2::Other>
-    class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> ()
-    class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> ()
-    class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> ()
-  class <singleton class:<constant:Outer1>> < ::<singleton class:<constant:Object>> ()
-  class <singleton class:<constant:Outer2>> < ::<singleton class:<constant:Object>> ()
-  method <static-init>$8 ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/first/resolver.rb:2
+  class <constant:Outer1> < ::<constant:Object> () -> <Class:Outer1> @ test/testdata/first/resolver.rb:2
+  class <constant:Outer2> < ::<constant:Object> () -> <Class:Outer2> @ test/testdata/first/resolver.rb:5
+    class <constant:C> < ::<constant:Object> () -> <Class:Outer2::C> @ test/testdata/first/resolver.rb:6
+    class <constant:Inner1> < ::<constant:Object> () -> <Class:Outer2::Inner1> @ test/testdata/first/resolver.rb:9
+      class <constant:A> < ::<constant:Object> () -> <Class:Outer2::Inner1::A> @ test/testdata/first/resolver.rb:10
+      class <constant:Inner2> < ::<constant:Object> () -> <Class:Outer2::Inner1::Inner2> @ test/testdata/first/resolver.rb:21
+        class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/first/resolver.rb:23
+        method <static-init> () @ test/testdata/first/resolver.rb:13
+      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:10
+      class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:13
+    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () -> <Class:Outer2::Other> @ test/testdata/first/resolver.rb:26
+    class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:6
+    class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:9
+    class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> () @ test/testdata/first/resolver.rb:26
+  class <singleton class:<constant:Outer1>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:2
+  class <singleton class:<constant:Outer2>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:5
+  method <static-init>$8 () @ test/testdata/first/resolver.rb:2
 

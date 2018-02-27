@@ -1,10 +1,10 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
-  class <constant:F> < ::<constant:Object> () -> <Class:F>
-    method bar (baz)
-      argument baz<>
-    method bla ()
-      method <block>$2 ()
-    method foo (<blk>)
-      argument <blk><block> -> untyped
-  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> ()
+class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+  class <constant:F> < ::<constant:Object> () -> <Class:F> @ test/testdata/namer/dynamic_method_with_class.rb:2
+    method bar (baz) @ test/testdata/namer/dynamic_method_with_class.rb:8
+      argument baz<> @ test/testdata/namer/dynamic_method_with_class.rb:8
+    method bla () @ test/testdata/namer/dynamic_method_with_class.rb:6
+      method <block>$2 () @ test/testdata/namer/dynamic_method_with_class.rb:7
+    method foo (<blk>) @ test/testdata/namer/dynamic_method_with_class.rb:3
+      argument <blk><block> -> untyped @ test/testdata/namer/dynamic_method_with_class.rb:4
+  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/dynamic_method_with_class.rb:2
 
