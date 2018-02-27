@@ -758,12 +758,15 @@ Phase extractStopAfter(cxxopts::Options &opts) {
 }
 
 int realmain(int argc, char **argv) {
-    FileFlatMapper flatMapper(argc, argv);
-
     console = spd::details::registry::instance().create("console", stderr_color_sink);
     console->set_pattern("%v");
     console_err = spd::stderr_color_mt("");
     console_err->set_pattern("%v");
+
+    FileFlatMapper flatMapper(argc, argv);
+    if (returnCode != 0) {
+        return returnCode;
+    }
 
     cxxopts::Options options = buildOptions();
 

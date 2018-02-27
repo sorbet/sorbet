@@ -475,12 +475,9 @@ SymbolRef Symbol::enclosingMethod(const GlobalState &gs) const {
 
 SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     SymbolRef owner = ref(gs);
-    while (owner != Symbols::root() && !owner.data(gs, false).isClass()) {
+    while (!owner.data(gs, false).isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in enclosingClass");
         owner = owner.data(gs).owner;
-    }
-    if (owner == Symbols::root()) {
-        return Symbols::noSymbol();
     }
     return owner;
 }
