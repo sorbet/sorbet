@@ -9861,7 +9861,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
     method untaint () -> UncaughtThrowError
     method untrust () -> UncaughtThrowError
   class <constant:Warning> (<constant:BasicObject>) -> <Class:Warning>
-  class <constant:YAML> (<constant:BasicObject>) -> <Class:YAML>
   class <constant:ZeroDivisionError> < ::<constant:StandardError> () -> <Class:ZeroDivisionError>
     method clone () -> ZeroDivisionError
     method dup () -> ZeroDivisionError
@@ -11802,14 +11801,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>>
   class <singleton class:<constant:UnboundMethod>> < ::<singleton class:<constant:Object>> ()
   class <singleton class:<constant:UncaughtThrowError>> < ::<singleton class:<constant:ArgumentError>> ()
   class <singleton class:<constant:Warning>> < ::<constant:Module> ()
-  class <singleton class:<constant:YAML>> < ::<constant:Module> ()
-    method load_file (filename) -> AppliedType {
-      klass = ::<constant:Array>
-      targs = [
-        <constant:Elem> = String
-      ]
-    }
-      argument filename<> -> String
   class <singleton class:<constant:ZeroDivisionError>> < ::<singleton class:<constant:StandardError>> ()
   method <static-init>$1 ()
   method <static-init>$3 ()

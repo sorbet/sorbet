@@ -12393,14 +12393,6 @@ class UncaughtThrowError
   def untrust(); end
 end
 
-module YAML
-  sig(
-      filename: String,
-  )
-  .returns(T::Array[String])
-  def self.load_file(filename); end
-end
-
 class ZeroDivisionError
   sig.returns(ZeroDivisionError)
   def clone(); end
