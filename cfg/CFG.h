@@ -99,6 +99,7 @@ public:
     // special minLoops
     static constexpr int MIN_LOOP_FIELD = -1;
     static constexpr int MIN_LOOP_GLOBAL = -2;
+    static constexpr int MIN_LOOP_LET = -3;
     std::unordered_map<core::LocalVariable, int> minLoops;
     std::unordered_map<core::LocalVariable, int> maxLoopWrite;
 

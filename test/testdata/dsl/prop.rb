@@ -59,15 +59,15 @@ end
 
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
-    T.assert_type!(SomeODM.new.foo, String) # error: argument does not have asserted type
+    T.assert_type!(SomeODM.new.foo, String) # error: Argument does not have asserted type
     T.assert_type!(SomeODM.new.foo = 'b', String)
     T.assert_type!(SomeODM.new.foo2, T.nilable(String))
-    T.assert_type!(SomeODM.new.foo2, String) # error: argument does not have asserted type
+    T.assert_type!(SomeODM.new.foo2, String) # error: Argument does not have asserted type
     T.assert_type!(SomeODM.new.foo2 = 'b', String)
 
     T.assert_type!(AdvancedODM.new.default, String)
     T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.nodefault, String) # error: argument does not have asserted type
+    T.assert_type!(AdvancedODM.new.nodefault, String) # error: Argument does not have asserted type
     T.assert_type!(AdvancedODM.new.factory, String)
 
     T.assert_type!(AdvancedODM.new.type, String)

@@ -4,6 +4,6 @@ module Constants
   B = "hi"
   C = :hi
   D = 1.0
-  E = T.cast(some_value, T::Array[Integer])
-  F = T.assert_type!(some_value, T::Array[String]) # error: Use cast()
+  E = T.let(some_value, T::Array[Integer])
+  F = T.assert_type!(some_value, T::Array[String]) # error: Use T.let()
 end

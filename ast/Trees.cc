@@ -165,8 +165,8 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
     _sanityCheck();
 }
 
-Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, bool assertType)
-    : Expression(loc), type(ty), arg(move(arg)), assertType(assertType) {
+Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, CastKind kind)
+    : Expression(loc), type(ty), arg(move(arg)), kind(kind) {
     categoryCounterInc("Trees", "Cast");
     _sanityCheck();
 }
@@ -850,10 +850,19 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Cast::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    if (this->assertType) {
-        buf << "T.assert_type!";
-    } else {
-        buf << "T.cast";
+    buf << "T.";
+    switch (this->kind) {
+        case CAST:
+            buf << "cast";
+            break;
+        case ASSERT_TYPE:
+            buf << "assert_type!";
+            break;
+        case LET:
+            buf << "let";
+            break;
+        default:
+            Error::raise("bad kind: ", this->kind);
     }
     buf << "(" << this->arg->toString(gs, tabs) << ", " << this->type->toString(gs, tabs) << ")";
 
@@ -864,7 +873,7 @@ string Cast::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << nodeName() << "{" << endl;
     printTabs(buf, tabs + 2);
-    buf << "assertType = " << this->assertType << "," << endl;
+    buf << "kind = " << this->kind << "," << endl;
     printTabs(buf, tabs + 2);
     buf << "arg = " << this->arg->showRaw(gs, tabs + 2) << endl;
     printTabs(buf, tabs + 2);

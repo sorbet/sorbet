@@ -114,6 +114,7 @@ NameDef names[] = {
 
     {"assertType", "assert_type!", Resolver},
     {"cast", DSL | Resolver},
+    {"let", Resolver},
     // end T keywords
 
     // Ruby DSL methods which we understand

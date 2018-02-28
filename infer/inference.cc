@@ -264,6 +264,11 @@ public:
         return buf.str();
     }
 
+    bool hasType(core::Context ctx, core::LocalVariable symbol) const {
+        auto fnd = find(vars.begin(), vars.end(), symbol);
+        return fnd != vars.end();
+    }
+
     core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -663,6 +668,7 @@ public:
             core::TypeAndOrigins tp;
             bool noLoopChecking = cfg::isa_instruction<cfg::Alias>(bind.value.get()) ||
                                   cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
+
             typecase(
                 bind.value.get(),
                 [&](cfg::Send *send) {
@@ -823,20 +829,23 @@ public:
                     tp.type = c->type;
                     tp.origins.push_back(bind.loc);
 
+                    if (!hasType(ctx, bind.bind)) {
+                        noLoopChecking = true;
+                    }
+
                     if (c->assertType) {
                         auto ty = getTypeAndOrigin(ctx, c->value);
                         if (ty.type->isDynamic()) {
                             ctx.state.error(core::ComplexError(
                                 bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "The typechecker was unable to infer the type of the argument to "
-                                "assert_type!.",
+                                "The typechecker was unable to infer the type of the asserted value.",
                                 {core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
                                  core::ErrorSection("You may need to add additional `sig` "
                                                     "annotations.")}));
                         } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
                             ctx.state.error(core::ComplexError(
                                 bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "assert_type!: argument does not have asserted type " + c->type->show(ctx),
+                                "Argument does not have asserted type " + c->type->show(ctx),
                                 {core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                     ty.origins2Explanations(ctx))}));
                         }
@@ -886,6 +895,12 @@ public:
                             ctx.state.error(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch,
                                             "Reassigning global with a value of wrong type: {} is not a subtype of {}",
                                             tp.type->show(ctx), cur.type->show(ctx));
+                            break;
+                        case cfg::CFG::MIN_LOOP_LET:
+                            ctx.state.error(
+                                bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch,
+                                "Incompatible assignment to variable declared via `let`: {} is not a subtype of {}",
+                                tp.type->show(ctx), cur.type->show(ctx));
                             break;
                         default:
                             ctx.state.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,

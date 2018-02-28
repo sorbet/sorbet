@@ -466,9 +466,9 @@ private:
                      }
                  },
                  [&](ast::Cast *cast) {
-                     if (cast->assertType) {
+                     if (cast->kind != ast::Cast::LET) {
                          ctx.state.error(cast->loc, core::errors::Resolver::ConstantAssertType,
-                                         "Use cast() instead of assert_type!() to specify the type of constants.");
+                                         "Use T.let() to specify the type of constants.");
                      }
                      result = cast->type;
                  },
@@ -533,22 +533,30 @@ public:
         if (id->symbol != core::Symbols::T()) {
             return send;
         }
-        bool checked = false;
         switch (send->fun._id) {
+            case core::Names::let()._id:
             case core::Names::assertType()._id:
-                checked = true;
-                /* fallthrough */
             case core::Names::cast()._id: {
                 if (send->args.size() < 2) {
                     ctx.state.error(send->loc, core::errors::Resolver::InvalidCast,
-                                    "Not enough arguments to {}: got {}, expected 2", send->fun.toString(ctx),
+                                    "Not enough arguments to T.{}: got {}, expected 2", send->fun.toString(ctx),
                                     send->args.size());
                     return send;
+                }
+                ast::Cast::CastKind kind;
+                if (send->fun == core::Names::let()) {
+                    kind = ast::Cast::LET;
+                } else if (send->fun == core::Names::cast()) {
+                    kind = ast::Cast::CAST;
+                } else if (send->fun == core::Names::assertType()) {
+                    kind = ast::Cast::ASSERT_TYPE;
+                } else {
+                    Error::raise();
                 }
 
                 auto expr = move(send->args[0]);
                 auto type = TypeSyntax::getResultType(ctx, send->args[1]);
-                return new ast::Cast(send->loc, type, move(expr), checked);
+                return new ast::Cast(send->loc, type, move(expr), kind);
             }
             default:
                 return send;
