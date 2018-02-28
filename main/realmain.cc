@@ -320,14 +320,11 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
                             file = lgs->enterFileAt(fileName, src, fileId);
-                            bool forceTypedSource = !opts.typedSource.empty() &&
-                                                    file.data(*lgs).path().find(opts.typedSource) != std::string::npos;
-                            if (forceTypedSource) {
-                                file.data(*lgs).source_type = ruby_typer::core::File::Typed;
-                            }
                         }
 
-                        if (opts.forceTyped) {
+                        bool forceTypedSource = !opts.typedSource.empty() &&
+                                                file.data(*lgs).path().find(opts.typedSource) != std::string::npos;
+                        if (forceTypedSource || opts.forceTyped) {
                             file.data(*lgs).source_type = core::File::Typed;
                         } else if (opts.forceUntyped) {
                             file.data(*lgs).source_type = core::File::Untyped;
