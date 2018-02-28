@@ -40,8 +40,7 @@ public:
         bool changed = true;
         while (changed) {
             changed = false;
-            for (auto it = cfg->backwardsTopoSort.rbegin(); it != cfg->backwardsTopoSort.rend(); ++it) {
-                auto &bb = *it;
+            for (auto &bb : cfg->forwardsTopoSort) {
                 for (auto &bind : bb->exprs) {
                     if (cfg::Ident *id = dynamic_cast<cfg::Ident *>(bind.value.get())) {
                         if (isNeeded(bind.bind) && !isNeeded(id->what)) {
@@ -1013,7 +1012,7 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
-        outEnvironments[cfg->backwardsTopoSort[i]->id].bb = cfg->backwardsTopoSort[i];
+        outEnvironments[cfg->forwardsTopoSort[i]->id].bb = cfg->forwardsTopoSort[i];
     }
     vector<bool> visited;
     visited.resize(cfg->maxBasicBlockId);
@@ -1021,7 +1020,8 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
     if (!cfg->basicBlocks.empty()) {
         ENFORCE(!cfg->symbol.data(ctx).isAbstract());
     }
-    for (cfg::BasicBlock *bb : cfg->backwardsTopoSort) {
+    for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+        cfg::BasicBlock *bb = *it;
         if (bb == cfg->deadBlock()) {
             continue;
         }

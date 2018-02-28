@@ -1,5 +1,6 @@
 #include "core/Types.h"
 #include "absl/base/casts.h"
+#include "absl/strings/escaping.h"
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Names.h"
@@ -237,9 +238,9 @@ string LiteralType::toString(const GlobalState &gs, int tabs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
     if (undSymbol == Symbols::String()) {
-        value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
+        value = "\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
     } else if (undSymbol == Symbols::Symbol()) {
-        value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
+        value = ":\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
     } else if (undSymbol == Symbols::Integer()) {
         value = to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {
@@ -255,7 +256,24 @@ string LiteralType::toString(const GlobalState &gs, int tabs) {
 }
 
 string LiteralType::show(const GlobalState &gs) {
-    return this->underlying->show(gs);
+    string value;
+    SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
+    if (undSymbol == Symbols::String()) {
+        value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
+    } else if (undSymbol == Symbols::Symbol()) {
+        value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
+    } else if (undSymbol == Symbols::Integer()) {
+        value = to_string(this->value);
+    } else if (undSymbol == Symbols::Float()) {
+        value = to_string(absl::bit_cast<double>(this->value));
+    } else if (undSymbol == Symbols::TrueClass()) {
+        value = "true";
+    } else if (undSymbol == Symbols::FalseClass()) {
+        value = "false";
+    } else {
+        Error::raise("should not be reachable");
+    }
+    return this->underlying->show(gs) + "(" + value + ")";
 }
 
 ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)

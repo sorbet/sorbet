@@ -9,6 +9,7 @@
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::CFG>;
 template class std::unique_ptr<ruby_typer::cfg::BasicBlock>;
+template class std::vector<ruby_typer::cfg::BasicBlock *>;
 
 using namespace std;
 

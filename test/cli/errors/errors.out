@@ -16,6 +16,6 @@ test/cli/errors/errors.rb:16: Argument arg does not match expected type Integer 
     test/cli/errors/errors.rb:9: Method foo has specified type of argument arg as Integer
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
-  Got String originating from:    test/cli/errors/errors.rb:16: 
+  Got String("foo") originating from:    test/cli/errors/errors.rb:16: 
     16 |    foo("foo")
                 ^^^^^

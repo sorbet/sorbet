@@ -51,16 +51,16 @@ try = 0 : Integer(0)
 
     "bb::<constant:Object>#main_4" [label = "block[id=4](try)
 <statTemp>$8 = 3 : Integer(3)
-<ifTemp>$6 = try.<(<statTemp>$8) : untyped
+<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass
 <ifTemp>$6"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_10" [style="tapered"];
 
     "bb::<constant:Object>#main_5" [label = "block[id=5](try)
-<statTemp>$10 = try : NilClass | Integer
+<statTemp>$10 = try : Integer(0)
 <statTemp>$11 = 1 : Integer(1)
-try = <statTemp>$10.+(<statTemp>$11) : untyped
+try = <statTemp>$10.+(<statTemp>$11) : Integer
 <statTemp>$12 = self : Object
 <statTemp>$13 = e : String(\"e\")
 <returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : NilClass

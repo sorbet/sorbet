@@ -45,7 +45,7 @@ try = 0 : Integer(0)
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="tapered"];
 
     "bb::<constant:Object>#main_3" [label = "block[id=3](<rescueTemp$5, <constant:A>$19, <constant:B>$29, try)
-<rescueTemp$39 = <rescueTemp$5.is_a?(<constant:B>$29) : TrueClass | FalseClass
+<rescueTemp$39 = <rescueTemp$5.is_a?(<constant:B>$29) : untyped
 <rescueTemp$39"];
 
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_22" [style="bold"];
@@ -74,16 +74,16 @@ try = 0 : Integer(0)
 
     "bb::<constant:Object>#main_7" [label = "block[id=7](<constant:A>$19, <constant:B>$29, try)
 <statTemp>$12 = 3 : Integer(3)
-<ifTemp>$10 = try.<(<statTemp>$12) : untyped
+<ifTemp>$10 = try.<(<statTemp>$12) : TrueClass | FalseClass
 <ifTemp>$10"];
 
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_8" [style="bold"];
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_9" [style="tapered"];
 
     "bb::<constant:Object>#main_8" [label = "block[id=8](<constant:A>$19, try)
-<statTemp>$14 = try : NilClass | Integer
+<statTemp>$14 = try : Integer(0)
 <statTemp>$15 = 1 : Integer(1)
-try = <statTemp>$14.+(<statTemp>$15) : untyped
+try = <statTemp>$14.+(<statTemp>$15) : Integer
 <statTemp>$16 = self : Object
 <statTemp>$17 = <constant:A>$19.new() : A
 <returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : NilClass
@@ -92,16 +92,16 @@ try = <statTemp>$14.+(<statTemp>$15) : untyped
     "bb::<constant:Object>#main_8" -> "bb::<constant:Object>#main_21" [style="bold"];
     "bb::<constant:Object>#main_9" [label = "block[id=9](<constant:B>$29, try)
 <statTemp>$22 = 6 : Integer(6)
-<ifTemp>$20 = try.<(<statTemp>$22) : untyped
+<ifTemp>$20 = try.<(<statTemp>$22) : TrueClass | FalseClass
 <ifTemp>$20"];
 
     "bb::<constant:Object>#main_9" -> "bb::<constant:Object>#main_10" [style="bold"];
     "bb::<constant:Object>#main_9" -> "bb::<constant:Object>#main_21" [style="tapered"];
 
     "bb::<constant:Object>#main_10" [label = "block[id=10](<constant:B>$29, try)
-<statTemp>$24 = try : NilClass | Integer
+<statTemp>$24 = try : Integer(0)
 <statTemp>$25 = 1 : Integer(1)
-try = <statTemp>$24.+(<statTemp>$25) : untyped
+try = <statTemp>$24.+(<statTemp>$25) : Integer
 <statTemp>$26 = self : Object
 <statTemp>$27 = <constant:B>$29.new() : B
 <returnMethodTemp>$2 = <statTemp>$26.raise(<statTemp>$27) : NilClass

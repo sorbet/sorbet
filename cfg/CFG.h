@@ -45,6 +45,8 @@ class BasicBlock final {
 public:
     std::vector<core::LocalVariable> args;
     int id = 0;
+    int fwdId = -1;
+    int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
     std::vector<Binding> exprs;
@@ -78,7 +80,6 @@ public:
      * the entry point is going to be the last node in sorted array.
      */
     std::vector<BasicBlock *> forwardsTopoSort;
-    std::vector<BasicBlock *> backwardsTopoSort;
     inline BasicBlock *entry() {
         return basicBlocks[0].get();
     }
@@ -91,15 +92,14 @@ public:
     void recordAnnotations(core::Context ctx);
 
     // Flags
-    static constexpr int FORWARD_TOPO_SORT_VISITED = 1 << 0;
-    static constexpr int BACKWARD_TOPO_SORT_VISITED = 1 << 1;
-    static constexpr int LOOP_HEADER = 1 << 2;
-    static constexpr int WAS_JUMP_DESTINATION = 1 << 3;
+    static constexpr int LOOP_HEADER = 1 << 0;
+    static constexpr int WAS_JUMP_DESTINATION = 1 << 1;
 
     // special minLoops
     static constexpr int MIN_LOOP_FIELD = -1;
     static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
+
     std::unordered_map<core::LocalVariable, int> minLoops;
     std::unordered_map<core::LocalVariable, int> maxLoopWrite;
 

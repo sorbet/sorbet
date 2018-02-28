@@ -27,7 +27,8 @@ shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, cor
     categoryCounterInc("dispatch_call", "ortype");
     shared_ptr<Type> lblock, rblock;
     auto leftRet = left->dispatchCall(ctx, name, callLoc, args, left, fullType, block == nullptr ? nullptr : &lblock);
-    auto rightRet = left->dispatchCall(ctx, name, callLoc, args, right, fullType, block == nullptr ? nullptr : &rblock);
+    auto rightRet =
+        right->dispatchCall(ctx, name, callLoc, args, right, fullType, block == nullptr ? nullptr : &rblock);
     if (block != nullptr) {
         if (lblock == nullptr && rblock == nullptr) {
             *block = Types::dynamic();

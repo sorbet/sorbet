@@ -53,16 +53,16 @@ try = 0 : Integer(0)
 
     "bb::<constant:Object>#main_4" [label = "block[id=4](<constant:A>$15, <constant:B>$25, try)
 <statTemp>$8 = 3 : Integer(3)
-<ifTemp>$6 = try.<(<statTemp>$8) : untyped
+<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass
 <ifTemp>$6"];
 
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
     "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_6" [style="tapered"];
 
     "bb::<constant:Object>#main_5" [label = "block[id=5](<constant:A>$15, try)
-<statTemp>$10 = try : NilClass | Integer
+<statTemp>$10 = try : Integer(0)
 <statTemp>$11 = 1 : Integer(1)
-try = <statTemp>$10.+(<statTemp>$11) : untyped
+try = <statTemp>$10.+(<statTemp>$11) : Integer
 <statTemp>$12 = self : Object
 <statTemp>$13 = <constant:A>$15.new() : A
 <returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : NilClass
@@ -71,16 +71,16 @@ try = <statTemp>$10.+(<statTemp>$11) : untyped
     "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_13" [style="bold"];
     "bb::<constant:Object>#main_6" [label = "block[id=6](<constant:B>$25, try)
 <statTemp>$18 = 6 : Integer(6)
-<ifTemp>$16 = try.<(<statTemp>$18) : untyped
+<ifTemp>$16 = try.<(<statTemp>$18) : TrueClass | FalseClass
 <ifTemp>$16"];
 
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_7" [style="bold"];
     "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_13" [style="tapered"];
 
     "bb::<constant:Object>#main_7" [label = "block[id=7](<constant:B>$25, try)
-<statTemp>$20 = try : NilClass | Integer
+<statTemp>$20 = try : Integer(0)
 <statTemp>$21 = 1 : Integer(1)
-try = <statTemp>$20.+(<statTemp>$21) : untyped
+try = <statTemp>$20.+(<statTemp>$21) : Integer
 <statTemp>$22 = self : Object
 <statTemp>$23 = <constant:B>$25.new() : B
 <returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : NilClass

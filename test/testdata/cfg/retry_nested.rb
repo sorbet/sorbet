@@ -6,11 +6,11 @@ def main
   begin
       puts "top"
       begin
-        if try < 3 # error: Method < does not exist on NilClass component of T.any(NilClass, Integer)
-            try += 1 # error: Method + does not exist on NilClass component of T.any(NilClass, Integer)
+        if try < 3
+            try += 1
             raise A.new
-        elsif try < 6 # error: Method < does not exist on NilClass component of T.any(NilClass, Integer)
-            try += 1 # error: Method + does not exist on NilClass component of T.any(NilClass, Integer)
+        elsif try < 6
+            try += 1
             raise B.new
         end
       rescue A
@@ -18,7 +18,7 @@ def main
         retry
         1
       end
-  rescue B # error: Argument arg0 does not match expected type
+  rescue B
     puts "rescue B "
     retry
     2

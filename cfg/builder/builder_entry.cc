@@ -81,12 +81,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 }
 
 void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
-    // needed to find loop headers.
-    for (auto &bb : cfg.basicBlocks) {
-        std::sort(bb->backEdges.begin(), bb->backEdges.end(),
-                  [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->outerLoops < b->outerLoops; });
-    }
-
     auto &target1 = cfg.forwardsTopoSort;
     target1.resize(cfg.basicBlocks.size());
     int count = topoSortFwd(target1, 0, cfg.entry());
@@ -94,9 +88,9 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
 
     // Remove unreachable blocks (which were not found by the toposort)
     for (auto &bb : cfg.basicBlocks) {
-        if ((bb->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0) {
+        if (bb->fwdId == -1) {
             for (auto &prev : bb->backEdges) {
-                ENFORCE((prev->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0);
+                ENFORCE(prev->fwdId == -1);
             }
 
             bb->bexit.thenb->backEdges.erase(
@@ -107,16 +101,16 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
                 bb->bexit.elseb->backEdges.end());
         }
     }
-    cfg.basicBlocks.erase(remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(),
-                                    [](auto &bb) -> bool { return (bb->flags & CFG::FORWARD_TOPO_SORT_VISITED) == 0; }),
-                          cfg.basicBlocks.end());
+    cfg.basicBlocks.erase(
+        remove_if(cfg.basicBlocks.begin(), cfg.basicBlocks.end(), [](auto &bb) -> bool { return bb->fwdId == -1; }),
+        cfg.basicBlocks.end());
 
-    auto &target2 = cfg.backwardsTopoSort;
-    target2.resize(cfg.basicBlocks.size());
-    count = topoSortBwd(target2, 0, cfg.deadBlock());
-    ENFORCE(count == cfg.basicBlocks.size(),
-            "Some block was unreachble from the bottom. Total blocks: ", cfg.basicBlocks.size(),
-            ", Reachable blocks: ", count);
+    // needed to find loop headers.
+    for (auto &bb : cfg.basicBlocks) {
+        std::sort(bb->backEdges.begin(), bb->backEdges.end(),
+                  [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
+    }
+
     return;
 }
 
@@ -136,7 +130,7 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
 }
 
 unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> cfg) {
-    for (auto *bb : cfg->backwardsTopoSort) {
+    for (auto &bb : cfg->basicBlocks) {
         if (bb->exprs.empty()) {
             continue;
         }

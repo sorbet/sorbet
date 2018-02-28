@@ -12,7 +12,8 @@ using namespace std;
 
 BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
-    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
+    //    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
+    // TODO: @dmitry: temporarily disable.
 }
 
 string BasicError::toString(const GlobalState &gs) {

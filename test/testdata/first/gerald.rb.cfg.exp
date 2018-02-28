@@ -548,11 +548,11 @@ dur_ms = <statTemp>$11.*(<statTemp>$15) : Float
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_1" [style="bold"];
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" [label = "block[id=2](<constant:<Magic>>$48, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20, dur_ms, rule, res)
 <statTemp>$21 = self : Opus::CIBot::Gerald::MatchTimeBudget
-<statTemp>$32 = Gerald rule \' : String(\"Gerald rule \'\")
+<statTemp>$32 = Gerald rule \' : String(\"Gerald rule \\\'\")
 <statTemp>$34 = rule.token() : untyped
 <statTemp>$33 = <statTemp>$34.to_s() : untyped
 <statTemp>$31 = <statTemp>$32.concat(<statTemp>$33) : String
-<statTemp>$36 = \' exceeded per-rule time budget actual= : String(\"\' exceeded per-rule time budget actual=\")
+<statTemp>$36 = \' exceeded per-rule time budget actual= : String(\"\\\' exceeded per-rule time budget actual=\")
 <statTemp>$30 = <statTemp>$31.concat(<statTemp>$36) : String
 <statTemp>$38 = dur_ms.to_i() : Integer
 <statTemp>$37 = <statTemp>$38.to_s() : String
@@ -955,7 +955,7 @@ subgraph "cluster_::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<const
 <constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>
 <selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff
 diff = load_arg(<selfMethodTemp>$4#parse, 0) : untyped
-<statTemp>$11 = ^diff [^\\n]*\\n : String(\"^diff [^\\n]*\\n\")
+<statTemp>$11 = ^diff [^\\n]*\\n : String(\"^diff [^\\\\n]*\\\\n\")
 <statTemp>$13 = 0 : Integer(0)
 <statTemp>$14 = 4 : Integer(4)
 <statTemp>$12 = <statTemp>$13.|(<statTemp>$14) : Integer
@@ -1007,8 +1007,7 @@ outerLoops: 1
 outerLoops: 1
 part$19 = load_yield_param(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#parse#<block>$2, 0) : untyped
 <statTemp>$28 = 
- : String(\"
-\")
+ : String(\"\\n\")
 lines$19 = part$19.split(<statTemp>$28) : untyped
 b_name$19 = <constant:nil>$30 : NilClass
 a_name$19 = b_name$19 : NilClass

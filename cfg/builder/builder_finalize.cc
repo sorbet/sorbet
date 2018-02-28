@@ -31,9 +31,6 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     cfg.forwardsTopoSort.erase(
                         std::remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb),
                         cfg.forwardsTopoSort.end());
-                    cfg.backwardsTopoSort.erase(
-                        std::remove(cfg.backwardsTopoSort.begin(), cfg.backwardsTopoSort.end(), bb),
-                        cfg.backwardsTopoSort.end());
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
@@ -142,7 +139,8 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
     vector<unordered_map<core::LocalVariable, core::LocalVariable>> outAliases;
 
     outAliases.resize(cfg.maxBasicBlockId);
-    for (BasicBlock *bb : cfg.backwardsTopoSort) {
+    for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
+        auto &bb = *it;
         if (bb == cfg.deadBlock()) {
             continue;
         }
@@ -364,7 +362,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     changed = true;
     while (changed) {
         changed = false;
-        for (auto it = cfg.backwardsTopoSort.begin(); it != cfg.backwardsTopoSort.end(); ++it) {
+        for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             BasicBlock *bb = *it;
             int sz = upper_bounds2[bb->id].size();
             upper_bounds2[bb->id].insert(writes_by_block[bb->id].begin(), writes_by_block[bb->id].end());
@@ -398,13 +396,14 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
     // ENFORCE(!marked[currentBB]) // graph is cyclic!
-    if ((currentBB->flags & CFG::FORWARD_TOPO_SORT_VISITED) != 0) {
+    if (currentBB->fwdId != -1) {
         return nextFree;
     } else {
-        currentBB->flags |= CFG::FORWARD_TOPO_SORT_VISITED;
+        currentBB->fwdId = -2;
         nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
         nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
         target[nextFree] = currentBB;
+        currentBB->fwdId = nextFree;
         return nextFree + 1;
     }
 }
@@ -418,18 +417,19 @@ int CFGBuilder::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
     // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
     // much harder.
 
-    if ((currentBB->flags & CFG::BACKWARD_TOPO_SORT_VISITED) != 0) {
+    if (currentBB->bwdId != -1) {
         return nextFree;
     } else {
-        currentBB->flags |= CFG::BACKWARD_TOPO_SORT_VISITED;
+        currentBB->bwdId = -2;
         int i = 0;
         // iterate over outer loops
-        while (i < currentBB->backEdges.size() && currentBB->outerLoops > currentBB->backEdges[i]->outerLoops) {
+        while (i < currentBB->backEdges.size() && currentBB->fwdId < currentBB->backEdges[i]->fwdId) {
             nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
             i++;
         }
         if (i > 0) { // This is a loop header!
             target[nextFree] = currentBB;
+            currentBB->bwdId = nextFree;
             nextFree = nextFree + 1;
             while (i < currentBB->backEdges.size()) {
                 nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
@@ -441,6 +441,7 @@ int CFGBuilder::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
                 i++;
             }
             target[nextFree] = currentBB;
+            currentBB->bwdId = nextFree;
             nextFree = nextFree + 1;
         }
         return nextFree;
