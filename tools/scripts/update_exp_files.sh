@@ -38,9 +38,14 @@ for this_src in "${rb_src[@]}" DUMMY; do
     srcs=("$this_src")
 done
 
+# Not all versions of bash have mapfile and read -r isn't reading in all the lines
+# shellcheck disable=SC2207
 cli_tests=($(bazel query 'filter("run_", test/cli/...)'))
 for cli in "${cli_tests[@]}"; do
     name=${cli#*:run_}
-    bazel run -c opt "$cli" | \
-        sed -e 's,\(rbi/stdlib.rbi:\)[0-9]*,\1__LINE__,' > "test/cli/$name/$name.out"
+    pattern='s,\(rbi/stdlib.rbi:\)[0-9]*,\1__LINE__,'
+    echo "bazel run -c opt $cli | sed -e '$pattern' > test/cli/$name/$name.out"
+    bazel run -c opt "$cli" 2>/dev/null | \
+        sed -e "$pattern" > \
+        "test/cli/$name/$name.out"
 done
