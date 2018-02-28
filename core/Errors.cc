@@ -18,7 +18,7 @@ BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
     buf << rang::style::reset << rang::style::underline << loc.filePosToString(gs) << rang::style::reset << ": "
-        << rang::fg::red << formatted << rang::fg::reset << rang::fgB::black << " [" << what.code << "]"
+        << rang::fg::red << formatted << rang::fg::reset << rang::fgB::black << " http://go/e/" << what.code
         << rang::fg::reset << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
