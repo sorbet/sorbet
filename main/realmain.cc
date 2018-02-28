@@ -882,7 +882,7 @@ int realmain(int argc, char **argv) {
             counterAdd("types.input.bytes", src.size());
             counterInc("types.input.lines");
             counterInc("types.input.files");
-            auto file = gs->enterFile(string("-e"), src);
+            auto file = gs->enterFile(string("-e"), src + "\n");
             inputFiles.push_back(file);
             if (opts.forceUntyped) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");

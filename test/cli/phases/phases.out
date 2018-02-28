@@ -1,13 +1,20 @@
+--- parse-tree start ---
 Integer {
   val = "1"
 }
+--- parse-tree end ---
+--- parse-tree-json start ---
 {
   "type" : "Integer",
   "val" : "1"
 }
+--- parse-tree-json end ---
+--- ast start ---
 class <emptyTree><<constant:<root>>> < ()
   1
 end
+--- ast end ---
+--- ast-raw start ---
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
@@ -15,9 +22,13 @@ ClassDef{
     IntLit{ value = 1 }
   ]
 }
+--- ast-raw end ---
+--- dsl-tree start ---
 class <emptyTree><<constant:<root>>> < ()
   1
 end
+--- dsl-tree end ---
+--- dsl-tree-raw start ---
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
@@ -25,9 +36,13 @@ ClassDef{
     IntLit{ value = 1 }
   ]
 }
+--- dsl-tree-raw end ---
+--- name-table start ---
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   method <static-init>$8 () @ -e:1
 
+--- name-table end ---
+--- name-table-full start ---
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:<<JUNK>>> () -> <Class:<<JUNK>>> @ ???
   class <constant:<<RESERVED>>0> < ::<constant:Object> () @ ???
@@ -11811,11 +11826,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   method <static-init>$8 () @ -e:1
   static-field <constant:M> -> AliasType { symbol = ::<constant:Opus>::<constant:DB>::<constant:Model> } @ ???
 
+--- name-table-full end ---
+--- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
   def self.<static-init><<static-init>$8>()
     1
   end
 end
+--- name-tree end ---
+--- name-tree-raw start ---
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
@@ -11828,6 +11847,8 @@ ClassDef{
     }
   ]
 }
+--- name-tree-raw end ---
+--- cfg start ---
 digraph "-e"{
 subgraph "cluster_#<static-init>$8" {
     label = "#<static-init>$8";
@@ -11849,6 +11870,8 @@ subgraph "cluster_#<static-init>$8" {
 
 }
 
+--- cfg end ---
+--- cfg-raw start ---
 digraph "-e"{
 subgraph "cluster_#<static-init>$8" {
     label = "#<static-init>$8";
@@ -11874,7 +11897,10 @@ subgraph "cluster_#<static-init>$8" {
 
 }
 
+--- cfg-raw end ---
+--- typed-source start ---
 1
 # <returnMethodTemp>$2: Integer(1)
 #
 # <finalReturn>: <bottom>
+--- typed-source end ---
