@@ -69,8 +69,13 @@ build:sanitize --linkopt=-fsanitize=address
 build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
-build:sanitize --linkopt=-lubsan
 build:sanitize --define unsanitized=false
+
+# For some reason, on our Linux builds, -fsanitize=undefined fails
+# with link errors without an explicit link of -lubsan. Per
+# https://github.com/google/oss-fuzz/issues/713 it might be related to
+# the fact that bazel uses $CC as the linker even for C++.
+build:sanitize --features=force-libubsan
 
 build:tstan --copt=-fsanitize=thread
 build:tstan --cxxopt==-fsanitize=thread
