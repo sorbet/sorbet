@@ -47,7 +47,7 @@ struct ErrorLine {
         std::string formatted = fmt::format(msg, args...);
         return ErrorLine(loc, formatted);
     }
-    std::string toString(const GlobalState &gs);
+    std::string toString(const GlobalState &gs, bool color = true);
 };
 
 struct ErrorSection {

@@ -2,8 +2,10 @@ cc_library(
     name = "common",
     srcs = glob(
         [
-            "**/*.cc",
-            "**/*.h",
+            "*.cc",
+            "*.h",
+            "os/**/*.cc",
+            "os/**/*.h",
         ],
 
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
@@ -27,5 +29,21 @@ cc_library(
         "@progressbar",
         "@spdlog",
         "@statsd",
+    ],
+)
+
+cc_test(
+    name = "common_test",
+    size = "small",
+    srcs = glob(["test/*.cc"]),
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        ":common",
+        "@gtest",
+        "@gtest//:gtest_main",
     ],
 )

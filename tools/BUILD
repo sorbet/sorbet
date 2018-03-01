@@ -41,6 +41,7 @@ compilation_database(
         "//core/serialize:serialize",
         "//core:generate_names",
         "//core:core_test",
+        "//common:common_test",
         "//cfg/builder:builder",
         "//cfg:cfg",
         "//ast/substitute:substitute",

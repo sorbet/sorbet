@@ -6,6 +6,7 @@
 #include "common/common.h"
 #include "core/Names/core.h"
 #include <memory>
+#include <tuple>
 #include <vector>
 
 namespace ruby_typer {
@@ -464,6 +465,15 @@ public:
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name, int MaxDepth = 100) const;
+    /* transitively finds a member with the most similar name */
+
+    struct FuzzySearchResult {
+        SymbolRef symbol;
+        NameRef name;
+        int distance;
+    };
+
+    FuzzySearchResult findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
 
     std::string fullName(const GlobalState &gs) const;
 

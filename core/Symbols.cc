@@ -303,6 +303,55 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
     return Symbols::noSymbol();
 }
 
+Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan) const {
+    FuzzySearchResult result;
+    result.symbol = Symbols::noSymbol();
+    result.name = NameRef::noName();
+    result.distance = betterThan;
+    if (name.data(gs).kind != NameKind::UTF8) {
+        return result;
+    }
+
+    auto currentName = name.data(gs).raw.utf8;
+    if (result.distance < 0) {
+        result.distance = 1 + (currentName.size() / 2);
+    }
+
+    for (auto pair : members) {
+        auto thisName = pair.first;
+        if (thisName.data(gs).kind != NameKind::UTF8) {
+            continue;
+        }
+        auto utf8 = thisName.data(gs).raw.utf8;
+        int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
+        if (thisDistance < result.distance) {
+            result.distance = thisDistance;
+            result.name = thisName;
+            result.symbol = pair.second;
+        }
+    }
+
+    for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+        ENFORCE(it->exists());
+
+        auto subResult = it->data(gs).findMemberFuzzyMatch(gs, name, result.distance);
+        if (subResult.symbol.exists()) {
+            ENFORCE(subResult.name.exists());
+            ENFORCE(subResult.name.data(gs).kind == NameKind::UTF8);
+            result = subResult;
+        }
+    }
+    if (this->superClass.exists()) {
+        auto subResult = this->superClass.data(gs).findMemberFuzzyMatch(gs, name, result.distance);
+        if (subResult.symbol.exists()) {
+            ENFORCE(subResult.name.exists());
+            ENFORCE(subResult.name.data(gs).kind == NameKind::UTF8);
+            result = subResult;
+        }
+    }
+    return result;
+}
+
 string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
     if (this->owner.exists() && this->owner != core::Symbols::root()) {

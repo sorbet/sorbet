@@ -10,6 +10,14 @@ namespace core {
 
 using namespace std;
 
+constexpr auto ERROR_COLOR = rang::fg::red;
+constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
+constexpr auto DETAIL_COLOR = rang::fg::yellow;
+constexpr auto RESET_COLOR = rang::fg::reset;
+
+constexpr auto FILE_POS_STYLE = rang::style::underline;
+constexpr auto RESET_STYLE = rang::style::reset;
+
 BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
     //    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
@@ -18,20 +26,22 @@ BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
 
 string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << rang::style::reset << rang::style::underline << loc.filePosToString(gs) << rang::style::reset << ": "
-        << rang::fg::red << formatted << rang::fg::reset << rang::fgB::black << " http://go/e/" << what.code
-        << rang::fg::reset << endl;
+    buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR << formatted
+        << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code << RESET_COLOR << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }
     return buf.str();
 }
 
-string ErrorLine::toString(const GlobalState &gs) {
+string ErrorLine::toString(const GlobalState &gs, bool color) {
     stringstream buf;
     string indent = "  ";
-    buf << indent << rang::style::underline << loc.filePosToString(gs) << rang::style::reset << ": " << formattedMessage
-        << endl;
+    buf << indent << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": ";
+    if (color) {
+        buf << DETAIL_COLOR;
+    }
+    buf << formattedMessage << RESET_COLOR << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }
@@ -41,8 +51,10 @@ string ErrorLine::toString(const GlobalState &gs) {
 string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
+    bool coloredLineHeaders = true;
     if (!this->header.empty()) {
-        buf << indent << rang::fg::yellow << this->header << rang::fg::reset;
+        coloredLineHeaders = false;
+        buf << indent << DETAIL_COLOR << this->header << RESET_COLOR;
     }
     bool first = true;
     for (auto &line : this->messages) {
@@ -50,7 +62,7 @@ string ErrorSection::toString(const GlobalState &gs) {
             buf << endl;
         }
         first = false;
-        buf << indent << line.toString(gs);
+        buf << indent << line.toString(gs, coloredLineHeaders);
     }
     return buf.str();
 }

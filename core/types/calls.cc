@@ -454,11 +454,26 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         }
 
         string maybeComponent;
+        core::Symbol::FuzzySearchResult alternative;
+
         if (fullType.get() != this) {
             maybeComponent = " component of " + fullType->show(ctx);
+        } else {
+            alternative = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
         }
-        ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
-                        fun.data(ctx).toString(ctx), this->show(ctx), maybeComponent);
+
+        if (alternative.symbol.exists()) {
+            ctx.state.error(
+                core::ComplexError(callLoc, core::errors::Infer::UnknownMethod,
+                                   "Method " + fun.data(ctx).toString(ctx) + " does not exist on " + this->show(ctx),
+                                   {core::ErrorSection({
+                                       core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
+                                                             "Did you mean: {}?", alternative.name.toString(ctx)),
+                                   })}));
+        } else {
+            ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
+                            fun.data(ctx).toString(ctx), this->show(ctx), maybeComponent);
+        }
         return Types::dynamic();
     }
 
