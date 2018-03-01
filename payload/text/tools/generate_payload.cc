@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "absl/strings/escaping.h"
+#include "version/version.h"
 
 using namespace std;
 
@@ -38,7 +39,12 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
     out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
     for (auto &file : sourceFiles) {
-        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + absl::CEscape(file) + "\", " +
+        string version = ruby_typer::Version::build_scm_revision;
+        if (version == "0") {
+            version = "master";
+        }
+        string permalink = "https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/" + version + "/" + file;
+        out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + absl::CEscape(permalink) + "\", " +
                    sourceName2funcName(file) + "()));"
             << endl;
     }

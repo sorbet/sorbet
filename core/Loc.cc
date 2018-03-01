@@ -112,7 +112,13 @@ string Loc::filePosToString(const GlobalState &gs) const {
         buf << "???";
     } else {
         auto pos = position(gs);
-        buf << file.data(gs).path() << ":";
+        auto path = file.data(gs).path();
+        if (path.find("https://") == 0) {
+            // For github permalinks
+            buf << path << "#L";
+        } else {
+            buf << path << ":";
+        }
         buf << pos.first.line;
         // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
     }

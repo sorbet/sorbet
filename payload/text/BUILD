@@ -5,7 +5,10 @@ cc_binary(
     ],
     copts = ["--std=c++14"],
     visibility = ["//tools:__pkg__"],
-    deps = ["//common"],
+    deps = [
+        "//common",
+        "//version",
+    ],
 )
 
 cc_library(

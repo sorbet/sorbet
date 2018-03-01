@@ -43,7 +43,7 @@ done
 cli_tests=($(bazel query 'filter("run_", test/cli/...)'))
 for cli in "${cli_tests[@]}"; do
     name=${cli#*:run_}
-    pattern='s,\(rbi/stdlib.rbi:\)[0-9]*,\1__LINE__,'
+    pattern='s,\(https://.*.rbi#L\)[0-9]*,\1__LINE__,'
     echo "bazel run -c opt $cli | sed -e '$pattern' > test/cli/$name/$name.out"
     bazel run -c opt "$cli" 2>/dev/null | \
         sed -e "$pattern" > \
