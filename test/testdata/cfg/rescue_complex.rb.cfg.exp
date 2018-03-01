@@ -670,7 +670,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402" {
 <statTemp>$5 = self : TestRescue
 <statTemp>$7 = self : TestRescue
 <statTemp>$6 = <statTemp>$7.bar() : untyped
-foo = <statTemp>$5.raise(<statTemp>$6) : NilClass
+foo = <statTemp>$5.raise(<statTemp>$6) : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_7" [style="bold"];
@@ -717,7 +717,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402_1" {
 <statTemp>$7 = self : TestRescue
 <statTemp>$9 = self : TestRescue
 <statTemp>$8 = <statTemp>$9.bar() : untyped
-<statTemp>$5 = <statTemp>$7.raise(<statTemp>$8) : NilClass
+<statTemp>$5 = <statTemp>$7.raise(<statTemp>$8) : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_7" [style="bold"];
@@ -768,7 +768,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402_2" {
 <statTemp>$15 = self : TestRescue
 <statTemp>$17 = self : TestRescue
 <statTemp>$16 = <statTemp>$17.bar() : untyped
-<statTemp>$13 = <statTemp>$15.raise(<statTemp>$16) : NilClass
+<statTemp>$13 = <statTemp>$15.raise(<statTemp>$16) : <bottom>
 <unconditional>"];
 
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_4" -> "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_7" [style="bold"];

@@ -505,7 +505,7 @@ dur_ms = <statTemp>$5.*(<statTemp>$11) : Float
 <statTemp>$21 = <statTemp>$22.concat(<statTemp>$26) : String
 <statTemp>$20 = <statTemp>$21.to_s() : String
 <statTemp>$17 = <constant:MatchTimeout>$19.new(<statTemp>$20) : Opus::CIBot::Gerald::MatchTimeout
-<returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : NilClass
+<returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#check!_4" [style="bold"];
@@ -570,7 +570,7 @@ dur_ms = <statTemp>$11.*(<statTemp>$15) : Float
   Symbol(:\"rule_token\") => untyped
 }
 <statTemp>$22 = <constant:MatchTimeout>$24.new(<statTemp>$25, <statTemp>$44) : Opus::CIBot::Gerald::MatchTimeout
-<statTemp>$16 = <statTemp>$21.raise(<statTemp>$22) : NilClass
+<statTemp>$16 = <statTemp>$21.raise(<statTemp>$22) : <bottom>
 <unconditional>"];
 
     "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_2" -> "bb::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#time_rule_4" [style="bold"];

@@ -6522,7 +6522,7 @@ module Kernel
   sig(
       msg: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def self.abort(msg=_); end
 
   sig(
@@ -6581,35 +6581,35 @@ module Kernel
   .returns(T.untyped)
   def self.eval(arg0, arg1=_, filename=_, lineno=_); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def self.exit(status=_); end
 
   sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def self.exit!(status); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       arg0: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def self.fail(arg0=_, arg1=_, arg2=_); end
 
   sig(
@@ -6676,23 +6676,23 @@ module Kernel
   .returns(NilClass)
   def self.puts(*arg0); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       arg0: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Exception,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def self.raise(arg0=_, arg1=_, arg2=_); end
 
   sig(
@@ -6859,7 +6859,7 @@ module Kernel
   sig(
       msg: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def abort(msg=_); end
 
   sig(
@@ -6884,35 +6884,35 @@ module Kernel
   sig.returns(Binding)
   def binding(); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def exit(status=_); end
 
   sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def exit!(status); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       arg0: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def fail(arg0=_, arg1=_, arg2=_); end
 
   sig(
@@ -7049,23 +7049,23 @@ module Kernel
   .returns(NilClass)
   def warn(*msg); end
 
-  sig.returns(NilClass)
+  sig.returns(T.noreturn)
   sig(
       arg0: String,
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   sig(
       arg0: Exception,
       arg1: String,
       arg2: T::Array[String],
   )
-  .returns(NilClass)
+  .returns(T.noreturn)
   def raise(arg0=_, arg1=_, arg2=_); end
 end
 
@@ -11916,7 +11916,7 @@ class Time
   )
   .returns(Time)
   sig(
-      seconds_with_frac: Numeric,
+      seconds: Numeric,
   )
   .returns(Time)
   sig(

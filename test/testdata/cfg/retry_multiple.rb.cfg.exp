@@ -65,7 +65,7 @@ try = 0 : Integer(0)
 try = <statTemp>$10.+(<statTemp>$11) : Integer
 <statTemp>$12 = self : Object
 <statTemp>$13 = <constant:A>$15.new() : A
-<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : NilClass
+<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_13" [style="bold"];
@@ -83,7 +83,7 @@ try = <statTemp>$10.+(<statTemp>$11) : Integer
 try = <statTemp>$20.+(<statTemp>$21) : Integer
 <statTemp>$22 = self : Object
 <statTemp>$23 = <constant:B>$25.new() : B
-<returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : NilClass
+<returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_13" [style="bold"];

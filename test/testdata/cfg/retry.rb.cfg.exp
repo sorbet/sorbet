@@ -63,7 +63,7 @@ try = 0 : Integer(0)
 try = <statTemp>$10.+(<statTemp>$11) : Integer
 <statTemp>$12 = self : Object
 <statTemp>$13 = e : String(\"e\")
-<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : NilClass
+<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_10" [style="bold"];
