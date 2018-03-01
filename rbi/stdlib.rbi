@@ -901,7 +901,7 @@ class Dir
   sig.returns(String)
   def inspect(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def path(); end
 
   sig.returns(Integer)
@@ -913,7 +913,7 @@ class Dir
   .returns(Integer)
   def pos=(arg0); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def read(); end
 
   sig.returns(Dir)
@@ -931,7 +931,7 @@ class Dir
   sig.returns(Integer)
   def tell(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def to_path(); end
 
   sig.returns(Dir)
@@ -1268,7 +1268,7 @@ class File
   sig(
       file: T.any(String, IO),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.size?(file); end
 
   sig(
@@ -1332,31 +1332,31 @@ class File
   sig(
       file: T.any(String, IO),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.world_readable?(file); end
 
   sig(
       file: T.any(String, IO),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.world_writable?(file); end
 
   sig(
       file: String,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.writable?(file); end
 
   sig(
       file: String,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.writable_real?(file); end
 
   sig(
       file: T.any(String, IO),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.zero?(file); end
 
   sig(
@@ -1609,7 +1609,7 @@ class IO
   .returns(Integer)
   def fcntl(integer_cmd, arg); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def fdatasync(); end
 
   sig.returns(Integer)
@@ -1621,20 +1621,20 @@ class IO
   sig.returns(IO)
   def freeze(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def fsync(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def getbyte(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def getc(); end
 
   sig(
       sep: String,
       limit: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def gets(sep=_, limit=_); end
 
   sig(
@@ -1711,7 +1711,7 @@ class IO
       length: Integer,
       outbuf: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def read(length=_, outbuf=_); end
 
   sig(
@@ -2033,7 +2033,7 @@ class IO
       error_array: T::Array[IO],
       timeout: Integer,
   )
-  .returns(T.any(T::Array[IO], NilClass))
+  .returns(T.nilable(T::Array[IO]))
   def self.select(read_array, write_array=_, error_array=_, timeout=_); end
 
   sig(
@@ -2047,7 +2047,7 @@ class IO
   sig(
       arg0: BasicObject,
   )
-  .returns(T.any(IO, NilClass))
+  .returns(T.nilable(IO))
   def self.try_convert(arg0); end
 
   sig(
@@ -3303,7 +3303,7 @@ class BigDecimal
   sig.returns(Integer)
   def imaginary(); end
 
-  sig.returns(T.any(NilClass, Integer))
+  sig.returns(T.nilable(Integer))
   def infinite?(); end
 
   sig.returns(String)
@@ -3602,7 +3602,7 @@ class Class
   .returns(Class)
   def public_constant(*arg0); end
 
-  sig.returns(T.any(Class, NilClass))
+  sig.returns(T.nilable(Class))
   sig.returns(Class)
   def superclass(); end
 
@@ -3916,7 +3916,7 @@ class Complex
 end
 
 module Coverage
-  sig.returns(T::Hash[String, T::Array[T.any(Integer, NilClass)]])
+  sig.returns(T::Hash[String, T::Array[T.nilable(Integer)]])
   def self.result(); end
 
   sig.returns(NilClass)
@@ -4023,7 +4023,7 @@ class Encoding
       obj1: BasicObject,
       obj2: BasicObject,
   )
-  .returns(T.any(Encoding, NilClass))
+  .returns(T.nilable(Encoding))
   def self.compatible?(obj1, obj2); end
 
   sig.returns(Encoding)
@@ -4045,11 +4045,11 @@ class Encoding
   sig(
       arg0: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Encoding,
   )
-  .returns(T.any(Encoding, NilClass))
+  .returns(T.nilable(Encoding))
   def self.default_internal=(arg0); end
 
   sig(
@@ -4190,7 +4190,7 @@ module Enumerable
       ifnone: Proc,
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(Elem, NilClass))
+  .returns(T.nilable(Elem))
   sig(
       ifnone: Proc,
   )
@@ -4241,19 +4241,19 @@ module Enumerable
   sig(
       value: BasicObject,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   sig.returns(Enumerator[Elem])
   def find_index(value=_, &blk); end
 
-  sig.returns(T.any(Elem, NilClass))
+  sig.returns(T.nilable(Elem))
   sig(
       n: Integer,
   )
-  .returns(T.any(T::Array[Elem], NilClass))
+  .returns(T.nilable(T::Array[Elem]))
   def first(n=_); end
 
   sig(
@@ -4430,7 +4430,7 @@ module Enumerable
   sig(
       n: Integer,
   )
-  .returns(T.any(T::Array[Elem], NilClass))
+  .returns(T.nilable(T::Array[Elem]))
   def take(n); end
 
   sig(
@@ -4458,7 +4458,7 @@ module Enumerable
       ifnone: Proc,
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(Elem, NilClass))
+  .returns(T.nilable(Elem))
   sig(
       ifnone: Proc,
   )
@@ -4589,7 +4589,7 @@ class Enumerator
   sig.returns(Enumerator)
   def rewind(); end
 
-  sig.returns(T.any(Integer, Float, NilClass))
+  sig.returns(T.nilable(T.any(Integer, Float)))
   def size(); end
 
   sig.returns(Enumerator)
@@ -4761,7 +4761,7 @@ class File::Stat
   sig(
       other: File::Stat,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig.returns(Time)
@@ -4770,13 +4770,13 @@ class File::Stat
   sig.returns(Time)
   def birthtime(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def blksize(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def blockdev?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def blocks(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -4842,7 +4842,7 @@ class File::Stat
   sig.returns(T.any(TrueClass, FalseClass))
   def pipe?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def rdev(); end
 
   sig.returns(Integer)
@@ -4878,10 +4878,10 @@ class File::Stat
   sig.returns(Integer)
   def uid(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def world_readable?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def world_writable?(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -5474,31 +5474,31 @@ module Gem
   sig(
       gem_name: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def self.datadir(gem_name); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_bindir(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_cert_path(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_dir(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_exec_format(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_key_path(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.default_path(); end
 
-  sig.returns(T.any(T::Array[String], NilClass))
+  sig.returns(T.nilable(T::Array[String]))
   def self.default_rubygems_dirs(); end
 
-  sig.returns(T.any(T::Array[String], NilClass))
+  sig.returns(T.nilable(T::Array[String]))
   def self.default_sources(); end
 end
 
@@ -6504,13 +6504,13 @@ module Kernel
   .returns(String)
   def self.String(x); end
 
-  sig.returns(T.any(Symbol, NilClass))
+  sig.returns(T.nilable(Symbol))
   def self.__callee__(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def self.__dir__(); end
 
-  sig.returns(T.any(Symbol, NilClass))
+  sig.returns(T.nilable(Symbol))
   def self.__method__(); end
 
   sig(
@@ -6541,7 +6541,7 @@ module Kernel
   sig(
       name: T.any(Symbol, String),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def self.autoload?(name); end
 
   sig.returns(Binding)
@@ -6554,22 +6554,22 @@ module Kernel
       start: Integer,
       length: Integer,
   )
-  .returns(T.any(T::Array[String], NilClass))
+  .returns(T.nilable(T::Array[String]))
   sig(
       arg0: Range,
   )
-  .returns(T.any(T::Array[String], NilClass))
+  .returns(T.nilable(T::Array[String]))
   def self.caller(start=_, length=_); end
 
   sig(
       start: Integer,
       length: Integer,
   )
-  .returns(T.any(T::Array[String], NilClass))
+  .returns(T.nilable(T::Array[String]))
   sig(
       arg0: Range,
   )
-  .returns(T.any(T::Array[String], NilClass))
+  .returns(T.nilable(T::Array[String]))
   def self.caller_locations(start=_, length=_); end
 
   sig(
@@ -6647,7 +6647,7 @@ module Kernel
       rest: T.any(String, Integer),
       block: String,
   )
-  .returns(T.any(IO, NilClass))
+  .returns(T.nilable(IO))
   def self.open(name, rest=_, block=_); end
 
   sig(
@@ -6841,13 +6841,13 @@ module Kernel
   .returns(String)
   def String(x); end
 
-  sig.returns(T.any(Symbol, NilClass))
+  sig.returns(T.nilable(Symbol))
   def __callee__(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def __dir__(); end
 
-  sig.returns(T.any(Symbol, NilClass))
+  sig.returns(T.nilable(Symbol))
   def __method__(); end
 
   sig(
@@ -6878,7 +6878,7 @@ module Kernel
   sig(
       name: T.any(Symbol, String),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def autoload?(name); end
 
   sig.returns(Binding)
@@ -6944,7 +6944,7 @@ module Kernel
       rest: T.any(String, Integer),
       block: String,
   )
-  .returns(T.any(IO, NilClass))
+  .returns(T.nilable(IO))
   def open(name, rest=_, block=_); end
 
   sig(
@@ -7170,7 +7170,7 @@ class MatchData
   sig(
       i: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       start: Integer,
       length: Integer,
@@ -7183,7 +7183,7 @@ class MatchData
   sig(
       name: T.any(String, Symbol),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def [](i, length=_); end
 
   sig(
@@ -7469,19 +7469,19 @@ class Module
   sig(
       other: Module,
   )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
+  .returns(T.nilable(T.any(TrueClass, FalseClass)))
   def <(other); end
 
   sig(
       other: Module,
   )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
+  .returns(T.nilable(T.any(TrueClass, FalseClass)))
   def <=(other); end
 
   sig(
       other: Module,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig(
@@ -7499,13 +7499,13 @@ class Module
   sig(
       other: Module,
   )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
+  .returns(T.nilable(T.any(TrueClass, FalseClass)))
   def >(other); end
 
   sig(
       other: Module,
   )
-  .returns(T.any(TrueClass, FalseClass, NilClass))
+  .returns(T.nilable(T.any(TrueClass, FalseClass)))
   def >=(other); end
 
   sig(
@@ -7552,7 +7552,7 @@ class Module
   sig(
       name: Symbol,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def autoload?(name); end
 
   sig(
@@ -8202,7 +8202,7 @@ class Numeric
   .returns(T.any(Integer, Float, Rational, BigDecimal))
   def modulo(arg0); end
 
-  sig.returns(T.any(T.untyped, NilClass))
+  sig.returns(T.nilable(T.untyped))
   def nonzero?(); end
 
   sig.returns(Integer)
@@ -8307,7 +8307,7 @@ class Object
   sig(
       other: BasicObject,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig(
@@ -8537,7 +8537,7 @@ class Pathname
   sig(
       p1: BasicObject,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(p1); end
 
   sig(
@@ -9099,11 +9099,11 @@ module Process
   .returns(T.untyped)
   def self.exit!(status=_); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   sig(
       blk: T.proc().returns(BasicObject),
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def self.fork(&blk); end
 
   sig(
@@ -9330,7 +9330,7 @@ class Process::Status
   sig.returns(T.any(TrueClass, FalseClass))
   def exited?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def exitstatus(); end
 
   sig.returns(String)
@@ -9345,13 +9345,13 @@ class Process::Status
   sig.returns(T.any(TrueClass, FalseClass))
   def stopped?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def stopsig(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def success?(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def termsig(); end
 
   sig.returns(Integer)
@@ -9585,7 +9585,7 @@ class Range
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.nilable(T.untyped))
   def bsearch(&blk); end
 
   sig.returns(Range)
@@ -9682,7 +9682,7 @@ class Range
   .returns(T::Array[Elem])
   def min(n=_, &blk); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def size(); end
 
   sig(
@@ -10225,7 +10225,7 @@ class Regexp
   sig(
       obj: BasicObject,
   )
-  .returns(T.any(Regexp, NilClass))
+  .returns(T.nilable(Regexp))
   def self.try_convert(obj); end
 
   sig(
@@ -10243,7 +10243,7 @@ class Regexp
   sig(
       str: String,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def =~(str); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -10286,7 +10286,7 @@ class Regexp
       arg0: String,
       arg1: Integer,
   )
-  .returns(T.any(MatchData, NilClass))
+  .returns(T.nilable(MatchData))
   def match(arg0, arg1=_); end
 
   sig.returns(T::Hash[String, T::Array[Integer]])
@@ -10316,7 +10316,7 @@ class Regexp
   sig.returns(Regexp)
   def untrust(); end
 
-  sig.returns(T.any(Integer, NilClass))
+  sig.returns(T.nilable(Integer))
   def ~(); end
 
   sig(
@@ -10490,7 +10490,7 @@ class Set
   sig(
       o: Elem,
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.nilable(T.untyped))
   def add?(o); end
 
   sig(
@@ -10514,7 +10514,7 @@ class Set
   sig(
       o: Elem,
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.nilable(T.untyped))
   def delete?(o); end
 
   sig(
@@ -10551,7 +10551,7 @@ class Set
   sig.returns(Set)
   def flatten(); end
 
-  sig.returns(T.any(T.untyped, NilClass))
+  sig.returns(T.nilable(T.untyped))
   def flatten!(); end
 
   sig.returns(Set)
@@ -10614,7 +10614,7 @@ class Set
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.nilable(T.untyped))
   def reject!(&blk); end
 
   sig(
@@ -10626,7 +10626,7 @@ class Set
   sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.any(T.untyped, NilClass))
+  .returns(T.nilable(T.untyped))
   def select!(&blk); end
 
   sig.returns(Integer)
@@ -10742,7 +10742,7 @@ module Signal
   sig(
       arg0: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def self.signame(arg0); end
 
   sig(
@@ -10925,7 +10925,7 @@ class String
   sig(
       other: String,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig(
@@ -10943,32 +10943,32 @@ class String
   sig(
       arg0: Object,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def =~(arg0); end
 
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: T.any(Range[Integer], Regexp),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def [](arg0, arg1=_); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -10987,23 +10987,23 @@ class String
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Range[Integer],
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def byteslice(arg0, arg1=_); end
 
   sig.returns(String)
   def capitalize(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def capitalize!(); end
 
   sig(
       arg0: String,
   )
-  .returns(T.any(NilClass, Integer))
+  .returns(T.nilable(Integer))
   def casecmp(arg0); end
 
   sig(
@@ -11025,13 +11025,13 @@ class String
   sig(
       arg0: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def chomp!(arg0=_); end
 
   sig.returns(String)
   def chop(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def chop!(); end
 
   sig.returns(String)
@@ -11080,13 +11080,13 @@ class String
       arg0: String,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def delete!(arg0, *arg1); end
 
   sig.returns(String)
   def downcase(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def downcase!(); end
 
   sig.returns(String)
@@ -11157,7 +11157,7 @@ class String
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def getbyte(arg0); end
 
   sig(
@@ -11189,12 +11189,12 @@ class String
       arg0: T.any(Regexp, String),
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: T.any(Regexp, String),
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: T.any(Regexp, String),
   )
@@ -11217,7 +11217,7 @@ class String
       arg0: T.any(Regexp, String),
       arg1: Integer,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def index(arg0, arg1=_); end
 
   sig(
@@ -11258,7 +11258,7 @@ class String
   sig.returns(String)
   def lstrip(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def lstrip!(); end
 
   sig(
@@ -11309,7 +11309,7 @@ class String
       arg0: T.any(String, Regexp),
       arg1: Integer,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def rindex(arg0, arg1=_); end
 
   sig(
@@ -11378,25 +11378,25 @@ class String
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: T.any(Range[Integer], Regexp),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def slice!(arg0, arg1=_); end
 
   sig(
@@ -11470,7 +11470,7 @@ class String
   sig.returns(String)
   def swapcase(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def swapcase!(); end
 
   sig.returns(String)
@@ -11511,7 +11511,7 @@ class String
       arg0: String,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def tr!(arg0, arg1); end
 
   sig(
@@ -11525,7 +11525,7 @@ class String
       arg0: String,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def tr_s!(arg0, arg1); end
 
   sig.returns(String)
@@ -11546,7 +11546,7 @@ class String
   sig.returns(String)
   def upcase(); end
 
-  sig.returns(T.any(String, NilClass))
+  sig.returns(T.nilable(String))
   def upcase!(); end
 
   sig(
@@ -11568,32 +11568,32 @@ class String
   sig(
       obj: Object,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def self.try_convert(obj); end
 
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: T.any(Range[Integer], Regexp),
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: Integer,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: Regexp,
       arg1: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   sig(
       arg0: String,
   )
-  .returns(T.any(String, NilClass))
+  .returns(T.nilable(String))
   def slice(arg0, arg1=_); end
 end
 
@@ -11625,7 +11625,7 @@ class Symbol
   sig(
       other: Symbol,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig(
@@ -11637,7 +11637,7 @@ class Symbol
   sig(
       obj: BasicObject,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def =~(obj); end
 
   sig(
@@ -11661,7 +11661,7 @@ class Symbol
   sig(
       other: Symbol,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def casecmp(other); end
 
   sig.returns(Symbol)
@@ -11697,7 +11697,7 @@ class Symbol
   sig(
       obj: BasicObject,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def match(obj); end
 
   sig.returns(Symbol)
@@ -11984,7 +11984,7 @@ class Time
   sig(
       other: Time,
   )
-  .returns(T.any(Integer, NilClass))
+  .returns(T.nilable(Integer))
   def <=>(other); end
 
   sig.returns(String)
@@ -12319,7 +12319,7 @@ module URI
   sig(
       uri: String,
   )
-  .returns(T::Array[T.any(String, NilClass)])
+  .returns(T::Array[T.nilable(String)])
   def self.split(uri); end
 
   sig(

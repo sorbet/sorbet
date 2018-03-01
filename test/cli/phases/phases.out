@@ -1503,7 +1503,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method hash () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method imag () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method imaginary () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method infinite? () -> NilClass | Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method infinite? () -> Integer | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method inspect () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method magnitude () -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method modulo (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -8715,7 +8715,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg1<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method capitalize () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method capitalize! () -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method casecmp (arg0) -> NilClass | Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method casecmp (arg0) -> Integer | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method center (arg0, arg1) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
