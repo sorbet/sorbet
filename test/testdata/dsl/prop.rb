@@ -97,8 +97,8 @@ def main
     T.assert_type!(AdvancedODM.new.no_class_arg, T.nilable(T::Array[String]))
     AdvancedODM.new.no_class_arg = ['b'] # error: Method no_class_arg= does not exist on AdvancedODM
 
-    T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn)
-    AdvancedODM.new.enum_prop = "hello" # error: Argument arg0 does not match expected type
+    # T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn) # no longer true
+    AdvancedODM.new.enum_prop = "hello" # error: Method enum_prop= does not exist
 
     T.assert_type!(PropHelpers.new.token, String)
     PropHelpers.new.token = "tok_token"

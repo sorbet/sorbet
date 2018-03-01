@@ -2257,7 +2257,7 @@ ClassDef{
                   recv = Ident{
                     symbol = <constant:T>
                   }
-                  name = noreturn
+                  name = untyped
                   block = nullptr
                   args = [
                   ]
@@ -2283,76 +2283,7 @@ ClassDef{
                     recv = Ident{
                       symbol = <constant:T>
                     }
-                    name = noreturn
-                    block = nullptr
-                    args = [
-                    ]
-                  }
-                ]
-              }
-            }
-
-            Send{
-              recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
-                name = sig
-                block = nullptr
-                args = [
-                  Hash{
-                    pairs = [
-                      [
-                        key = SymbolLit{ name = arg0 }
-                        value = Send{
-                          recv = Ident{
-                            symbol = <constant:T>
-                          }
-                          name = noreturn
-                          block = nullptr
-                          args = [
-                          ]
-                        }
-                      ]
-                    ]
-                  }
-                ]
-              }
-              name = returns
-              block = nullptr
-              args = [
-                Send{
-                  recv = Ident{
-                    symbol = <constant:T>
-                  }
-                  name = noreturn
-                  block = nullptr
-                  args = [
-                  ]
-                }
-              ]
-            }
-
-            MethodDef{
-              self = 0
-              name = enum_prop=<<constant:<todo sym>>>
-              args = [UnresolvedIdent{
-                  kind = Local
-                  name = arg0
-                }]
-              rhs = Send{
-                recv = Ident{
-                  symbol = <constant:T>
-                }
-                name = cast
-                block = nullptr
-                args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
-                  Send{
-                    recv = Ident{
-                      symbol = <constant:T>
-                    }
-                    name = noreturn
+                    name = untyped
                     block = nullptr
                     args = [
                     ]
@@ -3704,42 +3635,6 @@ ClassDef{
                 Array{
                   elems = [
                     StringLit{ value = b }
-                  ]
-                }
-              ]
-            }
-            Send{
-              recv = ConstantLit{
-                scope = EmptyTree
-                cnst = <constant:T>
-              }
-              name = assert_type!
-              block = nullptr
-              args = [
-                Send{
-                  recv = Send{
-                    recv = ConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:AdvancedODM>
-                    }
-                    name = new
-                    block = nullptr
-                    args = [
-                    ]
-                  }
-                  name = enum_prop
-                  block = nullptr
-                  args = [
-                  ]
-                }
-                Send{
-                  recv = ConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
-                  }
-                  name = noreturn
-                  block = nullptr
-                  args = [
                   ]
                 }
               ]

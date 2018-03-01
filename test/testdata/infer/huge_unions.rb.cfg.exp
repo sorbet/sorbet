@@ -317,7 +317,7 @@ r = <constant:C20>$85 : <Class:C20>
 
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [label = "block[id=61](r)
-s = r : <Class:C1> | <Class:C2> | <Class:C3> | <Class:C4> | <Class:C5> | <Class:C6> | <Class:C7> | <Class:C8> | <Class:C9> | <Class:C10> | <Class:C11> | <Class:C12> | <Class:C13> | <Class:C14> | <Class:C15> | <Class:C16> | <Class:C17> | <Class:C18> | <Class:C19> | <Class:C20> | NilClass
+s = r : <Class:C1> | <Class:C2> | <Class:C3> | <Class:C4> | <Class:C5> | <Class:C6> | <Class:C7> | <Class:C8> | <Class:C9> | <Class:C10> | <Class:C11> | <Class:C12> | <Class:C13> | <Class:C14> | <Class:C15> | <Class:C16> | <Class:C17> | <Class:C18> | <Class:C19> | <Class:C20>
 <returnMethodTemp>$2 = return s : <bottom>
 <unconditional>"];
 

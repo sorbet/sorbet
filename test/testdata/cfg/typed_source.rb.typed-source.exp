@@ -5,6 +5,7 @@ class Examples
     if true
        # <ifTemp>$4: TrueClass(true)
       return 1
+      # dead=1
       # <returnTemp>$5: Integer(1)
       #
       # <returnMethodTemp>$2: <bottom>
@@ -22,6 +23,7 @@ class Examples
       else
         2 # error: This code is unreachable
       end
+      # dead=1
       # <returnMethodTemp>$2: Integer(1)
       #
       # <finalReturn>: <bottom>
@@ -31,6 +33,7 @@ class Examples
       if (true)
           # <ifTemp>$4: TrueClass(true)
         return 1
+        # dead=1
         # <returnTemp>$5: Integer(1)
         #
         # <returnMethodTemp>$2: <bottom>
@@ -70,6 +73,7 @@ class Examples
       #
       # a: Integer(1)
       a + b
+      # dead=1
       # b: Integer
       #
       # a: Integer(1)
@@ -110,12 +114,12 @@ class Examples
             #   Being truthy entails:
             #     <constant:nil>$10 to be NilClass
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$12 to be <bottom>
+            #     <debugEnvironmentTemp>$12 to be untyped
             #     a to be Integer(1)
             #   Being falsy entails:
             #     <constant:nil>$10 to be NilClass
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$12 to be <bottom>
+            #     <debugEnvironmentTemp>$12 to be untyped
             #     a to be Integer(1)
       while true
             # <constant:nil>$10: NilClass
@@ -126,12 +130,12 @@ class Examples
             #   Being truthy entails:
             #     <constant:nil>$10 to be NilClass
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$12 to be <bottom>
+            #     <debugEnvironmentTemp>$12 to be untyped
             #     a to be Integer(1)
             #   Being falsy entails:
             #     <constant:nil>$10 to be NilClass
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$12 to be <bottom>
+            #     <debugEnvironmentTemp>$12 to be untyped
             #     a to be Integer(1)
             #
             # <whileTemp>$7: TrueClass(true)
@@ -144,12 +148,12 @@ class Examples
               #   Being truthy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
               #   Being falsy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
           b = 1 # error: Changing type of pinned argument
               # <constant:nil>$10: NilClass
@@ -160,12 +164,12 @@ class Examples
               #   Being truthy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
               #   Being falsy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
         else
               # <constant:nil>$10: NilClass
@@ -176,12 +180,12 @@ class Examples
               #   Being truthy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
               #   Being falsy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
           b = 2 # error: Changing type of pinned argument
               # <constant:nil>$10: NilClass
@@ -192,12 +196,12 @@ class Examples
               #   Being truthy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
               #   Being falsy entails:
               #     <constant:nil>$10 to be NilClass
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$12 to be <bottom>
+              #     <debugEnvironmentTemp>$12 to be untyped
               #     a to be Integer(1)
         end
       end
@@ -219,12 +223,12 @@ class Examples
             # cond: untyped
             #   Being truthy entails:
             #     <constant:nil>$8 to be NilClass
-            #     <debugEnvironmentTemp>$9 to be <bottom>
+            #     <debugEnvironmentTemp>$9 to be untyped
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
             #     <constant:nil>$8 to be NilClass
-            #     <debugEnvironmentTemp>$9 to be <bottom>
+            #     <debugEnvironmentTemp>$9 to be untyped
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
       while true
@@ -235,12 +239,12 @@ class Examples
             # cond: untyped
             #   Being truthy entails:
             #     <constant:nil>$8 to be NilClass
-            #     <debugEnvironmentTemp>$9 to be <bottom>
+            #     <debugEnvironmentTemp>$9 to be untyped
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
             #     <constant:nil>$8 to be NilClass
-            #     <debugEnvironmentTemp>$9 to be <bottom>
+            #     <debugEnvironmentTemp>$9 to be untyped
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #
@@ -253,12 +257,12 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
           b = 1 # error: Changing type of pinned argument
@@ -269,12 +273,12 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         else
@@ -285,12 +289,12 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
           b = 2 # error: Changing type of pinned argument
@@ -301,12 +305,12 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
               #     <constant:nil>$8 to be NilClass
-              #     <debugEnvironmentTemp>$9 to be <bottom>
+              #     <debugEnvironmentTemp>$9 to be untyped
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         end
@@ -332,6 +336,7 @@ class Examples
        #
        # <returnMethodTemp>$2: untyped
       end
+      # dead=1
       # <returnMethodTemp>$2: untyped
       #
       # <finalReturn>: <bottom>

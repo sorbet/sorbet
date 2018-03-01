@@ -29,6 +29,7 @@ class A
     #
     # y: Integer
     x + y
+    # dead=1
     # x: Integer
     #
     # y: Integer
