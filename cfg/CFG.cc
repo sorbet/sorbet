@@ -149,7 +149,7 @@ string BasicBlock::toString(core::Context ctx) {
         buf << "outerLoops: " << this->outerLoops << endl;
     }
     for (Binding &exp : this->exprs) {
-        if (dynamic_cast<DebugEnvironment *>(exp.value.get()) != nullptr) {
+        if (isa_instruction<DebugEnvironment>(exp.value.get())) {
             buf << exp.value->toString(ctx);
             continue;
         }
@@ -180,7 +180,7 @@ void BasicBlock::recordAnnotations(core::Context ctx) {
     }
 
     for (Binding &exp : this->exprs) {
-        if (auto debugEnv = dynamic_cast<DebugEnvironment *>(exp.value.get())) {
+        if (auto debugEnv = cast_instruction<DebugEnvironment>(exp.value.get())) {
             ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx), debugEnv->pos);
         }
     }

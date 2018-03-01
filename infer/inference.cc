@@ -28,7 +28,7 @@ public:
                 used_vars.insert(bb->bexit.cond);
             }
             for (auto &bind : bb->exprs) {
-                if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
+                if (cfg::Send *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                     if (send->fun == core::Names::hardAssert()) {
                         if (!send->args.empty()) {
                             used_vars.insert(send->args[0]);
@@ -42,12 +42,12 @@ public:
             changed = false;
             for (auto &bb : cfg->forwardsTopoSort) {
                 for (auto &bind : bb->exprs) {
-                    if (cfg::Ident *id = dynamic_cast<cfg::Ident *>(bind.value.get())) {
+                    if (cfg::Ident *id = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                         if (isNeeded(bind.bind) && !isNeeded(id->what)) {
                             used_vars.insert(id->what);
                             changed = true;
                         }
-                    } else if (cfg::Send *send = dynamic_cast<cfg::Send *>(bind.value.get())) {
+                    } else if (cfg::Send *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                         if (send->fun == core::Names::bang()) {
                             if (send->args.empty()) {
                                 if (isNeeded(bind.bind) && !isNeeded(send->recv)) {
@@ -852,7 +852,7 @@ public:
                 },
                 [&](cfg::DebugEnvironment *d) {
                     d->str = toString(ctx);
-                    tp.type = core::Types::bottom();
+                    tp.type = core::Types::dynamic();
                     tp.origins.push_back(bind.loc);
                 });
 
@@ -997,7 +997,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
 }
 bool isSyntheticReturn(core::Context ctx, cfg::Binding &bind) {
     if (bind.bind._name == core::Names::finalReturn()) {
-        if (auto *ret = dynamic_cast<cfg::Return *>(bind.value.get())) {
+        if (auto *ret = cfg::cast_instruction<cfg::Return>(bind.value.get())) {
             return ret->what.isSyntheticTemporary(ctx) ||
                    (ret->what._name.data(ctx).kind == core::NameKind::CONSTANT &&
                     ret->what._name.data(ctx).cnst.original == core::Names::nil());
@@ -1070,7 +1070,9 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
         if (current.isDead) {
             // this block is unreachable.
             if (!bb->exprs.empty() &&
-                !(bb->exprs.size() == 1 && isSyntheticReturn(ctx, bb->exprs[0])) // synthetic final return
+                !(bb->exprs.size() == 1 &&
+                  (isSyntheticReturn(ctx, bb->exprs[0]) ||
+                   cfg::isa_instruction<cfg::DebugEnvironment>(bb->exprs[0].value.get()))) // synthetic final return
             ) {
                 ctx.state.error(bb->exprs[0].loc, core::errors::Infer::DeadBranchInferencer,
                                 "This code is unreachable");
@@ -1079,11 +1081,13 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
         }
 
         for (cfg::Binding &bind : bb->exprs) {
-            current.ensureGoodAssignTarget(ctx, bind.bind);
-            bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter);
-            bind.tpe->sanityCheck(ctx);
-            if (current.isDead) {
-                break;
+            if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
+                current.ensureGoodAssignTarget(ctx, bind.bind);
+                bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter);
+                bind.tpe->sanityCheck(ctx);
+                if (bind.tpe->isBottom()) {
+                    current.isDead = true;
+                }
             }
         }
         if (!current.isDead) {

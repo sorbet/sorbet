@@ -35,6 +35,7 @@ a: Integer(2)
 <returnMethodTemp>$2: NilClass | Integer
 
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
+dead=1
 <returnMethodTemp>$2: NilClass | Integer
 
 <finalReturn>: <bottom>

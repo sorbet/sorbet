@@ -133,11 +133,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     if (type == nullptr) {
         if (getHashValue(rules, core::Names::enum_()) != nullptr) {
-            // Handle enum: by setting the type to bottom, so that we'll parse
-            // the declaration but won't allow use of this prop in typechecked
-            // code.
-            type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::noreturn());
+            // Handle enum: by setting the type to untyped, so that we'll parse
+            // the declaration. Don't allow assigning it from typed code by deleting setter
+            type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
             isNilable = false;
+            isImmutable = true;
         }
     }
 

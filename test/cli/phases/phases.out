@@ -11882,6 +11882,7 @@ subgraph "cluster_#<static-init>$8" {
     "bb#<static-init>$8_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
+dead=1
 <returnMethodTemp>$2: Integer(1)
 
 <finalReturn>: <bottom>
@@ -11900,6 +11901,7 @@ subgraph "cluster_#<static-init>$8" {
 --- cfg-raw end ---
 --- typed-source start ---
 1
+# dead=1
 # <returnMethodTemp>$2: Integer(1)
 #
 # <finalReturn>: <bottom>

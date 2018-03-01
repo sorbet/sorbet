@@ -59,9 +59,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method default () -> String @ test/testdata/dsl/prop.rb:25
     method default= (arg0) -> String @ test/testdata/dsl/prop.rb:25
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:25
-    method enum_prop () -> <bottom> @ test/testdata/dsl/prop.rb:47
-    method enum_prop= (arg0) -> <bottom> @ test/testdata/dsl/prop.rb:47
-      argument arg0<> -> <bottom> @ test/testdata/dsl/prop.rb:47
+    method enum_prop () -> untyped @ test/testdata/dsl/prop.rb:47
     method factory () -> String @ test/testdata/dsl/prop.rb:27
     method factory= (arg0) -> String @ test/testdata/dsl/prop.rb:27
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:27
