@@ -159,7 +159,9 @@ shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
 shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isDynamic()) {
-            ctx.state.error(loc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
         }
         return core::Types::dynamic();
     }
@@ -447,7 +449,9 @@ public:
 
             assumeKnowledge(ctx, true, send->args[0], loc, vars);
             if (this->isDead) {
-                ctx.state.error(loc, core::errors::Infer::DeadBranchInferencer, "Hard assert is always false");
+                if (auto e = ctx.state.beginError(loc, core::errors::Infer::DeadBranchInferencer)) {
+                    e.setHeader("Hard assert is always false");
+                }
             }
         }
     }
@@ -771,18 +775,19 @@ public:
 
                     auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                     if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                        ctx.state.error(core::ComplexError(
-                            bind.loc, core::errors::Infer::ReturnTypeMismatch,
-                            "Returning value that does not conform to method result type",
-                            {core::ErrorSection("Expected " + expectedType->show(ctx),
-                                                {
-                                                    core::ErrorLine::from(ctx.owner.data(ctx).definitionLoc,
-                                                                          "Method `{}` has return type `{}`",
-                                                                          ctx.owner.data(ctx).name.toString(ctx),
-                                                                          expectedType->show(ctx)),
-                                                }),
-                             core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
-                                                typeAndOrigin.origins2Explanations(ctx))}));
+                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
+                            e.setHeader("Returning value that does not conform to method result type");
+                            e.addErrorSection(core::ErrorSection(
+                                "Expected " + expectedType->show(ctx),
+                                {
+                                    core::ErrorLine::from(
+                                        ctx.owner.data(ctx).definitionLoc, "Method `{}` has return type `{}`",
+                                        ctx.owner.data(ctx).name.toString(ctx), expectedType->show(ctx)),
+                                }));
+                            e.addErrorSection(
+                                core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                                                   typeAndOrigin.origins2Explanations(ctx)));
+                        }
                     }
                 },
                 [&](cfg::BlockReturn *i) {
@@ -796,12 +801,15 @@ public:
                             // TODO(nelhage): We should somehow report location
                             // information about the `send` and/or the
                             // definition of the block type
-                            ctx.state.error(core::ComplexError(
-                                bind.loc, core::errors::Infer::ReturnTypeMismatch,
-                                "Returning value that does not conform to block result type",
-                                {core::ErrorSection("Expected " + expectedType->toString(ctx)),
-                                 core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
-                                                    typeAndOrigin.origins2Explanations(ctx))}));
+                            if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
+                                if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
+                                    e.setHeader("Returning value that does not conform to block result type");
+                                    e.addErrorSection(core::ErrorSection("Expected " + expectedType->toString(ctx)));
+                                    e.addErrorSection(core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) +
+                                                                             " originating from:",
+                                                                         typeAndOrigin.origins2Explanations(ctx)));
+                                }
+                            }
                         }
                     }
 
@@ -842,18 +850,19 @@ public:
                     if (c->cast != core::Names::cast()) {
                         auto ty = getTypeAndOrigin(ctx, c->value);
                         if (c->cast == core::Names::assertType() && ty.type->isDynamic()) {
-                            ctx.state.error(core::ComplexError(
-                                bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "The typechecker was unable to infer the type of the asserted value.",
-                                {core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
-                                 core::ErrorSection("You may need to add additional `sig` "
-                                                    "annotations.")}));
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                                e.setHeader("The typechecker was unable to infer the type of the asserted value.");
+                                e.addErrorSection(
+                                    core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)));
+                                e.addErrorSection(core::ErrorSection("You may need to add additional `sig` "
+                                                                     "annotations."));
+                            }
                         } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
-                            ctx.state.error(core::ComplexError(
-                                bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "Argument does not have asserted type " + castType->show(ctx),
-                                {core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
-                                                    ty.origins2Explanations(ctx))}));
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
+                                e.setHeader("Argument does not have asserted type {}", castType->show(ctx));
+                                e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
+                                                                     ty.origins2Explanations(ctx)));
+                            }
                         }
                     }
                 },
@@ -867,9 +876,10 @@ public:
             tp.type->sanityCheck(ctx);
 
             if (!tp.type->isFullyDefined()) {
-                ctx.state.error(
-                    bind.loc, core::errors::Infer::IncompleteType,
-                    "Expression does not have a fully-defined type (Did you reference another class's type members?)");
+                if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
+                    e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
+                                "members?)");
+                }
                 tp.type = core::Types::dynamic();
             }
             ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
@@ -893,25 +903,31 @@ public:
                 if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
                     switch (bindMinLoops) {
                         case cfg::CFG::MIN_LOOP_FIELD:
-                            ctx.state.error(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch,
-                                            "Reassigning field with a value of wrong type: {} is not a subtype of {}",
+                            if (auto e = ctx.state.beginError(bind.loc,
+                                                              core::errors::Infer::FieldReassignmentTypeMismatch)) {
+                                e.setHeader("Reassigning field with a value of wrong type: {} is not a subtype of {}",
                                             tp.type->show(ctx), cur.type->show(ctx));
+                            }
                             break;
                         case cfg::CFG::MIN_LOOP_GLOBAL:
-                            ctx.state.error(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch,
-                                            "Reassigning global with a value of wrong type: {} is not a subtype of {}",
+                            if (auto e = ctx.state.beginError(bind.loc,
+                                                              core::errors::Infer::GlobalReassignmentTypeMismatch)) {
+                                e.setHeader("Reassigning global with a value of wrong type: {} is not a subtype of {}",
                                             tp.type->show(ctx), cur.type->show(ctx));
+                            }
                             break;
                         case cfg::CFG::MIN_LOOP_LET:
-                            ctx.state.error(
-                                bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch,
-                                "Incompatible assignment to variable declared via `let`: {} is not a subtype of {}",
-                                tp.type->show(ctx), cur.type->show(ctx));
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+                                e.setHeader(
+                                    "Incompatible assignment to variable declared via `let`: {} is not a subtype of {}",
+                                    tp.type->show(ctx), cur.type->show(ctx));
+                            }
                             break;
                         default:
-                            ctx.state.error(bind.loc, core::errors::Infer::PinnedVariableMismatch,
-                                            "Changing type of pinned argument, {} is not a subtype of {}",
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+                                e.setHeader("Changing type of pinned argument, {} is not a subtype of {}",
                                             tp.type->show(ctx), cur.type->show(ctx));
+                            }
                             break;
                     }
                     tp.type = core::Types::dynamic();
@@ -927,7 +943,9 @@ public:
 
             return tp.type;
         } catch (...) {
-            ctx.state.error(bind.loc, core::errors::Internal::InternalError, "Failed to type (backtrace is above)");
+            if (auto e = ctx.state.beginError(bind.loc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to type (backtrace is above)");
+            }
             throw;
         }
     }
@@ -1081,8 +1099,9 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
                   (isSyntheticReturn(ctx, bb->exprs[0]) ||
                    cfg::isa_instruction<cfg::DebugEnvironment>(bb->exprs[0].value.get()))) // synthetic final return
             ) {
-                ctx.state.error(bb->exprs[0].loc, core::errors::Infer::DeadBranchInferencer,
-                                "This code is unreachable");
+                if (auto e = ctx.state.beginError(bb->exprs[0].loc, core::errors::Infer::DeadBranchInferencer)) {
+                    e.setHeader("This code is unreachable");
+                }
             }
             continue;
         }

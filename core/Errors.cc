@@ -84,10 +84,32 @@ string ComplexError::toString(const GlobalState &gs) {
 
 ErrorRegion::~ErrorRegion() {
     ErrorQueueMessage msg;
-    msg.kind = silenceErrors ? ErrorQueueMessage::Kind::Drop : ErrorQueueMessage::Kind::Flush;
+    msg.kind = ErrorQueueMessage::Kind::Flush;
     msg.whatFile = this->f;
     gs.errorQueue->queue.push(move(msg), 1);
 }
 
+ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
+    : gs(gs), willBuild(willBuild), loc(loc), what(what) {}
+
+void ErrorBuilder::_setHeader(std::string &&header) {
+    ENFORCE(willBuild);
+    this->header = move(header);
+}
+
+void ErrorBuilder::addErrorSection(ErrorSection &&section) {
+    ENFORCE(willBuild);
+    this->sections.emplace_back(move(section));
+}
+
+ErrorBuilder::~ErrorBuilder() {
+    unique_ptr<ComplexError> err =
+        make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
+    if (this->what == errors::Internal::InternalError) {
+        err->isCritical = true;
+        gs.errorQueue->hadCritical = true;
+    }
+    this->gs._error(move(err));
+}
 } // namespace core
 } // namespace ruby_typer

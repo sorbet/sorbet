@@ -124,7 +124,9 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
 }
 
 unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {
-    ctx.state.error(node->loc, core::errors::Desugar::UnsupportedNode, "Unsupported node type {}", node->nodeName());
+    if (auto e = ctx.state.beginError(node->loc, core::errors::Desugar::UnsupportedNode)) {
+        e.setHeader("Unsupported node type {}", node->nodeName());
+    }
     return MK::EmptyTree(node->loc);
 }
 
@@ -596,8 +598,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::DefS *method) {
                 parser::Self *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
-                    ctx.state.error(loc, core::errors::Desugar::InvalidSingletonDef,
-                                    "`def EXPRESSION.method' is only supported for `def self.method'");
+                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::InvalidSingletonDef)) {
+                        e.setHeader("`def EXPRESSION.method' is only supported for `def self.method'");
+                    }
                     unique_ptr<Expression> res = MK::EmptyTree(loc);
                     result.swap(res);
                     return;
@@ -614,8 +617,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 // which will get the symbol of `class.singleton_class`
                 parser::Self *self = parser::cast_node<parser::Self>(sclass->expr.get());
                 if (self == nullptr) {
-                    ctx.state.error(sclass->loc, core::errors::Desugar::InvalidSingletonDef,
-                                    "`class << EXPRESSION' is only supported for `class << self'");
+                    if (auto e = ctx.state.beginError(sclass->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                        e.setHeader("`class << EXPRESSION' is only supported for `class << self'");
+                    }
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
                     return;
@@ -775,12 +779,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     val = stol(integer->val);
                 } catch (std::out_of_range &) {
                     val = 0;
-                    ctx.state.error(loc, core::errors::Desugar::IntegerOutOfRange,
-                                    "Unsupported large integer literal: {}", integer->val);
+                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
+                        e.setHeader("Unsupported large integer literal: {}", integer->val);
+                    }
                 } catch (std::invalid_argument &) {
                     val = 0;
-                    ctx.state.error(loc, core::errors::Desugar::IntegerOutOfRange, "Unsupported integer literal: {}",
-                                    integer->val);
+                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
+                        e.setHeader("Unsupported integer literal: {}", integer->val);
+                    }
                 }
 
                 unique_ptr<Expression> res = MK::Int(loc, val);
@@ -792,17 +798,20 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     val = stod(floatNode->val);
                     if (isinf(val)) {
                         val = std::numeric_limits<double>::quiet_NaN();
-                        ctx.state.error(loc, core::errors::Desugar::FloatOutOfRange,
-                                        "Unsupported large float literal: {}", floatNode->val);
+                        if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
+                            e.setHeader("Unsupported large float literal: {}", floatNode->val);
+                        }
                     }
                 } catch (std::out_of_range &) {
                     val = std::numeric_limits<double>::quiet_NaN();
-                    ctx.state.error(loc, core::errors::Desugar::FloatOutOfRange, "Unsupported large float literal: {}",
-                                    floatNode->val);
+                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
+                        e.setHeader("Unsupported large float literal: {}", floatNode->val);
+                    }
                 } catch (std::invalid_argument &) {
                     val = std::numeric_limits<double>::quiet_NaN();
-                    ctx.state.error(loc, core::errors::Desugar::FloatOutOfRange, "Unsupported float literal: {}",
-                                    floatNode->val);
+                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
+                        e.setHeader("Unsupported float literal: {}", floatNode->val);
+                    }
                 }
 
                 unique_ptr<Expression> res = make_unique<FloatLit>(loc, val);
@@ -1273,8 +1282,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
     } catch (...) {
         if (!locReported) {
             locReported = true;
-            ctx.state.error(what->loc, core::errors::Internal::InternalError,
-                            "Failed to process tree (backtrace is above)");
+            if (auto e = ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
         }
         throw;
     }

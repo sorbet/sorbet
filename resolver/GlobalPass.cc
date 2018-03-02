@@ -16,23 +16,26 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         if (parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable())) {
             my = gs.enterTypeMember(inSym.definitionLoc, sym, name, parentVariance);
         } else {
-            gs.error(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared,
-                     "Type {} declared by parent {} should be declared again", name.toString(gs),
-                     parent.data(gs).show(gs));
+            if (auto e = gs.beginError(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared)) {
+                e.setHeader("Type {} declared by parent {} should be declared again", name.toString(gs),
+                            parent.data(gs).show(gs));
+            }
             return false;
         }
     }
     auto &data = my.data(gs);
     if (!data.isTypeMember() && !data.isTypeArgument()) {
-        gs.error(inSym.definitionLoc, core::errors::Resolver::NotATypeVariable,
-                 "Type variable {} needs to be declared as `= type_member(SOMETHING)`", name.toString(gs));
+        if (auto e = gs.beginError(inSym.definitionLoc, core::errors::Resolver::NotATypeVariable)) {
+            e.setHeader("Type variable {} needs to be declared as `= type_member(SOMETHING)`", name.toString(gs));
+        }
         return false;
     }
     auto myVariance = data.variance();
     if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
         // this requirement can be loosened. You can go from variant to invariant.
-        gs.error(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch,
-                 "Type variance mismatch with parent {}", parent.data(gs).show(gs));
+        if (auto e = gs.beginError(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch)) {
+            e.setHeader("Type variance mismatch with parent {}", parent.data(gs).show(gs));
+        }
         return true;
     }
     inSym.typeAliases.emplace_back(parentTypeMember, my);
@@ -48,8 +51,10 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs).definitionLoc;
                 if (!loc.file.data(gs).isStdLib()) {
-                    gs.error(tp.data(gs).definitionLoc, core::errors::Resolver::VariantTypeMemberInClass,
-                             "Classes can only have invariant type members");
+                    if (auto e = gs.beginError(tp.data(gs).definitionLoc,
+                                               core::errors::Resolver::VariantTypeMemberInClass)) {
+                        e.setHeader("Classes can only have invariant type members");
+                    }
                     return;
                 }
             }
@@ -71,8 +76,10 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
                 core::SymbolRef my = tp.dealiasAt(gs, sym);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (inSym.typeMembers()[i] != my) {
-                    gs.error(my.data(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder,
-                             "Type members in wrong order");
+                    if (auto e =
+                            gs.beginError(my.data(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder)) {
+                        e.setHeader("Type members in wrong order");
+                    }
                     int foundIdx = 0;
                     while (foundIdx < inSym.typeMembers().size() && inSym.typeMembers()[foundIdx] != my) {
                         foundIdx++;

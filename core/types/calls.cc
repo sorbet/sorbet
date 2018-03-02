@@ -152,22 +152,23 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
     if (Types::isSubType(ctx, argTpe.type, expectedType)) {
         return;
     }
-    ctx.state.error(core::ComplexError(
-        callLoc, core::errors::Infer::MethodArgumentMismatch,
-        "Argument " + argSym.name.toString(ctx) + " does not match expected type " + expectedType->show(ctx),
-        {core::ErrorSection({
-             core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
-                                   method.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
-                                   expectedType->show(ctx)),
-         }),
-         core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
-                            argTpe.origins2Explanations(ctx))}));
+    if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
+        e.setHeader("Argument {} does not match expected type {}", argSym.name.toString(ctx), expectedType->show(ctx));
+        e.addErrorSection(core::ErrorSection({
+            core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
+                                  method.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                  expectedType->show(ctx)),
+        }));
+        e.addErrorSection(core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
+                                             argTpe.origins2Explanations(ctx)));
+    }
 }
 
 void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
-    ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                    "Missing required keyword argument {} for method {}.", arg.data(ctx).name.toString(ctx),
+    if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+        e.setHeader("Missing required keyword argument {} for method {}.", arg.data(ctx).name.toString(ctx),
                     method.toString(ctx));
+    }
 }
 }; // namespace
 
@@ -302,7 +303,9 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
     if (ClassType *classType = cast_type<ClassType>(tp.get())) {
         SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
-            ctx.state.error(loc, errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
             return Types::dynamic();
         }
 
@@ -336,8 +339,9 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             // Default initialize() implementation if the class doesn't provide
             // one in userland
             if (!args.empty()) {
-                ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                                "Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
+                }
             }
             return core::Types::dynamic();
         }
@@ -368,9 +372,10 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             }
 
             if (args.size() != arity) {
-                ctx.state.error(callLoc, core::errors::Infer::GenericArgumentCountMismatch,
-                                "Wrong number of type parameters for {}. Expected {}, got {}",
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
+                    e.setHeader("Wrong number of type parameters for {}. Expected {}, got {}",
                                 attachedClass.data(ctx).show(ctx), arity, args.size());
+                }
             }
 
             vector<shared_ptr<core::Type>> targs;
@@ -463,16 +468,18 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         }
 
         if (alternative.symbol.exists()) {
-            ctx.state.error(
-                core::ComplexError(callLoc, core::errors::Infer::UnknownMethod,
-                                   "Method " + fun.data(ctx).toString(ctx) + " does not exist on " + this->show(ctx),
-                                   {core::ErrorSection({
-                                       core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
-                                                             "Did you mean: {}?", alternative.name.toString(ctx)),
-                                   })}));
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
+                e.setHeader("Method {} does not exist on {}", fun.data(ctx).toString(ctx), this->show(ctx));
+                e.addErrorSection(core::ErrorSection({
+                    core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: {}?",
+                                          alternative.name.toString(ctx)),
+                }));
+            }
         } else {
-            ctx.state.error(callLoc, core::errors::Infer::UnknownMethod, "Method {} does not exist on {}{}",
-                            fun.data(ctx).toString(ctx), this->show(ctx), maybeComponent);
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
+                e.setHeader("Method {} does not exist on {}{}", fun.data(ctx).toString(ctx), this->show(ctx),
+                            maybeComponent);
+            }
         }
         return Types::dynamic();
     }
@@ -518,14 +525,14 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     if (pit != pend) {
         if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
               pit->data(ctx).isBlockArgument())) {
-            ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                            "Not enough arguments provided for method {}. Expected: {}, provided: {}",
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                e.setHeader("Not enough arguments provided for method {}. Expected: {}, provided: {}",
                             fun.toString(ctx),
-
                             // TODO(nelhage): report actual counts of required arguments,
                             // and account for keyword arguments
                             data.arguments().size(),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
+            }
         }
     }
 
@@ -598,16 +605,18 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 }
                 NameRef arg(ctx.state, key->value);
 
-                ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                                "Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
                                 fun.toString(ctx));
+                }
             }
         } else if (hashArg.type->derivesFrom(ctx, core::Symbols::Hash())) {
             --aend;
-            ctx.state.error(core::ComplexError(
-                callLoc, core::errors::Infer::MethodArgumentMismatch, "Passing an untyped hash to keyword arguments",
-                {core::ErrorSection("Got " + hashArg.type->show(ctx) + " originating from:",
-                                    hashArg.origins2Explanations(ctx))}));
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                e.setHeader("Passing an untyped hash to keyword arguments");
+                e.addErrorSection(core::ErrorSection("Got " + hashArg.type->show(ctx) + " originating from:",
+                                                     hashArg.origins2Explanations(ctx)));
+            }
         }
     }
     if (hasKwargs && aend == args.end()) {
@@ -622,13 +631,13 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     }
 
     if (ait != aend) {
-        ctx.state.error(callLoc, core::errors::Infer::MethodArgumentCountMismatch,
-                        "Too many arguments provided for method {}. Expected: {}, provided: {}", fun.toString(ctx),
+        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+            e.setHeader("Too many arguments provided for method {}. Expected: {}, provided: {}", fun.toString(ctx),
 
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments
-                        data.arguments().size(),
-                        aend - args.begin()); // TODO: should use position and print the source tree, not the cfg one.
+                        data.arguments().size(), aend - args.begin());
+        }
     }
 
     if (block != nullptr) {
@@ -699,7 +708,9 @@ std::shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef na
             return wrapped;
         }
         default: {
-            ctx.state.error(callLoc, core::errors::Infer::BareTypeUsage, "Unsupported usage of bare type");
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
             return Types::dynamic();
         }
     }

@@ -45,7 +45,9 @@ private:
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
-                ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant");
+                if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
+                    e.setHeader("Stubbing out unknown constant");
+                }
                 result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
                 result.data(ctx).superClass = core::Symbols::StubClass();
                 result.data(ctx).resultType = core::Types::dynamic();
@@ -66,7 +68,9 @@ private:
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
                 if (resolved.data(ctx).resultType.get() == nullptr || !resolved.data(ctx).resultType->isDynamic()) {
-                    ctx.state.error(c->loc, core::errors::Resolver::StubConstant, "Stubbing out unknown constant");
+                    if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
+                        e.setHeader("Stubbing out unknown constant");
+                    }
                 }
                 result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
                 result.data(ctx).resultType = core::Types::dynamic();
@@ -75,8 +79,9 @@ private:
 
             return result;
         } else {
-            ctx.state.error(c->loc, core::errors::Resolver::DynamicConstant,
-                            "Dynamic constant references are unsupported {}", c->toString(ctx));
+            if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
+                e.setHeader("Dynamic constant references are unsupported {}", c->toString(ctx));
+            }
             return core::Symbols::untyped();
         }
     }
@@ -99,14 +104,16 @@ private:
 
         ast::Ident *id = ast::cast_tree<ast::Ident>(tree.get());
         if (id == nullptr || !id->symbol.data(ctx).isClass()) {
-            ctx.state.error(tree->loc, core::errors::Resolver::DynamicSuperclass,
-                            "Superclasses and mixins must be statically resolved.");
+            if (auto e = ctx.state.beginError(tree->loc, core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins must be statically resolved.");
+            }
             return core::Symbols::noSymbol();
         }
         if (id->symbol == klass || id->symbol.data(ctx).derivesFrom(ctx, klass)) {
-            ctx.state.error(id->loc, core::errors::Resolver::CircularDependency,
-                            "Circular dependency: {} and {} are declared as parents of each other",
+            if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::CircularDependency)) {
+                e.setHeader("Circular dependency: {} and {} are declared as parents of each other",
                             klass.data(ctx).name.toString(ctx), id->symbol.data(ctx).name.toString(ctx));
+            }
             return core::Symbols::noSymbol();
         }
 
@@ -142,8 +149,9 @@ public:
                            klass.data(ctx).superClass == core::Symbols::todo() || klass.data(ctx).superClass == sym) {
                     klass.data(ctx).superClass = sym;
                 } else {
-                    ctx.state.error(ancst->loc, core::errors::Resolver::RedefinitionOfParents,
-                                    "Class parents redefined for class {}", original->symbol.data(ctx).show(ctx));
+                    if (auto e = ctx.state.beginError(ancst->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                        e.setHeader("Class parents redefined for class {}", original->symbol.data(ctx).show(ctx));
+                    }
                 }
             } else {
                 klass.data(ctx).mixins(ctx).emplace_back(sym);
@@ -193,20 +201,23 @@ class ResolveSignaturesWalk {
 private:
     void processDeclareVariables(core::MutableContext ctx, ast::Send *send) {
         if (send->block != nullptr) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                            "Malformed `declare_variables'");
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                e.setHeader("Malformed `declare_variables'");
+            }
             return;
         }
 
         if (send->args.size() != 1) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                            "Wrong number of arguments to `declare_variables'");
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                e.setHeader("Wrong number of arguments to `declare_variables'");
+            }
             return;
         }
         auto hash = ast::cast_tree<ast::Hash>(send->args.front().get());
         if (hash == nullptr) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidDeclareVariables,
-                            "Malformed `declare_variables': Argument must be a hash");
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                e.setHeader("Malformed `declare_variables': Argument must be a hash");
+            }
             return;
         }
         for (int i = 0; i < hash->keys.size(); ++i) {
@@ -214,8 +225,9 @@ private:
             auto &value = hash->values[i];
             auto sym = ast::cast_tree<ast::SymbolLit>(key.get());
             if (sym == nullptr) {
-                ctx.state.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                "`declare_variables': variable names must be symbols");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("`declare_variables': variable names must be symbols");
+                }
                 continue;
             }
 
@@ -227,8 +239,9 @@ private:
                 core::Symbol &data = ctx.owner.data(ctx);
                 var = data.findMember(ctx, sym->name);
                 if (var.exists()) {
-                    ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
-                                    "Redeclaring variable `{}'", str);
+                    if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                        e.setHeader("Redeclaring variable `{}'", str);
+                    }
                 } else {
                     var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
@@ -236,14 +249,16 @@ private:
                 core::Symbol &data = ctx.owner.data(ctx);
                 var = data.findMember(ctx, sym->name);
                 if (var.exists()) {
-                    ctx.state.error(key->loc, core::errors::Resolver::DuplicateVariableDeclaration,
-                                    "Redeclaring variable `{}'", str);
+                    if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                        e.setHeader("Redeclaring variable `{}'", str);
+                    }
                 } else {
                     var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
                 }
             } else {
-                ctx.state.error(key->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                "`declare_variables`: variables must start with @ or @@");
+                if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("`declare_variables`: variables must start with @ or @@");
+                }
             }
 
             if (var.exists()) {
@@ -261,8 +276,9 @@ private:
         if (!sig.seen.returns) {
             if (sig.seen.args || !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation ||
                                    sig.seen.overridable || sig.seen.abstract)) {
-                ctx.state.error(exprLoc, core::errors::Resolver::InvalidMethodSignature,
-                                "Malformed `sig`: No return type specified. Specify one with .returns()");
+                if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed `sig`: No return type specified. Specify one with .returns()");
+                }
             }
         }
 
@@ -290,58 +306,69 @@ private:
                 arg.data(ctx).resultType = core::Types::dynamic();
                 if (sig.seen.args || sig.seen.returns) {
                     // Only error if we have any types
-                    ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Malformed sig. Type not specified for argument {}",
+                    if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
+                                                      core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed sig. Type not specified for argument {}",
                                     arg.data(ctx).name.toString(ctx));
+                    }
                 }
                 ++it;
             }
 
             if (isOverloaded && arg.data(ctx).isKeyword()) {
-                ctx.state.error(arg.data(ctx).definitionLoc, core::errors::Resolver::InvalidMethodSignature,
-                                "Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
+                if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
+                                                  core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Malformed sig. Overloaded functions cannot have keyword arguments:  {}",
                                 arg.data(ctx).name.toString(ctx));
+                }
             }
         }
 
         for (auto spec : sig.argTypes) {
-            ctx.state.error(spec.loc, core::errors::Resolver::InvalidMethodSignature, "Unknown argument name {}",
-                            spec.name.toString(ctx));
+            if (auto e = ctx.state.beginError(spec.loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Unknown argument name {}", spec.name.toString(ctx));
+            }
         }
     }
 
     void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
         if (!ctx.owner.data(ctx).isClassModule()) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
-                            "{} can only be declared inside a module, not a class.", send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("{} can only be declared inside a module, not a class.", send->fun.data(ctx).show(ctx));
+            }
             // Keep processing it anyways
         }
 
         if (send->args.size() != 1) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
-                            "Wrong number of arguments to {}: Expected 1", send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Wrong number of arguments to {}: Expected 1", send->fun.data(ctx).show(ctx));
+            }
             return;
         }
         auto *id = ast::cast_tree<ast::Ident>(send->args.front().get());
         if (id == nullptr || !id->symbol.data(ctx).isClass()) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
-                            "Argument to {} must be statically resolvable to a module.", send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Argument to {} must be statically resolvable to a module.", send->fun.data(ctx).show(ctx));
+            }
             return;
         }
         if (id->symbol.data(ctx).isClassClass()) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
-                            "{} is a class, not a module; Only modules may be mixins.", id->symbol.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("{} is a class, not a module; Only modules may be mixins.", id->symbol.data(ctx).show(ctx));
+            }
             return;
         }
         if (id->symbol == ctx.owner) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration, "Must not pass your self to {}",
-                            send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("Must not pass your self to {}", send->fun.data(ctx).show(ctx));
+            }
             return;
         }
         auto existing = ctx.owner.data(ctx).findMember(ctx, core::Names::classMethods());
         if (existing.exists()) {
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidMixinDeclaration,
-                            "{} can only be declared once per module", send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
+                e.setHeader("{} can only be declared once per module", send->fun.data(ctx).show(ctx));
+            }
             return;
         }
         ctx.owner.data(ctx).members.emplace_back(core::Names::classMethods(), id->symbol);
@@ -357,10 +384,11 @@ private:
                     if (TypeSyntax::isSig(ctx, send)) {
                         if (!lastSig.empty()) {
                             if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
-                                ctx.state.error(core::ComplexError(
-                                    lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Unused type annotation. No method def before next annotation.",
-                                    core::ErrorLine(send->loc, "Type annotation that will be used instead.")));
+                                if (auto e = ctx.state.beginError(lastSig[0]->loc,
+                                                                  core::errors::Resolver::InvalidMethodSignature)) {
+                                    e.setHeader("Unused type annotation. No method def before next annotation.");
+                                    e.addErrorLine(send->loc, "Type annotation that will be used instead.");
+                                }
                             }
                         }
                         lastSig.emplace_back(move(stat));
@@ -409,8 +437,11 @@ private:
                         fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()), isOverloaded);
 
                         if (mdef->symbol.data(ctx).isAbstract() && !ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
-                            ctx.state.error(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody,
-                                            "Abstract methods must not contain any code in their body.");
+                            if (auto e = ctx.state.beginError(mdef->rhs->loc,
+                                                              core::errors::Resolver::AbstractMethodWithBody)) {
+                                e.setHeader("Abstract methods must not contain any code in their body.");
+                            }
+
                             mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
                         }
 
@@ -437,8 +468,9 @@ private:
         }
 
         if (!lastSig.empty()) {
-            ctx.state.error(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature,
-                            "Malformed sig. No method def following it.");
+            if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed sig. No method def following it.");
+            }
         }
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
@@ -467,8 +499,9 @@ private:
                  },
                  [&](ast::Cast *cast) {
                      if (cast->cast != core::Names::let()) {
-                         ctx.state.error(cast->loc, core::errors::Resolver::ConstantAssertType,
-                                         "Use T.let() to specify the type of constants.");
+                         if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+                             e.setHeader("Use T.let() to specify the type of constants.");
+                         }
                      }
                      result = cast->type;
                  },
@@ -494,8 +527,9 @@ private:
         core::SymbolRef scope;
         if (uid->kind == ast::UnresolvedIdent::Class) {
             if (!ctx.owner.data(ctx).isClass()) {
-                ctx.state.error(uid->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                "Class variables must be declared at class scope.");
+                if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                    e.setHeader("Class variables must be declared at class scope.");
+                }
             }
 
             scope = ctx.contextClass();
@@ -505,8 +539,9 @@ private:
             } else {
                 // Inside a method; declaring a normal instance variable
                 if (ctx.owner.data(ctx).name != core::Names::initialize()) {
-                    ctx.state.error(uid->loc, core::errors::Resolver::InvalidDeclareVariables,
-                                    "Instance variables must be declared inside `initialize`");
+                    if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
+                        e.setHeader("Instance variables must be declared inside `initialize`");
+                    }
                 }
             }
             scope = ctx.selfClass();
@@ -514,9 +549,10 @@ private:
 
         auto prior = scope.data(ctx).findMember(ctx, uid->name);
         if (prior.exists()) {
-            ctx.state.error(core::ComplexError(
-                uid->loc, core::errors::Resolver::DuplicateVariableDeclaration, "Illegal variable redeclaration",
-                core::ErrorLine(prior.data(ctx).definitionLoc, "Previous declaration is here:")));
+            if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
+                e.setHeader("Illegal variable redeclaration");
+                e.addErrorLine(prior.data(ctx).definitionLoc, "Previous declaration is here:");
+            }
             return false;
         }
         core::SymbolRef var;
@@ -597,9 +633,10 @@ public:
             case core::Names::assertType()._id:
             case core::Names::cast()._id: {
                 if (send->args.size() < 2) {
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidCast,
-                                    "Not enough arguments to T.{}: got {}, expected 2", send->fun.toString(ctx),
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidCast)) {
+                        e.setHeader("Not enough arguments to T.{}: got {}, expected 2", send->fun.toString(ctx),
                                     send->args.size());
+                    }
                     return send;
                 }
 
@@ -853,8 +890,9 @@ public:
 
         core::SymbolRef sym = klass.data(ctx).findMemberTransitive(ctx, id->name);
         if (!sym.exists()) {
-            ctx.state.error(id->loc, core::errors::Resolver::UndeclaredVariable, "Use of undeclared variable `{}'",
-                            id->name.toString(ctx));
+            if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::UndeclaredVariable)) {
+                e.setHeader("Use of undeclared variable `{}'", id->name.toString(ctx));
+            }
             if (id->kind == ast::UnresolvedIdent::Class) {
                 sym = ctx.state.enterStaticFieldSymbol(id->loc, klass, id->name);
             } else {

@@ -33,6 +33,7 @@ class GlobalState final {
     friend FileRef;
     friend GlobalSubstitution;
     friend ErrorRegion;
+    friend ErrorBuilder;
     friend serialize::GlobalStateSerializer;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
@@ -93,23 +94,18 @@ public:
 
     bool hadCriticalError() const;
 
-    template <typename... Args>
-    void error(Loc loc, ErrorClass what, const std::string &msg, const Args &... args) const {
-        std::string formatted = fmt::format(msg, args...);
-        _error(std::make_unique<BasicError>(BasicError(loc, what, formatted)));
-    }
-    void error(ComplexError error) const {
-        _error(std::make_unique<ComplexError>(error));
-    }
+    ErrorBuilder beginError(Loc loc, ErrorClass what) const;
 
     int totalErrors() const;
     void flushErrors();
 
     int globalStateId;
+    bool silenceErrors = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
 
 private:
+    bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;
     absl::string_view enterString(absl::string_view nm);

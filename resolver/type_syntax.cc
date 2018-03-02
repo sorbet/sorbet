@@ -16,7 +16,9 @@ shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast
              [&](ast::StringLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::String(), lit->value); },
              [&](ast::SymbolLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::Symbol(), lit->name); },
              [&](ast::Expression *expr) {
-                 ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported type literal");
+                 if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                     e.setHeader("Unsupported type literal");
+                 }
                  result = core::Types::dynamic();
              });
     ENFORCE(result.get() != nullptr);
@@ -56,8 +58,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
             case core::Names::sig()._id:
             case core::Names::proc()._id: {
                 if (sig.seen.sig || sig.seen.proc) {
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Malformed `{}`: Found multiple argument lists", send->fun.toString(ctx));
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`: Found multiple argument lists", send->fun.toString(ctx));
+                    }
                     sig.argTypes.clear();
                 }
                 if (send->fun == core::Names::sig()) {
@@ -72,15 +75,17 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                 sig.seen.args = true;
 
                 if (send->args.size() > 1) {
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Wrong number of args to `{}`. Got {}, expected 0-1", send->fun.toString(ctx),
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Wrong number of args to `{}`. Got {}, expected 0-1", send->fun.toString(ctx),
                                     send->args.size());
+                    }
                 }
                 auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                 if (hash == nullptr) {
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Malformed `{}`; Expected a hash of arguments => types.", send->fun.toString(ctx),
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed `{}`; Expected a hash of arguments => types.", send->fun.toString(ctx),
                                     send->args.size());
+                    }
                     break;
                 }
 
@@ -109,8 +114,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
             case core::Names::returns()._id:
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {
-                    ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                    "Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
+                    }
                 }
                 if (!send->args.empty()) {
                     sig.returns = getResultType(ctx, send->args.front());
@@ -121,8 +127,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                 sig.seen.checked = true;
                 break;
             default:
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidMethodSignature,
-                                "Unknown `sig` builder method {}.", send->fun.toString(ctx));
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                    e.setHeader("Unknown `sig` builder method {}.", send->fun.toString(ctx));
+                }
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
     }
@@ -155,20 +162,24 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::enum_()._id: {
             if (send->args.size() != 1) {
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "enum only takes a single argument");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("enum only takes a single argument");
+                }
                 return core::Types::dynamic();
             }
             auto arr = ast::cast_tree<ast::Array>(send->args[0].get());
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
                 { return core::Types::bottom(); }
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
+                }
                 return core::Types::dynamic();
             }
             if (arr->elems.empty()) {
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "enum([]) is invalid");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("enum([]) is invalid");
+                }
                 return core::Types::dynamic();
             }
             auto result = getResultLiteral(ctx, arr->elems[0]);
@@ -181,20 +192,24 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::classOf()._id: {
             if (send->args.size() != 1) {
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "T.class_of only takes a single argument");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("T.class_of only takes a single argument");
+                }
                 return core::Types::dynamic();
             }
             auto *obj = ast::cast_tree<ast::Ident>(send->args[0].get());
             if (!obj) {
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "T.class_of needs a Class as its argument");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("T.class_of needs a Class as its argument");
+                }
                 return core::Types::dynamic();
             }
             auto sym = obj->symbol.data(ctx).dealias(ctx);
             auto singleton = sym.data(ctx).singletonClass(ctx);
             if (!singleton.exists()) {
-                ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unknown class");
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Unknown class");
+                }
                 return core::Types::dynamic();
             }
             return make_shared<core::ClassType>(singleton);
@@ -206,8 +221,9 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
             return core::Types::bottom();
 
         default:
-            ctx.state.error(send->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported method T.{}",
-                            send->fun.toString(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Unsupported method T.{}", send->fun.toString(ctx));
+            }
             return core::Types::dynamic();
     }
 }
@@ -235,8 +251,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                     keys.emplace_back(key);
                     values.emplace_back(val);
                 } else {
-                    ctx.state.error(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                    "Malformed type declaration. Shape keys must be Symbol literals.");
+                    if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("Malformed type declaration. Shape keys must be Symbol literals.");
+                    }
                 }
             }
             result = make_shared<core::ShapeType>(keys, values);
@@ -249,16 +266,18 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             auto sym = i->symbol.data(ctx).dealias(ctx);
             if (sym.data(ctx).isClass()) {
                 if (sym.data(ctx).typeArity(ctx) > 0 && !silenceGenericError) {
-                    ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                    "Malformed type declaration. Generic class without type arguments {}",
+                    if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("Malformed type declaration. Generic class without type arguments {}",
                                     i->toString(ctx));
+                    }
                 }
                 result = sym.data(ctx).externalType(ctx);
             } else if (sym.data(ctx).isTypeMember()) {
                 result = make_shared<core::LambdaParam>(sym);
             } else {
-                ctx.state.error(i->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "Malformed type declaration. Not a class type {}", i->toString(ctx));
+                if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Malformed type declaration. Not a class type {}", i->toString(ctx));
+                }
                 result = core::Types::dynamic();
             }
         },
@@ -269,8 +288,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 vector<shared_ptr<core::Type>> targs;
 
                 if (sig.returns == nullptr) {
-                    ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                    "Malformed T.proc: You must specify a return type.");
+                    if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("Malformed T.proc: You must specify a return type.");
+                    }
                     targs.emplace_back(core::Types::dynamic());
                 } else {
                     targs.emplace_back(sig.returns);
@@ -282,8 +302,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
                 auto arity = targs.size() - 1;
                 if (arity > core::Symbols::MAX_PROC_ARITY) {
-                    ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                    "Malformed T.proc: Too many arguments (max {})", core::Symbols::MAX_PROC_ARITY);
+                    if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                        e.setHeader("Malformed T.proc: Too many arguments (max {})", core::Symbols::MAX_PROC_ARITY);
+                    }
                     result = core::Types::dynamic();
                     return;
                 }
@@ -295,8 +316,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
             auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
             if (recvi == nullptr) {
-                ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                }
                 result = core::Types::dynamic();
                 return;
             }
@@ -321,8 +343,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             if (s->fun != core::Names::squareBrackets()) {
-                ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                                "Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Malformed type declaration. Unknown type syntax {}", expr->toString(ctx));
+                }
             }
 
             std::vector<core::TypeAndOrigins> targs;
@@ -344,8 +367,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 return;
             }
 
-            ctx.state.error(s->loc, core::errors::Resolver::InvalidTypeDeclaration,
-                            "Illegal type expression. Unknown type {}", out->toString(ctx));
+            if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Illegal type expression. Unknown type {}", out->toString(ctx));
+            }
             result = core::Types::dynamic();
         },
         [&](ast::Self *slf) {
@@ -353,7 +377,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             result = klass.data(ctx).selfType(ctx);
         },
         [&](ast::Expression *expr) {
-            ctx.state.error(expr->loc, core::errors::Resolver::InvalidTypeDeclaration, "Unsupported type syntax");
+            if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Unsupported type syntax");
+            }
             result = core::Types::dynamic();
         });
     ENFORCE(result.get() != nullptr);

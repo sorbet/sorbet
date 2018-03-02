@@ -110,21 +110,24 @@ class NameInserter {
         }
 
         if (send->args.size() != 1) {
-            ctx.state.error(send->loc, core::errors::Namer::IncludeMutipleParam,
-                            "`{}` should only be passed a single constant. You passed {} parameters.",
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
+                e.setHeader("`{}` should only be passed a single constant. You passed {} parameters.",
                             send->fun.data(ctx).show(ctx), send->args.size());
+            }
             return false;
         }
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
-            ctx.state.error(send->loc, core::errors::Namer::IncludeNotConstant,
-                            "`{}` must be passed a constant literal. You passed a {}.", send->fun.data(ctx).show(ctx),
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeNotConstant)) {
+                e.setHeader("`{}` must be passed a constant literal. You passed a {}.", send->fun.data(ctx).show(ctx),
                             send->args[0]->nodeName());
+            }
             return false;
         }
         if (send->block != nullptr) {
-            ctx.state.error(send->loc, core::errors::Namer::IncludePassedBlock, "`{}` can not be passed a block.",
-                            send->fun.data(ctx).show(ctx));
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
+                e.setHeader("`{}` can not be passed a block.", send->fun.data(ctx).show(ctx));
+            }
             return false;
         }
 
@@ -167,9 +170,10 @@ public:
         } else {
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (klass->symbol.data(ctx).isClassModuleSet() && isModule != klass->symbol.data(ctx).isClassModule()) {
-                ctx.state.error(klass->loc, core::errors::Namer::ModuleKindRedefinition,
-                                "{} was previously defined as a {}", klass->symbol.data(ctx).show(ctx),
+                if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("{} was previously defined as a {}", klass->symbol.data(ctx).show(ctx),
                                 klass->symbol.data(ctx).isClassModule() ? "module" : "class");
+                }
             } else {
                 klass->symbol.data(ctx).setIsModule(isModule);
             }
@@ -237,7 +241,9 @@ public:
                     original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
                 }
             } else {
-                ctx.state.error(original->loc, core::errors::Namer::SelfOutsideClass, "super outside of method");
+                if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
+                    e.setHeader("super outside of method");
+                }
             }
         }
         ast::MethodDef *mdef;
@@ -271,15 +277,18 @@ public:
                     for (auto &arg : original->args) {
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
-                            ctx.state.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
-                                            "Unsupported argument to {}: arguments must be symbol literals",
+                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
+                                e.setHeader("Unsupported argument to {}: arguments must be symbol literals",
                                             original->fun.toString(ctx));
+                            }
                             continue;
                         }
                         core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, sym->name);
                         if (!meth.exists()) {
-                            ctx.state.error(arg->loc, core::errors::Namer::MethodNotFound, "{}: no such method: {}",
-                                            original->fun.toString(ctx), sym->name.toString(ctx));
+                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
+                                e.setHeader("{}: no such method: {}", original->fun.toString(ctx),
+                                            sym->name.toString(ctx));
+                            }
                             continue;
                         }
                         aliasModuleFunction(ctx, meth);
@@ -291,16 +300,18 @@ public:
                     for (auto &arg : original->args) {
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
-                            ctx.state.error(arg->loc, core::errors::Namer::DynamicDSLInvocation,
-                                            "Unsupported argument to {}: arguments must be symbol literals",
+                            if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
+                                e.setHeader("Unsupported argument to {}: arguments must be symbol literals",
                                             original->fun.toString(ctx));
+                            }
                             continue;
                         }
                         args.push_back(sym->name);
                     }
                     if (original->args.size() != 2) {
-                        ctx.state.error(original->loc, core::errors::Namer::InvalidAlias,
-                                        "Wrong number of arguments to {}; Expected 2", original->fun.toString(ctx));
+                        if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
+                            e.setHeader("Wrong number of arguments to {}; Expected 2", original->fun.toString(ctx));
+                        }
                         break;
                     }
                     if (args.size() != 2) {
@@ -308,8 +319,10 @@ public:
                     }
                     core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, args[1]);
                     if (!meth.exists()) {
-                        ctx.state.error(original->args[1]->loc, core::errors::Namer::MethodNotFound,
-                                        "{}: no such method: {}", original->fun.toString(ctx), args[1].toString(ctx));
+                        if (auto e =
+                                ctx.state.beginError(original->args[1]->loc, core::errors::Namer::MethodNotFound)) {
+                            e.setHeader("{}: no such method: {}", original->fun.toString(ctx), args[1].toString(ctx));
+                        }
                         break;
                     }
                     aliasMethod(ctx, methodOwner(ctx), args[0], meth);
@@ -341,10 +354,10 @@ public:
                 pushEnclosingArgs(move(method->args));
                 return method;
             }
-            ctx.state.error(
-                core::ComplexError(method->loc, core::errors::Namer::RedefinitionOfMethod,
-                                   method->name.toString(ctx) + ": Method redefined",
-                                   core::ErrorLine::from(sym.data(ctx).definitionLoc, "Previous definition")));
+            if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
+                e.setHeader("{}: Method redefined", method->name.toString(ctx));
+                e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
+            }
             // TODO Check that the previous args match the new ones instead of
             // just moving the original one to the side
             ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
@@ -472,8 +485,9 @@ public:
 
                 if (!send->args.empty()) {
                     if (send->args.size() > 2) {
-                        ctx.state.error(send->loc, core::errors::Namer::InvalidTypeDefinition,
-                                        "Too many args in type definition");
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                            e.setHeader("Too many args in type definition");
+                        }
                         return new ast::EmptyTree(asgn->loc);
                     }
                     auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
@@ -485,15 +499,19 @@ public:
                         } else if (symbol->name == core::Names::invariant()) {
                             variance = core::Variance::Invariant;
                         } else {
-                            ctx.state.error(symbol->loc, core::errors::Namer::InvalidTypeDefinition,
-                                            "Invalid variance kind, only :{} and :{} are supported",
+                            if (auto e =
+                                    ctx.state.beginError(symbol->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                                e.setHeader("Invalid variance kind, only :{} and :{} are supported",
                                             core::Names::covariant().toString(ctx),
                                             core::Names::contravariant().toString(ctx));
+                            }
                         }
                     } else {
                         if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
-                            ctx.state.error(send->args[0]->loc, core::errors::Namer::InvalidTypeDefinition,
-                                            "Invalid param, must be a :symbol");
+                            if (auto e = ctx.state.beginError(send->args[0]->loc,
+                                                              core::errors::Namer::InvalidTypeDefinition)) {
+                                e.setHeader("Invalid param, must be a :symbol");
+                            }
                         }
                     }
                 }
@@ -502,8 +520,9 @@ public:
                 auto it = find_if(members.begin(), members.end(),
                                   [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
                 if (it != members.end()) {
-                    ctx.state.error(typeName->loc, core::errors::Namer::InvalidTypeDefinition,
-                                    "Duplicate type member {}", typeName->cnst.data(ctx).show(ctx));
+                    if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Duplicate type member {}", typeName->cnst.data(ctx).show(ctx));
+                    }
                     return new ast::EmptyTree(asgn->loc);
                 }
                 auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst,
@@ -528,8 +547,9 @@ public:
                                 return asgn;
                             }
                         }
-                        ctx.state.error(send->loc, core::errors::Namer::InvalidTypeDefinition,
-                                        "Missing required param :fixed");
+                        if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                            e.setHeader("Missing required param :fixed");
+                        }
                     }
                 }
                 return new ast::EmptyTree(asgn->loc);

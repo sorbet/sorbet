@@ -198,14 +198,13 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                     bool silenceErrors = false) {
+unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file) {
     auto &print = opts.print;
     try {
         std::unique_ptr<parser::Node> nodes;
         {
             tracer->trace("Parsing: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, file, silenceErrors);
+            core::ErrorRegion errs(lgs, file);
             core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
             nodes = parser::Parser::run(lgs, file);
         }
@@ -223,7 +222,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
         std::unique_ptr<ast::Expression> ast;
         {
             tracer->trace("Desugaring: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, file, silenceErrors);
+            core::ErrorRegion errs(lgs, file);
             core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
             ast = ast::desugar::node2Tree(ctx, move(nodes));
         }
@@ -239,7 +238,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
         {
             tracer->trace("Inlining DSLs: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, silenceErrors);
+            core::ErrorRegion errs(lgs, file);
             ast = dsl::DSL::run(ctx, move(ast));
         }
         if (print.DSLTree) {
@@ -254,8 +253,9 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
         return ast;
     } catch (...) {
-        lgs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,
-                  "Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
+        if (auto e = lgs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
+        }
         returnCode = 12;
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
@@ -263,7 +263,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
 vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std::string> frs,
                                           std::vector<core::FileRef> mainThreadFiles, const Options &opts,
-                                          WorkerPool &workers, bool silenceErrors = false) {
+                                          WorkerPool &workers) {
     vector<unique_ptr<ast::Expression>> result;
     vector<unique_ptr<ast::Expression>> empty;
     vector<unique_ptr<ast::Expression>> trees;
@@ -289,7 +289,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-        workers.multiplexJob([cgs, opts, fileq, resultq, silenceErrors]() {
+        workers.multiplexJob([cgs, opts, fileq, resultq]() {
             auto lgs = cgs->deepCopy();
             thread_result threadResult;
             int processedByThread = 0;
@@ -298,7 +298,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             {
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
-                        core::ErrorRegion errs(*lgs, core::FileRef(job.first), silenceErrors);
+                        core::ErrorRegion errs(*lgs, core::FileRef(job.first));
                         processedByThread++;
                         std::string fileName = job.second;
                         int fileId = job.first;
@@ -306,8 +306,10 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         try {
                             src = File::read(fileName.c_str());
                         } catch (FileNotFoundException e) {
-                            lgs->error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()),
-                                       core::errors::Internal::InternalError, "File Not Found: {}", fileName);
+                            if (auto e = lgs->beginError(ruby_typer::core::Loc::none(),
+                                                         core::errors::Internal::InternalError)) {
+                                e.setHeader("File Not Found: {}", fileName);
+                            }
                             returnCode = 11;
                             // continue with an empty source, because the
                             // assertion below requires every input file to map
@@ -335,7 +337,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
                         tracer->trace("{}", fileName);
 
-                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, silenceErrors));
+                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file));
                     }
                 }
             }
@@ -348,7 +350,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
         });
 
         for (auto f : mainThreadFiles) {
-            trees.emplace_back(indexOne(opts, gs, f, silenceErrors));
+            trees.emplace_back(indexOne(opts, gs, f));
         }
 
         thread_result threadResult;
@@ -394,7 +396,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 {
                     core::MutableContext ctx(gs, core::Symbols::root());
                     tracer->trace("Naming: {}", file.data(gs).path());
-                    core::ErrorRegion errs(gs, file, silenceErrors);
+                    core::ErrorRegion errs(gs, file);
                     core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
                     core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                     ast = namer::Namer::run(ctx, move(tree));
@@ -404,16 +406,16 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                 namingProgress.reportProgress(result.size());
             } catch (...) {
                 returnCode = 13;
-                gs.error(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError,
-                         "Exception naming file: {} (backtrace is above)", file.data(gs).path());
+                if (auto e = gs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    e.setHeader("Exception naming file: {} (backtrace is above)", file.data(gs).path());
+                }
             }
         }
     }
     return result;
 }
 
-unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts,
-                                          bool silenceErrors = false) {
+unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
     if (opts.stopAfterPhase == Phase::NAMER) {
@@ -427,7 +429,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
         CFG_Collector_and_Typer collector(opts);
         {
             tracer->trace("CFG+Infer: {}", f.data(ctx).path());
-            core::ErrorRegion errs(ctx, f, silenceErrors);
+            core::ErrorRegion errs(ctx, f);
             result = ast::TreeMap::apply(ctx, collector, move(resolved));
         }
         if (wantTypedSource(opts, ctx, f)) {
@@ -437,8 +439,9 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
             cout << "}" << endl << endl;
         }
     } catch (...) {
-        ctx.state.error(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError,
-                        "Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
+        if (auto e = ctx.state.beginError(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
+        }
         returnCode = 15;
     }
     return result;
@@ -452,7 +455,7 @@ struct typecheck_thread_result {
 // If ever given a result type, it should be something along the lines of
 // vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
 void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
-               WorkerPool &workers, bool silenceErrors = false) {
+               WorkerPool &workers) {
     vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 
     try {
@@ -461,14 +464,15 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
         {
             Timer timeit(console_err, "Resolving");
             tracer->trace("Resolving (global pass)...");
-            core::ErrorRegion errs(*gs, ruby_typer::core::FileRef(), silenceErrors);
+            core::ErrorRegion errs(*gs, ruby_typer::core::FileRef());
             core::UnfreezeNameTable nameTableAccess(*gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (...) {
-        gs->error(ruby_typer::core::Loc::none(ruby_typer::core::FileRef()), core::errors::Internal::InternalError,
-                  "Exception resolving (backtrace is above)");
+        if (auto e = gs->beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
         returnCode = 14;
     }
     gs->flushErrors();
@@ -495,7 +499,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
 
     {
         ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-        workers.multiplexJob([ctx, opts, fileq, resultq, silenceErrors]() {
+        workers.multiplexJob([ctx, opts, fileq, resultq]() {
             typecheck_thread_result threadResult;
             unique_ptr<ast::Expression> job;
             int processedByThread = 0;
@@ -505,9 +509,9 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
                     if (result.gotItem()) {
                         processedByThread++;
                         core::FileRef file = job->loc.file;
-                        core::ErrorRegion errs(ctx, file, silenceErrors);
+                        core::ErrorRegion errs(ctx, file);
                         try {
-                            threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts, silenceErrors));
+                            threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts));
                         } catch (...) {
                             console_err->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                         }
@@ -706,9 +710,11 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Optio
         emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, tracer);
         vector<std::string> empty;
+        auto oldSilence = gs->silenceErrors;
+        gs->silenceErrors = true;
 
-        typecheck(gs, index(*gs, empty, payloadFiles, emptyOpts, workers, true), emptyOpts, workers,
-                  true); // result is thrown away
+        typecheck(gs, index(*gs, empty, payloadFiles, emptyOpts, workers), emptyOpts, workers); // result is thrown away
+        gs->silenceErrors = oldSilence;
     } else {
         Timer timeit(console_err, "Read serialized payload");
         core::serialize::GlobalStateSerializer::load(*gs, nameTablePayload);
@@ -872,6 +878,9 @@ int realmain(int argc, char **argv) {
 
     tracer->trace("building initial global state");
     createInitialGlobalState(gs, opts);
+    if (options.count("q") != 0) {
+        gs->silenceErrors = true;
+    }
     tracer->trace("done building initial global state");
 
     Timer timeall(console_err, "Done in");

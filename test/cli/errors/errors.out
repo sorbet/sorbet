@@ -1,6 +1,7 @@
 test/cli/errors/errors.rb:4: Stubbing out unknown constant http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+
 test/cli/errors/errors.rb:12: Argument arg0 does not match expected type String http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^

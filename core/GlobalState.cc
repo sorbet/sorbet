@@ -854,6 +854,7 @@ bool GlobalState::unfreezeSymbolTable() {
 std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
+    result->silenceErrors = this->silenceErrors;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;
@@ -972,31 +973,10 @@ int GlobalState::totalErrors() const {
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
-    File::Type source_type = File::Typed;
-    if (error->loc.file.exists()) {
-        source_type = error->loc.file.data(*this).source_type;
-    }
-
-    switch (error->what.code) {
-        case errors::Internal::InternalError.code:
-            error->isCritical = true;
-            errorQueue->hadCritical = true;
-            break;
-        case errors::Parser::ParserError.code:
-        case errors::Resolver::InvalidMethodSignature.code:
-        case errors::Resolver::InvalidTypeDeclaration.code:
-        case errors::Resolver::InvalidDeclareVariables.code:
-        case errors::Resolver::DuplicateVariableDeclaration.code:
-            // These are always shown, even for untyped source
-            break;
-
-        default:
-            if (source_type != File::Typed) {
-                return;
-            }
-    }
-
     histogramAdd("error", error->what.code, 1);
+    if (!shouldReportErrorOn(error->loc, error->what)) {
+        return;
+    }
     ErrorQueueMessage msg;
     msg.kind = ErrorQueueMessage::Kind::Error;
     msg.whatFile = error->loc.file;
@@ -1011,6 +991,32 @@ bool GlobalState::hadCriticalError() const {
 
 void GlobalState::flushErrors() {
     this->errorQueue->flushErrors();
+}
+
+ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
+    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+}
+
+bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
+    File::Type source_type = File::Typed;
+    if (loc.file.exists()) {
+        source_type = loc.file.data(*this).source_type;
+    }
+
+    switch (what.code) {
+        case errors::Internal::InternalError.code:
+            return true;
+        case errors::Parser::ParserError.code:
+        case errors::Resolver::InvalidMethodSignature.code:
+        case errors::Resolver::InvalidTypeDeclaration.code:
+        case errors::Resolver::InvalidDeclareVariables.code:
+        case errors::Resolver::DuplicateVariableDeclaration.code:
+            // These are shown even for untyped source
+            return !this->silenceErrors;
+
+        default:
+            return !this->silenceErrors && source_type == File::Typed;
+    }
 }
 
 } // namespace core

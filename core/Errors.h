@@ -82,14 +82,12 @@ struct ComplexError : public BasicError {
  */
 class ErrorRegion {
 public:
-    ErrorRegion(const GlobalState &gs, FileRef f, bool silenceErrors = false)
-        : gs(gs), f(f), silenceErrors(silenceErrors){};
+    ErrorRegion(const GlobalState &gs, FileRef f) : gs(gs), f(f){};
     ~ErrorRegion();
 
 private:
     const GlobalState &gs;
     FileRef f;
-    bool silenceErrors;
 };
 
 struct ErrorQueueMessage {
@@ -98,6 +96,35 @@ struct ErrorQueueMessage {
     FileRef whatFile;
     std::string text;
     std::unique_ptr<BasicError> error;
+};
+
+class ErrorBuilder {
+    const GlobalState &gs;
+    bool willBuild;
+    Loc loc;
+    ErrorClass what;
+    std::string header;
+    std::vector<ErrorSection> sections;
+    void _setHeader(std::string &&header);
+
+public:
+    ErrorBuilder(const ErrorBuilder &) = delete;
+    ErrorBuilder(ErrorBuilder &&) = default;
+    ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
+    ~ErrorBuilder();
+    inline explicit operator bool() const {
+        return willBuild;
+    }
+    void addErrorSection(ErrorSection &&section);
+    template <typename... Args> void addErrorLine(Loc loc, const std::string &msg, const Args &... args) {
+        std::string formatted = fmt::format(msg, args...);
+        addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
+    }
+
+    template <typename... Args> void setHeader(const std::string &msg, const Args &... args) {
+        std::string formatted = fmt::format(msg, args...);
+        _setHeader(move(formatted));
+    }
 };
 
 } // namespace core

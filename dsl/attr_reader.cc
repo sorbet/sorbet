@@ -22,7 +22,9 @@ core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
     } else if (auto str = ast::cast_tree<ast::StringLit>(name)) {
         return str->value;
     }
-    ctx.state.error(name->loc, core::errors::DSL::BadAttrArg, "arg must be a Symbol or String");
+    if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+        e.setHeader("arg must be a Symbol or String");
+    }
     return core::NameRef::noName();
 }
 
