@@ -466,7 +466,7 @@ private:
                      }
                  },
                  [&](ast::Cast *cast) {
-                     if (cast->kind != ast::Cast::LET) {
+                     if (cast->cast != core::Names::let()) {
                          ctx.state.error(cast->loc, core::errors::Resolver::ConstantAssertType,
                                          "Use T.let() to specify the type of constants.");
                      }
@@ -476,8 +476,67 @@ private:
         return result;
     }
 
+    bool handleDeclaration(core::MutableContext ctx, ast::Assign *asgn) {
+        auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn->lhs.get());
+        if (uid == nullptr) {
+            return false;
+        }
+
+        if (uid->kind != ast::UnresolvedIdent::Instance && uid->kind != ast::UnresolvedIdent::Class) {
+            return false;
+        }
+
+        auto *cast = ast::cast_tree<ast::Cast>(asgn->rhs.get());
+        if (cast == nullptr) {
+            return false;
+        }
+
+        core::SymbolRef scope;
+        if (uid->kind == ast::UnresolvedIdent::Class) {
+            if (!ctx.owner.data(ctx).isClass()) {
+                ctx.state.error(uid->loc, core::errors::Resolver::InvalidDeclareVariables,
+                                "Class variables must be declared at class scope.");
+            }
+
+            scope = ctx.contextClass();
+        } else {
+            if (ctx.owner.data(ctx).isClass()) {
+                // Declaring a class instance variable
+            } else {
+                // Inside a method; declaring a normal instance variable
+                if (ctx.owner.data(ctx).name != core::Names::initialize()) {
+                    ctx.state.error(uid->loc, core::errors::Resolver::InvalidDeclareVariables,
+                                    "Instance variables must be declared inside `initialize`");
+                }
+            }
+            scope = ctx.selfClass();
+        }
+
+        auto prior = scope.data(ctx).findMember(ctx, uid->name);
+        if (prior.exists()) {
+            ctx.state.error(core::ComplexError(
+                uid->loc, core::errors::Resolver::DuplicateVariableDeclaration, "Illegal variable redeclaration",
+                core::ErrorLine(prior.data(ctx).definitionLoc, "Previous declaration is here:")));
+            return false;
+        }
+        core::SymbolRef var;
+
+        if (uid->kind == ast::UnresolvedIdent::Class) {
+            var = ctx.state.enterStaticFieldSymbol(uid->loc, scope, uid->name);
+        } else {
+            var = ctx.state.enterFieldSymbol(uid->loc, scope, uid->name);
+        }
+
+        var.data(ctx).resultType = cast->type;
+        return true;
+    }
+
 public:
     ast::Assign *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
+        if (handleDeclaration(ctx, asgn)) {
+            return asgn;
+        }
+
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr) {
             return asgn;
@@ -543,26 +602,16 @@ public:
                                     send->args.size());
                     return send;
                 }
-                ast::Cast::CastKind kind;
-                if (send->fun == core::Names::let()) {
-                    kind = ast::Cast::LET;
-                } else if (send->fun == core::Names::cast()) {
-                    kind = ast::Cast::CAST;
-                } else if (send->fun == core::Names::assertType()) {
-                    kind = ast::Cast::ASSERT_TYPE;
-                } else {
-                    Error::raise();
-                }
 
                 auto expr = move(send->args[0]);
                 auto type = TypeSyntax::getResultType(ctx, send->args[1]);
-                return new ast::Cast(send->loc, type, move(expr), kind);
+                return new ast::Cast(send->loc, type, move(expr), send->fun);
             }
             default:
                 return send;
         }
     }
-}; // namespace namer
+};
 
 class FlattenWalk {
 private:

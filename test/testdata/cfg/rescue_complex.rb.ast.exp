@@ -19,6 +19,10 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
     x
   end
 
+  def initialize<<constant:<todo sym>>>()
+    @ex = <emptyTree>::<constant:T>.let(::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:StandardError>))
+  end
+
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
@@ -104,8 +108,6 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
       self(<constant:<todo sym>>).bar()
     end
   end
-
-  self(<constant:<todo sym>>).declare_variables({:@ex => <emptyTree>::<constant:StandardError>})
 
   def parse_resbody_var_1<<constant:<todo sym>>>()
     begin

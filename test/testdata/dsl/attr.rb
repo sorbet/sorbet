@@ -1,9 +1,9 @@
 # @typed
 class TestAttr
-  declare_variables(
-    :@v1 => Integer,
-    :@v2 => String,
-  )
+  def initialize
+    @v1 = T.let(0, Integer)
+    @v2 = T.let("", String)
+  end
 
   sig.returns(Integer)
   attr :v1

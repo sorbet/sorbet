@@ -1,11 +1,13 @@
 # @typed
 
+def _; end
+
 class Box
   A = type_member
 
-  declare_variables(
-    :@value => A,
-  )
+  def initialize
+    @value = T.let(_, A)
+  end
 
    sig.returns(T.any(A, Integer))
    def read

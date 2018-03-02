@@ -1,4 +1,24 @@
 digraph "fields.rb"{
+subgraph "cluster_::<constant:Foo>#initialize" {
+    label = "::<constant:Foo>#initialize";
+    color = blue;
+    "bb::<constant:Foo>#initialize_0" [shape = invhouse];
+    "bb::<constant:Foo>#initialize_1" [shape = parallelogram];
+
+    "bb::<constant:Foo>#initialize_0" [label = "block[id=0]()
+@ivar$4 = alias @ivar : Integer
+<castTemp$5 = 0 : Integer(0)
+@ivar$4 = cast(<castTemp$5, Integer); : Integer
+<finalReturn> = return @ivar$4 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Foo>#initialize_0" -> "bb::<constant:Foo>#initialize_1" [style="bold"];
+    "bb::<constant:Foo>#initialize_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:Foo>#initialize_1" -> "bb::<constant:Foo>#initialize_1" [style="bold"];
+}
+
 subgraph "cluster_::<constant:Foo>#foo" {
     label = "::<constant:Foo>#foo";
     color = blue;

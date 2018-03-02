@@ -1,8 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    def declare_variables<<constant:<todo sym>>>(a)
-      <emptyTree>
-    end
     class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       <emptyTree>
     end
@@ -38,7 +35,9 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:F><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <singleton class><<constant:<todo sym>>> < ()
-        self(<constant:<todo sym>>).declare_variables({:@f => <emptyTree>::<constant:Integer>})
+        def initialize<<constant:<todo sym>>>()
+          @f = <emptyTree>::<constant:T>.let(0, <emptyTree>::<constant:Integer>)
+        end
 
         self(<constant:<todo sym>>).sig({:arg0 => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:Integer>)
 

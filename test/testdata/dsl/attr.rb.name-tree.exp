@@ -13,6 +13,15 @@ class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<constant:<todo
 
   <emptyTree>
 
+  <emptyTree>
+
+  def initialize<initialize>()
+    begin
+      ::<constant:TestAttr>#@v1 = T.let(0, Integer)
+      ::<constant:TestAttr>#@v2 = T.let("", String)
+    end
+  end
+
   def v1<v1>()
     ::<constant:TestAttr>#@v1
   end

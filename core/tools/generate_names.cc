@@ -112,9 +112,9 @@ NameDef names[] = {
     {"classOf", "class_of", Resolver},
     {"declareVariables", "declare_variables", Desugar | DSL | Resolver},
 
-    {"assertType", "assert_type!", Resolver},
-    {"cast", DSL | Resolver},
-    {"let", Resolver},
+    {"assertType", "assert_type!", Resolver | CFG | Infer},
+    {"cast", DSL | Resolver | CFG | Infer},
+    {"let", Resolver | CFG | Infer},
     // end T keywords
 
     // Ruby DSL methods which we understand

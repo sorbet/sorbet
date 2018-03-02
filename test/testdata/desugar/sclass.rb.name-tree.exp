@@ -7,7 +7,6 @@ begin
         <emptyTree>
         <emptyTree>
         <emptyTree>
-        <emptyTree>
         #$c = ::<constant:Object>.new()
         <emptyTree>
         <emptyTree>
@@ -18,10 +17,6 @@ begin
         <emptyTree>
         self(<singleton class:<constant:<root>>>).main()
       end
-    end
-
-    def declare_variables<declare_variables>(a)
-      <emptyTree>
     end
 
     def main<main>()
@@ -81,6 +76,14 @@ begin
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:F>>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    def initialize<initialize>()
+      ::<singleton class:<constant:F>>#@f = T.let(0, Integer)
+    end
+
     def f=<f=>(arg0)
       ::<singleton class:<constant:F>>#@f = arg0
     end

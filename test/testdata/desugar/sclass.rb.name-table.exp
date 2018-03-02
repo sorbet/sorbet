@@ -1,43 +1,42 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/desugar/sclass.rb:2
-  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/desugar/sclass.rb:4
-  class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/desugar/sclass.rb:13
-  class <constant:D> < ::<constant:Object> () -> <Class:D> @ test/testdata/desugar/sclass.rb:28
-  class <constant:E> < ::<constant:Object> () -> <Class:E> @ test/testdata/desugar/sclass.rb:38
-    method <static-init> () @ test/testdata/desugar/sclass.rb:46
-  class <constant:F> < ::<constant:Object> () -> <Class:F> @ test/testdata/desugar/sclass.rb:49
-  class <constant:G> < ::<constant:Object> () -> <Class:G> @ test/testdata/desugar/sclass.rb:57
-    method wrapper () @ test/testdata/desugar/sclass.rb:58
-  class <constant:H> < ::<constant:Object> () -> <Class:H> @ test/testdata/desugar/sclass.rb:71
+  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/desugar/sclass.rb:2
+  class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/desugar/sclass.rb:11
+  class <constant:D> < ::<constant:Object> () -> <Class:D> @ test/testdata/desugar/sclass.rb:26
+  class <constant:E> < ::<constant:Object> () -> <Class:E> @ test/testdata/desugar/sclass.rb:36
+    method <static-init> () @ test/testdata/desugar/sclass.rb:44
+  class <constant:F> < ::<constant:Object> () -> <Class:F> @ test/testdata/desugar/sclass.rb:47
+  class <constant:G> < ::<constant:Object> () -> <Class:G> @ test/testdata/desugar/sclass.rb:58
+    method wrapper () @ test/testdata/desugar/sclass.rb:59
+  class <constant:H> < ::<constant:Object> () -> <Class:H> @ test/testdata/desugar/sclass.rb:72
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L8300
-    method declare_variables (a) @ test/testdata/desugar/sclass.rb:2
-      argument a<> @ test/testdata/desugar/sclass.rb:2
-    method main () @ test/testdata/desugar/sclass.rb:81
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:4
-  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:B>> @ test/testdata/desugar/sclass.rb:14
-    method b () @ test/testdata/desugar/sclass.rb:15
-  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:D>> @ test/testdata/desugar/sclass.rb:29
-  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:E>> @ test/testdata/desugar/sclass.rb:39
-    method e () @ test/testdata/desugar/sclass.rb:41
-    method wrapper () @ test/testdata/desugar/sclass.rb:40
-  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>> @ test/testdata/desugar/sclass.rb:50
-    field @f -> Integer @ test/testdata/desugar/sclass.rb:51
-    method f= (arg0) -> Integer @ test/testdata/desugar/sclass.rb:53
-      argument arg0<> -> Integer @ test/testdata/desugar/sclass.rb:52
-  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>> @ test/testdata/desugar/sclass.rb:59
-    method g () @ test/testdata/desugar/sclass.rb:66
-    method inner () @ test/testdata/desugar/sclass.rb:60
-  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>> @ test/testdata/desugar/sclass.rb:72
-    class <constant:H2> < ::<constant:Object> () -> <Class:<Class:H>::H2> @ test/testdata/desugar/sclass.rb:73
-    class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:73
-      method h () @ test/testdata/desugar/sclass.rb:74
-  class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:14
-  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <Class:<Class:<Class:D>>> @ test/testdata/desugar/sclass.rb:30
-    method d () @ test/testdata/desugar/sclass.rb:31
-  class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:39
-  class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:49
-  class <singleton class:<singleton class:<constant:G>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:59
-  class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:72
-  class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> () @ test/testdata/desugar/sclass.rb:30
-  field $c @ test/testdata/desugar/sclass.rb:21
+    method main () @ test/testdata/desugar/sclass.rb:82
+  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:2
+  class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:B>> @ test/testdata/desugar/sclass.rb:12
+    method b () @ test/testdata/desugar/sclass.rb:13
+  class <singleton class:<constant:D>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:D>> @ test/testdata/desugar/sclass.rb:27
+  class <singleton class:<constant:E>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:E>> @ test/testdata/desugar/sclass.rb:37
+    method e () @ test/testdata/desugar/sclass.rb:39
+    method wrapper () @ test/testdata/desugar/sclass.rb:38
+  class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>> @ test/testdata/desugar/sclass.rb:48
+    field @f -> Integer @ test/testdata/desugar/sclass.rb:50
+    method f= (arg0) -> Integer @ test/testdata/desugar/sclass.rb:54
+      argument arg0<> -> Integer @ test/testdata/desugar/sclass.rb:53
+    method initialize () @ test/testdata/desugar/sclass.rb:49
+  class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>> @ test/testdata/desugar/sclass.rb:60
+    method g () @ test/testdata/desugar/sclass.rb:67
+    method inner () @ test/testdata/desugar/sclass.rb:61
+  class <singleton class:<constant:H>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:H>> @ test/testdata/desugar/sclass.rb:73
+    class <constant:H2> < ::<constant:Object> () -> <Class:<Class:H>::H2> @ test/testdata/desugar/sclass.rb:74
+    class <singleton class:<constant:H2>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/sclass.rb:74
+      method h () @ test/testdata/desugar/sclass.rb:75
+  class <singleton class:<singleton class:<constant:B>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:12
+  class <singleton class:<singleton class:<constant:D>>> < ::<singleton class:<singleton class:<constant:Object>>> () -> <Class:<Class:<Class:D>>> @ test/testdata/desugar/sclass.rb:28
+    method d () @ test/testdata/desugar/sclass.rb:29
+  class <singleton class:<singleton class:<constant:E>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:37
+  class <singleton class:<singleton class:<constant:F>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:47
+  class <singleton class:<singleton class:<constant:G>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:60
+  class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:73
+  class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> () @ test/testdata/desugar/sclass.rb:28
+  field $c @ test/testdata/desugar/sclass.rb:19
   method <static-init>$8 () @ test/testdata/desugar/sclass.rb:2
 

@@ -1,8 +1,8 @@
 # @typed
 class Foo
-  declare_variables(
-    :@ivar => Integer
-  )
+  def initialize
+    @ivar = T.let(0, Integer)
+  end
 
   def foo
     @ivar = 2

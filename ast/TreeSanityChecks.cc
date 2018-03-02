@@ -1,4 +1,5 @@
 #include "Trees.h"
+#include "core/Names/resolver.h"
 
 using namespace std;
 
@@ -40,6 +41,7 @@ void Break::_sanityCheck() {
 void Cast::_sanityCheck() {
     ENFORCE(arg);
     ENFORCE(type);
+    ENFORCE(cast == core::Names::cast() || cast == core::Names::assertType() || cast == core::Names::let());
 }
 
 void ClassDef::_sanityCheck() {

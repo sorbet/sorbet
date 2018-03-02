@@ -1,6 +1,8 @@
 # @typed
 class TestIVar
-  declare_variables(:@foo => Integer)
+  def initialize
+    @foo = T.let(0, Integer)
+  end
 
   def test
     @foo = nil # error: NilClass is not a subtype of Integer

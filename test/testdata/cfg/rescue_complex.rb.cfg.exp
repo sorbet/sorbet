@@ -90,6 +90,27 @@ x = load_arg(<selfMethodTemp>$3#take_arg, 0) : untyped
     "bb::<constant:TestRescue>#take_arg_1" -> "bb::<constant:TestRescue>#take_arg_1" [style="bold"];
 }
 
+subgraph "cluster_::<constant:TestRescue>#initialize" {
+    label = "::<constant:TestRescue>#initialize";
+    color = blue;
+    "bb::<constant:TestRescue>#initialize_0" [shape = invhouse];
+    "bb::<constant:TestRescue>#initialize_1" [shape = parallelogram];
+
+    "bb::<constant:TestRescue>#initialize_0" [label = "block[id=0]()
+<constant:nil>$6 = alias <constant:nil> : NilClass
+@ex$4 = alias @ex : StandardError | NilClass
+<castTemp$5 = <constant:nil>$6 : NilClass
+@ex$4 = cast(<castTemp$5, StandardError | NilClass); : StandardError | NilClass
+<finalReturn> = return @ex$4 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:TestRescue>#initialize_0" -> "bb::<constant:TestRescue>#initialize_1" [style="bold"];
+    "bb::<constant:TestRescue>#initialize_1" [label = "block[id=1]()
+<unconditional>"];
+
+    "bb::<constant:TestRescue>#initialize_1" -> "bb::<constant:TestRescue>#initialize_1" [style="bold"];
+}
+
 subgraph "cluster_::<constant:TestRescue>#multiple_rescue" {
     label = "::<constant:TestRescue>#multiple_rescue";
     color = blue;
@@ -556,7 +577,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_resbody_var_1" {
 
     "bb::<constant:TestRescue>#parse_resbody_var_1_0" [label = "block[id=0](<constant:StandardError>$8, @ex$11)
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-@ex$11 = alias @ex : StandardError
+@ex$11 = alias @ex : StandardError | NilClass
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
 

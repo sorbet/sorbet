@@ -1,6 +1,4 @@
 # @typed
-def declare_variables(a); end
-
 class A
 end
 
@@ -47,8 +45,11 @@ class E
 end
 
 class F
-    class << self
-        declare_variables({:@f => Integer})
+  class << self
+        def initialize
+          @f = T.let(0, Integer)
+        end
+
         sig(arg0: Integer).returns(Integer)
         attr_writer :f
     end

@@ -425,20 +425,10 @@ public:
     std::shared_ptr<core::Type> type;
     std::unique_ptr<Expression> arg;
 
-    enum CastKind {
-        // T.cast: Trust the user and assume the provided type
-        CAST = 0,
+    // The name of the cast operator.
+    core::NameRef cast;
 
-        // T.assert_type!: Check that the provided type matches
-        ASSERT_TYPE = 1,
-
-        // T.let: Check the provided type, and also pin the left-hand-side
-        // variable.
-        LET = 2,
-    };
-    CastKind kind;
-
-    Cast(core::Loc loc, std::shared_ptr<core::Type> type, std::unique_ptr<Expression> arg, CastKind kind);
+    Cast(core::Loc loc, std::shared_ptr<core::Type> type, std::unique_ptr<Expression> arg, core::NameRef kind);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

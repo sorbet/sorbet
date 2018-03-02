@@ -201,10 +201,10 @@ class Cast final : public Instruction {
 public:
     core::LocalVariable value;
     std::shared_ptr<core::Type> type;
-    bool assertType;
+    core::NameRef cast;
 
-    Cast(core::LocalVariable value, std::shared_ptr<core::Type> type, bool assertType)
-        : value(value), type(type), assertType(assertType) {}
+    Cast(core::LocalVariable value, std::shared_ptr<core::Type> type, core::NameRef cast)
+        : value(value), type(type), cast(cast) {}
 
     virtual std::string toString(core::Context ctx);
 };

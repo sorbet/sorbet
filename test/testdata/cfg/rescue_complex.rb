@@ -6,6 +6,10 @@ class TestRescue
   def baz; 3; end
   def take_arg(x); x; end
 
+  def initialize
+    @ex = T.let(nil, T.nilable(StandardError))
+  end
+
   def multiple_rescue()
     begin
       meth
@@ -56,7 +60,6 @@ class TestRescue
     begin; meth; rescue => ex; bar; end
   end
 
-  declare_variables(:@ex => StandardError)
   def parse_resbody_var_1()
     begin; meth; rescue => @ex; bar; end
   end

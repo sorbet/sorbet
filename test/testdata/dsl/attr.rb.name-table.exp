@@ -5,6 +5,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     field @v3 -> untyped @ test/testdata/dsl/attr.rb:17
     field @v4 -> untyped @ test/testdata/dsl/attr.rb:19
     field @v5 -> untyped @ test/testdata/dsl/attr.rb:19
+    method initialize () @ test/testdata/dsl/attr.rb:3
     method v1 () -> Integer @ test/testdata/dsl/attr.rb:9
     method v1= (arg0) -> Integer @ test/testdata/dsl/attr.rb:11
       argument arg0<> -> Integer @ test/testdata/dsl/attr.rb:10

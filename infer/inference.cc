@@ -825,26 +825,33 @@ public:
                     tp.origins.push_back(bind.loc);
                 },
                 [&](cfg::Cast *c) {
-                    tp.type = c->type;
+                    auto klass = ctx.owner.data(ctx).enclosingClass(ctx);
+                    auto castType =
+                        c->type->instantiate(ctx, klass.data(ctx).typeMembers(), klass.data(ctx).selfTypeArgs(ctx));
+                    if (castType == nullptr) {
+                        castType = c->type;
+                    }
+
+                    tp.type = castType;
                     tp.origins.push_back(bind.loc);
 
                     if (!hasType(ctx, bind.bind)) {
                         noLoopChecking = true;
                     }
 
-                    if (c->assertType) {
+                    if (c->cast != core::Names::cast()) {
                         auto ty = getTypeAndOrigin(ctx, c->value);
-                        if (ty.type->isDynamic()) {
+                        if (c->cast == core::Names::assertType() && ty.type->isDynamic()) {
                             ctx.state.error(core::ComplexError(
                                 bind.loc, core::errors::Infer::CastTypeMismatch,
                                 "The typechecker was unable to infer the type of the asserted value.",
                                 {core::ErrorSection("Value originated from:", ty.origins2Explanations(ctx)),
                                  core::ErrorSection("You may need to add additional `sig` "
                                                     "annotations.")}));
-                        } else if (!core::Types::isSubType(ctx, ty.type, c->type)) {
+                        } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                             ctx.state.error(core::ComplexError(
                                 bind.loc, core::errors::Infer::CastTypeMismatch,
-                                "Argument does not have asserted type " + c->type->show(ctx),
+                                "Argument does not have asserted type " + castType->show(ctx),
                                 {core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                     ty.origins2Explanations(ctx))}));
                         }
