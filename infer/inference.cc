@@ -637,34 +637,40 @@ public:
         }
     }
 
-    void computePins(core::Context ctx, const vector<Environment> &envs, cfg::CFG &inWhat, const cfg::BasicBlock *bb) {
+    void computePins(core::Context ctx, const vector<Environment> &envs, const cfg::CFG &inWhat,
+                     const cfg::BasicBlock *bb) {
         if (bb->backEdges.size() == 0) {
             return;
         }
 
         for (core::LocalVariable var : vars) {
-            auto bindMinLoops = inWhat.minLoops.find(var)->second;
             core::TypeAndOrigins tp;
+
+            auto bindMinLoops = inWhat.minLoops.at(var);
+            if (bb->outerLoops <= bindMinLoops || bindMinLoops != inWhat.maxLoopWrite.at(var)) {
+                continue;
+            }
 
             for (cfg::BasicBlock *parent : bb->backEdges) {
                 auto &other = envs[parent->id];
-                // If we are in a loop, propogate the pinned type
-                if (bb->outerLoops > bindMinLoops) {
-                    auto otherPin = other.pinnedTypes.find(var);
-                    if (otherPin != other.pinnedTypes.end()) {
-                        auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
-                        if (tp.type != nullptr) {
-                            tp.type = core::Types::lub(ctx, tp.type, otherTO.type);
-                            // merge
-                            tp.type->sanityCheck(ctx);
-                        } else {
-                            tp = otherTO;
+                auto otherPin = other.pinnedTypes.find(var);
+                if (otherPin != other.pinnedTypes.end()) {
+                    auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
+                    if (tp.type != nullptr) {
+                        tp.type = core::Types::lub(ctx, tp.type, otherTO.type);
+                        for (auto origin : otherTO.origins) {
+                            if (find(tp.origins.begin(), tp.origins.end(), origin) == tp.origins.end()) {
+                                tp.origins.push_back(origin);
+                            }
                         }
+                        tp.type->sanityCheck(ctx);
+                    } else {
+                        tp = otherTO;
                     }
                 }
             }
 
-            if (bb->outerLoops == bindMinLoops && bindMinLoops != inWhat.maxLoopWrite[var] && tp.type != nullptr) {
+            if (tp.type != nullptr) {
                 pinnedTypes[var] = tp;
             }
         }
