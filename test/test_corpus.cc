@@ -97,7 +97,8 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(bool raw = false, bool typedSource = false) : raw(raw), typedSource(typedSource){};
     vector<string> cfgs;
-    ruby_typer::ast::MethodDef *preTransformMethodDef(ruby_typer::core::Context ctx, ruby_typer::ast::MethodDef *m) {
+    unique_ptr<ruby_typer::ast::MethodDef> preTransformMethodDef(ruby_typer::core::Context ctx,
+                                                                 unique_ptr<ruby_typer::ast::MethodDef> m) {
         auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (raw || typedSource) {
             cfg = ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));

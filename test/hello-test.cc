@@ -36,111 +36,111 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     class Counter {
     public:
         int count = 0;
-        ClassDef *preTransformClassDef(core::MutableContext ctx, ClassDef *original) {
+        unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original) {
             count++;
             return original;
         }
-        MethodDef *preTransformMethodDef(core::MutableContext ctx, MethodDef *original) {
-            count++;
-            return original;
-        }
-
-        If *preTransformIf(core::MutableContext ctx, If *original) {
+        unique_ptr<MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original) {
             count++;
             return original;
         }
 
-        While *preTransformWhile(core::MutableContext ctx, While *original) {
+        unique_ptr<If> preTransformIf(core::MutableContext ctx, unique_ptr<If> original) {
             count++;
             return original;
         }
 
-        Break *postTransformBreak(core::MutableContext ctx, Break *original) {
+        unique_ptr<While> preTransformWhile(core::MutableContext ctx, unique_ptr<While> original) {
             count++;
             return original;
         }
 
-        Next *postTransformNext(core::MutableContext ctx, Next *original) {
+        unique_ptr<Break> postTransformBreak(core::MutableContext ctx, unique_ptr<Break> original) {
             count++;
             return original;
         }
 
-        Return *preTransformReturn(core::MutableContext ctx, Return *original) {
+        unique_ptr<Next> postTransformNext(core::MutableContext ctx, unique_ptr<Next> original) {
             count++;
             return original;
         }
 
-        Rescue *preTransformRescue(core::MutableContext ctx, Rescue *original) {
+        unique_ptr<Return> preTransformReturn(core::MutableContext ctx, unique_ptr<Return> original) {
             count++;
             return original;
         }
 
-        Ident *postTransformIdent(core::MutableContext ctx, Ident *original) {
+        unique_ptr<Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original) {
             count++;
             return original;
         }
 
-        Assign *preTransformAssign(core::MutableContext ctx, Assign *original) {
+        unique_ptr<Ident> postTransformIdent(core::MutableContext ctx, unique_ptr<Ident> original) {
             count++;
             return original;
         }
 
-        Send *preTransformSend(core::MutableContext ctx, Send *original) {
+        unique_ptr<Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original) {
             count++;
             return original;
         }
 
-        Hash *preTransformHash(core::MutableContext ctx, Hash *original) {
+        unique_ptr<Send> preTransformSend(core::MutableContext ctx, unique_ptr<Send> original) {
             count++;
             return original;
         }
 
-        Array *preTransformArray(core::MutableContext ctx, Array *original) {
+        unique_ptr<Hash> preTransformHash(core::MutableContext ctx, unique_ptr<Hash> original) {
             count++;
             return original;
         }
 
-        FloatLit *postTransformFloatLit(core::MutableContext ctx, FloatLit *original) {
+        unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original) {
             count++;
             return original;
         }
 
-        IntLit *postTransformIntLit(core::MutableContext ctx, IntLit *original) {
+        unique_ptr<FloatLit> postTransformFloatLit(core::MutableContext ctx, unique_ptr<FloatLit> original) {
             count++;
             return original;
         }
 
-        StringLit *postTransformStringLit(core::MutableContext ctx, StringLit *original) {
+        unique_ptr<IntLit> postTransformIntLit(core::MutableContext ctx, unique_ptr<IntLit> original) {
             count++;
             return original;
         }
 
-        ConstantLit *postTransformConstantLit(core::MutableContext ctx, ConstantLit *original) {
+        unique_ptr<StringLit> postTransformStringLit(core::MutableContext ctx, unique_ptr<StringLit> original) {
             count++;
             return original;
         }
 
-        ArraySplat *preTransformArraySplat(core::MutableContext ctx, ArraySplat *original) {
+        unique_ptr<ConstantLit> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {
             count++;
             return original;
         }
 
-        HashSplat *preTransformHashSplat(core::MutableContext ctx, HashSplat *original) {
+        unique_ptr<ArraySplat> preTransformArraySplat(core::MutableContext ctx, unique_ptr<ArraySplat> original) {
             count++;
             return original;
         }
 
-        Self *postTransformSelf(core::MutableContext ctx, Self *original) {
+        unique_ptr<HashSplat> preTransformHashSplat(core::MutableContext ctx, unique_ptr<HashSplat> original) {
             count++;
             return original;
         }
 
-        Block *preTransformBlock(core::MutableContext ctx, Block *original) {
+        unique_ptr<Self> postTransformSelf(core::MutableContext ctx, unique_ptr<Self> original) {
             count++;
             return original;
         }
 
-        InsSeq *preTransformInsSeq(core::MutableContext ctx, InsSeq *original) {
+        unique_ptr<Block> preTransformBlock(core::MutableContext ctx, unique_ptr<Block> original) {
+            count++;
+            return original;
+        }
+
+        unique_ptr<InsSeq> preTransformInsSeq(core::MutableContext ctx, unique_ptr<InsSeq> original) {
             count++;
             return original;
         }

@@ -166,7 +166,7 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
-    ast::MethodDef *preTransformMethodDef(core::Context ctx, ast::MethodDef *m) {
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->loc.file.data(ctx).source_type != core::File::Typed) {
             return m;
         }

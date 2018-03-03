@@ -89,7 +89,7 @@ class NameInserter {
     vector<LocalFrame> scopeStack;
     u4 scopeId;
 
-    bool addAncestor(core::MutableContext ctx, ast::ClassDef *klass, unique_ptr<ast::Expression> &node) {
+    bool addAncestor(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &node) {
         auto send = ast::cast_tree<ast::Send>(node.get());
         if (send == nullptr) {
             ENFORCE(node.get() != nullptr);
@@ -155,7 +155,7 @@ class NameInserter {
     }
 
 public:
-    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *klass) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         if (klass->symbol == core::Symbols::todo()) {
             klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         } else {
@@ -183,7 +183,7 @@ public:
         return klass;
     }
 
-    ast::ClassDef *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *klass) {
+    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
@@ -192,7 +192,7 @@ public:
 
         auto toRemove =
             remove_if(klass->rhs.begin(), klass->rhs.end(),
-                      [this, ctx, klass](unique_ptr<ast::Expression> &line) { return addAncestor(ctx, klass, line); });
+                      [this, ctx, &klass](unique_ptr<ast::Expression> &line) { return addAncestor(ctx, klass, line); });
         klass->symbol.data(ctx).definitionLoc = klass->loc;
         klass->symbol.data(ctx).resultType = make_unique<core::ClassType>(klass->symbol.data(ctx).singletonClass(ctx));
         klass->rhs.erase(toRemove, klass->rhs.end());
@@ -232,7 +232,7 @@ public:
         }
     }
 
-    ast::Expression *postTransformSend(core::MutableContext ctx, ast::Send *original) {
+    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
             core::SymbolRef method = ctx.owner.data(ctx).enclosingMethod(ctx);
@@ -265,7 +265,7 @@ public:
                 default:
                     return original;
             }
-            return original->args[0].release();
+            return move(original->args[0]);
         }
         if (ast::isa_tree<ast::Self>(original->recv.get())) {
             switch (original->fun._id) {
@@ -334,7 +334,7 @@ public:
         return original;
     }
 
-    ast::MethodDef *preTransformMethodDef(core::MutableContext ctx, ast::MethodDef *method) {
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         scopeStack.emplace_back();
         ++scopeId;
         core::SymbolRef owner = methodOwner(ctx);
@@ -371,7 +371,7 @@ public:
         return method;
     }
 
-    ast::MethodDef *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *method) {
+    unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         method->args = popEnclosingArgs();
         ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size());
         scopeStack.pop_back();
@@ -385,7 +385,7 @@ public:
         return method;
     }
 
-    ast::Block *preTransformBlock(core::MutableContext ctx, ast::Block *blk) {
+    unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         core::SymbolRef owner = ctx.owner;
         if (owner == core::Symbols::noSymbol()) {
             // Root methods end up going on object
@@ -415,13 +415,14 @@ public:
         return blk;
     }
 
-    ast::Block *postTransformBlock(core::MutableContext ctx, ast::Block *blk) {
+    unique_ptr<ast::Block> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         blk->args = popEnclosingArgs();
         scopeStack.pop_back();
         return blk;
     }
 
-    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *nm) {
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> nm) {
         switch (nm->kind) {
             case ast::UnresolvedIdent::Local: {
                 auto &frame = scopeStack.back();
@@ -430,7 +431,7 @@ public:
                     cur = enterLocal(ctx, nm->name);
                     frame.locals[nm->name] = cur;
                 }
-                return new ast::Local(nm->loc, cur);
+                return make_unique<ast::Local>(nm->loc, cur);
             }
             case ast::UnresolvedIdent::Global: {
                 core::Symbol &root = core::Symbols::root().data(ctx);
@@ -438,19 +439,19 @@ public:
                 if (!sym.exists()) {
                     sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
                 }
-                return new ast::Ident(nm->loc, sym);
+                return make_unique<ast::Ident>(nm->loc, sym);
             }
             default:
                 return nm;
         }
     }
 
-    ast::Self *postTransformSelf(core::MutableContext ctx, ast::Self *self) {
+    unique_ptr<ast::Self> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> self) {
         self->claz = ctx.selfClass();
         return self;
     }
 
-    ast::Assign *fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, ast::Assign *asgn) {
+    unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, unique_ptr<ast::Assign> asgn) {
         // TODO(nelhage): forbid dynamic constant definition
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
@@ -459,7 +460,7 @@ public:
         return asgn;
     }
 
-    ast::Expression *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
+    unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
             return asgn;
@@ -467,16 +468,16 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send == nullptr) {
-            return fillAssign(ctx, lhs, asgn);
+            return fillAssign(ctx, lhs, move(asgn));
         }
         auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
         if (shouldBeSelf == nullptr) {
-            return fillAssign(ctx, lhs, asgn);
+            return fillAssign(ctx, lhs, move(asgn));
         }
 
         auto *typeName = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (typeName == nullptr) {
-            return fillAssign(ctx, lhs, asgn);
+            return fillAssign(ctx, lhs, move(asgn));
         }
 
         switch (send->fun._id) {
@@ -488,7 +489,7 @@ public:
                         if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                             e.setHeader("Too many args in type definition");
                         }
-                        return new ast::EmptyTree(asgn->loc);
+                        return make_unique<ast::EmptyTree>(asgn->loc);
                     }
                     auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
                     if (symbol) {
@@ -508,8 +509,7 @@ public:
                         }
                     } else {
                         if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
-                            if (auto e = ctx.state.beginError(send->args[0]->loc,
-                                                              core::errors::Namer::InvalidTypeDefinition)) {
+                            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                                 e.setHeader("Invalid param, must be a :symbol");
                             }
                         }
@@ -523,7 +523,7 @@ public:
                     if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
                         e.setHeader("Duplicate type member {}", typeName->cnst.data(ctx).show(ctx));
                     }
-                    return new ast::EmptyTree(asgn->loc);
+                    return make_unique<ast::EmptyTree>(asgn->loc);
                 }
                 auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst,
                                                      variance);
@@ -552,14 +552,14 @@ public:
                         }
                     }
                 }
-                return new ast::EmptyTree(asgn->loc);
+                return make_unique<ast::EmptyTree>(asgn->loc);
             }
             default:
-                return fillAssign(ctx, lhs, asgn);
+                return fillAssign(ctx, lhs, move(asgn));
         }
     }
 
-    ast::Expression *postTransformYield(core::MutableContext ctx, ast::Yield *yield) {
+    unique_ptr<ast::Expression> postTransformYield(core::MutableContext ctx, unique_ptr<ast::Yield> yield) {
         auto method = ctx.owner.data(ctx).enclosingMethod(ctx);
         core::SymbolRef blockArg;
         for (auto arg : method.data(ctx).arguments()) {
@@ -589,7 +589,7 @@ public:
         ast::Send::ARGS_store nargs;
         nargs.emplace_back(move(yield->expr));
 
-        return new ast::Send(yield->loc, move(recv), core::Names::call(), move(nargs));
+        return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(nargs));
     }
 
 private:

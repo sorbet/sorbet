@@ -13,7 +13,7 @@ class DSLReplacer {
     friend class DSL;
 
 public:
-    ast::ClassDef *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
+    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),

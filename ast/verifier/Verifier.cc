@@ -6,8 +6,8 @@ namespace ast {
 
 class VerifierWalker {
 public:
-    Expression *preTransformExpression(core::MutableContext ctx, Expression *original) {
-        if (!isa_tree<EmptyTree>(original)) {
+    unique_ptr<Expression> preTransformExpression(core::MutableContext ctx, unique_ptr<Expression> original) {
+        if (!isa_tree<EmptyTree>(original.get())) {
             ENFORCE(!original->loc.is_none(), "location is unset");
         }
 

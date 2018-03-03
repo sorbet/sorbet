@@ -45,14 +45,14 @@ private:
 public:
     SubstWalk(const ruby_typer::core::GlobalSubstitution &subst) : subst(subst) {}
 
-    ClassDef *preTransformClassDef(core::MutableContext ctx, ClassDef *original) {
+    unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original) {
         original->name = substClassName(ctx, move(original->name));
         for (auto &anc : original->ancestors) {
             anc = substClassName(ctx, move(anc));
         }
         return original;
     }
-    MethodDef *preTransformMethodDef(core::MutableContext ctx, MethodDef *original) {
+    unique_ptr<MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original) {
         original->name = subst.substitute(original->name);
         for (auto &arg : original->args) {
             arg = substArg(ctx, move(arg));
@@ -60,31 +60,32 @@ public:
         return original;
     }
 
-    Block *preTransformBlock(core::MutableContext ctx, Block *original) {
+    unique_ptr<Block> preTransformBlock(core::MutableContext ctx, unique_ptr<Block> original) {
         for (auto &arg : original->args) {
             arg = substArg(ctx, move(arg));
         }
         return original;
     }
 
-    Expression *postTransformUnresolvedIdent(core::MutableContext ctx, UnresolvedIdent *original) {
+    unique_ptr<Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                        unique_ptr<UnresolvedIdent> original) {
         original->name = subst.substitute(original->name);
         return original;
     }
 
-    Send *preTransformSend(core::MutableContext ctx, Send *original) {
+    unique_ptr<Send> preTransformSend(core::MutableContext ctx, unique_ptr<Send> original) {
         original->fun = subst.substitute(original->fun);
         return original;
     }
-    Expression *postTransformStringLit(core::MutableContext ctx, StringLit *original) {
+    unique_ptr<Expression> postTransformStringLit(core::MutableContext ctx, unique_ptr<StringLit> original) {
         original->value = subst.substitute(original->value);
         return original;
     }
-    Expression *postTransformSymbolLit(core::MutableContext ctx, SymbolLit *original) {
+    unique_ptr<Expression> postTransformSymbolLit(core::MutableContext ctx, unique_ptr<SymbolLit> original) {
         original->name = subst.substitute(original->name);
         return original;
     }
-    Expression *postTransformConstantLit(core::MutableContext ctx, ConstantLit *original) {
+    unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {
         original->cnst = subst.substitute(original->cnst);
         original->scope = substClassName(ctx, move(original->scope));
         return original;

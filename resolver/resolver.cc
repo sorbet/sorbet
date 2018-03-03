@@ -123,11 +123,11 @@ private:
 public:
     ResolveConstantsWalk(core::MutableContext ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
-    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
         return original;
     }
-    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         nesting_ = move(nesting_->parent);
 
         core::SymbolRef klass = original->symbol;
@@ -169,17 +169,17 @@ public:
         return original;
     }
 
-    ast::Expression *postTransformConstantLit(core::MutableContext ctx, ast::ConstantLit *c) {
-        core::SymbolRef resolved = resolveConstant(ctx, c);
+    unique_ptr<ast::Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> c) {
+        core::SymbolRef resolved = resolveConstant(ctx, c.get());
         if (!resolved.exists()) {
             string str = c->toString(ctx);
-            resolved = resolveConstant(ctx, c);
+            resolved = resolveConstant(ctx, c.get());
             return c;
         }
-        return new ast::Ident(c->loc, resolved);
+        return make_unique<ast::Ident>(c->loc, resolved);
     }
 
-    ast::Expression *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
+    unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
         if (id == nullptr || !id->symbol.data(ctx).isStaticField()) {
             return asgn;
@@ -191,7 +191,7 @@ public:
         }
 
         id->symbol.data(ctx).resultType = make_unique<core::AliasType>(rhs->symbol);
-        return new ast::EmptyTree(asgn->loc);
+        return make_unique<ast::EmptyTree>(asgn->loc);
     }
 
     unique_ptr<Nesting> nesting_;
@@ -374,7 +374,7 @@ private:
         ctx.owner.data(ctx).members.emplace_back(core::Names::classMethods(), id->symbol);
     }
 
-    void processClassBody(core::MutableContext ctx, ast::ClassDef *klass) {
+    void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
         InlinedVector<unique_ptr<ast::Expression>, 1> lastSig;
         for (auto &stat : klass->rhs) {
             typecase(
@@ -509,7 +509,7 @@ private:
         return result;
     }
 
-    bool handleDeclaration(core::MutableContext ctx, ast::Assign *asgn) {
+    bool handleDeclaration(core::MutableContext ctx, unique_ptr<ast::Assign> &asgn) {
         auto *uid = ast::cast_tree<ast::UnresolvedIdent>(asgn->lhs.get());
         if (uid == nullptr) {
             return false;
@@ -568,7 +568,7 @@ private:
     }
 
 public:
-    ast::Assign *postTransformAssign(core::MutableContext ctx, ast::Assign *asgn) {
+    unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         if (handleDeclaration(ctx, asgn)) {
             return asgn;
         }
@@ -615,12 +615,12 @@ public:
         return asgn;
     }
 
-    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
         return original;
     }
 
-    ast::Expression *postTransformSend(core::MutableContext ctx, ast::Send *send) {
+    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         auto *id = ast::cast_tree<ast::Ident>(send->recv.get());
         if (id == nullptr) {
             return send;
@@ -642,7 +642,7 @@ public:
 
                 auto expr = move(send->args[0]);
                 auto type = TypeSyntax::getResultType(ctx, send->args[1]);
-                return new ast::Cast(send->loc, type, move(expr), send->fun);
+                return make_unique<ast::Cast>(send->loc, type, move(expr), send->fun);
             }
             default:
                 return send;
@@ -666,7 +666,7 @@ private:
         return false;
     }
 
-    unique_ptr<ast::Expression> extractClassInit(core::MutableContext ctx, ast::ClassDef *klass) {
+    unique_ptr<ast::Expression> extractClassInit(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
         ast::InsSeq::STATS_store inits;
 
         for (auto it = klass->rhs.begin(); it != klass->rhs.end(); /* nothing */) {
@@ -697,7 +697,7 @@ public:
         ENFORCE(classStack.empty());
     }
 
-    ast::ClassDef *preTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
+    unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         newMethodSet();
         classStack.emplace_back(classes.size());
         classes.emplace_back();
@@ -726,7 +726,14 @@ public:
         return classDef;
     }
 
-    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *classDef) {
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
+        auto &methods = curMethodSet();
+        methods.stack.emplace_back(methods.methods.size());
+        methods.methods.emplace_back();
+        return methodDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         ENFORCE(!classStack.empty());
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
@@ -735,17 +742,10 @@ public:
         classes[classStack.back()] = make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
                                                                 move(classDef->ancestors), move(rhs), classDef->kind);
         classStack.pop_back();
-        return new ast::EmptyTree(classDef->loc);
+        return make_unique<ast::EmptyTree>(classDef->loc);
     };
 
-    ast::MethodDef *preTransformMethodDef(core::MutableContext ctx, ast::MethodDef *methodDef) {
-        auto &methods = curMethodSet();
-        methods.stack.emplace_back(methods.methods.size());
-        methods.methods.emplace_back();
-        return methodDef;
-    }
-
-    ast::Expression *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *methodDef) {
+    unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
         auto &methods = curMethodSet();
         ENFORCE(!methods.stack.empty());
         ENFORCE(methods.methods.size() > methods.stack.back());
@@ -755,7 +755,7 @@ public:
             make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol, methodDef->name, move(methodDef->args),
                                         move(methodDef->rhs), methodDef->isSelf);
         methods.stack.pop_back();
-        return new ast::EmptyTree(methodDef->loc);
+        return make_unique<ast::EmptyTree>(methodDef->loc);
     };
 
     std::unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
@@ -873,7 +873,8 @@ private:
 
 class ResolveVariablesWalk {
 public:
-    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *id) {
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> id) {
         core::SymbolRef klass;
 
         switch (id->kind) {
@@ -901,36 +902,37 @@ public:
             sym.data(ctx).resultType = core::Types::dynamic();
         }
 
-        return new ast::Ident(id->loc, sym);
+        return make_unique<ast::Ident>(id->loc, sym);
     };
 };
 
 class ResolveSanityCheckWalk {
 public:
-    ast::Expression *postTransformClassDef(core::MutableContext ctx, ast::ClassDef *original) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformMethodDef(core::MutableContext ctx, ast::MethodDef *original) {
+    unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformConstDef(core::MutableContext ctx, ast::ConstDef *original) {
+    unique_ptr<ast::Expression> postTransformConstDef(core::MutableContext ctx, unique_ptr<ast::ConstDef> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformIdent(core::MutableContext ctx, ast::Ident *original) {
+    unique_ptr<ast::Expression> postTransformIdent(core::MutableContext ctx, unique_ptr<ast::Ident> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformUnresolvedIdent(core::MutableContext ctx, ast::UnresolvedIdent *original) {
+    unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
+                                                             unique_ptr<ast::UnresolvedIdent> original) {
         Error::raise("These should have all been removed");
     }
-    ast::Expression *postTransformSelf(core::MutableContext ctx, ast::Self *original) {
+    unique_ptr<ast::Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
         ENFORCE(original->claz != core::Symbols::todo());
         return original;
     }
-    ast::Expression *postTransformBlock(core::MutableContext ctx, ast::Block *original) {
+    unique_ptr<ast::Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
