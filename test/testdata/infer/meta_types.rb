@@ -10,8 +10,8 @@ class TestMetaType
     puts(T::Array[String]) # error: Argument arg0 does not match expected type
 
     puts(
-      if _ # error: Unsupported usage of bare type
-        T::Array[String]
+      if _
+        T::Array[String] # error: Unsupported usage of bare type
       else
         false
       end

@@ -186,7 +186,7 @@ void BasicBlock::recordAnnotations(core::Context ctx) {
     }
 }
 
-core::Loc BasicBlock::loc() {
+core::Loc BasicBlock::loc() const {
     core::Loc loc;
     if (!this->exprs.empty()) {
         loc = loc.join(this->exprs.front().loc);

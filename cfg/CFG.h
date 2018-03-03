@@ -58,7 +58,7 @@ public:
 
     std::string toString(core::Context ctx);
     void recordAnnotations(core::Context ctx);
-    core::Loc loc();
+    core::Loc loc() const;
 };
 
 class CFGContext;

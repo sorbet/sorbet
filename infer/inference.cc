@@ -247,6 +247,7 @@ public:
     vector<core::TypeAndOrigins> types;
     vector<TestedKnowledge> knowledge;
     unordered_map<core::SymbolRef, shared_ptr<core::Type>> blockTypes;
+    unordered_map<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
     string toString(core::Context ctx) {
         stringstream buf;
@@ -270,6 +271,8 @@ public:
         return fnd != vars.end();
     }
 
+    // NB: you can't call this function on vars in the first basic block since
+    // their type will be nullptr
     core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const {
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
@@ -562,32 +565,38 @@ public:
         }
     }
 
+    core::TypeAndOrigins getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
+                                                      const Environment &other) {
+        auto otherTO = other.getTypeAndOrigin(ctx, var);
+        otherTO.type = dropConstructor(ctx, otherTO.origins.front(), otherTO.type);
+        return otherTO;
+    }
+
     void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter) {
         int i = -1;
         this->isDead |= other.isDead;
         for (core::LocalVariable var : vars) {
             i++;
-            auto otherTO = other.getTypeAndOrigin(ctx, var);
-            auto otherType = dropConstructor(ctx, loc, otherTO.type);
+            auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
             auto &thisTO = types[i];
             if (thisTO.type.get() != nullptr) {
-                thisTO.type = core::Types::lub(ctx, thisTO.type, otherType);
+                thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type);
                 thisTO.type->sanityCheck(ctx);
-            } else {
-                types[i].type = otherType;
-            }
-            for (auto origin : otherTO.origins) {
-                if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
-                    thisTO.origins.push_back(origin);
+                for (auto origin : otherTO.origins) {
+                    if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
+                        thisTO.origins.push_back(origin);
+                    }
                 }
+            } else {
+                types[i] = otherTO;
             }
 
             if (((bb->flags & cfg::CFG::LOOP_HEADER) != 0) && bb->outerLoops <= inWhat.maxLoopWrite[var]) {
                 continue;
             }
-            bool canBeFalsy = core::Types::canBeFalsy(ctx, otherType);
-            bool canBeTruthy = core::Types::canBeTruthy(ctx, otherType);
+            bool canBeFalsy = core::Types::canBeFalsy(ctx, otherTO.type);
+            bool canBeTruthy = core::Types::canBeTruthy(ctx, otherTO.type);
 
             if (canBeTruthy) {
                 auto &thisKnowledge = getKnowledge(var);
@@ -628,6 +637,39 @@ public:
         }
     }
 
+    void computePins(core::Context ctx, const vector<Environment> &envs, cfg::CFG &inWhat, const cfg::BasicBlock *bb) {
+        if (bb->backEdges.size() == 0) {
+            return;
+        }
+
+        for (core::LocalVariable var : vars) {
+            auto bindMinLoops = inWhat.minLoops.find(var)->second;
+            core::TypeAndOrigins tp;
+
+            for (cfg::BasicBlock *parent : bb->backEdges) {
+                auto &other = envs[parent->id];
+                // If we are in a loop, propogate the pinned type
+                if (bb->outerLoops > bindMinLoops) {
+                    auto otherPin = other.pinnedTypes.find(var);
+                    if (otherPin != other.pinnedTypes.end()) {
+                        auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
+                        if (tp.type != nullptr) {
+                            tp.type = core::Types::lub(ctx, tp.type, otherTO.type);
+                            // merge
+                            tp.type->sanityCheck(ctx);
+                        } else {
+                            tp = otherTO;
+                        }
+                    }
+                }
+            }
+
+            if (bb->outerLoops == bindMinLoops && bindMinLoops != inWhat.maxLoopWrite[var] && tp.type != nullptr) {
+                pinnedTypes[var] = tp;
+            }
+        }
+    }
+
     void populateFrom(core::Context ctx, const Environment &other) {
         int i = -1;
         this->isDead = other.isDead;
@@ -642,6 +684,7 @@ public:
         }
 
         this->blockTypes = other.blockTypes;
+        this->pinnedTypes = other.pinnedTypes;
     }
 
     shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
@@ -731,6 +774,7 @@ public:
                     } else {
                         Error::notImplemented();
                     }
+                    pinnedTypes[bind.bind] = tp;
                 },
                 [&](cfg::Self *i) {
                     tp.type = i->klass.data(ctx).selfType(ctx);
@@ -900,6 +944,10 @@ public:
                 }
                 setTypeAndOrigin(bind.bind, tp);
             } else {
+                auto pin = pinnedTypes.find(bind.bind);
+                if (pin != pinnedTypes.end()) {
+                    cur = pin->second;
+                }
                 if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
                     switch (bindMinLoops) {
                         case cfg::CFG::MIN_LOOP_FIELD:
@@ -1080,6 +1128,9 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
                 }
             }
         }
+
+        current.computePins(ctx, outEnvironments, *cfg.get(), bb);
+
         int i = -1;
         for (auto &uninitialized : current.types) {
             i++;
