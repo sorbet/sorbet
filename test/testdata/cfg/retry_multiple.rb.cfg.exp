@@ -24,7 +24,7 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_0" [shape = invhouse];
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0](<constant:A>$15, <constant:B>$25)
+    "bb::<constant:Object>#main_0" [label = "block[id=0]()
 <constant:A>$15 = alias <constant:A> : <Class:A>
 <constant:B>$25 = alias <constant:B> : <Class:B>
 try = 0 : Integer(0)

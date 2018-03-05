@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Foo>#bar" {
     "bb::<constant:Foo>#bar_0" [shape = invhouse];
     "bb::<constant:Foo>#bar_1" [shape = parallelogram];
 
-    "bb::<constant:Foo>#bar_0" [label = "block[id=0](<constant:<Magic>>$6)
+    "bb::<constant:Foo>#bar_0" [label = "block[id=0]()
 <constant:<Magic>>$6 = alias <constant:<Magic>> : <Magic>
 <selfMethodTemp>$3 = self : Foo
 cond = load_arg(<selfMethodTemp>$3#bar, 0) : untyped

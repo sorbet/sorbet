@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_0" [shape = invhouse];
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0](<constant:StandardError>$10)
+    "bb::<constant:Object>#main_0" [label = "block[id=0]()
 <constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];

@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:StandardError>$9)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
 <selfMethodTemp>$3 = self : Object
 foo = load_arg(<selfMethodTemp>$3#foo, 0) : untyped

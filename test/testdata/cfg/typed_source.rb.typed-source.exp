@@ -222,13 +222,13 @@ class Examples
             #
             # cond: untyped
             #   Being truthy entails:
-            #     <constant:nil>$8 to be NilClass
             #     <debugEnvironmentTemp>$9 to be untyped
+            #     <constant:nil>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
-            #     <constant:nil>$8 to be NilClass
             #     <debugEnvironmentTemp>$9 to be untyped
+            #     <constant:nil>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
       while true
@@ -238,13 +238,13 @@ class Examples
             #
             # cond: untyped
             #   Being truthy entails:
-            #     <constant:nil>$8 to be NilClass
             #     <debugEnvironmentTemp>$9 to be untyped
+            #     <constant:nil>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
-            #     <constant:nil>$8 to be NilClass
             #     <debugEnvironmentTemp>$9 to be untyped
+            #     <constant:nil>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #
@@ -256,13 +256,13 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
           b = 1 # error: Changing type of pinned argument
@@ -272,13 +272,13 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         else
@@ -288,13 +288,13 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
           b = 2 # error: Changing type of pinned argument
@@ -304,13 +304,13 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <constant:nil>$8 to be NilClass
               #     <debugEnvironmentTemp>$9 to be untyped
+              #     <constant:nil>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         end

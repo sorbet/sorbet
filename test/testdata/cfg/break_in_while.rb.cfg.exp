@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$10)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:nil>$10 = alias <constant:nil> : NilClass
 <whileTemp>$4 = true : untyped
 <finalReturn> = return <constant:nil>$10 : <bottom>

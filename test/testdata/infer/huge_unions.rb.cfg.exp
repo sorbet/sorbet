@@ -22,7 +22,7 @@ subgraph "cluster_::<singleton class:<constant:A>>#send_beta_invitation" {
     "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [shape = invhouse];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [label = "block[id=0](<constant:C1>$9, <constant:C2>$13, <constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85)
+    "bb::<singleton class:<constant:A>>#send_beta_invitation_0" [label = "block[id=0]()
 <constant:C1>$9 = alias <constant:C1> : <Class:C1>
 <constant:C2>$13 = alias <constant:C2> : <Class:C2>
 <constant:C3>$17 = alias <constant:C3> : <Class:C3>

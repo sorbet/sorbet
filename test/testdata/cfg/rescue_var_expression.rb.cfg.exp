@@ -26,7 +26,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:Exception>$9, <constant:MyClass>$14)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:Exception>$9 = alias <constant:Exception> : <Class:Exception>
 <constant:MyClass>$14 = alias <constant:MyClass> : <Class:MyClass>
 <rescueTemp$4 = <unanalyzable> : untyped

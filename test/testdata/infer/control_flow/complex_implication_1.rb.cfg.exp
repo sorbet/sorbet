@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:ModuleMethods>#instrumented_request" {
     "bb::<constant:ModuleMethods>#instrumented_request_0" [shape = invhouse];
     "bb::<constant:ModuleMethods>#instrumented_request_1" [shape = parallelogram];
 
-    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "block[id=0](<constant:StandardError>$8)
+    "bb::<constant:ModuleMethods>#instrumented_request_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <selfMethodTemp>$3 = self : ModuleMethods
 final_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : untyped

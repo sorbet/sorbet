@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:A>#initialize" {
     "bb::<constant:A>#initialize_0" [shape = invhouse];
     "bb::<constant:A>#initialize_1" [shape = parallelogram];
 
-    "bb::<constant:A>#initialize_0" [label = "block[id=0](<constant:StandardError>$11)
+    "bb::<constant:A>#initialize_0" [label = "block[id=0]()
 <constant:StandardError>$11 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$6 = self : A
 <statTemp>$5 = <statTemp>$6.spec_list() : untyped

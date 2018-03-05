@@ -57,7 +57,7 @@ subgraph "cluster_::<constant:Main>#with_and" {
     "bb::<constant:Main>#with_and_0" [shape = invhouse];
     "bb::<constant:Main>#with_and_1" [shape = parallelogram];
 
-    "bb::<constant:Main>#with_and_0" [label = "block[id=0](<constant:nil>$14)
+    "bb::<constant:Main>#with_and_0" [label = "block[id=0]()
 <constant:nil>$14 = alias <constant:nil> : NilClass
 <selfMethodTemp>$3 = self : Main
 a = load_arg(<selfMethodTemp>$3#with_and, 0) : String | NilClass

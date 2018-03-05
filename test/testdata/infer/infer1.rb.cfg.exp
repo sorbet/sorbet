@@ -211,7 +211,7 @@ subgraph "cluster_::<constant:Object>#baz8" {
     "bb::<constant:Object>#baz8_0" [shape = invhouse];
     "bb::<constant:Object>#baz8_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz8_0" [label = "block[id=0](<constant:nil>$6)
+    "bb::<constant:Object>#baz8_0" [label = "block[id=0]()
 <constant:nil>$6 = alias <constant:nil> : NilClass
 <unconditional>"];
 

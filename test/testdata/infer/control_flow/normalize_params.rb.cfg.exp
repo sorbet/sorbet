@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:Test>#normalize_params" {
     "bb::<constant:Test>#normalize_params_0" [shape = invhouse];
     "bb::<constant:Test>#normalize_params_1" [shape = parallelogram];
 
-    "bb::<constant:Test>#normalize_params_0" [label = "block[id=0](<constant:Array>$16)
+    "bb::<constant:Test>#normalize_params_0" [label = "block[id=0]()
 <constant:Array>$16 = alias <constant:Array> : <Class:Array>
 <constant:Hash>$8 = alias <constant:Hash> : <Class:Hash>
 <selfMethodTemp>$4 = self : Test

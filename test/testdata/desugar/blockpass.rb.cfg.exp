@@ -100,7 +100,7 @@ subgraph "cluster_::<constant:Object>#calls_with_object" {
     "bb::<constant:Object>#calls_with_object_0" [shape = invhouse];
     "bb::<constant:Object>#calls_with_object_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#calls_with_object_0" [label = "block[id=0](<constant:<Magic>>$14)
+    "bb::<constant:Object>#calls_with_object_0" [label = "block[id=0]()
 <constant:<Magic>>$14 = alias <constant:<Magic>> : <Magic>
 <constant:HasMeth>$8 = alias <constant:HasMeth> : <Class:HasMeth>
 <selfMethodTemp>$4 = self : Object
@@ -146,7 +146,7 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_0" [shape = invhouse];
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:nil>$99 = alias <constant:nil> : NilClass
 <constant:<Magic>>$29 = alias <constant:<Magic>> : <Magic>
 <constant:HasMeth>$114 = alias <constant:HasMeth> : <Class:HasMeth>
@@ -531,7 +531,7 @@ subgraph "cluster_::<singleton class:<constant:CallsWithObjectChild>>#calls_with
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [shape = invhouse];
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [label = "block[id=0](<constant:<Magic>>$11)
+    "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_0" [label = "block[id=0]()
 <constant:<Magic>>$11 = alias <constant:<Magic>> : <Magic>
 <selfMethodTemp>$4 = self : <Class:CallsWithObjectChild>
 blk = load_arg(<selfMethodTemp>$4#calls_with_object, 0) : untyped

@@ -5,7 +5,7 @@ subgraph "cluster_::<constant:HasLoops>#variable_only_inside_loop" {
     "bb::<constant:HasLoops>#variable_only_inside_loop_0" [shape = invhouse];
     "bb::<constant:HasLoops>#variable_only_inside_loop_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "block[id=0](<constant:nil>$6)
+    "bb::<constant:HasLoops>#variable_only_inside_loop_0" [label = "block[id=0]()
 <constant:nil>$6 = alias <constant:nil> : NilClass
 <unconditional>"];
 
@@ -41,7 +41,7 @@ subgraph "cluster_::<constant:HasLoops>#incorrect_assignment" {
     "bb::<constant:HasLoops>#incorrect_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#incorrect_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "block[id=0](<constant:nil>$7)
+    "bb::<constant:HasLoops>#incorrect_assignment_0" [label = "block[id=0]()
 <constant:nil>$7 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];
@@ -78,7 +78,7 @@ subgraph "cluster_::<constant:HasLoops>#correct_assignment" {
     "bb::<constant:HasLoops>#correct_assignment_0" [shape = invhouse];
     "bb::<constant:HasLoops>#correct_assignment_1" [shape = parallelogram];
 
-    "bb::<constant:HasLoops>#correct_assignment_0" [label = "block[id=0](<constant:nil>$7)
+    "bb::<constant:HasLoops>#correct_assignment_0" [label = "block[id=0]()
 <constant:nil>$7 = alias <constant:nil> : NilClass
 a = s : String(\"s\")
 <unconditional>"];

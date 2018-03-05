@@ -365,9 +365,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
             BasicBlock *bb = *it;
             int sz = upper_bounds2[bb->id].size();
-            upper_bounds2[bb->id].insert(writes_by_block[bb->id].begin(), writes_by_block[bb->id].end());
             for (BasicBlock *edge : bb->backEdges) {
                 if (edge != cfg.deadBlock()) {
+                    upper_bounds2[bb->id].insert(writes_by_block[edge->id].begin(), writes_by_block[edge->id].end());
                     upper_bounds2[bb->id].insert(upper_bounds2[edge->id].begin(), upper_bounds2[edge->id].end());
                 }
             }

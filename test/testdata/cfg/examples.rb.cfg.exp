@@ -185,7 +185,7 @@ subgraph "cluster_::<constant:Examples>#variables_and_loop" {
     "bb::<constant:Examples>#variables_and_loop_0" [shape = invhouse];
     "bb::<constant:Examples>#variables_and_loop_1" [shape = parallelogram];
 
-    "bb::<constant:Examples>#variables_and_loop_0" [label = "block[id=0](<constant:nil>$10)
+    "bb::<constant:Examples>#variables_and_loop_0" [label = "block[id=0]()
 <constant:nil>$10 = alias <constant:nil> : NilClass
 <selfMethodTemp>$3 = self : Examples
 cond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped
@@ -249,7 +249,7 @@ subgraph "cluster_::<constant:Examples>#variables_loop_if" {
     "bb::<constant:Examples>#variables_loop_if_0" [shape = invhouse];
     "bb::<constant:Examples>#variables_loop_if_1" [shape = parallelogram];
 
-    "bb::<constant:Examples>#variables_loop_if_0" [label = "block[id=0](<constant:nil>$8)
+    "bb::<constant:Examples>#variables_loop_if_0" [label = "block[id=0]()
 <constant:nil>$8 = alias <constant:nil> : NilClass
 <selfMethodTemp>$3 = self : Examples
 cond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped

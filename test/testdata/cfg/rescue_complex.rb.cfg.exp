@@ -117,7 +117,7 @@ subgraph "cluster_::<constant:TestRescue>#multiple_rescue" {
     "bb::<constant:TestRescue>#multiple_rescue_0" [shape = invhouse];
     "bb::<constant:TestRescue>#multiple_rescue_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#multiple_rescue_0" [label = "block[id=0](<constant:StandardError>$8)
+    "bb::<constant:TestRescue>#multiple_rescue_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -174,7 +174,7 @@ subgraph "cluster_::<constant:TestRescue>#multiple_rescue_classes" {
     "bb::<constant:TestRescue>#multiple_rescue_classes_0" [shape = invhouse];
     "bb::<constant:TestRescue>#multiple_rescue_classes_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#multiple_rescue_classes_0" [label = "block[id=0](<constant:Foo>$8, <constant:Bar>$11)
+    "bb::<constant:TestRescue>#multiple_rescue_classes_0" [label = "block[id=0]()
 <constant:Foo>$8 = alias <constant:Foo> : untyped
 <constant:Bar>$11 = alias <constant:Bar> : untyped
 <rescueTemp$4 = <unanalyzable> : untyped
@@ -226,7 +226,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_rescue_ensure" {
     "bb::<constant:TestRescue>#parse_rescue_ensure_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_rescue_ensure_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_rescue_ensure_0" [label = "block[id=0](<constant:StandardError>$9)
+    "bb::<constant:TestRescue>#parse_rescue_ensure_0" [label = "block[id=0]()
 <constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -272,7 +272,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_bug_rescue_empty_else" {
     "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_0" [label = "block[id=0](<constant:LoadError>$7)
+    "bb::<constant:TestRescue>#parse_bug_rescue_empty_else_0" [label = "block[id=0]()
 <constant:LoadError>$7 = alias <constant:LoadError> : <Class:LoadError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -304,7 +304,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12686" {
     "bb::<constant:TestRescue>#parse_ruby_bug_12686_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_ruby_bug_12686_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_ruby_bug_12686_0" [label = "block[id=0](<constant:nil>$12, <constant:StandardError>$10)
+    "bb::<constant:TestRescue>#parse_ruby_bug_12686_0" [label = "block[id=0]()
 <constant:nil>$12 = alias <constant:nil> : NilClass
 <constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$4 = self : TestRescue
@@ -350,7 +350,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_rescue_mod" {
     "bb::<constant:TestRescue>#parse_rescue_mod_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_rescue_mod_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_rescue_mod_0" [label = "block[id=0](<constant:StandardError>$8)
+    "bb::<constant:TestRescue>#parse_rescue_mod_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -439,7 +439,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_rescue_else_ensure" {
     "bb::<constant:TestRescue>#parse_rescue_else_ensure_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_rescue_else_ensure_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_rescue_else_ensure_0" [label = "block[id=0](<constant:StandardError>$10)
+    "bb::<constant:TestRescue>#parse_rescue_else_ensure_0" [label = "block[id=0]()
 <constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -487,7 +487,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_rescue" {
     "bb::<constant:TestRescue>#parse_rescue_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_rescue_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_rescue_0" [label = "block[id=0](<constant:StandardError>$8)
+    "bb::<constant:TestRescue>#parse_rescue_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -531,7 +531,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_resbody_var" {
     "bb::<constant:TestRescue>#parse_resbody_var_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_resbody_var_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_resbody_var_0" [label = "block[id=0](<constant:StandardError>$8)
+    "bb::<constant:TestRescue>#parse_resbody_var_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
@@ -575,7 +575,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_resbody_var_1" {
     "bb::<constant:TestRescue>#parse_resbody_var_1_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_resbody_var_1_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_resbody_var_1_0" [label = "block[id=0](<constant:StandardError>$8, @ex$11)
+    "bb::<constant:TestRescue>#parse_resbody_var_1_0" [label = "block[id=0]()
 <constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
 @ex$11 = alias @ex : StandardError | NilClass
 <rescueTemp$4 = <unanalyzable> : untyped
@@ -621,7 +621,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_rescue_mod_op_assign" {
     "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_0" [label = "block[id=0](<constant:StandardError>$10)
+    "bb::<constant:TestRescue>#parse_rescue_mod_op_assign_0" [label = "block[id=0]()
 <constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$4 = foo : NilClass
 <rescueTemp$6 = <unanalyzable> : untyped
@@ -667,7 +667,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402" {
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_ruby_bug_12402_0" [label = "block[id=0](<constant:nil>$12, <constant:StandardError>$10)
+    "bb::<constant:TestRescue>#parse_ruby_bug_12402_0" [label = "block[id=0]()
 <constant:nil>$12 = alias <constant:nil> : NilClass
 <constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$4 = <unanalyzable> : untyped
@@ -713,7 +713,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402_1" {
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_0" [label = "block[id=0](<constant:nil>$14, <constant:StandardError>$12)
+    "bb::<constant:TestRescue>#parse_ruby_bug_12402_1_0" [label = "block[id=0]()
 <constant:nil>$14 = alias <constant:nil> : NilClass
 <constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$4 = foo : NilClass
@@ -761,7 +761,7 @@ subgraph "cluster_::<constant:TestRescue>#parse_ruby_bug_12402_2" {
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_0" [shape = invhouse];
     "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_1" [shape = parallelogram];
 
-    "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_0" [label = "block[id=0](<constant:nil>$22, <constant:StandardError>$20)
+    "bb::<constant:TestRescue>#parse_ruby_bug_12402_2_0" [label = "block[id=0]()
 <constant:nil>$22 = alias <constant:nil> : NilClass
 <constant:StandardError>$20 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$5 = self : TestRescue

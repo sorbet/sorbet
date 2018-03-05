@@ -268,7 +268,11 @@ public:
 
     bool hasType(core::Context ctx, core::LocalVariable symbol) const {
         auto fnd = find(vars.begin(), vars.end(), symbol);
-        return fnd != vars.end();
+        if (fnd == vars.end()) {
+            return false;
+        }
+        // We don't distinguish between nullptr and "not set"
+        return types[fnd - vars.begin()].type.get() != nullptr;
     }
 
     // NB: you can't call this function on vars in the first basic block since

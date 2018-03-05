@@ -109,7 +109,7 @@ subgraph "cluster_::<singleton class:<constant:Main>>#main" {
     "bb::<singleton class:<constant:Main>>#main_0" [shape = invhouse];
     "bb::<singleton class:<constant:Main>>#main_1" [shape = parallelogram];
 
-    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<singleton class:<constant:Main>>#main_0" [label = "block[id=0]()
 <constant:E>$100 = alias <constant:E> : <Class:E>
 <constant:A>$12 = alias <constant:A> : <Class:A>
 @a$84 = alias @a : untyped

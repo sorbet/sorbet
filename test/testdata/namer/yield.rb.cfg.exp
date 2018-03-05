@@ -130,7 +130,7 @@ subgraph "cluster_::<constant:Main>#main" {
     "bb::<constant:Main>#main_0" [shape = invhouse];
     "bb::<constant:Main>#main_1" [shape = parallelogram];
 
-    "bb::<constant:Main>#main_0" [label = "block[id=0](<constant:<Magic>>$23)
+    "bb::<constant:Main>#main_0" [label = "block[id=0]()
 <constant:<Magic>>$23 = alias <constant:<Magic>> : <Magic>
 <statTemp>$10 = self : Main
 l = <statTemp>$10.lambda() : untyped
