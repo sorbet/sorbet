@@ -380,12 +380,17 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
 
             vector<shared_ptr<core::Type>> targs;
             auto it = args.begin();
+            int i = -1;
             for (auto mem : attachedClass.data(ctx).typeMembers()) {
+                ++i;
                 if (mem.data(ctx).isFixed()) {
                     targs.emplace_back(mem.data(ctx).resultType);
                 } else if (it != args.end()) {
                     targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
                     ++it;
+                } else if (attachedClass == core::Symbols::Hash() && i == 2) {
+                    auto tupleArgs = targs;
+                    targs.emplace_back(make_shared<TupleType>(tupleArgs));
                 } else {
                     targs.emplace_back(core::Types::dynamic());
                 }

@@ -3087,7 +3087,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
               <constant:Elem> = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
             ]
           }
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = AppliedType {
+                  klass = ::<constant:Array>
+                  targs = [
+                    <constant:Elem> = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
+                  ]
+                }
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -3269,7 +3277,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
         <constant:V> = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
+            1 = LambdaParam(::<constant:Enumerable>#<constant:Elem>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4621,7 +4632,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> AppliedType {
@@ -4629,7 +4643,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         targs = [
           <constant:K> = BasicObject
           <constant:V> = BasicObject
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = BasicObject
+              1 = BasicObject
+            }
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4646,7 +4663,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4684,7 +4704,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> AppliedType {
@@ -4700,7 +4723,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method compare_by_identity? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4717,7 +4743,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4741,7 +4770,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4757,7 +4789,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4772,7 +4807,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4788,7 +4826,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4821,7 +4862,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:V>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:K>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:V>)
+            1 = LambdaParam(::<constant:Hash>#<constant:K>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method keep_if (blk) -> AppliedType {
@@ -4829,7 +4873,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4858,7 +4905,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> AppliedType {
@@ -4866,7 +4916,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         targs = [
           <constant:K> = BasicObject
           <constant:V> = BasicObject
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = BasicObject
+              1 = BasicObject
+            }
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4882,7 +4935,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method reject () -> AppliedType {
@@ -4900,7 +4956,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4916,7 +4975,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4932,7 +4994,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -4977,7 +5042,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = LambdaParam(::<constant:Hash>#<constant:K>)
         <constant:V> = LambdaParam(::<constant:Hash>#<constant:V>)
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = LambdaParam(::<constant:Hash>#<constant:K>)
+            1 = LambdaParam(::<constant:Hash>#<constant:V>)
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method to_s () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5865,7 +5933,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument x<> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7909,7 +7980,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
               <constant:Elem> = Integer
             ]
           }
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = AppliedType {
+                  klass = ::<constant:Array>
+                  targs = [
+                    <constant:Elem> = Integer
+                  ]
+                }
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method names () -> AppliedType {
@@ -8071,7 +8150,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -9895,7 +9977,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = String
         <constant:V> = String
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = String
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument words<> -> AppliedType {
@@ -9999,7 +10084,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         targs = [
           <constant:K> = Symbol
           <constant:V> = BasicObject
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = Symbol
+              1 = BasicObject
+            }
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument path<> -> AppliedType {
@@ -10023,7 +10111,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
               <constant:Elem> = Integer | NilClass
             ]
           }
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = AppliedType {
+                  klass = ::<constant:Array>
+                  targs = [
+                    <constant:Elem> = Integer | NilClass
+                  ]
+                }
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method start () -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -10344,7 +10440,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = String
         <constant:V> = String
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = String
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method compatible? (obj1, obj2) -> Encoding | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -10651,7 +10750,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         targs = [
           <constant:K> = Symbol
           <constant:V> = TrueClass | FalseClass
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = Symbol
+              1 = TrueClass | FalseClass
+            }
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument src<> -> String | Pathname @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -10667,7 +10769,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         targs = [
           <constant:K> = Symbol
           <constant:V> = TrueClass | FalseClass
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = Symbol
+              1 = TrueClass | FalseClass
+            }
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
   class <singleton class:<constant:Float>> < ::<singleton class:<constant:Numeric>> () @ ???
@@ -10685,7 +10790,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = Symbol
         <constant:V> = Integer
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = Symbol
+            1 = Integer
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> -> AppliedType {
@@ -10744,7 +10852,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<repeated> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11153,7 +11264,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = untyped
         <constant:V> = untyped
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = untyped
+            1 = untyped
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument x<> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11654,7 +11768,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = String
         <constant:V> = Integer
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = Integer
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method signame (arg0) -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11803,7 +11920,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       targs = [
         <constant:K> = String
         <constant:V> = Class
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = String
+            1 = Class
+          }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method split (uri) -> AppliedType {

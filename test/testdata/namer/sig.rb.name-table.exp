@@ -44,7 +44,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
         targs = [
           <constant:K> = T1
           <constant:V> = T2
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = T1
+              1 = T2
+            }
         ]
       } @ test/testdata/namer/sig.rb:15
       argument h<> -> FalseClass | Integer | Float | String | Symbol @ test/testdata/namer/sig.rb:16

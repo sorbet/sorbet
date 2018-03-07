@@ -68,7 +68,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       targs = [
         <constant:K> = Symbol
         <constant:V> = String
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = Symbol
+            1 = String
+          }
       ]
     } @ test/testdata/dsl/prop.rb:35
     method hash_of= (arg0) -> AppliedType {
@@ -76,7 +79,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       targs = [
         <constant:K> = Symbol
         <constant:V> = String
-        <constant:Elem> = untyped
+        <constant:Elem> = TupleType {
+            0 = Symbol
+            1 = String
+          }
       ]
     } @ test/testdata/dsl/prop.rb:35
       argument arg0<> -> AppliedType {
@@ -84,7 +90,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
         targs = [
           <constant:K> = Symbol
           <constant:V> = String
-          <constant:Elem> = untyped
+          <constant:Elem> = TupleType {
+              0 = Symbol
+              1 = String
+            }
         ]
       } @ test/testdata/dsl/prop.rb:35
     method no_class_arg () -> AppliedType {

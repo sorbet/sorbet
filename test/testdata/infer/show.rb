@@ -25,7 +25,7 @@ class Main
         T.assert_type!(foo, T.any(String, Integer)) # error: asserted type T.any(String, Integer)
         T.assert_type!(foo, T.all(A, B)) # error: asserted type T.all(A, B)
         T.assert_type!(foo, T::Array[Integer]) # error: asserted type T::Array[Integer]
-        T.assert_type!(foo, T::Hash[T.any(Symbol, String), Integer]) # error: asserted type T::Hash[T.any(Symbol, String), Integer, untyped]
+        T.assert_type!(foo, T::Hash[T.any(Symbol, String), Integer]) # error: asserted type T::Hash[T.any(Symbol, String), Integer]
         T.assert_type!(foo, Box[Integer]) # error: asserted type Box[Integer]
         T.assert_type!(foo, Box[Box[Integer]]) # error: asserted type Box[Box[Integer]]
         T.assert_type!(foo, [Integer, String, Symbol]) # error: asserted type [Integer, String, Symbol]

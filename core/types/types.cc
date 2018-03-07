@@ -881,6 +881,9 @@ std::string AppliedType::show(const GlobalState &gs) {
 
     bool first = true;
     for (auto &targ : this->targs) {
+        if (this->klass == core::Symbols::Hash() && &targ == &this->targs.back()) {
+            break;
+        }
         if (first) {
             first = false;
         } else {
