@@ -56,12 +56,12 @@ string ErrorSection::toString(const GlobalState &gs) {
         coloredLineHeaders = false;
         buf << indent << DETAIL_COLOR << this->header << RESET_COLOR;
     }
-    bool first = true;
+    // Print a leading newline iff there was a header
+    bool printnl = !this->header.empty();
     for (auto &line : this->messages) {
-        if (!first) {
+        if (printnl)
             buf << endl;
-        }
-        first = false;
+        printnl = false;
         buf << indent << line.toString(gs, coloredLineHeaders);
     }
     return buf.str();
