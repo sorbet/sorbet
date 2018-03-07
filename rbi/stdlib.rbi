@@ -3109,19 +3109,19 @@ class BigDecimal
   sig(
       arg0: Integer,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Float,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Rational,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(Object)
+  .returns(Integer)
   def <=>(arg0); end
 
   sig(
@@ -5085,19 +5085,19 @@ class Float
   sig(
       arg0: Integer,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Float,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Rational,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(Object)
+  .returns(Integer)
   def <=>(arg0); end
 
   sig(
@@ -6009,19 +6009,19 @@ class Integer
   sig(
       arg0: Integer,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Float,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Rational,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(Object)
+  .returns(Integer)
   def <=>(arg0); end
 
   sig(
@@ -8112,7 +8112,7 @@ class Numeric
   sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
   )
-  .returns(Object)
+  .returns(Integer)
   def <=>(arg0); end
 
   sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
@@ -9921,19 +9921,19 @@ class Rational
   sig(
       arg0: Integer,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Float,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: Rational,
   )
-  .returns(Object)
+  .returns(Integer)
   sig(
       arg0: BigDecimal,
   )
-  .returns(Object)
+  .returns(Integer)
   def <=>(arg0); end
 
   sig(
