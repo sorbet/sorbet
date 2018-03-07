@@ -111,18 +111,29 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
             case core::Names::overridable()._id:
                 sig.seen.overridable = true;
                 break;
-            case core::Names::returns()._id:
+            case core::Names::returns()._id: {
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
                     }
-                }
-                if (!send->args.empty()) {
-                    sig.returns = getResultType(ctx, send->args.front());
+                    break;
                 }
 
+                auto nil = ast::cast_tree<ast::Ident>(send->args[0].get());
+                if (nil && nil->symbol == core::Symbols::nil()) {
+                    if (auto e =
+                            ctx.state.beginError(send->args[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("You probably meant .returns(NilClass)");
+                    }
+                    sig.returns = core::Types::nil();
+                    break;
+                }
+
+                sig.returns = getResultType(ctx, send->args.front());
+
                 break;
+            }
             case core::Names::checked()._id:
                 sig.seen.checked = true;
                 break;
