@@ -18,7 +18,11 @@ class Main
     def with_type(**args)
     end
 
-    def main
+    sig(x: String, y: Symbol).returns(NilClass)
+    def opt_and_repeated_kw(x="hi", **y)
+    end
+
+  def main
         wild(a: 1)
         double_wild
         double_wild(a: 1)
@@ -35,5 +39,11 @@ class Main
         with_type(a: 1)
         with_type(a: "bad") # error: Argument args does not match expected type
         with_type(a: "bad", b: "bad") # error: MULTI
+
+        # This should assign `z`, instead of assigning `x={z: :foo}`,
+        # which would happen with `y={}`
+        opt_and_repeated_kw(z: :foo)
+        opt_and_repeated_kw("hi")
+        opt_and_repeated_kw("hi", z: "foo") # error: Argument y does not match expected type Symbol
     end
 end
