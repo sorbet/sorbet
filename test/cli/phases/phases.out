@@ -1335,7 +1335,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     static-field <constant:FORMAT> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
   class <constant:BigDecimal> < ::<constant:Numeric> () -> <Class:BigDecimal> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method % (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method * (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ** (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -1468,8 +1468,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method add (arg0, arg1) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer | Float | Rational | BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg1<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method angle () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method arg () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method angle () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method arg () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ceil () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method coerce (arg0) -> TupleType {
@@ -1507,14 +1507,14 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method inspect () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method magnitude () -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method modulo (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method mult (arg0, arg1) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer | Float | Rational | BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg1<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method nan? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method nonzero? () -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method numerator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method phase () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method phase () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method power (arg0) -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method precs () -> TupleType {
@@ -1773,7 +1773,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method <overload N.1 : quo> (arg0) -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : rationalize> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : **> (arg0) -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : *> (arg0) -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -1812,8 +1812,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method == (arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method abs () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method abs2 () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method abs () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method abs2 () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method angle () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method arg () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -1821,7 +1821,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       0 = Complex
       1 = Complex
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method conj () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method conjugate () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method denominator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -1831,7 +1831,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method equal? (arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method fdiv (arg0) -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method freeze () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method hash () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method imag () -> Integer | Float | Rational | BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4117,7 +4117,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : %> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : *> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4141,7 +4141,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       0 = Float
       1 = Float
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : div> (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : fdiv> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4151,12 +4151,12 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method <overload N.1 : quo> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : rationalize> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : round> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : round> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : %> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.2 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.2 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : *> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -4238,8 +4238,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs2 () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method angle () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method arg () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method angle () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method arg () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ceil () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method coerce (arg0) -> TupleType {
@@ -4278,7 +4278,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method nan? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method next_float () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method numerator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method phase () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method phase () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method prev_float () -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method quo (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5566,7 +5566,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method * (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method ** (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method ** (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method + (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5586,7 +5586,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : %> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : *> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5625,11 +5625,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method <overload N.1 : quo> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : rationalize> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : remainder> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : round> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : round> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : times> () -> AppliedType {
       klass = ::<constant:Enumerator>
       targs = [
@@ -5647,7 +5647,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : %> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.2 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.2 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : *> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5743,8 +5743,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs2 () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method angle () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method arg () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method angle () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method arg () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method bit_length () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ceil () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method chr (arg0) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5754,7 +5754,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       0 = Integer | Float | Rational | BigDecimal
       1 = Integer | Float | Rational | BigDecimal
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method conj () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method conjugate () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method denominator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -5805,7 +5805,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method numerator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method odd? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ord () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method phase () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method phase () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method pred () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method quo (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -6545,108 +6545,112 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method untaint () -> NotImplementedError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method untrust () -> NotImplementedError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
   class <constant:Numeric> < ::<constant:Object> (<constant:Comparable>) -> <Class:Numeric> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method % (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method +@ () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method -@ () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method % (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method + (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method +@ () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method - (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method -@ () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <=> (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : step> (arg0) -> AppliedType {
       klass = ::<constant:Enumerator>
       targs = [
-        <constant:Elem> = Integer | Float | Rational | BigDecimal | Complex
+        <constant:Elem> = Numeric
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.2 : step> (arg0, arg1, blk) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg1<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.2 : step> (arg0, arg1, blk) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg1<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
         klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = BasicObject
-          <constant:Arg0> = Integer | Float | Rational | BigDecimal | Complex
+          <constant:Arg0> = Numeric
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.3 : step> (arg0, arg1) -> AppliedType {
       klass = ::<constant:Enumerator>
       targs = [
-        <constant:Elem> = Integer | Float | Rational | BigDecimal | Complex
+        <constant:Elem> = Numeric
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg1<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg1<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method abs () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method abs2 () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method angle () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method arg () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method abs () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method abs2 () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method angle () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method arg () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ceil () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method coerce (arg0) -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method conj () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method conjugate () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method conj () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method conjugate () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method denominator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method div (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method divmod (arg0) -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method dup () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method eql? (arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method fdiv (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method fdiv (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method floor () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method freeze () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method i () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method imag () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method imaginary () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method imag () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method imaginary () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method integer? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method magnitude () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method magnitude () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method modulo (arg0) -> Integer | Float | Rational | BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method nonzero? () -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method numerator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method phase () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method phase () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method polar () -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method quo (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method real () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method real? () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method quo (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method real () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method real? () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method rect () -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method rectangular () -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method remainder (arg0) -> Integer | Float | Rational | BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method round (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method round (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method singleton_method_added (arg0) -> TypeError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Symbol @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method step (arg0, blk) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method step (arg0, blk) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument blk<block> -> AppliedType {
         klass = ::<constant:Proc1>
         targs = [
           <constant:Return> = BasicObject
-          <constant:Arg0> = Integer | Float | Rational | BigDecimal | Complex
+          <constant:Arg0> = Numeric
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method taint () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7714,7 +7718,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method * (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method ** (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method ** (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method + (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7732,7 +7736,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : %> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : *> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7752,7 +7756,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : >> (arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : ceil> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : ceil> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : coerce> (arg0) -> TupleType {
       0 = Float
@@ -7763,21 +7767,21 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : fdiv> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : floor> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : floor> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : modulo> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : quo> (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : rationalize> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-      argument arg0<optional> -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.1 : round> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+      argument arg0<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.1 : round> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.1 : truncate> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : %> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method <overload N.2 : **> (arg0) -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method <overload N.2 : **> (arg0) -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.2 : *> (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7833,8 +7837,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method <overload N.3 : >> (arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> BigDecimal @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.3 : coerce> (arg0) -> TupleType {
-      0 = Integer | Float | Rational | BigDecimal | Complex
-      1 = Integer | Float | Rational | BigDecimal | Complex
+      0 = Numeric
+      1 = Numeric
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method <overload N.3 : div> (arg0) -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7867,8 +7871,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs () -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method abs2 () -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method angle () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method arg () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method angle () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method arg () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method ceil () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clone () -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -7902,7 +7906,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method modulo (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method numerator () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method phase () -> Integer | Float | Rational | BigDecimal | Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method phase () -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method quo (arg0) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method rationalize () -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__

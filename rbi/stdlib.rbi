@@ -2953,7 +2953,7 @@ end
 
 class BigDecimal
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(BigDecimal)
   def %(arg0); end
@@ -3188,10 +3188,10 @@ class BigDecimal
   .returns(BigDecimal)
   def add(arg0, arg1); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def angle(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def arg(); end
 
   sig.returns(Integer)
@@ -3313,7 +3313,7 @@ class BigDecimal
   def magnitude(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(BigDecimal)
   def modulo(arg0); end
@@ -3334,7 +3334,7 @@ class BigDecimal
   sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def phase(); end
 
   sig(
@@ -3765,10 +3765,10 @@ class Complex
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def abs(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def abs2(); end
 
   sig.returns(Float)
@@ -3781,7 +3781,7 @@ class Complex
   def clone(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns([Complex, Complex])
   def coerce(arg0); end
@@ -3811,7 +3811,7 @@ class Complex
   def equal?(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Complex)
   def fdiv(arg0); end
@@ -3867,7 +3867,7 @@ class Complex
 
   sig.returns(Rational)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Rational)
   def rationalize(arg0=_); end
@@ -4959,11 +4959,11 @@ class Float
   sig(
       arg0: Float,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: Rational,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: BigDecimal,
   )
@@ -5154,10 +5154,10 @@ class Float
   sig.returns(Float)
   def abs2(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def angle(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def arg(); end
 
   sig.returns(Integer)
@@ -5171,7 +5171,7 @@ class Float
   )
   .returns([Float, Float])
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns([Float, Float])
   def coerce(arg0); end
@@ -5300,7 +5300,7 @@ class Float
   sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def phase(); end
 
   sig.returns(Float)
@@ -5330,7 +5330,7 @@ class Float
 
   sig.returns(Rational)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Rational)
   def rationalize(arg0=_); end
@@ -5343,9 +5343,9 @@ class Float
 
   sig.returns(Integer)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def round(arg0=_); end
 
   sig.returns(Float)
@@ -5873,15 +5873,15 @@ class Integer
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: Float,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: Rational,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: BigDecimal,
   )
@@ -6108,10 +6108,10 @@ class Integer
   sig.returns(Integer)
   def abs2(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def angle(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def arg(); end
 
   sig.returns(Integer)
@@ -6130,7 +6130,7 @@ class Integer
   def clone(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def coerce(arg0); end
@@ -6291,7 +6291,7 @@ class Integer
   sig.returns(Integer)
   def ord(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def phase(); end
 
   sig.returns(Integer)
@@ -6321,7 +6321,7 @@ class Integer
 
   sig.returns(Rational)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Rational)
   def rationalize(arg0=_); end
@@ -6352,9 +6352,9 @@ class Integer
 
   sig.returns(Integer)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def round(arg0=_); end
 
   sig.returns(Integer)
@@ -8098,33 +8098,45 @@ end
 
 class Numeric
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def %(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: Numeric,
+  )
+  .returns(Numeric)
+  def +(arg0); end
+
+  sig.returns(Numeric)
   def +@(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig(
+      arg0: Numeric,
+  )
+  .returns(Numeric)
+  def -(arg0); end
+
+  sig.returns(Numeric)
   def -@(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Integer)
   def <=>(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def abs(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def abs2(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def angle(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def arg(); end
 
   sig.returns(Integer)
@@ -8134,45 +8146,45 @@ class Numeric
   def clone(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  .returns([Numeric, Numeric])
   def coerce(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def conj(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def conjugate(); end
 
   sig.returns(Integer)
   def denominator(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Integer)
   def div(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  .returns([Numeric, Numeric])
   def divmod(arg0); end
 
   sig.returns(Numeric)
   def dup(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def fdiv(arg0); end
 
   sig.returns(Integer)
@@ -8184,20 +8196,20 @@ class Numeric
   sig.returns(Complex)
   def i(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def imag(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def imaginary(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   def integer?(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def magnitude(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(T.any(Integer, Float, Rational, BigDecimal))
   def modulo(arg0); end
@@ -8208,40 +8220,40 @@ class Numeric
   sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def phase(); end
 
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  sig.returns([Numeric, Numeric])
   def polar(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def quo(arg0); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def real(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def real?(); end
 
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  sig.returns([Numeric, Numeric])
   def rect(); end
 
-  sig.returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  sig.returns([Numeric, Numeric])
   def rectangular(); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(T.any(Integer, Float, Rational, BigDecimal))
   def remainder(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def round(arg0); end
 
   sig(
@@ -8251,25 +8263,25 @@ class Numeric
   def singleton_method_added(arg0); end
 
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-      blk: T.proc(arg0: T.any(Integer, Float, Rational, BigDecimal, Complex)).returns(BasicObject),
+      arg0: Numeric,
+      blk: T.proc(arg0: Numeric).returns(BasicObject),
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
-  .returns(Enumerator[T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  .returns(Enumerator[Numeric])
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-      arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
-      blk: T.proc(arg0: T.any(Integer, Float, Rational, BigDecimal, Complex)).returns(BasicObject),
+      arg0: Numeric,
+      arg1: Numeric,
+      blk: T.proc(arg0: Numeric).returns(BasicObject),
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
-      arg1: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
+      arg1: Numeric,
   )
-  .returns(Enumerator[T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  .returns(Enumerator[Numeric])
   def step(arg0, arg1=_, &blk); end
 
   sig.returns(Numeric)
@@ -9791,15 +9803,15 @@ class Rational
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: Float,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: Rational,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   sig(
       arg0: BigDecimal,
   )
@@ -9984,17 +9996,17 @@ class Rational
   sig.returns(Rational)
   def abs2(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def angle(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def arg(); end
 
   sig.returns(Integer)
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def ceil(arg0=_); end
 
   sig.returns(Rational)
@@ -10015,7 +10027,7 @@ class Rational
   sig(
       arg0: Complex,
   )
-  .returns([T.any(Integer, Float, Rational, BigDecimal, Complex), T.any(Integer, Float, Rational, BigDecimal, Complex)])
+  .returns([Numeric, Numeric])
   def coerce(arg0); end
 
   sig.returns(Rational)
@@ -10086,7 +10098,7 @@ class Rational
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def floor(arg0=_); end
 
   sig.returns(Rational)
@@ -10125,7 +10137,7 @@ class Rational
   sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  sig.returns(Numeric)
   def phase(); end
 
   sig(
@@ -10152,7 +10164,7 @@ class Rational
 
   sig.returns(Rational)
   sig(
-      arg0: T.any(Integer, Float, Rational, BigDecimal, Complex),
+      arg0: Numeric,
   )
   .returns(Rational)
   def rationalize(arg0=_); end
@@ -10167,7 +10179,7 @@ class Rational
   sig(
       arg0: Integer,
   )
-  .returns(T.any(Integer, Float, Rational, BigDecimal, Complex))
+  .returns(Numeric)
   def round(arg0=_); end
 
   sig.returns(Rational)
