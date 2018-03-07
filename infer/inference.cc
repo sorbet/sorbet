@@ -281,7 +281,7 @@ public:
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             core::TypeAndOrigins ret;
-            ret.type = core::Types::nil();
+            ret.type = core::Types::nilClass();
             ret.origins.push_back(ctx.owner.data(ctx).definitionLoc);
             return ret;
         }
@@ -293,7 +293,7 @@ public:
         auto fnd = find(vars.begin(), vars.end(), symbol);
         if (fnd == vars.end()) {
             core::TypeAndOrigins ret;
-            ret.type = core::Types::nil();
+            ret.type = core::Types::nilClass();
             ret.origins.push_back(ctx.owner.data(ctx).definitionLoc);
             vars.emplace_back(symbol);
             types.push_back(ret);
@@ -382,8 +382,8 @@ public:
                 return;
             }
             auto &whoKnows = getKnowledge(local);
-            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, core::Types::nil());
-            whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, core::Types::nil());
+            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, core::Types::nilClass());
+            whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, core::Types::nilClass());
             whoKnows.sanityCheck();
         }
 
@@ -1145,7 +1145,7 @@ unique_ptr<cfg::CFG> ruby_typer::infer::Inference::run(core::Context ctx, unique
         for (auto &uninitialized : current.types) {
             i++;
             if (uninitialized.type.get() == nullptr) {
-                uninitialized.type = core::Types::nil();
+                uninitialized.type = core::Types::nilClass();
                 uninitialized.origins.push_back(ctx.owner.data(ctx).definitionLoc);
             } else {
                 uninitialized.type->sanityCheck(ctx);

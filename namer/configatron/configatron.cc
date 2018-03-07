@@ -160,7 +160,7 @@ template class std::shared_ptr<Path>;
 void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> prefix) {
     switch (node.Type()) {
         case YAML::NodeType::Null:
-            prefix->setType(gs, core::Types::nil());
+            prefix->setType(gs, core::Types::nilClass());
             break;
         case YAML::NodeType::Scalar:
             prefix->setType(gs, getType(gs, node));

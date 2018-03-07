@@ -40,7 +40,7 @@ public:
 
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
-    static std::shared_ptr<Type> nil();
+    static std::shared_ptr<Type> nilClass();
     static std::shared_ptr<Type> dynamic();
     static std::shared_ptr<Type> trueClass();
     static std::shared_ptr<Type> falseClass();

@@ -126,7 +126,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                             ctx.state.beginError(send->args[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("You probably meant .returns(NilClass)");
                     }
-                    sig.returns = core::Types::nil();
+                    sig.returns = core::Types::nilClass();
                     break;
                 }
 
@@ -152,7 +152,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
 shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0]), core::Types::nil());
+            return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0]), core::Types::nilClass());
         case core::Names::all()._id: {
             auto result = TypeSyntax::getResultType(ctx, send->args[0]);
             int i = 1;

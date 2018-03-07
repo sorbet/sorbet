@@ -24,7 +24,7 @@ shared_ptr<Type> Types::bottom() {
     return res;
 }
 
-shared_ptr<Type> Types::nil() {
+shared_ptr<Type> Types::nilClass() {
     static auto res = make_shared<ClassType>(core::Symbols::NilClass());
     return res;
 }
@@ -106,7 +106,7 @@ std::shared_ptr<Type> Types::Object() {
 }
 
 std::shared_ptr<Type> Types::falsyTypes() {
-    static auto res = OrType::make_shared(Types::nil(), Types::falseClass());
+    static auto res = OrType::make_shared(Types::nilClass(), Types::falseClass());
     return res;
 }
 
@@ -164,7 +164,7 @@ bool Types::canBeFalsy(core::Context ctx, std::shared_ptr<Type> what) {
         return true;
     }
     return Types::isSubType(ctx, Types::falseClass(), what) ||
-           Types::isSubType(ctx, Types::nil(),
+           Types::isSubType(ctx, Types::nilClass(),
                             what); // check if inhabited by falsy values
 }
 

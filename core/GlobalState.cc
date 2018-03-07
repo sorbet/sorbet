@@ -203,7 +203,7 @@ void GlobalState::initEmpty() {
     ENFORCE(T_Enumerable_id = Symbols::T_Enumerable());
 
     // Synthesize nil = NilClass()
-    Symbols::nil().data(*this).resultType = core::Types::nil();
+    Symbols::nil().data(*this).resultType = core::Types::nilClass();
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();
