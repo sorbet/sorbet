@@ -1,8 +1,8 @@
 class <emptyTree><<constant:<root>>> < ()
   def self.<static-init><<static-init>$9>()
     begin
-      ::<constant:Foo>::<constant:Bar>.baz(1)
-      ::<constant:Foo>::<constant:Bar>.baz(2)
+      ::<constant:untyped>.baz(1)
+      ::<constant:untyped>.baz(2)
     end
   end
 end

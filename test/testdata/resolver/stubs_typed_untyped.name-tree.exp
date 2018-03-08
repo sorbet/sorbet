@@ -1,0 +1,21 @@
+begin
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$9>()
+      begin
+        <emptyTree>
+        ::<constant:untyped>
+        ::<constant:untyped>
+      end
+    end
+  end
+  module <emptyTree>::<constant:Foo><<constant:Foo>> < ()  end
+  <emptyTree>
+end
+class <emptyTree><<constant:<root>>> < ()
+  def self.<static-init><<static-init>$10>()
+    begin
+      ::<constant:Bar>
+      ::<constant:Foo>::<constant:Bar>
+    end
+  end
+end

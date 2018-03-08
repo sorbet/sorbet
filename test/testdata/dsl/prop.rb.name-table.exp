@@ -149,8 +149,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method main () @ test/testdata/dsl/prop.rb:60
   class <constant:Opus> () -> <Class:Opus> @ ???
     class <constant:Param> () -> untyped @ test/testdata/dsl/prop.rb:11
-      class <constant:CaseParam> () -> untyped @ test/testdata/dsl/prop.rb:11
-      class <constant:ParamSpecsParam> () -> untyped @ test/testdata/dsl/prop.rb:11
   class <constant:PropHelpers2> < ::<constant:Object> () -> <Class:PropHelpers2> @ test/testdata/dsl/prop.rb:55
     method created () -> Float @ test/testdata/dsl/prop.rb:57
     method token () -> String @ test/testdata/dsl/prop.rb:56

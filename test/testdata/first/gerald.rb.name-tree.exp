@@ -35,7 +35,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Chalk>::<constant:Log>)
+  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:untyped>)
     <emptyTree>
 
     <emptyTree>
@@ -43,7 +43,7 @@ begin
     def initialize<initialize>()
       begin
         begin
-          <assignTemp$3 = ::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$2|
+          <assignTemp$3 = ::<constant:untyped>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$2|
             <block-pass>$2$2.valid?()
           end
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = <assignTemp$3.[](0)
@@ -276,7 +276,7 @@ begin
     end
 
     def changed_openapi?<changed_openapi?>()
-      self(<constant:Diff>).changed_files().include?(::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
+      self(<constant:Diff>).changed_files().include?(::<constant:untyped>)
     end
 
     def parse<parse>(diff)

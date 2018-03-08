@@ -47,11 +47,18 @@ private:
             if (!result.exists()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
                     e.setHeader("Stubbing out unknown constant");
+
+                    // Stub out the constant only if we actually reported an
+                    // error. Otherwise, we create an order dependency where a
+                    // constant referenced from both typed and untyped code will
+                    // error iff the typed code is processed first.
+                    result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
+                    result.data(ctx).superClass = core::Symbols::StubClass();
+                    result.data(ctx).resultType = core::Types::dynamic();
+                    result.data(ctx).setIsModule(false);
+                } else {
+                    result = core::Symbols::untyped();
                 }
-                result = ctx.state.enterClassSymbol(c->loc, nesting_.get()->scope, c->cnst);
-                result.data(ctx).superClass = core::Symbols::StubClass();
-                result.data(ctx).resultType = core::Types::dynamic();
-                result.data(ctx).setIsModule(false);
             }
             return result;
 
@@ -67,14 +74,18 @@ private:
             core::SymbolRef resolved = id->symbol;
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             if (!result.exists()) {
+                result = core::Symbols::untyped();
+
                 if (resolved.data(ctx).resultType.get() == nullptr || !resolved.data(ctx).resultType->isDynamic()) {
                     if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
                         e.setHeader("Stubbing out unknown constant");
+
+                        // See comment above about stubbing
+                        result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
+                        result.data(ctx).resultType = core::Types::dynamic();
+                        result.data(ctx).setIsModule(false);
                     }
                 }
-                result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);
-                result.data(ctx).resultType = core::Types::dynamic();
-                result.data(ctx).setIsModule(false);
             }
 
             return result;

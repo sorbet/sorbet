@@ -4344,7 +4344,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:Gem> (<constant:BasicObject>) -> <Class:Gem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     class <constant:BasicSpecification> < ::<constant:Object> () -> <Class:Gem::BasicSpecification> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     class <constant:CommandLineError> < ::<constant:Gem>::<constant:Exception> () -> <Class:Gem::CommandLineError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    class <constant:ConfigFile> () -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     class <constant:ConflictError> < ::<constant:Gem>::<constant:LoadError> () -> <Class:Gem::ConflictError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     class <constant:Dependency> < ::<constant:Object> () -> <Class:Gem::Dependency> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       static-field <constant:TYPES> -> AppliedType {
@@ -10834,7 +10833,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method clear_paths () -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method config_file () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-    method configuration () -> Gem::ConfigFile @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method configuration () -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method configuration= (config) -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument config<> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method datadir (gem_name) -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__

@@ -3,11 +3,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     class <constant:AutogenLoader> () -> untyped @ test/testdata/first/gerald.rb:3
     class <constant:CIBot> () -> <Class:Opus::CIBot> @ test/testdata/first/gerald.rb:5
       class <constant:Actions> () -> untyped @ test/testdata/first/gerald.rb:147
-        class <constant:OpenAPI> () -> untyped @ test/testdata/first/gerald.rb:147
-          class <constant:SPEC_PATH> () -> untyped @ test/testdata/first/gerald.rb:147
       class <constant:Gerald> (<constant:BasicObject>) -> <Class:Opus::CIBot::Gerald> @ test/testdata/first/gerald.rb:5
         class <constant:Chalk> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/first/gerald.rb:18
-          class <constant:Log> () -> untyped @ test/testdata/first/gerald.rb:18
         class <constant:Diff> < ::<constant:Object> () -> <Class:Opus::CIBot::Gerald::Diff> @ test/testdata/first/gerald.rb:111
           field @parsed -> untyped @ test/testdata/first/gerald.rb:115
           field @raw -> untyped @ test/testdata/first/gerald.rb:114
@@ -85,7 +82,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
             argument message<> @ test/testdata/first/gerald.rb:11
             argument rule_token<optional, keyword> @ test/testdata/first/gerald.rb:11
           method rule_token () @ test/testdata/first/gerald.rb:9
-        class <constant:Matcher> < ::<constant:Object> (<constant:Log>) -> <Class:Opus::CIBot::Gerald::Matcher> @ test/testdata/first/gerald.rb:17
+        class <constant:Matcher> < ::<constant:Object> (<constant:untyped>) -> <Class:Opus::CIBot::Gerald::Matcher> @ test/testdata/first/gerald.rb:17
           field @rules -> untyped @ test/testdata/first/gerald.rb:23
           method initialize () @ test/testdata/first/gerald.rb:22
             method <block>$2 (<block-pass>$2) @ test/testdata/first/gerald.rb:25
@@ -104,7 +101,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
         class <singleton class:<constant:MatchTimeout>> < ::<singleton class:<constant:StandardError>> () @ test/testdata/first/gerald.rb:7
         class <singleton class:<constant:Matcher>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:17
       class <constant:Model> () -> untyped @ test/testdata/first/gerald.rb:24
-        class <constant:GeraldRule> () -> untyped @ test/testdata/first/gerald.rb:24
       class <singleton class:<constant:Gerald>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
     class <singleton class:<constant:CIBot>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
   method <static-init>$9 () @ test/testdata/first/gerald.rb:2
