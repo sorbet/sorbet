@@ -33,5 +33,5 @@ class BadChild2 < Parent # error: should be declared again
 end
 
 class BadChild3 < Parent
-  Elem = 3 # error: Type variable <constant:Elem> needs to be declared as `= type_member(SOMETHING)`
+  Elem = 3 # error: Type variable `<constant:Elem>` needs to be declared as `= type_member(SOMETHING)`
 end

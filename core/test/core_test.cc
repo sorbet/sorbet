@@ -52,7 +52,7 @@ TEST(ASTTest, Errors) { // NOLINT
     ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     if (auto e = gs.beginError(core::Loc{f, 0, 3}, core::errors::Internal::InternalError)) {
-        e.setHeader("Use of metavariable: {}", "foo");
+        e.setHeader("Use of metavariable: `{}`", "foo");
     }
     ASSERT_TRUE(gs.hadCriticalError());
     auto errors = errorQueue->drainErrors();

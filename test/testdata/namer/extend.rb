@@ -16,4 +16,4 @@ end
 
 C.say_hello
 C.say_goodbye
-C.new.say_hello # error: Method say_hello does not exist
+C.new.say_hello # error: Method `say_hello` does not exist

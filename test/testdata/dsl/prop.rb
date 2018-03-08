@@ -6,10 +6,10 @@ class NotAODM
     prop "not_a_symbol", String
     prop :foo, String, "not_a_hash"
     prop "too", String, {}, "many"
-    optional :company_name, String, :nonempty_string # error: Method optional does not exist
+    optional :company_name, String, :nonempty_string # error: Method `optional` does not exist
     optional :day, IntegerParam.new(min: 1, max: 31) # error: MULTI
     optional :how_many, Opus::Param::CaseParam.new(self.how_many_cases, Opus::Param::ParamSpecsParam.new(Default)) # error: MULTI
-    optional :optional_param, IntegerParam.new # error: Method optional does not exist
+    optional :optional_param, IntegerParam.new # error: Method `optional` does not exist
 end
 
 class SomeODM
@@ -83,35 +83,35 @@ def main
     T.assert_type!(AdvancedODM.new.optional_explicit, T.nilable(String))
     T.assert_type!(AdvancedODM.new.optional_existing, T.nilable(String))
     AdvancedODM.new.optional_existing = 'b'
-    AdvancedODM.new.optional_existing = nil # error: Argument arg0 does not match expected type
+    AdvancedODM.new.optional_existing = nil # error: Argument `arg0` does not match expected type
     T.assert_type!(AdvancedODM.new.optional_false, String)
     T.assert_type!(AdvancedODM.new.optional, T.nilable(String))
     AdvancedODM.new.optional = 'b'
     AdvancedODM.new.optional = nil
 
     T.assert_type!(AdvancedODM.new.const_explicit, String)
-    AdvancedODM.new.const_explicit = 'b' # error: Method const_explicit= does not exist on AdvancedODM
+    AdvancedODM.new.const_explicit = 'b' # error: Method `const_explicit=` does not exist on `AdvancedODM`
     T.assert_type!(AdvancedODM.new.const, String)
-    AdvancedODM.new.const = 'b' # error: Method const= does not exist on AdvancedODM
+    AdvancedODM.new.const = 'b' # error: Method `const=` does not exist on `AdvancedODM`
 
     T.assert_type!(AdvancedODM.new.no_class_arg, T.nilable(T::Array[String]))
-    AdvancedODM.new.no_class_arg = ['b'] # error: Method no_class_arg= does not exist on AdvancedODM
+    AdvancedODM.new.no_class_arg = ['b'] # error: Method `no_class_arg=` does not exist on `AdvancedODM`
 
     # T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn) # no longer true
-    AdvancedODM.new.enum_prop = "hello" # error: Method enum_prop= does not exist
+    AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
 
     T.assert_type!(PropHelpers.new.token, String)
     PropHelpers.new.token = "tok_token"
-    PropHelpers.new.token = nil # error: Argument arg0 does not match expected type
+    PropHelpers.new.token = nil # error: Argument `arg0` does not match expected type
 
     T.assert_type!(PropHelpers.new.created, Float)
     PropHelpers.new.created = 0.0
-    PropHelpers.new.created = nil # error: Argument arg0 does not match expected type
+    PropHelpers.new.created = nil # error: Argument `arg0` does not match expected type
 
     T.assert_type!(PropHelpers2.new.token, String)
     PropHelpers2.new.token = "tok_token"
-    PropHelpers2.new.token = nil # error: Argument arg0 does not match expected type
+    PropHelpers2.new.token = nil # error: Argument `arg0` does not match expected type
 
     T.assert_type!(PropHelpers2.new.created, Float)
-    PropHelpers2.new.created = 0.0 # error: Method created= does not exist
+    PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
 end

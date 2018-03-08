@@ -254,7 +254,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
         return ast;
     } catch (...) {
         if (auto e = lgs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception parsing file: {} (backtrace is above)", file.data(lgs).path());
+            e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
         returnCode = 12;
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -308,7 +308,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         } catch (FileNotFoundException e) {
                             if (auto e = lgs->beginError(ruby_typer::core::Loc::none(),
                                                          core::errors::Internal::InternalError)) {
-                                e.setHeader("File Not Found: {}", fileName);
+                                e.setHeader("File Not Found: `{}`", fileName);
                             }
                             returnCode = 11;
                             // continue with an empty source, because the
@@ -407,7 +407,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             } catch (...) {
                 returnCode = 13;
                 if (auto e = gs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: {} (backtrace is above)", file.data(gs).path());
+                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
                 }
             }
         }
@@ -865,12 +865,12 @@ int realmain(int argc, char **argv) {
 
     if (options["color"].as<string>() == "auto") {
         if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
-            rang::setControlMode(rang::control::Force);
+            core::ErrorBuilder::enableColors();
         }
     } else if (options["color"].as<string>() == "always") {
-        rang::setControlMode(rang::control::Force);
+        core::ErrorBuilder::enableColors();
     } else if (options["color"].as<string>() == "never") {
-        rang::setControlMode(rang::control::Off);
+        core::ErrorBuilder::disableColors();
     }
 
     WorkerPool workers(opts.threads, tracer);

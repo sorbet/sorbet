@@ -153,9 +153,10 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
         return;
     }
     if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
-        e.setHeader("Argument {} does not match expected type {}", argSym.name.toString(ctx), expectedType->show(ctx));
+        e.setHeader("Argument `{}` does not match expected type `{}`", argSym.name.toString(ctx),
+                    expectedType->show(ctx));
         e.addErrorSection(core::ErrorSection({
-            core::ErrorLine::from(argSym.definitionLoc, "Method {} has specified type of argument {} as {}",
+            core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified type of argument `{}` as `{}`",
                                   method.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
                                   expectedType->show(ctx)),
         }));
@@ -166,7 +167,7 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
 
 void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument {} for method {}.", arg.data(ctx).name.toString(ctx),
+        e.setHeader("Missing required keyword argument `{}` for method `{}`.", arg.data(ctx).name.toString(ctx),
                     method.toString(ctx));
     }
 }
@@ -340,7 +341,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             // one in userland
             if (!args.empty()) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments for constructor. Expected: 0, found: {}", args.size());
+                    e.setHeader("Wrong number of arguments for constructor. Expected: 0, found: `{}`", args.size());
                 }
             }
             return core::Types::dynamic();
@@ -373,7 +374,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
 
             if (args.size() != arity) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of type parameters for {}. Expected {}, got {}",
+                    e.setHeader("Wrong number of type parameters for `{}`. Expected `{}`, got `{}`",
                                 attachedClass.data(ctx).show(ctx), arity, args.size());
                 }
             }
@@ -474,15 +475,15 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 
         if (alternative.symbol.exists()) {
             if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
-                e.setHeader("Method {} does not exist on {}", fun.data(ctx).toString(ctx), this->show(ctx));
+                e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
                 e.addErrorSection(core::ErrorSection({
-                    core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: {}?",
+                    core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: `{}`?",
                                           alternative.name.toString(ctx)),
                 }));
             }
         } else {
             if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
-                e.setHeader("Method {} does not exist on {}{}", fun.data(ctx).toString(ctx), this->show(ctx),
+                e.setHeader("Method `{}` does not exist on `{}`{}", fun.data(ctx).toString(ctx), this->show(ctx),
                             maybeComponent);
             }
         }
@@ -531,7 +532,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
               pit->data(ctx).isBlockArgument())) {
             if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                e.setHeader("Not enough arguments provided for method {}. Expected: {}, provided: {}",
+                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
                             fun.toString(ctx),
                             // TODO(nelhage): report actual counts of required arguments,
                             // and account for keyword arguments
@@ -611,7 +612,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 NameRef arg(ctx.state, key->value);
 
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Unrecognized keyword argument {} passed for method {}.", arg.toString(ctx),
+                    e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`.", arg.toString(ctx),
                                 fun.toString(ctx));
                 }
             }
@@ -637,7 +638,8 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method {}. Expected: {}, provided: {}", fun.toString(ctx),
+            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
+                        fun.toString(ctx),
 
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments

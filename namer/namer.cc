@@ -111,7 +111,7 @@ class NameInserter {
 
         if (send->args.size() != 1) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` should only be passed a single constant. You passed {} parameters.",
+                e.setHeader("`{}` should only be passed a single constant. You passed `{}` parameters.",
                             send->fun.data(ctx).show(ctx), send->args.size());
             }
             return false;
@@ -119,7 +119,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeNotConstant)) {
-                e.setHeader("`{}` must be passed a constant literal. You passed a {}.", send->fun.data(ctx).show(ctx),
+                e.setHeader("`{}` must be passed a constant literal. You passed a `{}`.", send->fun.data(ctx).show(ctx),
                             send->args[0]->nodeName());
             }
             return false;
@@ -171,7 +171,7 @@ public:
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (klass->symbol.data(ctx).isClassModuleSet() && isModule != klass->symbol.data(ctx).isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("{} was previously defined as a {}", klass->symbol.data(ctx).show(ctx),
+                    e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx).show(ctx),
                                 klass->symbol.data(ctx).isClassModule() ? "module" : "class");
                 }
             } else {
@@ -278,7 +278,7 @@ public:
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
-                                e.setHeader("Unsupported argument to {}: arguments must be symbol literals",
+                                e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
                                             original->fun.toString(ctx));
                             }
                             continue;
@@ -286,7 +286,7 @@ public:
                         core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, sym->name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
-                                e.setHeader("{}: no such method: {}", original->fun.toString(ctx),
+                                e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
                                             sym->name.toString(ctx));
                             }
                             continue;
@@ -301,7 +301,7 @@ public:
                         auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
                         if (sym == nullptr) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
-                                e.setHeader("Unsupported argument to {}: arguments must be symbol literals",
+                                e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
                                             original->fun.toString(ctx));
                             }
                             continue;
@@ -310,7 +310,7 @@ public:
                     }
                     if (original->args.size() != 2) {
                         if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
-                            e.setHeader("Wrong number of arguments to {}; Expected 2", original->fun.toString(ctx));
+                            e.setHeader("Wrong number of arguments to `{}`; Expected 2", original->fun.toString(ctx));
                         }
                         break;
                     }
@@ -321,7 +321,8 @@ public:
                     if (!meth.exists()) {
                         if (auto e =
                                 ctx.state.beginError(original->args[1]->loc, core::errors::Namer::MethodNotFound)) {
-                            e.setHeader("{}: no such method: {}", original->fun.toString(ctx), args[1].toString(ctx));
+                            e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
+                                        args[1].toString(ctx));
                         }
                         break;
                     }
@@ -355,7 +356,7 @@ public:
                 return method;
             }
             if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
-                e.setHeader("{}: Method redefined", method->name.toString(ctx));
+                e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
                 e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
             }
             // TODO Check that the previous args match the new ones instead of
@@ -521,7 +522,7 @@ public:
                                   [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
                 if (it != members.end()) {
                     if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Duplicate type member {}", typeName->cnst.data(ctx).show(ctx));
+                        e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx).show(ctx));
                     }
                     return make_unique<ast::EmptyTree>(asgn->loc);
                 }

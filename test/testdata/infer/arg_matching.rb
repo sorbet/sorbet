@@ -35,12 +35,12 @@ class TestArgs
     # "too many arguments" and "missing keyword argument b"
     kwarg(1, 2) # error: MULTI
 
-    kwarg(1) # error: Missing required keyword argument b
+    kwarg(1) # error: Missing required keyword argument `b`
 
     kwarg(1, b: 2)
-    kwarg(1, b: 2, c: 3) # error: Unrecognized keyword argument c
-    kwarg(1, {}) # error: Missing required keyword argument b
-    kwarg(1, b: "hi") # error: Argument b does not match expected type Integer
+    kwarg(1, b: 2, c: 3) # error: Unrecognized keyword argument `c`
+    kwarg(1, {}) # error: Missing required keyword argument `b`
+    kwarg(1, b: "hi") # error: Argument `b` does not match expected type `Integer`
     kwarg(1, any)
     kwarg(1, a_hash) # error: Passing an untyped hash
   end
@@ -55,7 +55,7 @@ class TestArgs
   def call_repeated
     repeated
     repeated(1, 2, 3)
-    repeated(1, "hi") # error: Argument x does not match expected type Integer
+    repeated(1, "hi") # error: Argument `x` does not match expected type `Integer`
 
     # We error on each incorrect argument
     repeated("hi", "there") # error: MULTI
@@ -86,7 +86,7 @@ class TestArgs
   def call_optkw
     # There's ambiguity here about whether to report `u` or `x` as
     # missing; We follow Ruby in complaining about `u`.
-    optkw(u: 1) # error: Missing required keyword argument u
+    optkw(u: 1) # error: Missing required keyword argument `u`
     optkw(1, 2, 3) # error: MULTI
   end
 end

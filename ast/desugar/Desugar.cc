@@ -125,7 +125,7 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
 
 unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {
     if (auto e = ctx.state.beginError(node->loc, core::errors::Desugar::UnsupportedNode)) {
-        e.setHeader("Unsupported node type {}", node->nodeName());
+        e.setHeader("Unsupported node type `{}`", node->nodeName());
     }
     return MK::EmptyTree(node->loc);
 }
@@ -780,12 +780,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 } catch (std::out_of_range &) {
                     val = 0;
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
-                        e.setHeader("Unsupported large integer literal: {}", integer->val);
+                        e.setHeader("Unsupported large integer literal: `{}`", integer->val);
                     }
                 } catch (std::invalid_argument &) {
                     val = 0;
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
-                        e.setHeader("Unsupported integer literal: {}", integer->val);
+                        e.setHeader("Unsupported integer literal: `{}`", integer->val);
                     }
                 }
 
@@ -799,18 +799,18 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     if (isinf(val)) {
                         val = std::numeric_limits<double>::quiet_NaN();
                         if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
-                            e.setHeader("Unsupported large float literal: {}", floatNode->val);
+                            e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
                         }
                     }
                 } catch (std::out_of_range &) {
                     val = std::numeric_limits<double>::quiet_NaN();
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
-                        e.setHeader("Unsupported large float literal: {}", floatNode->val);
+                        e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
                     }
                 } catch (std::invalid_argument &) {
                     val = std::numeric_limits<double>::quiet_NaN();
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
-                        e.setHeader("Unsupported float literal: {}", floatNode->val);
+                        e.setHeader("Unsupported float literal: `{}`", floatNode->val);
                     }
                 }
 

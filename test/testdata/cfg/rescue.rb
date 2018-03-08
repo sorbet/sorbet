@@ -16,4 +16,4 @@ def b; end
 def c; end
 def d; end
 
-puts foo() # error: Method foo does not exist
+puts foo() # error: Method `foo` does not exist

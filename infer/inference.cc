@@ -963,27 +963,29 @@ public:
                         case cfg::CFG::MIN_LOOP_FIELD:
                             if (auto e = ctx.state.beginError(bind.loc,
                                                               core::errors::Infer::FieldReassignmentTypeMismatch)) {
-                                e.setHeader("Reassigning field with a value of wrong type: {} is not a subtype of {}",
-                                            tp.type->show(ctx), cur.type->show(ctx));
+                                e.setHeader(
+                                    "Reassigning field with a value of wrong type: `{}` is not a subtype of `{}`",
+                                    tp.type->show(ctx), cur.type->show(ctx));
                             }
                             break;
                         case cfg::CFG::MIN_LOOP_GLOBAL:
                             if (auto e = ctx.state.beginError(bind.loc,
                                                               core::errors::Infer::GlobalReassignmentTypeMismatch)) {
-                                e.setHeader("Reassigning global with a value of wrong type: {} is not a subtype of {}",
-                                            tp.type->show(ctx), cur.type->show(ctx));
+                                e.setHeader(
+                                    "Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
+                                    tp.type->show(ctx), cur.type->show(ctx));
                             }
                             break;
                         case cfg::CFG::MIN_LOOP_LET:
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader(
-                                    "Incompatible assignment to variable declared via `let`: {} is not a subtype of {}",
-                                    tp.type->show(ctx), cur.type->show(ctx));
+                                e.setHeader("Incompatible assignment to variable declared via `let`: `{}` is not a "
+                                            "subtype of `{}`",
+                                            tp.type->show(ctx), cur.type->show(ctx));
                             }
                             break;
                         default:
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing type of pinned argument, {} is not a subtype of {}",
+                                e.setHeader("Changing type of pinned argument, `{}` is not a subtype of `{}`",
                                             tp.type->show(ctx), cur.type->show(ctx));
                             }
                             break;

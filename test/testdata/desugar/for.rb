@@ -9,7 +9,7 @@ end
 
 class E
     def self.e=(e)
-        @e = e; # error: Use of undeclared variable `@e'
+        @e = e; # error: Use of undeclared variable `@e`
     end
     def self.e
         @e

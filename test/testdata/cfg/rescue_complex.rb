@@ -65,7 +65,7 @@ class TestRescue
   end
 
   def parse_rescue_mod_op_assign()
-    foo += meth rescue bar # error: Method + does not exist on NilClass
+    foo += meth rescue bar # error: Method `+` does not exist on `NilClass`
   end
 
   def parse_ruby_bug_12402()
@@ -73,7 +73,7 @@ class TestRescue
   end
 
   def parse_ruby_bug_12402_1()
-    foo += raise(bar) rescue nil # error: Method + does not exist on NilClass
+    foo += raise(bar) rescue nil # error: Method `+` does not exist on `NilClass`
   end
 
   def parse_ruby_bug_12402_2()

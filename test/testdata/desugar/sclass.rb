@@ -59,10 +59,10 @@ class G
     def wrapper
         class << self
             def inner
-                singleton_class.g # error: Method g does not exist on Class
+                singleton_class.g # error: Method `g` does not exist on `Class`
             end
         end
-        inner # error: Method inner does not exist on G
+        inner # error: Method `inner` does not exist on `G`
     end
     def self.g
         "g"
@@ -80,13 +80,13 @@ class H
 end
 
 def main
-    puts A.a # error: Method a does not exist on <Class:A>
+    puts A.a # error: Method `a` does not exist on `<Class:A>`
     puts B.b
     puts $c.c
-    puts D.singleton_class.d # error: Method d does not exist on Class
+    puts D.singleton_class.d # error: Method `d` does not exist on `Class`
     puts E.e
     puts F.f = 91
     puts G.new.wrapper
-    puts H.singleton_class::H2.h # error: Dynamic constant references are unsupported <emptyTree>::<constant:H>.singleton_class()::<constant:H2>
+    puts H.singleton_class::H2.h # error: Dynamic constant references are unsupported `<emptyTree>::<constant:H>.singleton_class()::<constant:H2>`
 end
 main

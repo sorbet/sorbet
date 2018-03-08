@@ -26,6 +26,6 @@ class C
     Funcs.h("world")
 
     # Classes don't inherit the `module_function`s as static methods
-    C.f # error: Method f does not exist
+    C.f # error: Method `f` does not exist
   end
 end

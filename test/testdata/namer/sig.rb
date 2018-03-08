@@ -70,7 +70,7 @@ class A
   def f2(x)
   end
 
-  sig(x: T1).returns(T1) # error: Unknown argument name x
+  sig(x: T1).returns(T1) # error: Unknown argument name `x`
   def f3
   end
 

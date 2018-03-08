@@ -24,7 +24,7 @@ end
 class InstanceMethod
   def test_imethod_new
     o = Object.new
-    o.new # error: Method new does not exist
+    o.new # error: Method `new` does not exist
   end
 
   def _; end

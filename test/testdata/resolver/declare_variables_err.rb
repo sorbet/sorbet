@@ -21,6 +21,6 @@ class A
   )
 
   declare_variables(
-    :@foo => Integer,      # error: Redeclaring variable `@foo'
+    :@foo => Integer,      # error: Redeclaring variable `@foo`
   )
 end

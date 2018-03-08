@@ -23,7 +23,7 @@ Test.new.mixin_method
 
 module Bad1
   extend T::Helpers
-  mixes_in_class_methods # error: Wrong number of arguments to mixes_in_class_methods
+  mixes_in_class_methods # error: Wrong number of arguments to `mixes_in_class_methods`
 end
 
 class Bad2

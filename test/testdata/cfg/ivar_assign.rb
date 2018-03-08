@@ -5,6 +5,6 @@ class TestIVar
   end
 
   def test
-    @foo = nil # error: NilClass is not a subtype of Integer
+    @foo = nil # error: `NilClass` is not a subtype of `Integer`
   end
 end

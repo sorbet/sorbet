@@ -2,20 +2,20 @@ test/cli/errors/errors.rb:4: Stubbing out unknown constant http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:12: Argument arg0 does not match expected type String http://go/e/7002
+test/cli/errors/errors.rb:12: Argument `arg0` does not match expected type `String` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__: Method <overload N.1 : raise> has specified type of argument arg0 as String
+    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
     7054 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9: 
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
-test/cli/errors/errors.rb:16: Argument arg does not match expected type Integer http://go/e/7002
+test/cli/errors/errors.rb:16: Argument `arg` does not match expected type `Integer` http://go/e/7002
     16 |    foo("foo")
             ^^^^^^^^^^
-    test/cli/errors/errors.rb:9: Method foo has specified type of argument arg as Integer
+    test/cli/errors/errors.rb:9: Method `foo` has specified type of argument `arg` as `Integer`
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
   Got String("foo") originating from:

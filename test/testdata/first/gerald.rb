@@ -25,7 +25,7 @@ module Opus::CIBot::Gerald
                 partition(&:valid?)
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',')
-        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: Method log does not exist on Opus::CIBot::Gerald::Matcher
+        log.warn('Gerald skipping invalid rules: ' + invalid_rule_ids) # error: Method `log` does not exist on `Opus::CIBot::Gerald::Matcher`
       end
     end
 
@@ -35,7 +35,7 @@ module Opus::CIBot::Gerald
       # number of commits. I don't think it is worth switching right now, but
       # maybe in the future.
       if match_context.diff.affected_files.count > MAX_AFFECTED_FILES
-        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files") # error: Method log does not exist on Opus::CIBot::Gerald::Matcher
+        log.warn("Gerald skipping large PR with #{match_context.diff.affected_files.count} affected files") # error: Method `log` does not exist on `Opus::CIBot::Gerald::Matcher`
         return []
       end
 
