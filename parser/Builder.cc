@@ -515,7 +515,14 @@ public:
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        return make_unique<DefMethod>(tok_loc(def, end), gs_.enterNameUTF8(name->string()), move(args), move(body));
+        Loc loc = tok_loc(def, name);
+        loc = loc.join(maybe_loc(args));
+        if (body != nullptr) {
+            Loc before_body(body->loc.file, body->loc.begin_pos, body->loc.end_pos);
+            loc = loc.join(before_body);
+        }
+
+        return make_unique<DefMethod>(loc, gs_.enterNameUTF8(name->string()), move(args), move(body));
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
@@ -529,7 +536,13 @@ public:
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
                                    unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        Loc loc = tok_loc(def).join(tok_loc(end));
+        Loc loc = tok_loc(def, name);
+        loc = loc.join(maybe_loc(args));
+        if (body != nullptr) {
+            Loc before_body(body->loc.file, body->loc.begin_pos, body->loc.end_pos);
+            loc = loc.join(before_body);
+        }
+
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
         return make_unique<DefS>(loc, move(definee), gs_.enterNameUTF8(name->string()), move(args), move(body));
