@@ -63,7 +63,7 @@ public:
     absl::string_view source() const;
     Type source_type;
 
-    bool isStdLib() const;
+    bool isPayload() const;
 
     File(std::string &&path_, std::string &&source_, Type sourcetype);
     File(File &&other) = default;

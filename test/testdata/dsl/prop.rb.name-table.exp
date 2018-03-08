@@ -177,5 +177,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <singleton class:<constant:PropHelpers2>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:55
   class <singleton class:<constant:PropHelpers>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:50
   class <singleton class:<constant:SomeODM>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:15
-  method <static-init>$8 () @ test/testdata/dsl/prop.rb:2
+  method <static-init>$9 () @ test/testdata/dsl/prop.rb:2
 

@@ -7,5 +7,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L8312
     method main () @ test/testdata/namer/singleton_class.rb:4
   class <singleton class:<constant:A>> < ::<constant:Module> () @ test/testdata/namer/singleton_class.rb:1
-  method <static-init>$8 () @ test/testdata/namer/singleton_class.rb:1
+  method <static-init>$9 () @ test/testdata/namer/singleton_class.rb:1
 

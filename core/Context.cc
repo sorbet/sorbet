@@ -32,7 +32,7 @@ bool Context::permitOverloadDefinitions() const {
     }
     auto &file = owner.data(*this).definitionLoc.file.data(*this);
     constexpr char const *whitelistedTest = "overloads_test.rb";
-    return file.isStdLib() || ::ruby_typer::File::getFileName(file.path()) == whitelistedTest;
+    return file.isPayload() || ::ruby_typer::File::getFileName(file.path()) == whitelistedTest;
 }
 
 bool MutableContext::permitOverloadDefinitions() const {

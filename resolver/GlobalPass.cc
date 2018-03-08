@@ -50,7 +50,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
             auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs).definitionLoc;
-                if (!loc.file.data(gs).isStdLib()) {
+                if (!loc.file.data(gs).isPayload()) {
                     if (auto e = gs.beginError(tp.data(gs).definitionLoc,
                                                core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");

@@ -39,7 +39,7 @@ ClassDef{
 --- dsl-tree-raw end ---
 --- name-table start ---
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  method <static-init>$8 () @ -e:1
+  method <static-init>$9 () @ -e:1
 
 --- name-table end ---
 --- name-table-full start ---
@@ -9295,7 +9295,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method trust () -> ThreadGroup @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method untaint () -> ThreadGroup @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method untrust () -> ThreadGroup @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-  class <constant:Time> < ::<constant:Object> (<constant:Comparable>) -> <Class:Time> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+  class <constant:Time> < ::<constant:Object> (<constant:Comparable>) -> <Class:Time> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method + (arg0) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method - (arg0) -> Float @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -9324,6 +9324,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method gmtoff () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method hash () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method hour () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method httpdate () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method initialize (year, month, day, hour, min, sec, usec_with_frac) -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument day<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument hour<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -9334,6 +9335,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument year<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method inspect () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method isdst () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method iso8601 (fraction_digits) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument fraction_digits<optional> -> Integer | String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method localtime (utc_offset) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument utc_offset<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method mday () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -9342,6 +9345,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method monday? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method month () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method nsec () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method rfc2822 () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method rfc822 () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method round (arg0) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method saturday? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -9385,6 +9390,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method utc_offset () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method wday () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method wednesday? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method xmlschema (fraction_digits) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument fraction_digits<optional> -> Integer | String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method yday () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method year () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method zone () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11835,6 +11842,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument sec<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument usec_with_frac<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument year<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method httpdate (date) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method iso8601 (date) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method local (year, month, day, hour, min, sec, usec_with_frac) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument day<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument hour<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11852,6 +11863,17 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument usec_with_frac<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument year<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
     method now () -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method parse (date, now) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument now<optional> -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method rfc2822 (date) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method rfc822 (date) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method strptime (date, format, now) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument format<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument now<optional> -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
     method utc (year, month, day, hour, min, sec, usec_with_frac) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument day<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument hour<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11860,6 +11882,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument sec<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument usec_with_frac<optional> -> Numeric @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
       argument year<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
+    method xmlschema (date) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument date<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+    method zone_offset (zone) -> Time @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
+      argument zone<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib/time.rbi#L__LINE__
   class <singleton class:<constant:TracePoint>> < ::<singleton class:<constant:Object>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
   class <singleton class:<constant:TrueClass>> < ::<singleton class:<constant:Object>> () @ ???
   class <singleton class:<constant:TypeError>> < ::<singleton class:<constant:StandardError>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
@@ -11947,15 +11973,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   method <static-init>$3 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
   method <static-init>$4 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
   method <static-init>$5 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/stdlib.rbi#L__LINE__
-  method <static-init>$6 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
-  method <static-init>$7 () @ -e:1
+  method <static-init>$7 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
   method <static-init>$8 () @ -e:1
+  method <static-init>$9 () @ -e:1
   static-field <constant:M> -> AliasType { symbol = ::<constant:Opus>::<constant:DB>::<constant:Model> } @ ???
 
 --- name-table-full end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$8>()
+  def self.<static-init><<static-init>$9>()
     1
   end
 end
@@ -11967,7 +11993,7 @@ ClassDef{
   rhs = [
     MethodDef{
       self = 1
-      name = <static-init><<static-init>$8>
+      name = <static-init><<static-init>$9>
       args = []
       rhs = IntLit{ value = 1 }
     }
@@ -11976,22 +12002,22 @@ ClassDef{
 --- name-tree-raw end ---
 --- cfg start ---
 digraph "-e"{
-subgraph "cluster_#<static-init>$8" {
-    label = "#<static-init>$8";
+subgraph "cluster_#<static-init>$9" {
+    label = "#<static-init>$9";
     color = blue;
-    "bb#<static-init>$8_0" [shape = invhouse];
-    "bb#<static-init>$8_1" [shape = parallelogram];
+    "bb#<static-init>$9_0" [shape = invhouse];
+    "bb#<static-init>$9_1" [shape = parallelogram];
 
-    "bb#<static-init>$8_0" [label = "block[id=0]()
+    "bb#<static-init>$9_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
-    "bb#<static-init>$8_0" -> "bb#<static-init>$8_1" [style="bold"];
-    "bb#<static-init>$8_1" [label = "block[id=1]()
+    "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
+    "bb#<static-init>$9_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$8_1" -> "bb#<static-init>$8_1" [style="bold"];
+    "bb#<static-init>$9_1" -> "bb#<static-init>$9_1" [style="bold"];
 }
 
 }
@@ -11999,13 +12025,13 @@ subgraph "cluster_#<static-init>$8" {
 --- cfg end ---
 --- cfg-raw start ---
 digraph "-e"{
-subgraph "cluster_#<static-init>$8" {
-    label = "#<static-init>$8";
+subgraph "cluster_#<static-init>$9" {
+    label = "#<static-init>$9";
     color = blue;
-    "bb#<static-init>$8_0" [shape = invhouse];
-    "bb#<static-init>$8_1" [shape = parallelogram];
+    "bb#<static-init>$9_0" [shape = invhouse];
+    "bb#<static-init>$9_1" [shape = parallelogram];
 
-    "bb#<static-init>$8_0" [label = "block[id=0]()
+    "bb#<static-init>$9_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 dead=1
@@ -12015,11 +12041,11 @@ dead=1
 
 <unconditional>"];
 
-    "bb#<static-init>$8_0" -> "bb#<static-init>$8_1" [style="bold"];
-    "bb#<static-init>$8_1" [label = "block[id=1]()
+    "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
+    "bb#<static-init>$9_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$8_1" -> "bb#<static-init>$8_1" [style="bold"];
+    "bb#<static-init>$9_1" -> "bb#<static-init>$9_1" [style="bold"];
 }
 
 }

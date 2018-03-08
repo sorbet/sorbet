@@ -38,5 +38,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <singleton class:<singleton class:<constant:H>>> < ::<singleton class:<singleton class:<constant:Object>>> () @ test/testdata/desugar/sclass.rb:73
   class <singleton class:<singleton class:<singleton class:<constant:D>>>> < ::<singleton class:<singleton class:<singleton class:<constant:Object>>>> () @ test/testdata/desugar/sclass.rb:28
   field $c @ test/testdata/desugar/sclass.rb:19
-  method <static-init>$8 () @ test/testdata/desugar/sclass.rb:2
+  method <static-init>$9 () @ test/testdata/desugar/sclass.rb:2
 

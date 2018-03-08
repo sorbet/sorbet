@@ -23,5 +23,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method normal_static_method () @ test/testdata/first/namer.rb:5
   class <singleton class:<constant:OtherMixin>> < ::<constant:Module> () @ test/testdata/first/namer.rb:24
   class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/namer.rb:20
-  method <static-init>$8 () @ test/testdata/first/namer.rb:2
+  method <static-init>$9 () @ test/testdata/first/namer.rb:2
 

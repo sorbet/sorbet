@@ -7,5 +7,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     class <singleton class:<constant:Inner>> < ::<constant:Module> () @ test/testdata/resolver/resolve_through_alias.rb:4
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/resolve_through_alias.rb:8
   class <singleton class:<constant:NS>> < ::<constant:Module> () @ test/testdata/resolver/resolve_through_alias.rb:3
-  method <static-init>$8 () @ test/testdata/resolver/resolve_through_alias.rb:3
+  method <static-init>$9 () @ test/testdata/resolver/resolve_through_alias.rb:3
 

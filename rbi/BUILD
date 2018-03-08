@@ -1,7 +1,7 @@
 filegroup(
     name = "rbi",
     srcs = glob([
-        "*.rbi",
+        "**/*.rbi",
     ]) + [":generate_procs_rbi"],
     visibility = ["//visibility:public"],
 )

@@ -3,5 +3,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/namer/superclass_redefinition.rb:4
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/superclass_redefinition.rb:2
   class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/superclass_redefinition.rb:4
-  method <static-init>$8 () @ test/testdata/namer/superclass_redefinition.rb:2
+  method <static-init>$9 () @ test/testdata/namer/superclass_redefinition.rb:2
 

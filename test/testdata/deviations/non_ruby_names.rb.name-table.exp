@@ -7,5 +7,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:B> (<constant:BasicObject>) -> <Class:B> @ test/testdata/deviations/non_ruby_names.rb:2
   class <singleton class:<constant:A>> < ::<constant:Module> () @ test/testdata/deviations/non_ruby_names.rb:5
   class <singleton class:<constant:B>> < ::<constant:Module> () @ test/testdata/deviations/non_ruby_names.rb:2
-  method <static-init>$8 () @ test/testdata/deviations/non_ruby_names.rb:2
+  method <static-init>$9 () @ test/testdata/deviations/non_ruby_names.rb:2
 

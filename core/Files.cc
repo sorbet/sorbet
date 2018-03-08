@@ -45,9 +45,8 @@ absl::string_view File::source() const {
     return this->source_;
 }
 
-bool File::isStdLib() const {
-    constexpr char const *whitelisted = "stdlib.rbi";
-    return ::ruby_typer::File::getFileName(path()) == whitelisted;
+bool File::isPayload() const {
+    return source_type == Type::PayloadGeneration || source_type == Type::Payload;
 }
 
 } // namespace core

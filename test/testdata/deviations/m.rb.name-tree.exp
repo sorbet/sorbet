@@ -1,6 +1,6 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$8>()
+    def self.<static-init><<static-init>$9>()
       begin
         <emptyTree>
         ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>

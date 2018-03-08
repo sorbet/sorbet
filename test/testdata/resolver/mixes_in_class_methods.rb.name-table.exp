@@ -25,5 +25,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <singleton class:<constant:Bad6>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
   class <singleton class:<constant:Mixin>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
   class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
-  method <static-init>$8 () @ test/testdata/resolver/mixes_in_class_methods.rb:2
+  method <static-init>$9 () @ test/testdata/resolver/mixes_in_class_methods.rb:2
 
