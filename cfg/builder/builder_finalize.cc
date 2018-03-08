@@ -41,7 +41,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 }
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
-                if (thenb->backEdges.size() == 1) {
+                if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), std::make_move_iterator(thenb->exprs.begin()),
                                      std::make_move_iterator(thenb->exprs.end()));
                     thenb->backEdges.clear();

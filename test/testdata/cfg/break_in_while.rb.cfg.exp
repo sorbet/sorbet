@@ -28,17 +28,26 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0]()
 <constant:nil>$10 = alias <constant:nil> : NilClass
-<whileTemp>$4 = true : untyped
-<finalReturn> = return <constant:nil>$10 : <bottom>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
     "bb::<constant:Object>#foo_1" [label = "block[id=1]()
 <statTemp>$9 = self
 <statTemp>$5 = <statTemp>$9.dead()
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:nil>$10)
+outerLoops: 1
+<whileTemp>$4 = true : TrueClass(true)
+<whileTemp>$4"];
+
+    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="bold"];
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:nil>$10)
+<finalReturn> = return <constant:nil>$10 : <bottom>
+<unconditional>"];
+
+    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
 }
 
 }

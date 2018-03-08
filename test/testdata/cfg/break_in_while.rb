@@ -1,6 +1,6 @@
 # @typed
 def foo
-  while true # error: Changing type of pinned argument, `TrueClass(true)` is not a subtype of `NilClass`
+  while true
     1
     break 2
     dead
