@@ -362,6 +362,10 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 attachedClass = core::Symbols::Hash();
             } else if (attachedClass == core::Symbols::T_Enumerable()) {
                 attachedClass = core::Symbols::Enumerable();
+            } else if (attachedClass == core::Symbols::T_Range()) {
+                attachedClass = core::Symbols::Range();
+            } else if (attachedClass == core::Symbols::T_Set()) {
+                attachedClass = core::Symbols::Set();
             }
 
             auto arity = attachedClass.data(ctx).typeArity(ctx);
