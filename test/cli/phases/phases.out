@@ -138,10 +138,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:<<RESERVED>>91> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>92> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>93> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>94> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>95> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>96> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>97> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>9> < ::<constant:Object> () @ ???
   class <constant:<Magic>> < ::<constant:Object> () -> <Magic> @ ???
     method <build-array> (arg0) -> AppliedType {
@@ -9248,12 +9244,16 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     class <constant:Hash> () -> <Class:T::Hash> @ ???
     class <constant:Helpers> (<constant:BasicObject>) -> <Class:T::Helpers> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
     class <constant:Proc> () -> <Class:T::Proc> @ ???
+    class <constant:Range> () -> <Class:T::Range> @ ???
+    class <constant:Set> () -> <Class:T::Set> @ ???
     class <singleton class:<constant:Array>> < ::<constant:Module> () @ ???
     class <singleton class:<constant:Enumerable>> < ::<constant:Module> () @ ???
     class <singleton class:<constant:Generic>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
     class <singleton class:<constant:Hash>> < ::<constant:Module> () @ ???
     class <singleton class:<constant:Helpers>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
     class <singleton class:<constant:Proc>> < ::<constant:Module> () @ ???
+    class <singleton class:<constant:Range>> < ::<constant:Module> () @ ???
+    class <singleton class:<constant:Set>> < ::<constant:Module> () @ ???
     method all () @ ???
     method any () @ ???
     method nilable () @ ???

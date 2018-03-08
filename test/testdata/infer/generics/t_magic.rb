@@ -15,4 +15,14 @@ class Main
     def enumerable(val)
         val.first
     end
+
+    sig(val: T::Range[Integer]).returns(Integer)
+    def range(val)
+        val.first
+    end
+
+    sig(val: T::Set[String]).returns(T.nilable(String))
+    def set(val)
+        val.first
+    end
 end
