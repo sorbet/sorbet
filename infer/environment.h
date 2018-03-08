@@ -1,0 +1,183 @@
+#ifndef RUBY_TYPER_ENVIRONMENT_H
+#define RUBY_TYPER_ENVIRONMENT_H
+
+#include "cfg/CFG.h"
+#include "core/Context.h"
+#include "core/Names/infer.h"
+#include "core/Symbols.h"
+#include "core/errors/infer.h"
+#include "core/errors/internal.h"
+#include "inference.h"
+#include <memory>
+#include <unordered_map>
+#include <unordered_set>
+#include <utility>
+#include <vector>
+
+namespace ruby_typer {
+namespace infer {
+
+class Environment;
+
+// storing all the knowledge is slow
+// it only makes sense for us to store it if we are going to use it
+// wallk all the instructions and collect knowledge that we may ever need
+class KnowledgeFilter {
+    std::unordered_set<core::LocalVariable> used_vars;
+
+public:
+    KnowledgeFilter(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);
+
+    KnowledgeFilter(KnowledgeFilter &) = delete;
+    KnowledgeFilter(KnowledgeFilter &&) = delete;
+
+    bool isNeeded(core::LocalVariable var);
+};
+
+class KnowledgeRef;
+/**
+ * Encode things that we know hold and don't hold
+ */
+struct KnowledgeFact {
+    bool isDead = false;
+    /* the following type tests are known to be true */
+    InlinedVector<std::pair<core::LocalVariable, std::shared_ptr<core::Type>>, 1> yesTypeTests;
+    /* the following type tests are known to be false */
+    InlinedVector<std::pair<core::LocalVariable, std::shared_ptr<core::Type>>, 1> noTypeTests;
+
+    /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
+    void min(core::Context ctx, const KnowledgeFact &other);
+
+    /** Computes all possible implications of this knowledge holding as an exit from environment env in block bb
+     */
+    static KnowledgeRef under(core::Context ctx, const KnowledgeRef &what, const Environment &env, core::Loc loc,
+                              cfg::CFG &inWhat, cfg::BasicBlock *bb, bool isNeeded);
+
+    void sanityCheck() const;
+
+    std::string toString(core::Context ctx) const;
+};
+
+// KnowledgeRef wraps a `KnowledgeFact` with copy-on-write semantics
+class KnowledgeRef {
+public:
+    KnowledgeRef() : knowledge(std::make_shared<KnowledgeFact>()) {}
+    KnowledgeRef(const KnowledgeRef &) = default;
+    KnowledgeRef &operator=(const KnowledgeRef &) = default;
+    KnowledgeRef(KnowledgeRef &&) = default;
+    KnowledgeRef &operator=(KnowledgeRef &&) = default;
+
+    const KnowledgeFact &operator*() const;
+    const KnowledgeFact *operator->() const;
+
+    KnowledgeFact &mutate();
+
+private:
+    std::shared_ptr<KnowledgeFact> knowledge;
+};
+
+/** Almost a named pair of two KnowledgeFact-s. One holds knowledge that is true when a variable is falsy,
+ * the other holds knowledge which is true if the same variable is falsy->
+ */
+class TestedKnowledge {
+public:
+    KnowledgeRef truthy, falsy;
+    bool seenTruthyOption; // Only used during environment merge. Used to indicate "all-knowing" truthy option.
+    bool seenFalsyOption;  // Same for falsy
+
+    std::string toString(core::Context ctx) const;
+
+    static TestedKnowledge empty; // optimization
+
+    void sanityCheck() const;
+};
+
+class Environment {
+public:
+    Environment() = default;
+    Environment(const Environment &rhs) = delete;
+    Environment(Environment &&rhs) = default;
+
+    bool isDead = false;
+    cfg::BasicBlock *bb;
+    std::vector<core::LocalVariable> vars;
+    std::vector<core::TypeAndOrigins> types;
+    std::vector<TestedKnowledge> knowledge;
+    std::unordered_map<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
+    std::unordered_map<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
+
+    std::string toString(core::Context ctx);
+
+    bool hasType(core::Context ctx, core::LocalVariable symbol) const;
+
+    // NB: you can't call this function on vars in the first basic block since
+    // their type will be nullptr
+    core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const;
+
+    core::TypeAndOrigins getOrCreateTypeAndOrigin(core::Context ctx, core::LocalVariable symbol);
+
+    const TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) const;
+
+    TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) {
+        return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));
+    }
+
+    /* propagate knowledge on `to = from` */
+    void propagateKnowledge(core::Context ctx, core::LocalVariable to, core::LocalVariable from,
+                            KnowledgeFilter &knowledgeFilter);
+
+    /* variable was reasigned. Forget everything about previous value */
+    void clearKnowledge(core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter);
+
+    /* Special case sources of knowledge */
+    void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
+                         KnowledgeFilter &knowledgeFilter);
+
+    void setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins);
+
+    /*
+     * Create an Environment out of this one that holds if final condition in
+     * this environment was isTrue
+     *
+     * Either returns a reference to `env` unchanged, or populates `copy` and
+     * returns a reference to that. This odd calling convention is used to avoid
+     * copies, and because all callers of this immediately use the result and
+     * then discard it, so the mixed lifetimes are not a problem in practice.
+     */
+    static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
+                                       const std::vector<core::LocalVariable> &filter);
+
+    void assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVariable cond, core::Loc loc,
+                         const std::vector<core::LocalVariable> &filter);
+
+    core::TypeAndOrigins getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
+                                                      const Environment &other);
+
+    void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
+                   KnowledgeFilter &knowledgeFilter);
+
+    void computePins(core::Context ctx, const std::vector<Environment> &envs, const cfg::CFG &inWhat,
+                     const cfg::BasicBlock *bb);
+
+    void populateFrom(core::Context ctx, const Environment &other);
+
+    // Extract the return value type from a proc. This should potentially be a
+    // method on `Type` or otherwise handled there.
+    std::shared_ptr<core::Type> getReturnType(core::Context ctx, std::shared_ptr<core::Type> procType);
+
+    std::shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
+                                               KnowledgeFilter &knowledgeFilter);
+
+    void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
+    void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}
+
+    void cloneFrom(const Environment &rhs);
+
+private:
+    Environment &operator=(const Environment &rhs) = default;
+};
+
+} // namespace infer
+} // namespace ruby_typer
+
+#endif // RUBY_TYPER_ENVIRONMENT_H

@@ -1,7 +1,10 @@
 cc_library(
     name = "infer",
     srcs = glob(
-        ["*.cc"],
+        [
+            "*.cc",
+            "*.h",
+        ],
         # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
         exclude = [
             "*_test.cc",
