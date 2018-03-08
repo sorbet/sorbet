@@ -486,13 +486,50 @@ string OrType::toString(const GlobalState &gs, int tabs) {
     return buf.str();
 }
 
+string showOrs(const GlobalState &gs, shared_ptr<Type> left, shared_ptr<Type> right) {
+    stringstream buf;
+    auto *lt = cast_type<OrType>(left.get());
+    if (lt != nullptr) {
+        buf << showOrs(gs, lt->left, lt->right);
+    } else {
+        buf << left->show(gs);
+    }
+    buf << ", ";
+
+    auto *rt = cast_type<OrType>(right.get());
+    if (rt != nullptr) {
+        buf << showOrs(gs, rt->left, rt->right);
+    } else {
+        buf << right->show(gs);
+    }
+    return buf.str();
+}
+
+string showOrSpecialCase(const GlobalState &gs, shared_ptr<Type> type, shared_ptr<Type> rest) {
+    auto *ct = cast_type<ClassType>(type.get());
+    if (ct != nullptr && ct->symbol == core::Symbols::NilClass()) {
+        stringstream buf;
+        buf << "T.nilable(";
+        buf << rest->show(gs);
+        buf << ")";
+        return buf.str();
+    }
+    return "";
+}
+
 string OrType::show(const GlobalState &gs) {
     stringstream buf;
 
+    string ret;
+    if ((ret = showOrSpecialCase(gs, this->left, this->right)) != "") {
+        return ret;
+    }
+    if ((ret = showOrSpecialCase(gs, this->right, this->left)) != "") {
+        return ret;
+    }
+
     buf << "T.any(";
-    buf << this->left->show(gs);
-    buf << ", ";
-    buf << this->right->show(gs);
+    buf << showOrs(gs, this->left, this->right);
     buf << ")";
     return buf.str();
 }
