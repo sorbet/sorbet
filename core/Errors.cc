@@ -15,7 +15,7 @@ constexpr auto LOW_NOISE_COLOR = rang::fgB::black;
 constexpr auto DETAIL_COLOR = rang::fg::yellow;
 constexpr auto RESET_COLOR = rang::fg::reset;
 
-constexpr auto INTERPOLATION_COLOR = rang::fg::green;
+constexpr auto INTERPOLATION_COLOR = rang::fg::cyan;
 
 constexpr auto FILE_POS_STYLE = rang::style::underline;
 constexpr auto RESET_STYLE = rang::style::reset;
