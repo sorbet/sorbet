@@ -36,8 +36,8 @@ ClassDef{
               name = prop
               block = nullptr
               args = [
-                SymbolLit{ name = foo }
-                SymbolLit{ name = not_a_string }
+                Literal{ value = :"foo" }
+                Literal{ value = :"not_a_string" }
               ]
             }
 
@@ -46,7 +46,7 @@ ClassDef{
               name = prop
               block = nullptr
               args = [
-                StringLit{ value = not_a_symbol }
+                Literal{ value = "not_a_symbol" }
                 ConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
@@ -59,12 +59,12 @@ ClassDef{
               name = prop
               block = nullptr
               args = [
-                SymbolLit{ name = foo }
+                Literal{ value = :"foo" }
                 ConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
-                StringLit{ value = not_a_hash }
+                Literal{ value = "not_a_hash" }
               ]
             }
 
@@ -73,7 +73,7 @@ ClassDef{
               name = prop
               block = nullptr
               args = [
-                StringLit{ value = too }
+                Literal{ value = "too" }
                 ConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
@@ -82,7 +82,7 @@ ClassDef{
                   pairs = [
                   ]
                 }
-                StringLit{ value = many }
+                Literal{ value = "many" }
               ]
             }
 
@@ -91,12 +91,12 @@ ClassDef{
               name = optional
               block = nullptr
               args = [
-                SymbolLit{ name = company_name }
+                Literal{ value = :"company_name" }
                 ConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
-                SymbolLit{ name = nonempty_string }
+                Literal{ value = :"nonempty_string" }
               ]
             }
 
@@ -105,7 +105,7 @@ ClassDef{
               name = optional
               block = nullptr
               args = [
-                SymbolLit{ name = day }
+                Literal{ value = :"day" }
                 Send{
                   recv = ConstantLit{
                     scope = EmptyTree
@@ -117,12 +117,12 @@ ClassDef{
                     Hash{
                       pairs = [
                         [
-                          key = SymbolLit{ name = min }
-                          value = IntLit{ value = 1 }
+                          key = Literal{ value = :"min" }
+                          value = Literal{ value = 1 }
                         ]
                         [
-                          key = SymbolLit{ name = max }
-                          value = IntLit{ value = 31 }
+                          key = Literal{ value = :"max" }
+                          value = Literal{ value = 31 }
                         ]
                       ]
                     }
@@ -136,7 +136,7 @@ ClassDef{
               name = optional
               block = nullptr
               args = [
-                SymbolLit{ name = how_many }
+                Literal{ value = :"how_many" }
                 Send{
                   recv = ConstantLit{
                     scope = ConstantLit{
@@ -188,7 +188,7 @@ ClassDef{
               name = optional
               block = nullptr
               args = [
-                SymbolLit{ name = optional_param }
+                Literal{ value = :"optional_param" }
                 Send{
                   recv = ConstantLit{
                     scope = EmptyTree
@@ -254,9 +254,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -283,7 +281,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -317,9 +315,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -368,9 +364,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = ConstantLit{
                       scope = EmptyTree
@@ -398,7 +392,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -433,9 +427,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -487,9 +479,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -507,7 +497,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -541,9 +531,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -594,9 +582,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -623,7 +609,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -657,9 +643,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -701,9 +685,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -721,7 +703,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -755,9 +737,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -799,9 +779,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -819,7 +797,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -853,9 +831,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -905,9 +881,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -933,7 +907,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Ident{
                           symbol = <constant:Object>
                         }
@@ -965,9 +939,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:Object>
                   }
@@ -1008,9 +980,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
@@ -1028,7 +998,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:Array>
@@ -1062,9 +1032,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
@@ -1115,9 +1083,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:Array>
@@ -1144,7 +1110,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Send{
                           recv = Ident{
                             symbol = <constant:Array>
@@ -1196,9 +1162,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:Array>
@@ -1249,9 +1213,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
@@ -1269,7 +1231,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:Array>
@@ -1303,9 +1265,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
@@ -1360,9 +1320,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = ConstantLit{
                       scope = ConstantLit{
@@ -1393,7 +1351,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Send{
                           recv = ConstantLit{
                             scope = ConstantLit{
@@ -1453,9 +1411,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = ConstantLit{
                       scope = ConstantLit{
@@ -1527,9 +1483,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = ConstantLit{
                       scope = ConstantLit{
@@ -1564,7 +1518,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Send{
                           recv = ConstantLit{
                             scope = ConstantLit{
@@ -1632,9 +1586,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = ConstantLit{
                       scope = ConstantLit{
@@ -1693,9 +1645,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -1713,7 +1663,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Send{
                           recv = Ident{
                             symbol = <constant:T>
@@ -1765,9 +1715,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -1818,9 +1766,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -1838,7 +1784,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -1872,9 +1818,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -1916,9 +1860,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -1936,7 +1878,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = ConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
@@ -1970,9 +1912,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -2014,9 +1954,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -2034,7 +1972,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Send{
                           recv = Ident{
                             symbol = <constant:T>
@@ -2086,9 +2024,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -2139,9 +2075,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -2183,9 +2117,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
@@ -2227,9 +2159,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   ConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
@@ -2276,9 +2206,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Send{
                     recv = Ident{
                       symbol = <constant:T>
@@ -2334,9 +2262,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:String>
                   }
@@ -2353,7 +2279,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Ident{
                           symbol = <constant:String>
                         }
@@ -2385,9 +2311,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:String>
                   }
@@ -2427,9 +2351,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:Float>
                   }
@@ -2446,7 +2368,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Ident{
                           symbol = <constant:Float>
                         }
@@ -2478,9 +2400,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:Float>
                   }
@@ -2530,9 +2450,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:String>
                   }
@@ -2549,7 +2467,7 @@ ClassDef{
                   Hash{
                     pairs = [
                       [
-                        key = SymbolLit{ name = arg0 }
+                        key = Literal{ value = :"arg0" }
                         value = Ident{
                           symbol = <constant:String>
                         }
@@ -2581,9 +2499,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:String>
                   }
@@ -2623,9 +2539,7 @@ ClassDef{
                 name = cast
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:nil>
-                  }
+                  Literal{ value = nil }
                   Ident{
                     symbol = <constant:Float>
                   }
@@ -2733,7 +2647,7 @@ ClassDef{
                   name = foo=
                   block = nullptr
                   args = [
-                    StringLit{ value = b }
+                    Literal{ value = "b" }
                   ]
                 }
                 ConstantLit{
@@ -2834,7 +2748,7 @@ ClassDef{
                   name = foo2=
                   block = nullptr
                   args = [
-                    StringLit{ value = b }
+                    Literal{ value = "b" }
                   ]
                 }
                 ConstantLit{
@@ -3343,7 +3257,7 @@ ClassDef{
               name = optional_existing=
               block = nullptr
               args = [
-                StringLit{ value = b }
+                Literal{ value = "b" }
               ]
             }
             Send{
@@ -3360,9 +3274,7 @@ ClassDef{
               name = optional_existing=
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:nil>
-                }
+                Literal{ value = nil }
               ]
             }
             Send{
@@ -3449,7 +3361,7 @@ ClassDef{
               name = optional=
               block = nullptr
               args = [
-                StringLit{ value = b }
+                Literal{ value = "b" }
               ]
             }
             Send{
@@ -3466,9 +3378,7 @@ ClassDef{
               name = optional=
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:nil>
-                }
+                Literal{ value = nil }
               ]
             }
             Send{
@@ -3515,7 +3425,7 @@ ClassDef{
               name = const_explicit=
               block = nullptr
               args = [
-                StringLit{ value = b }
+                Literal{ value = "b" }
               ]
             }
             Send{
@@ -3562,7 +3472,7 @@ ClassDef{
               name = const=
               block = nullptr
               args = [
-                StringLit{ value = b }
+                Literal{ value = "b" }
               ]
             }
             Send{
@@ -3634,7 +3544,7 @@ ClassDef{
               args = [
                 Array{
                   elems = [
-                    StringLit{ value = b }
+                    Literal{ value = "b" }
                   ]
                 }
               ]
@@ -3653,7 +3563,7 @@ ClassDef{
               name = enum_prop=
               block = nullptr
               args = [
-                StringLit{ value = hello }
+                Literal{ value = "hello" }
               ]
             }
             Send{
@@ -3700,7 +3610,7 @@ ClassDef{
               name = token=
               block = nullptr
               args = [
-                StringLit{ value = tok_token }
+                Literal{ value = "tok_token" }
               ]
             }
             Send{
@@ -3717,9 +3627,7 @@ ClassDef{
               name = token=
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:nil>
-                }
+                Literal{ value = nil }
               ]
             }
             Send{
@@ -3766,7 +3674,7 @@ ClassDef{
               name = created=
               block = nullptr
               args = [
-                FloatLit{ value = 0.000000 }
+                Literal{ value = 0.000000 }
               ]
             }
             Send{
@@ -3783,9 +3691,7 @@ ClassDef{
               name = created=
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:nil>
-                }
+                Literal{ value = nil }
               ]
             }
             Send{
@@ -3832,7 +3738,7 @@ ClassDef{
               name = token=
               block = nullptr
               args = [
-                StringLit{ value = tok_token }
+                Literal{ value = "tok_token" }
               ]
             }
             Send{
@@ -3849,9 +3755,7 @@ ClassDef{
               name = token=
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:nil>
-                }
+                Literal{ value = nil }
               ]
             }
             Send{
@@ -3899,7 +3803,7 @@ ClassDef{
             name = created=
             block = nullptr
             args = [
-              FloatLit{ value = 0.000000 }
+              Literal{ value = 0.000000 }
             ]
           }
         }

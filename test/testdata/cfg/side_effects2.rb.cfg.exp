@@ -21,7 +21,7 @@ cond"];
 
     "bb::<constant:Side>#foo_1" -> "bb::<constant:Side>#foo_1" [style="bold"];
     "bb::<constant:Side>#foo_2" [label = "block[id=2](<statTemp>$5, <statTemp>$6)
-a = true : TrueClass(true)
+a = true : TrueClass
 <unconditional>"];
 
     "bb::<constant:Side>#foo_2" -> "bb::<constant:Side>#foo_4" [style="bold"];

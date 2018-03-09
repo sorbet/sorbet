@@ -235,27 +235,14 @@ string LiteralType::typeName() {
 }
 
 string LiteralType::toString(const GlobalState &gs, int tabs) {
-    string value;
-    SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
-    if (undSymbol == Symbols::String()) {
-        value = "\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
-    } else if (undSymbol == Symbols::Symbol()) {
-        value = ":\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
-    } else if (undSymbol == Symbols::Integer()) {
-        value = to_string(this->value);
-    } else if (undSymbol == Symbols::Float()) {
-        value = to_string(absl::bit_cast<double>(this->value));
-    } else if (undSymbol == Symbols::TrueClass()) {
-        value = "true";
-    } else if (undSymbol == Symbols::FalseClass()) {
-        value = "false";
-    } else {
-        Error::raise("should not be reachable");
-    }
-    return this->underlying->toString(gs, tabs) + "(" + value + ")";
+    return this->underlying->toString(gs, tabs) + "(" + showValue(gs) + ")";
 }
 
 string LiteralType::show(const GlobalState &gs) {
+    return this->underlying->show(gs) + "(" + showValue(gs) + ")";
+}
+
+string LiteralType::showValue(const GlobalState &gs) {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
     if (undSymbol == Symbols::String()) {
@@ -273,7 +260,7 @@ string LiteralType::show(const GlobalState &gs) {
     } else {
         Error::raise("should not be reachable");
     }
-    return this->underlying->show(gs) + "(" + value + ")";
+    return value;
 }
 
 ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
@@ -713,9 +700,9 @@ std::shared_ptr<Type> ruby_typer::core::TypeVar::getCallArgumentType(core::Conte
     return instantiation->getCallArgumentType(ctx, name, i);
 }
 
-bool TypeVar::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool TypeVar::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     ENFORCE(isInstantiated);
-    return instantiation->derivesFrom(ctx, klass);
+    return instantiation->derivesFrom(gs, klass);
 }
 
 std::string TypeVar::toString(const GlobalState &gs, int tabs) {
@@ -1007,9 +994,9 @@ std::shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::
     }
 }
 
-bool AppliedType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool AppliedType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     ClassType und(this->klass);
-    return und.derivesFrom(ctx, klass);
+    return und.derivesFrom(gs, klass);
 }
 
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
@@ -1039,11 +1026,11 @@ std::string SelfTypeParam::typeName() {
     return "SelfTypeParam";
 }
 
-bool LambdaParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool LambdaParam::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool SelfTypeParam::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 

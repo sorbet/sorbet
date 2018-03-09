@@ -1,3 +1,4 @@
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
@@ -100,17 +101,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
             return original;
         }
 
-        unique_ptr<FloatLit> postTransformFloatLit(core::MutableContext ctx, unique_ptr<FloatLit> original) {
-            count++;
-            return original;
-        }
-
-        unique_ptr<IntLit> postTransformIntLit(core::MutableContext ctx, unique_ptr<IntLit> original) {
-            count++;
-            return original;
-        }
-
-        unique_ptr<StringLit> postTransformStringLit(core::MutableContext ctx, unique_ptr<StringLit> original) {
+        unique_ptr<Literal> postTransformLiteral(core::MutableContext ctx, unique_ptr<Literal> original) {
             count++;
             return original;
         }
@@ -160,7 +151,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
-    unique_ptr<Expression> rhs(new IntLit(loc, 5));
+    unique_ptr<Expression> rhs(ast::MK::Int(loc, 5));
     auto arg = unique_ptr<Expression>(new Local(loc, argumentSym));
     MethodDef::ARGS_store args;
     args.emplace_back(move(arg));

@@ -1,9 +1,9 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:Constants> (<constant:BasicObject>) -> <Class:Constants> @ test/testdata/namer/constant_types.rb:2
-    static-field <constant:A> -> Integer @ test/testdata/namer/constant_types.rb:3
-    static-field <constant:B> -> String @ test/testdata/namer/constant_types.rb:4
-    static-field <constant:C> -> Symbol @ test/testdata/namer/constant_types.rb:5
-    static-field <constant:D> -> Float @ test/testdata/namer/constant_types.rb:6
+    static-field <constant:A> -> Integer(1) @ test/testdata/namer/constant_types.rb:3
+    static-field <constant:B> -> String("hi") @ test/testdata/namer/constant_types.rb:4
+    static-field <constant:C> -> Symbol(:"hi") @ test/testdata/namer/constant_types.rb:5
+    static-field <constant:D> -> Float(1.000000) @ test/testdata/namer/constant_types.rb:6
     static-field <constant:E> -> AppliedType {
       klass = ::<constant:Array>
       targs = [

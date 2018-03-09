@@ -15,7 +15,7 @@ ClassDef{
                   kind = Local
                   name = try
                 }
-                rhs = IntLit{ value = 0 }
+                rhs = Literal{ value = 0 }
               }
             ],
             expr = InsSeq{
@@ -31,7 +31,7 @@ ClassDef{
                     name = <
                     block = nullptr
                     args = [
-                      IntLit{ value = 3 }
+                      Literal{ value = 3 }
                     ]
                   }
                   thenp = InsSeq{
@@ -49,7 +49,7 @@ ClassDef{
                           name = +
                           block = nullptr
                           args = [
-                            IntLit{ value = 1 }
+                            Literal{ value = 1 }
                           ]
                         }
                       }
@@ -59,7 +59,7 @@ ClassDef{
                       name = raise
                       block = nullptr
                       args = [
-                        StringLit{ value = e }
+                        Literal{ value = "e" }
                       ]
                     }
                   }
@@ -80,12 +80,12 @@ ClassDef{
                           name = puts
                           block = nullptr
                           args = [
-                            StringLit{ value = rescue }
+                            Literal{ value = "rescue" }
                           ]
                         }
                         Retry{}
                       ],
-                      expr = IntLit{ value = 1 }
+                      expr = Literal{ value = 1 }
                     }
                   }
                 ]

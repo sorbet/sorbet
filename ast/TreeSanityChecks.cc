@@ -32,8 +32,6 @@ void BlockArg::_sanityCheck() {
     ENFORCE(expr);
 }
 
-void BoolLit::_sanityCheck() {}
-
 void Break::_sanityCheck() {
     ENFORCE(expr);
 }
@@ -65,7 +63,9 @@ void ConstantLit::_sanityCheck() {
 
 void EmptyTree::_sanityCheck() {}
 
-void FloatLit::_sanityCheck() {}
+void Literal::_sanityCheck() {
+    ENFORCE(value != nullptr);
+}
 
 void Hash::_sanityCheck() {
     for (auto &node : keys) {
@@ -97,8 +97,6 @@ void InsSeq::_sanityCheck() {
     }
     ENFORCE(expr);
 }
-
-void IntLit::_sanityCheck() {}
 
 void KeywordArg::_sanityCheck() {
     ENFORCE(expr);
@@ -166,14 +164,6 @@ void Send::_sanityCheck() {
 
 void ShadowArg::_sanityCheck() {
     ENFORCE(expr);
-}
-
-void StringLit::_sanityCheck() {
-    ENFORCE(value.exists());
-}
-
-void SymbolLit::_sanityCheck() {
-    ENFORCE(name.exists());
 }
 
 void UnresolvedIdent::_sanityCheck() {

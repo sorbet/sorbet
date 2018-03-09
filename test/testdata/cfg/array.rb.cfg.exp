@@ -24,7 +24,7 @@ subgraph "cluster_::<constant:TestArray>#a_string" {
     "bb::<constant:TestArray>#a_string_1" [shape = parallelogram];
 
     "bb::<constant:TestArray>#a_string_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = str : String(\"str\")
+<returnMethodTemp>$2 = \"str\" : String(\"str\")
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 

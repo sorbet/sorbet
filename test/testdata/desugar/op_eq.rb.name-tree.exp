@@ -28,7 +28,7 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
   def example<example>(a)
     begin
       if a
-        a = :a
+        a = :"a"
       else
         a
       end
@@ -36,7 +36,7 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
         b$2 = self(<constant:OpEq>)
         b$3 = b$2.b()
         if b$3
-          b$2.b=(:b)
+          b$2.b=(:"b")
         else
           b$3
         end
@@ -55,7 +55,7 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
       if a
         a
       else
-        a = :a
+        a = :"a"
       end
       begin
         b$8 = self(<constant:OpEq>)
@@ -63,7 +63,7 @@ class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<constant:<todo sym>>)
         if b$9
           b$9
         else
-          b$8.b=(:b)
+          b$8.b=(:"b")
         end
       end
       begin

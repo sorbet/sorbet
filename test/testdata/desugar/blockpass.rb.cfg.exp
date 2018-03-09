@@ -29,7 +29,7 @@ outerLoops: 1
     "bb#<static-init>$9_3" -> "bb#<static-init>$9_1" [style="bold"];
     "bb#<static-init>$9_4" [label = "block[id=4](<returnMethodTemp>$2)
 outerLoops: 1
-<blockReturnTemp>$13 = foo : String(\"foo\")
+<blockReturnTemp>$13 = \"foo\" : String(\"foo\")
 <blockReturnTemp>$14 = blockreturn<#<block>$2> <blockReturnTemp>$13 : <bottom>
 <unconditional>"];
 
@@ -66,7 +66,7 @@ outerLoops: 1
     "bb::<constant:Object>#returns_lambda_3" -> "bb::<constant:Object>#returns_lambda_1" [style="bold"];
     "bb::<constant:Object>#returns_lambda_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
-<blockReturnTemp>$6 = returns_lambda : String(\"returns_lambda\")
+<blockReturnTemp>$6 = \"returns_lambda\" : String(\"returns_lambda\")
 <blockReturnTemp>$7 = blockreturn<::<constant:Object>#returns_lambda#<block>$2> <blockReturnTemp>$6 : <bottom>
 <unconditional>"];
 
@@ -147,12 +147,11 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0]()
-<constant:nil>$99 = alias <constant:nil> : NilClass
 <constant:<Magic>>$29 = alias <constant:<Magic>> : <Magic>
-<constant:HasMeth>$114 = alias <constant:HasMeth> : <Class:HasMeth>
+<constant:HasMeth>$113 = alias <constant:HasMeth> : <Class:HasMeth>
 <constant:HasToProc>$72 = alias <constant:HasToProc> : <Class:HasToProc>
 <constant:CallsWithObject>$91 = alias <constant:CallsWithObject> : <Class:CallsWithObject>
-<constant:CallsWithObjectChild>$106 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>
+<constant:CallsWithObjectChild>$105 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>
 <selfMethodTemp>$16 = self : Object
 blk = load_arg(<selfMethodTemp>$16#foo, 0) : untyped
 <statTemp>$18 = self : Object
@@ -164,20 +163,20 @@ blk = load_arg(<selfMethodTemp>$16#foo, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
 
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$23 = self : Object
 <statTemp>$22 = <statTemp>$23.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_5" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_4" [label = "block[id=4](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$2$4 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : untyped
 <blockReturnTemp>$19 = <block-pass>$2$4.meth() : untyped
@@ -185,23 +184,23 @@ outerLoops: 1
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_2" [style="bold"];
-    "bb::<constant:Object>#foo_5" [label = "block[id=5](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_5" [label = "block[id=5](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_7" [style="bold"];
     "bb::<constant:Object>#foo_5" -> "bb::<constant:Object>#foo_6" [style="tapered"];
 
-    "bb::<constant:Object>#foo_6" [label = "block[id=6](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_6" [label = "block[id=6](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$34 = self : Object
 <statTemp>$33 = <statTemp>$34.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_6" -> "bb::<constant:Object>#foo_8" [style="bold"];
-    "bb::<constant:Object>#foo_7" [label = "block[id=7](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_7" [label = "block[id=7](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 args$5 = load_yield_param(::<constant:Object>#foo#<block>$3, 0) : untyped
-<statTemp>$26 = <symbol:meth> : Symbol(:\"meth\")
+<statTemp>$26 = :\"meth\" : Symbol(:\"meth\")
 <statTemp>$25 = <statTemp>$26.to_proc() : Proc
 <statTemp>$30 = args$5.to_a() : untyped
 <statTemp>$27 = <constant:<Magic>>$29.<splat>(<statTemp>$30) : untyped
@@ -210,43 +209,43 @@ args$5 = load_yield_param(::<constant:Object>#foo#<block>$3, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_5" [style="bold"];
-    "bb::<constant:Object>#foo_8" [label = "block[id=8](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_8" [label = "block[id=8](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_10" [style="bold"];
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_9" [style="tapered"];
 
-    "bb::<constant:Object>#foo_9" [label = "block[id=9](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_9" [label = "block[id=9](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$41 = self : Object
 <statTemp>$40 = <statTemp>$41.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_9" -> "bb::<constant:Object>#foo_11" [style="bold"];
-    "bb::<constant:Object>#foo_10" [label = "block[id=10](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_10" [label = "block[id=10](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 x$6 = load_yield_param(::<constant:Object>#foo#<block>$4, 0) : untyped
-<statTemp>$37 = <symbol:meth> : Symbol(:\"meth\")
+<statTemp>$37 = :\"meth\" : Symbol(:\"meth\")
 <statTemp>$36 = <statTemp>$37.to_proc() : Proc
 <blockReturnTemp>$35 = <statTemp>$36.call(x$6) : untyped
 <blockReturnTemp>$39 = blockreturn<::<constant:Object>#foo#<block>$4> <blockReturnTemp>$35 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_8" [style="bold"];
-    "bb::<constant:Object>#foo_11" [label = "block[id=11](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_11" [label = "block[id=11](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_13" [style="bold"];
     "bb::<constant:Object>#foo_11" -> "bb::<constant:Object>#foo_12" [style="tapered"];
 
-    "bb::<constant:Object>#foo_12" [label = "block[id=12](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_12" [label = "block[id=12](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$46 = self : Object
 <statTemp>$45 = <statTemp>$46.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_12" -> "bb::<constant:Object>#foo_14" [style="bold"];
-    "bb::<constant:Object>#foo_13" [label = "block[id=13](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_13" [label = "block[id=13](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 x$7 = load_yield_param(::<constant:Object>#foo#<block>$5, 0) : untyped
 <blockReturnTemp>$42 = x$7.meth() : untyped
@@ -254,20 +253,20 @@ x$7 = load_yield_param(::<constant:Object>#foo#<block>$5, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_13" -> "bb::<constant:Object>#foo_11" [style="bold"];
-    "bb::<constant:Object>#foo_14" [label = "block[id=14](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_14" [label = "block[id=14](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_16" [style="bold"];
     "bb::<constant:Object>#foo_14" -> "bb::<constant:Object>#foo_15" [style="tapered"];
 
-    "bb::<constant:Object>#foo_15" [label = "block[id=15](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_15" [label = "block[id=15](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$56 = self : Object
 <statTemp>$55 = <statTemp>$56.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_15" -> "bb::<constant:Object>#foo_17" [style="bold"];
-    "bb::<constant:Object>#foo_16" [label = "block[id=16](<constant:nil>$99, <constant:<Magic>>$29, blk, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_16" [label = "block[id=16](<constant:<Magic>>$29, blk, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$3$8 = load_yield_param(::<constant:Object>#foo#<block>$6, 0) : untyped
 <statTemp>$48 = blk.to_proc() : untyped
@@ -278,20 +277,20 @@ outerLoops: 1
 <unconditional>"];
 
     "bb::<constant:Object>#foo_16" -> "bb::<constant:Object>#foo_14" [style="bold"];
-    "bb::<constant:Object>#foo_17" [label = "block[id=17](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_17" [label = "block[id=17](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_19" [style="bold"];
     "bb::<constant:Object>#foo_17" -> "bb::<constant:Object>#foo_18" [style="tapered"];
 
-    "bb::<constant:Object>#foo_18" [label = "block[id=18](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_18" [label = "block[id=18](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$67 = self : Object
 <statTemp>$66 = <statTemp>$67.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_18" -> "bb::<constant:Object>#foo_20" [style="bold"];
-    "bb::<constant:Object>#foo_19" [label = "block[id=19](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_19" [label = "block[id=19](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$4$9 = load_yield_param(::<constant:Object>#foo#<block>$7, 0) : untyped
 <statTemp>$60 = self : Object
@@ -304,20 +303,20 @@ outerLoops: 1
 <unconditional>"];
 
     "bb::<constant:Object>#foo_19" -> "bb::<constant:Object>#foo_17" [style="bold"];
-    "bb::<constant:Object>#foo_20" [label = "block[id=20](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_20" [label = "block[id=20](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_22" [style="bold"];
     "bb::<constant:Object>#foo_20" -> "bb::<constant:Object>#foo_21" [style="tapered"];
 
-    "bb::<constant:Object>#foo_21" [label = "block[id=21](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_21" [label = "block[id=21](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$79 = self : Object
 <statTemp>$78 = <statTemp>$79.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_21" -> "bb::<constant:Object>#foo_23" [style="bold"];
-    "bb::<constant:Object>#foo_22" [label = "block[id=22](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_22" [label = "block[id=22](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$5$10 = load_yield_param(::<constant:Object>#foo#<block>$8, 0) : untyped
 <statTemp>$70 = <constant:HasToProc>$72.new() : HasToProc
@@ -329,19 +328,19 @@ outerLoops: 1
 <unconditional>"];
 
     "bb::<constant:Object>#foo_22" -> "bb::<constant:Object>#foo_20" [style="bold"];
-    "bb::<constant:Object>#foo_23" [label = "block[id=23](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_23" [label = "block[id=23](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_25" [style="bold"];
     "bb::<constant:Object>#foo_23" -> "bb::<constant:Object>#foo_24" [style="tapered"];
 
-    "bb::<constant:Object>#foo_24" [label = "block[id=24](<constant:nil>$99, <constant:HasMeth>$114, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_24" [label = "block[id=24](<constant:HasMeth>$113, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$89 = <constant:CallsWithObject>$91.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_24" -> "bb::<constant:Object>#foo_26" [style="bold"];
-    "bb::<constant:Object>#foo_25" [label = "block[id=25](<constant:nil>$99, <constant:<Magic>>$29, <constant:HasMeth>$114, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_25" [label = "block[id=25](<constant:<Magic>>$29, <constant:HasMeth>$113, <constant:HasToProc>$72, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 args$11 = load_yield_param(::<constant:Object>#foo#<block>$9, 0) : untyped
 <statTemp>$82 = <constant:HasToProc>$72.new() : HasToProc
@@ -353,21 +352,21 @@ args$11 = load_yield_param(::<constant:Object>#foo#<block>$9, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_25" -> "bb::<constant:Object>#foo_23" [style="bold"];
-    "bb::<constant:Object>#foo_26" [label = "block[id=26](<constant:nil>$99, <constant:HasMeth>$114, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_26" [label = "block[id=26](<constant:HasMeth>$113, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_26" -> "bb::<constant:Object>#foo_28" [style="bold"];
     "bb::<constant:Object>#foo_26" -> "bb::<constant:Object>#foo_27" [style="tapered"];
 
-    "bb::<constant:Object>#foo_27" [label = "block[id=27](<constant:nil>$99, <constant:HasMeth>$114, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_27" [label = "block[id=27](<constant:HasMeth>$113, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <ifTemp>$97 = <constant:CallsWithObject>$91.nil?() : TrueClass | FalseClass
 <ifTemp>$97"];
 
     "bb::<constant:Object>#foo_27" -> "bb::<constant:Object>#foo_34" [style="bold"];
     "bb::<constant:Object>#foo_27" -> "bb::<constant:Object>#foo_30" [style="tapered"];
 
-    "bb::<constant:Object>#foo_28" [label = "block[id=28](<constant:nil>$99, <constant:HasMeth>$114, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_28" [label = "block[id=28](<constant:HasMeth>$113, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$6$12 = load_yield_param(::<constant:Object>#foo#<block>$10, 0) : untyped
 <blockReturnTemp>$92 = <block-pass>$6$12.meth() : untyped
@@ -375,72 +374,72 @@ outerLoops: 1
 <unconditional>"];
 
     "bb::<constant:Object>#foo_28" -> "bb::<constant:Object>#foo_26" [style="bold"];
-    "bb::<constant:Object>#foo_30" [label = "block[id=30](<constant:HasMeth>$114, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_30" [label = "block[id=30](<constant:HasMeth>$113, <constant:CallsWithObject>$91, <constant:CallsWithObjectChild>$105)
 <statTemp>$95 = <constant:CallsWithObject>$91.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_30" -> "bb::<constant:Object>#foo_31" [style="bold"];
-    "bb::<constant:Object>#foo_31" [label = "block[id=31](<constant:HasMeth>$114, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_31" [label = "block[id=31](<constant:HasMeth>$113, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_31" -> "bb::<constant:Object>#foo_33" [style="bold"];
     "bb::<constant:Object>#foo_31" -> "bb::<constant:Object>#foo_34" [style="tapered"];
 
-    "bb::<constant:Object>#foo_33" [label = "block[id=33](<constant:HasMeth>$114, <constant:CallsWithObjectChild>$106)
+    "bb::<constant:Object>#foo_33" [label = "block[id=33](<constant:HasMeth>$113, <constant:CallsWithObjectChild>$105)
 outerLoops: 1
 <block-pass>$8$13 = load_yield_param(::<constant:Object>#foo#<block>$11, 0) : untyped
-<blockReturnTemp>$101 = <block-pass>$8$13.meth() : untyped
-<blockReturnTemp>$103 = blockreturn<::<constant:Object>#foo#<block>$11> <blockReturnTemp>$101 : <bottom>
+<blockReturnTemp>$100 = <block-pass>$8$13.meth() : untyped
+<blockReturnTemp>$102 = blockreturn<::<constant:Object>#foo#<block>$11> <blockReturnTemp>$100 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_33" -> "bb::<constant:Object>#foo_31" [style="bold"];
-    "bb::<constant:Object>#foo_34" [label = "block[id=34](<constant:HasMeth>$114, <constant:CallsWithObjectChild>$106)
-<statTemp>$104 = <constant:CallsWithObjectChild>$106.calls_with_object() : untyped
+    "bb::<constant:Object>#foo_34" [label = "block[id=34](<constant:HasMeth>$113, <constant:CallsWithObjectChild>$105)
+<statTemp>$103 = <constant:CallsWithObjectChild>$105.calls_with_object() : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_34" -> "bb::<constant:Object>#foo_35" [style="bold"];
-    "bb::<constant:Object>#foo_35" [label = "block[id=35](<constant:HasMeth>$114)
+    "bb::<constant:Object>#foo_35" [label = "block[id=35](<constant:HasMeth>$113)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_37" [style="bold"];
     "bb::<constant:Object>#foo_35" -> "bb::<constant:Object>#foo_36" [style="tapered"];
 
-    "bb::<constant:Object>#foo_36" [label = "block[id=36](<constant:HasMeth>$114)
-<statTemp>$111 = self : Object
-<statTemp>$112 = <constant:HasMeth>$114.new() : HasMeth
-<statTemp>$110 = <statTemp>$111.calls_arg_with_object(<statTemp>$112) : untyped
+    "bb::<constant:Object>#foo_36" [label = "block[id=36](<constant:HasMeth>$113)
+<statTemp>$110 = self : Object
+<statTemp>$111 = <constant:HasMeth>$113.new() : HasMeth
+<statTemp>$109 = <statTemp>$110.calls_arg_with_object(<statTemp>$111) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_36" -> "bb::<constant:Object>#foo_38" [style="bold"];
-    "bb::<constant:Object>#foo_37" [label = "block[id=37](<constant:HasMeth>$114)
+    "bb::<constant:Object>#foo_37" [label = "block[id=37](<constant:HasMeth>$113)
 outerLoops: 1
 <block-pass>$9$14 = load_yield_param(::<constant:Object>#foo#<block>$12, 0) : untyped
-<blockReturnTemp>$107 = <block-pass>$9$14.meth() : untyped
-<blockReturnTemp>$109 = blockreturn<::<constant:Object>#foo#<block>$12> <blockReturnTemp>$107 : <bottom>
+<blockReturnTemp>$106 = <block-pass>$9$14.meth() : untyped
+<blockReturnTemp>$108 = blockreturn<::<constant:Object>#foo#<block>$12> <blockReturnTemp>$106 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_37" -> "bb::<constant:Object>#foo_35" [style="bold"];
-    "bb::<constant:Object>#foo_38" [label = "block[id=38](<constant:HasMeth>$114)
+    "bb::<constant:Object>#foo_38" [label = "block[id=38](<constant:HasMeth>$113)
 outerLoops: 1
 <block-call>"];
 
     "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_40" [style="bold"];
     "bb::<constant:Object>#foo_38" -> "bb::<constant:Object>#foo_39" [style="tapered"];
 
-    "bb::<constant:Object>#foo_39" [label = "block[id=39](<constant:HasMeth>$114)
-<statTemp>$118 = self : Object
-<statTemp>$119 = <constant:HasMeth>$114.new() : HasMeth
-<returnMethodTemp>$15 = <statTemp>$118.calls_arg_with_object(<statTemp>$119) : untyped
+    "bb::<constant:Object>#foo_39" [label = "block[id=39](<constant:HasMeth>$113)
+<statTemp>$117 = self : Object
+<statTemp>$118 = <constant:HasMeth>$113.new() : HasMeth
+<returnMethodTemp>$15 = <statTemp>$117.calls_arg_with_object(<statTemp>$118) : untyped
 <unconditional>"];
 
     "bb::<constant:Object>#foo_39" -> "bb::<constant:Object>#foo_41" [style="bold"];
-    "bb::<constant:Object>#foo_40" [label = "block[id=40](<constant:HasMeth>$114)
+    "bb::<constant:Object>#foo_40" [label = "block[id=40](<constant:HasMeth>$113)
 outerLoops: 1
 <block-pass>$10$15 = load_yield_param(::<constant:Object>#foo#<block>$13, 0) : untyped
-<blockReturnTemp>$115 = <block-pass>$10$15.meth() : untyped
-<blockReturnTemp>$117 = blockreturn<::<constant:Object>#foo#<block>$13> <blockReturnTemp>$115 : <bottom>
+<blockReturnTemp>$114 = <block-pass>$10$15.meth() : untyped
+<blockReturnTemp>$116 = blockreturn<::<constant:Object>#foo#<block>$13> <blockReturnTemp>$114 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_40" -> "bb::<constant:Object>#foo_38" [style="bold"];
@@ -459,8 +458,8 @@ outerLoops: 1
     "bb::<constant:Object>#foo_43" [label = "block[id=43](<returnMethodTemp>$15)
 outerLoops: 1
 x$16 = load_yield_param(::<constant:Object>#foo#<block>$14, 0) : untyped
-<blockReturnTemp>$121 = x$16.meth() : untyped
-<blockReturnTemp>$123 = blockreturn<::<constant:Object>#foo#<block>$14> <blockReturnTemp>$121 : <bottom>
+<blockReturnTemp>$120 = x$16.meth() : untyped
+<blockReturnTemp>$122 = blockreturn<::<constant:Object>#foo#<block>$14> <blockReturnTemp>$120 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_43" -> "bb::<constant:Object>#foo_41" [style="bold"];
@@ -473,7 +472,7 @@ subgraph "cluster_::<constant:HasMeth>#meth" {
     "bb::<constant:HasMeth>#meth_1" [shape = parallelogram];
 
     "bb::<constant:HasMeth>#meth_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = meth : String(\"meth\")
+<returnMethodTemp>$2 = \"meth\" : String(\"meth\")
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 

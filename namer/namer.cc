@@ -119,8 +119,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeNotConstant)) {
-                e.setHeader("`{}` must be passed a constant literal. You passed a `{}`.", send->fun.data(ctx).show(ctx),
-                            send->args[0]->nodeName());
+                e.setHeader("`{}` must be passed a constant literal.", send->fun.data(ctx).show(ctx));
             }
             return false;
         }
@@ -275,19 +274,21 @@ public:
                         break;
                     }
                     for (auto &arg : original->args) {
-                        auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
-                        if (sym == nullptr) {
+                        auto lit = ast::cast_tree<ast::Literal>(arg.get());
+                        if (lit == nullptr || !lit->isSymbol(ctx)) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
                                 e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
                                             original->fun.toString(ctx));
                             }
                             continue;
                         }
-                        core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, sym->name);
+                        core::NameRef name = lit->asSymbol(ctx);
+
+                        core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
                                 e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
-                                            sym->name.toString(ctx));
+                                            name.toString(ctx));
                             }
                             continue;
                         }
@@ -298,15 +299,17 @@ public:
                 case core::Names::aliasMethod()._id: {
                     vector<core::NameRef> args;
                     for (auto &arg : original->args) {
-                        auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
-                        if (sym == nullptr) {
+                        auto lit = ast::cast_tree<ast::Literal>(arg.get());
+                        if (lit == nullptr || !lit->isSymbol(ctx)) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::DynamicDSLInvocation)) {
                                 e.setHeader("Unsupported argument to `{}`: arguments must be symbol literals",
                                             original->fun.toString(ctx));
                             }
                             continue;
                         }
-                        args.push_back(sym->name);
+                        core::NameRef name = lit->asSymbol(ctx);
+
+                        args.push_back(name);
                     }
                     if (original->args.size() != 2) {
                         if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
@@ -492,17 +495,19 @@ public:
                         }
                         return make_unique<ast::EmptyTree>(asgn->loc);
                     }
-                    auto *symbol = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
-                    if (symbol) {
-                        if (symbol->name == core::Names::covariant()) {
+
+                    auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
+                    if (lit != nullptr && lit->isSymbol(ctx)) {
+                        core::NameRef name = lit->asSymbol(ctx);
+
+                        if (name == core::Names::covariant()) {
                             variance = core::Variance::CoVariant;
-                        } else if (symbol->name == core::Names::contravariant()) {
+                        } else if (name == core::Names::contravariant()) {
                             variance = core::Variance::ContraVariant;
-                        } else if (symbol->name == core::Names::invariant()) {
+                        } else if (name == core::Names::invariant()) {
                             variance = core::Variance::Invariant;
                         } else {
-                            if (auto e =
-                                    ctx.state.beginError(symbol->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                            if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
                                 e.setHeader("Invalid variance kind, only :{} and :{} are supported",
                                             core::Names::covariant().toString(ctx),
                                             core::Names::contravariant().toString(ctx));
@@ -535,8 +540,9 @@ public:
                         int i = -1;
                         for (auto &keyExpr : hash->keys) {
                             i++;
-                            auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
-                            if (key && key->name == core::Names::fixed()) {
+                            auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
+                            core::NameRef name;
+                            if (key != nullptr && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::fixed()) {
                                 // Leave it in the tree for the resolver to chew on.
                                 sym.data(ctx).setFixed();
 

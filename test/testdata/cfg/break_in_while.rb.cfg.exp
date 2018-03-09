@@ -27,7 +27,6 @@ subgraph "cluster_::<constant:Object>#foo" {
     "bb::<constant:Object>#foo_1" [shape = parallelogram];
 
     "bb::<constant:Object>#foo_0" [label = "block[id=0]()
-<constant:nil>$10 = alias <constant:nil> : NilClass
 <unconditional>"];
 
     "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
@@ -37,14 +36,15 @@ subgraph "cluster_::<constant:Object>#foo" {
 <unconditional>"];
 
     "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:nil>$10)
+    "bb::<constant:Object>#foo_2" [label = "block[id=2]()
 outerLoops: 1
-<whileTemp>$4 = true : TrueClass(true)
+<whileTemp>$4 = true : TrueClass
 <whileTemp>$4"];
 
     "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](<constant:nil>$10)
-<finalReturn> = return <constant:nil>$10 : <bottom>
+    "bb::<constant:Object>#foo_3" [label = "block[id=3]()
+<returnMethodTemp>$2 = nil : NilClass
+<finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];

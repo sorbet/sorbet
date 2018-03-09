@@ -41,10 +41,10 @@ class <emptyTree><<constant:<root>>> < ()
           <block-pass>$2.meth()
         end
         self(<constant:<todo sym>>).calls_with_object() do |*args|
-          :meth.to_proc().call(::<constant:<Magic>>.<splat>(args.to_a()))
+          :"meth".to_proc().call(::<constant:<Magic>>.<splat>(args.to_a()))
         end
         self(<constant:<todo sym>>).calls_with_object() do |x|
-          :meth.to_proc().call(x)
+          :"meth".to_proc().call(x)
         end
         self(<constant:<todo sym>>).calls_with_object() do |x|
           x.meth()
@@ -67,7 +67,7 @@ class <emptyTree><<constant:<root>>> < ()
         begin
           <assignTemp$7 = <emptyTree>::<constant:CallsWithObject>
           if <assignTemp$7.nil?()
-            ::<constant:nil>
+            nil
           else
             <assignTemp$7.calls_with_object() do |<block-pass>$8|
               <block-pass>$8.meth()

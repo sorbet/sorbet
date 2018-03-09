@@ -58,19 +58,19 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     ast::Hash::ENTRY_store values;
 
     for (auto &arg : send->args) {
-        auto sym = ast::cast_tree<ast::SymbolLit>(arg.get());
-        if (!sym) {
+        auto sym = ast::cast_tree<ast::Literal>(arg.get());
+        if (!sym || !sym->isSymbol(ctx)) {
             return empty;
         }
+        core::NameRef name = sym->asSymbol(ctx);
         body.emplace_back(
-            ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::attrAccessor(), ast::MK::Symbol(loc, sym->name)));
-        auto key = ctx.state.enterNameUTF8("@" + sym->name.toString(ctx));
+            ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::attrAccessor(), ast::MK::Symbol(loc, name)));
+        auto key = ctx.state.enterNameUTF8("@" + name.toString(ctx));
         keys.emplace_back(ast::MK::Symbol(loc, key));
         values.emplace_back(ast::MK::Ident(loc, core::Symbols::BasicObject()));
-        sigKeys.emplace_back(ast::MK::Symbol(loc, sym->name));
+        sigKeys.emplace_back(ast::MK::Symbol(loc, name));
         sigValues.emplace_back(ast::MK::Ident(loc, core::Symbols::BasicObject()));
-        newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, sym->name),
-                                                           ast::MK::Ident(loc, core::Symbols::nil())));
+        newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, name), ast::MK::Nil(loc)));
     }
     body.emplace(body.begin(), ast::MK::Send1(loc, ast::MK::Self(loc), core::Names::declareVariables(),
                                               make_unique<ast::Hash>(loc, move(keys), move(values))));

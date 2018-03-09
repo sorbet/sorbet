@@ -58,17 +58,21 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
 
     return make_pair(move(args), move(body));
 }
+bool isStringLit(core::MutableContext ctx, unique_ptr<Expression> &expr) {
+    Literal *lit;
+    return (lit = cast_tree<Literal>(expr.get())) && lit->isString(ctx);
+}
 
 unique_ptr<Expression> desugarDString(core::MutableContext ctx, core::Loc loc, parser::NodeVec nodes,
                                       u2 &uniqueCounter) {
     if (nodes.empty()) {
-        return make_unique<StringLit>(loc, core::Names::empty());
+        return MK::String(loc, core::Names::empty());
     }
     auto it = nodes.begin();
     auto end = nodes.end();
     unique_ptr<Expression> res;
     unique_ptr<Expression> first = node2TreeImpl(ctx, move(*it), uniqueCounter);
-    if (isa_tree<StringLit>(first.get())) {
+    if (isStringLit(ctx, first)) {
         res = move(first);
     } else {
         auto pieceLoc = first->loc;
@@ -78,7 +82,7 @@ unique_ptr<Expression> desugarDString(core::MutableContext ctx, core::Loc loc, p
     for (; it != end; ++it) {
         auto &stat = *it;
         unique_ptr<Expression> narg = node2TreeImpl(ctx, move(stat), uniqueCounter);
-        if (!isa_tree<StringLit>(narg.get())) {
+        if (!isStringLit(ctx, first)) {
             auto pieceLoc = narg->loc;
             narg = MK::Send0(pieceLoc, move(narg), core::Names::to_s());
         }
@@ -104,13 +108,14 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
     core::Loc loc = expr->loc;
     core::NameRef temp =
         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp(), ++uniqueCounter);
-
-    if (auto sym = cast_tree<SymbolLit>(expr.get())) {
+    Literal *lit;
+    if ((lit = cast_tree<Literal>(expr.get())) && lit->isSymbol(ctx)) {
         // &:foo => {|temp| temp.foo() }
+        core::NameRef name(ctx, core::cast_type<core::LiteralType>(lit->value.get())->value);
         MethodDef::ARGS_store args;
         args.emplace_back(MK::Local(loc, temp));
         unique_ptr<Expression> recv = MK::Local(loc, temp);
-        unique_ptr<Expression> body = MK::Send0(loc, move(recv), sym->name);
+        unique_ptr<Expression> body = MK::Send0(loc, move(recv), name);
         return make_unique<Block>(loc, move(args), move(body));
     }
 
@@ -252,7 +257,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::String *string) {
-                unique_ptr<Expression> res = make_unique<StringLit>(loc, string->val);
+                unique_ptr<Expression> res = MK::String(loc, string->val);
                 result.swap(res);
             },
             [&](parser::Symbol *symbol) {
@@ -458,7 +463,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, move(csend->args));
                 auto send = node2TreeImpl(ctx, move(sendNode), uniqueCounter);
 
-                unique_ptr<Expression> nil = MK::Ident(loc, core::Symbols::nil());
+                unique_ptr<Expression> nil = MK::Nil(loc);
                 auto iff = MK::If(loc, move(cond), move(nil), move(send));
                 InsSeq::STATS_store stats;
                 stats.emplace_back(move(assgn));
@@ -480,7 +485,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto end = dsymbol->nodes.end();
                 unique_ptr<Expression> res;
                 unique_ptr<Expression> first = node2TreeImpl(ctx, move(*it), uniqueCounter);
-                if (isa_tree<StringLit>(first.get())) {
+                if (isStringLit(ctx, first)) {
                     res = move(first);
                 } else {
                     res = MK::Send0(loc, move(first), core::Names::to_s());
@@ -489,7 +494,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 for (; it != end; ++it) {
                     auto &stat = *it;
                     unique_ptr<Expression> narg = node2TreeImpl(ctx, move(stat), uniqueCounter);
-                    if (!isa_tree<StringLit>(narg.get())) {
+                    if (!isStringLit(ctx, narg)) {
                         narg = MK::Send0(loc, move(narg), core::Names::to_s());
                     }
                     auto n = MK::Send1(loc, move(res), core::Names::concat(), move(narg));
@@ -500,7 +505,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::FileLiteral *fileLiteral) {
-                unique_ptr<Expression> res = make_unique<StringLit>(loc, core::Names::currentFile());
+                unique_ptr<Expression> res = MK::String(loc, core::Names::currentFile());
                 result.swap(res);
             },
             [&](parser::ConstLhs *constLhs) {
@@ -680,7 +685,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Nil *wl) {
-                unique_ptr<Expression> res = MK::Ident(loc, core::Symbols::nil());
+                unique_ptr<Expression> res = MK::Nil(loc);
                 result.swap(res);
             },
             [&](parser::IVar *var) {
@@ -814,21 +819,21 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     }
                 }
 
-                unique_ptr<Expression> res = make_unique<FloatLit>(loc, val);
+                unique_ptr<Expression> res = MK::Float(loc, val);
                 result.swap(res);
             },
             [&](parser::Complex *complex) {
                 auto kernel = MK::Ident(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Complex().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
-                auto send = MK::Send1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
+                auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Ident(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Rational().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
-                auto send = MK::Send1(loc, move(kernel), complex_name, make_unique<StringLit>(loc, value));
+                auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Array *array) {

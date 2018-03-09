@@ -210,7 +210,7 @@ outerLoops: 1
 
     "bb::<singleton class:<constant:Main>>#main_12" [label = "block[id=12](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
 <statTemp>$76 = self : <Class:Main>
-<statTemp>$77 = main : String(\"main\")
+<statTemp>$77 = \"main\" : String(\"main\")
 <statTemp>$75 = <statTemp>$76.puts(<statTemp>$77) : NilClass
 <statTemp>$78 = <constant:A>$12.each() : untyped
 <unconditional>"];

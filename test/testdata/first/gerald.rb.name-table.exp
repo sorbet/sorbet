@@ -74,8 +74,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
           method time_rule (rule, <blk>) @ test/testdata/first/gerald.rb:96
             argument <blk><block> -> untyped @ test/testdata/first/gerald.rb:98
             argument rule<> @ test/testdata/first/gerald.rb:96
-          static-field <constant:PER_RULE_MS> -> Integer @ test/testdata/first/gerald.rb:82
-          static-field <constant:TOTAL_TIME_MS> -> Integer @ test/testdata/first/gerald.rb:81
+          static-field <constant:PER_RULE_MS> -> Integer(2000) @ test/testdata/first/gerald.rb:82
+          static-field <constant:TOTAL_TIME_MS> -> Integer(10000) @ test/testdata/first/gerald.rb:81
         class <constant:MatchTimeout> < ::<constant:StandardError> () -> <Class:Opus::CIBot::Gerald::MatchTimeout> @ test/testdata/first/gerald.rb:7
           field @rule_token -> untyped @ test/testdata/first/gerald.rb:9
           method initialize (message, rule_token) @ test/testdata/first/gerald.rb:11
@@ -94,7 +94,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
             method <block>$2 (r) @ test/testdata/first/gerald.rb:43
               argument r<> @ test/testdata/first/gerald.rb:43
               method <block>$2 () @ test/testdata/first/gerald.rb:44
-          static-field <constant:MAX_AFFECTED_FILES> -> Integer @ test/testdata/first/gerald.rb:20
+          static-field <constant:MAX_AFFECTED_FILES> -> Integer(100) @ test/testdata/first/gerald.rb:20
         class <singleton class:<constant:Diff>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:111
         class <singleton class:<constant:MatchContext>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:51
         class <singleton class:<constant:MatchTimeBudget>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:79

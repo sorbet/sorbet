@@ -11,7 +11,7 @@ class <emptyTree><<constant:<root>>> < ()
       c = "c"
       ::<constant:Regexp>.new(begin
           a
-        end.to_s().concat("b").concat(begin
+        end.to_s().concat("b".to_s()).concat(begin
             c
           end.to_s()), 0)
       <emptyTree>::<constant:Regexp>.new(a.+("b").+(c))

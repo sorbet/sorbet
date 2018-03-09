@@ -60,12 +60,12 @@ unique_ptr<ast::Expression> dupType(ast::Expression *orig) {
     return ast::MK::Constant(cons->loc, dupType(scopeCnst), cons->cnst);
 }
 
-ast::Expression *getHashValue(ast::Hash *hash, core::NameRef name) {
+ast::Expression *getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
     int i = -1;
     for (auto &keyExpr : hash->keys) {
         i++;
-        auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
-        if (key && key->name == name) {
+        auto *key = ast::cast_tree<ast::Literal>(keyExpr.get());
+        if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
             return hash->values[i].get();
         }
     }
@@ -104,11 +104,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     auto loc = send->loc;
 
     if (!name.exists()) {
-        auto *sym = ast::cast_tree<ast::SymbolLit>(send->args[0].get());
-        if (sym == nullptr) {
+        auto *sym = ast::cast_tree<ast::Literal>(send->args[0].get());
+        if (!sym || !sym->isSymbol(ctx)) {
             return empty;
         }
-        name = sym->name;
+        name = sym->asSymbol(ctx);
     }
 
     if (type == nullptr) {
@@ -128,11 +128,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        type = dupType(getHashValue(rules, core::Names::type()));
+        type = dupType(getHashValue(ctx, rules, core::Names::type()));
     }
 
     if (type == nullptr) {
-        if (getHashValue(rules, core::Names::enum_()) != nullptr) {
+        if (getHashValue(ctx, rules, core::Names::enum_()) != nullptr) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
@@ -142,7 +142,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        auto arrayType = dupType(getHashValue(rules, core::Names::array()));
+        auto arrayType = dupType(getHashValue(ctx, rules, core::Names::array()));
         if (arrayType) {
             type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),
                                   move(arrayType));
@@ -167,21 +167,21 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the getters
 
     if (rules) {
-        auto optional = getHashValue(rules, core::Names::optional());
-        auto boolOptional = ast::cast_tree<ast::BoolLit>(optional);
-        if (boolOptional && boolOptional->value) {
+        auto optional = getHashValue(ctx, rules, core::Names::optional());
+        auto boolOptional = ast::cast_tree<ast::Literal>(optional);
+        if (boolOptional && boolOptional->isTrue(ctx)) {
             isOptional = true;
         }
 
-        auto immutable = ast::cast_tree<ast::BoolLit>(getHashValue(rules, core::Names::immutable()));
-        if (immutable && immutable->value) {
+        auto immutable = ast::cast_tree<ast::Literal>(getHashValue(ctx, rules, core::Names::immutable()));
+        if (immutable && immutable->isTrue(ctx)) {
             isImmutable = true;
         }
 
-        if (getHashValue(rules, core::Names::default_())) {
+        if (getHashValue(ctx, rules, core::Names::default_())) {
             isNilable = false;
         }
-        if (getHashValue(rules, core::Names::factory())) {
+        if (getHashValue(ctx, rules, core::Names::factory())) {
             isNilable = false;
         }
 

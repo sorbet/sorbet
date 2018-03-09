@@ -28,7 +28,7 @@ subgraph "cluster_::<constant:Foo>#foo" {
     "bb::<constant:Foo>#foo_0" [label = "block[id=0]()
 @ivar$5 = alias @ivar : Integer
 @ivar$5 = 2 : Integer(2)
-@ivar$5 = ss : untyped
+@ivar$5 = \"ss\" : untyped
 <finalReturn> = return @ivar$5 : <bottom>
 <unconditional>"];
 

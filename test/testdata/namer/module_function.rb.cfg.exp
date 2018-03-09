@@ -81,7 +81,7 @@ subgraph "cluster_::<constant:Funcs>#<static-init>" {
 
     "bb::<constant:Funcs>#<static-init>_0" [label = "block[id=0]()
 <statTemp>$5 = self : <Class:Funcs>
-<statTemp>$6 = <symbol:f> : Symbol(:\"f\")
+<statTemp>$6 = :\"f\" : Symbol(:\"f\")
 <statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module
 <statTemp>$8 = self : <Class:Funcs>
 <statTemp>$7 = <statTemp>$8.module_function() : Module
@@ -110,14 +110,14 @@ subgraph "cluster_::<constant:C>#test_calls" {
 <statTemp>$10 = 0 : Integer(0)
 <statTemp>$7 = <constant:Funcs>$9.f(<statTemp>$10) : Integer
 <statTemp>$12 = self : C
-<statTemp>$13 = <symbol:f> : Symbol(:\"f\")
+<statTemp>$13 = :\"f\" : Symbol(:\"f\")
 <statTemp>$11 = <statTemp>$12.g(<statTemp>$13) : Symbol
-<statTemp>$16 = <symbol:f> : Symbol(:\"f\")
+<statTemp>$16 = :\"f\" : Symbol(:\"f\")
 <statTemp>$14 = <constant:Funcs>$9.g(<statTemp>$16) : Symbol
 <statTemp>$18 = self : C
-<statTemp>$19 = hello : String(\"hello\")
+<statTemp>$19 = \"hello\" : String(\"hello\")
 <statTemp>$17 = <statTemp>$18.h(<statTemp>$19) : String
-<statTemp>$22 = world : String(\"world\")
+<statTemp>$22 = \"world\" : String(\"world\")
 <statTemp>$20 = <constant:Funcs>$9.h(<statTemp>$22) : String
 <returnMethodTemp>$2 = <constant:C>$24.f() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>

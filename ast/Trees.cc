@@ -100,11 +100,6 @@ Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(m
     _sanityCheck();
 }
 
-BoolLit::BoolLit(core::Loc loc, bool value) : Expression(loc), value(value) {
-    categoryCounterInc("trees", "boollit");
-    _sanityCheck();
-}
-
 Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
     categoryCounterInc("trees", "return");
     _sanityCheck();
@@ -202,18 +197,8 @@ BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), 
     _sanityCheck();
 }
 
-FloatLit::FloatLit(core::Loc loc, double value) : Expression(loc), value(value) {
-    categoryCounterInc("trees", "floatlit");
-    _sanityCheck();
-}
-
-IntLit::IntLit(core::Loc loc, int64_t value) : Expression(loc), value(value) {
-    categoryCounterInc("trees", "intlit");
-    _sanityCheck();
-}
-
-StringLit::StringLit(core::Loc loc, core::NameRef value) : Expression(loc), value(value) {
-    categoryCounterInc("trees", "stringlit");
+Literal::Literal(core::Loc loc, std::shared_ptr<core::Type> value) : Expression(loc), value(value) {
+    categoryCounterInc("trees", "literal");
     _sanityCheck();
 }
 
@@ -243,11 +228,6 @@ Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> b
     categoryCounterInc("trees", "block");
     _sanityCheck();
 };
-
-SymbolLit::SymbolLit(core::Loc loc, core::NameRef name) : Expression(loc), name(name) {
-    categoryCounterInc("trees", "symbollit");
-    _sanityCheck();
-}
 
 Hash::Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values)
     : Expression(loc), keys(move(keys)), values(move(values)) {
@@ -537,14 +517,6 @@ string EmptyTree::toString(const core::GlobalState &gs, int tabs) {
     return "<emptyTree>";
 }
 
-string StringLit::toString(const core::GlobalState &gs, int tabs) {
-    return "\"" + this->value.data(gs).toString(gs) + "\"";
-}
-
-string StringLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ value = " + this->value.data(gs).toString(gs) + " }";
-}
-
 string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
     return this->scope->toString(gs, tabs) + "::" + this->cnst.data(gs).toString(gs);
 }
@@ -690,32 +662,26 @@ string Retry::toString(const core::GlobalState &gs, int tabs) {
     return "retry";
 }
 
-string IntLit::toString(const core::GlobalState &gs, int tabs) {
-    return to_string(this->value);
-}
-
-string IntLit::showRaw(const core::GlobalState &gs, int tabs) {
+string Literal::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
 }
 
-string FloatLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
-}
-
-string BoolLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ value = " + this->toString(gs, 0) + " }";
-}
-
-string FloatLit::toString(const core::GlobalState &gs, int tabs) {
-    return to_string(this->value);
-}
-
-string BoolLit::toString(const core::GlobalState &gs, int tabs) {
-    if (this->value) {
-        return "true";
-    } else {
-        return "false";
-    }
+string Literal::toString(const core::GlobalState &gs, int tabs) {
+    std::string res;
+    typecase(this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
+             [&](core::ClassType *l) {
+                 if (l->symbol == core::Symbols::NilClass()) {
+                     res = "nil";
+                 } else if (l->symbol == core::Symbols::FalseClass()) {
+                     res = "false";
+                 } else if (l->symbol == core::Symbols::TrueClass()) {
+                     res = "true";
+                 } else {
+                     res = "literal(" + this->value->toString(gs, tabs) + ")";
+                 }
+             },
+             [&](core::Type *t) { res = "literal(" + this->value->toString(gs, tabs) + ")"; });
+    return res;
 }
 
 string Assign::toString(const core::GlobalState &gs, int tabs) {
@@ -981,14 +947,6 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string SymbolLit::toString(const core::GlobalState &gs, int tabs) {
-    return ":" + this->name.data(gs).toString(gs);
-}
-
-string SymbolLit::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ name = " + this->name.data(gs).toString(gs) + " }";
-}
-
 string RestArg::toString(const core::GlobalState &gs, int tabs) {
     return "*" + this->expr->toString(gs, tabs);
 }
@@ -1053,10 +1011,6 @@ string Retry::nodeName() {
     return "Retry";
 }
 
-string SymbolLit::nodeName() {
-    return "SymbolLit";
-}
-
 string Assign::nodeName() {
     return "Assign";
 }
@@ -1081,20 +1035,44 @@ string Array::nodeName() {
     return "Array";
 }
 
-string FloatLit::nodeName() {
-    return "FloatLit";
+string Literal::nodeName() {
+    return "Literal";
 }
 
-string IntLit::nodeName() {
-    return "IntLit";
+core::NameRef Literal::asString(const core::GlobalState &gs) const {
+    ENFORCE(isString(gs));
+    auto t = core::cast_type<core::LiteralType>(value.get());
+    core::NameRef res(gs, t->value);
+    return res;
 }
 
-string StringLit::nodeName() {
-    return "StringLit";
+core::NameRef Literal::asSymbol(const core::GlobalState &gs) const {
+    ENFORCE(isSymbol(gs));
+    auto t = core::cast_type<core::LiteralType>(value.get());
+    core::NameRef res(gs, t->value);
+    return res;
 }
 
-string BoolLit::nodeName() {
-    return "BoolLit";
+bool Literal::isSymbol(const core::GlobalState &gs) const {
+    auto t = core::cast_type<core::LiteralType>(value.get());
+    return t && t->derivesFrom(gs, core::Symbols::Symbol());
+}
+
+bool Literal::isNil(const core::GlobalState &gs) const {
+    return value->derivesFrom(gs, core::Symbols::NilClass());
+}
+
+bool Literal::isString(const core::GlobalState &gs) const {
+    auto t = core::cast_type<core::LiteralType>(value.get());
+    return t && t->derivesFrom(gs, core::Symbols::String());
+}
+
+bool Literal::isTrue(const core::GlobalState &gs) {
+    return value->derivesFrom(gs, core::Symbols::TrueClass());
+}
+
+bool Literal::isFalse(const core::GlobalState &gs) {
+    return value->derivesFrom(gs, core::Symbols::FalseClass());
 }
 
 string ConstantLit::nodeName() {

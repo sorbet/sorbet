@@ -4,28 +4,28 @@ class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo s
       begin
         <assignTemp$2 = self(<constant:<todo sym>>).a()
         if self(<constant:<todo sym>>).foo1().===(<assignTemp$2)
-          :a
+          :"a"
         else
           if if self(<constant:<todo sym>>).foo3().===(<assignTemp$2)
               true
             else
               self(<constant:<todo sym>>).foo2().===(<assignTemp$2)
             end
-            :b
+            :"b"
           else
-            :c
+            :"c"
           end
         end
       end
       if self(<constant:<todo sym>>).test1()
-        :a
+        :"a"
       else
         if if self(<constant:<todo sym>>).test3()
             true
           else
             self(<constant:<todo sym>>).test2()
           end
-          :b
+          :"b"
         else
           <emptyTree>
         end

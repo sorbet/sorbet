@@ -534,187 +534,184 @@ public:
         return SymbolRef(nullptr, 3);
     }
 
-    static SymbolRef nil() {
+    static SymbolRef todo() {
         return SymbolRef(nullptr, 4);
     }
 
-    static SymbolRef todo() {
+    static SymbolRef Object() {
         return SymbolRef(nullptr, 5);
     }
 
-    static SymbolRef Object() {
+    static SymbolRef junk() {
         return SymbolRef(nullptr, 6);
     }
 
-    static SymbolRef junk() {
+    static SymbolRef Integer() {
         return SymbolRef(nullptr, 7);
     }
 
-    static SymbolRef Integer() {
+    static SymbolRef Float() {
         return SymbolRef(nullptr, 8);
     }
 
-    static SymbolRef Float() {
+    static SymbolRef String() {
         return SymbolRef(nullptr, 9);
     }
 
-    static SymbolRef String() {
+    static SymbolRef Symbol() {
         return SymbolRef(nullptr, 10);
     }
 
-    static SymbolRef Symbol() {
+    static SymbolRef Array() {
         return SymbolRef(nullptr, 11);
     }
 
-    static SymbolRef Array() {
+    static SymbolRef Hash() {
         return SymbolRef(nullptr, 12);
     }
 
-    static SymbolRef Hash() {
+    static SymbolRef TrueClass() {
         return SymbolRef(nullptr, 13);
     }
 
-    static SymbolRef TrueClass() {
+    static SymbolRef FalseClass() {
         return SymbolRef(nullptr, 14);
     }
 
-    static SymbolRef FalseClass() {
+    static SymbolRef NilClass() {
         return SymbolRef(nullptr, 15);
     }
 
-    static SymbolRef NilClass() {
+    static SymbolRef untyped() {
         return SymbolRef(nullptr, 16);
     }
 
-    static SymbolRef untyped() {
+    static SymbolRef Opus() {
         return SymbolRef(nullptr, 17);
     }
 
-    static SymbolRef Opus() {
+    static SymbolRef T() {
         return SymbolRef(nullptr, 18);
     }
 
-    static SymbolRef T() {
+    static SymbolRef Class() {
         return SymbolRef(nullptr, 19);
     }
 
-    static SymbolRef Class() {
+    static SymbolRef BasicObject() {
         return SymbolRef(nullptr, 20);
     }
 
-    static SymbolRef BasicObject() {
+    static SymbolRef Kernel() {
         return SymbolRef(nullptr, 21);
     }
 
-    static SymbolRef Kernel() {
+    static SymbolRef Range() {
         return SymbolRef(nullptr, 22);
     }
 
-    static SymbolRef Range() {
+    static SymbolRef Regexp() {
         return SymbolRef(nullptr, 23);
     }
 
-    static SymbolRef Regexp() {
+    static SymbolRef Magic() {
         return SymbolRef(nullptr, 24);
     }
 
-    static SymbolRef Magic() {
+    static SymbolRef Module() {
         return SymbolRef(nullptr, 25);
     }
 
-    static SymbolRef Module() {
+    static SymbolRef StandardError() {
         return SymbolRef(nullptr, 26);
     }
 
-    static SymbolRef StandardError() {
+    static SymbolRef Complex() {
         return SymbolRef(nullptr, 27);
     }
 
-    static SymbolRef Complex() {
+    static SymbolRef Rational() {
         return SymbolRef(nullptr, 28);
     }
 
-    static SymbolRef Rational() {
+    static SymbolRef T_Array() {
         return SymbolRef(nullptr, 29);
     }
 
-    static SymbolRef T_Array() {
+    static SymbolRef T_Hash() {
         return SymbolRef(nullptr, 30);
     }
 
-    static SymbolRef T_Hash() {
+    static SymbolRef T_Proc() {
         return SymbolRef(nullptr, 31);
     }
 
-    static SymbolRef T_Proc() {
+    static SymbolRef Proc() {
         return SymbolRef(nullptr, 32);
     }
 
-    static SymbolRef Proc() {
+    static SymbolRef T_any() {
         return SymbolRef(nullptr, 33);
     }
 
-    static SymbolRef T_any() {
+    static SymbolRef T_all() {
         return SymbolRef(nullptr, 34);
     }
 
-    static SymbolRef T_all() {
+    static SymbolRef T_untyped() {
         return SymbolRef(nullptr, 35);
     }
 
-    static SymbolRef T_untyped() {
+    static SymbolRef T_nilable() {
         return SymbolRef(nullptr, 36);
     }
 
-    static SymbolRef T_nilable() {
+    static SymbolRef Enumerable() {
         return SymbolRef(nullptr, 37);
     }
 
-    static SymbolRef Enumerable() {
+    static SymbolRef Set() {
         return SymbolRef(nullptr, 38);
     }
 
-    static SymbolRef Set() {
+    static SymbolRef Struct() {
         return SymbolRef(nullptr, 39);
     }
 
-    static SymbolRef Struct() {
+    static SymbolRef File() {
         return SymbolRef(nullptr, 40);
     }
 
-    static SymbolRef File() {
+    static SymbolRef RubyTyper() {
         return SymbolRef(nullptr, 41);
     }
 
-    static SymbolRef RubyTyper() {
+    static SymbolRef StubClass() {
         return SymbolRef(nullptr, 42);
     }
 
-    static SymbolRef StubClass() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 43);
     }
 
-    static SymbolRef T_Enumerable() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 44);
     }
 
-    static SymbolRef T_Range() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 45);
     }
 
-    static SymbolRef T_Set() {
-        return SymbolRef(nullptr, 46);
-    }
     static SymbolRef Configatron() {
-        return SymbolRef(nullptr, 47);
+        return SymbolRef(nullptr, 46);
     }
 
     static SymbolRef Configatron_Store() {
-        return SymbolRef(nullptr, 48);
+        return SymbolRef(nullptr, 47);
     }
 
     static SymbolRef Configatron_RootStore() {
-        return SymbolRef(nullptr, 49);
+        return SymbolRef(nullptr, 48);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

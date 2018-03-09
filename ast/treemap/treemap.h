@@ -68,15 +68,6 @@ public:
     unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original);
     Expression *postransformArray(core::MutableContext ctx, unique_ptr<Array> original);
 
-    unique_ptr<Expression> postTransformBoolLit(core::MutableContext ctx, unique_ptr<BoolLit> original);
-
-    unique_ptr<Expression> postTransformFloatLit(core::MutableContext ctx, unique_ptr<FloatLit> original);
-
-    unique_ptr<Expression> postTransformIntLit(core::MutableContext ctx, unique_ptr<IntLit> original);
-
-    unique_ptr<StringLit> postTransformStringLit(core::MutableContext ctx, unique_ptr<StringLit> original);
-    unique_ptr<Expression> postTransformSymbolLit(core::MutableContext ctx, unique_ptr<StringLit> original);
-
     unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original);
 
     unique_ptr<ArraySplat> preTransformArraySplat(core::MutableContext ctx, unique_ptr<ArraySplat> original);
@@ -143,13 +134,9 @@ GENERATE_HAS_MEMBER(preTransformInsSeq);
 // used to check for ABSENCE of method
 GENERATE_HAS_MEMBER(preTransformIdent);
 GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
-GENERATE_HAS_MEMBER(preTransformBoolLit);
-GENERATE_HAS_MEMBER(preTransformStringLit);
-GENERATE_HAS_MEMBER(preTransformSymbolLit);
-GENERATE_HAS_MEMBER(preTransformFloatLit);
 GENERATE_HAS_MEMBER(preTransformLocal);
-GENERATE_HAS_MEMBER(preTransformIntLit);
 GENERATE_HAS_MEMBER(preTransformConstantLit);
+GENERATE_HAS_MEMBER(preTransformLiteral);
 GENERATE_HAS_MEMBER(preTransformSelf);
 GENERATE_HAS_MEMBER(preTransformCast);
 
@@ -172,11 +159,7 @@ GENERATE_HAS_MEMBER(postTransformSend);
 GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformLocal);
 GENERATE_HAS_MEMBER(postTransformArray);
-GENERATE_HAS_MEMBER(postTransformBoolLit);
-GENERATE_HAS_MEMBER(postTransformFloatLit);
-GENERATE_HAS_MEMBER(postTransformIntLit);
-GENERATE_HAS_MEMBER(postTransformStringLit);
-GENERATE_HAS_MEMBER(postTransformSymbolLit);
+GENERATE_HAS_MEMBER(postTransformLiteral);
 GENERATE_HAS_MEMBER(postTransformConstantLit);
 GENERATE_HAS_MEMBER(postTransformArraySplat);
 GENERATE_HAS_MEMBER(postTransformHashSplat);
@@ -274,12 +257,8 @@ GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
 GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
-GENERATE_POSTPONE_POSTCLASS(BoolLit);
 GENERATE_POSTPONE_POSTCLASS(Local);
-GENERATE_POSTPONE_POSTCLASS(FloatLit);
-GENERATE_POSTPONE_POSTCLASS(IntLit);
-GENERATE_POSTPONE_POSTCLASS(StringLit);
-GENERATE_POSTPONE_POSTCLASS(SymbolLit);
+GENERATE_POSTPONE_POSTCLASS(Literal);
 GENERATE_POSTPONE_POSTCLASS(ConstantLit);
 GENERATE_POSTPONE_POSTCLASS(ArraySplat);
 GENERATE_POSTPONE_POSTCLASS(HashSplat);
@@ -303,11 +282,7 @@ private:
 
     static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformBoolLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformStringLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformSymbolLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformFloatLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformIntLit<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
@@ -632,38 +607,12 @@ private:
                         ctx, move(v), func);
                 }
                 return move(v);
-            } else if (FloatLit *u = cast_tree<FloatLit>(what.get())) {
-                unique_ptr<FloatLit> v(u);
+            } else if (Literal *u = cast_tree<Literal>(what.get())) {
+                unique_ptr<Literal> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformFloatLit<FUNC>::value) {
-                    return PostPonePostTransform_FloatLit<FUNC, CTX,
-                                                          HAS_MEMBER_postTransformFloatLit<FUNC>::value>::call(ctx,
-                                                                                                               move(v),
-                                                                                                               func);
-                }
-                return move(v);
-            } else if (BoolLit *u = cast_tree<BoolLit>(what.get())) {
-                unique_ptr<BoolLit> v(u);
-                what.release();
-                if (HAS_MEMBER_postTransformBoolLit<FUNC>::value) {
-                    return PostPonePostTransform_BoolLit<FUNC, CTX, HAS_MEMBER_postTransformBoolLit<FUNC>::value>::call(
+                if (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
+                    return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>::value>::call(
                         ctx, move(v), func);
-                }
-                return move(v);
-            } else if (IntLit *u = cast_tree<IntLit>(what.get())) {
-                unique_ptr<IntLit> v(u);
-                what.release();
-                if (HAS_MEMBER_postTransformIntLit<FUNC>::value) {
-                    return PostPonePostTransform_IntLit<FUNC, CTX, HAS_MEMBER_postTransformIntLit<FUNC>::value>::call(
-                        ctx, move(v), func);
-                }
-                return move(v);
-            } else if (StringLit *u = cast_tree<StringLit>(what.get())) {
-                unique_ptr<StringLit> v(u);
-                what.release();
-                if (HAS_MEMBER_postTransformStringLit<FUNC>::value) {
-                    return PostPonePostTransform_StringLit<
-                        FUNC, CTX, HAS_MEMBER_postTransformStringLit<FUNC>::value>::call(ctx, move(v), func);
                 }
                 return move(v);
             } else if (ConstantLit *u = cast_tree<ConstantLit>(what.get())) {
@@ -674,9 +623,6 @@ private:
                         FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(ctx, move(v), func);
                 }
                 return move(v);
-            } else if (BoolLit *v = cast_tree<BoolLit>(what.get())) {
-                // Error::notImplemented();
-                return what;
             } else if (ArraySplat *u = cast_tree<ArraySplat>(what.get())) {
                 unique_ptr<ArraySplat> v(u);
                 what.release();
@@ -706,14 +652,6 @@ private:
                 if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
                     return PostPonePostTransform_HashSplat<
                         FUNC, CTX, HAS_MEMBER_postTransformHashSplat<FUNC>::value>::call(ctx, move(v), func);
-                }
-                return move(v);
-            } else if (SymbolLit *u = cast_tree<SymbolLit>(what.get())) {
-                unique_ptr<SymbolLit> v(u);
-                what.release();
-                if (HAS_MEMBER_postTransformSymbolLit<FUNC>::value) {
-                    return PostPonePostTransform_SymbolLit<
-                        FUNC, CTX, HAS_MEMBER_postTransformSymbolLit<FUNC>::value>::call(ctx, move(v), func);
                 }
                 return move(v);
             } else if (Self *u = cast_tree<Self>(what.get())) {

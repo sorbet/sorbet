@@ -990,26 +990,26 @@ bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shar
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ProxyType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    return underlying->derivesFrom(ctx, klass);
+bool ProxyType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+    return underlying->derivesFrom(gs, klass);
 }
 
-bool ClassType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool ClassType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     if (symbol == core::Symbols::untyped() || symbol == klass) {
         return true;
     }
-    return symbol.data(ctx).derivesFrom(ctx, klass);
+    return symbol.data(gs).derivesFrom(gs, klass);
 }
 
-bool OrType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    return left->derivesFrom(ctx, klass) && right->derivesFrom(ctx, klass);
+bool OrType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+    return left->derivesFrom(gs, klass) && right->derivesFrom(gs, klass);
 }
 
-bool AndType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
-    return left->derivesFrom(ctx, klass) || right->derivesFrom(ctx, klass);
+bool AndType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+    return left->derivesFrom(gs, klass) || right->derivesFrom(gs, klass);
 }
 
-bool AliasType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool AliasType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     Error::raise("AliasType.derivesfrom");
 }
 
@@ -1042,7 +1042,7 @@ bool MetaType::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
-bool MetaType::derivesFrom(core::Context ctx, core::SymbolRef klass) {
+bool MetaType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     return false;
 }
 

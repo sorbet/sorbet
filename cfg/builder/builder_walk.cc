@@ -97,9 +97,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     walk(cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock), a->body.get(), bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat, a->loc);
 
-                continueBlock->exprs.emplace_back(
-                    cctx.target, a->loc,
-                    make_unique<Ident>(global2Local(cctx.ctx, core::Symbols::nil(), cctx.inWhat, cctx.aliases)));
+                continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
                 ret = continueBlock;
             },
             [&](ast::Return *a) {
@@ -133,24 +131,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     ret = cctx.inWhat.deadBlock();
                 }
             },
-            [&](ast::IntLit *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<IntLit>(a->value));
-                ret = current;
-            },
-            [&](ast::FloatLit *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<FloatLit>(a->value));
-                ret = current;
-            },
-            [&](ast::StringLit *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<StringLit>(a->value));
-                ret = current;
-            },
-            [&](ast::SymbolLit *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<SymbolLit>(a->name));
-                ret = current;
-            },
-            [&](ast::BoolLit *a) {
-                current->exprs.emplace_back(cctx.target, a->loc, make_unique<BoolLit>(a->value));
+            [&](ast::Literal *a) {
+                current->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(a->value));
                 ret = current;
             },
             [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },

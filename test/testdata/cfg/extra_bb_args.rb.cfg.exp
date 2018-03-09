@@ -6,11 +6,10 @@ subgraph "cluster_::<constant:Object>#main" {
     "bb::<constant:Object>#main_1" [shape = parallelogram];
 
     "bb::<constant:Object>#main_0" [label = "block[id=0]()
-<constant:nil>$6 = alias <constant:nil> : NilClass
-<castTemp$5 = <constant:nil>$6 : NilClass
+<castTemp$5 = nil : NilClass
 name = cast(<castTemp$5, String | NilClass); : String | NilClass
-<ifTemp>$8 = name.nil?() : TrueClass | FalseClass
-<ifTemp>$8"];
+<ifTemp>$7 = name.nil?() : TrueClass | FalseClass
+<ifTemp>$7"];
 
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_2" [style="bold"];
     "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_3" [style="tapered"];
@@ -20,14 +19,14 @@ name = cast(<castTemp$5, String | NilClass); : String | NilClass
 
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_2" [label = "block[id=2]()
-<returnTemp>$10 = missing name : String(\"missing name\")
-<statTemp>$7 = return <returnTemp>$10 : <bottom>
+<returnTemp>$9 = \"missing name\" : String(\"missing name\")
+<statTemp>$6 = return <returnTemp>$9 : <bottom>
 <unconditional>"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_3" [label = "block[id=3](name)
-<statTemp>$12 = foo : String(\"foo\")
-<returnMethodTemp>$2 = name.include?(<statTemp>$12) : TrueClass | FalseClass
+<statTemp>$11 = \"foo\" : String(\"foo\")
+<returnMethodTemp>$2 = name.include?(<statTemp>$11) : TrueClass | FalseClass
 <finalReturn> = return <returnMethodTemp>$2 : <bottom>
 <unconditional>"];
 

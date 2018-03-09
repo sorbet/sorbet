@@ -30,20 +30,26 @@ Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariab
     histogramInc("cfg.send.args", this->args.size());
 }
 
-FloatLit::FloatLit(double value) : value(value) {
-    categoryCounterInc("cfg", "floatlit");
+Literal::Literal(std::shared_ptr<core::Type> value) : value(value) {
+    categoryCounterInc("cfg", "literal");
 }
 
-string FloatLit::toString(core::Context ctx) {
-    return to_string(this->value);
-}
-
-IntLit::IntLit(int64_t value) : value(value) {
-    categoryCounterInc("cfg", "intlit");
-}
-
-string IntLit::toString(core::Context ctx) {
-    return to_string(this->value);
+string Literal::toString(core::Context ctx) {
+    string res;
+    typecase(this->value.get(), [&](core::LiteralType *l) { res = l->showValue(ctx); },
+             [&](core::ClassType *l) {
+                 if (l->symbol == core::Symbols::NilClass()) {
+                     res = "nil";
+                 } else if (l->symbol == core::Symbols::FalseClass()) {
+                     res = "false";
+                 } else if (l->symbol == core::Symbols::TrueClass()) {
+                     res = "true";
+                 } else {
+                     res = "literal(" + this->value->toString(ctx, 0) + ")";
+                 }
+             },
+             [&](core::Type *t) { res = "literal(" + this->value->toString(ctx, 0) + ")"; });
+    return res;
 }
 
 Ident::Ident(core::LocalVariable what) : what(what) {
@@ -75,22 +81,6 @@ string Send::toString(core::Context ctx) {
     }
     buf << ")";
     return buf.str();
-}
-
-string StringLit::toString(core::Context ctx) {
-    return this->value.data(ctx).toString(ctx);
-}
-
-string SymbolLit::toString(core::Context ctx) {
-    return "<symbol:" + this->value.data(ctx).toString(ctx) + ">";
-}
-
-string BoolLit::toString(core::Context ctx) {
-    if (value) {
-        return "true";
-    } else {
-        return "false";
-    }
 }
 
 string Self::toString(core::Context ctx) {

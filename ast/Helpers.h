@@ -47,6 +47,10 @@ public:
         return Send(loc, move(recv), fun, move(nargs));
     }
 
+    static std::unique_ptr<Expression> Nil(core::Loc loc) {
+        return std::make_unique<ast::Literal>(loc, core::Types::nilClass());
+    }
+
     static std::unique_ptr<Expression> Ident(core::Loc loc, core::SymbolRef symbol) {
         return std::make_unique<ast::Ident>(loc, symbol);
     }
@@ -114,11 +118,11 @@ public:
     }
 
     static std::unique_ptr<Expression> True(core::Loc loc) {
-        return std::make_unique<BoolLit>(loc, true);
+        return std::make_unique<Literal>(loc, core::Types::trueClass());
     }
 
     static std::unique_ptr<Expression> False(core::Loc loc) {
-        return std::make_unique<BoolLit>(loc, false);
+        return std::make_unique<Literal>(loc, core::Types::falseClass());
     }
 
     static std::unique_ptr<Expression> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
@@ -126,11 +130,19 @@ public:
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
-        return std::make_unique<IntLit>(loc, val);
+        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(val));
+    }
+
+    static std::unique_ptr<Expression> Float(core::Loc loc, double val) {
+        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(val));
     }
 
     static std::unique_ptr<Expression> Symbol(core::Loc loc, core::NameRef name) {
-        return std::make_unique<SymbolLit>(loc, name);
+        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::Symbol(), name));
+    }
+
+    static std::unique_ptr<Expression> String(core::Loc loc, core::NameRef value) {
+        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::String(), value));
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
@@ -175,8 +187,7 @@ public:
     }
 
     static std::unique_ptr<Expression> Cast(core::Loc loc, std::unique_ptr<Expression> type) {
-        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Ident(loc, core::Symbols::nil()),
-                     move(type));
+        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Nil(loc), move(type));
     }
 };
 

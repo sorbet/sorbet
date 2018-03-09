@@ -1,8 +1,8 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    :foo
+    :"foo"
     "foo".intern()
-    :
+    :""
     "hello_".concat(begin
         self(<constant:<todo sym>>).name()
       end.to_s()).concat("!").intern()

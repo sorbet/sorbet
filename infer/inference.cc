@@ -4,15 +4,34 @@
 using namespace std;
 namespace ruby_typer {
 
-bool isSyntheticReturn(core::Context ctx, cfg::Binding &bind) {
-    if (bind.bind._name == core::Names::finalReturn()) {
-        if (auto *ret = cfg::cast_instruction<cfg::Return>(bind.value.get())) {
-            return ret->what.isSyntheticTemporary(ctx) ||
-                   (ret->what._name.data(ctx).kind == core::NameKind::CONSTANT &&
-                    ret->what._name.data(ctx).cnst.original == core::Names::nil());
-        }
+bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
+    if (bb->exprs.size() > 3) {
+        return false;
     }
-    return false;
+    core::LocalVariable allowedLocal;
+    for (auto &expr : bb->exprs) {
+        if (cfg::isa_instruction<cfg::DebugEnvironment>(expr.value.get())) {
+            continue;
+        }
+        if (auto lit = cfg::cast_instruction<cfg::Literal>(expr.value.get())) {
+            if (lit->value->derivesFrom(ctx, core::Symbols::NilClass())) {
+                allowedLocal = expr.bind;
+                continue;
+            }
+        }
+
+        if (expr.bind._name == core::Names::finalReturn()) {
+            auto *ret = cfg::cast_instruction<cfg::Return>(expr.value.get());
+            if (ret) {
+                if (ret->what == allowedLocal) {
+                    continue;
+                }
+            }
+        }
+
+        return false;
+    }
+    return true;
 }
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
@@ -81,10 +100,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         visited[bb->id] = true;
         if (current.isDead) {
             // this block is unreachable.
-            if (!bb->exprs.empty() &&
-                !(bb->exprs.size() == 1 &&
-                  (isSyntheticReturn(ctx, bb->exprs[0]) ||
-                   cfg::isa_instruction<cfg::DebugEnvironment>(bb->exprs[0].value.get()))) // synthetic final return
+            if (!bb->exprs.empty() && !(isSyntheticBlock(ctx, bb)) // synthetic final return
             ) {
                 if (auto e = ctx.state.beginError(bb->exprs[0].loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");

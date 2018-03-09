@@ -21,7 +21,6 @@ const char *top_str = "<top>";
 const char *bottom_str = "<bottom>";
 const char *untyped_str = "untyped";
 const char *root_str = "<root>";
-const char *nil_str = "nil";
 const char *object_str = "Object";
 const char *junk_str = "<<JUNK>>";
 const char *string_str = "String";
@@ -114,7 +113,6 @@ void GlobalState::initEmpty() {
     Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
     Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
     Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
-    SymbolRef nil_id = synthesizeClass(nil_str);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
     SymbolRef object_id = synthesizeClass(object_str, core::Symbols::BasicObject()._id);
     SymbolRef junk_id = synthesizeClass(junk_str, 0);
@@ -169,7 +167,6 @@ void GlobalState::initEmpty() {
     ENFORCE(top_id == Symbols::top());
     ENFORCE(bottom_id == Symbols::bottom());
     ENFORCE(root_id == Symbols::root());
-    ENFORCE(nil_id == Symbols::nil());
     ENFORCE(todo_id == Symbols::todo());
     ENFORCE(object_id == Symbols::Object());
     ENFORCE(junk_id == Symbols::junk());
@@ -215,9 +212,6 @@ void GlobalState::initEmpty() {
     ENFORCE(configatron_rootstore_id = Symbols::Configatron_RootStore());
     ENFORCE(T_Range_id = Symbols::T_Range());
     ENFORCE(T_Set_id = Symbols::T_Set());
-
-    // Synthesize nil = NilClass()
-    Symbols::nil().data(*this).resultType = core::Types::nilClass();
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();

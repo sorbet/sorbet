@@ -311,7 +311,7 @@ r = <constant:C20>$85 : <Class:C20>
     "bb::<singleton class:<constant:A>>#send_beta_invitation_40" -> "bb::<singleton class:<constant:A>>#send_beta_invitation_61" [style="bold"];
     "bb::<singleton class:<constant:A>>#send_beta_invitation_41" [label = "block[id=41]()
 <statTemp>$86 = self : <Class:A>
-<statTemp>$87 = Bla bla bla : String(\"Bla bla bla\")
+<statTemp>$87 = \"Bla bla bla\" : String(\"Bla bla bla\")
 <statTemp>$4 = <statTemp>$86.raise(<statTemp>$87) : <bottom>
 <unconditional>"];
 

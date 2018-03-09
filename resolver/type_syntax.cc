@@ -10,11 +10,7 @@ namespace resolver {
 
 shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
     shared_ptr<core::Type> result;
-    typecase(expr.get(), [&](ast::IntLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-             [&](ast::FloatLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-             [&](ast::BoolLit *lit) { result = make_shared<core::LiteralType>(lit->value); },
-             [&](ast::StringLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::String(), lit->value); },
-             [&](ast::SymbolLit *lit) { result = make_shared<core::LiteralType>(core::Symbols::Symbol(), lit->name); },
+    typecase(expr.get(), [&](ast::Literal *lit) { result = lit->value; },
              [&](ast::Expression *expr) {
                  if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                      e.setHeader("Unsupported type literal");
@@ -92,9 +88,10 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                 int i = 0;
                 for (auto &key : hash->keys) {
                     auto &value = hash->values[i++];
-                    if (auto *symbolLit = ast::cast_tree<ast::SymbolLit>(key.get())) {
-                        sig.argTypes.emplace_back(
-                            ParsedSig::ArgSpec{key->loc, symbolLit->name, getResultType(ctx, value)});
+                    auto lit = ast::cast_tree<ast::Literal>(key.get());
+                    if (lit && lit->isSymbol(ctx)) {
+                        core::NameRef name = lit->asSymbol(ctx);
+                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{key->loc, name, getResultType(ctx, value)});
                     }
                 }
                 break;
@@ -120,8 +117,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                     break;
                 }
 
-                auto nil = ast::cast_tree<ast::Ident>(send->args[0].get());
-                if (nil && nil->symbol == core::Symbols::nil()) {
+                auto nil = ast::cast_tree<ast::Literal>(send->args[0].get());
+                if (nil && nil->isNil(ctx)) {
                     if (auto e =
                             ctx.state.beginError(send->args[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("You probably meant .returns(NilClass)");
@@ -257,9 +254,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
                 auto val = getResultType(ctx, vtree);
-                if (auto *sym = ast::cast_tree<ast::SymbolLit>(ktree.get())) {
-                    auto key = make_shared<core::LiteralType>(core::Symbols::Symbol(), sym->name);
-                    keys.emplace_back(key);
+                auto lit = ast::cast_tree<ast::Literal>(ktree.get());
+                if (lit && lit->isSymbol(ctx)) {
+                    keys.emplace_back(std::dynamic_pointer_cast<core::LiteralType>(lit->value));
                     values.emplace_back(val);
                 } else {
                     if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {

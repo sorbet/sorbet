@@ -1,11 +1,11 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    self(<constant:<todo sym>>).alias_method(:afoo, :bar)
+    self(<constant:<todo sym>>).alias_method(:"afoo", :"bar")
     @iv = 1
     @@cv = 1
     $gv = 1
     begin
-      <assignTemp$2 = [::<constant:nil>, ::<constant:nil>]
+      <assignTemp$2 = [nil, nil]
       self(<constant:<todo sym>>).x().var=(<assignTemp$2.[](0))
       y = <assignTemp$2.[](1)
       <assignTemp$2
@@ -19,7 +19,7 @@ class <emptyTree><<constant:<root>>> < ()
     xaaaaz = [self(<constant:<todo sym>>).yayayaya(), self(<constant:<todo sym>>).tutututu()]
     <emptyTree>
     begin
-      ::<constant:nil>
+      nil
     end
     begin
       self(<constant:<todo sym>>).a()
@@ -85,16 +85,16 @@ class <emptyTree><<constant:<root>>> < ()
     x.to_hash()
     86
     while true
-      ::<constant:nil>
+      nil
     end
     while true
-      ::<constant:nil>
+      nil
     end
     while true.!()
-      ::<constant:nil>
+      nil
     end
     while true.!()
-      ::<constant:nil>
+      nil
     end
     begin
       <assignTemp$8 = 1
@@ -118,7 +118,7 @@ class <emptyTree><<constant:<root>>> < ()
     begin
       <emptyTree>
     rescue <emptyTree>::<constant:E> => x
-      ::<constant:nil>
+      nil
     end
     begin
       <assignTemp$10 = y.to_a()
@@ -128,7 +128,7 @@ class <emptyTree><<constant:<root>>> < ()
     "foo".concat(begin
         self(<constant:<todo sym>>).bar()
       end.to_s()).intern()
-    [:sym]
+    [:"sym"]
     if x
       1
     else

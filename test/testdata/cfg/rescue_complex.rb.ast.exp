@@ -20,7 +20,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
   end
 
   def initialize<<constant:<todo sym>>>()
-    @ex = <emptyTree>::<constant:T>.let(::<constant:nil>, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:StandardError>))
+    @ex = <emptyTree>::<constant:T>.let(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:StandardError>))
   end
 
   def multiple_rescue<<constant:<todo sym>>>()
@@ -63,7 +63,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
     self(<constant:<todo sym>>).take_arg(begin
         self(<constant:<todo sym>>).bar()
       rescue => <rescueTemp$2
-        ::<constant:nil>
+        nil
       end)
   end
 
@@ -129,13 +129,13 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
   rescue => <rescueTemp$2
-    ::<constant:nil>
+    nil
   end
 
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
     rescue => <rescueTemp$2
-      ::<constant:nil>)
+      nil)
   end
 
   def parse_ruby_bug_12402_2<<constant:<todo sym>>>()
@@ -144,7 +144,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<constant:<
       []$4 = 0
       []$3.[]=([]$4, []$3.[]([]$4).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
         rescue => <rescueTemp$2
-          ::<constant:nil>))
+          nil))
     end
   end
 end

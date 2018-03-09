@@ -4,7 +4,7 @@ class <emptyTree><<constant:<root>>> < ()
       begin
         <assignTemp$2 = self(<constant:<todo sym>>).foo()
         if <assignTemp$2.nil?()
-          ::<constant:nil>
+          nil
         else
           <assignTemp$2.bar()
         end
@@ -12,7 +12,7 @@ class <emptyTree><<constant:<root>>> < ()
       begin
         <assignTemp$3 = self(<constant:<todo sym>>).foo()
         if <assignTemp$3.nil?()
-          ::<constant:nil>
+          nil
         else
           <assignTemp$3.bar() do |x|
             x

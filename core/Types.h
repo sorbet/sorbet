@@ -108,7 +108,7 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *blockType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) = 0;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) = 0;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) = 0;
     virtual void _sanityCheck(core::Context ctx) = 0;
     void sanityCheck(core::Context ctx) {
         if (!debug_mode)
@@ -145,7 +145,7 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) override;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) override;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) override;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) override;
 
     void _sanityCheck(core::Context ctx) override;
 };
@@ -172,7 +172,7 @@ public:
                                                 std::shared_ptr<Type> *block);
 
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                               const std::vector<std::shared_ptr<Type>> &targs);
@@ -192,7 +192,7 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
@@ -240,7 +240,7 @@ public:
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
 
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
@@ -275,6 +275,7 @@ public:
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0);
     virtual std::string show(const GlobalState &gs) final;
+    virtual std::string showValue(const GlobalState &gs) final;
     virtual std::string typeName();
     virtual bool isFullyDefined() final;
 
@@ -361,7 +362,7 @@ public:
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
 
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                               const std::vector<std::shared_ptr<Type>> &targs);
@@ -390,7 +391,7 @@ public:
 
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i);
 
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass);
 };
 
 // MetaType is the type of a Type. You can think of it as generalization of
@@ -411,7 +412,7 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
@@ -434,7 +435,7 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
@@ -457,7 +458,7 @@ public:
     virtual std::string show(const GlobalState &gs) final;
     virtual std::string typeName() final;
 
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass);
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass);
 
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
@@ -481,7 +482,7 @@ public:
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(core::Context ctx, core::SymbolRef klass) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
 
     SymbolRef symbol;
     void _sanityCheck(core::Context ctx) final;

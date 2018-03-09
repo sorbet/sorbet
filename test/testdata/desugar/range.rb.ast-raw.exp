@@ -16,8 +16,8 @@ ClassDef{
             name = new
             block = nullptr
             args = [
-              IntLit{ value = 1 }
-              IntLit{ value = 2 }
+              Literal{ value = 1 }
+              Literal{ value = 2 }
             ]
           }
           Send{
@@ -28,8 +28,8 @@ ClassDef{
             name = new
             block = nullptr
             args = [
-              IntLit{ value = 1 }
-              IntLit{ value = 2 }
+              Literal{ value = 1 }
+              Literal{ value = 2 }
             ]
           }
           Send{
@@ -39,9 +39,9 @@ ClassDef{
             name = new
             block = nullptr
             args = [
-              IntLit{ value = 1 }
-              IntLit{ value = 2 }
-              BoolLit{ value = true }
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+              Literal{ value = true }
             ]
           }
         ],
@@ -53,9 +53,9 @@ ClassDef{
           name = new
           block = nullptr
           args = [
-            IntLit{ value = 1 }
-            IntLit{ value = 2 }
-            BoolLit{ value = true }
+            Literal{ value = 1 }
+            Literal{ value = 2 }
+            Literal{ value = true }
           ]
         }
       }

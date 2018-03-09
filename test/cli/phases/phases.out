@@ -19,7 +19,7 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    IntLit{ value = 1 }
+    Literal{ value = 1 }
   ]
 }
 --- ast-raw end ---
@@ -33,7 +33,7 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    IntLit{ value = 1 }
+    Literal{ value = 1 }
   ]
 }
 --- dsl-tree-raw end ---
@@ -131,6 +131,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:<<RESERVED>>85> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>86> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>87> < ::<constant:Object> () @ ???
+  class <constant:<<RESERVED>>88> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>8> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>9> < ::<constant:Object> () @ ???
   class <constant:<Magic>> < ::<constant:Object> () -> <Magic> @ ???
@@ -9975,7 +9976,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method trust () -> ZeroDivisionError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untaint () -> ZeroDivisionError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untrust () -> ZeroDivisionError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-  class <constant:nil> < ::<constant:Object> () -> NilClass @ ???
   class <constant:untyped> () -> untyped @ ???
   class <singleton class:<constant:<<JUNK>>>> < ::<constant:Module> () @ ???
   class <singleton class:<constant:<root>>> < ::<singleton class:<constant:Object>> () @ ???
@@ -11994,7 +11994,7 @@ ClassDef{
       self = 1
       name = <static-init><<static-init>$9>
       args = []
-      rhs = IntLit{ value = 1 }
+      rhs = Literal{ value = 1 }
     }
   ]
 }

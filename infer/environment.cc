@@ -734,14 +734,6 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.type = i->klass.data(ctx).selfType(ctx);
                 tp.origins.push_back(bind.loc);
             },
-            [&](cfg::SymbolLit *i) {
-                tp.type = make_shared<core::LiteralType>(core::Symbols::Symbol(), i->value);
-                tp.origins.push_back(bind.loc);
-            },
-            [&](cfg::StringLit *i) {
-                tp.type = make_shared<core::LiteralType>(core::Symbols::String(), i->value);
-                tp.origins.push_back(bind.loc);
-            },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
                 tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
@@ -814,16 +806,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.type = core::Types::bottom();
                 tp.origins.push_back(bind.loc);
             },
-            [&](cfg::IntLit *i) {
-                tp.type = make_shared<core::LiteralType>(i->value);
-                tp.origins.push_back(bind.loc);
-            },
-            [&](cfg::BoolLit *i) {
-                tp.type = make_shared<core::LiteralType>(i->value);
-                tp.origins.push_back(bind.loc);
-            },
-            [&](cfg::FloatLit *i) {
-                tp.type = make_shared<core::LiteralType>(i->value);
+            [&](cfg::Literal *i) {
+                tp.type = i->value;
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Unanalyzable *i) {

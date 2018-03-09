@@ -43,7 +43,7 @@ begin
     def initialize<initialize>()
       begin
         begin
-          <assignTemp$3 = ::<constant:untyped>.query_by(:deleted_at_is_nil).load_all({}).partition() do |<block-pass>$2$2|
+          <assignTemp$3 = ::<constant:untyped>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2$2|
             <block-pass>$2$2.valid?()
           end
           ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = <assignTemp$3.[](0)
@@ -69,7 +69,7 @@ begin
           begin
             self(<constant:Matcher>).log().warn("Gerald skipping large PR with ".concat(begin
                   match_context.diff().affected_files().count()
-                end.to_s()).concat(" affected files").to_s())
+                end.to_s()).concat(" affected files".to_s()).to_s())
             return []
           end
         else
@@ -173,7 +173,7 @@ begin
         if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
           self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
                   ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>
-                end.to_s()).concat("ms").to_s()))
+                end.to_s()).concat("ms".to_s()).to_s()))
         else
           <emptyTree>
         end
@@ -190,11 +190,11 @@ begin
         if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
           self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
                   rule.token()
-                end.to_s()).concat("' exceeded per-rule time budget actual=").concat(begin
+                end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
                   dur_ms.to_i()
-                end.to_s()).concat("ms budget=").concat(begin
+                end.to_s()).concat("ms budget=".to_s()).concat(begin
                   ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>
-                end.to_s()).concat("ms").to_s(), {:rule_token => rule.token()}))
+                end.to_s()).concat("ms".to_s()).to_s(), {:"rule_token" => rule.token()}))
         else
           <emptyTree>
         end
@@ -237,37 +237,37 @@ begin
 
     def added_files<added_files>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$4|
-        part$4.[](:a_name).==("/dev/null")
+        part$4.[](:"a_name").==("/dev/null")
       end.map() do |part$5|
-        part$5.[](:b_name)
+        part$5.[](:"b_name")
       end
     end
 
     def deleted_files<deleted_files>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$7|
-        part$7.[](:b_name).==("/dev/null")
+        part$7.[](:"b_name").==("/dev/null")
       end.map() do |part$8|
-        part$8.[](:a_name)
+        part$8.[](:"a_name")
       end
     end
 
     def changed_files<changed_files>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$10|
-        part$10.[](:a_name).==(part$10.[](:b_name))
+        part$10.[](:"a_name").==(part$10.[](:"b_name"))
       end.map() do |part$11|
-        part$11.[](:b_name)
+        part$11.[](:"b_name")
       end
     end
 
     def added_lines<added_lines>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$13|
-        part$13.[](:added_lines)
+        part$13.[](:"added_lines")
       end.flatten()
     end
 
     def removed_lines<removed_lines>()
       ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$15|
-        part$15.[](:removed_lines)
+        part$15.[](:"removed_lines")
       end.flatten()
     end
 
@@ -291,7 +291,7 @@ begin
           begin
             lines$19 = part$19.split("
 ")
-            a_name$19 = b_name$19 = ::<constant:nil>
+            a_name$19 = b_name$19 = nil
             added_lines$19 = []
             removed_lines$19 = []
             lines$19.each() do |line$20|
@@ -344,7 +344,7 @@ begin
             else
               <emptyTree>
             end
-            {:a_name => a_name$19, :b_name => b_name$19, :added_lines => added_lines$19, :removed_lines => removed_lines$19}
+            {:"a_name" => a_name$19, :"b_name" => b_name$19, :"added_lines" => added_lines$19, :"removed_lines" => removed_lines$19}
           end
         end.compact()
       end

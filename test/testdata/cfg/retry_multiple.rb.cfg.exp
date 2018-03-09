@@ -94,7 +94,7 @@ try = <statTemp>$20.+(<statTemp>$21) : Integer
     "bb::<constant:Object>#main_13" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_14" [label = "block[id=14](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <statTemp>$30 = self : Object
-<statTemp>$31 = rescue A  : String(\"rescue A \")
+<statTemp>$31 = \"rescue A \" : String(\"rescue A \")
 <statTemp>$29 = <statTemp>$30.puts(<statTemp>$31) : NilClass
 <unconditional>"];
 
@@ -108,7 +108,7 @@ try = <statTemp>$20.+(<statTemp>$21) : Integer
 
     "bb::<constant:Object>#main_16" [label = "block[id=16](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <statTemp>$36 = self : Object
-<statTemp>$37 = rescue B  : String(\"rescue B \")
+<statTemp>$37 = \"rescue B \" : String(\"rescue B \")
 <statTemp>$35 = <statTemp>$36.puts(<statTemp>$37) : NilClass
 <unconditional>"];
 

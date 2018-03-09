@@ -365,20 +365,6 @@ private:
     virtual void _sanityCheck();
 };
 
-class SymbolLit final : public Expression {
-public:
-    core::NameRef name;
-
-    SymbolLit(core::Loc loc, core::NameRef name);
-
-    virtual std::string toString(const core::GlobalState &gs, int tabs);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-
-private:
-    virtual void _sanityCheck();
-};
-
 class Assign final : public Expression {
 public:
     std::unique_ptr<Expression> lhs;
@@ -472,53 +458,21 @@ private:
     virtual void _sanityCheck();
 };
 
-class FloatLit final : public Expression {
+class Literal final : public Expression {
 public:
-    double value;
+    std::shared_ptr<core::Type> value;
 
-    FloatLit(core::Loc loc, double value);
+    Literal(core::Loc loc, std::shared_ptr<core::Type> value);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
-
-private:
-    virtual void _sanityCheck();
-};
-
-class IntLit final : public Expression {
-public:
-    int64_t value;
-
-    IntLit(core::Loc loc, int64_t value);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-
-private:
-    virtual void _sanityCheck();
-};
-
-class StringLit final : public Expression {
-public:
-    core::NameRef value;
-
-    StringLit(core::Loc loc, core::NameRef value);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-
-private:
-    virtual void _sanityCheck();
-};
-
-class BoolLit final : public Expression {
-public:
-    bool value;
-
-    BoolLit(core::Loc loc, bool value);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
+    bool isString(const core::GlobalState &gs) const;
+    bool isSymbol(const core::GlobalState &gs) const;
+    bool isNil(const core::GlobalState &gs) const;
+    core::NameRef asString(const core::GlobalState &gs) const;
+    core::NameRef asSymbol(const core::GlobalState &gs) const;
+    bool isTrue(const core::GlobalState &gs);
+    bool isFalse(const core::GlobalState &gs);
 
 private:
     virtual void _sanityCheck();

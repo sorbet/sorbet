@@ -234,37 +234,38 @@ private:
         for (int i = 0; i < hash->keys.size(); ++i) {
             auto &key = hash->keys[i];
             auto &value = hash->values[i];
-            auto sym = ast::cast_tree<ast::SymbolLit>(key.get());
-            if (sym == nullptr) {
+            auto lit = ast::cast_tree<ast::Literal>(key.get());
+            if (lit == nullptr || !lit->isSymbol(ctx)) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("`declare_variables': variable names must be symbols");
                 }
                 continue;
             }
+            core::NameRef name = lit->asSymbol(ctx);
 
             auto typ = TypeSyntax::getResultType(ctx, value);
             core::SymbolRef var;
 
-            auto str = sym->name.toString(ctx);
+            auto str = name.toString(ctx);
             if (str.substr(0, 2) == "@@") {
                 core::Symbol &data = ctx.owner.data(ctx);
-                var = data.findMember(ctx, sym->name);
+                var = data.findMember(ctx, name);
                 if (var.exists()) {
                     if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
                         e.setHeader("Redeclaring variable `{}`", str);
                     }
                 } else {
-                    var = ctx.state.enterStaticFieldSymbol(sym->loc, ctx.owner, sym->name);
+                    var = ctx.state.enterStaticFieldSymbol(key->loc, ctx.owner, name);
                 }
             } else if (str.substr(0, 1) == "@") {
                 core::Symbol &data = ctx.owner.data(ctx);
-                var = data.findMember(ctx, sym->name);
+                var = data.findMember(ctx, name);
                 if (var.exists()) {
                     if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
                         e.setHeader("Redeclaring variable `{}`", str);
                     }
                 } else {
-                    var = ctx.state.enterFieldSymbol(sym->loc, ctx.owner, sym->name);
+                    var = ctx.state.enterFieldSymbol(key->loc, ctx.owner, name);
                 }
             } else {
                 if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::InvalidDeclareVariables)) {
@@ -499,17 +500,7 @@ private:
     // type (once we have generics) will be nontrivial.
     shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(expr.get(), [&](ast::SymbolLit *) { result = core::Types::Symbol(); },
-                 [&](ast::FloatLit *) { result = core::Types::Float(); },
-                 [&](ast::IntLit *) { result = core::Types::Integer(); },
-                 [&](ast::StringLit *) { result = core::Types::String(); },
-                 [&](ast::BoolLit *b) {
-                     if (b->value) {
-                         result = core::Types::trueClass();
-                     } else {
-                         result = core::Types::falseClass();
-                     }
-                 },
+        typecase(expr.get(), [&](ast::Literal *a) { result = a->value; },
                  [&](ast::Cast *cast) {
                      if (cast->cast != core::Names::let()) {
                          if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
@@ -612,8 +603,8 @@ public:
                 int i = -1;
                 for (auto &keyExpr : hash->keys) {
                     i++;
-                    auto *key = ast::cast_tree<ast::SymbolLit>(keyExpr.get());
-                    if (key && key->name == core::Names::fixed()) {
+                    auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         data.resultType = TypeSyntax::getResultType(ctx, hash->values[i]);
                     }
                 }

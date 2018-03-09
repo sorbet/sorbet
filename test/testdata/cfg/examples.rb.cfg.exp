@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:Examples>#i_like_ifs" {
     "bb::<constant:Examples>#i_like_ifs_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#i_like_ifs_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:Examples>#i_like_ifs_0" -> "bb::<constant:Examples>#i_like_ifs_2" [style="bold"];
@@ -38,7 +38,7 @@ subgraph "cluster_::<constant:Examples>#i_like_exps" {
     "bb::<constant:Examples>#i_like_exps_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#i_like_exps_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:Examples>#i_like_exps_0" -> "bb::<constant:Examples>#i_like_exps_2" [style="bold"];
@@ -72,7 +72,7 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch1" {
     "bb::<constant:Examples>#return_in_one_branch1_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#return_in_one_branch1_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:Examples>#return_in_one_branch1_0" -> "bb::<constant:Examples>#return_in_one_branch1_2" [style="bold"];
@@ -103,7 +103,7 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch2" {
     "bb::<constant:Examples>#return_in_one_branch2_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#return_in_one_branch2_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:Examples>#return_in_one_branch2_0" -> "bb::<constant:Examples>#return_in_one_branch2_2" [style="bold"];
@@ -134,7 +134,7 @@ subgraph "cluster_::<constant:Examples>#variables" {
     "bb::<constant:Examples>#variables_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#variables_0" [label = "block[id=0]()
-<ifTemp>$5 = true : TrueClass(true)
+<ifTemp>$5 = true : TrueClass
 <ifTemp>$5"];
 
     "bb::<constant:Examples>#variables_0" -> "bb::<constant:Examples>#variables_2" [style="bold"];
@@ -155,7 +155,7 @@ a = 2
 
     "bb::<constant:Examples>#variables_3" -> "bb::<constant:Examples>#variables_4" [style="bold"];
     "bb::<constant:Examples>#variables_4" [label = "block[id=4](a)
-<ifTemp>$7 = false : FalseClass(false)
+<ifTemp>$7 = false : FalseClass
 <ifTemp>$7"];
 
     "bb::<constant:Examples>#variables_4" -> "bb::<constant:Examples>#variables_5" [style="bold"];
@@ -186,10 +186,9 @@ subgraph "cluster_::<constant:Examples>#variables_and_loop" {
     "bb::<constant:Examples>#variables_and_loop_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#variables_and_loop_0" [label = "block[id=0]()
-<constant:nil>$10 = alias <constant:nil> : NilClass
 <selfMethodTemp>$3 = self : Examples
 cond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped
-<ifTemp>$5 = true : TrueClass(true)
+<ifTemp>$5 = true : TrueClass
 <ifTemp>$5"];
 
     "bb::<constant:Examples>#variables_and_loop_0" -> "bb::<constant:Examples>#variables_and_loop_2" [style="bold"];
@@ -199,43 +198,43 @@ cond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_1" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_2" [label = "block[id=2](<constant:nil>$10, cond)
+    "bb::<constant:Examples>#variables_and_loop_2" [label = "block[id=2](cond)
 a = 1 : Integer(1)
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_2" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_3" [label = "block[id=3](<constant:nil>$10, cond)
+    "bb::<constant:Examples>#variables_and_loop_3" [label = "block[id=3](cond)
 a = 2
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_3" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_5" [label = "block[id=5](<constant:nil>$10, b, cond)
+    "bb::<constant:Examples>#variables_and_loop_5" [label = "block[id=5](b, cond)
 outerLoops: 1
-<whileTemp>$7 = true : TrueClass(true)
+<whileTemp>$7 = true : TrueClass
 <whileTemp>$7"];
 
     "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_7" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_5" -> "bb::<constant:Examples>#variables_and_loop_6" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_and_loop_6" [label = "block[id=6](<constant:nil>$10, b)
+    "bb::<constant:Examples>#variables_and_loop_6" [label = "block[id=6](b)
 <finalReturn> = return b
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_6" -> "bb::<constant:Examples>#variables_and_loop_1" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_7" [label = "block[id=7](<constant:nil>$10, b, cond)
+    "bb::<constant:Examples>#variables_and_loop_7" [label = "block[id=7](b, cond)
 outerLoops: 1
 cond"];
 
     "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_8" [style="bold"];
     "bb::<constant:Examples>#variables_and_loop_7" -> "bb::<constant:Examples>#variables_and_loop_9" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_and_loop_8" [label = "block[id=8](<constant:nil>$10, b, cond)
+    "bb::<constant:Examples>#variables_and_loop_8" [label = "block[id=8](b, cond)
 outerLoops: 1
 b = 1 : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_and_loop_8" -> "bb::<constant:Examples>#variables_and_loop_5" [style="bold"];
-    "bb::<constant:Examples>#variables_and_loop_9" [label = "block[id=9](<constant:nil>$10, b, cond)
+    "bb::<constant:Examples>#variables_and_loop_9" [label = "block[id=9](b, cond)
 outerLoops: 1
 b = 2 : untyped
 <unconditional>"];
@@ -250,7 +249,6 @@ subgraph "cluster_::<constant:Examples>#variables_loop_if" {
     "bb::<constant:Examples>#variables_loop_if_1" [shape = parallelogram];
 
     "bb::<constant:Examples>#variables_loop_if_0" [label = "block[id=0]()
-<constant:nil>$8 = alias <constant:nil> : NilClass
 <selfMethodTemp>$3 = self : Examples
 cond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped
 <unconditional>"];
@@ -260,33 +258,33 @@ cond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_loop_if_1" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
-    "bb::<constant:Examples>#variables_loop_if_2" [label = "block[id=2](<constant:nil>$8, b, cond)
+    "bb::<constant:Examples>#variables_loop_if_2" [label = "block[id=2](b, cond)
 outerLoops: 1
-<whileTemp>$5 = true : TrueClass(true)
+<whileTemp>$5 = true : TrueClass
 <whileTemp>$5"];
 
     "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_4" [style="bold"];
     "bb::<constant:Examples>#variables_loop_if_2" -> "bb::<constant:Examples>#variables_loop_if_3" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_loop_if_3" [label = "block[id=3](<constant:nil>$8, b)
+    "bb::<constant:Examples>#variables_loop_if_3" [label = "block[id=3](b)
 <finalReturn> = return b
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_loop_if_3" -> "bb::<constant:Examples>#variables_loop_if_1" [style="bold"];
-    "bb::<constant:Examples>#variables_loop_if_4" [label = "block[id=4](<constant:nil>$8, b, cond)
+    "bb::<constant:Examples>#variables_loop_if_4" [label = "block[id=4](b, cond)
 outerLoops: 1
 cond"];
 
     "bb::<constant:Examples>#variables_loop_if_4" -> "bb::<constant:Examples>#variables_loop_if_5" [style="bold"];
     "bb::<constant:Examples>#variables_loop_if_4" -> "bb::<constant:Examples>#variables_loop_if_6" [style="tapered"];
 
-    "bb::<constant:Examples>#variables_loop_if_5" [label = "block[id=5](<constant:nil>$8, b, cond)
+    "bb::<constant:Examples>#variables_loop_if_5" [label = "block[id=5](b, cond)
 outerLoops: 1
 b = 1 : untyped
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_loop_if_5" -> "bb::<constant:Examples>#variables_loop_if_2" [style="bold"];
-    "bb::<constant:Examples>#variables_loop_if_6" [label = "block[id=6](<constant:nil>$8, b, cond)
+    "bb::<constant:Examples>#variables_loop_if_6" [label = "block[id=6](b, cond)
 outerLoops: 1
 b = 2 : untyped
 <unconditional>"];
@@ -303,7 +301,7 @@ subgraph "cluster_::<constant:Examples>#take_arguments" {
     "bb::<constant:Examples>#take_arguments_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Examples
 i = load_arg(<selfMethodTemp>$3#take_arguments, 0) : untyped
-<ifTemp>$4 = false : FalseClass(false)
+<ifTemp>$4 = false : FalseClass
 <ifTemp>$4"];
 
     "bb::<constant:Examples>#take_arguments_0" -> "bb::<constant:Examples>#take_arguments_2" [style="bold"];

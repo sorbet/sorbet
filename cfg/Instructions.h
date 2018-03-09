@@ -80,39 +80,11 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class FloatLit final : public Instruction {
+class Literal final : public Instruction {
 public:
-    double value;
+    std::shared_ptr<core::Type> value;
 
-    FloatLit(double value);
-    virtual std::string toString(core::Context ctx);
-};
-
-class IntLit final : public Instruction {
-public:
-    int64_t value;
-
-    IntLit(int64_t value);
-    virtual std::string toString(core::Context ctx);
-};
-
-class StringLit final : public Instruction {
-public:
-    core::NameRef value;
-
-    StringLit(core::NameRef value) : value(value) {
-        categoryCounterInc("cfg", "stringlit");
-    };
-    virtual std::string toString(core::Context ctx);
-};
-
-class SymbolLit final : public Instruction {
-public:
-    core::NameRef value;
-
-    SymbolLit(core::NameRef value) : value(value) {
-        categoryCounterInc("cfg", "symbollit");
-    };
+    Literal(std::shared_ptr<core::Type> value);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -130,16 +102,6 @@ public:
 
     NotSupported(std::string why) : why(why) {
         categoryCounterInc("cfg", "notsupported");
-    };
-    virtual std::string toString(core::Context ctx);
-};
-
-class BoolLit final : public Instruction {
-public:
-    bool value;
-
-    BoolLit(bool value) : value(value) {
-        categoryCounterInc("cfg", "boollit");
     };
     virtual std::string toString(core::Context ctx);
 };

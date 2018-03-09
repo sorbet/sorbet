@@ -17,15 +17,20 @@ unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) 
 }
 
 core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
-    if (auto sym = ast::cast_tree<ast::SymbolLit>(name)) {
-        return sym->name;
-    } else if (auto str = ast::cast_tree<ast::StringLit>(name)) {
-        return str->value;
+    core::NameRef res = core::NameRef::noName();
+    if (auto lit = ast::cast_tree<ast::Literal>(name)) {
+        if (lit->isSymbol(ctx)) {
+            res = lit->asSymbol(ctx);
+        } else if (lit->isString(ctx)) {
+            res = lit->asString(ctx);
+        }
     }
-    if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
-        e.setHeader("arg must be a Symbol or String");
+    if (!res.exists()) {
+        if (auto e = ctx.state.beginError(name->loc, core::errors::DSL::BadAttrArg)) {
+            e.setHeader("arg must be a Symbol or String");
+        }
     }
-    return core::NameRef::noName();
+    return res;
 }
 
 vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, ast::Send *send) {

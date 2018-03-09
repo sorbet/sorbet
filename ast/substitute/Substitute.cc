@@ -1,4 +1,5 @@
 #include "substitute.h"
+#include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 
 using namespace ruby_typer;
@@ -77,12 +78,23 @@ public:
         original->fun = subst.substitute(original->fun);
         return original;
     }
-    unique_ptr<Expression> postTransformStringLit(core::MutableContext ctx, unique_ptr<StringLit> original) {
-        original->value = subst.substitute(original->value);
-        return original;
-    }
-    unique_ptr<Expression> postTransformSymbolLit(core::MutableContext ctx, unique_ptr<SymbolLit> original) {
-        original->name = subst.substitute(original->name);
+    unique_ptr<Expression> postTransformLiteral(core::MutableContext ctx, unique_ptr<Literal> original) {
+        if (original->isString(ctx)) {
+            auto nameRef = original->asString(ctx);
+            auto newName = subst.substitute(nameRef);
+            if (newName == nameRef) {
+                return original;
+            }
+            return MK::String(original->loc, newName);
+        }
+        if (original->isSymbol(ctx)) {
+            auto nameRef = original->asSymbol(ctx);
+            auto newName = subst.substitute(nameRef);
+            if (newName == nameRef) {
+                return original;
+            }
+            return MK::Symbol(original->loc, newName);
+        }
         return original;
     }
     unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {

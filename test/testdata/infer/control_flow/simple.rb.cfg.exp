@@ -289,7 +289,7 @@ a"];
     "bb::<constant:ControlFlow>#orZero4_2" -> "bb::<constant:ControlFlow>#orZero4_6" [style="tapered"];
 
     "bb::<constant:ControlFlow>#orZero4_3" [label = "block[id=3](a)
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:ControlFlow>#orZero4_3" -> "bb::<constant:ControlFlow>#orZero4_5" [style="bold"];
@@ -328,7 +328,7 @@ a"];
 
     "bb::<constant:ControlFlow>#orZero5_1" -> "bb::<constant:ControlFlow>#orZero5_1" [style="bold"];
     "bb::<constant:ControlFlow>#orZero5_2" [label = "block[id=2](a)
-<ifTemp>$4 = true : TrueClass(true)
+<ifTemp>$4 = true : TrueClass
 <ifTemp>$4"];
 
     "bb::<constant:ControlFlow>#orZero5_2" -> "bb::<constant:ControlFlow>#orZero5_5" [style="bold"];
