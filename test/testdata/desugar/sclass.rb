@@ -50,7 +50,7 @@ class F
           @f = T.let(0, Integer)
         end
 
-        sig(arg0: Integer).returns(Integer)
+        sig(f: Integer).returns(Integer)
         attr_writer :f
     end
 end

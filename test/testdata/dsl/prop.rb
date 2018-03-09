@@ -83,7 +83,7 @@ def main
     T.assert_type!(AdvancedODM.new.optional_explicit, T.nilable(String))
     T.assert_type!(AdvancedODM.new.optional_existing, T.nilable(String))
     AdvancedODM.new.optional_existing = 'b'
-    AdvancedODM.new.optional_existing = nil # error: Argument `arg0` does not match expected type
+    AdvancedODM.new.optional_existing = nil # error: does not match expected type
     T.assert_type!(AdvancedODM.new.optional_false, String)
     T.assert_type!(AdvancedODM.new.optional, T.nilable(String))
     AdvancedODM.new.optional = 'b'
@@ -102,15 +102,15 @@ def main
 
     T.assert_type!(PropHelpers.new.token, String)
     PropHelpers.new.token = "tok_token"
-    PropHelpers.new.token = nil # error: Argument `arg0` does not match expected type
+    PropHelpers.new.token = nil # error: does not match expected type
 
     T.assert_type!(PropHelpers.new.created, Float)
     PropHelpers.new.created = 0.0
-    PropHelpers.new.created = nil # error: Argument `arg0` does not match expected type
+    PropHelpers.new.created = nil # error: does not match expected type
 
     T.assert_type!(PropHelpers2.new.token, String)
     PropHelpers2.new.token = "tok_token"
-    PropHelpers2.new.token = nil # error: Argument `arg0` does not match expected type
+    PropHelpers2.new.token = nil # error: does not match expected type
 
     T.assert_type!(PropHelpers2.new.created, Float)
     PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist

@@ -73,8 +73,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
 
             core::NameRef varName = ctx.state.enterNameUTF8("@" + name.toString(ctx));
             core::NameRef setName = ctx.state.enterNameUTF8(name.toString(ctx) + "=");
-            auto body = ast::MK::Assign(loc, ast::MK::Instance(loc, varName), ast::MK::Local(loc, core::Names::arg0()));
-            stats.emplace_back(ast::MK::Method1(loc, setName, ast::MK::Local(loc, core::Names::arg0()), move(body)));
+            auto body = ast::MK::Assign(loc, ast::MK::Instance(loc, varName), ast::MK::Local(loc, name));
+            stats.emplace_back(ast::MK::Method1(loc, setName, ast::MK::Local(loc, name), move(body)));
         }
     }
 

@@ -84,8 +84,8 @@ begin
       ::<singleton class:<constant:F>>#@f = T.let(0, Integer)
     end
 
-    def f=<f=>(arg0)
-      ::<singleton class:<constant:F>>#@f = arg0
+    def f=<f=>(f)
+      ::<singleton class:<constant:F>>#@f = f
     end
   end
   class <emptyTree>::<constant:G><<constant:G>> < (::<constant:<todo sym>>)

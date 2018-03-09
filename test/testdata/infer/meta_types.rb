@@ -7,7 +7,7 @@ class TestMetaType
   def _; end
 
   def testit
-    puts(T::Array[String]) # error: Argument `arg0` does not match expected type
+    puts(T::Array[String]) # error: Expression passed as an argument `arg0` to method `puts` does not match expected type
 
     puts(
       if _

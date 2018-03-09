@@ -7,7 +7,7 @@ class TestAttr
 
   sig.returns(Integer)
   attr :v1
-  sig(arg0: Integer).returns(Integer)
+  sig(v1: Integer).returns(Integer)
   attr_writer :v1
 
   sig.returns(String)

@@ -26,27 +26,27 @@ class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<constant:<todo
     ::<constant:TestAttr>#@v1
   end
 
-  def v1=<v1=>(arg0)
-    ::<constant:TestAttr>#@v1 = arg0
+  def v1=<v1=>(v1)
+    ::<constant:TestAttr>#@v1 = v1
   end
 
   def v2<v2>()
     ::<constant:TestAttr>#@v2
   end
 
-  def v2=<v2=>(arg0)
-    ::<constant:TestAttr>#@v2 = arg0
+  def v2=<v2=>(v2)
+    ::<constant:TestAttr>#@v2 = v2
   end
 
   def v3<v3>()
     ::<constant:TestAttr>#@v3
   end
 
-  def v4=<v4=>(arg0)
-    ::<constant:TestAttr>#@v4 = arg0
+  def v4=<v4=>(v4)
+    ::<constant:TestAttr>#@v4 = v4
   end
 
-  def v5=<v5=>(arg0)
-    ::<constant:TestAttr>#@v5 = arg0
+  def v5=<v5=>(v5)
+    ::<constant:TestAttr>#@v5 = v5
   end
 end

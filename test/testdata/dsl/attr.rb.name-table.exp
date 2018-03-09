@@ -7,15 +7,15 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     field @v5 -> untyped @ test/testdata/dsl/attr.rb:19
     method initialize () @ test/testdata/dsl/attr.rb:3
     method v1 () -> Integer @ test/testdata/dsl/attr.rb:9
-    method v1= (arg0) -> Integer @ test/testdata/dsl/attr.rb:11
-      argument arg0<> -> Integer @ test/testdata/dsl/attr.rb:10
+    method v1= (v1) -> Integer @ test/testdata/dsl/attr.rb:11
+      argument v1<> -> Integer @ test/testdata/dsl/attr.rb:10
     method v2 () -> String @ test/testdata/dsl/attr.rb:14
-    method v2= (arg0) @ test/testdata/dsl/attr.rb:14
-      argument arg0<> @ test/testdata/dsl/attr.rb:14
+    method v2= (v2) @ test/testdata/dsl/attr.rb:14
+      argument v2<> @ test/testdata/dsl/attr.rb:14
     method v3 () -> String @ test/testdata/dsl/attr.rb:17
-    method v4= (arg0) @ test/testdata/dsl/attr.rb:19
-      argument arg0<> @ test/testdata/dsl/attr.rb:19
-    method v5= (arg0) @ test/testdata/dsl/attr.rb:19
-      argument arg0<> @ test/testdata/dsl/attr.rb:19
+    method v4= (v4) @ test/testdata/dsl/attr.rb:19
+      argument v4<> @ test/testdata/dsl/attr.rb:19
+    method v5= (v5) @ test/testdata/dsl/attr.rb:19
+      argument v5<> @ test/testdata/dsl/attr.rb:19
   class <singleton class:<constant:TestAttr>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/attr.rb:2
 

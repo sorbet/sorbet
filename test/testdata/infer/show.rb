@@ -16,7 +16,7 @@ class Main
     end
 
     def main
-        int("string") # error: expected type `Integer`
+        int("string") # error: does not match expected type
 
         foo = Object.new
         # T.assert_type!(foo, 3) # commented-out-error: 3

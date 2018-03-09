@@ -19,8 +19,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method wrapper () @ test/testdata/desugar/sclass.rb:38
   class <singleton class:<constant:F>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:F>> @ test/testdata/desugar/sclass.rb:48
     field @f -> Integer @ test/testdata/desugar/sclass.rb:50
-    method f= (arg0) -> Integer @ test/testdata/desugar/sclass.rb:54
-      argument arg0<> -> Integer @ test/testdata/desugar/sclass.rb:53
+    method f= (f) -> Integer @ test/testdata/desugar/sclass.rb:54
+      argument f<> -> Integer @ test/testdata/desugar/sclass.rb:53
     method initialize () @ test/testdata/desugar/sclass.rb:49
   class <singleton class:<constant:G>> < ::<singleton class:<constant:Object>> () -> <Class:<Class:G>> @ test/testdata/desugar/sclass.rb:60
     method g () @ test/testdata/desugar/sclass.rb:67

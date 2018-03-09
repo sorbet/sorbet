@@ -34,16 +34,16 @@ class <emptyTree><<constant:<root>>> < ()
           @foo
         end
 
-        def foo=<<constant:<todo sym>>>(arg0)
-          @foo = arg0
+        def foo=<<constant:<todo sym>>>(foo)
+          @foo = foo
         end
 
         def bar<<constant:<todo sym>>>()
           @bar
         end
 
-        def bar=<<constant:<todo sym>>>(arg0)
-          @bar = arg0
+        def bar=<<constant:<todo sym>>>(bar)
+          @bar = bar
         end
 
         self(<constant:<todo sym>>).sig({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)

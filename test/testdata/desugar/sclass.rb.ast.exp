@@ -39,7 +39,7 @@ class <emptyTree><<constant:<root>>> < ()
           @f = <emptyTree>::<constant:T>.let(0, <emptyTree>::<constant:Integer>)
         end
 
-        self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:Integer>)
+        self(<constant:<todo sym>>).sig({:"f" => <emptyTree>::<constant:Integer>}).returns(<emptyTree>::<constant:Integer>)
 
         self(<constant:<todo sym>>).attr_writer(:"f")
       end

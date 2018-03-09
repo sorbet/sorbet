@@ -141,9 +141,16 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
 }
 
 namespace {
-void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass, core::SymbolRef method,
+bool isSetter(core::Context ctx, core::NameRef fun) {
+    if (fun.data(ctx).kind != NameKind::UTF8) {
+        return false;
+    }
+    return fun.data(ctx).raw.utf8.back() == '=';
+}
+
+void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass, core::NameRef fun,
                   TypeAndOrigins &argTpe, const core::Symbol &argSym, shared_ptr<core::Type> &fullType,
-                  vector<shared_ptr<Type>> &targs) {
+                  vector<shared_ptr<Type>> &targs, bool mayBeSetter = false) {
     shared_ptr<Type> expectedType = core::Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
         expectedType = Types::dynamic();
@@ -153,13 +160,18 @@ void matchArgType(core::Context ctx, core::Loc callLoc, core::SymbolRef inClass,
         return;
     }
     if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
-        e.setHeader("Argument `{}` does not match expected type `{}`", argSym.name.toString(ctx),
-                    expectedType->show(ctx));
-        e.addErrorSection(core::ErrorSection({
-            core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified type of argument `{}` as `{}`",
-                                  method.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
-                                  expectedType->show(ctx)),
-        }));
+        if (mayBeSetter && isSetter(ctx, fun)) {
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.name.toString(ctx),
+                        expectedType->show(ctx));
+        } else {
+            e.setHeader("Expression passed as an argument `{}` to method `{}` does not match expected type",
+                        argSym.name.toString(ctx), fun.toString(ctx), expectedType->show(ctx));
+            e.addErrorSection(core::ErrorSection({
+                core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified type of argument `{}` as `{}`",
+                                      argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                      expectedType->show(ctx)),
+            }));
+        }
         e.addErrorSection(core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
                                              argTpe.origins2Explanations(ctx)));
     }
@@ -524,12 +536,13 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             (spec.isOptional() || spec.isRepeated())) {
             break;
         }
+
+        matchArgType(ctx, callLoc, this->symbol, fun, arg, spec, fullType, targs, args.size() == 1);
+
         if (!spec.isRepeated()) {
             ++pit;
         }
         ++ait;
-
-        matchArgType(ctx, callLoc, this->symbol, method, arg, spec, fullType, targs);
     }
 
     if (pit != pend) {
@@ -585,7 +598,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                         TypeAndOrigins tpe;
                         tpe.origins = args.back().origins;
                         tpe.type = hash->values[it - hash->keys.begin()];
-                        matchArgType(ctx, callLoc, this->symbol, method, tpe, spec, fullType, targs);
+                        matchArgType(ctx, callLoc, this->symbol, fun, tpe, spec, fullType, targs);
                     }
                     break;
                 }
@@ -605,7 +618,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 TypeAndOrigins tpe;
                 tpe.origins = args.back().origins;
                 tpe.type = hash->values[arg - hash->keys.begin()];
-                matchArgType(ctx, callLoc, this->symbol, method, tpe, spec, fullType, targs);
+                matchArgType(ctx, callLoc, this->symbol, fun, tpe, spec, fullType, targs);
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
