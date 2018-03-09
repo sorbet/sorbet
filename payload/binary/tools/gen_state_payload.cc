@@ -13,13 +13,13 @@ int main(int argc, char **argv) {
     if (!fin.good()) {
         throw ruby_typer::FileNotFoundException();
     }
-    std::vector<ruby_typer::u4> data;
+    std::vector<ruby_typer::u1> data;
 
     fin.seekg(0, std::ios::end);
     size_t filesize = fin.tellg();
     fin.seekg(0, std::ios::beg);
 
-    data.resize(filesize / sizeof(ruby_typer::u4));
+    data.resize(filesize);
 
     fin.read((char *)data.data(), filesize);
 
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
     classfile << "#include \"common/common.h\"\n"
               << "\n"
-              << "const ruby_typer::u4 nameTablePayload[] = {\n";
+              << "const ruby_typer::u1 nameTablePayload[] = {\n";
     int i = -1;
     bool first = true;
     for (auto c : data) {
@@ -39,11 +39,11 @@ int main(int argc, char **argv) {
         if (i % 10 == 0) {
             classfile << "\n    ";
         }
-        classfile << c;
+        classfile << (int)c;
     }
     classfile << "};\n";
     classfile
-        << "extern const ruby_typer::u4 * const getNameTablePayload = (const ruby_typer::u4 * const)&nameTablePayload;"
+        << "extern const ruby_typer::u1 * const getNameTablePayload = (const ruby_typer::u1 * const)&nameTablePayload;"
         << endl;
 
     classfile.close();

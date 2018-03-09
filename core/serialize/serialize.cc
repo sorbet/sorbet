@@ -15,135 +15,167 @@ const u1 COMPRESSION_DEGREE = 19; // >20 introduce decompression slowdown
 
 void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
     putU4(s.size());
-    constexpr int step = (sizeof(u4) / sizeof(u1));
-    int end = (s.size() / step) * step;
 
-    ENFORCE(step == 4);
-    for (int i = 0; i < end; i += step) {
-        put4U1((u1)s[i], (u1)s[i + 1], (u1)s[i + 2], (u1)s[i + 3]);
-    }
-    if (end != s.size()) {
-        u4 acc = 0;
-        for (int i = end; i < s.size(); i++) {
-            acc = acc * 256u + (u1)s[i];
-        }
-        putU4(acc);
+    for (char c : s) {
+        putU1(absl::bit_cast<u1>(c));
     }
 }
 
-char u1tochar(u4 u) {
-    u1 sm = u;
-    ENFORCE(sm == u);
-    return absl::bit_cast<char>(sm);
-}
+constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
 
-std::vector<u4> GlobalStateSerializer::Pickler::result() {
-    const size_t max_dst_size = Lizard_compressBound(data.size() * sizeof(u4));
-    std::vector<u4> compressed_data;
-    compressed_data.resize(512 + max_dst_size / sizeof(u4)); // give extra room for compression
-                                                             // Lizard_compressBound returns size of data if compression
-                                                             // succeeds. It seems to be written for big inputs
-                                                             // and returns too small sizes for small inputs,
-                                                             // where compressed size is bigger than original size
-    int resultCode =
-        Lizard_compress((const char *)data.data(), (char *)(compressed_data.data() + 2), data.size() * sizeof(u4),
-                        (compressed_data.size() - 2) * sizeof(u4), COMPRESSION_DEGREE);
+std::vector<u1> GlobalStateSerializer::Pickler::result() {
+    if (zeroCounter != 0) {
+        data.emplace_back(zeroCounter);
+        zeroCounter = 0;
+    }
+    const size_t max_dst_size = Lizard_compressBound(data.size());
+    std::vector<u1> compressed_data;
+    compressed_data.resize(2048 + max_dst_size); // give extra room for compression
+                                                 // Lizard_compressBound returns size of data if compression
+                                                 // succeeds. It seems to be written for big inputs
+                                                 // and returns too small sizes for small inputs,
+                                                 // where compressed size is bigger than original size
+    int resultCode = Lizard_compress((const char *)data.data(), (char *)(compressed_data.data() + SIZE_BYTES * 2),
+                                     data.size(), (compressed_data.size() - SIZE_BYTES * 2), COMPRESSION_DEGREE);
     if (resultCode == 0) {
         // did not compress!
         Error::raise("uncompressable picker?");
     } else {
-        compressed_data[0] = resultCode;                        // ~200K of our stdlib
-        compressed_data[1] = data.size();                       // 172817 ints(x4), ~675K of our stdlib
-        int actualCompressedSize = 1 + resultCode / sizeof(u4); // 1 left for rounding
-        compressed_data.resize(actualCompressedSize + 2);       // two are for header bytes
+        memcpy(compressed_data.data(), &resultCode, SIZE_BYTES); // ~200K of our stdlib
+        int uncompressedSize = data.size();
+        memcpy(compressed_data.data() + SIZE_BYTES, &uncompressedSize,
+               SIZE_BYTES);                                     // 172817 ints(x4), ~675K of our stdlib
+        int actualCompressedSize = resultCode + SIZE_BYTES * 2; // SIZE_BYTES * 2 are for sizes
+        compressed_data.resize(actualCompressedSize);
     }
     return compressed_data;
 }
 
-GlobalStateSerializer::UnPickler::UnPickler(const u4 *const compressed) : pos(0) {
-    u4 compressedSize = compressed[0];
-    u4 uncompressedSize = compressed[1];
+GlobalStateSerializer::UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
+    int compressedSize;
+    memcpy(&compressedSize, compressed, SIZE_BYTES);
+    int uncompressedSize;
+    memcpy(&uncompressedSize, compressed + SIZE_BYTES, SIZE_BYTES);
+
     data.resize(uncompressedSize);
 
-    int resultCode = Lizard_decompress_safe((const char *)(compressed + 2), (char *)this->data.data(), compressedSize,
-                                            uncompressedSize * sizeof(u4));
-    if (resultCode != uncompressedSize * sizeof(u4)) {
+    int resultCode = Lizard_decompress_safe((const char *)(compressed + 2 * SIZE_BYTES), (char *)this->data.data(),
+                                            compressedSize, uncompressedSize);
+    if (resultCode != uncompressedSize) {
         Error::raise("incomplete decompression");
     }
 }
 
 std::string GlobalStateSerializer::UnPickler::getStr() {
     int sz = getU4();
-    constexpr int step = (sizeof(u4) / sizeof(u1));
-    int end = (sz / step) * step;
     std::string result(sz, '\0');
-    for (int i = 0; i < end; i += step) {
-        u4 el = getU4();
-        result[i + 3] = u1tochar(el & 255u);
-        result[i + 2] = u1tochar((el >> 8u) & 255u);
-        result[i + 1] = u1tochar((el >> 16u) & 255u);
-        result[i] = u1tochar((el >> 24u) & 255u);
-    }
-    if (end != result.size()) {
-        u4 acc = getU4();
-        for (int i = result.size() - 1; i >= end; i--) {
-            result[i] = u1tochar(acc & 255u);
-            acc = acc >> 8;
-        }
+    for (int i = 0; i < sz; i++) {
+        result[i] = absl::bit_cast<char>(getU1());
     }
     return result;
 }
 
-void GlobalStateSerializer::Pickler::put4U1(u1 v1, u1 v2, u1 v3, u1 v4) {
-    u4 uv1 = (u1)v1;
-    u4 uv2 = (u1)v2;
-    u4 uv3 = (u1)v3;
-    u4 uv4 = (u1)v4;
-    putU4((uv1 << 24u) | (uv2 << 16u) | (uv3 << 8u) | uv4);
+void GlobalStateSerializer::Pickler::putU1(u1 u) {
+    if (zeroCounter != 0) {
+        data.push_back(zeroCounter);
+        zeroCounter = 0;
+    }
+    data.push_back(u);
 }
 
-void GlobalStateSerializer::UnPickler::get4U1(u1 &v1, u1 &v2, u1 &v3, u1 &v4) {
-    u4 el = getU4();
-    v4 = el & 255u;
-    v3 = (el >> 8u) & 255u;
-    v2 = (el >> 16u) & 255u;
-    v1 = (el >> 24u) & 255u;
+u1 GlobalStateSerializer::UnPickler::getU1() {
+    ENFORCE(zeroCounter == 0);
+    return data[pos++];
 }
 
-void GlobalStateSerializer::Pickler::putU4(const u4 u) {
-    if (u != 0) {
-        data.push_back(u);
-    } else if (data.size() >= 2 && data[data.size() - 2] == 0 && data[data.size() - 1] != UINT_MAX) {
-        data[data.size() - 1]++;
+void GlobalStateSerializer::Pickler::putU4(u4 u) {
+    if (u == 0) {
+        if (zeroCounter != 0) {
+            if (zeroCounter == UCHAR_MAX) {
+                data.push_back(UCHAR_MAX);
+                zeroCounter = 0;
+                putU4(u);
+                return;
+            }
+            zeroCounter++;
+            return;
+        } else {
+            data.push_back(0);
+            zeroCounter = 1;
+        }
     } else {
-        data.push_back(0);
-        data.push_back(1);
+        if (zeroCounter != 0) {
+            data.push_back(zeroCounter);
+            zeroCounter = 0;
+        }
+        while (u > 127) {
+            data.push_back(128 | (u & 127));
+            u = u >> 7;
+        }
+        data.push_back(u & 127);
     }
 }
 
 u4 GlobalStateSerializer::UnPickler::getU4() {
-    if (zeroCounter != 0u) {
+    if (zeroCounter != 0) {
         zeroCounter--;
         return 0;
     }
-    auto r = data[pos++];
+    u1 r = data[pos++];
     if (r == 0) {
         zeroCounter = data[pos++];
         zeroCounter--;
+        return r;
+    } else {
+        u4 res = r & 127;
+        u4 vle = r;
+        if ((vle & 128) == 0)
+            goto done;
+
+        vle = data[pos++];
+        res |= (vle & 127) << 7;
+        if ((vle & 128) == 0)
+            goto done;
+
+        vle = data[pos++];
+        res |= (vle & 127) << 14;
+        if ((vle & 128) == 0)
+            goto done;
+
+        vle = data[pos++];
+        res |= (vle & 127) << 21;
+        if ((vle & 128) == 0)
+            goto done;
+
+        vle = data[pos++];
+        res |= (vle & 127) << 28;
+        if ((vle & 128) == 0)
+            goto done;
+
+    done:
+        return res;
     }
-    return r;
 }
 
 void GlobalStateSerializer::Pickler::putS8(const int64_t i) {
-    putU4((u4)i);
-    putU4((u4)(i >> 32));
+    u8 u = absl::bit_cast<u8>(i);
+    while (u > 127) {
+        putU1((u & 127) | 128);
+        u = u >> 7;
+    }
+    putU1(u & 127);
 }
 
 int64_t GlobalStateSerializer::UnPickler::getS8() {
-    u8 low = getU4();
-    u8 high = getU4();
-    u8 full = (high << 32) + low;
-    return absl::bit_cast<int64_t>(full);
+    u8 res = 0;
+    u8 vle = 128;
+    int i = 0;
+    while (vle & 128) {
+        vle = getU1();
+        res |= (vle & 127) << (i * 7);
+        i++;
+    }
+    return absl::bit_cast<int64_t>(res);
 }
 
 void GlobalStateSerializer::pickle(Pickler &p, File &what) {
@@ -158,13 +190,13 @@ std::shared_ptr<File> GlobalStateSerializer::unpickleFile(UnPickler &p) {
 }
 
 void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
-    p.putU4(what.kind);
+    p.putU1(what.kind);
     switch (what.kind) {
         case NameKind::UTF8:
             p.putStr(what.raw.utf8);
             break;
         case NameKind::UNIQUE:
-            p.putU4(what.unique.uniqueNameKind);
+            p.putU1(what.unique.uniqueNameKind);
             p.putU4(what.unique.original._id);
             p.putU4(what.unique.num);
             break;
@@ -176,14 +208,14 @@ void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
 
 Name GlobalStateSerializer::unpickleName(UnPickler &p, GlobalState &gs) {
     Name result;
-    result.kind = (NameKind)p.getU4();
+    result.kind = (NameKind)p.getU1();
     switch (result.kind) {
         case NameKind::UTF8:
             result.kind = NameKind::UTF8;
             result.raw.utf8 = gs.enterString(p.getStr());
             break;
         case NameKind::UNIQUE:
-            result.unique.uniqueNameKind = (UniqueNameKind)p.getU4();
+            result.unique.uniqueNameKind = (UniqueNameKind)p.getU1();
             result.unique.original = NameRef(gs, p.getU4());
             result.unique.num = p.getU4();
             break;
@@ -253,7 +285,8 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
 }
 
 std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalState *gs) {
-    auto tag = p.getU4();
+    auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that size difference after
+                          // compression is small and u4 is 10% faster
     switch (tag) {
         case 0: {
             std::shared_ptr<Type> empty;
@@ -322,7 +355,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
             return std::make_shared<AppliedType>(klass, targs);
         }
         default:
-            Error::notImplemented();
+            Error::raise("Uknown type tag {}", tag);
     }
 }
 
@@ -486,12 +519,12 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
     result.sanityCheck();
 }
 
-std::vector<u4> GlobalStateSerializer::store(GlobalState &gs) {
+std::vector<u1> GlobalStateSerializer::store(GlobalState &gs) {
     Pickler p = pickle(gs);
     return p.result();
 }
 
-void GlobalStateSerializer::load(GlobalState &gs, const u4 *const data) {
+void GlobalStateSerializer::load(GlobalState &gs, const u1 *const data) {
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
     UnPickler p(data);
     unpickleGS(p, gs);

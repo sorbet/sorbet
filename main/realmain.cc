@@ -692,7 +692,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Optio
         return;
     }
 
-    const u4 *const nameTablePayload = getNameTablePayload;
+    const u1 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs->initEmpty();
         Timer timeit(console_err, "Indexed payload");

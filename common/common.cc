@@ -33,13 +33,13 @@ string ruby_typer::File::read(const absl::string_view filename) {
     return src;
 }
 
-void ruby_typer::File::write(const absl::string_view filename, const vector<ruby_typer::u4> &data) {
+void ruby_typer::File::write(const absl::string_view filename, const vector<ruby_typer::u1> &data) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr, ios::out | ios::binary);
     if (!fout.good()) {
         throw ruby_typer::FileNotFoundException();
     }
-    fout.write((const char *)data.data(), data.size() * sizeof(ruby_typer::u4));
+    fout.write((const char *)data.data(), data.size());
 }
 
 void ruby_typer::File::write(const absl::string_view filename, const absl::string_view text) {

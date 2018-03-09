@@ -18,6 +18,29 @@ TEST(SerializeTest, U4) { // NOLINT
     EXPECT_EQ(u.getU4(), 4294967295);
 }
 
+TEST(SerializeTest, U4U1) { // NOLINT
+    GlobalStateSerializer::Pickler p;
+    p.putU4(0);
+    p.putU4(0);
+    p.putStr("aaaaa");
+    p.putU4(0);
+    p.putU4(0);
+    p.putU1(1);
+    p.putU4(1);
+    p.putU1(0);
+    p.putU4(4294967295);
+    GlobalStateSerializer::UnPickler u(p.result().data());
+    EXPECT_EQ(u.getU4(), 0);
+    EXPECT_EQ(u.getU4(), 0);
+    EXPECT_EQ(u.getStr(), "aaaaa");
+    EXPECT_EQ(u.getU4(), 0);
+    EXPECT_EQ(u.getU4(), 0);
+    EXPECT_EQ(u.getU1(), 1);
+    EXPECT_EQ(u.getU4(), 1);
+    EXPECT_EQ(u.getU1(), 0);
+    EXPECT_EQ(u.getU4(), 4294967295);
+}
+
 TEST(SerializeTest, U8) { // NOLINT
     GlobalStateSerializer::Pickler p;
     p.putS8(0);

@@ -118,7 +118,7 @@ template <class From, class To> To *fast_cast(From *what) {
 class File final {
 public:
     static std::string read(const absl::string_view filename);
-    static void write(const absl::string_view filename, const std::vector<ruby_typer::u4> &data);
+    static void write(const absl::string_view filename, const std::vector<ruby_typer::u1> &data);
     static void write(const absl::string_view filename, const absl::string_view text);
     static absl::string_view getFileName(const absl::string_view filename);
     static absl::string_view getExtension(const absl::string_view path);
