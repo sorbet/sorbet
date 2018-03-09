@@ -345,7 +345,7 @@ bool storeCountersToProtoFile(const std::string &fileName, const std::string &pr
     metrics.set_branch(branch);
     metrics.set_sha(sha);
     metrics.set_status(status);
-    auto unix_timestamp = std::chrono::seconds(std::time(NULL));
+    auto unix_timestamp = std::chrono::seconds(std::time(nullptr));
     metrics.set_timestamp(unix_timestamp.count());
 
     // UUID version 1 as specified in RFC 4122

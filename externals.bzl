@@ -114,19 +114,19 @@ package(default_visibility = ["//visibility:public"])
     )
 
     native.new_http_archive(
-        name="clang_5_0_0_darwin",
-        url="http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz",
+        name="clang_6_0_0_darwin",
+        url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz",
         build_file="//:clang.BUILD",
-        sha256="326be172ccb61210c9ae5dced27204977e249ec6589521cc30f82fd0904b0671",
+        sha256="0ef8e99e9c9b262a53ab8f2821e2391d041615dd3f3ff36fdf5370916b0f4268",
         type="tar.xz",
-        strip_prefix="clang+llvm-5.0.0-x86_64-apple-darwin/",
+        strip_prefix="clang+llvm-6.0.0-x86_64-apple-darwin/",
     )
 
     native.new_http_archive(
-        name="clang_5_0_0_linux",
-        url="http://releases.llvm.org/5.0.1/clang+llvm-5.0.1-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
+        name="clang_6_0_0_linux",
+        url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
         build_file="//:clang.BUILD",
-        sha256="9e61c6669991e2f0d065348c95917b2c6b697d75098b60ec1c2e9f17093ce012",
+        sha256="114e78b2f6db61aaee314c572e07b0d635f653adc5d31bd1cd0bf31a3db4a6e5",
         type="tar.xz",
-        strip_prefix="clang+llvm-5.0.1-x86_64-linux-gnu-ubuntu-14.04/",
+        strip_prefix="clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/",
     )

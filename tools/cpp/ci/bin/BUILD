@@ -14,7 +14,7 @@ WRAPPERS = [
         name = shim,
         srcs = [
             "shim-{}".format(shim),
-            "@clang_5_0_0_linux//:bin/{}".format(shim),
+            "@clang_6_0_0_linux//:bin/{}".format(shim),
         ],
     )
     for shim in WRAPPERS

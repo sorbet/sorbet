@@ -1,6 +1,6 @@
 #ifdef __APPLE__
 #include "common/common.h"
-#include <assert.h>
+#include <cassert>
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 #include <stdbool.h>
@@ -57,7 +57,7 @@ static bool amIBeingDebugged()
     // Call sysctl.
 
     size = sizeof(info);
-    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, NULL, 0);
+    junk = sysctl(mib, sizeof(mib) / sizeof(*mib), &info, &size, nullptr, 0);
     assert(junk == 0);
 
     // We're being debugged if the P_TRACED flag is set.

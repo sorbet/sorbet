@@ -1,2 +1,2 @@
 #!/bin/bash
-exec "${WORKSPACE_TOP-}external/clang_5_0_0_linux/bin/clang" "$@"
+exec "${WORKSPACE_TOP-}external/clang_6_0_0_linux/bin/clang" "$@"

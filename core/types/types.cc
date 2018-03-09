@@ -508,10 +508,10 @@ string OrType::show(const GlobalState &gs) {
     stringstream buf;
 
     string ret;
-    if ((ret = showOrSpecialCase(gs, this->left, this->right)) != "") {
+    if (!(ret = showOrSpecialCase(gs, this->left, this->right)).empty()) {
         return ret;
     }
-    if ((ret = showOrSpecialCase(gs, this->right, this->left)) != "") {
+    if (!(ret = showOrSpecialCase(gs, this->right, this->left)).empty()) {
         return ret;
     }
 

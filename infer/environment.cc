@@ -597,7 +597,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
 
 void Environment::computePins(core::Context ctx, const vector<Environment> &envs, const cfg::CFG &inWhat,
                               const cfg::BasicBlock *bb) {
-    if (bb->backEdges.size() == 0) {
+    if (bb->backEdges.empty()) {
         return;
     }
 

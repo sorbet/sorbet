@@ -78,7 +78,7 @@ TIMEFILE2=$(mktemp)
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_5_0_0_linux/bin/llvm-symbolizer" \
+env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer" \
     ASAN_OPTIONS=detect_leaks=0 \
     UBSAN_OPTIONS=print_stacktrace=1 \
     LSAN_OPTIONS=verbosity=1:log_threads=1 \

@@ -41,14 +41,14 @@ toolchain {
   cxx_flag: "-stdlib=libc++"
   linker_flag: "-stdlib=libc++"
   linker_flag: "-pthread"
-  linker_flag: "-Lexternal/clang_5_0_0_linux/lib/"
+  linker_flag: "-Lexternal/clang_6_0_0_linux/lib/"
 
   # TODO(bazel-team): In theory, the path here ought to exactly match the path
   # used by gcc. That works because bazel currently doesn't track files at
   # absolute locations and has no remote execution, yet. However, this will need
   # to be fixed, maybe with auto-detection?
-  cxx_builtin_include_directory: "%package(@clang_5_0_0_linux//include)%"
-  cxx_builtin_include_directory: "%package(@clang_5_0_0_linux//lib/clang)%"
+  cxx_builtin_include_directory: "%package(@clang_6_0_0_linux//include)%"
+  cxx_builtin_include_directory: "%package(@clang_6_0_0_linux//lib/clang)%"
   cxx_builtin_include_directory: "/usr/include"
 
   tool_path { name: "gcov" path: "/usr/bin/gcov" }

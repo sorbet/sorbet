@@ -46,7 +46,7 @@ public:
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
 
-    ~GlobalState();
+    ~GlobalState() = default;
 
     SymbolRef enterClassSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterTypeMember(Loc loc, SymbolRef owner, NameRef name, Variance variance);

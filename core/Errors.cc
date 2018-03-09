@@ -89,8 +89,9 @@ string ErrorSection::toString(const GlobalState &gs) {
     // Print a leading newline iff there was a header
     bool printnl = !this->header.empty();
     for (auto &line : this->messages) {
-        if (printnl)
+        if (printnl) {
             buf << endl;
+        }
         printnl = false;
         buf << indent << line.toString(gs, coloredLineHeaders);
     }

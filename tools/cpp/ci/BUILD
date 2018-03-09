@@ -4,10 +4,10 @@ filegroup(
     name = "clang_linux_all_files",
     srcs = [
         "//tools/cpp/ci/bin:wrappers",
-        "@clang_5_0_0_linux//:bin",
-        "@clang_5_0_0_linux//:includes",
-        "@clang_5_0_0_linux//:lib",
-        "@clang_5_0_0_linux//:libclang",
+        "@clang_6_0_0_linux//:bin",
+        "@clang_6_0_0_linux//:includes",
+        "@clang_6_0_0_linux//:lib",
+        "@clang_6_0_0_linux//:libclang",
     ],
 )
 
@@ -15,10 +15,10 @@ filegroup(
     name = "clang_linux_compiler_files",
     srcs = [
         "//tools/cpp/ci/bin:wrappers",
-        "@clang_5_0_0_linux//:bin",
-        "@clang_5_0_0_linux//:includes",
-        "@clang_5_0_0_linux//:lib",
-        "@clang_5_0_0_linux//:libclang",
+        "@clang_6_0_0_linux//:bin",
+        "@clang_6_0_0_linux//:includes",
+        "@clang_6_0_0_linux//:lib",
+        "@clang_6_0_0_linux//:libclang",
     ],
 )
 

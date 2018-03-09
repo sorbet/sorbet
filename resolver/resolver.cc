@@ -462,7 +462,6 @@ private:
                         // OVERLOAD
                         lastSig.clear();
                     }
-
                 },
                 [&](ast::ClassDef *cdef) {
                     // Leave in place

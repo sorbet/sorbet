@@ -945,7 +945,7 @@ int realmain(int argc, char **argv) {
                                  options["metrics-sha"].as<string>(), status);
     }
 
-    // je_malloc_stats_print(NULL, NULL, NULL); // uncomment this to print jemalloc statistics
+    // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
     if (gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !options.count("suppress-non-critical")) {

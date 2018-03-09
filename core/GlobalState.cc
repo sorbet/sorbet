@@ -300,8 +300,6 @@ void GlobalState::initEmpty() {
     sanityCheck();
 }
 
-GlobalState::~GlobalState(){};
-
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
 
 SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags) {
@@ -750,15 +748,15 @@ FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
     auto &owner = what.data(*this).owner;
     auto &members = owner.data(*this).members;
-    for (auto it = members.begin(); it != members.end(); ++it) {
-        if (it->first == origName) {
+    for (auto &mem : members) {
+        if (mem.first == origName) {
             int collisionCount = 1;
             core::NameRef name;
             do {
                 name = freshNameUnique(kind, origName, collisionCount++);
             } while (owner.data(*this).findMember(*this, name).exists());
-            it->first = name;
-            it->second.data(*this).name = it->first;
+            mem.first = name;
+            mem.second.data(*this).name = mem.first;
             break;
         }
     }

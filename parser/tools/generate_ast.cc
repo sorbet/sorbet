@@ -318,7 +318,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    buf << \"{\" << std::endl;" << endl;
     out << "    printTabs(buf, tabs + 1);" << endl;
     auto maybeComma = "";
-    if (node.fields.size() > 0) {
+    if (!node.fields.empty()) {
         maybeComma = ",";
     }
     out << "    buf << \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma << "\" << std::endl;" << endl;

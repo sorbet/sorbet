@@ -297,7 +297,6 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                     } else {
                         result = lub(ctx, p1->underlying, p2->underlying);
                     }
-
                 });
             ENFORCE(result.get() != nullptr);
             return result;
@@ -572,7 +571,6 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
                     } else {
                         result = Types::bottom();
                     }
-
                 });
             ENFORCE(result.get() != nullptr);
             return result;

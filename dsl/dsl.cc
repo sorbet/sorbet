@@ -18,7 +18,6 @@ public:
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
                      [&](ast::Assign *assign) {
-
                          auto nodes = Struct::replaceDSL(ctx, assign);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
@@ -27,7 +26,6 @@ public:
                      },
 
                      [&](ast::Send *send) {
-
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
@@ -63,7 +61,7 @@ public:
     }
 
 private:
-    DSLReplacer() {}
+    DSLReplacer() = default;
 };
 
 unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
