@@ -49,6 +49,7 @@ NameDef names[] = {
     {"to_hash", Desugar},
     {"to_proc", Desugar},
     {"concat", Desugar},
+    {"key_p", "key?", Core},
     {"intern", Desugar},
     {"call", Desugar | Namer | Infer},
     {"bang", "!", Desugar | Infer | Parser},

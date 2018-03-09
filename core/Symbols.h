@@ -705,6 +705,17 @@ public:
     static SymbolRef T_Set() {
         return SymbolRef(nullptr, 46);
     }
+    static SymbolRef Configatron() {
+        return SymbolRef(nullptr, 47);
+    }
+
+    static SymbolRef Configatron_Store() {
+        return SymbolRef(nullptr, 48);
+    }
+
+    static SymbolRef Configatron_RootStore() {
+        return SymbolRef(nullptr, 49);
+    }
 
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {

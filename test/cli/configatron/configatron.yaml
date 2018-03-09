@@ -3,4 +3,5 @@ default: &default
   test_int: 42
   test_string: Mamba
   test_float: 42.42
-
+  test_nested:
+      test_int: 43

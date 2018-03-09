@@ -137,15 +137,14 @@ struct Path {
             parent.data(gs).resultType = myType;
         } else {
             auto classSym =
-                gs.enterClassSymbol(core::Loc::none(), owner, gs.enterNameConstant("Configatron" + this->toString()));
+                gs.enterClassSymbol(core::Loc::none(), owner, gs.enterNameConstant("configatron" + this->toString()));
+            if (this->parent == nullptr) {
+                classSym.data(gs).superClass = core::Symbols::Configatron_RootStore();
+            } else {
+                classSym.data(gs).superClass = core::Symbols::Configatron_Store();
+            }
             parent.data(gs).resultType = make_shared<core::ClassType>(classSym);
-            auto squareBrackets = gs.enterMethodSymbol(core::Loc::none(), classSym, core::Names::squareBrackets());
-            squareBrackets.data(gs).resultType = core::Types::dynamic();
-            auto to_h = gs.enterMethodSymbol(core::Loc::none(), classSym, core::Names::to_h());
-            to_h.data(gs).resultType = core::Types::dynamic();
-            auto arg = gs.enterMethodArgumentSymbol(core::Loc::none(), squareBrackets, core::Names::arg0());
-            arg.data(gs).resultType = core::Types::dynamic();
-            squareBrackets.data(gs).argumentsOrMixins.emplace_back(arg);
+            // DO NOT ADD METHODS HERE. add them to Configatron::Store shim
 
             for (auto &child : children) {
                 auto method = gs.enterMethodSymbol(core::Loc::none(), classSym, gs.enterNameUTF8(child->selector));

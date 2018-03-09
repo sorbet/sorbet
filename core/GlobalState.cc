@@ -58,6 +58,9 @@ const char *struct_str = "Struct";
 const char *file_str = "File";
 const char *ruby_typer_str = "RubyTyper";
 const char *stub_str = "StubClass";
+const char *configatron_str = "Configatron";
+const char *store_str = "Store";
+const char *root_store_str = "RootStore";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -157,6 +160,10 @@ void GlobalState::initEmpty() {
     SymbolRef T_Enumerable_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(enumerable_str));
     SymbolRef T_Range_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(range_str));
     SymbolRef T_Set_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(set_str));
+    SymbolRef configatron_id = synthesizeClass(configatron_str);
+    SymbolRef configatron_store_id = enterClassSymbol(Loc::none(), configatron_id, enterNameConstant(store_str));
+    SymbolRef configatron_rootstore_id =
+        enterClassSymbol(Loc::none(), configatron_id, enterNameConstant(root_store_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -203,6 +210,9 @@ void GlobalState::initEmpty() {
     ENFORCE(ruby_typer_id = Symbols::RubyTyper());
     ENFORCE(stub_id = Symbols::StubClass());
     ENFORCE(T_Enumerable_id = Symbols::T_Enumerable());
+    ENFORCE(configatron_id = Symbols::Configatron());
+    ENFORCE(configatron_store_id = Symbols::Configatron_Store());
+    ENFORCE(configatron_rootstore_id = Symbols::Configatron_RootStore());
     ENFORCE(T_Range_id = Symbols::T_Range());
     ENFORCE(T_Set_id = Symbols::T_Set());
 

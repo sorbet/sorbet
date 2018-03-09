@@ -131,13 +131,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:<<RESERVED>>85> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>86> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>87> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>88> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>89> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>8> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>90> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>91> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>92> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>93> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>9> < ::<constant:Object> () @ ???
   class <constant:<Magic>> < ::<constant:Object> () -> <Magic> @ ???
     method <build-array> (arg0) -> AppliedType {
@@ -1865,6 +1859,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method untrust () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method zero? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:I> -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  class <constant:Configatron> < ::<constant:Object> () -> <Class:Configatron> @ ???
+    class <constant:RootStore> () -> <Class:Configatron::RootStore> @ ???
+    class <constant:Store> () -> <Class:Configatron::Store> @ ???
+    class <singleton class:<constant:RootStore>> < ::<constant:Module> () @ ???
+    class <singleton class:<constant:Store>> < ::<constant:Module> () @ ???
   class <constant:Coverage> (<constant:BasicObject>) -> <Class:Coverage> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Data> < ::<constant:Object> () -> <Class:Data> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> Data @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -10110,6 +10109,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <singleton class:<constant:ClosedQueueError>> < ::<singleton class:<constant:StopIteration>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:Comparable>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:Complex>> < ::<singleton class:<constant:Numeric>> () @ ???
+  class <singleton class:<constant:Configatron>> < ::<singleton class:<constant:Object>> () @ ???
   class <singleton class:<constant:Coverage>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method result () -> AppliedType {
       klass = ::<constant:Hash>
