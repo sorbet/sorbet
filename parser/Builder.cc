@@ -515,12 +515,7 @@ public:
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        Loc loc = tok_loc(def, name);
-        loc = loc.join(maybe_loc(args));
-        if (body != nullptr) {
-            Loc before_body(body->loc.file, body->loc.begin_pos, body->loc.end_pos);
-            loc = loc.join(before_body);
-        }
+        Loc loc = tok_loc(def, name).join(maybe_loc(args));
 
         return make_unique<DefMethod>(loc, gs_.enterNameUTF8(name->string()), move(args), move(body));
     }
@@ -536,12 +531,7 @@ public:
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
                                    unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        Loc loc = tok_loc(def, name);
-        loc = loc.join(maybe_loc(args));
-        if (body != nullptr) {
-            Loc before_body(body->loc.file, body->loc.begin_pos, body->loc.end_pos);
-            loc = loc.join(before_body);
-        }
+        Loc loc = tok_loc(def, name).join(maybe_loc(args));
 
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
