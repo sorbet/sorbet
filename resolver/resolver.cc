@@ -741,11 +741,11 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        auto rhs = addMethods(ctx, move(classDef->rhs));
-        classes[classStack.back()] = make_unique<ast::ClassDef>(classDef->loc, classDef->symbol, move(classDef->name),
-                                                                move(classDef->ancestors), move(rhs), classDef->kind);
+        auto loc = classDef->loc;
+        classDef->rhs = addMethods(ctx, move(classDef->rhs));
+        classes[classStack.back()] = move(classDef);
         classStack.pop_back();
-        return make_unique<ast::EmptyTree>(classDef->loc);
+        return make_unique<ast::EmptyTree>(loc);
     };
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
@@ -754,11 +754,10 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
-        methods.methods[methods.stack.back()] =
-            make_unique<ast::MethodDef>(methodDef->loc, methodDef->symbol, methodDef->name, move(methodDef->args),
-                                        move(methodDef->rhs), methodDef->isSelf);
+        auto loc = methodDef->loc;
+        methods.methods[methods.stack.back()] = move(methodDef);
         methods.stack.pop_back();
-        return make_unique<ast::EmptyTree>(methodDef->loc);
+        return make_unique<ast::EmptyTree>(loc);
     };
 
     std::unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
