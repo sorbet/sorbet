@@ -290,6 +290,11 @@ private:
     TreeMapper(FUNC &func) : func(func) {}
 
     unique_ptr<Expression> mapIt(unique_ptr<Expression> what, CTX ctx) {
+        if (what == nullptr) {
+            return what;
+        }
+        auto loc = what->loc;
+
         try {
             // TODO: reorder by frequency
             if (HAS_MEMBER_preTransformExpression<FUNC>::value) {
@@ -297,8 +302,9 @@ private:
                     ctx, move(what), func);
             }
 
-            if (what == nullptr || isa_tree<EmptyTree>(what.get()) || isa_tree<ZSuperArgs>(what.get()))
+            if (isa_tree<EmptyTree>(what.get()) || isa_tree<ZSuperArgs>(what.get())) {
                 return what;
+            }
 
             if (ClassDef *u = cast_tree<ClassDef>(what.get())) {
                 unique_ptr<ClassDef> v(u);
@@ -727,7 +733,7 @@ private:
         } catch (...) {
             if (!locReported) {
                 locReported = true;
-                if (auto e = ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
+                if (auto e = ctx.state.beginError(loc, core::errors::Internal::InternalError)) {
                     e.setHeader("Failed to process tree (backtrace is above)");
                 }
             }
