@@ -4,6 +4,40 @@
 // makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expression>;
 template class std::unique_ptr<ruby_typer::ast::Reference>;
+template class std::unique_ptr<ruby_typer::ast::ClassDef>;
+template class std::unique_ptr<ruby_typer::ast::MethodDef>;
+template class std::unique_ptr<ruby_typer::ast::ConstDef>;
+template class std::unique_ptr<ruby_typer::ast::If>;
+template class std::unique_ptr<ruby_typer::ast::While>;
+template class std::unique_ptr<ruby_typer::ast::Break>;
+template class std::unique_ptr<ruby_typer::ast::Retry>;
+template class std::unique_ptr<ruby_typer::ast::Next>;
+template class std::unique_ptr<ruby_typer::ast::Return>;
+template class std::unique_ptr<ruby_typer::ast::Yield>;
+template class std::unique_ptr<ruby_typer::ast::RescueCase>;
+template class std::unique_ptr<ruby_typer::ast::Rescue>;
+template class std::unique_ptr<ruby_typer::ast::Ident>;
+template class std::unique_ptr<ruby_typer::ast::Local>;
+template class std::unique_ptr<ruby_typer::ast::UnresolvedIdent>;
+template class std::unique_ptr<ruby_typer::ast::RestArg>;
+template class std::unique_ptr<ruby_typer::ast::KeywordArg>;
+template class std::unique_ptr<ruby_typer::ast::OptionalArg>;
+template class std::unique_ptr<ruby_typer::ast::BlockArg>;
+template class std::unique_ptr<ruby_typer::ast::ShadowArg>;
+template class std::unique_ptr<ruby_typer::ast::Assign>;
+template class std::unique_ptr<ruby_typer::ast::Send>;
+template class std::unique_ptr<ruby_typer::ast::Cast>;
+template class std::unique_ptr<ruby_typer::ast::Hash>;
+template class std::unique_ptr<ruby_typer::ast::Array>;
+template class std::unique_ptr<ruby_typer::ast::Literal>;
+template class std::unique_ptr<ruby_typer::ast::ConstantLit>;
+template class std::unique_ptr<ruby_typer::ast::ArraySplat>;
+template class std::unique_ptr<ruby_typer::ast::HashSplat>;
+template class std::unique_ptr<ruby_typer::ast::ZSuperArgs>;
+template class std::unique_ptr<ruby_typer::ast::Self>;
+template class std::unique_ptr<ruby_typer::ast::Block>;
+template class std::unique_ptr<ruby_typer::ast::InsSeq>;
+template class std::unique_ptr<ruby_typer::ast::EmptyTree>;
 
 using namespace std;
 
