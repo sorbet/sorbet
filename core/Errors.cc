@@ -66,12 +66,16 @@ string BasicError::toString(const GlobalState &gs) {
 string ErrorLine::toString(const GlobalState &gs, bool color) {
     stringstream buf;
     string indent = "  ";
-    buf << indent << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": ";
-    if (color) {
-        buf << DETAIL_COLOR << restoreColors(formattedMessage, DETAIL_COLOR) << RESET_COLOR << endl;
-    } else {
-        buf << restoreColors(formattedMessage, RESET_COLOR) << endl;
+    buf << indent << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ":";
+    if (!formattedMessage.empty()) {
+        buf << " ";
+        if (color) {
+            buf << DETAIL_COLOR << restoreColors(formattedMessage, DETAIL_COLOR) << RESET_COLOR;
+        } else {
+            buf << restoreColors(formattedMessage, RESET_COLOR);
+        }
     }
+    buf << endl;
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }

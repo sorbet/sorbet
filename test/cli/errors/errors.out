@@ -9,7 +9,7 @@ test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method 
     7054 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:9: 
+    test/cli/errors/errors.rb:9:
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
 test/cli/errors/errors.rb:16: Expression passed as an argument `arg` to method `foo` does not match expected type http://go/e/7002
@@ -19,6 +19,6 @@ test/cli/errors/errors.rb:16: Expression passed as an argument `arg` to method `
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
   Got String("foo") originating from:
-    test/cli/errors/errors.rb:16: 
+    test/cli/errors/errors.rb:16:
     16 |    foo("foo")
                 ^^^^^
