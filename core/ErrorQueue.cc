@@ -27,9 +27,6 @@ ErrorQueue::ErrorQueue(spd::logger &logger) : logger(logger) {
 void ErrorQueue::renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical) {
     for (auto &error : collected[whatFile]) {
         auto &out = error.error->isCritical ? critical : nonCritical;
-        if (out.tellp() != 0) {
-            out << '\n';
-        }
         out << error.text;
     }
     collected[whatFile].clear();
@@ -58,9 +55,6 @@ void ErrorQueue::flushErrors(bool all) {
         for (auto &part : collected) {
             for (auto &error : part.second) {
                 auto &out = error.error->isCritical ? critical : nonCritical;
-                if (out.tellp() != 0) {
-                    out << '\n';
-                }
                 out << error.text;
             }
         }

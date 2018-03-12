@@ -16,3 +16,20 @@ class ComplexError
     foo("foo")
   end
 end
+
+class ErrorLines
+  def main(foo)
+    a = case foo
+        when 1
+          nil
+        when 2
+          2
+        end
+    bar(a)
+  end
+
+  sig(a: Integer).returns(Integer)
+  def bar(a)
+    a
+  end
+end

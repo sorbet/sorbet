@@ -82,7 +82,7 @@ string Loc::toString(const core::GlobalState &gs, int tabs) const {
             endPos -= 1;
         }
         buf.write(filed.source().data() + filed.line_breaks[lineIt] + 1, endPos - filed.line_breaks[lineIt]);
-        buf << '\n';
+        buf << endl;
         lineIt++;
     }
 
@@ -101,7 +101,7 @@ string Loc::toString(const core::GlobalState &gs, int tabs) const {
         for (; p < pos.second.column; p++) {
             buf << '^';
         }
-        buf << rang::fg::reset;
+        buf << endl << rang::fg::reset;
     }
     return buf.str();
 }

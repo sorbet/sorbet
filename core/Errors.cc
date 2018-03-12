@@ -88,15 +88,9 @@ string ErrorSection::toString(const GlobalState &gs) {
     bool coloredLineHeaders = true;
     if (!this->header.empty()) {
         coloredLineHeaders = false;
-        buf << indent << DETAIL_COLOR << restoreColors(this->header, DETAIL_COLOR) << RESET_COLOR;
+        buf << indent << DETAIL_COLOR << restoreColors(this->header, DETAIL_COLOR) << RESET_COLOR << endl;
     }
-    // Print a leading newline iff there was a header
-    bool printnl = !this->header.empty();
     for (auto &line : this->messages) {
-        if (printnl) {
-            buf << endl;
-        }
-        printnl = false;
         buf << indent << line.toString(gs, coloredLineHeaders);
     }
     return buf.str();
@@ -104,14 +98,9 @@ string ErrorSection::toString(const GlobalState &gs) {
 
 string ComplexError::toString(const GlobalState &gs) {
     stringstream buf;
-    buf << BasicError::toString(gs) << endl;
+    buf << BasicError::toString(gs);
 
-    bool first = true;
     for (auto &section : this->sections) {
-        if (!first) {
-            buf << endl;
-        }
-        first = false;
         buf << section.toString(gs);
     }
     return buf.str();
