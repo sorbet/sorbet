@@ -183,7 +183,7 @@ public:
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (print.CFG || print.CFGRaw) {
-            cout << cfg->toString(ctx) << endl << endl;
+            cout << cfg->toString(ctx) << '\n' << '\n';
         }
         if (printSrc) {
             cfg->recordAnnotations(ctx);
@@ -209,10 +209,10 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
             nodes = parser::Parser::run(lgs, file);
         }
         if (print.ParseTree) {
-            cout << nodes->toString(lgs, 0) << endl;
+            cout << nodes->toString(lgs, 0) << '\n';
         }
         if (print.ParseTreeJSON) {
-            cout << nodes->toJSON(lgs, 0) << endl;
+            cout << nodes->toJSON(lgs, 0) << '\n';
         }
         if (opts.stopAfterPhase == Phase::PARSER) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -227,10 +227,10 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
             ast = ast::desugar::node2Tree(ctx, move(nodes));
         }
         if (print.Desugared) {
-            cout << ast->toString(lgs, 0) << endl;
+            cout << ast->toString(lgs, 0) << '\n';
         }
         if (print.DesugaredRaw) {
-            cout << ast->showRaw(lgs) << endl;
+            cout << ast->showRaw(lgs) << '\n';
         }
         if (opts.stopAfterPhase == Phase::DESUGARER) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -242,10 +242,10 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
             ast = dsl::DSL::run(ctx, move(ast));
         }
         if (print.DSLTree) {
-            cout << ast->toString(lgs, 0) << endl;
+            cout << ast->toString(lgs, 0) << '\n';
         }
         if (print.DSLTreeRaw) {
-            cout << ast->showRaw(lgs) << endl;
+            cout << ast->showRaw(lgs) << '\n';
         }
         if (opts.stopAfterPhase == Phase::DSL) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -424,7 +424,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << File::getFileName(f.data(ctx).path()) << "\"{" << endl;
+            cout << "digraph \"" << File::getFileName(f.data(ctx).path()) << "\"{" << '\n';
         }
         CFG_Collector_and_Typer collector(opts);
         {
@@ -436,7 +436,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
             cout << ctx.state.showAnnotatedSource(f);
         }
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "}" << endl << endl;
+            cout << "}" << '\n' << '\n';
         }
     } catch (...) {
         if (auto e = ctx.state.beginError(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError)) {
@@ -479,10 +479,10 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
 
     for (auto &resolved : what) {
         if (opts.print.NameTree) {
-            cout << resolved->toString(*gs, 0) << endl;
+            cout << resolved->toString(*gs, 0) << '\n';
         }
         if (opts.print.NameTreeRaw) {
-            cout << resolved->showRaw(*gs) << endl;
+            cout << resolved->showRaw(*gs) << '\n';
         }
     }
 
@@ -539,10 +539,10 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     }
 
     if (opts.print.NameTable) {
-        cout << gs->toString() << endl;
+        cout << gs->toString() << '\n';
     }
     if (opts.print.NameTableFull) {
-        cout << gs->toString(true) << endl;
+        cout << gs->toString(true) << '\n';
     }
     return;
 }

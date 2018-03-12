@@ -19,25 +19,25 @@ string sourceName2funcName(string sourceName) {
 }
 
 void emit_header(vector<string> sourceFiles, ostream &out) {
-    out << "#include<string>" << endl << "#include<vector>" << endl;
-    out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
+    out << "#include<string>" << '\n' << "#include<vector>" << '\n';
+    out << "namespace ruby_typer{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
-        out << "  std::string " + sourceName2funcName(file) << "();" << endl;
+        out << "  std::string " + sourceName2funcName(file) << "();" << '\n';
     }
-    out << "  std::vector<std::pair<std::string, std::string>> all();" << endl;
+    out << "  std::vector<std::pair<std::string, std::string>> all();" << '\n';
 
-    out << "}};" << endl;
+    out << "}};" << '\n';
 }
 
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
-    out << "#include<string>" << endl << "#include<vector>" << endl;
-    out << "namespace ruby_typer{" << endl << "namespace rbi{" << endl;
+    out << "#include<string>" << '\n' << "#include<vector>" << '\n';
+    out << "namespace ruby_typer{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
-        out << "  std::string " + sourceName2funcName(file) << "() {" << endl;
-        out << "  return \"" + absl::CEscape(ruby_typer::File::read(file.c_str())) + "\";" << endl << "}" << endl;
+        out << "  std::string " + sourceName2funcName(file) << "() {" << '\n';
+        out << "  return \"" + absl::CEscape(ruby_typer::File::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
     }
-    out << "std::vector<std::pair<std::string, std::string>> all() {" << endl;
-    out << "  std::vector<std::pair<std::string, std::string>> result;" << endl;
+    out << "std::vector<std::pair<std::string, std::string>> all() {" << '\n';
+    out << "  std::vector<std::pair<std::string, std::string>> result;" << '\n';
     for (auto &file : sourceFiles) {
         string version = ruby_typer::Version::build_scm_revision;
         if (version == "0") {
@@ -46,11 +46,11 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
         string permalink = "https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/" + version + "/" + file;
         out << "  result.push_back(std::make_pair<std::string, std::string>(\"" + absl::CEscape(permalink) + "\", " +
                    sourceName2funcName(file) + "()));"
-            << endl;
+            << '\n';
     }
-    out << "  return result;" << endl;
+    out << "  return result;" << '\n';
 
-    out << "}}};" << endl;
+    out << "}}};" << '\n';
 }
 
 int main(int argc, char **argv) {
@@ -58,13 +58,13 @@ int main(int argc, char **argv) {
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
-            cerr << "unable to open " << argv[1] << endl;
+            cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
 
         ofstream classfile(argv[2], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[2] << endl;
+            cerr << "unable to open " << argv[2] << '\n';
             return 1;
         }
 

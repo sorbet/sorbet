@@ -102,7 +102,7 @@ struct Path {
     string show(core::GlobalState &gs) {
         stringstream result;
         if (myType) {
-            result << toString() + " -> " + myType->toString(gs) << endl;
+            result << toString() + " -> " + myType->toString(gs) << '\n';
         }
         for (auto child : children) {
             result << child->show(gs);
@@ -227,7 +227,7 @@ void ruby_typer::namer::configatron::fillInFromFileSystem(core::GlobalState &gs,
         handleFile(gs, file, rootNode);
     }
 
-    //    cout << rootNode->show(gs) << endl;
+    //    cout << rootNode->show(gs) << '\n';
     core::SymbolRef configatron =
         gs.enterMethodSymbol(core::Loc::none(), core::Symbols::Kernel(), gs.enterNameUTF8("configatron"));
     rootNode->enter(gs, configatron, core::Symbols::root());

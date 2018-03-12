@@ -56,7 +56,7 @@ string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
     buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
         << restoreColors(formatted, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
-        << RESET_COLOR << endl;
+        << RESET_COLOR << '\n';
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }
@@ -75,7 +75,7 @@ string ErrorLine::toString(const GlobalState &gs, bool color) {
             buf << restoreColors(formattedMessage, RESET_COLOR);
         }
     }
-    buf << endl;
+    buf << '\n';
     if (!loc.is_none()) {
         buf << loc.toString(gs, 2);
     }

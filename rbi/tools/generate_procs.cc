@@ -5,21 +5,21 @@ constexpr int MAX_PROC_ARITY = 10;
 using namespace std;
 
 void emit_proc(std::ofstream &out, int arity) {
-    out << "class Proc" << arity << " < Proc" << endl;
-    out << "  Return = type_member" << endl;
+    out << "class Proc" << arity << " < Proc" << '\n';
+    out << "  Return = type_member" << '\n';
     for (int i = 0; i < arity; ++i) {
-        out << "  Arg" << i << " = type_member" << endl;
+        out << "  Arg" << i << " = type_member" << '\n';
     }
 
-    out << endl;
+    out << '\n';
 
-    out << "  sig(" << endl;
+    out << "  sig(" << '\n';
     for (int i = 0; i < arity; ++i) {
         out << "    arg" << i << ": "
-            << "Arg" << i << "," << endl;
+            << "Arg" << i << "," << '\n';
     }
-    out << "  )" << endl;
-    out << "  .returns(Return)" << endl;
+    out << "  )" << '\n';
+    out << "  .returns(Return)" << '\n';
     out << "  def call(";
     for (int i = 0; i < arity; ++i) {
         if (i != 0) {
@@ -27,12 +27,12 @@ void emit_proc(std::ofstream &out, int arity) {
         }
         out << "arg" << i;
     }
-    out << ")" << endl;
-    out << "  end" << endl;
-    out << endl;
-    out << "  alias_method :[], :call" << endl;
-    out << endl;
-    out << "end" << endl << endl;
+    out << ")" << '\n';
+    out << "  end" << '\n';
+    out << '\n';
+    out << "  alias_method :[], :call" << '\n';
+    out << '\n';
+    out << "end" << '\n' << '\n';
 }
 
 int main(int argc, char **argv) {

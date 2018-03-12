@@ -206,37 +206,37 @@ NameDef names[] = {
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
-    out << "#ifndef NAME_" << name.srcName << endl;
-    out << "#define NAME_" << name.srcName << endl;
-    out << "    // \"" << name.val << "\"" << endl;
-    out << "    static inline constexpr NameRef " << name.srcName << "() {" << endl;
-    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << endl;
-    out << "    }" << endl;
-    out << "#endif" << endl;
-    out << endl;
+    out << "#ifndef NAME_" << name.srcName << '\n';
+    out << "#define NAME_" << name.srcName << '\n';
+    out << "    // \"" << name.val << "\"" << '\n';
+    out << "    static inline constexpr NameRef " << name.srcName << "() {" << '\n';
+    out << "        return NameRef(NameRef::WellKnown{}, " << name.id << ");" << '\n';
+    out << "    }" << '\n';
+    out << "#endif" << '\n';
+    out << '\n';
 }
 
 void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
-    out << absl::CEscape(name.val) << "\";" << endl;
+    out << absl::CEscape(name.val) << "\";" << '\n';
 
     out << "absl::string_view " << name.srcName << "_DESC{(char*)";
-    out << name.srcName << "," << name.val.size() << "};" << endl;
-    out << endl;
+    out << name.srcName << "," << name.val.size() << "};" << '\n';
+    out << '\n';
 }
 
 void emit_register(ostream &out) {
-    out << "void Names::registerNames(GlobalState &gs) {" << endl;
+    out << "void Names::registerNames(GlobalState &gs) {" << '\n';
     for (auto &name : names) {
-        out << "    NameRef " << name.srcName << "_id = gs.enterNameUTF8(" << name.srcName << "_DESC);" << endl;
+        out << "    NameRef " << name.srcName << "_id = gs.enterNameUTF8(" << name.srcName << "_DESC);" << '\n';
     }
-    out << endl;
+    out << '\n';
     for (auto &name : names) {
         out << "    ENFORCE(" << name.srcName << "_id._id == " << name.id << "); /* Names::" << name.srcName << "() */"
-            << endl;
+            << '\n';
     }
-    out << endl;
-    out << "}" << endl;
+    out << '\n';
+    out << "}" << '\n';
 }
 
 int main(int argc, char **argv) {
@@ -250,36 +250,36 @@ int main(int argc, char **argv) {
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
-            cerr << "unable to open " << argv[1] << endl;
+            cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
 
-        header << "namespace Names {" << endl;
-        header << "    void registerNames(GlobalState &gs);" << endl;
-        header << "};" << endl;
+        header << "namespace Names {" << '\n';
+        header << "    void registerNames(GlobalState &gs);" << '\n';
+        header << "};" << '\n';
     }
 
     // emit initialization .cc file
     {
         ofstream classfile(argv[2], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[2] << endl;
+            cerr << "unable to open " << argv[2] << '\n';
             return 1;
         }
-        classfile << "#include \"core/GlobalState.h\"" << endl << endl;
-        classfile << "namespace ruby_typer {" << endl;
-        classfile << "namespace core {" << endl;
-        classfile << "namespace {" << endl;
+        classfile << "#include \"core/GlobalState.h\"" << '\n' << '\n';
+        classfile << "namespace ruby_typer {" << '\n';
+        classfile << "namespace core {" << '\n';
+        classfile << "namespace {" << '\n';
         for (auto &name : names) {
             emit_name_string(classfile, name);
         }
-        classfile << "}" << endl;
-        classfile << endl;
+        classfile << "}" << '\n';
+        classfile << '\n';
 
         emit_register(classfile);
 
-        classfile << "}" << endl;
-        classfile << "}" << endl;
+        classfile << "}" << '\n';
+        classfile << "}" << '\n';
     }
 
     // Emit per-phase name definitions
@@ -287,27 +287,27 @@ int main(int argc, char **argv) {
         string arg = argv[i];
         auto eq = arg.find('=');
         if (arg.substr(0, 2) != "--" || eq == string::npos) {
-            cerr << "bad arg: " << arg << endl;
+            cerr << "bad arg: " << arg << '\n';
             return 1;
         }
         auto phase = arg.substr(2, eq - 2);
         auto path = arg.substr(eq + 1);
         auto it = phaseNames.find(phase);
         if (it == phaseNames.end()) {
-            cerr << "unknown phase: " << phase << endl;
+            cerr << "unknown phase: " << phase << '\n';
             return 1;
         }
 
         ofstream header(path, ios::trunc);
         if (!header.good()) {
-            cerr << "unable to open " << path << endl;
+            cerr << "unable to open " << path << '\n';
             return 1;
         }
 
-        header << "#include \"core/Names.h\"" << endl << endl;
-        header << "namespace ruby_typer {" << endl;
-        header << "namespace core {" << endl;
-        header << "namespace Names {" << endl;
+        header << "#include \"core/Names.h\"" << '\n' << '\n';
+        header << "namespace ruby_typer {" << '\n';
+        header << "namespace core {" << '\n';
+        header << "namespace Names {" << '\n';
 
         for (auto &name : names) {
             if ((name.phases & it->second) != 0) {
@@ -316,15 +316,15 @@ int main(int argc, char **argv) {
         }
 
         if (phase == "core") {
-            header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << endl;
-            header << "#define NAME_LAST_WELL_KNOWN_NAME" << endl;
-            header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << endl;
-            header << "#endif" << endl;
+            header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
+            header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
+            header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
+            header << "#endif" << '\n';
         }
 
-        header << "};" << endl;
-        header << "};" << endl;
-        header << "};" << endl;
+        header << "};" << '\n';
+        header << "};" << '\n';
+        header << "};" << '\n';
     }
     return 0;
 }

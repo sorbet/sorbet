@@ -327,11 +327,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
+            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << '\n';
             for (auto &cfg : collector.cfgs) {
-                dot << cfg << endl << endl;
+                dot << cfg << '\n' << '\n';
             }
-            dot << "}" << endl << endl;
+            dot << "}" << '\n' << '\n';
             got["cfg"].append(dot.str());
 
             auto newErrors = errorQueue->drainErrors();
@@ -347,11 +347,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << endl;
+            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << '\n';
             for (auto &cfg : collector.cfgs) {
-                dot << cfg << endl << endl;
+                dot << cfg << '\n' << '\n';
             }
-            dot << "}" << endl << endl;
+            dot << "}" << '\n' << '\n';
             got["cfg-raw"].append(dot.str());
 
             auto newErrors = errorQueue->drainErrors();
@@ -396,7 +396,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expect = ruby_typer::File::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
-            TEST_COUT << gotPhase.first << " ok" << endl;
+            TEST_COUT << gotPhase.first << " ok" << '\n';
         }
     }
 
@@ -459,11 +459,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             int line = unknownLocErrorLine++;
             auto expectedError = expectedErrors.find(make_pair(files.front(), line));
             if (expectedError == expectedErrors.end()) {
-                ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << endl
+                ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << '\n'
                                                       << "Reported error: " << error->formatted;
             } else if (error->formatted.find(expectedError->second.error) == string::npos) {
-                ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << endl
-                                                      << " Expectation: " << expectedError->second.error << endl
+                ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << '\n'
+                                                      << " Expectation: " << expectedError->second.error << '\n'
                                                       << " Reported error: " << error->formatted;
             } else {
                 seenErrorLines[make_pair(files.front(), line)]++;
@@ -482,13 +482,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                 if (expectedError.empty()) {
                     ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
                                                           "substring of) the expected error after `# error:` "
-                                                       << endl
+                                                       << '\n'
                                                        << "The message was: '" << error->formatted << "'";
                 } else if (expectedError.find("MULTI") != string::npos) { // multiple errors. Ignore message and pos
                     continue;
                 } else if (error->formatted.find(expectedError) == string::npos) {
-                    ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << endl
-                                                       << " Expectation: " << expectedError << endl
+                    ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << '\n'
+                                                       << " Expectation: " << expectedError << '\n'
                                                        << " Reported error: " << error->formatted;
                 } else if (expectedErrorIt->second.beginPos != -1 &&
                            pos.first.column != expectedErrorIt->second.beginPos) {
@@ -522,7 +522,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     // Allow later phases to have errors that we didn't test for
     errorQueue->drainErrors();
 
-    TEST_COUT << "errors OK" << endl;
+    TEST_COUT << "errors OK" << '\n';
 }
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(shardId, totalShards)), prettyPrintTest);

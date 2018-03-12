@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     classfile << "};\n";
     classfile
         << "extern const ruby_typer::u1 * const getNameTablePayload = (const ruby_typer::u1 * const)&nameTablePayload;"
-        << endl;
+        << '\n';
 
     classfile.close();
 

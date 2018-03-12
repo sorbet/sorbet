@@ -183,10 +183,10 @@ string KnowledgeFact::toString(core::Context ctx) const {
     stringstream buf;
 
     for (auto &el : yesTypeTests) {
-        buf << "    " << el.first.toString(ctx) << " to be " << el.second->toString(ctx, 0) << endl;
+        buf << "    " << el.first.toString(ctx) << " to be " << el.second->toString(ctx, 0) << '\n';
     }
     for (auto &el : noTypeTests) {
-        buf << "    " << el.first.toString(ctx) << " NOT to be " << el.second->toString(ctx, 0) << endl;
+        buf << "    " << el.first.toString(ctx) << " NOT to be " << el.second->toString(ctx, 0) << '\n';
     }
     return buf.str();
 }
@@ -210,11 +210,11 @@ KnowledgeFact &KnowledgeRef::mutate() {
 string TestedKnowledge::toString(core::Context ctx) const {
     stringstream buf;
     if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
-        buf << "  Being truthy entails:" << endl;
+        buf << "  Being truthy entails:" << '\n';
     }
     buf << truthy->toString(ctx);
     if (!falsy->noTypeTests.empty() || !falsy->yesTypeTests.empty()) {
-        buf << "  Being falsy entails:" << endl;
+        buf << "  Being falsy entails:" << '\n';
     }
     buf << falsy->toString(ctx);
     return buf.str();
@@ -235,7 +235,7 @@ void TestedKnowledge::sanityCheck() const {
 string Environment::toString(core::Context ctx) {
     stringstream buf;
     if (isDead) {
-        buf << "dead=" << isDead << endl;
+        buf << "dead=" << isDead << '\n';
     }
     int i = -1;
     for (auto var : vars) {
@@ -243,8 +243,8 @@ string Environment::toString(core::Context ctx) {
         if (var._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        buf << var.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << endl;
-        buf << knowledge[i].toString(ctx) << endl;
+        buf << var.toString(ctx) << ": " << types[i].type->toString(ctx, 0) << '\n';
+        buf << knowledge[i].toString(ctx) << '\n';
     }
     return buf.str();
 }

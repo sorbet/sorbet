@@ -229,15 +229,15 @@ string field_type(FieldType arg) {
 }
 
 void emit_node_header(ostream &out, NodeDef &node) {
-    out << "class " << node.name << " final : public Node {" << endl;
-    out << "public:" << endl;
+    out << "class " << node.name << " final : public Node {" << '\n';
+    out << "public:" << '\n';
 
     // generate constructor
     out << "    " << node.name << "(Loc loc";
     for (auto &arg : node.fields) {
         out << ", " << arg_type(arg.type) << arg.name;
     }
-    out << ")" << endl;
+    out << ")" << '\n';
     out << "        : Node(loc)";
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
@@ -250,78 +250,77 @@ void emit_node_header(ostream &out, NodeDef &node) {
         }
         out << ")";
     }
-    out << endl;
+    out << '\n';
     out << "{";
-    out << "    categoryCounterInc(\"nodes\", \"" << node.name << "\");" << endl;
-    out << "}" << endl;
-    out << endl;
+    out << "    categoryCounterInc(\"nodes\", \"" << node.name << "\");" << '\n';
+    out << "}" << '\n';
+    out << '\n';
 
     // Generate fields
     for (auto &arg : node.fields) {
-        out << "    " << field_type(arg.type) << " " << arg.name << ";" << endl;
+        out << "    " << field_type(arg.type) << " " << arg.name << ";" << '\n';
     }
-    out << endl;
-    out << "  virtual std::string toString(const core::GlobalState &gs, int tabs = 0);" << endl;
-    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << endl;
-    out << "  virtual std::string nodeName();" << endl;
+    out << '\n';
+    out << "  virtual std::string toString(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string toJSON(const core::GlobalState &gs, int tabs = 0);" << '\n';
+    out << "  virtual std::string nodeName();" << '\n';
 
-    out << "};" << endl;
-    out << endl;
+    out << "};" << '\n';
+    out << '\n';
 }
 
 void emit_node_classfile(ostream &out, NodeDef &node) {
-    out << "  std::string " << node.name << "::nodeName() {" << endl;
-    out << "    return \"" << node.name << "\";" << endl;
-    out << "  };" << endl << endl;
+    out << "  std::string " << node.name << "::nodeName() {" << '\n';
+    out << "    return \"" << node.name << "\";" << '\n';
+    out << "  };" << '\n' << '\n';
 
-    out << "  std::string " << node.name << "::toString(const core::GlobalState &gs, int tabs) {" << endl
-        << "    std::stringstream buf;" << endl;
-    out << "    buf << \"" << node.name << " {\" << std::endl;" << endl;
+    out << "  std::string " << node.name << "::toString(const core::GlobalState &gs, int tabs) {" << '\n'
+        << "    std::stringstream buf;" << '\n';
+    out << "    buf << \"" << node.name << " {\" << '\\n';" << '\n';
     // Generate fields
     for (auto &arg : node.fields) {
-        out << "    printTabs(buf, tabs + 1);" << endl;
+        out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case Name:
-                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".data(gs).toString(gs) << std::endl;"
-                    << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".data(gs).toString(gs) << '\\n';"
+                    << '\n';
                 break;
             case Node:
-                out << "    buf << \"" << arg.name << " = \";" << endl;
-                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);" << endl;
+                out << "    buf << \"" << arg.name << " = \";" << '\n';
+                out << "    printNode(buf, " << arg.name << ", gs, tabs + 1);" << '\n';
                 break;
             case NodeVec:
-                out << "    buf << \"" << arg.name << " = [\" << std::endl;" << endl;
-                out << "    for (auto &&a: " << arg.name << ") {" << endl;
-                out << "      printTabs(buf, tabs + 2);" << endl;
-                out << "      printNode(buf, a, gs, tabs + 2);" << endl;
-                out << "    }" << endl;
-                out << "    printTabs(buf, tabs + 1);" << endl;
-                out << "    buf << \"]\" << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = [\" << '\\n';" << '\n';
+                out << "    for (auto &&a: " << arg.name << ") {" << '\n';
+                out << "      printTabs(buf, tabs + 2);" << '\n';
+                out << "      printNode(buf, a, gs, tabs + 2);" << '\n';
+                out << "    }" << '\n';
+                out << "    printTabs(buf, tabs + 1);" << '\n';
+                out << "    buf << \"]\" << '\\n';" << '\n';
                 break;
             case String:
-                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << " << \"\\\"\" << std::endl;"
-                    << endl;
+                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << " << \"\\\"\" << '\\n';" << '\n';
                 break;
             case Uint:
-                out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << std::endl;" << endl;
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << '\\n';" << '\n';
                 break;
         }
     }
-    out << "    printTabs(buf, tabs);" << endl;
-    out << "    buf << \"}\";" << endl;
-    out << "    return buf.str();" << endl;
-    out << "  }" << endl;
-    out << endl;
+    out << "    printTabs(buf, tabs);" << '\n';
+    out << "    buf << \"}\";" << '\n';
+    out << "    return buf.str();" << '\n';
+    out << "  }" << '\n';
+    out << '\n';
 
-    out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << endl
-        << "    std::stringstream buf;" << endl;
-    out << "    buf << \"{\" << std::endl;" << endl;
-    out << "    printTabs(buf, tabs + 1);" << endl;
+    out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
+        << "    std::stringstream buf;" << '\n';
+    out << "    buf << \"{\" << '\\n';" << '\n';
+    out << "    printTabs(buf, tabs + 1);" << '\n';
     auto maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << "    buf << \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma << "\" << std::endl;" << endl;
+    out << "    buf << \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma << "\" << '\\n';" << '\n';
     int i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -329,47 +328,47 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         if (++i + 1 < node.fields.size()) {
             maybeComma = ",";
         }
-        out << "    printTabs(buf, tabs + 1);" << endl;
+        out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case Name:
                 out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << escapeJSON(" << arg.name
-                    << ".data(gs).show(gs)) << \"\\\"" << maybeComma << "\" << std::endl;" << endl;
+                    << ".data(gs).show(gs)) << \"\\\"" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case Node:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : \";" << endl;
-                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);" << endl;
-                out << "    buf << \"" << maybeComma << "\" << std::endl;" << endl;
+                out << "    buf << \"\\\"" << arg.name << "\\\" : \";" << '\n';
+                out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);" << '\n';
+                out << "    buf << \"" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case NodeVec:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : [\" << std::endl;" << endl;
-                out << "    int i = -1;" << endl;
-                out << "    for (auto &&a: " << arg.name << ") {" << endl;
-                out << "      i++;" << endl;
-                out << "      printTabs(buf, tabs + 2);" << endl;
-                out << "      printNodeJSON(buf, a, gs, tabs + 2);" << endl;
-                out << "      if (i + 1 < " << arg.name << ".size()) {" << endl;
-                out << "        buf << \",\";" << endl;
-                out << "      }" << endl;
-                out << "      buf << std::endl;" << endl;
-                out << "    }" << endl;
-                out << "    printTabs(buf, tabs + 1);" << endl;
-                out << "    buf << \"]" << maybeComma << "\" << std::endl;" << endl;
+                out << "    buf << \"\\\"" << arg.name << "\\\" : [\" << '\\n';" << '\n';
+                out << "    int i = -1;" << '\n';
+                out << "    for (auto &&a: " << arg.name << ") {" << '\n';
+                out << "      i++;" << '\n';
+                out << "      printTabs(buf, tabs + 2);" << '\n';
+                out << "      printNodeJSON(buf, a, gs, tabs + 2);" << '\n';
+                out << "      if (i + 1 < " << arg.name << ".size()) {" << '\n';
+                out << "        buf << \",\";" << '\n';
+                out << "      }" << '\n';
+                out << "      buf << '\\n';" << '\n';
+                out << "    }" << '\n';
+                out << "    printTabs(buf, tabs + 1);" << '\n';
+                out << "    buf << \"]" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case String:
                 out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
-                    << "\" << std::endl;" << endl;
+                    << "\" << '\\n';" << '\n';
                 break;
             case Uint:
                 out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
-                    << "\" << std::endl;" << endl;
+                    << "\" << '\\n';" << '\n';
                 break;
         }
     }
-    out << "    printTabs(buf, tabs);" << endl;
-    out << "    buf << \"}\";" << endl;
-    out << "    return buf.str();" << endl;
-    out << "  }" << endl;
-    out << endl;
+    out << "    printTabs(buf, tabs);" << '\n';
+    out << "    buf << \"}\";" << '\n';
+    out << "    return buf.str();" << '\n';
+    out << "  }" << '\n';
+    out << '\n';
 }
 
 int main(int argc, char **argv) {
@@ -377,7 +376,7 @@ int main(int argc, char **argv) {
     {
         ofstream header(argv[1], ios::trunc);
         if (!header.good()) {
-            cerr << "unable to open " << argv[1] << endl;
+            cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
         for (auto &node : nodes) {
@@ -388,17 +387,17 @@ int main(int argc, char **argv) {
     {
         ofstream classfile(argv[2], ios::trunc);
         if (!classfile.good()) {
-            cerr << "unable to open " << argv[2] << endl;
+            cerr << "unable to open " << argv[2] << '\n';
             return 1;
         }
-        classfile << "#include \"parser/Node.h\"" << endl << endl;
-        classfile << "namespace ruby_typer {" << endl;
-        classfile << "namespace parser {" << endl;
+        classfile << "#include \"parser/Node.h\"" << '\n' << '\n';
+        classfile << "namespace ruby_typer {" << '\n';
+        classfile << "namespace parser {" << '\n';
         for (auto &node : nodes) {
             emit_node_classfile(classfile, node);
         }
-        classfile << "}" << endl;
-        classfile << "}" << endl;
+        classfile << "}" << '\n';
+        classfile << "}" << '\n';
     }
     return 0;
 }

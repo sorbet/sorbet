@@ -195,7 +195,7 @@ string getCounterStatistics() {
     }
     stringstream buf;
 
-    buf << "Counters: " << endl;
+    buf << "Counters: " << '\n';
 
     auto canon = counterState.canonicalize();
 
@@ -208,25 +208,25 @@ string getCounterStatistics() {
         }
         sort(sorted.begin(), sorted.end(), [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
-        buf << " " << cat.first << "    Total: " << sum << endl;
+        buf << " " << cat.first << "    Total: " << sum << '\n';
 
         for (auto &e : sorted) {
             string number = padOrLimit(to_string(e.first), 6);
             string perc = padOrLimit(to_string(round(e.first * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
             buf << "  " << padOrLimit(e.second, PAD_LIMIT - 4) << " :" << number << ", " << perc << "% " << hashes
-                << endl;
+                << '\n';
         }
-        buf << endl;
+        buf << '\n';
     }
 
-    buf << "\nHistograms: " << endl;
+    buf << "\nHistograms: " << '\n';
     for (auto &hist : canon.histograms) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
         }
-        buf << " " << hist.first << "    Total: " << sum << endl;
+        buf << " " << hist.first << "    Total: " << sum << '\n';
 
         CounterImpl::CounterType header = 0;
         auto it = hist.second.begin();
@@ -239,7 +239,7 @@ string getCounterStatistics() {
             string perc = padOrLimit(to_string(round(header * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
             buf << " <" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << endl;
+                << hashes << '\n';
         }
 
         while (it != hist.second.end() && (sum - header) * 1.0 / sum > HIST_CUTOFF) {
@@ -248,7 +248,7 @@ string getCounterStatistics() {
             string perc = padOrLimit(to_string(round(it->second * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
             buf << "  " << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << endl;
+                << hashes << '\n';
             it++;
         }
         if (it != hist.second.end()) {
@@ -256,9 +256,9 @@ string getCounterStatistics() {
             string perc = padOrLimit(to_string(round((sum - header) * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
             buf << ">=" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << endl;
+                << hashes << '\n';
         }
-        buf << endl;
+        buf << '\n';
     }
 
     buf << "\nOther:\n";

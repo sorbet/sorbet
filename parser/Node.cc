@@ -20,9 +20,9 @@ void Node::printTabs(stringstream &to, int count) {
 
 void Node::printNode(stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
     if (node) {
-        to << node->toString(gs, tabs) << endl;
+        to << node->toString(gs, tabs) << '\n';
     } else {
-        to << "NULL" << endl;
+        to << "NULL" << '\n';
     }
 }
 

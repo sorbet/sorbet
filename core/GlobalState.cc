@@ -935,7 +935,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
             lines.pop_back();
         }
         if (!lines.empty()) {
-            buf << endl;
+            buf << '\n';
             for (auto line : lines) {
                 for (int p = 1; p < pos.first.column; p++) {
                     buf << " ";
@@ -946,7 +946,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
                 } else {
                     buf << "# " << line;
                 }
-                buf << endl;
+                buf << '\n';
             }
         }
         auto out = buf.str();

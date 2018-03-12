@@ -102,11 +102,11 @@ void CFG::sanityCheck(core::Context ctx) {
 string CFG::toString(core::Context ctx) {
     stringstream buf;
     string symbolName = this->symbol.data(ctx).fullName(ctx);
-    buf << "subgraph \"cluster_" << symbolName << "\" {" << endl;
-    buf << "    label = \"" << symbolName << "\";" << endl;
-    buf << "    color = blue;" << endl;
-    buf << "    \"bb" << symbolName << "_0\" [shape = invhouse];" << endl;
-    buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << endl << endl;
+    buf << "subgraph \"cluster_" << symbolName << "\" {" << '\n';
+    buf << "    label = \"" << symbolName << "\";" << '\n';
+    buf << "    color = blue;" << '\n';
+    buf << "    \"bb" << symbolName << "_0\" [shape = invhouse];" << '\n';
+    buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << '\n' << '\n';
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->toString(ctx);
         auto lines = absl::StrSplit(text, "\n");
@@ -114,19 +114,19 @@ string CFG::toString(core::Context ctx) {
         bool first = true;
         for (auto &line : lines) {
             if (!first) {
-                escaped << endl;
+                escaped << '\n';
             }
             first = false;
             escaped << absl::CEscape(line);
         }
-        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << escaped.str() << "\"];" << endl
-            << endl;
+        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << escaped.str() << "\"];" << '\n'
+            << '\n';
         buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-            << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << endl;
+            << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << '\n';
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
             buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-                << basicBlock->bexit.elseb->id << "\" [style=\"tapered\"];" << endl
-                << endl;
+                << basicBlock->bexit.elseb->id << "\" [style=\"tapered\"];" << '\n'
+                << '\n';
         }
     }
     buf << "}";
@@ -144,9 +144,9 @@ string BasicBlock::toString(core::Context ctx) {
         first = false;
         buf << arg.toString(ctx);
     }
-    buf << ")" << endl;
+    buf << ")" << '\n';
     if (this->outerLoops > 0) {
-        buf << "outerLoops: " << this->outerLoops << endl;
+        buf << "outerLoops: " << this->outerLoops << '\n';
     }
     for (Binding &exp : this->exprs) {
         if (isa_instruction<DebugEnvironment>(exp.value.get())) {
@@ -157,7 +157,7 @@ string BasicBlock::toString(core::Context ctx) {
         if (exp.tpe) {
             buf << " : " << exp.tpe->toString(ctx);
         }
-        buf << endl;
+        buf << '\n';
     }
     if (this->bexit.cond.exists()) {
         buf << this->bexit.cond.toString(ctx);

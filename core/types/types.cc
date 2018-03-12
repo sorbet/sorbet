@@ -304,12 +304,12 @@ void printTabs(stringstream &to, int count) {
 
 string TupleType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "TupleType {" << endl;
+    buf << "TupleType {" << '\n';
     int i = -1;
     for (auto &el : this->elems) {
         i++;
         printTabs(buf, tabs + 1);
-        buf << i << " = " << el->toString(gs, tabs + 3) << endl;
+        buf << i << " = " << el->toString(gs, tabs + 3) << '\n';
     }
     printTabs(buf, tabs);
     buf << "}";
@@ -343,11 +343,11 @@ ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, ve
 
 string ShapeType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "ShapeType {" << endl;
+    buf << "ShapeType {" << '\n';
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
         printTabs(buf, tabs + 1);
-        buf << el->toString(gs, tabs + 2) << " => " << (*valueIterator)->toString(gs, tabs + 2) << endl;
+        buf << el->toString(gs, tabs + 2) << " => " << (*valueIterator)->toString(gs, tabs + 2) << '\n';
         ++valueIterator;
     }
     printTabs(buf, tabs);
@@ -707,34 +707,34 @@ bool TypeVar::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
 
 std::string TypeVar::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "TypeVar(" + name.toString(gs) + ") {" << endl;
+    buf << "TypeVar(" + name.toString(gs) + ") {" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "instantiated = " + std::to_string(static_cast<int>(isInstantiated)) << endl;
+    buf << "instantiated = " + std::to_string(static_cast<int>(isInstantiated)) << '\n';
     if (isInstantiated) {
         printTabs(buf, tabs + 1);
-        buf << "instantiation = " << this->instantiation->toString(gs, tabs + 1) << endl;
+        buf << "instantiation = " << this->instantiation->toString(gs, tabs + 1) << '\n';
     }
     if (!this->upperConstraints.empty()) {
         printTabs(buf, tabs + 1);
-        buf << "upperConstraints = [" << endl;
+        buf << "upperConstraints = [" << '\n';
         int i = 0;
         for (auto &el : this->upperConstraints) {
             printTabs(buf, tabs + 2);
-            buf << i++ << " = " << el->toString(gs, tabs + 3) << endl;
+            buf << i++ << " = " << el->toString(gs, tabs + 3) << '\n';
         }
         printTabs(buf, tabs + 1);
-        buf << "]" << endl;
+        buf << "]" << '\n';
     }
     if (!this->lowerConstraints.empty()) {
         printTabs(buf, tabs + 1);
-        buf << "lowerConstraints = [" << endl;
+        buf << "lowerConstraints = [" << '\n';
         int i = 0;
         for (auto &el : this->lowerConstraints) {
             printTabs(buf, tabs + 2);
-            buf << i++ << " = " << el->toString(gs, tabs + 3) << endl;
+            buf << i++ << " = " << el->toString(gs, tabs + 3) << '\n';
         }
         printTabs(buf, tabs + 1);
-        buf << "]" << endl;
+        buf << "]" << '\n';
     }
     printTabs(buf, tabs);
     buf << "}";
@@ -871,21 +871,21 @@ std::shared_ptr<Type> AndType::instantiate(core::Context ctx, std::vector<Symbol
 
 std::string AppliedType::toString(const GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "AppliedType {" << endl;
+    buf << "AppliedType {" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "klass = " << this->klass.data(gs).fullName(gs) << endl;
+    buf << "klass = " << this->klass.data(gs).fullName(gs) << '\n';
 
     printTabs(buf, tabs + 1);
-    buf << "targs = [" << endl;
+    buf << "targs = [" << '\n';
     int i = -1;
     for (auto &targ : this->targs) {
         ++i;
         printTabs(buf, tabs + 2);
         auto tyMem = this->klass.data(gs).typeMembers()[i];
-        buf << tyMem.data(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << endl;
+        buf << tyMem.data(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << '\n';
     }
     printTabs(buf, tabs + 1);
-    buf << "]" << endl;
+    buf << "]" << '\n';
 
     printTabs(buf, tabs);
     buf << "}";
