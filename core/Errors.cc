@@ -42,8 +42,7 @@ std::string ErrorColors::replaceAll(const std::string &inWhat, const std::string
 
 BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
-    //    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
-    // TODO: @dmitry: temporarily disable.
+    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
 }
 
 std::string restoreColors(const std::string &formatted, rang::fg color) {
