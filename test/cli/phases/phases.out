@@ -7294,6 +7294,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:Proc> < ::<constant:Object> () -> <Class:Proc> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method arity () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method binding () -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method call (arg0) -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      argument arg0<repeated> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method curry (arity) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arity<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__

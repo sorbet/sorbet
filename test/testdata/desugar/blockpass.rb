@@ -37,8 +37,8 @@ end
 
 def foo(&blk)
     calls_with_object(&:meth)
-    calls_with_object {|*args| :meth.to_proc.call(*args)} # error: Method `call` does not exist on `Proc`
-    calls_with_object {|x| :meth.to_proc.call(x)} # error: Method `call` does not exist on `Proc`
+    calls_with_object {|*args| :meth.to_proc.call(*args)}
+    calls_with_object {|x| :meth.to_proc.call(x)}
     calls_with_object {|x| x.meth}
     calls_with_object(&blk)
     calls_with_object(&returns_lambda)

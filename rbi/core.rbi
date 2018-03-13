@@ -8995,6 +8995,12 @@ class Proc
   sig.returns(Binding)
   def binding(); end
 
+  sig(
+      arg0: BasicObject,
+  )
+  .returns(T.untyped)
+  def call(*arg0); end
+
   sig.returns(Proc)
   def clone(); end
 
