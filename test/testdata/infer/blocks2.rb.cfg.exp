@@ -10,7 +10,7 @@ subgraph "cluster_::<constant:Foo>#bar" {
 <blk> = load_arg(<selfMethodTemp>$3#bar, 0) : untyped
 <statTemp>$5 = 1 : Integer(1)
 <returnMethodTemp>$2 = <blk>.call(<statTemp>$5) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_0" -> "bb::<constant:Foo>#bar_1" [style="bold"];
@@ -44,7 +44,7 @@ outerLoops: 1
     "bb::<constant:Foo>#baz_2" -> "bb::<constant:Foo>#baz_3" [style="tapered"];
 
     "bb::<constant:Foo>#baz_3" [label = "block[id=3](<returnMethodTemp>$3)
-<finalReturn> = return <returnMethodTemp>$3 : <bottom>
+<finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#baz_3" -> "bb::<constant:Foo>#baz_1" [style="bold"];
@@ -53,7 +53,7 @@ outerLoops: 1
 r$3 = load_yield_param(::<constant:Foo>#baz#<block>$2, 0) : untyped
 <statTemp>$7 = self : Foo
 <blockReturnTemp>$6 = <statTemp>$7.puts(r$3) : NilClass
-<blockReturnTemp>$9 = blockreturn<::<constant:Foo>#baz#<block>$2> <blockReturnTemp>$6 : <bottom>
+<blockReturnTemp>$9 = blockreturn<::<constant:Foo>#baz#<block>$2> <blockReturnTemp>$6 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#baz_4" -> "bb::<constant:Foo>#baz_2" [style="bold"];

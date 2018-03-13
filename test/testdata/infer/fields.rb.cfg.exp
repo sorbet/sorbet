@@ -9,7 +9,7 @@ subgraph "cluster_::<constant:Foo>#initialize" {
 @ivar$4 = alias @ivar : Integer
 <castTemp$5 = 0 : Integer(0)
 @ivar$4 = cast(<castTemp$5, Integer); : Integer
-<finalReturn> = return @ivar$4 : <bottom>
+<finalReturn> = return @ivar$4 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#initialize_0" -> "bb::<constant:Foo>#initialize_1" [style="bold"];
@@ -29,7 +29,7 @@ subgraph "cluster_::<constant:Foo>#foo" {
 @ivar$5 = alias @ivar : Integer
 @ivar$5 = 2 : Integer(2)
 @ivar$5 = \"ss\" : untyped
-<finalReturn> = return @ivar$5 : <bottom>
+<finalReturn> = return @ivar$5 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#foo_0" -> "bb::<constant:Foo>#foo_1" [style="bold"];

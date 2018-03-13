@@ -8,7 +8,7 @@ subgraph "cluster_#<static-init>$9" {
     "bb#<static-init>$9_0" [label = "block[id=0]()
 <constant:Main>$8 = alias <constant:Main> : <Class:Main>
 <returnMethodTemp>$2 = <constant:Main>$8.main() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
@@ -54,7 +54,7 @@ subgraph "cluster_::<singleton class:<constant:A>>#each" {
   4 = Integer(0)
 }
 <returnMethodTemp>$2 = <blk>.call(<statTemp>$14) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:A>>#each_0" -> "bb::<singleton class:<constant:A>>#each_1" [style="bold"];
@@ -75,7 +75,7 @@ subgraph "cluster_::<singleton class:<constant:E>>#e=" {
 <selfMethodTemp>$3 = self : <Class:E>
 e = load_arg(<selfMethodTemp>$3#e=, 0) : untyped
 @e$4 = e : untyped
-<finalReturn> = return @e$4 : <bottom>
+<finalReturn> = return @e$4 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e=_0" -> "bb::<singleton class:<constant:E>>#e=_1" [style="bold"];
@@ -93,7 +93,7 @@ subgraph "cluster_::<singleton class:<constant:E>>#e" {
 
     "bb::<singleton class:<constant:E>>#e_0" [label = "block[id=0]()
 @e$4 = alias @e : untyped
-<finalReturn> = return @e$4 : <bottom>
+<finalReturn> = return @e$4 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:E>>#e_0" -> "bb::<singleton class:<constant:E>>#e_1" [style="bold"];
@@ -143,7 +143,7 @@ a$2 = forTemp$2$2.[](<statTemp>$18) : untyped
 <statTemp>$19 = self : <Class:Main>
 <statTemp>$20 = a$2.inspect() : untyped
 <blockReturnTemp>$13 = <statTemp>$19.puts(<statTemp>$20) : NilClass
-<blockReturnTemp>$22 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$2> <blockReturnTemp>$13 : <bottom>
+<blockReturnTemp>$22 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$2> <blockReturnTemp>$13 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_4" -> "bb::<singleton class:<constant:Main>>#main_2" [style="bold"];
@@ -168,7 +168,7 @@ a$3 = <assignTemp$4$3.[](<statTemp>$31) : untyped
 <statTemp>$32 = self : <Class:Main>
 <statTemp>$33 = a$3.inspect() : untyped
 <blockReturnTemp>$25 = <statTemp>$32.puts(<statTemp>$33) : NilClass
-<blockReturnTemp>$35 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$3> <blockReturnTemp>$25 : <bottom>
+<blockReturnTemp>$35 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$3> <blockReturnTemp>$25 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_7" -> "bb::<singleton class:<constant:Main>>#main_5" [style="bold"];
@@ -197,7 +197,7 @@ b$4 = forTemp$5$4.[](<statTemp>$46) : untyped
 <statTemp>$51 = self : <Class:Main>
 <statTemp>$52 = b$4.inspect() : untyped
 <blockReturnTemp>$38 = <statTemp>$51.puts(<statTemp>$52) : NilClass
-<blockReturnTemp>$54 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$4> <blockReturnTemp>$38 : <bottom>
+<blockReturnTemp>$54 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$4> <blockReturnTemp>$38 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_10" -> "bb::<singleton class:<constant:Main>>#main_8" [style="bold"];
@@ -230,7 +230,7 @@ b$5 = <assignTemp$7$5.[](<statTemp>$66) : untyped
 <statTemp>$71 = self : <Class:Main>
 <statTemp>$72 = b$5.inspect() : untyped
 <blockReturnTemp>$57 = <statTemp>$71.puts(<statTemp>$72) : NilClass
-<blockReturnTemp>$74 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$5> <blockReturnTemp>$57 : <bottom>
+<blockReturnTemp>$74 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$5> <blockReturnTemp>$57 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_13" -> "bb::<singleton class:<constant:Main>>#main_11" [style="bold"];
@@ -276,7 +276,7 @@ d$6 = forTemp$8$6.[](<statTemp>$97) : untyped
 <statTemp>$122 = <constant:E>$100.e() : untyped
 <statTemp>$121 = <statTemp>$122.inspect() : untyped
 <blockReturnTemp>$80 = <statTemp>$120.puts(<statTemp>$121) : NilClass
-<blockReturnTemp>$124 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$6> <blockReturnTemp>$80 : <bottom>
+<blockReturnTemp>$124 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$6> <blockReturnTemp>$80 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_16" -> "bb::<singleton class:<constant:Main>>#main_14" [style="bold"];
@@ -288,7 +288,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:Main>>#main_17" -> "bb::<singleton class:<constant:Main>>#main_18" [style="tapered"];
 
     "bb::<singleton class:<constant:Main>>#main_18" [label = "block[id=18](<returnMethodTemp>$8)
-<finalReturn> = return <returnMethodTemp>$8 : <bottom>
+<finalReturn> = return <returnMethodTemp>$8 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_18" -> "bb::<singleton class:<constant:Main>>#main_1" [style="bold"];
@@ -323,7 +323,7 @@ d$7 = <assignTemp$10$7.[](<statTemp>$141) : untyped
 <statTemp>$165 = <constant:E>$100.e() : untyped
 <statTemp>$164 = <statTemp>$165.inspect() : untyped
 <blockReturnTemp>$126 = <statTemp>$163.puts(<statTemp>$164) : NilClass
-<blockReturnTemp>$167 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$7> <blockReturnTemp>$126 : <bottom>
+<blockReturnTemp>$167 = blockreturn<::<singleton class:<constant:Main>>#main#<block>$7> <blockReturnTemp>$126 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:Main>>#main_19" -> "bb::<singleton class:<constant:Main>>#main_17" [style="bold"];

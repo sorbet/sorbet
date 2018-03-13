@@ -6,7 +6,7 @@ subgraph "cluster_::<constant:TestCasts>#untyped" {
     "bb::<constant:TestCasts>#untyped_1" [shape = parallelogram];
 
     "bb::<constant:TestCasts>#untyped_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:TestCasts>#untyped_0" -> "bb::<constant:TestCasts>#untyped_1" [style="bold"];
@@ -49,7 +49,7 @@ s = cast(<castTemp$30, untyped); : untyped
 <statTemp>$31 = s.+(<statTemp>$33) : untyped
 <statTemp>$35 = 3 : Integer(3)
 <returnMethodTemp>$2 = s.+(<statTemp>$35) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:TestCasts>#test_casts_0" -> "bb::<constant:TestCasts>#test_casts_1" [style="bold"];

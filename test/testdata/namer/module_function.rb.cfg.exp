@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$9" {
     "bb#<static-init>$9_1" [shape = parallelogram];
 
     "bb#<static-init>$9_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::<constant:Funcs>#f" {
     "bb::<constant:Funcs>#f_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 x = load_arg(<selfMethodTemp>$3#f, 0) : Integer
-<finalReturn> = return x : <bottom>
+<finalReturn> = return x : <impossible>
 <unconditional>"];
 
     "bb::<constant:Funcs>#f_0" -> "bb::<constant:Funcs>#f_1" [style="bold"];
@@ -44,7 +44,7 @@ subgraph "cluster_::<constant:Funcs>#g" {
     "bb::<constant:Funcs>#g_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 s = load_arg(<selfMethodTemp>$3#g, 0) : Symbol
-<finalReturn> = return s : <bottom>
+<finalReturn> = return s : <impossible>
 <unconditional>"];
 
     "bb::<constant:Funcs>#g_0" -> "bb::<constant:Funcs>#g_1" [style="bold"];
@@ -63,7 +63,7 @@ subgraph "cluster_::<constant:Funcs>#h" {
     "bb::<constant:Funcs>#h_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 s = load_arg(<selfMethodTemp>$3#h, 0) : String
-<finalReturn> = return s : <bottom>
+<finalReturn> = return s : <impossible>
 <unconditional>"];
 
     "bb::<constant:Funcs>#h_0" -> "bb::<constant:Funcs>#h_1" [style="bold"];
@@ -85,7 +85,7 @@ subgraph "cluster_::<constant:Funcs>#<static-init>" {
 <statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module
 <statTemp>$8 = self : <Class:Funcs>
 <statTemp>$7 = <statTemp>$8.module_function() : Module
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Funcs>#<static-init>_0" -> "bb::<constant:Funcs>#<static-init>_1" [style="bold"];
@@ -120,7 +120,7 @@ subgraph "cluster_::<constant:C>#test_calls" {
 <statTemp>$22 = \"world\" : String(\"world\")
 <statTemp>$20 = <constant:Funcs>$9.h(<statTemp>$22) : String
 <returnMethodTemp>$2 = <constant:C>$24.f() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:C>#test_calls_0" -> "bb::<constant:C>#test_calls_1" [style="bold"];

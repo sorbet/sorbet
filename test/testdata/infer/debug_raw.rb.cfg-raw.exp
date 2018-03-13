@@ -34,11 +34,11 @@ a: Integer(2)
     "bb::<constant:Object>#main_4" [label = "block[id=4](<returnMethodTemp>$2)
 <returnMethodTemp>$2: NilClass | Integer
 
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 dead=1
 <returnMethodTemp>$2: NilClass | Integer
 
-<finalReturn>: <bottom>
+<finalReturn>: <impossible>
 
 <unconditional>"];
 

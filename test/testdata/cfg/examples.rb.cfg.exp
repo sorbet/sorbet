@@ -19,7 +19,7 @@ subgraph "cluster_::<constant:Examples>#i_like_ifs" {
     "bb::<constant:Examples>#i_like_ifs_1" -> "bb::<constant:Examples>#i_like_ifs_1" [style="bold"];
     "bb::<constant:Examples>#i_like_ifs_2" [label = "block[id=2]()
 <returnTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$5 : <bottom>
+<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_ifs_2" -> "bb::<constant:Examples>#i_like_ifs_1" [style="bold"];
@@ -59,7 +59,7 @@ subgraph "cluster_::<constant:Examples>#i_like_exps" {
 
     "bb::<constant:Examples>#i_like_exps_3" -> "bb::<constant:Examples>#i_like_exps_4" [style="bold"];
     "bb::<constant:Examples>#i_like_exps_4" [label = "block[id=4](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#i_like_exps_4" -> "bb::<constant:Examples>#i_like_exps_1" [style="bold"];
@@ -84,7 +84,7 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch1" {
     "bb::<constant:Examples>#return_in_one_branch1_1" -> "bb::<constant:Examples>#return_in_one_branch1_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch1_2" [label = "block[id=2]()
 <returnTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$5 : <bottom>
+<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch1_2" -> "bb::<constant:Examples>#return_in_one_branch1_1" [style="bold"];
@@ -115,7 +115,7 @@ subgraph "cluster_::<constant:Examples>#return_in_one_branch2" {
     "bb::<constant:Examples>#return_in_one_branch2_1" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
     "bb::<constant:Examples>#return_in_one_branch2_2" [label = "block[id=2]()
 <returnMethodTemp>$2 = 1 : Integer(1)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#return_in_one_branch2_2" -> "bb::<constant:Examples>#return_in_one_branch2_1" [style="bold"];
@@ -173,7 +173,7 @@ b = 2 : Integer(2)
     "bb::<constant:Examples>#variables_6" -> "bb::<constant:Examples>#variables_7" [style="bold"];
     "bb::<constant:Examples>#variables_7" [label = "block[id=7](b, a)
 <returnMethodTemp>$2 = a.+(b) : Integer
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#variables_7" -> "bb::<constant:Examples>#variables_1" [style="bold"];
@@ -322,7 +322,7 @@ i = load_arg(<selfMethodTemp>$3#take_arguments, 0) : untyped
 
     "bb::<constant:Examples>#take_arguments_3" -> "bb::<constant:Examples>#take_arguments_4" [style="bold"];
     "bb::<constant:Examples>#take_arguments_4" [label = "block[id=4](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Examples>#take_arguments_4" -> "bb::<constant:Examples>#take_arguments_1" [style="bold"];

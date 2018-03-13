@@ -60,7 +60,7 @@ outerLoops: 1
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" [label = "block[id=3]()
 <returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#incorrect_assignment_3" -> "bb::<constant:HasLoops>#incorrect_assignment_1" [style="bold"];
@@ -97,7 +97,7 @@ outerLoops: 1
 
     "bb::<constant:HasLoops>#correct_assignment_3" [label = "block[id=3]()
 <returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:HasLoops>#correct_assignment_3" -> "bb::<constant:HasLoops>#correct_assignment_1" [style="bold"];

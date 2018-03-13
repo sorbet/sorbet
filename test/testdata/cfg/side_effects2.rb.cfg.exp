@@ -32,7 +32,7 @@ a = 2 : Integer(2)
     "bb::<constant:Side>#foo_3" -> "bb::<constant:Side>#foo_4" [style="bold"];
     "bb::<constant:Side>#foo_4" [label = "block[id=4](<statTemp>$5, <statTemp>$6, a)
 <returnMethodTemp>$2 = <statTemp>$5.bar(<statTemp>$6, a, a) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Side>#foo_4" -> "bb::<constant:Side>#foo_1" [style="bold"];
@@ -51,7 +51,7 @@ b = load_arg(<selfMethodTemp>$3#bar, 1) : untyped
 c = load_arg(<selfMethodTemp>$3#bar, 2) : untyped
 <statTemp>$4 = self : Side
 <returnMethodTemp>$2 = <statTemp>$4.puts(a, b, c) : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Side>#bar_0" -> "bb::<constant:Side>#bar_1" [style="bold"];

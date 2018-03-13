@@ -15,7 +15,7 @@ a = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String
 <castTemp$11 = a : String
 <statTemp>$10 = cast(<castTemp$11, String); : String
 <returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Main>#basic_0" -> "bb::<constant:Main>#basic_1" [style="bold"];
@@ -41,7 +41,7 @@ a = load_arg(<selfMethodTemp>$3#not, 0) : String | NilClass
 <castTemp$10 = a : String
 <statTemp>$9 = cast(<castTemp$10, String); : String
 <returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Main>#not_0" -> "bb::<constant:Main>#not_1" [style="bold"];
@@ -88,7 +88,7 @@ a = load_arg(<selfMethodTemp>$3#with_and, 0) : String | NilClass
 <castTemp$13 = a : NilClass
 <statTemp>$12 = cast(<castTemp$13, NilClass); : NilClass
 <returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Main>#with_and_4" -> "bb::<constant:Main>#with_and_1" [style="bold"];
@@ -110,7 +110,7 @@ subgraph "cluster_::<constant:Main>#with_storytime" {
   Symbol(:\"storytime\") => Integer(42)
 }
 <returnMethodTemp>$2 = <statTemp>$4.hard_assert(<statTemp>$5, <statTemp>$6) : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Main>#with_storytime_0" -> "bb::<constant:Main>#with_storytime_1" [style="bold"];

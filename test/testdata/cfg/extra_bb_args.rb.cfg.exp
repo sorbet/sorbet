@@ -20,14 +20,14 @@ name = cast(<castTemp$5, String | NilClass); : String | NilClass
     "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_2" [label = "block[id=2]()
 <returnTemp>$9 = \"missing name\" : String(\"missing name\")
-<statTemp>$6 = return <returnTemp>$9 : <bottom>
+<statTemp>$6 = return <returnTemp>$9 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_1" [style="bold"];
     "bb::<constant:Object>#main_3" [label = "block[id=3](name)
 <statTemp>$11 = \"foo\" : String(\"foo\")
 <returnMethodTemp>$2 = name.include?(<statTemp>$11) : TrueClass | FalseClass
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_1" [style="bold"];

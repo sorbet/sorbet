@@ -26,13 +26,13 @@ subgraph "cluster_::<constant:Object>#foo" {
 
     "bb::<constant:Object>#foo_4" [label = "block[id=4]()
 <returnTemp>$6 = 1 : Integer(1)
-<statTemp>$4 = return <returnTemp>$6 : <bottom>
+<statTemp>$4 = return <returnTemp>$6 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];
     "bb::<constant:Object>#foo_8" [label = "block[id=8](<rescueTemp$5)
 <returnTemp>$11 = 2 : Integer(2)
-<statTemp>$4 = return <returnTemp>$11 : <bottom>
+<statTemp>$4 = return <returnTemp>$11 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_1" [style="bold"];

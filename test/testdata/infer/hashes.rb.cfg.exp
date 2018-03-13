@@ -34,7 +34,7 @@ s = <constant:<Magic>>$6.<build-hash>() : ShapeType {
     "bb::<constant:Foo>#bar_4" [label = "block[id=4](s)
 r = s : ShapeType {
 }
-<returnMethodTemp>$2 = return r : <bottom>
+<returnMethodTemp>$2 = return r : <impossible>
 <unconditional>"];
 
     "bb::<constant:Foo>#bar_4" -> "bb::<constant:Foo>#bar_1" [style="bold"];

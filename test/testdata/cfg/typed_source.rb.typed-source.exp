@@ -8,7 +8,7 @@ class Examples
       # dead=1
       # <returnTemp>$5: Integer(1)
       #
-      # <returnMethodTemp>$2: <bottom>
+      # <returnMethodTemp>$2: <impossible>
     else
       return 2 # error: This code is unreachable
     end
@@ -26,7 +26,7 @@ class Examples
       # dead=1
       # <returnMethodTemp>$2: Integer(1)
       #
-      # <finalReturn>: <bottom>
+      # <finalReturn>: <impossible>
     end
 
     def return_in_one_branch1()
@@ -36,7 +36,7 @@ class Examples
         # dead=1
         # <returnTemp>$5: Integer(1)
         #
-        # <returnMethodTemp>$2: <bottom>
+        # <returnMethodTemp>$2: <impossible>
       else
         2 # error: This code is unreachable
       end
@@ -80,7 +80,7 @@ class Examples
       #
       # <returnMethodTemp>$2: Integer
       #
-      # <finalReturn>: <bottom>
+      # <finalReturn>: <impossible>
     end
 
 
@@ -283,7 +283,7 @@ class Examples
       # dead=1
       # <returnMethodTemp>$2: untyped
       #
-      # <finalReturn>: <bottom>
+      # <finalReturn>: <impossible>
     end
 
 end

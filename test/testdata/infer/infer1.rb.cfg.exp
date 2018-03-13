@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>$9" {
     "bb#<static-init>$9_1" [shape = parallelogram];
 
     "bb#<static-init>$9_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
@@ -25,7 +25,7 @@ subgraph "cluster_::<constant:Object>#baz1" {
     "bb::<constant:Object>#baz1_0" [label = "block[id=0]()
 a = \"foo\" : String(\"foo\")
 b = a.getbyte(a) : Integer | NilClass
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz1_0" -> "bb::<constant:Object>#baz1_1" [style="bold"];
@@ -45,7 +45,7 @@ subgraph "cluster_::<constant:Object>#baz2" {
 a = \"foo\" : String(\"foo\")
 <statTemp>$6 = \"foo\" : String(\"foo\")
 b = a.getbyte(<statTemp>$6) : Integer | NilClass
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz2_0" -> "bb::<constant:Object>#baz2_1" [style="bold"];
@@ -65,7 +65,7 @@ subgraph "cluster_::<constant:Object>#baz3" {
 <statTemp>$4 = \"foo\" : String(\"foo\")
 <statTemp>$5 = \"foo\" : String(\"foo\")
 b = <statTemp>$4.getbyte(<statTemp>$5) : Integer | NilClass
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz3_0" -> "bb::<constant:Object>#baz3_1" [style="bold"];
@@ -86,7 +86,7 @@ subgraph "cluster_::<constant:Object>#baz4" {
 <statTemp>$4 = <statTemp>$5.a() : untyped
 <statTemp>$6 = \"foo\" : String(\"foo\")
 b = <statTemp>$4.getbyte(<statTemp>$6) : untyped
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz4_0" -> "bb::<constant:Object>#baz4_1" [style="bold"];
@@ -128,7 +128,7 @@ b = \"foo\" : String(\"foo\")
 <statTemp>$6 = b : Integer | String
 <statTemp>$7 = 1 : Integer(1)
 b = <statTemp>$6.getbyte(<statTemp>$7) : untyped
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz5_4" -> "bb::<constant:Object>#baz5_1" [style="bold"];
@@ -166,7 +166,7 @@ b = \"foo\" : String(\"foo\")
 <statTemp>$6 = \"foo\" : String(\"foo\")
 <statTemp>$7 = b : Integer | String
 b = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz6_4" -> "bb::<constant:Object>#baz6_1" [style="bold"];
@@ -199,7 +199,7 @@ b = 1 : Integer(1)
 <statTemp>$6 = \"foo\" : String(\"foo\")
 <statTemp>$7 = b : NilClass | Integer
 b = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass
-<finalReturn> = return b : <bottom>
+<finalReturn> = return b : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#baz7_4" -> "bb::<constant:Object>#baz7_1" [style="bold"];

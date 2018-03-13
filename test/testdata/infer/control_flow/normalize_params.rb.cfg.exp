@@ -72,12 +72,12 @@ outerLoops: 1
 e$2 = load_yield_param(::<constant:Test>#normalize_params#<block>$2, 0) : untyped
 <statTemp>$19 = self : Test
 <blockReturnTemp>$18 = <statTemp>$19.normalize_params(e$2) : untyped
-<blockReturnTemp>$21 = blockreturn<::<constant:Test>#normalize_params#<block>$2> <blockReturnTemp>$18 : <bottom>
+<blockReturnTemp>$21 = blockreturn<::<constant:Test>#normalize_params#<block>$2> <blockReturnTemp>$18 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_8" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
     "bb::<constant:Test>#normalize_params_10" [label = "block[id=10](<returnMethodTemp>$3)
-<finalReturn> = return <returnMethodTemp>$3 : <bottom>
+<finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Test>#normalize_params_10" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];

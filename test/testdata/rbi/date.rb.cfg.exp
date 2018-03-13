@@ -11,7 +11,7 @@ t = load_arg(<selfMethodTemp>$3#foo, 0) : Time
 <statTemp>$5 = t.to_datetime() : DateTime
 <statTemp>$4 = <statTemp>$5.to_date() : Date
 <returnMethodTemp>$2 = <statTemp>$4.to_time() : Time
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1" [style="bold"];

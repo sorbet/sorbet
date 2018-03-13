@@ -8,7 +8,7 @@ subgraph "cluster_#<static-init>$9" {
     "bb#<static-init>$9_0" [label = "block[id=0]()
 <statTemp>$7 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$7.main() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
@@ -65,7 +65,7 @@ try = 0 : Integer(0)
 try = <statTemp>$10.+(<statTemp>$11) : Integer
 <statTemp>$12 = self : Object
 <statTemp>$13 = <constant:A>$15.new() : A
-<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <bottom>
+<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_13" [style="bold"];
@@ -83,12 +83,12 @@ try = <statTemp>$10.+(<statTemp>$11) : Integer
 try = <statTemp>$20.+(<statTemp>$21) : Integer
 <statTemp>$22 = self : Object
 <statTemp>$23 = <constant:B>$25.new() : B
-<returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : <bottom>
+<returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_13" [style="bold"];
     "bb::<constant:Object>#main_13" [label = "block[id=13](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#main_13" -> "bb::<constant:Object>#main_1" [style="bold"];

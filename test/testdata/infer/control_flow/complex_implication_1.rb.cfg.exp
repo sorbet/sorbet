@@ -94,7 +94,7 @@ err"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_21" -> "bb::<constant:ModuleMethods>#instrumented_request_24" [style="bold"];
     "bb::<constant:ModuleMethods>#instrumented_request_24" [label = "block[id=24](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:ModuleMethods>#instrumented_request_24" -> "bb::<constant:ModuleMethods>#instrumented_request_1" [style="bold"];

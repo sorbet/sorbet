@@ -23,14 +23,14 @@ outerLoops: 1
     "bb#<static-init>$9_2" -> "bb#<static-init>$9_3" [style="tapered"];
 
     "bb#<static-init>$9_3" [label = "block[id=3](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_3" -> "bb#<static-init>$9_1" [style="bold"];
     "bb#<static-init>$9_4" [label = "block[id=4](<returnMethodTemp>$2)
 outerLoops: 1
 <blockReturnTemp>$13 = \"foo\" : String(\"foo\")
-<blockReturnTemp>$14 = blockreturn<#<block>$2> <blockReturnTemp>$13 : <bottom>
+<blockReturnTemp>$14 = blockreturn<#<block>$2> <blockReturnTemp>$13 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_4" -> "bb#<static-init>$9_2" [style="bold"];
@@ -60,14 +60,14 @@ outerLoops: 1
     "bb::<constant:Object>#returns_lambda_2" -> "bb::<constant:Object>#returns_lambda_3" [style="tapered"];
 
     "bb::<constant:Object>#returns_lambda_3" [label = "block[id=3](<returnMethodTemp>$3)
-<finalReturn> = return <returnMethodTemp>$3 : <bottom>
+<finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#returns_lambda_3" -> "bb::<constant:Object>#returns_lambda_1" [style="bold"];
     "bb::<constant:Object>#returns_lambda_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
 <blockReturnTemp>$6 = \"returns_lambda\" : String(\"returns_lambda\")
-<blockReturnTemp>$7 = blockreturn<::<constant:Object>#returns_lambda#<block>$2> <blockReturnTemp>$6 : <bottom>
+<blockReturnTemp>$7 = blockreturn<::<constant:Object>#returns_lambda#<block>$2> <blockReturnTemp>$6 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#returns_lambda_4" -> "bb::<constant:Object>#returns_lambda_2" [style="bold"];
@@ -84,7 +84,7 @@ subgraph "cluster_::<constant:Object>#calls_arg_with_object" {
 arg = load_arg(<selfMethodTemp>$3#calls_arg_with_object, 0) : untyped
 blk = load_arg(<selfMethodTemp>$3#calls_arg_with_object, 1) : untyped
 <returnMethodTemp>$2 = blk.call(arg) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#calls_arg_with_object_0" -> "bb::<constant:Object>#calls_arg_with_object_1" [style="bold"];
@@ -123,7 +123,7 @@ outerLoops: 1
     "bb::<constant:Object>#calls_with_object_2" -> "bb::<constant:Object>#calls_with_object_3" [style="tapered"];
 
     "bb::<constant:Object>#calls_with_object_3" [label = "block[id=3](<returnMethodTemp>$3)
-<finalReturn> = return <returnMethodTemp>$3 : <bottom>
+<finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#calls_with_object_3" -> "bb::<constant:Object>#calls_with_object_1" [style="bold"];
@@ -134,7 +134,7 @@ outerLoops: 1
 <statTemp>$15 = <block-pass>$2$4.to_a() : untyped
 <statTemp>$12 = <constant:<Magic>>$14.<splat>(<statTemp>$15) : untyped
 <blockReturnTemp>$9 = <statTemp>$10.call(<statTemp>$12) : untyped
-<blockReturnTemp>$17 = blockreturn<::<constant:Object>#calls_with_object#<block>$2> <blockReturnTemp>$9 : <bottom>
+<blockReturnTemp>$17 = blockreturn<::<constant:Object>#calls_with_object#<block>$2> <blockReturnTemp>$9 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#calls_with_object_4" -> "bb::<constant:Object>#calls_with_object_2" [style="bold"];
@@ -180,7 +180,7 @@ outerLoops: 1
 outerLoops: 1
 <block-pass>$2$4 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : untyped
 <blockReturnTemp>$19 = <block-pass>$2$4.meth() : untyped
-<blockReturnTemp>$21 = blockreturn<::<constant:Object>#foo#<block>$2> <blockReturnTemp>$19 : <bottom>
+<blockReturnTemp>$21 = blockreturn<::<constant:Object>#foo#<block>$2> <blockReturnTemp>$19 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_2" [style="bold"];
@@ -205,7 +205,7 @@ args$5 = load_yield_param(::<constant:Object>#foo#<block>$3, 0) : untyped
 <statTemp>$30 = args$5.to_a() : untyped
 <statTemp>$27 = <constant:<Magic>>$29.<splat>(<statTemp>$30) : untyped
 <blockReturnTemp>$24 = <statTemp>$25.call(<statTemp>$27) : untyped
-<blockReturnTemp>$32 = blockreturn<::<constant:Object>#foo#<block>$3> <blockReturnTemp>$24 : <bottom>
+<blockReturnTemp>$32 = blockreturn<::<constant:Object>#foo#<block>$3> <blockReturnTemp>$24 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_5" [style="bold"];
@@ -228,7 +228,7 @@ x$6 = load_yield_param(::<constant:Object>#foo#<block>$4, 0) : untyped
 <statTemp>$37 = :\"meth\" : Symbol(:\"meth\")
 <statTemp>$36 = <statTemp>$37.to_proc() : Proc
 <blockReturnTemp>$35 = <statTemp>$36.call(x$6) : untyped
-<blockReturnTemp>$39 = blockreturn<::<constant:Object>#foo#<block>$4> <blockReturnTemp>$35 : <bottom>
+<blockReturnTemp>$39 = blockreturn<::<constant:Object>#foo#<block>$4> <blockReturnTemp>$35 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_8" [style="bold"];
@@ -249,7 +249,7 @@ outerLoops: 1
 outerLoops: 1
 x$7 = load_yield_param(::<constant:Object>#foo#<block>$5, 0) : untyped
 <blockReturnTemp>$42 = x$7.meth() : untyped
-<blockReturnTemp>$44 = blockreturn<::<constant:Object>#foo#<block>$5> <blockReturnTemp>$42 : <bottom>
+<blockReturnTemp>$44 = blockreturn<::<constant:Object>#foo#<block>$5> <blockReturnTemp>$42 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_13" -> "bb::<constant:Object>#foo_11" [style="bold"];
@@ -273,7 +273,7 @@ outerLoops: 1
 <statTemp>$52 = <block-pass>$3$8.to_a() : untyped
 <statTemp>$50 = <constant:<Magic>>$29.<splat>(<statTemp>$52) : untyped
 <blockReturnTemp>$47 = <statTemp>$48.call(<statTemp>$50) : untyped
-<blockReturnTemp>$54 = blockreturn<::<constant:Object>#foo#<block>$6> <blockReturnTemp>$47 : <bottom>
+<blockReturnTemp>$54 = blockreturn<::<constant:Object>#foo#<block>$6> <blockReturnTemp>$47 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_16" -> "bb::<constant:Object>#foo_14" [style="bold"];
@@ -299,7 +299,7 @@ outerLoops: 1
 <statTemp>$63 = <block-pass>$4$9.to_a() : untyped
 <statTemp>$61 = <constant:<Magic>>$29.<splat>(<statTemp>$63) : untyped
 <blockReturnTemp>$57 = <statTemp>$58.call(<statTemp>$61) : untyped
-<blockReturnTemp>$65 = blockreturn<::<constant:Object>#foo#<block>$7> <blockReturnTemp>$57 : <bottom>
+<blockReturnTemp>$65 = blockreturn<::<constant:Object>#foo#<block>$7> <blockReturnTemp>$57 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_19" -> "bb::<constant:Object>#foo_17" [style="bold"];
@@ -324,7 +324,7 @@ outerLoops: 1
 <statTemp>$75 = <block-pass>$5$10.to_a() : untyped
 <statTemp>$73 = <constant:<Magic>>$29.<splat>(<statTemp>$75) : untyped
 <blockReturnTemp>$68 = <statTemp>$69.call(<statTemp>$73) : untyped
-<blockReturnTemp>$77 = blockreturn<::<constant:Object>#foo#<block>$8> <blockReturnTemp>$68 : <bottom>
+<blockReturnTemp>$77 = blockreturn<::<constant:Object>#foo#<block>$8> <blockReturnTemp>$68 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_22" -> "bb::<constant:Object>#foo_20" [style="bold"];
@@ -348,7 +348,7 @@ args$11 = load_yield_param(::<constant:Object>#foo#<block>$9, 0) : untyped
 <statTemp>$86 = args$11.to_a() : untyped
 <statTemp>$84 = <constant:<Magic>>$29.<splat>(<statTemp>$86) : untyped
 <blockReturnTemp>$80 = <statTemp>$81.call(<statTemp>$84) : untyped
-<blockReturnTemp>$88 = blockreturn<::<constant:Object>#foo#<block>$9> <blockReturnTemp>$80 : <bottom>
+<blockReturnTemp>$88 = blockreturn<::<constant:Object>#foo#<block>$9> <blockReturnTemp>$80 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_25" -> "bb::<constant:Object>#foo_23" [style="bold"];
@@ -370,7 +370,7 @@ outerLoops: 1
 outerLoops: 1
 <block-pass>$6$12 = load_yield_param(::<constant:Object>#foo#<block>$10, 0) : untyped
 <blockReturnTemp>$92 = <block-pass>$6$12.meth() : untyped
-<blockReturnTemp>$94 = blockreturn<::<constant:Object>#foo#<block>$10> <blockReturnTemp>$92 : <bottom>
+<blockReturnTemp>$94 = blockreturn<::<constant:Object>#foo#<block>$10> <blockReturnTemp>$92 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_28" -> "bb::<constant:Object>#foo_26" [style="bold"];
@@ -390,7 +390,7 @@ outerLoops: 1
 outerLoops: 1
 <block-pass>$8$13 = load_yield_param(::<constant:Object>#foo#<block>$11, 0) : untyped
 <blockReturnTemp>$100 = <block-pass>$8$13.meth() : untyped
-<blockReturnTemp>$102 = blockreturn<::<constant:Object>#foo#<block>$11> <blockReturnTemp>$100 : <bottom>
+<blockReturnTemp>$102 = blockreturn<::<constant:Object>#foo#<block>$11> <blockReturnTemp>$100 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_33" -> "bb::<constant:Object>#foo_31" [style="bold"];
@@ -417,7 +417,7 @@ outerLoops: 1
 outerLoops: 1
 <block-pass>$9$14 = load_yield_param(::<constant:Object>#foo#<block>$12, 0) : untyped
 <blockReturnTemp>$106 = <block-pass>$9$14.meth() : untyped
-<blockReturnTemp>$108 = blockreturn<::<constant:Object>#foo#<block>$12> <blockReturnTemp>$106 : <bottom>
+<blockReturnTemp>$108 = blockreturn<::<constant:Object>#foo#<block>$12> <blockReturnTemp>$106 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_37" -> "bb::<constant:Object>#foo_35" [style="bold"];
@@ -439,7 +439,7 @@ outerLoops: 1
 outerLoops: 1
 <block-pass>$10$15 = load_yield_param(::<constant:Object>#foo#<block>$13, 0) : untyped
 <blockReturnTemp>$114 = <block-pass>$10$15.meth() : untyped
-<blockReturnTemp>$116 = blockreturn<::<constant:Object>#foo#<block>$13> <blockReturnTemp>$114 : <bottom>
+<blockReturnTemp>$116 = blockreturn<::<constant:Object>#foo#<block>$13> <blockReturnTemp>$114 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_40" -> "bb::<constant:Object>#foo_38" [style="bold"];
@@ -451,7 +451,7 @@ outerLoops: 1
     "bb::<constant:Object>#foo_41" -> "bb::<constant:Object>#foo_42" [style="tapered"];
 
     "bb::<constant:Object>#foo_42" [label = "block[id=42](<returnMethodTemp>$15)
-<finalReturn> = return <returnMethodTemp>$15 : <bottom>
+<finalReturn> = return <returnMethodTemp>$15 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_42" -> "bb::<constant:Object>#foo_1" [style="bold"];
@@ -459,7 +459,7 @@ outerLoops: 1
 outerLoops: 1
 x$16 = load_yield_param(::<constant:Object>#foo#<block>$14, 0) : untyped
 <blockReturnTemp>$120 = x$16.meth() : untyped
-<blockReturnTemp>$122 = blockreturn<::<constant:Object>#foo#<block>$14> <blockReturnTemp>$120 : <bottom>
+<blockReturnTemp>$122 = blockreturn<::<constant:Object>#foo#<block>$14> <blockReturnTemp>$120 : <impossible>
 <unconditional>"];
 
     "bb::<constant:Object>#foo_43" -> "bb::<constant:Object>#foo_41" [style="bold"];
@@ -473,7 +473,7 @@ subgraph "cluster_::<constant:HasMeth>#meth" {
 
     "bb::<constant:HasMeth>#meth_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = \"meth\" : String(\"meth\")
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:HasMeth>#meth_0" -> "bb::<constant:HasMeth>#meth_1" [style="bold"];
@@ -492,7 +492,7 @@ subgraph "cluster_::<constant:HasToProc>#to_proc" {
     "bb::<constant:HasToProc>#to_proc_0" [label = "block[id=0]()
 <statTemp>$4 = self : HasToProc
 <returnMethodTemp>$2 = <statTemp>$4.returns_lambda() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:HasToProc>#to_proc_0" -> "bb::<constant:HasToProc>#to_proc_1" [style="bold"];
@@ -514,7 +514,7 @@ subgraph "cluster_::<singleton class:<constant:CallsWithObject>>#calls_with_obje
 blk = load_arg(<selfMethodTemp>$3#calls_with_object, 0) : untyped
 <statTemp>$5 = <constant:HasMeth>$7.new() : HasMeth
 <returnMethodTemp>$2 = blk.call(<statTemp>$5) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_0" -> "bb::<singleton class:<constant:CallsWithObject>>#calls_with_object_1" [style="bold"];
@@ -551,7 +551,7 @@ outerLoops: 1
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_2" -> "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_3" [style="tapered"];
 
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_3" [label = "block[id=3](<returnMethodTemp>$3)
-<finalReturn> = return <returnMethodTemp>$3 : <bottom>
+<finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_3" -> "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_1" [style="bold"];
@@ -562,7 +562,7 @@ outerLoops: 1
 <statTemp>$12 = <block-pass>$2$2.to_a() : untyped
 <statTemp>$9 = <constant:<Magic>>$11.<splat>(<statTemp>$12) : untyped
 <blockReturnTemp>$6 = <statTemp>$7.call(<statTemp>$9) : untyped
-<blockReturnTemp>$14 = blockreturn<::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object#<block>$2> <blockReturnTemp>$6 : <bottom>
+<blockReturnTemp>$14 = blockreturn<::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object#<block>$2> <blockReturnTemp>$6 : <impossible>
 <unconditional>"];
 
     "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_4" -> "bb::<singleton class:<constant:CallsWithObjectChild>>#calls_with_object_2" [style="bold"];

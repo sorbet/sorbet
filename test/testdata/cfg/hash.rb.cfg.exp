@@ -7,7 +7,7 @@ subgraph "cluster_::<constant:TestHash>#something" {
 
     "bb::<constant:TestHash>#something_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 17 : Integer(17)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1" [style="bold"];
@@ -40,7 +40,7 @@ subgraph "cluster_::<constant:TestHash>#test" {
     <constant:Elem> = untyped
   ]
 }
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1" [style="bold"];
@@ -73,7 +73,7 @@ subgraph "cluster_::<constant:TestHash>#test_shaped" {
   Symbol(:\"foo\") => Symbol(:\"bar\")
   Symbol(:\"baz\") => untyped
 }
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];

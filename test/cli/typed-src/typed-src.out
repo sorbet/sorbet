@@ -36,6 +36,6 @@ class A
     #
     # <returnMethodTemp>$2: Integer
     #
-    # <finalReturn>: <bottom>
+    # <finalReturn>: <impossible>
   end
 end

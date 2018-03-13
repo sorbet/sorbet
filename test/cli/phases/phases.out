@@ -158,7 +158,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = untyped
         ]
       } @ ???
-  class <constant:<bottom>> () @ ???
+  class <constant:<impossible>> () @ ???
   class <constant:<none>> () @ ???
   class <constant:<todo sym>> () -> <Class:<todo sym>> @ ???
   class <constant:<top>> () @ ???
@@ -5861,13 +5861,13 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method <overload N.1 : Rational> (x) -> Rational @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument x<> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument y<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : exit> (status) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : exit> (status) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<optional> -> Integer | TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : fail> (arg0) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : fail> (arg0) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : raise> (arg0) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : raise> (arg0) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -5875,7 +5875,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> String | Symbol @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<repeated> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.2 : fail> (arg0, arg1) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.2 : fail> (arg0, arg1) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> AppliedType {
         klass = ::<constant:Array>
@@ -5884,7 +5884,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.2 : raise> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.2 : raise> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -5893,7 +5893,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = String
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.3 : fail> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.3 : fail> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -5902,7 +5902,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = String
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.3 : raise> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.3 : raise> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Exception @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -5948,7 +5948,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method __method__ () -> Symbol | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method ` (arg0) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method abort (msg) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method abort (msg) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument msg<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method at_exit (blk) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -5965,11 +5965,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method binding () -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> Kernel @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method configatron () @ ???
-    method exit () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method exit () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method exit! (status) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method exit! (status) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<> -> Integer | TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method fail () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method fail () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -6016,7 +6016,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method puts (arg0) -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<repeated> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method raise () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method raise () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -11213,17 +11213,17 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         } | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument length<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument start<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : exit> (status) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : exit> (status) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<optional> -> Integer | TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : fail> (arg0) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : fail> (arg0) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.1 : raise> (arg0) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.1 : raise> (arg0) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.2 : fail> (arg0, arg1) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.2 : fail> (arg0, arg1) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> AppliedType {
         klass = ::<constant:Array>
@@ -11232,7 +11232,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.2 : raise> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.2 : raise> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -11241,7 +11241,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = String
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.3 : fail> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.3 : fail> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -11250,7 +11250,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = String
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method <overload N.3 : raise> (arg0, arg1, arg2) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method <overload N.3 : raise> (arg0, arg1, arg2) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> Exception @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> -> AppliedType {
@@ -11296,7 +11296,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method __method__ () -> Symbol | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method ` (arg0) -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method abort (msg) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method abort (msg) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument msg<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method at_exit (blk) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> -> AppliedType {
@@ -11333,11 +11333,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg1<optional> -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument filename<optional> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument lineno<optional> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method exit () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method exit () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method exit! (status) -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method exit! (status) -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument status<> -> Integer | TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method fail () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method fail () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -11387,7 +11387,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method puts (arg0) -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<repeated> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method raise () -> <bottom> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method raise () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg1<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg2<optional> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -12011,7 +12011,7 @@ subgraph "cluster_#<static-init>$9" {
 
     "bb#<static-init>$9_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
@@ -12034,11 +12034,11 @@ subgraph "cluster_#<static-init>$9" {
 
     "bb#<static-init>$9_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
-<finalReturn> = return <returnMethodTemp>$2 : <bottom>
+<finalReturn> = return <returnMethodTemp>$2 : <impossible>
 dead=1
 <returnMethodTemp>$2: Integer(1)
 
-<finalReturn>: <bottom>
+<finalReturn>: <impossible>
 
 <unconditional>"];
 
@@ -12057,5 +12057,5 @@ dead=1
 # dead=1
 # <returnMethodTemp>$2: Integer(1)
 #
-# <finalReturn>: <bottom>
+# <finalReturn>: <impossible>
 --- typed-source end ---
