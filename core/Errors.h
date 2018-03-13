@@ -26,6 +26,20 @@ public:
     }
 };
 
+class ErrorColors {
+    static const std::string coloredPatternSigil;
+    static std::string coloredPatternReplace;
+    static std::string replaceAll(const std::string &inWhat, const std::string &from, const std::string &to);
+
+public:
+    ErrorColors() = delete;
+    template <typename... Args> static std::string format(const std::string &msg, const Args &... args) {
+        return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
+    }
+    static void enableColors();
+    static void disableColors();
+};
+
 struct BasicError {
     Loc loc;
     ErrorClass what;
@@ -44,7 +58,7 @@ struct ErrorLine {
     ErrorLine(Loc loc, std::string formattedMessage) : loc(loc), formattedMessage(formattedMessage){};
 
     template <typename... Args> static ErrorLine from(Loc loc, const std::string &msg, const Args &... args) {
-        std::string formatted = fmt::format(msg, args...);
+        std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, formatted);
     }
     std::string toString(const GlobalState &gs, bool color = true);
@@ -105,17 +119,9 @@ class ErrorBuilder {
     ErrorClass what;
     std::string header;
     std::vector<ErrorSection> sections;
-    static const std::string coloredPatternSigil;
-    static std::string coloredPatternReplace;
     void _setHeader(std::string &&header);
-    static std::string replaceAll(const std::string &inWhat, const std::string &from, const std::string &to);
-    template <typename... Args> std::string colorFormat(const std::string &msg, const Args &... args) {
-        return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
-    }
 
 public:
-    static void enableColors();
-    static void disableColors();
     ErrorBuilder(const ErrorBuilder &) = delete;
     ErrorBuilder(ErrorBuilder &&) = default;
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
@@ -125,12 +131,12 @@ public:
     }
     void addErrorSection(ErrorSection &&section);
     template <typename... Args> void addErrorLine(Loc loc, const std::string &msg, const Args &... args) {
-        std::string formatted = colorFormat(msg, args...);
+        std::string formatted = ErrorColors::format(msg, args...);
         addErrorSection(ErrorSection({ErrorLine(loc, formatted)}));
     }
 
     template <typename... Args> void setHeader(const std::string &msg, const Args &... args) {
-        std::string formatted = colorFormat(msg, args...);
+        std::string formatted = ErrorColors::format(msg, args...);
         _setHeader(move(formatted));
     }
 };

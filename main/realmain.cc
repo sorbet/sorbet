@@ -865,12 +865,12 @@ int realmain(int argc, char **argv) {
 
     if (options["color"].as<string>() == "auto") {
         if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
-            core::ErrorBuilder::enableColors();
+            core::ErrorColors::enableColors();
         }
     } else if (options["color"].as<string>() == "always") {
-        core::ErrorBuilder::enableColors();
+        core::ErrorColors::enableColors();
     } else if (options["color"].as<string>() == "never") {
-        core::ErrorBuilder::disableColors();
+        core::ErrorColors::disableColors();
     }
 
     WorkerPool workers(opts.threads, tracer);
