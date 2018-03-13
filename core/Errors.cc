@@ -36,7 +36,7 @@ std::string _replaceAll(const std::string &inWhat, const std::string &from, cons
     return copy;
 }
 
-std::string ErrorBuilder::replaceAll(const std::string &inWhat, const std::string &from, const std::string &to) {
+std::string ErrorColors::replaceAll(const std::string &inWhat, const std::string &from, const std::string &to) {
     return _replaceAll(inWhat, from, to);
 }
 
@@ -135,16 +135,16 @@ ErrorBuilder::~ErrorBuilder() {
     }
     this->gs._error(move(err));
 }
-const string ErrorBuilder::coloredPatternSigil = "`{}`";
-string ErrorBuilder::coloredPatternReplace = coloredPatternSigil;
+const string ErrorColors::coloredPatternSigil = "`{}`";
+string ErrorColors::coloredPatternReplace = coloredPatternSigil;
 
-void ErrorBuilder::enableColors() {
+void ErrorColors::enableColors() {
     rang::setControlMode(rang::control::Force);
     stringstream buf;
     buf << INTERPOLATION_COLOR << "{}" << REVERT_COLOR_SIGIL;
-    ErrorBuilder::coloredPatternReplace = buf.str();
+    coloredPatternReplace = buf.str();
 }
-void ErrorBuilder::disableColors() {
+void ErrorColors::disableColors() {
     coloredPatternReplace = coloredPatternSigil;
     rang::setControlMode(rang::control::Off);
 }
