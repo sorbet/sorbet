@@ -168,7 +168,15 @@ public:
             klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
         } else {
             bool isModule = klass->kind == ast::ClassDefKind::Module;
-            if (klass->symbol.data(ctx).isClassModuleSet() && isModule != klass->symbol.data(ctx).isClassModule()) {
+            if (!klass->symbol.data(ctx).isClass()) {
+                if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                    e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx).show(ctx));
+                    ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name,
+                                                 core::UniqueNameKind::Namer);
+                    klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+                }
+            } else if (klass->symbol.data(ctx).isClassModuleSet() &&
+                       isModule != klass->symbol.data(ctx).isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx).show(ctx),
                                 klass->symbol.data(ctx).isClassModule() ? "module" : "class");
@@ -182,7 +190,7 @@ public:
         return klass;
     }
 
-    unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
+    unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
@@ -458,6 +466,13 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, unique_ptr<ast::Assign> asgn) {
         // TODO(nelhage): forbid dynamic constant definition
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
+        auto sym = scope.data(ctx).findMember(ctx, lhs->cnst);
+        if (sym.exists() && !sym.data(ctx).isStaticField()) {
+            if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
+                e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx).show(ctx));
+                ctx.state.mangleRenameSymbol(sym, sym.data(ctx).name, core::UniqueNameKind::Namer);
+            }
+        }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         auto loc = lhs->loc;
         asgn->lhs = make_unique<ast::Ident>(loc, cnst);

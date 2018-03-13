@@ -1,0 +1,15 @@
+begin
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$9>()
+      begin
+        #<constant:A>$1 = 91
+        <emptyTree>
+        <emptyTree>
+        #<constant:B> = 91
+      end
+    end
+  end
+  class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:B><<constant:B>$1> < (::<constant:<todo sym>>)  end
+  <emptyTree>
+end

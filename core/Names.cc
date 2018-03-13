@@ -115,7 +115,8 @@ bool Name::isClassName(const GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return this->unique.uniqueNameKind == core::Singleton && this->unique.original.data(gs).isClassName(gs);
+            return (this->unique.uniqueNameKind == core::Singleton || this->unique.uniqueNameKind == core::Namer) &&
+                   this->unique.original.data(gs).isClassName(gs);
         }
         case CONSTANT:
             ENFORCE(this->cnst.original.data(gs).kind == UTF8);
