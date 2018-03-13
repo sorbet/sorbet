@@ -5517,7 +5517,7 @@ class Hash
   sig(
       arg0: K,
   )
-  .returns(V)
+  .returns(T.nilable(V))
   def [](arg0); end
 
   sig(
@@ -5565,7 +5565,7 @@ class Hash
   sig(
       arg0: K,
   )
-  .returns(V)
+  .returns(T.nilable(V))
   sig(
       arg0: K,
       blk: T.proc(arg0: K).returns(BasicObject),

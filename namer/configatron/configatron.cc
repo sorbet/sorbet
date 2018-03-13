@@ -138,6 +138,7 @@ struct Path {
         } else {
             auto classSym =
                 gs.enterClassSymbol(core::Loc::none(), owner, gs.enterNameConstant("configatron" + this->toString()));
+            classSym.data(gs).setIsModule(false);
             if (this->parent == nullptr) {
                 classSym.data(gs).superClass = core::Symbols::Configatron_RootStore();
             } else {

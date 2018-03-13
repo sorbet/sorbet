@@ -4682,7 +4682,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Arg0> = LambdaParam(::<constant:Hash>#<constant:K>)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method [] (arg0) -> LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method [] (arg0) -> NilClass | LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::<constant:Hash>#<constant:K>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method []= (arg0, arg1) -> LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::<constant:Hash>#<constant:K>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -4730,7 +4730,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method default= (arg0) -> LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    method delete (arg0) -> LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method delete (arg0) -> NilClass | LambdaParam(::<constant:Hash>#<constant:V>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::<constant:Hash>#<constant:K>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method delete_if (blk) -> AppliedType {

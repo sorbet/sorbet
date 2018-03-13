@@ -8,7 +8,7 @@ class Main
 
     sig(val: T::Hash[Symbol, String]).returns(String)
     def hash(val)
-        val[:zero]
+        val.fetch(:zero)
     end
 
     sig(val: T::Enumerable[Symbol]).returns(T.nilable(Symbol))

@@ -10,4 +10,17 @@ class TestConfigatron
       T.assert_type!(configatron, Configatron::RootStore)
       T.assert_type!(configatron.test_nested, Configatron::Store)
   end
+
+  def lub_test(param)
+    config = if param
+      configatron.test_hash_a
+    else
+      configatron.test_hash_b
+    end
+
+    if config && 4
+      "foo"
+    end
+    "bar"
+  end
 end
