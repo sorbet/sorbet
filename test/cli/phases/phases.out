@@ -158,10 +158,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = untyped
         ]
       } @ ???
+  class <constant:<any>> () @ ???
   class <constant:<impossible>> () @ ???
   class <constant:<none>> () @ ???
   class <constant:<todo sym>> () -> <Class:<todo sym>> @ ???
-  class <constant:<top>> () @ ???
   class <constant:Abbrev> (<constant:BasicObject>) -> <Class:Abbrev> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:ArgumentError> < ::<constant:StandardError> () -> <Class:ArgumentError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> ArgumentError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__

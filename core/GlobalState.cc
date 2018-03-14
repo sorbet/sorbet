@@ -17,7 +17,7 @@ namespace ruby_typer {
 namespace core {
 
 namespace {
-const char *top_str = "<top>";
+const char *top_str = "<any>";
 const char *bottom_str = "<impossible>";
 const char *untyped_str = "untyped";
 const char *root_str = "<root>";
