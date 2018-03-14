@@ -154,6 +154,13 @@ NameRef NameRef::addEq(GlobalState &gs) const {
     return gs.enterNameUTF8(nameEq);
 }
 
+NameRef NameRef::addAt(GlobalState &gs) const {
+    Name &name = this->data(gs);
+    ENFORCE(name.kind == UTF8, "addAt over non-utf8 name");
+    string nameEq = "@" + string(name.raw.utf8.begin(), name.raw.utf8.end());
+    return gs.enterNameUTF8(nameEq);
+}
+
 Name Name::deepCopy(const GlobalState &to) const {
     Name out;
     out.kind = this->kind;

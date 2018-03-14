@@ -86,6 +86,7 @@ public:
     }
 
     NameRef addEq(GlobalState &gs) const;
+    NameRef addAt(GlobalState &gs) const;
 
     std::string toString(const GlobalState &gs) const;
 

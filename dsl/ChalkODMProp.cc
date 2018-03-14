@@ -207,7 +207,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         stats.emplace_back(
             ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), dupType(setType.get())),
                          dupType(setType.get())));
-        core::NameRef setName = ctx.state.enterNameUTF8(name.toString(ctx) + "=");
+        core::NameRef setName = name.addEq(ctx);
         stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
     }
 
