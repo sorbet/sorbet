@@ -605,7 +605,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
         core::TypeAndOrigins tp;
 
         auto bindMinLoops = inWhat.minLoops.at(var);
-        if (bb->outerLoops <= bindMinLoops || bindMinLoops != inWhat.maxLoopWrite.at(var)) {
+        if (bb->outerLoops == bindMinLoops || bindMinLoops == inWhat.maxLoopWrite.at(var)) {
             continue;
         }
 
@@ -613,17 +613,16 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
             auto &other = envs[parent->id];
             auto otherPin = other.pinnedTypes.find(var);
             if (otherPin != other.pinnedTypes.end()) {
-                auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
                 if (tp.type != nullptr) {
-                    tp.type = core::Types::lub(ctx, tp.type, otherTO.type);
-                    for (auto origin : otherTO.origins) {
+                    tp.type = core::Types::lub(ctx, tp.type, otherPin->second.type);
+                    for (auto origin : otherPin->second.origins) {
                         if (find(tp.origins.begin(), tp.origins.end(), origin) == tp.origins.end()) {
                             tp.origins.push_back(origin);
                         }
                     }
                     tp.type->sanityCheck(ctx);
                 } else {
-                    tp = otherTO;
+                    tp = otherPin->second;
                 }
             }
         }
@@ -846,6 +845,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                                                                  ty.origins2Explanations(ctx)));
                         }
                     }
+                }
+                if (c->cast == core::Names::let()) {
+                    pinnedTypes[bind.bind] = tp;
                 }
             },
             [&](cfg::DebugEnvironment *d) {
