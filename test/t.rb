@@ -13,8 +13,6 @@ end
 def sig(*args)
   T::Sig.new
 end
-def declare_variables(*args)
-end
 
 class Module
   def [](*args)

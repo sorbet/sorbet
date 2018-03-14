@@ -16,12 +16,10 @@ class RealStruct
 end
 class RealStructDesugar
     class A < Struct
-        declare_variables(
-            :@foo => BasicObject,
-            :@bar => BasicObject,
-        )
-        attr_accessor :foo
-        attr_accessor :bar
+        def foo; end
+        def bar; end
+        def foo=(arg0); arg0; end
+        def bar=(arg0); arg0; end
         sig(foo: BasicObject, bar: BasicObject).returns(A)
         def self.new(foo=nil, bar=nil)
             T.cast(nil, A)

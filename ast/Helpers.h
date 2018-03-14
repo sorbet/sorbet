@@ -186,6 +186,16 @@ public:
         return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 
+    static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
+        auto sig = Send0(loc, Self(loc), core::Names::sig());
+        return Send1(loc, move(sig), core::Names::returns(), move(ret));
+    }
+
+    static std::unique_ptr<Expression> Sig1(core::Loc loc, std::unique_ptr<Expression> key,
+                                            std::unique_ptr<Expression> value, std::unique_ptr<Expression> ret) {
+        return Sig(loc, Hash1(loc, move(key), move(value)), move(ret));
+    }
+
     static std::unique_ptr<Expression> Cast(core::Loc loc, std::unique_ptr<Expression> type) {
         return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Nil(loc), move(type));
     }

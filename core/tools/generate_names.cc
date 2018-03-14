@@ -111,7 +111,6 @@ NameDef names[] = {
     {"singletonClass", "singleton_class", Core | Resolver},
     {"class_", "class", Core},
     {"classOf", "class_of", Resolver},
-    {"declareVariables", "declare_variables", Desugar | DSL | Resolver},
 
     {"assertType", "assert_type!", Resolver | CFG | Infer},
     {"cast", DSL | Resolver | CFG | Infer},

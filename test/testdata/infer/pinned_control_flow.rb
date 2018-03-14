@@ -1,8 +1,8 @@
 # @typed
 class Main
-  declare_variables(
-    :@s => T.nilable(Integer),
-  )
+  def initialize
+    @s = T.let(nil, T.nilable(Integer))
+  end
 
   def foo
     @s = 1 unless @s

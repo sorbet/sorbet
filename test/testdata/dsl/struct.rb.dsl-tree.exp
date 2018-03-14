@@ -13,11 +13,21 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
-        self(<constant:<todo sym>>).declare_variables({:"@foo" => ::<constant:BasicObject>, :"@bar" => ::<constant:BasicObject>})
+        def foo<<constant:<todo sym>>>()
+          <emptyTree>
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"foo")
+        def foo=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"bar")
+        def bar<<constant:<todo sym>>>()
+          <emptyTree>
+        end
+
+        def bar=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
         self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>, :"bar" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
 
@@ -28,22 +38,20 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
-        self(<constant:<todo sym>>).declare_variables({:"@foo" => <emptyTree>::<constant:BasicObject>, :"@bar" => <emptyTree>::<constant:BasicObject>})
-
         def foo<<constant:<todo sym>>>()
-          @foo
-        end
-
-        def foo=<<constant:<todo sym>>>(foo)
-          @foo = foo
+          <emptyTree>
         end
 
         def bar<<constant:<todo sym>>>()
-          @bar
+          <emptyTree>
         end
 
-        def bar=<<constant:<todo sym>>>(bar)
-          @bar = bar
+        def foo=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
+
+        def bar=<<constant:<todo sym>>>(arg0)
+          arg0
         end
 
         self(<constant:<todo sym>>).sig({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
@@ -55,9 +63,13 @@ class <emptyTree><<constant:<root>>> < ()
     end
     class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<constant:<todo sym>>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
-        self(<constant:<todo sym>>).declare_variables({:"@foo" => ::<constant:BasicObject>})
+        def foo<<constant:<todo sym>>>()
+          <emptyTree>
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"foo")
+        def foo=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
         self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
 
@@ -67,9 +79,13 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<constant:Struct>)
-        self(<constant:<todo sym>>).declare_variables({:"@foo" => ::<constant:BasicObject>})
+        def foo<<constant:<todo sym>>>()
+          <emptyTree>
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"foo")
+        def foo=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
         self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:B>)
 
@@ -84,11 +100,21 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
-        self(<constant:<todo sym>>).declare_variables({:"@foo" => ::<constant:BasicObject>, :"@bar" => ::<constant:BasicObject>})
+        def foo<<constant:<todo sym>>>()
+          <emptyTree>
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"foo")
+        def foo=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
-        self(<constant:<todo sym>>).attr_accessor(:"bar")
+        def bar<<constant:<todo sym>>>()
+          <emptyTree>
+        end
+
+        def bar=<<constant:<todo sym>>>(arg0)
+          arg0
+        end
 
         self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>, :"bar" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
 

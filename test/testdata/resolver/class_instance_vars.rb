@@ -1,11 +1,10 @@
 # @typed
 class Parent
-  declare_variables(
-    :@ivar => Integer,
-    :@ivar2 => Integer,
-    :@@class_var => String,
-  )
-  @@class_var = "hi"
+  def initialize
+    @ivar = T.let(1, Integer)
+    @ivar2 = T.let(2, Integer)
+  end
+  @@class_var = T.let("hi", String)
 
   def hi
     @ivar = 1
@@ -14,9 +13,7 @@ class Parent
 end
 
 module Mixin
-  declare_variables(
-    :@@mixin_cvar => Integer,
-  )
+  @@mixin_cvar = T.let(3, Integer)
   @@mixin_cvar
 end
 

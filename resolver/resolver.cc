@@ -210,75 +210,6 @@ public:
 
 class ResolveSignaturesWalk {
 private:
-    void processDeclareVariables(core::MutableContext ctx, ast::Send *send) {
-        if (send->block != nullptr) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                e.setHeader("Malformed `declare_variables'");
-            }
-            return;
-        }
-
-        if (send->args.size() != 1) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                e.setHeader("Wrong number of arguments to `declare_variables'");
-            }
-            return;
-        }
-        auto hash = ast::cast_tree<ast::Hash>(send->args.front().get());
-        if (hash == nullptr) {
-            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                e.setHeader("Malformed `declare_variables': Argument must be a hash");
-            }
-            return;
-        }
-        for (int i = 0; i < hash->keys.size(); ++i) {
-            auto &key = hash->keys[i];
-            auto &value = hash->values[i];
-            auto lit = ast::cast_tree<ast::Literal>(key.get());
-            if (lit == nullptr || !lit->isSymbol(ctx)) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("`declare_variables': variable names must be symbols");
-                }
-                continue;
-            }
-            core::NameRef name = lit->asSymbol(ctx);
-
-            auto typ = TypeSyntax::getResultType(ctx, value);
-            core::SymbolRef var;
-
-            auto str = name.toString(ctx);
-            if (str.substr(0, 2) == "@@") {
-                core::Symbol &data = ctx.owner.data(ctx);
-                var = data.findMember(ctx, name);
-                if (var.exists()) {
-                    if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                        e.setHeader("Redeclaring variable `{}`", str);
-                    }
-                } else {
-                    var = ctx.state.enterStaticFieldSymbol(key->loc, ctx.owner, name);
-                }
-            } else if (str.substr(0, 1) == "@") {
-                core::Symbol &data = ctx.owner.data(ctx);
-                var = data.findMember(ctx, name);
-                if (var.exists()) {
-                    if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
-                        e.setHeader("Redeclaring variable `{}`", str);
-                    }
-                } else {
-                    var = ctx.state.enterFieldSymbol(key->loc, ctx.owner, name);
-                }
-            } else {
-                if (auto e = ctx.state.beginError(key->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("`declare_variables`: variables must start with @ or @@");
-                }
-            }
-
-            if (var.exists()) {
-                var.data(ctx).resultType = typ;
-            }
-        }
-    }
-
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
         auto &methodInfo = method.data(ctx);
@@ -414,9 +345,6 @@ private:
                     }
 
                     switch (send->fun._id) {
-                        case core::Names::declareVariables()._id:
-                            processDeclareVariables(ctx, send);
-                            break;
                         case core::Names::mixesInClassMethods()._id: {
                             processMixesInClassMethods(ctx, send);
                         } break;

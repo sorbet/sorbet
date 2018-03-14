@@ -15,6 +15,15 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
+    def initialize<initialize>()
+      begin
+        ::<constant:Parent>#@ivar = T.let(1, Integer)
+        ::<constant:Parent>#@ivar2 = T.let(2, Integer)
+      end
+    end
+
     def hi<hi>()
       begin
         ::<constant:Parent>#@ivar = 1
@@ -23,12 +32,16 @@ begin
     end
 
     def self.<static-init><<static-init>>()
-      ::<constant:Parent>#@@class_var = "hi"
+      ::<constant:Parent>#@@class_var = T.let("hi", String)
     end
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
     def self.<static-init><<static-init>>()
-      ::<constant:Mixin>#@@mixin_cvar
+      begin
+        ::<constant:Mixin>#@@mixin_cvar = T.let(3, Integer)
+        ::<constant:Mixin>#@@mixin_cvar
+        <emptyTree>
+      end
     end
   end
   class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
