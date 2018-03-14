@@ -198,54 +198,54 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file) {
+unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::GlobalState> &lgs, core::FileRef file) {
     auto &print = opts.print;
     try {
         std::unique_ptr<parser::Node> nodes;
         {
-            tracer->trace("Parsing: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, file);
-            core::UnfreezeNameTable nameTableAccess(lgs); // enters strings from source code as names
-            nodes = parser::Parser::run(lgs, file);
+            tracer->trace("Parsing: {}", file.data(*lgs).path());
+            core::ErrorRegion errs(*lgs, file);
+            core::UnfreezeNameTable nameTableAccess(*lgs); // enters strings from source code as names
+            nodes = parser::Parser::run(*lgs, file);
         }
         if (print.ParseTree) {
-            cout << nodes->toString(lgs, 0) << '\n';
+            cout << nodes->toString(*lgs, 0) << '\n';
         }
         if (print.ParseTreeJSON) {
-            cout << nodes->toJSON(lgs, 0) << '\n';
+            cout << nodes->toJSON(*lgs, 0) << '\n';
         }
         if (opts.stopAfterPhase == Phase::PARSER) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
-        core::MutableContext ctx(lgs, core::Symbols::root());
+        core::MutableContext ctx(*lgs, core::Symbols::root());
         std::unique_ptr<ast::Expression> ast;
         {
-            tracer->trace("Desugaring: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, file);
-            core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
+            tracer->trace("Desugaring: {}", file.data(*lgs).path());
+            core::ErrorRegion errs(*lgs, file);
+            core::UnfreezeNameTable nameTableAccess(*lgs); // creates temporaries during desugaring
             ast = ast::desugar::node2Tree(ctx, move(nodes));
         }
         if (print.Desugared) {
-            cout << ast->toString(lgs, 0) << '\n';
+            cout << ast->toString(*lgs, 0) << '\n';
         }
         if (print.DesugaredRaw) {
-            cout << ast->showRaw(lgs) << '\n';
+            cout << ast->showRaw(*lgs) << '\n';
         }
         if (opts.stopAfterPhase == Phase::DESUGARER) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
         {
-            tracer->trace("Inlining DSLs: {}", file.data(lgs).path());
-            core::ErrorRegion errs(lgs, file);
+            tracer->trace("Inlining DSLs: {}", file.data(*lgs).path());
+            core::ErrorRegion errs(*lgs, file);
             ast = dsl::DSL::run(ctx, move(ast));
         }
         if (print.DSLTree) {
-            cout << ast->toString(lgs, 0) << '\n';
+            cout << ast->toString(*lgs, 0) << '\n';
         }
         if (print.DSLTreeRaw) {
-            cout << ast->showRaw(lgs) << '\n';
+            cout << ast->showRaw(*lgs) << '\n';
         }
         if (opts.stopAfterPhase == Phase::DSL) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -253,15 +253,15 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
         return ast;
     } catch (...) {
-        if (auto e = lgs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
-            e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
+        if (auto e = lgs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+            e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(*lgs).path());
         }
         returnCode = 12;
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
     }
 }
 
-vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std::string> frs,
+vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std::vector<std::string> frs,
                                           std::vector<core::FileRef> mainThreadFiles, const Options &opts,
                                           WorkerPool &workers) {
     vector<unique_ptr<ast::Expression>> result;
@@ -272,25 +272,36 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
         return empty;
     }
 
-    shared_ptr<ConcurrentBoundedQueue<std::pair<int, std::string>>> fileq =
-        make_shared<ConcurrentBoundedQueue<std::pair<int, std::string>>>(frs.size());
-    shared_ptr<BlockingBoundedQueue<thread_result>> resultq =
-        make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
+    shared_ptr<ConcurrentBoundedQueue<std::pair<int, std::string>>> fileq;
 
-    int i = gs.filesUsed();
+    shared_ptr<BlockingBoundedQueue<thread_result>> resultq;
+
+    {
+        Timer timeit(console_err, "creating index queues");
+
+        fileq = make_shared<ConcurrentBoundedQueue<std::pair<int, std::string>>>(frs.size());
+        resultq = make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
+    }
+
+    int i = gs->filesUsed();
     for (auto f : frs) {
         tracer->trace("enqueue: {}", f);
         std::pair<int, std::string> job(i++, f);
         fileq->push(move(job), 1);
     }
 
-    gs.sanityCheck();
-    const std::shared_ptr<core::GlobalState> cgs{gs.deepCopy()};
+    gs->sanityCheck();
+
+    const std::shared_ptr<core::GlobalState> cgs = gs;
+    gs = nullptr;
+    tracer->trace("Done deep copying global state");
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
         workers.multiplexJob([cgs, opts, fileq, resultq]() {
+            tracer->trace("worker deep copying global state");
             auto lgs = cgs->deepCopy();
+            tracer->trace("worker done deep copying global state");
             thread_result threadResult;
             int processedByThread = 0;
             std::pair<int, std::string> job;
@@ -301,6 +312,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                         core::ErrorRegion errs(*lgs, core::FileRef(job.first));
                         processedByThread++;
                         std::string fileName = job.second;
+                        tracer->trace("Reading: {}", fileName);
                         int fileId = job.first;
                         string src;
                         try {
@@ -335,9 +347,7 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
-                        tracer->trace("{}", fileName);
-
-                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file));
+                        threadResult.trees.emplace_back(indexOne(opts, lgs, file));
                     }
                 }
             }
@@ -349,9 +359,15 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             }
         });
 
+        tracer->trace("Deep copying global state");
+        auto mainTheadGs = cgs->deepCopy();
+        tracer->trace("Done deep copying global state");
+
         for (auto f : mainThreadFiles) {
-            trees.emplace_back(indexOne(opts, gs, f));
+            trees.emplace_back(indexOne(opts, mainTheadGs, f));
         }
+
+        gs = move(mainTheadGs);
 
         thread_result threadResult;
         {
@@ -360,17 +376,17 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
                  result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
                 if (result.gotItem()) {
                     tracer->trace("Building global substitution");
-                    core::GlobalSubstitution substitution(*threadResult.gs, gs);
+                    core::GlobalSubstitution substitution(*threadResult.gs, *gs, cgs.get());
                     tracer->trace("Consuming counters");
                     counterConsume(move(threadResult.counters));
-                    core::MutableContext ctx(gs, core::Symbols::root());
+                    core::MutableContext ctx(*gs, core::Symbols::root());
                     tracer->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
                         trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
                     }
                     tracer->trace("Tree substitution done");
                 }
-                gs.flushErrors();
+                gs->flushErrors();
                 indexingProgress.reportProgress(fileq->doneEstimate());
             }
             tracer->trace("Done collecting results from indexing threads");
@@ -379,10 +395,10 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
 
     ENFORCE(mainThreadFiles.size() + frs.size() == trees.size());
     {
-        core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
-        core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
+        core::UnfreezeNameTable nameTableAccess(*gs);     // creates names from config
+        core::UnfreezeSymbolTable symbolTableAccess(*gs); // creates methods for them
         ProgressIndicator namingProgress(opts.showProgress, "Configatron", 1);
-        namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
+        namer::configatron::fillInFromFileSystem(*gs, opts.configatronDirs, opts.configatronFiles);
     }
 
     {
@@ -394,20 +410,20 @@ vector<unique_ptr<ast::Expression>> index(core::GlobalState &gs, std::vector<std
             try {
                 unique_ptr<ast::Expression> ast;
                 {
-                    core::MutableContext ctx(gs, core::Symbols::root());
-                    tracer->trace("Naming: {}", file.data(gs).path());
-                    core::ErrorRegion errs(gs, file);
-                    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-                    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+                    core::MutableContext ctx(*gs, core::Symbols::root());
+                    tracer->trace("Naming: {}", file.data(*gs).path());
+                    core::ErrorRegion errs(*gs, file);
+                    core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+                    core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
                     ast = namer::Namer::run(ctx, move(tree));
                 }
                 result.emplace_back(move(ast));
-                gs.flushErrors();
+                gs->flushErrors();
                 namingProgress.reportProgress(result.size());
             } catch (...) {
                 returnCode = 13;
-                if (auto e = gs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
+                if (auto e = gs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(*gs).path());
                 }
             }
         }
@@ -485,11 +501,14 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
             cout << resolved->showRaw(*gs) << '\n';
         }
     }
+    shared_ptr<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>> fileq;
+    shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
 
-    shared_ptr<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>> fileq =
-        make_shared<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>>(what.size());
-    shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq =
-        make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+    {
+        Timer timeit(console_err, "creating typecheck queues");
+        fileq = make_shared<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>>(what.size());
+        resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+    }
 
     core::Context ctx(*gs, core::Symbols::root());
     for (auto &resolved : what) {
@@ -686,7 +705,7 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Options &options) {
+void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Options &options) {
     if (options.noStdlib) {
         gs->initEmpty();
         return;
@@ -713,7 +732,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> gs, const Optio
         auto oldSilence = gs->silenceErrors;
         gs->silenceErrors = true;
 
-        typecheck(gs, index(*gs, empty, payloadFiles, emptyOpts, workers), emptyOpts, workers); // result is thrown away
+        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers), emptyOpts, workers); // result is thrown away
         gs->silenceErrors = oldSilence;
     } else {
         Timer timeit(console_err, "Read serialized payload");
@@ -907,7 +926,7 @@ int realmain(int argc, char **argv) {
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(*gs, files, inputFiles, opts, workers);
+        indexed = index(gs, files, inputFiles, opts, workers);
     }
 
     {
