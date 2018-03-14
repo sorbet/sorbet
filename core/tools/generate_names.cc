@@ -148,6 +148,9 @@ NameDef names[] = {
     {"const_", "const", DSL},
     {"token", DSL},
     {"created", DSL},
+
+    {"describe", DSL},
+    {"it", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning

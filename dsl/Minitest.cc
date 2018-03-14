@@ -1,0 +1,83 @@
+#include "dsl/Minitest.h"
+#include "ast/Helpers.h"
+#include "ast/ast.h"
+#include "core/Context.h"
+#include "core/Names/dsl.h"
+#include "core/core.h"
+#include "core/errors/dsl.h"
+#include "dsl/dsl.h"
+
+using namespace std;
+
+namespace ruby_typer {
+namespace dsl {
+
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
+
+unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+    body = recurse(ctx, move(body));
+
+    auto bodySeq = ast::cast_tree<ast::InsSeq>(body.get());
+    if (bodySeq) {
+        for (auto &exp : bodySeq->stats) {
+            exp = recurse(ctx, move(exp));
+        }
+        bodySeq->expr = recurse(ctx, move(bodySeq->expr));
+    }
+    return body;
+}
+
+unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send *send) {
+    if (send->args.size() != 1 || send->block == nullptr) {
+        return nullptr;
+    }
+
+    auto self = ast::cast_tree<ast::Self>(send->recv.get());
+    if (self == nullptr) {
+        return nullptr;
+    }
+
+    auto arg = ast::cast_tree<ast::Literal>(send->args[0].get());
+    if (arg == nullptr || !arg->isString(ctx)) {
+        return nullptr;
+    }
+
+    vector<unique_ptr<ast::Expression>> stats;
+    if (send->fun == core::Names::describe()) {
+        ast::ClassDef::ANCESTORS_store ancestors;
+        ancestors.emplace_back(ast::MK::Self(arg->loc));
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(prepareBody(ctx, move(send->block->body)));
+        auto name = ast::MK::Constant(arg->loc, ast::MK::EmptyTree(arg->loc),
+                                      ctx.state.enterNameConstant("<class_" + arg->asString(ctx).toString(ctx) + ">"));
+        return ast::MK::Class(send->loc, move(name), move(ancestors), move(rhs), ast::ClassDefKind::Class);
+    } else if (send->fun == core::Names::it()) {
+        auto name = ctx.state.enterNameUTF8("<test_" + arg->asString(ctx).toString(ctx) + ">");
+        return ast::MK::Method0(send->loc, move(name), prepareBody(ctx, move(send->block->body)));
+    }
+
+    return nullptr;
+}
+
+unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body) {
+    auto bodySend = ast::cast_tree<ast::Send>(body.get());
+    if (bodySend) {
+        auto change = replaceDSLSingle(ctx, bodySend);
+        if (change) {
+            return change;
+        }
+    }
+    return body;
+}
+
+vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+    vector<unique_ptr<ast::Expression>> stats;
+    auto exp = replaceDSLSingle(ctx, send);
+    if (exp != nullptr) {
+        stats.emplace_back(move(exp));
+    }
+    return stats;
+}
+
+} // namespace dsl
+}; // namespace ruby_typer

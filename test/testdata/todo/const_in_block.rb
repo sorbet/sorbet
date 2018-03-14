@@ -1,6 +1,6 @@
 # @typed
 class Test
-  describe 'this is a class-building DSL' do
+  some_dsl 'this is a class-building DSL' do
     class A
     end
 

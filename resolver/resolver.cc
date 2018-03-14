@@ -104,6 +104,9 @@ private:
                 return make_unique<ast::Ident>(expr->loc, resolved);
             }
         }
+        if (ast::Self *self = ast::cast_tree<ast::Self>(expr)) {
+            return make_unique<ast::Ident>(expr->loc, ctx.contextClass());
+        }
         return nullptr;
     }
 

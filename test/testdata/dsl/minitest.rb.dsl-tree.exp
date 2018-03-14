@@ -1,0 +1,40 @@
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    class <emptyTree>::<constant:MyTest><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      def outside_method<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def <test_works outside><<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).outside_method()
+      end
+
+      class <emptyTree>::<constant:<class_some inner tests>><<constant:<todo sym>>> < (self(<constant:<todo sym>>))
+        begin
+          def inside_method<<constant:<todo sym>>>()
+            <emptyTree>
+          end
+          def <test_works inside><<constant:<todo sym>>>()
+            begin
+              self(<constant:<todo sym>>).outside_method()
+              self(<constant:<todo sym>>).inside_method()
+            end
+          end
+        end
+      end
+
+      def self.it<<constant:<todo sym>>>(*args)
+        <emptyTree>
+      end
+
+      self(<constant:<todo sym>>).it("ignores methods without a block")
+
+      self(<constant:<todo sym>>).junk().it("ignores non-self calls") do ||
+        self(<constant:<todo sym>>).junk()
+      end
+    end
+    def junk<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+  end
+end

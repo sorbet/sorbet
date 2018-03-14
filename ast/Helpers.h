@@ -161,6 +161,12 @@ public:
         return Method(loc, name, move(args), move(rhs));
     }
 
+    static std::unique_ptr<ClassDef> Class(core::Loc loc, std::unique_ptr<Expression> name,
+                                           ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
+                                           ClassDefKind kind) {
+        return std::make_unique<ClassDef>(loc, core::Symbols::todo(), move(name), move(ancestors), move(rhs), kind);
+    }
+
     static std::unique_ptr<Expression> Hash(core::Loc loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
         return std::make_unique<ast::Hash>(loc, move(keys), move(values));
     }
