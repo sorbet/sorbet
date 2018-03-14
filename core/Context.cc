@@ -3,6 +3,7 @@
 #include "Types.h"
 #include "Unfreeze.h"
 
+#include "../common/common.h"
 #include "common/common.h"
 #include <algorithm>
 #include <sstream>
@@ -56,7 +57,8 @@ SymbolRef MutableContext::contextClass() const {
     return self.contextClass();
 }
 
-GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to) {
+GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
+                                       const GlobalState *optionalCommonParent) {
     ENFORCE(from.symbols.size() == to.symbols.size(), "Can't substitute symbols yet");
 
     const_cast<GlobalState &>(from).sanityCheck();
@@ -75,42 +77,60 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to)
             to.enterFileAt(from.files[fileIdx], fileIdx);
         }
     }
-    bool seenEmpty = false;
-    {
-        UnfreezeNameTable unfreezeNames(to);
-        int i = -1;
-        for (const Name &nm : from.names) {
-            i++;
-            ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
-            if (seenEmpty) {
-                switch (nm.kind) {
-                    case NameKind::UNIQUE:
-                        nameSubstitution.push_back(to.freshNameUnique(nm.unique.uniqueNameKind,
-                                                                      substitute(nm.unique.original), nm.unique.num));
-                        break;
-                    case NameKind::UTF8:
-                        nameSubstitution.push_back(to.enterNameUTF8(nm.raw.utf8));
-                        break;
-                    case NameKind::CONSTANT:
-                        nameSubstitution.push_back(to.enterNameConstant(substitute(nm.cnst.original)));
-                        break;
-                    default:
-                        ENFORCE(false, "NameKind missing");
-                }
-            } else {
-                nameSubstitution.push_back(NameRef(to, 0));
-                seenEmpty = true;
-            }
+
+    fastPath = false;
+    if (optionalCommonParent != nullptr) {
+        if (from.namesUsed() == optionalCommonParent->namesUsed() &&
+            from.symbolsUsed() == optionalCommonParent->symbolsUsed()) {
+            ENFORCE(to.namesUsed() >= from.namesUsed());
+            ENFORCE(to.symbolsUsed() >= from.symbolsUsed());
+            fastPath = true;
         }
     }
 
-    // Enforce that the symbol tables are the same
-    for (int i = 0; i < from.symbols.size(); ++i) {
-        ENFORCE(substitute(from.symbols[i].name) == from.symbols[i].name);
-        ENFORCE(from.symbols[i].name == to.symbols[i].name);
+    if (!fastPath || debug_mode) {
+        bool seenEmpty = false;
+        {
+            UnfreezeNameTable unfreezeNames(to);
+            int i = -1;
+            for (const Name &nm : from.names) {
+                i++;
+                ENFORCE(nameSubstitution.size() == i, "Name substitution has wrong size");
+                if (seenEmpty) {
+                    switch (nm.kind) {
+                        case NameKind::UNIQUE:
+                            nameSubstitution.push_back(to.freshNameUnique(
+                                nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
+                            break;
+                        case NameKind::UTF8:
+                            nameSubstitution.push_back(to.enterNameUTF8(nm.raw.utf8));
+                            break;
+                        case NameKind::CONSTANT:
+                            nameSubstitution.push_back(to.enterNameConstant(substitute(nm.cnst.original)));
+                            break;
+                        default:
+                            ENFORCE(false, "NameKind missing");
+                    }
+                } else {
+                    nameSubstitution.push_back(NameRef(to, 0));
+                    seenEmpty = true;
+                }
+                ENFORCE(!fastPath || nameSubstitution.back()._id == i);
+            }
+        }
+
+        // Enforce that the symbol tables are the same
+        for (int i = 0; i < from.symbols.size(); ++i) {
+            ENFORCE(substitute(from.symbols[i].name) == from.symbols[i].name);
+            ENFORCE(from.symbols[i].name == to.symbols[i].name);
+        }
     }
 
     to.sanityCheck();
+}
+
+bool GlobalSubstitution::useFastPath() const {
+    return fastPath;
 }
 
 } // namespace core

@@ -107,6 +107,9 @@ public:
 std::unique_ptr<Expression> ruby_typer::ast::Substitute::run(core::MutableContext ctx,
                                                              const ruby_typer::core::GlobalSubstitution &subst,
                                                              std::unique_ptr<Expression> what) {
+    if (subst.useFastPath()) {
+        return what;
+    }
     SubstWalk walk(subst);
     what = TreeMap::apply(ctx, walk, move(what));
     return what;

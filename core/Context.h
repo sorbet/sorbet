@@ -92,15 +92,19 @@ public:
 
 class GlobalSubstitution {
 public:
-    GlobalSubstitution(const GlobalState &from, GlobalState &to);
+    GlobalSubstitution(const GlobalState &from, GlobalState &to, const GlobalState *optionalCommonParent = nullptr);
 
     NameRef substitute(NameRef from) const {
         ENFORCE(from._id < nameSubstitution.size(), "name substitution index out of bounds");
         return nameSubstitution[from._id];
     }
 
+    bool useFastPath() const;
+
 private:
     std::vector<NameRef> nameSubstitution;
+    // set if no substitution is actually necessary
+    bool fastPath;
 };
 
 } // namespace core
