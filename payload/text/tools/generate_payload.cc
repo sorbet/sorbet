@@ -34,7 +34,7 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "namespace ruby_typer{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "() {" << '\n';
-        out << "  return \"" + absl::CEscape(ruby_typer::File::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
+        out << "  return \"" + absl::CEscape(ruby_typer::FileOps::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
     }
     out << "std::vector<std::pair<std::string, std::string>> all() {" << '\n';
     out << "  std::vector<std::pair<std::string, std::string>> result;" << '\n';

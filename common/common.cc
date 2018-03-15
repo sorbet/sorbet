@@ -17,7 +17,7 @@ using namespace std;
 #define MAX_STACK_FRAMES 128
 static void *stack_traces[MAX_STACK_FRAMES];
 
-string ruby_typer::File::read(const absl::string_view filename) {
+string ruby_typer::FileOps::read(const absl::string_view filename) {
     string fileNameStr(filename.data(), filename.size());
     ifstream fin(fileNameStr);
     if (!fin.good()) {
@@ -33,7 +33,7 @@ string ruby_typer::File::read(const absl::string_view filename) {
     return src;
 }
 
-void ruby_typer::File::write(const absl::string_view filename, const vector<ruby_typer::u1> &data) {
+void ruby_typer::FileOps::write(const absl::string_view filename, const vector<ruby_typer::u1> &data) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr, ios::out | ios::binary);
     if (!fout.good()) {
@@ -42,7 +42,7 @@ void ruby_typer::File::write(const absl::string_view filename, const vector<ruby
     fout.write((const char *)data.data(), data.size());
 }
 
-void ruby_typer::File::write(const absl::string_view filename, const absl::string_view text) {
+void ruby_typer::FileOps::write(const absl::string_view filename, const absl::string_view text) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr);
     if (!fout.good()) {
@@ -51,12 +51,12 @@ void ruby_typer::File::write(const absl::string_view filename, const absl::strin
     fout << text;
 }
 
-absl::string_view ruby_typer::File::getFileName(const absl::string_view path) {
+absl::string_view ruby_typer::FileOps::getFileName(const absl::string_view path) {
     std::size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }
 
-absl::string_view ruby_typer::File::getExtension(const absl::string_view path) {
+absl::string_view ruby_typer::FileOps::getExtension(const absl::string_view path) {
     std::size_t found = path.find_last_of(".");
     if (found == absl::string_view::npos) {
         return absl::string_view();

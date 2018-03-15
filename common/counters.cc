@@ -402,7 +402,7 @@ bool storeCountersToProtoFile(const std::string &fileName, const std::string &pr
     options.always_print_primitive_fields = true;
     options.preserve_proto_field_names = true;
     google::protobuf::util::MessageToJsonString(metrics, &json_string, options);
-    File::write(fileName, json_string);
+    FileOps::write(fileName, json_string);
     return true;
 }
 

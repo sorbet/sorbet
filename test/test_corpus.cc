@@ -45,7 +45,7 @@ vector<Expectations> getInputs(int myId, int totalShards);
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     string res = arg.param.folder + arg.param.basename;
-    auto ext = ruby_typer::File::getExtension(res);
+    auto ext = ruby_typer::FileOps::getExtension(res);
     if (ext == "rb") {
         res.erase(res.end() - ext.size() - 1, res.end());
     }
@@ -176,7 +176,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         for (auto &srcPath : test.sourceFiles) {
             auto path = test.folder + srcPath;
-            auto src = ruby_typer::File::read(path.c_str());
+            auto src = ruby_typer::FileOps::read(path.c_str());
             files.push_back(gs.enterFile(path, src));
         }
     }
@@ -327,7 +327,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << '\n';
+            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\"{" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -347,7 +347,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::File::getFileName(inputPath) << "\"{" << '\n';
+            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\"{" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -393,7 +393,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
         auto checker = test.folder + expectation->second;
-        auto expect = ruby_typer::File::read(checker.c_str());
+        auto expect = ruby_typer::FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
             TEST_COUT << gotPhase.first << " ok" << '\n';
@@ -555,8 +555,8 @@ bool compareNames(const string &left, const string &right) {
 
     // If the base names match, compare by reverse order on extension, so that
     // .exp comes after .rb.
-    auto lext = ruby_typer::File::getExtension(left);
-    auto rext = ruby_typer::File::getExtension(right);
+    auto lext = ruby_typer::FileOps::getExtension(left);
+    auto rext = ruby_typer::FileOps::getExtension(right);
     if (lext != rext) {
         return rext < lext;
     }

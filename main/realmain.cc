@@ -316,7 +316,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         int fileId = job.first;
                         string src;
                         try {
-                            src = File::read(fileName.c_str());
+                            src = FileOps::read(fileName.c_str());
                         } catch (FileNotFoundException e) {
                             if (auto e = lgs->beginError(ruby_typer::core::Loc::none(),
                                                          core::errors::Internal::InternalError)) {
@@ -440,7 +440,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << File::getFileName(f.data(ctx).path()) << "\"{" << '\n';
+            cout << "digraph \"" << FileOps::getFileName(f.data(ctx).path()) << "\"{" << '\n';
         }
         CFG_Collector_and_Typer collector(opts);
         {
@@ -591,7 +591,7 @@ public:
         for (int i = 0; i < argc; i++) {
             if (argv[i][0] == '@') {
                 try {
-                    string argsP = File::read(argv[i] + 1);
+                    string argsP = FileOps::read(argv[i] + 1);
                     for (string arg : split(argsP, '\n')) {
                         char *c_arg = (char *)malloc(arg.size() + 1);
                         memcpy(c_arg, arg.c_str(), arg.size() + 1);
@@ -937,7 +937,7 @@ int realmain(int argc, char **argv) {
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
-        File::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(*gs));
+        FileOps::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(*gs));
     }
 
     if (options.count("counters") != 0) {

@@ -115,7 +115,7 @@ template <class From, class To> To *fast_cast(From *what) {
     return dynamic_cast<To *>(what);
 };
 
-class File final {
+class FileOps final {
 public:
     static std::string read(const absl::string_view filename);
     static void write(const absl::string_view filename, const std::vector<ruby_typer::u1> &data);
