@@ -19,7 +19,7 @@ bool NameRef::isWellKnownName() const {
     return _id <= Names::LAST_WELL_KNOWN_NAME;
 }
 
-ruby_typer::core::Name::~Name() noexcept {
+core::Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
         unique.~UniqueName();
     }

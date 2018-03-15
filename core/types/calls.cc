@@ -7,7 +7,7 @@
 
 template class std::vector<ruby_typer::core::SymbolRef>;
 using namespace ruby_typer;
-using namespace ruby_typer::core;
+using namespace core;
 using namespace std;
 
 shared_ptr<Type> ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,

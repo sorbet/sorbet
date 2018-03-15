@@ -1,31 +1,37 @@
 #include "Unfreeze.h"
 
-ruby_typer::core::UnfreezeSymbolTable::UnfreezeSymbolTable(ruby_typer::core::GlobalState &gs) : gs(gs) {
+namespace ruby_typer {
+namespace core {
+
+UnfreezeSymbolTable::UnfreezeSymbolTable(GlobalState &gs) : gs(gs) {
     this->oldState = gs.unfreezeSymbolTable();
 }
 
-ruby_typer::core::UnfreezeSymbolTable::~UnfreezeSymbolTable() {
+UnfreezeSymbolTable::~UnfreezeSymbolTable() {
     if (oldState) {
         gs.freezeSymbolTable();
     }
 }
 
-ruby_typer::core::UnfreezeNameTable::UnfreezeNameTable(ruby_typer::core::GlobalState &gs) : gs(gs) {
+UnfreezeNameTable::UnfreezeNameTable(GlobalState &gs) : gs(gs) {
     this->oldState = gs.unfreezeNameTable();
 }
 
-ruby_typer::core::UnfreezeNameTable::~UnfreezeNameTable() {
+UnfreezeNameTable::~UnfreezeNameTable() {
     if (oldState) {
         gs.freezeNameTable();
     }
 }
 
-ruby_typer::core::UnfreezeFileTable::UnfreezeFileTable(ruby_typer::core::GlobalState &gs) : gs(gs) {
+UnfreezeFileTable::UnfreezeFileTable(GlobalState &gs) : gs(gs) {
     this->oldState = gs.unfreezeFileTable();
 }
 
-ruby_typer::core::UnfreezeFileTable::~UnfreezeFileTable() {
+UnfreezeFileTable::~UnfreezeFileTable() {
     if (oldState) {
         gs.freezeFileTable();
     }
 }
+
+} // namespace core
+} // namespace ruby_typer

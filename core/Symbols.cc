@@ -266,20 +266,20 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
-        if (auto e = gs.beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
+        if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ",
                         name.toString(gs), this->fullName(gs));
         }
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
             i++;
-            if (auto e = gs.beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
+            if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
                 e.setHeader("`{}`:- `{}`", i, it->data(gs).fullName(gs));
             }
             int j = 0;
             for (auto it2 = it->data(gs).argumentsOrMixins.rbegin(); it2 != it->data(gs).argumentsOrMixins.rend();
                  ++it2) {
-                if (auto e = gs.beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
+                if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
                     e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs).fullName(gs));
                 }
                 j++;

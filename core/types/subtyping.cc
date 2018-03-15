@@ -8,10 +8,9 @@ namespace core {
 
 using namespace std;
 
-shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
+shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ctx, shared_ptr<Type> t1,
-                                                                shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto ret = _lub(ctx, t1, t2);
     ret->sanityCheck(ctx);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
@@ -21,22 +20,22 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::lub(core::Context ct
     return ret;
 }
 
-shared_ptr<ruby_typer::core::Type> underlying(shared_ptr<Type> t1) {
+shared_ptr<core::Type> underlying(shared_ptr<Type> t1) {
     if (auto *f = cast_type<ProxyType>(t1.get())) {
         return f->underlying;
     }
     return t1;
 }
 
-shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     OrType *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    shared_ptr<ruby_typer::core::Type> n1 = Types::lub(ctx, o1->left, t2);
+    shared_ptr<core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
         categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
-    shared_ptr<ruby_typer::core::Type> n2 = Types::lub(ctx, o1->right, t2);
+    shared_ptr<core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
         categoryCounterInc("lub_distribute_or.outcome", "n2'");
         return n2;
@@ -60,15 +59,15 @@ shared_ptr<ruby_typer::core::Type> lubDistributeOr(core::Context ctx, shared_ptr
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
-shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     AndType *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
-    shared_ptr<ruby_typer::core::Type> n1 = Types::glb(ctx, a1->left, t2);
+    shared_ptr<core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
         categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
-    shared_ptr<ruby_typer::core::Type> n2 = Types::glb(ctx, a1->right, t2);
+    shared_ptr<core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
         categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
@@ -94,7 +93,7 @@ shared_ptr<ruby_typer::core::Type> glbDistributeAnd(core::Context ctx, shared_pt
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
-shared_ptr<ruby_typer::core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (AndType *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
@@ -108,8 +107,7 @@ shared_ptr<ruby_typer::core::Type> dropLubComponents(core::Context ctx, shared_p
     return t1;
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
-                                                                 shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -229,13 +227,13 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
         if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
             categoryCounterInc("lub", "proxy>");
             // both are proxy
-            shared_ptr<ruby_typer::core::Type> result;
-            ruby_typer::typecase(
+            shared_ptr<core::Type> result;
+            typecase(
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                     if (TupleType *a2 = cast_type<TupleType>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                            vector<shared_ptr<ruby_typer::core::Type>> elemLubs;
+                            vector<shared_ptr<core::Type>> elemLubs;
                             int i = -1;
                             for (auto &el2 : a2->elems) {
                                 ++i;
@@ -254,8 +252,8 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = -1;
-                            vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
-                            vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
+                            vector<shared_ptr<core::LiteralType>> keys;
+                            vector<shared_ptr<core::Type>> valueLubs;
                             for (auto &el2 : h2->keys) {
                                 ++i;
                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
@@ -334,7 +332,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_lub(core::Context c
     return lubGround(ctx, t1, t2);
 }
 
-shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -359,7 +357,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<ruby_typer::core::Type> result;
+    shared_ptr<core::Type> result;
 
     // 1 :-)
     ClassType *c1 = cast_type<ClassType>(t1.get());
@@ -381,7 +379,7 @@ shared_ptr<ruby_typer::core::Type> lubGround(core::Context ctx, shared_ptr<Type>
     }
 }
 
-shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -406,7 +404,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<ruby_typer::core::Type> result;
+    shared_ptr<core::Type> result;
     // 1 :-)
     ClassType *c1 = cast_type<ClassType>(t1.get());
     ClassType *c2 = cast_type<ClassType>(t2.get());
@@ -430,8 +428,7 @@ shared_ptr<ruby_typer::core::Type> glbGround(core::Context ctx, shared_ptr<Type>
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ctx, shared_ptr<Type> t1,
-                                                                shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto ret = _glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
@@ -444,8 +441,7 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::glb(core::Context ct
     return ret;
 }
 
-shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
-                                                                 shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -497,81 +493,80 @@ shared_ptr<ruby_typer::core::Type> ruby_typer::core::Types::_glb(core::Context c
             if (typeid(*p1) != typeid(*p2)) {
                 return Types::bottom();
             }
-            shared_ptr<ruby_typer::core::Type> result;
-            ruby_typer::typecase(
-                p1,
-                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                    TupleType *a2 = cast_type<TupleType>(p2);
-                    ENFORCE(a2 != nullptr);
-                    if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                        vector<shared_ptr<ruby_typer::core::Type>> elemGlbs;
-                        int i = -1;
-                        for (auto &el2 : a2->elems) {
-                            ++i;
-                            auto glbe = glb(ctx, a1->elems[i], el2);
-                            if (glbe->isBottom()) {
-                                result = Types::bottom();
-                                return;
-                            }
-                            elemGlbs.emplace_back(glbe);
-                        }
-                        result = make_shared<TupleType>(elemGlbs);
-                    } else {
-                        result = Types::bottom();
-                    }
+            shared_ptr<core::Type> result;
+            typecase(p1,
+                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                         TupleType *a2 = cast_type<TupleType>(p2);
+                         ENFORCE(a2 != nullptr);
+                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
+                             vector<shared_ptr<core::Type>> elemGlbs;
+                             int i = -1;
+                             for (auto &el2 : a2->elems) {
+                                 ++i;
+                                 auto glbe = glb(ctx, a1->elems[i], el2);
+                                 if (glbe->isBottom()) {
+                                     result = Types::bottom();
+                                     return;
+                                 }
+                                 elemGlbs.emplace_back(glbe);
+                             }
+                             result = make_shared<TupleType>(elemGlbs);
+                         } else {
+                             result = Types::bottom();
+                         }
 
-                },
-                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                    ShapeType *h2 = cast_type<ShapeType>(p2);
-                    ENFORCE(h2 != nullptr);
-                    if (h2->keys.size() == h1->keys.size()) {
-                        // have enough keys.
-                        int i = -1;
-                        vector<shared_ptr<ruby_typer::core::LiteralType>> keys;
-                        vector<shared_ptr<ruby_typer::core::Type>> valueLubs;
-                        for (auto &el2 : h2->keys) {
-                            ++i;
-                            ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
-                            ENFORCE(u2 != nullptr);
-                            auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                                ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
-                                return candidate->value == el2->value && u1 == u2; // from lambda
-                            });
-                            if (fnd != h1->keys.end()) {
-                                keys.emplace_back(el2);
-                                auto glbe = glb(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
-                                if (glbe->isBottom()) {
-                                    result = Types::bottom();
-                                    return;
-                                }
-                                valueLubs.emplace_back(glbe);
-                            } else {
-                                result = Types::bottom();
-                                return;
-                            }
-                        }
-                        result = make_shared<ShapeType>(keys, valueLubs);
-                    } else {
-                        result = Types::bottom();
-                    }
+                     },
+                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                         ShapeType *h2 = cast_type<ShapeType>(p2);
+                         ENFORCE(h2 != nullptr);
+                         if (h2->keys.size() == h1->keys.size()) {
+                             // have enough keys.
+                             int i = -1;
+                             vector<shared_ptr<core::LiteralType>> keys;
+                             vector<shared_ptr<core::Type>> valueLubs;
+                             for (auto &el2 : h2->keys) {
+                                 ++i;
+                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
+                                 ENFORCE(u2 != nullptr);
+                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
+                                     return candidate->value == el2->value && u1 == u2; // from lambda
+                                 });
+                                 if (fnd != h1->keys.end()) {
+                                     keys.emplace_back(el2);
+                                     auto glbe = glb(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                     if (glbe->isBottom()) {
+                                         result = Types::bottom();
+                                         return;
+                                     }
+                                     valueLubs.emplace_back(glbe);
+                                 } else {
+                                     result = Types::bottom();
+                                     return;
+                                 }
+                             }
+                             result = make_shared<ShapeType>(keys, valueLubs);
+                         } else {
+                             result = Types::bottom();
+                         }
 
-                },
-                [&](LiteralType *l1) {
-                    LiteralType *l2 = cast_type<LiteralType>(p2);
-                    ENFORCE(l2 != nullptr);
-                    ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
-                    ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
-                    ENFORCE(u1 != nullptr && u2 != nullptr);
-                    if (u1->symbol == u2->symbol) {
-                        if (l1->value == l2->value) {
-                            result = t1;
-                        } else {
-                            result = Types::bottom();
-                        }
-                    } else {
-                        result = Types::bottom();
-                    }
-                });
+                     },
+                     [&](LiteralType *l1) {
+                         LiteralType *l2 = cast_type<LiteralType>(p2);
+                         ENFORCE(l2 != nullptr);
+                         ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
+                         ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
+                         ENFORCE(u1 != nullptr && u2 != nullptr);
+                         if (u1->symbol == u2->symbol) {
+                             if (l1->value == l2->value) {
+                                 result = t1;
+                             } else {
+                                 result = Types::bottom();
+                             }
+                         } else {
+                             result = Types::bottom();
+                         }
+                     });
             ENFORCE(result.get() != nullptr);
             return result;
         } else {
@@ -863,53 +858,51 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
             bool result;
             // TODO: simply compare as memory regions
-            ruby_typer::typecase(p1,
-                                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                                     TupleType *a2 = cast_type<TupleType>(p2);
-                                     result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
-                                     if (result) {
-                                         int i = -1;
-                                         for (auto &el2 : a2->elems) {
-                                             ++i;
-                                             result = Types::isSubType(ctx, a1->elems[i], el2);
-                                             if (!result) {
-                                                 break;
-                                             }
-                                         }
-                                     }
-                                 },
-                                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                                     ShapeType *h2 = cast_type<ShapeType>(p2);
-                                     result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
-                                     if (!result) {
-                                         return;
-                                     }
-                                     // have enough keys.
-                                     int i = -1;
-                                     for (auto &el2 : h2->keys) {
-                                         ++i;
-                                         ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
-                                         ENFORCE(u2 != nullptr);
-                                         auto fnd =
-                                             find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
-                                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
-                                                 return candidate->value == el2->value && u1 == u2; // from lambda
-                                             });
-                                         result =
-                                             fnd != h1->keys.end() &&
-                                             Types::isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
-                                         if (!result) {
-                                             return;
-                                         }
-                                     }
-                                 },
-                                 [&](LiteralType *l1) {
-                                     LiteralType *l2 = cast_type<LiteralType>(p2);
-                                     ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
-                                     ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
-                                     ENFORCE(u1 != nullptr && u2 != nullptr);
-                                     result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
-                                 });
+            typecase(p1,
+                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                         TupleType *a2 = cast_type<TupleType>(p2);
+                         result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
+                         if (result) {
+                             int i = -1;
+                             for (auto &el2 : a2->elems) {
+                                 ++i;
+                                 result = Types::isSubType(ctx, a1->elems[i], el2);
+                                 if (!result) {
+                                     break;
+                                 }
+                             }
+                         }
+                     },
+                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                         ShapeType *h2 = cast_type<ShapeType>(p2);
+                         result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
+                         if (!result) {
+                             return;
+                         }
+                         // have enough keys.
+                         int i = -1;
+                         for (auto &el2 : h2->keys) {
+                             ++i;
+                             ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
+                             ENFORCE(u2 != nullptr);
+                             auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
+                                 return candidate->value == el2->value && u1 == u2; // from lambda
+                             });
+                             result = fnd != h1->keys.end() &&
+                                      Types::isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                             if (!result) {
+                                 return;
+                             }
+                         }
+                     },
+                     [&](LiteralType *l1) {
+                         LiteralType *l2 = cast_type<LiteralType>(p2);
+                         ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
+                         ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
+                         ENFORCE(u1 != nullptr && u2 != nullptr);
+                         result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
+                     });
             return result;
             // both are proxy
         } else {
@@ -935,7 +928,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
     }
 }
 
-bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -984,7 +977,7 @@ bool ruby_typer::core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, 
     return isSubTypeSingle(ctx, t1, t2); // 1
 }
 
-bool ruby_typer::core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 

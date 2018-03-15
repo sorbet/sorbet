@@ -23,7 +23,7 @@ struct Offset2PosTest {
 TEST(ASTTest, TestOffset2Pos) { // NOLINT
     core::GlobalState gs(errorQueue);
     gs.initEmpty();
-    ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+    core::UnfreezeFileTable fileTableAccess(gs);
 
     vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
                                     {"line 1\nline 2", 1, 1, 2},
@@ -49,7 +49,7 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
 TEST(ASTTest, Errors) { // NOLINT
     core::GlobalState gs(errorQueue);
     gs.initEmpty();
-    ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+    core::UnfreezeFileTable fileTableAccess(gs);
     core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
     if (auto e = gs.beginError(core::Loc{f, 0, 3}, core::errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
@@ -81,7 +81,7 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"@typed\n# @typed some noise\n", false},
     };
     for (auto &tc : cases) {
-        EXPECT_EQ(tc.isTyped, ruby_typer::core::fileIsTyped(tc.src));
+        EXPECT_EQ(tc.isTyped, core::fileIsTyped(tc.src));
     }
 }
 

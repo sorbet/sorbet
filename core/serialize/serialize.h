@@ -9,7 +9,7 @@ public:
     static void load(GlobalState &gs, const u1 *const p);
 
     class Pickler {
-        std::vector<ruby_typer::u1> data;
+        std::vector<u1> data;
         u1 zeroCounter = 0;
 
     public:
@@ -17,13 +17,13 @@ public:
         void putU1(const u1 v1);
         void putS8(const int64_t i);
         void putStr(const absl::string_view s);
-        std::vector<ruby_typer::u1> result();
+        std::vector<u1> result();
         Pickler() = default;
     };
     class UnPickler {
         int pos;
         u1 zeroCounter = 0;
-        std::vector<ruby_typer::u1> data;
+        std::vector<u1> data;
 
     public:
         u4 getU4();

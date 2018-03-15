@@ -7,11 +7,11 @@
 #include "core/Types.h"
 
 using namespace ruby_typer;
-using namespace ruby_typer::core;
+using namespace core;
 using namespace std;
 
 // improve debugging.
-template class std::shared_ptr<ruby_typer::core::Type>;
+template class std::shared_ptr<core::Type>;
 template class std::vector<core::Loc>;
 
 shared_ptr<Type> Types::top() {
@@ -179,23 +179,23 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
     return result;
 }
 
-ruby_typer::core::ClassType::ClassType(ruby_typer::core::SymbolRef symbol) : symbol(symbol) {
+core::ClassType::ClassType(core::SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-string ruby_typer::core::ClassType::toString(const GlobalState &gs, int tabs) {
+string core::ClassType::toString(const GlobalState &gs, int tabs) {
     return this->symbol.data(gs).show(gs);
 }
 
-string ruby_typer::core::ClassType::show(const GlobalState &gs) {
+string core::ClassType::show(const GlobalState &gs) {
     return this->symbol.data(gs).show(gs);
 }
 
-string ruby_typer::core::ClassType::typeName() {
+string core::ClassType::typeName() {
     return "ClassType";
 }
 
-ruby_typer::core::ProxyType::ProxyType(shared_ptr<ruby_typer::core::Type> underlying) : underlying(move(underlying)) {}
+core::ProxyType::ProxyType(shared_ptr<core::Type> underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(core::Context ctx) {
     ENFORCE(cast_type<ClassType>(this->underlying.get()) != nullptr ||
@@ -218,16 +218,16 @@ bool Type::isBottom() {
     return t != nullptr && t->symbol == core::Symbols::bottom();
 }
 
-ruby_typer::core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
+core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
 
-ruby_typer::core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), value(absl::bit_cast<u8>(val)) {}
+core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), value(absl::bit_cast<u8>(val)) {}
 
-ruby_typer::core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
+core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(klass == core::Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
     ENFORCE(klass == core::Symbols::String() || klass == core::Symbols::Symbol());
 }
 
-ruby_typer::core::LiteralType::LiteralType(bool val)
+core::LiteralType::LiteralType(bool val)
     : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
 string LiteralType::typeName() {
@@ -263,7 +263,7 @@ string LiteralType::showValue(const GlobalState &gs) {
     return value;
 }
 
-ruby_typer::core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
+core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
 
 string TupleType::typeName() {
@@ -336,9 +336,9 @@ void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
 }
 
-ruby_typer::core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
+core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
 
-ruby_typer::core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
+core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(core::Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
 
 string ShapeType::toString(const GlobalState &gs, int tabs) {
@@ -633,7 +633,7 @@ bool OrType::isFullyDefined() {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
 
-ruby_typer::core::TypeVar::TypeVar(NameRef name) : name(name) {}
+core::TypeVar::TypeVar(NameRef name) : name(name) {}
 
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
@@ -691,11 +691,11 @@ std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::Symbo
     return original.resultType;
 }
 
-bool ruby_typer::core::TypeVar::isFullyDefined() {
+bool core::TypeVar::isFullyDefined() {
     return this->isInstantiated;
 }
 
-std::shared_ptr<Type> ruby_typer::core::TypeVar::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+std::shared_ptr<Type> core::TypeVar::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     ENFORCE(isInstantiated);
     return instantiation->getCallArgumentType(ctx, name, i);
 }
