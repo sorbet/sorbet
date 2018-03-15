@@ -13,7 +13,9 @@ class A
        # <ifTemp>$5: TrueClass | FalseClass
        #   Being truthy entails:
        #     x to be String
+       #     x to be String
        #   Being falsy entails:
+       #     x NOT to be String
        #     x NOT to be String
           # x: String
           #

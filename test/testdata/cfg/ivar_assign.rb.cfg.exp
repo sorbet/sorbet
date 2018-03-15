@@ -27,7 +27,7 @@ subgraph "cluster_::<constant:TestIVar>#test" {
 
     "bb::<constant:TestIVar>#test_0" [label = "block[id=0]()
 @foo$4 = alias @foo : Integer
-@foo$4 = nil : untyped
+@foo$4 = nil : Integer
 <finalReturn> = return @foo$4 : <impossible>
 <unconditional>"];
 

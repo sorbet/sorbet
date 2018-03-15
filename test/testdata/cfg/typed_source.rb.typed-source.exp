@@ -105,11 +105,11 @@ class Examples
             # cond: untyped
             #   Being truthy entails:
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$11 to be untyped
+            #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #   Being falsy entails:
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$11 to be untyped
+            #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
       while true
             # b: NilClass
@@ -117,11 +117,11 @@ class Examples
             # cond: untyped
             #   Being truthy entails:
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$11 to be untyped
+            #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #   Being falsy entails:
             #     cond to be untyped
-            #     <debugEnvironmentTemp>$11 to be untyped
+            #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #
             # <whileTemp>$7: TrueClass
@@ -131,23 +131,23 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
-          b = 1 # error: Changing type of pinned argument
+          b = 1 # error: Changing type of a variable in a loop
               # b: untyped
               #
               # cond: untyped
               #   Being truthy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
         else
               # b: NilClass
@@ -155,23 +155,23 @@ class Examples
               # cond: untyped
               #   Being truthy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
-          b = 2 # error: Changing type of pinned argument
+          b = 2 # error: Changing type of a variable in a loop
               # b: untyped
               #
               # cond: untyped
               #   Being truthy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
               #     cond to be untyped
-              #     <debugEnvironmentTemp>$11 to be untyped
+              #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
         end
       end
@@ -188,11 +188,11 @@ class Examples
             #
             # cond: untyped
             #   Being truthy entails:
-            #     <debugEnvironmentTemp>$8 to be untyped
+            #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
-            #     <debugEnvironmentTemp>$8 to be untyped
+            #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
       while true
@@ -200,11 +200,11 @@ class Examples
             #
             # cond: untyped
             #   Being truthy entails:
-            #     <debugEnvironmentTemp>$8 to be untyped
+            #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #   Being falsy entails:
-            #     <debugEnvironmentTemp>$8 to be untyped
+            #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
             #     cond to be untyped
             #
@@ -214,23 +214,23 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
-          b = 1 # error: Changing type of pinned argument
+          b = 1 # error: Changing type of a variable in a loop
               # b: untyped
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         else
@@ -238,23 +238,23 @@ class Examples
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
-          b = 2 # error: Changing type of pinned argument
+          b = 2 # error: Changing type of a variable in a loop
               # b: untyped
               #
               # cond: untyped
               #   Being truthy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
               #   Being falsy entails:
-              #     <debugEnvironmentTemp>$8 to be untyped
+              #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
               #     cond to be untyped
         end

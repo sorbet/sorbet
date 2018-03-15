@@ -211,11 +211,12 @@ class <emptyTree><<constant:<root>>> < ()
               else
                 parts = []
               end
+              parts = <emptyTree>::<constant:T>.cast(parts, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
               parts.map() do |part|
                 begin
                   lines = part.split("
 ")
-                  a_name = b_name = nil
+                  a_name = b_name = <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
                   added_lines = []
                   removed_lines = []
                   lines.each() do |line|

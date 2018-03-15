@@ -33,10 +33,10 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
             argument raw_diff<> @ test/testdata/first/gerald.rb:113
           method parse : private (diff) @ test/testdata/first/gerald.rb:150
             argument diff<> @ test/testdata/first/gerald.rb:150
-            method <block>$2 (part) @ test/testdata/first/gerald.rb:154
-              argument part<> @ test/testdata/first/gerald.rb:154
-              method <block>$2 (line) @ test/testdata/first/gerald.rb:160
-                argument line<> @ test/testdata/first/gerald.rb:160
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:155
+              argument part<> @ test/testdata/first/gerald.rb:155
+              method <block>$2 (line) @ test/testdata/first/gerald.rb:161
+                argument line<> @ test/testdata/first/gerald.rb:161
           method removed_lines () @ test/testdata/first/gerald.rb:138
             method <block>$2 (part) @ test/testdata/first/gerald.rb:139
               argument part<> @ test/testdata/first/gerald.rb:139

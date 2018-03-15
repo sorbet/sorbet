@@ -59,9 +59,9 @@ class Examples
 
       while true
         if (cond)
-          b = 1 # error: Changing type of pinned argument
+          b = 1 # error: Changing type of a variable in a loop
         else
-          b = 2 # error: Changing type of pinned argument
+          b = 2 # error: Changing type of a variable in a loop
         end
       end
 
@@ -72,9 +72,9 @@ class Examples
     def variables_loop_if(cond)
       while true
         if (cond)
-          b = 1 # error: Changing type of pinned argument
+          b = 1 # error: Changing type of a variable in a loop
         else
-          b = 2 # error: Changing type of pinned argument
+          b = 2 # error: Changing type of a variable in a loop
         end
       end
 

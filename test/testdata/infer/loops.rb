@@ -9,7 +9,7 @@ class HasLoops
   def incorrect_assignment
     a = "s"
     while(false)
-      a = 1 # error: Changing type of pinned argument
+      a = 1 # error: Changing type of a variable in a loop
     end
   end
 

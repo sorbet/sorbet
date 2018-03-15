@@ -151,10 +151,11 @@ module Opus::CIBot::Gerald
       parts = diff.split(/^diff [^\n]*\n/m)[
         1..-1]
       parts ||= []
+      parts = T.cast(parts, T::Array[String])
       parts.map do |part|
         lines = part.split("\n")
 
-        a_name = b_name = nil
+        a_name = b_name = T.cast(nil, T.nilable(String))
         added_lines = []
         removed_lines = []
         lines.each do |line|
@@ -162,10 +163,12 @@ module Opus::CIBot::Gerald
             next
           elsif line.start_with?('---')
             a_name = line[4..-1]
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/')
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Changing type of a variable in a loop, `T.nilable(String)` is not a subtype of `String`
+                                                                         # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+++')
             b_name = line[4..-1]
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/')
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Changing type of a variable in a loop, `T.nilable(String)` is not a subtype of `String`
+                                                                         # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+')
             added_lines << line[1..-1]
           elsif line.start_with?('-')
@@ -174,7 +177,7 @@ module Opus::CIBot::Gerald
         end
         next if a_name.nil?
         {
-          a_name: a_name, # error: unreachable
+          a_name: a_name,
           b_name: b_name,
           added_lines: added_lines,
           removed_lines: removed_lines,

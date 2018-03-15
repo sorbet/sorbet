@@ -1429,6 +1429,39 @@ Begin {
                               ]
                             }
                           }
+                          Assign {
+                            lhs = LVarLhs {
+                              name = parts
+                            }
+                            rhs = Send {
+                              receiver = Const {
+                                scope = NULL
+                                name = <constant:T>
+                              }
+                              method = cast
+                              args = [
+                                LVar {
+                                  name = parts
+                                }
+                                Send {
+                                  receiver = Const {
+                                    scope = Const {
+                                      scope = NULL
+                                      name = <constant:T>
+                                    }
+                                    name = <constant:Array>
+                                  }
+                                  method = []
+                                  args = [
+                                    Const {
+                                      scope = NULL
+                                      name = <constant:String>
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          }
                           Send {
                             receiver = Block {
                               send = Send {
@@ -1477,7 +1510,29 @@ Begin {
                                       lhs = LVarLhs {
                                         name = b_name
                                       }
-                                      rhs = Nil {
+                                      rhs = Send {
+                                        receiver = Const {
+                                          scope = NULL
+                                          name = <constant:T>
+                                        }
+                                        method = cast
+                                        args = [
+                                          Nil {
+                                          }
+                                          Send {
+                                            receiver = Const {
+                                              scope = NULL
+                                              name = <constant:T>
+                                            }
+                                            method = nilable
+                                            args = [
+                                              Const {
+                                                scope = NULL
+                                                name = <constant:String>
+                                              }
+                                            ]
+                                          }
+                                        ]
                                       }
                                     }
                                   }

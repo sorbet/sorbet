@@ -1823,6 +1823,48 @@
                             }
                           },
                           {
+                            "type" : "Assign",
+                            "lhs" : {
+                              "type" : "LVarLhs",
+                              "name" : "parts"
+                            },
+                            "rhs" : {
+                              "type" : "Send",
+                              "receiver" : {
+                                "type" : "Const",
+                                "scope" : null,
+                                "name" : "T"
+                              },
+                              "method" : "cast",
+                              "args" : [
+                                {
+                                  "type" : "LVar",
+                                  "name" : "parts"
+                                },
+                                {
+                                  "type" : "Send",
+                                  "receiver" : {
+                                    "type" : "Const",
+                                    "scope" : {
+                                      "type" : "Const",
+                                      "scope" : null,
+                                      "name" : "T"
+                                    },
+                                    "name" : "Array"
+                                  },
+                                  "method" : "[]",
+                                  "args" : [
+                                    {
+                                      "type" : "Const",
+                                      "scope" : null,
+                                      "name" : "String"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          },
+                          {
                             "type" : "Send",
                             "receiver" : {
                               "type" : "Block",
@@ -1887,7 +1929,34 @@
                                         "name" : "b_name"
                                       },
                                       "rhs" : {
-                                        "type" : "Nil"
+                                        "type" : "Send",
+                                        "receiver" : {
+                                          "type" : "Const",
+                                          "scope" : null,
+                                          "name" : "T"
+                                        },
+                                        "method" : "cast",
+                                        "args" : [
+                                          {
+                                            "type" : "Nil"
+                                          },
+                                          {
+                                            "type" : "Send",
+                                            "receiver" : {
+                                              "type" : "Const",
+                                              "scope" : null,
+                                              "name" : "T"
+                                            },
+                                            "method" : "nilable",
+                                            "args" : [
+                                              {
+                                                "type" : "Const",
+                                                "scope" : null,
+                                                "name" : "String"
+                                              }
+                                            ]
+                                          }
+                                        ]
                                       }
                                     }
                                   },

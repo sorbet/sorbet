@@ -852,7 +852,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::DebugEnvironment *d) {
                 d->str = toString(ctx);
-                tp.type = core::Types::dynamic();
+                tp.type = core::Types::nilClass();
                 tp.origins.push_back(bind.loc);
             });
 
@@ -888,46 +888,62 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             if (pin != pinnedTypes.end()) {
                 cur = pin->second;
             }
-            if (!core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type))) {
+            bool asGoodAs = core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type));
+
+            {
                 switch (bindMinLoops) {
                     case cfg::CFG::MIN_LOOP_FIELD:
-                        if (auto e =
-                                ctx.state.beginError(bind.loc, core::errors::Infer::FieldReassignmentTypeMismatch)) {
-                            e.setHeader("Reassigning field with a value of wrong type: `{}` is not a subtype of `{}`",
-                                        tp.type->show(ctx), cur.type->show(ctx));
+                        if (!asGoodAs) {
+                            if (auto e = ctx.state.beginError(bind.loc,
+                                                              core::errors::Infer::FieldReassignmentTypeMismatch)) {
+                                e.setHeader(
+                                    "Reassigning field with a value of wrong type: `{}` is not a subtype of `{}`",
+                                    tp.type->show(ctx), cur.type->show(ctx));
+                            }
+                            tp = cur;
                         }
                         break;
                     case cfg::CFG::MIN_LOOP_GLOBAL:
-                        if (auto e =
-                                ctx.state.beginError(bind.loc, core::errors::Infer::GlobalReassignmentTypeMismatch)) {
-                            e.setHeader("Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
-                                        tp.type->show(ctx), cur.type->show(ctx));
+                        if (!asGoodAs) {
+                            if (auto e = ctx.state.beginError(bind.loc,
+                                                              core::errors::Infer::GlobalReassignmentTypeMismatch)) {
+                                e.setHeader(
+                                    "Reassigning global with a value of wrong type: `{}` is not a subtype of `{}`",
+                                    tp.type->show(ctx), cur.type->show(ctx));
+                            }
+                            tp = cur;
                         }
                         break;
                     case cfg::CFG::MIN_LOOP_LET:
-                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                            e.setHeader("Incompatible assignment to variable declared via `let`: `{}` is not a "
-                                        "subtype of `{}`",
-                                        tp.type->show(ctx), cur.type->show(ctx));
+                        if (!asGoodAs) {
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+                                e.setHeader("Incompatible assignment to variable declared via `let`: `{}` is not a "
+                                            "subtype of `{}`",
+                                            tp.type->show(ctx), cur.type->show(ctx));
+                            }
+                            tp = cur;
                         }
                         break;
                     default:
-                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                            e.setHeader("Changing type of pinned argument, `{}` is not a subtype of `{}`",
-                                        tp.type->show(ctx), cur.type->show(ctx));
+                        if (!asGoodAs || (tp.type->isDynamic() && !cur.type->isDynamic())) {
+                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
+                                e.setHeader("Changing type of a variable in a loop, `{}` is not a subtype of `{}`",
+                                            tp.type->show(ctx), cur.type->show(ctx));
+                            }
+                            tp.type = core::Types::dynamic();
                         }
                         break;
                 }
-                tp.type = core::Types::dynamic();
             }
-            clearKnowledge(ctx, bind.bind, knowledgeFilter);
-            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                updateKnowledge(ctx, bind.bind, bind.loc, send, knowledgeFilter);
-            } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
-                propagateKnowledge(ctx, bind.bind, i->what, knowledgeFilter);
-            }
-            setTypeAndOrigin(bind.bind, tp);
         }
+
+        clearKnowledge(ctx, bind.bind, knowledgeFilter);
+        if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+            updateKnowledge(ctx, bind.bind, bind.loc, send, knowledgeFilter);
+        } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+            propagateKnowledge(ctx, bind.bind, i->what, knowledgeFilter);
+        }
+        setTypeAndOrigin(bind.bind, tp);
 
         return tp.type;
     } catch (...) {

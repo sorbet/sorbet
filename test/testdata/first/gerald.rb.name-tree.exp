@@ -287,11 +287,17 @@ begin
         else
           parts = []
         end
+        parts = T.cast(parts, AppliedType {
+          klass = ::<constant:Array>
+          targs = [
+            <constant:Elem> = String
+          ]
+        })
         parts.map() do |part$19|
           begin
             lines$19 = part$19.split("
 ")
-            a_name$19 = b_name$19 = nil
+            a_name$19 = b_name$19 = T.cast(nil, String | NilClass)
             added_lines$19 = []
             removed_lines$19 = []
             lines$19.each() do |line$20|
