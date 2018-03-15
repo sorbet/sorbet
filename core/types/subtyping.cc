@@ -100,9 +100,16 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
         if (a1a != a1->left || a1b != a1->right) {
             return Types::buildAnd(ctx, a1a, a1b);
         }
-    }
-    if (Types::isSubTypeWhenFrozen(ctx, t1, t2)) {
-        return Types::top();
+    } else if (OrType *o1 = cast_type<OrType>(t1.get())) {
+        auto subl = Types::isSubTypeWhenFrozen(ctx, o1->left, t2);
+        auto subr = Types::isSubTypeWhenFrozen(ctx, o1->right, t2);
+        if (subl && subr) {
+            return Types::bottom();
+        } else if (subl) {
+            return o1->right;
+        } else if (subr) {
+            return o1->left;
+        }
     }
     return t1;
 }
@@ -156,21 +163,8 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
-
-        auto t1filteredL = dropLubComponents(ctx, t1d, a2->left);
-        if (t1filteredL != t1d) {
-            categoryCounterInc("lub.and>simplified", "left");
-            return Types::buildAnd(ctx, lub(ctx, t1filteredL, a2->right), a2->left);
-        }
-
-        auto t1filteredR = dropLubComponents(ctx, t1d, a2->right);
-        if (t1filteredR != t1d) {
-            categoryCounterInc("lub.and>simplified", "left");
-            return Types::buildAnd(ctx, lub(ctx, t1filteredR, a2->left), a2->right);
-        }
-
-        categoryCounterInc("lub.and>simplified", "none");
-        return OrType::make_shared(t1, t2);
+        auto t2filtered = dropLubComponents(ctx, t2, t1d);
+        return OrType::make_shared(t1, t2filtered);
     }
 
     if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
@@ -619,37 +613,37 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         }
 
         if (auto *o1 = cast_type<OrType>(t1.get())) { // 6
-            // try hard to collapse
-            bool subt11 = Types::isSubTypeWhenFrozen(ctx, o1->left, o2->left) ||
-                          Types::isSubTypeWhenFrozen(ctx, o1->left, o2->right);
-            if (!subt11) { // left is not in right, we can drop it
-                categoryCounterInc("glb", "ZorOr");
-                return Types::glb(ctx, o1->right, t2);
+            auto t11 = Types::glb(ctx, o1->left, o2->left);
+            auto t12 = Types::glb(ctx, o1->left, o2->right);
+            auto t21 = Types::glb(ctx, o1->right, o2->left);
+            auto t22 = Types::glb(ctx, o1->right, o2->right);
+
+            // This is a heuristic to try and eagerly make a smaller type. For
+            // now we are choosing that if any type collapses then we should use
+            // an Or otherwise use an And.
+            auto score = 0;
+            if (t11 == o1->left || t11 == o2->left) {
+                score++;
             }
-            bool subt12 = Types::isSubTypeWhenFrozen(ctx, o1->right, o2->left) ||
-                          Types::isSubTypeWhenFrozen(ctx, o1->right, o2->right);
-            if (!subt12) {
-                categoryCounterInc("glb", "ZZorOr");
-                return Types::glb(ctx, o1->left, t2);
+            if (t12 == o1->left || t12 == o2->right) {
+                score++;
             }
-            bool subt21 = Types::isSubTypeWhenFrozen(ctx, o2->left, o1->left) ||
-                          Types::isSubTypeWhenFrozen(ctx, o2->left, o1->right);
-            if (!subt21) {
-                categoryCounterInc("glb", "ZZZorOr");
-                return Types::glb(ctx, o2->right, t1);
+            if (t21 == o1->right || t21 == o2->left) {
+                score++;
             }
-            bool subt22 = Types::isSubTypeWhenFrozen(ctx, o2->right, o1->left) ||
-                          Types::isSubTypeWhenFrozen(ctx, o2->right, o1->right);
-            if (!subt22) {
-                categoryCounterInc("glb", "ZZZZorOr");
-                return Types::glb(ctx, o2->left, t1);
+            if (t22 == o1->right || t22 == o2->right) {
+                score++;
             }
-            categoryCounterInc("glb", "ZZZZZorWorst");
-            return AndType::make_shared(t1, t2);
-        } else {
-            categoryCounterInc("glb.orcollapsed", "no");
-            return AndType::make_shared(t1, t2);
+            if (t11->isBottom() || t12->isBottom() || t21->isBottom() || t22->isBottom()) {
+                score++;
+            }
+
+            if (score > 0) {
+                return Types::lub(ctx, Types::lub(ctx, t11, t12), Types::lub(ctx, t21, t22));
+            }
         }
+        categoryCounterInc("glb.orcollapsed", "no");
+        return AndType::make_shared(t1, t2);
     }
 
     if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
@@ -703,6 +697,17 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
             j++;
         }
         return make_shared<AppliedType>(a1->klass, newTargs);
+    }
+
+    SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
+    SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
+
+    if (s1 != nullptr || s2 != nullptr) {
+        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+            return AndType::make_shared(t1, t2);
+        } else {
+            return t1;
+        }
     }
 
     return glbGround(ctx, t1, t2);
@@ -945,32 +950,53 @@ bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<T
     // _ wildcards are ClassType or ProxyType(ClassType)
 
     // Note: order of cases here matters!
-    if (auto *a1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
-        // this will be incorrect if\when we have Type members
-        return Types::isSubType(ctx, a1->left, t2) && Types::isSubType(ctx, a1->right, t2);
+    if (auto *o1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
+        return Types::isSubType(ctx, o1->left, t2) && Types::isSubType(ctx, o1->right, t2);
     }
 
     if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 5
-        // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
     }
 
-    auto *a2 = cast_type<OrType>(t2.get());
     auto *a1 = cast_type<AndType>(t1.get());
+    auto *o2 = cast_type<OrType>(t2.get());
 
-    if (a2 != nullptr) {
-        // this will be incorrect if\when we have Type members
-        if (a1 != nullptr) { // 6
-            // dropping either of parts eagerly make subtype test be too strict.
-            // we have to try all 4 cases, when we normaly try only 2
-            return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right) ||
-                   Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+    if (a1 != nullptr) {
+        // If the left is an And of an Or, then we can reorder it to be an Or of
+        // an And, which lets us recurse on smaller types
+        auto l = a1->left;
+        auto r = a1->right;
+        if (isa_type<OrType>(r.get())) {
+            swap(r, l);
         }
-        return Types::isSubType(ctx, t1, a2->left) || Types::isSubType(ctx, t1, a2->right); // 3
+        auto *a2o = cast_type<OrType>(l.get());
+        if (a2o != nullptr) {
+            // This handles `(A | B) & C` -> `(A & C) | (B & C)`
+            return Types::isSubType(ctx, glb(ctx, a2o->left, r), t2) &&
+                   Types::isSubType(ctx, glb(ctx, a2o->right, r), t2);
+        }
+    }
+    if (o2 != nullptr) {
+        // Simiarly to above, if the right is an Or of an And, then we can reorder it to be an And of
+        // an Or, which lets us recurse on smaller types
+        auto l = o2->left;
+        auto r = o2->right;
+        if (isa_type<AndType>(r.get())) {
+            swap(r, l);
+        }
+        auto *o2a = cast_type<AndType>(l.get());
+        if (o2a != nullptr) {
+            // This handles `(A & B) | C` -> `(A | C) & (B | C)`
+            return Types::isSubType(ctx, t1, lub(ctx, o2a->left, r)) &&
+                   Types::isSubType(ctx, t1, lub(ctx, o2a->right, r));
+        }
     }
 
+    // This order matters
+    if (o2 != nullptr) {
+        return Types::isSubType(ctx, t1, o2->left) || Types::isSubType(ctx, t1, o2->right); // 3
+    }
     if (a1 != nullptr) { // 4
-        // this will be incorrect if\when we have Type members
         return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
     }
 
