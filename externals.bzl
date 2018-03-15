@@ -25,7 +25,7 @@ def externals():
     new_git_repository(
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
-        commit="ccd675a286f457068ee8c823f8207f13c2325b26", # v0.16.3
+        commit="55680db160c3c486ccbbb40e10f6338e4d98e84d", # v0.16.3 - with eol customization
         build_file="//:spdlog.BUILD",
     )
 

@@ -893,7 +893,12 @@ int realmain(int argc, char **argv) {
     }
 
     WorkerPool workers(opts.threads, tracer);
-    shared_ptr<core::GlobalState> gs = make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*console)));
+    auto typeErrorsConsole = spd::details::registry::instance().create("type-errors", stderr_color_sink);
+    // Use a custom formatter so we don't get a default newline
+    auto formatter = make_shared<spd::pattern_formatter>("%v", spd::pattern_time_type::local, "");
+    typeErrorsConsole->set_formatter(formatter);
+    shared_ptr<core::GlobalState> gs =
+        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*typeErrorsConsole)));
 
     tracer->trace("building initial global state");
     createInitialGlobalState(gs, opts);

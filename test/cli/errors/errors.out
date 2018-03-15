@@ -37,4 +37,3 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-
