@@ -6884,6 +6884,9 @@ module Kernel
   sig.returns(Binding)
   def binding(); end
 
+  sig.returns(T.any(TrueClass, FalseClass))
+  def block_given?(); end
+
   sig.returns(T.noreturn)
   sig(
       status: T.any(Integer, TrueClass, FalseClass),

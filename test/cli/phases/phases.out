@@ -5963,6 +5963,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method autoload? (name) -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument name<> -> Symbol | String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method binding () -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method block_given? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> Kernel @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method configatron () @ ???
     method exit () -> <impossible> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
