@@ -30,7 +30,7 @@ outerLoops: 1
     "bb#<static-init>$9_4" [label = "block[id=4](<returnMethodTemp>$2)
 outerLoops: 1
 <blockReturnTemp>$13 = \"foo\" : String(\"foo\")
-<blockReturnTemp>$14 = blockreturn<#<block>$2> <blockReturnTemp>$13 : <impossible>
+<blockReturnTemp>$14 = blockreturn<::<constant:Object>#<block>$2> <blockReturnTemp>$13 : <impossible>
 <unconditional>"];
 
     "bb#<static-init>$9_4" -> "bb#<static-init>$9_2" [style="bold"];

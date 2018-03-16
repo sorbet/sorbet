@@ -1,9 +1,9 @@
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:Test> < ::<constant:Object> () -> <Class:Test> @ test/testdata/todo/const_in_block.rb:2
-    method <block>$2 () @ test/testdata/todo/const_in_block.rb:3
-      class <constant:A> < ::<constant:Object> () -> <Class:Test#<block>::A> @ test/testdata/todo/const_in_block.rb:4
-      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/todo/const_in_block.rb:4
     method <static-init> () @ test/testdata/todo/const_in_block.rb:3
-    static-field <constant:B> -> Integer(17) @ test/testdata/todo/const_in_block.rb:7
   class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> () @ test/testdata/todo/const_in_block.rb:2
+    method <block>$2 () @ test/testdata/todo/const_in_block.rb:3
+      class <constant:A> < ::<constant:Object> () -> <Class:<Class:Test>#<block>::A> @ test/testdata/todo/const_in_block.rb:4
+      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/todo/const_in_block.rb:4
+    static-field <constant:B> -> Integer(17) @ test/testdata/todo/const_in_block.rb:7
 

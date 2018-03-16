@@ -5,7 +5,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     class <singleton class:<constant:ClassInNamespace>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/namer.rb:17
     class <singleton class:<constant:ObviousChild>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/namer.rb:14
   class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <Class:Child> @ test/testdata/first/namer.rb:26
-    method <block>$2 () @ test/testdata/first/namer.rb:30
     method <static-init> () @ test/testdata/first/namer.rb:26
   class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/first/namer.rb:22
   class <constant:NormalClass> < ::<constant:Object> () -> <Class:NormalClass> @ test/testdata/first/namer.rb:2
@@ -18,6 +17,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:Parent> < ::<constant:Object> () -> <Class:Parent> @ test/testdata/first/namer.rb:20
   class <singleton class:<constant:ANamespace>> < ::<constant:Module> () @ test/testdata/first/namer.rb:13
   class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> () @ test/testdata/first/namer.rb:26
+    method <block>$2 () @ test/testdata/first/namer.rb:30
   class <singleton class:<constant:Mixin>> < ::<constant:Module> () @ test/testdata/first/namer.rb:22
   class <singleton class:<constant:NormalClass>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/namer.rb:2
     method normal_static_method () @ test/testdata/first/namer.rb:5

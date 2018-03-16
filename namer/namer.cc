@@ -399,9 +399,13 @@ public:
 
     unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         core::SymbolRef owner = ctx.owner;
-        if (owner == core::Symbols::noSymbol()) {
+        if (owner == core::Symbols::noSymbol() || owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();
+        } else if (owner.data(ctx).isClass()) {
+            // If we're at class scope, we're actually in the context of the
+            // singleton class.
+            owner = owner.data(ctx).singletonClass(ctx);
         }
         blk->symbol =
             ctx.state.enterMethodSymbol(blk->loc, owner,
