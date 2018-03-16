@@ -12,11 +12,26 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
 
 shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     auto ret = _lub(ctx, t1, t2);
-    ret->sanityCheck(ctx);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
                                                 " was lubbing with " + t2->toString(ctx));
     ENFORCE(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a super type of " + t2->toString(ctx) +
                                                 " was lubbing with " + t1->toString(ctx));
+
+    //  TODO: @dmitry, reenable
+    //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
+    //                !Types::isSubType(ctx, t2, t1) || ret == t1 || ret->isDynamic(),
+    //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
+    //
+    //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
+    //
+    //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense!
+    //                !Types::isSubType(ctx, t1, t2) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                Types::isSubType(ctx, t2, t1),
+    //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
+    //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
+
+    ret->sanityCheck(ctx);
+
     return ret;
 }
 
@@ -97,6 +112,11 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
     if (AndType *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
+        auto subl = Types::isSubTypeWhenFrozen(ctx, a1a, t2);
+        auto subr = Types::isSubTypeWhenFrozen(ctx, a1b, t2);
+        if (subl || subr) {
+            return Types::bottom();
+        }
         if (a1a != a1->left || a1b != a1->right) {
             return Types::buildAnd(ctx, a1a, a1b);
         }
@@ -157,14 +177,17 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
         categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
-    } else if (cast_type<OrType>(t1.get()) != nullptr) {
-        categoryCounterInc("lub", "<or");
-        return lubDistributeOr(ctx, t1, t2);
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
         categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
         auto t2filtered = dropLubComponents(ctx, t2, t1d);
+        if (t2filtered != t2) {
+            return lub(ctx, t1, t2filtered);
+        }
         return OrType::make_shared(t1, t2filtered);
+    } else if (cast_type<OrType>(t1.get()) != nullptr) {
+        categoryCounterInc("lub", "<or");
+        return lubDistributeOr(ctx, t1, t2);
     }
 
     if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
@@ -175,13 +198,15 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
             }
             return OrType::make_shared(t1, t2);
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
-        bool ltr = !rtl && a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
+
+        bool ltr = a1->klass == a2->klass || a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
+        bool rtl = !ltr && a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
         if (ltr) {
             std::swap(a1, a2);
+            std::swap(t1, t2);
         }
         // now a1 <: a2
 
@@ -190,6 +215,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
         int j = 0;
+        bool changed = false;
         for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
             int i = 0;
             while (indexes[j] != a1->klass.data(ctx).typeMembers()[i]) {
@@ -202,18 +228,23 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1, t2);
                 }
-                if (a2->targs[j]->isDynamic()) {
-                    newTargs.push_back(a2->targs[j]);
-                } else {
+                if (a1->targs[i]->isDynamic()) {
                     newTargs.push_back(a1->targs[i]);
+                } else {
+                    newTargs.push_back(a2->targs[j]);
                 }
 
             } else if (idx.data(ctx).isContravariant()) {
                 newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
             }
+            changed = changed || newTargs.back() != a2->targs[j];
             j++;
         }
-        return make_shared<AppliedType>(a2->klass, newTargs);
+        if (changed) {
+            return make_shared<AppliedType>(a2->klass, newTargs);
+        } else {
+            return t2;
+        }
     }
 
     if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
@@ -229,11 +260,21 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<shared_ptr<core::Type>> elemLubs;
                             int i = -1;
+                            bool differ1 = false;
+                            bool differ2 = false;
                             for (auto &el2 : a2->elems) {
                                 ++i;
                                 elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
+                                differ1 = differ1 || elemLubs.back() != a1->elems[i];
+                                differ2 = differ2 || elemLubs.back() != el2;
                             }
-                            result = make_shared<TupleType>(elemLubs);
+                            if (!differ1) {
+                                result = t1;
+                            } else if (!differ2) {
+                                result = t2;
+                            } else {
+                                result = make_shared<TupleType>(elemLubs);
+                            }
                         } else {
                             result = core::Types::arrayOfUntyped();
                         }
@@ -248,6 +289,8 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                             int i = -1;
                             vector<shared_ptr<core::LiteralType>> keys;
                             vector<shared_ptr<core::Type>> valueLubs;
+                            bool differ1 = false;
+                            bool differ2 = false;
                             for (auto &el2 : h2->keys) {
                                 ++i;
                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
@@ -259,12 +302,20 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                                 if (fnd != h1->keys.end()) {
                                     keys.emplace_back(el2);
                                     valueLubs.emplace_back(lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
+                                    differ1 = differ1 || valueLubs.back() != h1->values[fnd - h1->keys.begin()];
+                                    differ2 = differ2 || valueLubs.back() != h2->values[i];
                                 } else {
                                     result = core::Types::hashOfUntyped();
                                     return;
                                 }
                             }
-                            result = make_shared<ShapeType>(keys, valueLubs);
+                            if (!differ1) {
+                                result = t1;
+                            } else if (!differ2) {
+                                result = t2;
+                            } else {
+                                result = make_shared<ShapeType>(keys, valueLubs);
+                            }
                         } else {
                             result = core::Types::hashOfUntyped();
                         }
@@ -361,12 +412,12 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
-    if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
-        categoryCounterInc("lub.<class>.collapsed", "yes");
-        return t2;
-    } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
+    if (sym1 == sym2 || sym2.data(ctx).derivesFrom(ctx, sym1)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
+    } else if (sym1.data(ctx).derivesFrom(ctx, sym2)) {
+        categoryCounterInc("lub.<class>.collapsed", "yes");
+        return t2;
     } else {
         categoryCounterInc("lub.class>.collapsed", "no");
         return OrType::make_shared(t1, t2);
@@ -431,6 +482,18 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
 
     ENFORCE(Types::isSubType(ctx, ret, t2), ret->toString(ctx) + " is not a subtype of " + t2->toString(ctx) +
                                                 " was glbbing with " + t1->toString(ctx));
+    //  TODO: @dmitry, reenable
+    //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
+    //                !Types::isSubType(ctx, t1, t2) || ret == t1 || ret->isDynamic(),
+    //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
+    //
+    //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
+    //
+    //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
+    //                !Types::isSubType(ctx, t2, t1) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                Types::isSubType(ctx, t1, t2),
+    //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
+    //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
 
     return ret;
 }

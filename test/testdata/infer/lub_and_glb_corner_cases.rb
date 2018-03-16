@@ -33,4 +33,6 @@ module Main
       ))
       T.assert_type!(ret, T.any(A, T.all(B, C), D))
   end
+
+  T.assert_type!(1, T.any(Integer, NilClass, String, Integer)) # exists to tigger a sanity check
 end

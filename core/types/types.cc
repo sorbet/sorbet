@@ -534,6 +534,10 @@ void AndType::_sanityCheck(core::Context ctx) {
 
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
+    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, left, right),
+            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " + right->toString(ctx));
+    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, right, left),
+            this->toString(ctx) + " should have collapsed: " + right->toString(ctx) + " <: " + left->toString(ctx));
 }
 
 void OrType::_sanityCheck(core::Context ctx) {
@@ -543,6 +547,13 @@ void OrType::_sanityCheck(core::Context ctx) {
     //    ENFORCE(!isa_type<ProxyType>(right.get()));
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
+    //  TODO: @dmitry, reenable
+    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, left, right),
+    //            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " +
+    //            right->toString(ctx));
+    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, right, left),
+    //            this->toString(ctx) + " should have collapsed: " + right->toString(ctx) + " <: " +
+    //            left->toString(ctx));
 }
 
 void ClassType::_sanityCheck(core::Context ctx) {
@@ -935,6 +946,8 @@ std::string AppliedType::typeName() {
 
 void AppliedType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->klass.data(ctx).isClass());
+    ENFORCE(this->klass != core::Symbols::untyped());
+
     ENFORCE(this->klass.data(ctx).typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
                 this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
@@ -1079,3 +1092,44 @@ std::shared_ptr<Type> LambdaParam::instantiate(core::Context ctx, std::vector<Sy
     }
     return nullptr;
 }
+bool Type::hasUntyped() {
+    return false;
+}
+
+bool ClassType::hasUntyped() {
+    return isDynamic();
+}
+
+bool OrType::hasUntyped() {
+    return left->hasUntyped() || right->hasUntyped();
+}
+
+bool AndType::hasUntyped() {
+    return left->hasUntyped() || right->hasUntyped();
+}
+bool AppliedType::hasUntyped() {
+    for (auto &arg : this->targs) {
+        if (arg->hasUntyped()) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool TupleType::hasUntyped() {
+    for (auto &arg : this->elems) {
+        if (arg->hasUntyped()) {
+            return true;
+        }
+    }
+    return false;
+};
+
+bool ShapeType::hasUntyped() {
+    for (auto &arg : this->values) {
+        if (arg->hasUntyped()) {
+            return true;
+        }
+    }
+    return false;
+};
