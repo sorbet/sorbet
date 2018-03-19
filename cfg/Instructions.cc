@@ -9,7 +9,7 @@ namespace ruby_typer {
 namespace cfg {
 
 Return::Return(core::LocalVariable what) : what(what) {
-    categoryCounterInc("cfg", "return");
+    core::categoryCounterInc("cfg", "return");
 }
 
 string Return::toString(core::Context ctx) {
@@ -17,7 +17,7 @@ string Return::toString(core::Context ctx) {
 }
 
 BlockReturn::BlockReturn(core::SymbolRef block, core::LocalVariable what) : block(block), what(what) {
-    categoryCounterInc("cfg", "blockreturn");
+    core::categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(core::Context ctx) {
@@ -26,12 +26,12 @@ string BlockReturn::toString(core::Context ctx) {
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args, core::SymbolRef block)
     : recv(recv), fun(fun), args(move(args)), block(block) {
-    categoryCounterInc("cfg", "send");
-    histogramInc("cfg.send.args", this->args.size());
+    core::categoryCounterInc("cfg", "send");
+    core::histogramInc("cfg.send.args", this->args.size());
 }
 
 Literal::Literal(std::shared_ptr<core::Type> value) : value(value) {
-    categoryCounterInc("cfg", "literal");
+    core::categoryCounterInc("cfg", "literal");
 }
 
 string Literal::toString(core::Context ctx) {
@@ -53,11 +53,11 @@ string Literal::toString(core::Context ctx) {
 }
 
 Ident::Ident(core::LocalVariable what) : what(what) {
-    categoryCounterInc("cfg", "ident");
+    core::categoryCounterInc("cfg", "ident");
 }
 
 Alias::Alias(core::SymbolRef what) : what(what) {
-    categoryCounterInc("cfg", "alias");
+    core::categoryCounterInc("cfg", "alias");
 }
 
 string Ident::toString(core::Context ctx) {

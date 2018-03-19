@@ -135,7 +135,6 @@ std::string demangle(const char *mangled);
 
 #include "Error.h"
 #include "Levenstein.h"
-#include "counters.h"
 #include "typecase.h"
 
 #endif

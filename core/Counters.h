@@ -1,12 +1,14 @@
 #ifndef SRUBY_COUNTERS_H
 #define SRUBY_COUNTERS_H
 #include "absl/strings/string_view.h"
+#include "core/GlobalState.h"
+#include "core/Names.h"
 #include <map>
 #include <string>
 #include <unordered_map>
 
-#include "common.h"
 namespace ruby_typer {
+namespace core {
 
 // A common on the use of strings in this API
 //
@@ -72,5 +74,6 @@ std::string getCounterStatistics();
 bool submitCountersToStatsd(std::string host, int port, std::string prefix);
 bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
                               const std::string &branch, const std::string &sha, const std::string &status);
+} // namespace core
 } // namespace ruby_typer
 #endif // SRUBY_COUNTERS_H

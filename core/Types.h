@@ -2,6 +2,7 @@
 #define SRUBY_TYPES_H
 
 #include "Context.h"
+#include "Counters.h"
 #include "Symbols.h"
 #include <memory>
 #include <string>
@@ -84,7 +85,7 @@ public:
         return result;
     }
     ~TypeAndOrigins() {
-        histogramInc("TypeAndOrigins.origins.size", origins.size());
+        core::histogramInc("TypeAndOrigins.origins.size", origins.size());
     }
 };
 

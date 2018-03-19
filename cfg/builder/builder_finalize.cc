@@ -293,7 +293,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
-        histogramInc("cfgbuilder.readsPerBlock", rds.second.size());
+        core::histogramInc("cfgbuilder.readsPerBlock", rds.second.size());
         if (rds.second.size() == 1 && wts.size() == 1 && *(rds.second.begin()) == *(wts.begin())) {
             wts.clear();
             rds.second.clear(); // remove symref that never escapes a block.
@@ -303,7 +303,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     }
 
     for (auto &wts : RnW.writes) {
-        histogramInc("cfgbuilder.writesPerBlock", wts.second.size());
+        core::histogramInc("cfgbuilder.writesPerBlock", wts.second.size());
         auto &rds = RnW.reads[wts.first];
         if (rds.empty()) {
             wts.second.clear();
@@ -386,7 +386,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
             }
         }
         sort(it->args.begin(), it->args.end());
-        histogramInc("cfgbuilder.blockArguments", it->args.size());
+        core::histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
 
     return;

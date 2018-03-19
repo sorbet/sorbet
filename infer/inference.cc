@@ -35,7 +35,7 @@ bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
 }
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
-    counterInc("infer.methods_typechecked");
+    core::counterInc("infer.methods_typechecked");
     const int startErrorCount = ctx.state.totalErrors();
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->maxBasicBlockId);
@@ -122,16 +122,16 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         if (!current.isDead) {
             current.ensureGoodCondition(ctx, bb->bexit.cond);
         }
-        histogramInc("infer.environment.size", current.vars.size());
+        core::histogramInc("infer.environment.size", current.vars.size());
         for (auto &k : current.knowledge) {
-            histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
-            histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
-            histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());
-            histogramInc("infer.knowledge.falsy.no.size", k.falsy->noTypeTests.size());
+            core::histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
+            core::histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
+            core::histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());
+            core::histogramInc("infer.knowledge.falsy.no.size", k.falsy->noTypeTests.size());
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {
-        counterInc("infer.methods_typechecked.no_errors");
+        core::counterInc("infer.methods_typechecked.no_errors");
     }
     return cfg;
 }

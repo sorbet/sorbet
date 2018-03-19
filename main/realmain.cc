@@ -194,7 +194,7 @@ public:
 
 struct thread_result {
     unique_ptr<core::GlobalState> gs;
-    CounterState counters;
+    core::CounterState counters;
     vector<unique_ptr<ast::Expression>> trees;
 };
 
@@ -327,9 +327,9 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                             // assertion below requires every input file to map
                             // to one output tree
                         }
-                        counterAdd("types.input.bytes", src.size());
-                        counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
-                        counterInc("types.input.files");
+                        core::counterAdd("types.input.bytes", src.size());
+                        core::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
+                        core::counterInc("types.input.files");
 
                         core::FileRef file;
                         {
@@ -353,7 +353,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
             }
 
             if (processedByThread > 0) {
-                threadResult.counters = getAndClearThreadCounters();
+                threadResult.counters = core::getAndClearThreadCounters();
                 threadResult.gs = move(lgs);
                 resultq->push(move(threadResult), processedByThread);
             }
@@ -465,7 +465,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
 
 struct typecheck_thread_result {
     vector<unique_ptr<ast::Expression>> trees;
-    CounterState counters;
+    core::CounterState counters;
 };
 
 // If ever given a result type, it should be something along the lines of
@@ -538,7 +538,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
                 }
             }
             if (processedByThread > 0) {
-                threadResult.counters = getAndClearThreadCounters();
+                threadResult.counters = core::getAndClearThreadCounters();
                 resultq->push(move(threadResult), processedByThread);
             }
         });
@@ -915,9 +915,9 @@ int realmain(int argc, char **argv) {
         core::UnfreezeFileTable fileTableAccess(*gs);
         if (options.count("e") != 0) {
             string src = options["e"].as<string>();
-            counterAdd("types.input.bytes", src.size());
-            counterInc("types.input.lines");
-            counterInc("types.input.files");
+            core::counterAdd("types.input.bytes", src.size());
+            core::counterInc("types.input.lines");
+            core::counterInc("types.input.files");
             auto file = gs->enterFile(string("-e"), src + "\n");
             inputFiles.push_back(file);
             if (opts.forceUntyped) {
@@ -946,12 +946,12 @@ int realmain(int argc, char **argv) {
     }
 
     if (options.count("counters") != 0) {
-        console_err->warn("" + getCounterStatistics());
+        console_err->warn("" + core::getCounterStatistics());
     }
 
     if (options.count("statsd-host") != 0) {
-        submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
-                               options["statsd-prefix"].as<string>() + ".counters");
+        core::submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
+                                     options["statsd-prefix"].as<string>() + ".counters");
     }
 
     if (options.count("metrics-file") != 0) {
@@ -964,9 +964,9 @@ int realmain(int argc, char **argv) {
             status = "Success";
         }
 
-        storeCountersToProtoFile(options["metrics-file"].as<string>(), options["metrics-prefix"].as<string>(),
-                                 options["metrics-repo"].as<string>(), options["metrics-branch"].as<string>(),
-                                 options["metrics-sha"].as<string>(), status);
+        core::storeCountersToProtoFile(options["metrics-file"].as<string>(), options["metrics-prefix"].as<string>(),
+                                       options["metrics-repo"].as<string>(), options["metrics-branch"].as<string>(),
+                                       options["metrics-sha"].as<string>(), status);
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics

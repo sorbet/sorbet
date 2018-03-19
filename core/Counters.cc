@@ -1,9 +1,10 @@
-#include "counters.h"
+#include "core/Counters.h"
+#include "core/Names.h"
 extern "C" {
 #include "statsd-client.h"
 }
-#include "Random.h"
 #include "absl/strings/str_cat.h"
+#include "common/Random.h"
 #include "proto/SourceMetrics.pb.h"
 #include <algorithm>
 #include <chrono>
@@ -19,6 +20,7 @@ extern "C" {
 using namespace std;
 
 namespace ruby_typer {
+namespace core {
 static constexpr bool enable_counters = debug_mode;
 
 CounterState::CounterState(unique_ptr<CounterImpl> counters) : counters(move(counters)) {}
@@ -406,4 +408,5 @@ bool storeCountersToProtoFile(const std::string &fileName, const std::string &pr
     return true;
 }
 
+} // namespace core
 }; // namespace ruby_typer

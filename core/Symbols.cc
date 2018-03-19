@@ -254,7 +254,7 @@ SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
 SymbolRef::SymbolRef(GlobalState const *from, u4 _id) : _id(_id) {}
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
-    histogramInc("find_member_scope_size", members.size());
+    core::histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
             return member.second.data(gs).dealias(gs);
@@ -402,7 +402,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.data(gs);
 
-    counterInc("singleton_classes");
+    core::counterInc("singleton_classes");
     singletonInfo.members.push_back(make_pair(Names::attached(), selfRef));
     singletonInfo.superClass = core::Symbols::todo();
     singletonInfo.setIsModule(false);

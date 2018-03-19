@@ -47,30 +47,30 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
     ENFORCE(o1 != nullptr);
     shared_ptr<core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
-        categoryCounterInc("lub_distribute_or.outcome", "t1");
+        core::categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
     shared_ptr<core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
-        categoryCounterInc("lub_distribute_or.outcome", "n2'");
+        core::categoryCounterInc("lub_distribute_or.outcome", "n2'");
         return n2;
     }
     if (n2.get() == o1->right.get()) {
-        categoryCounterInc("lub_distribute_or.outcome", "t1'");
+        core::categoryCounterInc("lub_distribute_or.outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        categoryCounterInc("lub_distribute_or.outcome", "n1'");
+        core::categoryCounterInc("lub_distribute_or.outcome", "n1'");
         return n1;
     }
     if (Types::isSubTypeWhenFrozen(ctx, n1, n2)) {
-        categoryCounterInc("lub_distribute_or.outcome", "n2''");
+        core::categoryCounterInc("lub_distribute_or.outcome", "n2''");
         return n2;
     } else if (Types::isSubTypeWhenFrozen(ctx, n2, n1)) {
-        categoryCounterInc("lub_distribute_or.outcome", "n1'''");
+        core::categoryCounterInc("lub_distribute_or.outcome", "n1'''");
         return n1;
     }
-    categoryCounterInc("lub_distribute_or.outcome", "worst");
+    core::categoryCounterInc("lub_distribute_or.outcome", "worst");
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
@@ -79,31 +79,31 @@ shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, 
     ENFORCE(t1 != nullptr);
     shared_ptr<core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
-        categoryCounterInc("lub_distribute_or.outcome", "t1");
+        core::categoryCounterInc("lub_distribute_or.outcome", "t1");
         return t1;
     }
     shared_ptr<core::Type> n2 = Types::glb(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
+        core::categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
     }
     if (n2.get() == a1->right.get()) {
-        categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
+        core::categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
+        core::categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
     if (Types::isSubTypeWhenFrozen(ctx, n1, n2)) {
-        categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
+        core::categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
         return n2;
     } else if (Types::isSubTypeWhenFrozen(ctx, n2, n1)) {
-        categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
+        core::categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
         return n1;
     }
 
-    categoryCounterInc("glbDistributeAnd.outcome", "worst");
+    core::categoryCounterInc("glbDistributeAnd.outcome", "worst");
     return AndType::make_shared(t1, t2);
 }
 
@@ -136,7 +136,7 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
 
 shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
-        categoryCounterInc("lub", "ref-eq");
+        core::categoryCounterInc("lub", "ref-eq");
         return t1;
     }
 
@@ -146,39 +146,39 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
 
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
-            categoryCounterInc("lub", "<untyped");
+            core::categoryCounterInc("lub", "<untyped");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
-            categoryCounterInc("lub", "<bottom");
+            core::categoryCounterInc("lub", "<bottom");
             return t2;
         }
         if (mayBeSpecial1->symbol == core::Symbols::top()) {
-            categoryCounterInc("lub", "<top");
+            core::categoryCounterInc("lub", "<top");
             return t1;
         }
     }
 
     if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
-            categoryCounterInc("lub", "untyped>");
+            core::categoryCounterInc("lub", "untyped>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
-            categoryCounterInc("lub", "bottom>");
+            core::categoryCounterInc("lub", "bottom>");
             return t1;
         }
         if (mayBeSpecial2->symbol == core::Symbols::top()) {
-            categoryCounterInc("lub", "top>");
+            core::categoryCounterInc("lub", "top>");
             return t2;
         }
     }
 
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
-        categoryCounterInc("lub", "or>");
+        core::categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
-        categoryCounterInc("lub", "and>");
+        core::categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
         auto t2filtered = dropLubComponents(ctx, t2, t1d);
         if (t2filtered != t2) {
@@ -186,7 +186,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
         }
         return OrType::make_shared(t1, t2filtered);
     } else if (cast_type<OrType>(t1.get()) != nullptr) {
-        categoryCounterInc("lub", "<or");
+        core::categoryCounterInc("lub", "<or");
         return lubDistributeOr(ctx, t1, t2);
     }
 
@@ -248,9 +248,9 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
     }
 
     if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
-        categoryCounterInc("lub", "<proxy");
+        core::categoryCounterInc("lub", "<proxy");
         if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
-            categoryCounterInc("lub", "proxy>");
+            core::categoryCounterInc("lub", "proxy>");
             // both are proxy
             shared_ptr<core::Type> result;
             typecase(
@@ -349,7 +349,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
             return lub(ctx, und, t2);
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
-        categoryCounterInc("lub", "proxy>");
+        core::categoryCounterInc("lub", "proxy>");
         // only 2nd is proxy
         shared_ptr<Type> und = p2->underlying;
         return lub(ctx, t1, und);
@@ -390,7 +390,7 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
-        categoryCounterInc("lub", "ref-eq2");
+        core::categoryCounterInc("lub", "ref-eq2");
         return t1;
     }
 
@@ -407,19 +407,19 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
     // 1 :-)
     ClassType *c1 = cast_type<ClassType>(t1.get());
     ClassType *c2 = cast_type<ClassType>(t2.get());
-    categoryCounterInc("lub", "<class>");
+    core::categoryCounterInc("lub", "<class>");
     ENFORCE(c1 != nullptr && c2 != nullptr);
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym2.data(ctx).derivesFrom(ctx, sym1)) {
-        categoryCounterInc("lub.<class>.collapsed", "yes");
+        core::categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
     } else if (sym1.data(ctx).derivesFrom(ctx, sym2)) {
-        categoryCounterInc("lub.<class>.collapsed", "yes");
+        core::categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
     } else {
-        categoryCounterInc("lub.class>.collapsed", "no");
+        core::categoryCounterInc("lub.class>.collapsed", "no");
         return OrType::make_shared(t1, t2);
     }
 }
@@ -437,7 +437,7 @@ shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
-        categoryCounterInc("glb", "ref-eq2");
+        core::categoryCounterInc("glb", "ref-eq2");
         return t1;
     }
 
@@ -454,22 +454,22 @@ shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_
     ClassType *c1 = cast_type<ClassType>(t1.get());
     ClassType *c2 = cast_type<ClassType>(t2.get());
     ENFORCE(c1 != nullptr && c2 != nullptr);
-    categoryCounterInc("glb", "<class>");
+    core::categoryCounterInc("glb", "<class>");
 
     core::SymbolRef sym1 = c1->symbol;
     core::SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
-        categoryCounterInc("glb.<class>.collapsed", "yes");
+        core::categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
     } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
-        categoryCounterInc("glb.<class>.collapsed", "yes");
+        core::categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
         if (sym1.data(ctx).isClassClass() && sym2.data(ctx).isClassClass()) {
-            categoryCounterInc("glb.<class>.collapsed", "bottom");
+            core::categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
-        categoryCounterInc("glb.<class>.collapsed", "no");
+        core::categoryCounterInc("glb.<class>.collapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 }
@@ -500,36 +500,36 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
 
 shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
-        categoryCounterInc("glb", "ref-eq");
+        core::categoryCounterInc("glb", "ref-eq");
         return t1;
     }
 
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
-            categoryCounterInc("glb", "<untyped");
+            core::categoryCounterInc("glb", "<untyped");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
-            categoryCounterInc("glb", "<bottom");
+            core::categoryCounterInc("glb", "<bottom");
             return t1;
         }
         if (mayBeSpecial1->symbol == core::Symbols::top()) {
-            categoryCounterInc("glb", "<top");
+            core::categoryCounterInc("glb", "<top");
             return t2;
         }
     }
 
     if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
-            categoryCounterInc("glb", "untyped>");
+            core::categoryCounterInc("glb", "untyped>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
-            categoryCounterInc("glb", "bottom>");
+            core::categoryCounterInc("glb", "bottom>");
             return t2;
         }
         if (mayBeSpecial2->symbol == core::Symbols::top()) {
-            categoryCounterInc("glb", "top>");
+            core::categoryCounterInc("glb", "top>");
             return t1;
         }
     }
@@ -538,10 +538,10 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         return _glb(ctx, t2, t1);
     }
     if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
-        categoryCounterInc("glb", "<and");
+        core::categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2
-        categoryCounterInc("glb", "and>");
+        core::categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     }
 
@@ -646,25 +646,25 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
         bool collapseInLeft = Types::isSubTypeWhenFrozen(ctx, t1, t2);
         if (collapseInLeft) {
-            categoryCounterInc("glb", "Zor");
+            core::categoryCounterInc("glb", "Zor");
             return t1;
         }
 
         bool collapseInRight = Types::isSubTypeWhenFrozen(ctx, t2, t1);
         if (collapseInRight) {
-            categoryCounterInc("glb", "ZZor");
+            core::categoryCounterInc("glb", "ZZor");
             return t2;
         }
 
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
             auto lft = Types::glb(ctx, t1, o2->left);
             if (Types::isSubTypeWhenFrozen(ctx, lft, o2->right)) {
-                categoryCounterInc("glb", "ZZZorClass");
+                core::categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::glb(ctx, t1, o2->right);
             if (Types::isSubTypeWhenFrozen(ctx, rght, o2->left)) {
-                categoryCounterInc("glb", "ZZZZorClass");
+                core::categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
             if (lft->isBottom()) {
@@ -705,7 +705,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
                 return Types::lub(ctx, Types::lub(ctx, t11, t12), Types::lub(ctx, t21, t22));
             }
         }
-        categoryCounterInc("glb.orcollapsed", "no");
+        core::categoryCounterInc("glb.orcollapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 

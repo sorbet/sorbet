@@ -308,13 +308,13 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     Symbol &ownerScope = owner.data(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
-    histogramInc("symbol_enter_by_name", ownerScope.members.size());
+    core::histogramInc("symbol_enter_by_name", ownerScope.members.size());
 
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
             ENFORCE((from->second.data(*this).flags & flags) == flags, "existing symbol has wrong flags");
-            counterInc("symbols.hit");
+            core::counterInc("symbols.hit");
             return from->second;
         }
         from++;
@@ -331,17 +331,17 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data.owner = owner;
     data.definitionLoc = loc;
     if (data.isBlockSymbol(*this)) {
-        categoryCounterInc("symbols", "block");
+        core::categoryCounterInc("symbols", "block");
     } else if (data.isClass()) {
-        categoryCounterInc("symbols", "class");
+        core::categoryCounterInc("symbols", "class");
     } else if (data.isMethod()) {
-        categoryCounterInc("symbols", "method");
+        core::categoryCounterInc("symbols", "method");
     } else if (data.isField()) {
-        categoryCounterInc("symbols", "field");
+        core::categoryCounterInc("symbols", "field");
     } else if (data.isStaticField()) {
-        categoryCounterInc("symbols", "static_field");
+        core::categoryCounterInc("symbols", "static_field");
     } else if (data.isMethodArgument()) {
-        categoryCounterInc("symbols", "argument");
+        core::categoryCounterInc("symbols", "argument");
     }
 
     if (!reallocate) {
@@ -448,7 +448,7 @@ absl::string_view GlobalState::enterString(absl::string_view nm) {
         from = strings.back()->data() + strings_last_page_used;
     }
 
-    counterInc("strings");
+    core::counterInc("strings");
     memcpy(from, nm.data(), nm.size());
     strings_last_page_used += nm.size();
     return absl::string_view(from, nm.size());
@@ -467,7 +467,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
             auto name_id = bucket.second;
             auto &nm2 = names[name_id];
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
-                counterInc("names.utf8.hit");
+                core::counterInc("names.utf8.hit");
                 return nm2.ref(*this);
             }
         }
@@ -498,7 +498,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 
     names[idx].kind = NameKind::UTF8;
     names[idx].raw.utf8 = enterString(nm);
-    categoryCounterInc("names", "utf8");
+    core::categoryCounterInc("names", "utf8");
 
     return NameRef(*this, idx);
 }
@@ -518,7 +518,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
-                counterInc("names.constant.hit");
+                core::counterInc("names.constant.hit");
                 return nm2.ref(*this);
             }
         }
@@ -552,7 +552,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     names[idx].kind = CONSTANT;
     names[idx].cnst.original = original;
-    categoryCounterInc("names", "constant");
+    core::categoryCounterInc("names", "constant");
     return NameRef(*this, idx);
 }
 
@@ -604,7 +604,7 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
-                counterInc("names.unique.hit");
+                core::counterInc("names.unique.hit");
                 return nm2.ref(*this);
             }
         }
@@ -628,7 +628,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
-                counterInc("names.unique.hit");
+                core::counterInc("names.unique.hit");
                 return nm2.ref(*this);
             }
         }
@@ -664,7 +664,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
-    categoryCounterInc("names", "unique");
+    core::categoryCounterInc("names", "unique");
     return NameRef(*this, idx);
 }
 
@@ -979,7 +979,7 @@ int GlobalState::totalErrors() const {
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
-    histogramAdd("error", error->what.code, 1);
+    core::histogramAdd("error", error->what.code, 1);
     if (!shouldReportErrorOn(error->loc, error->what)) {
         return;
     }

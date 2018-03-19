@@ -85,17 +85,17 @@ Reference::Reference(core::Loc loc) : Expression(loc) {}
 ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store ancestors,
                    RHS_store rhs, ClassDefKind kind)
     : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {
-    categoryCounterInc("trees", "classdef");
-    histogramInc("trees.classdef.kind", (int)kind);
-    histogramInc("trees.classdef.ancestors", this->ancestors.size());
+    core::categoryCounterInc("trees", "classdef");
+    core::histogramInc("trees.classdef.kind", (int)kind);
+    core::histogramInc("trees.classdef.ancestors", this->ancestors.size());
     _sanityCheck();
 }
 
 MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
                      unique_ptr<Expression> rhs, bool isSelf)
     : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {
-    categoryCounterInc("trees", "methoddef");
-    histogramInc("trees.methodDef.args", this->args.size());
+    core::categoryCounterInc("trees", "methoddef");
+    core::histogramInc("trees.methodDef.args", this->args.size());
     _sanityCheck();
 }
 
@@ -103,188 +103,188 @@ Declaration::Declaration(core::Loc loc, core::SymbolRef symbol) : Expression(loc
 
 ConstDef::ConstDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> rhs)
     : Declaration(loc, symbol), rhs(move(rhs)) {
-    categoryCounterInc("trees", "constdef");
+    core::categoryCounterInc("trees", "constdef");
     _sanityCheck();
 }
 
 If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : Expression(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {
-    categoryCounterInc("trees", "if");
+    core::categoryCounterInc("trees", "if");
     _sanityCheck();
 }
 
 While::While(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> body)
     : Expression(loc), cond(move(cond)), body(move(body)) {
-    categoryCounterInc("trees", "while");
+    core::categoryCounterInc("trees", "while");
     _sanityCheck();
 }
 
 Break::Break(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "break");
+    core::categoryCounterInc("trees", "break");
     _sanityCheck();
 }
 
 Retry::Retry(core::Loc loc) : Expression(loc) {
-    categoryCounterInc("trees", "retry");
+    core::categoryCounterInc("trees", "retry");
     _sanityCheck();
 }
 
 Next::Next(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "next");
+    core::categoryCounterInc("trees", "next");
     _sanityCheck();
 }
 
 Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "return");
+    core::categoryCounterInc("trees", "return");
     _sanityCheck();
 }
 
 Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "yield");
+    core::categoryCounterInc("trees", "yield");
     _sanityCheck();
 }
 
 RescueCase::RescueCase(core::Loc loc, EXCEPTION_store exceptions, unique_ptr<Expression> var,
                        unique_ptr<Expression> body)
     : Expression(loc), exceptions(move(exceptions)), var(move(var)), body(move(body)) {
-    categoryCounterInc("trees", "rescuecase");
-    histogramInc("trees.rescueCase.exceptions", this->exceptions.size());
+    core::categoryCounterInc("trees", "rescuecase");
+    core::histogramInc("trees.rescueCase.exceptions", this->exceptions.size());
     _sanityCheck();
 }
 
 Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store rescueCases, unique_ptr<Expression> else_,
                unique_ptr<Expression> ensure)
     : Expression(loc), body(move(body)), rescueCases(move(rescueCases)), else_(move(else_)), ensure(move(ensure)) {
-    categoryCounterInc("trees", "rescue");
-    histogramInc("trees.rescue.rescuecases", this->rescueCases.size());
+    core::categoryCounterInc("trees", "rescue");
+    core::histogramInc("trees.rescue.rescuecases", this->rescueCases.size());
     _sanityCheck();
 }
 
 Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
-    categoryCounterInc("trees", "ident");
+    core::categoryCounterInc("trees", "ident");
     _sanityCheck();
 }
 
 Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Expression(loc), localVariable(localVariable1) {
-    categoryCounterInc("trees", "local");
+    core::categoryCounterInc("trees", "local");
     _sanityCheck();
 }
 
 UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
     : Reference(loc), kind(kind), name(name) {
-    categoryCounterInc("trees", "unresolvedident");
+    core::categoryCounterInc("trees", "unresolvedident");
     _sanityCheck();
     _sanityCheck();
 }
 
 Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression> rhs)
     : Expression(loc), lhs(move(lhs)), rhs(move(rhs)) {
-    categoryCounterInc("trees", "assign");
+    core::categoryCounterInc("trees", "assign");
     _sanityCheck();
 }
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
            unique_ptr<Block> block)
     : Expression(loc), recv(move(recv)), fun(fun), args(move(args)), block(move(block)) {
-    categoryCounterInc("trees", "send");
+    core::categoryCounterInc("trees", "send");
     if (block) {
-        counterInc("trees.send.with_block");
+        core::counterInc("trees.send.with_block");
     }
-    histogramInc("trees.send.args", this->args.size());
+    core::histogramInc("trees.send.args", this->args.size());
     _sanityCheck();
 }
 
 Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast)
     : Expression(loc), type(ty), arg(move(arg)), cast(cast) {
-    categoryCounterInc("Trees", "Cast");
+    core::categoryCounterInc("Trees", "Cast");
     _sanityCheck();
 }
 
 ZSuperArgs::ZSuperArgs(core::Loc loc) : Expression(loc) {
-    categoryCounterInc("trees", "zsuper");
+    core::categoryCounterInc("trees", "zsuper");
     _sanityCheck();
 }
 
 RestArg::RestArg(core::Loc loc, unique_ptr<Reference> arg) : Reference(loc), expr(move(arg)) {
-    categoryCounterInc("trees", "restarg");
+    core::categoryCounterInc("trees", "restarg");
     _sanityCheck();
 }
 
 KeywordArg::KeywordArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "keywordarg");
+    core::categoryCounterInc("trees", "keywordarg");
     _sanityCheck();
 }
 
 OptionalArg::OptionalArg(core::Loc loc, unique_ptr<Reference> expr, unique_ptr<Expression> default_)
     : Reference(loc), expr(move(expr)), default_(move(default_)) {
-    categoryCounterInc("trees", "optionalarg");
+    core::categoryCounterInc("trees", "optionalarg");
     _sanityCheck();
 }
 
 ShadowArg::ShadowArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "shadowarg");
+    core::categoryCounterInc("trees", "shadowarg");
     _sanityCheck();
 }
 
 BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), expr(move(expr)) {
-    categoryCounterInc("trees", "blockarg");
+    core::categoryCounterInc("trees", "blockarg");
     _sanityCheck();
 }
 
 Literal::Literal(core::Loc loc, std::shared_ptr<core::Type> value) : Expression(loc), value(value) {
-    categoryCounterInc("trees", "literal");
+    core::categoryCounterInc("trees", "literal");
     _sanityCheck();
 }
 
 ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {
-    categoryCounterInc("trees", "constantlit");
+    core::categoryCounterInc("trees", "constantlit");
     _sanityCheck();
 }
 
 ArraySplat::ArraySplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    categoryCounterInc("trees", "arraysplat");
+    core::categoryCounterInc("trees", "arraysplat");
     _sanityCheck();
 }
 
 HashSplat::HashSplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    categoryCounterInc("trees", "hashsplat");
+    core::categoryCounterInc("trees", "hashsplat");
     _sanityCheck();
 }
 
 Self::Self(core::Loc loc, core::SymbolRef claz) : Expression(loc), claz(claz) {
-    categoryCounterInc("trees", "self");
+    core::categoryCounterInc("trees", "self");
     _sanityCheck();
 }
 
 Block::Block(core::Loc loc, MethodDef::ARGS_store args, unique_ptr<Expression> body)
     : Expression(loc), args(move(args)), body(move(body)) {
-    categoryCounterInc("trees", "block");
+    core::categoryCounterInc("trees", "block");
     _sanityCheck();
 };
 
 Hash::Hash(core::Loc loc, ENTRY_store keys, ENTRY_store values)
     : Expression(loc), keys(move(keys)), values(move(values)) {
-    categoryCounterInc("trees", "hash");
-    histogramInc("trees.hash.entries", this->keys.size());
+    core::categoryCounterInc("trees", "hash");
+    core::histogramInc("trees.hash.entries", this->keys.size());
     _sanityCheck();
 }
 
 Array::Array(core::Loc loc, ENTRY_store elems) : Expression(loc), elems(move(elems)) {
-    categoryCounterInc("trees", "array");
-    histogramInc("trees.array.elems", this->elems.size());
+    core::categoryCounterInc("trees", "array");
+    core::histogramInc("trees.array.elems", this->elems.size());
     _sanityCheck();
 }
 
 InsSeq::InsSeq(core::Loc loc, STATS_store stats, unique_ptr<Expression> expr)
     : Expression(loc), stats(move(stats)), expr(move(expr)) {
-    categoryCounterInc("trees", "insseq");
-    histogramInc("trees.insseq.stats", this->stats.size());
+    core::categoryCounterInc("trees", "insseq");
+    core::histogramInc("trees.insseq.stats", this->stats.size());
     _sanityCheck();
 }
 
 EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {
-    categoryCounterInc("trees", "emptytree");
+    core::categoryCounterInc("trees", "emptytree");
     _sanityCheck();
 }
 

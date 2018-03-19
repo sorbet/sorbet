@@ -91,7 +91,7 @@ public:
 class Unanalyzable : public Instruction {
 public:
     Unanalyzable() {
-        categoryCounterInc("cfg", "Unanalyzable");
+        core::categoryCounterInc("cfg", "Unanalyzable");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -101,7 +101,7 @@ public:
     std::string why;
 
     NotSupported(std::string why) : why(why) {
-        categoryCounterInc("cfg", "notsupported");
+        core::categoryCounterInc("cfg", "notsupported");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -111,7 +111,7 @@ public:
     core::NameRef arg;
 
     ArraySplat(core::NameRef arg) : arg(arg) {
-        categoryCounterInc("cfg", "arraysplat");
+        core::categoryCounterInc("cfg", "arraysplat");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -121,7 +121,7 @@ public:
     core::NameRef arg;
 
     HashSplat(core::NameRef arg) : arg(arg) {
-        categoryCounterInc("cfg", "hashsplat");
+        core::categoryCounterInc("cfg", "hashsplat");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -131,7 +131,7 @@ public:
     core::SymbolRef klass;
 
     Self(core::SymbolRef klass) : klass(klass) {
-        categoryCounterInc("cfg", "self");
+        core::categoryCounterInc("cfg", "self");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -143,7 +143,7 @@ public:
     u4 arg;
 
     LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
-        categoryCounterInc("cfg", "loadarg");
+        core::categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -154,7 +154,7 @@ public:
     u4 arg;
 
     LoadYieldParam(core::SymbolRef block, u4 arg) : block(block), arg(arg) {
-        categoryCounterInc("cfg", "loadarg");
+        core::categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
