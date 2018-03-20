@@ -191,17 +191,28 @@ CounterImpl CounterImpl::canonicalize() {
     return out;
 }
 
-string getCounterStatistics() {
+const vector<string> Counters::ALL_COUNTERS = {"<all>"};
+bool shouldShow(vector<string> &wantNames, string name) {
+    if (wantNames == Counters::ALL_COUNTERS) {
+        return true;
+    }
+    return find(wantNames.begin(), wantNames.end(), name) != wantNames.end();
+}
+
+string getCounterStatistics(vector<string> names) {
     if (!enable_counters) {
         return "Statistics collection is not available in production build. Use debug build.";
     }
     stringstream buf;
 
-    buf << "Counters: " << '\n';
+    buf << "Counters and Histograms: " << '\n';
 
     auto canon = counterState.canonicalize();
 
     for (auto &cat : canon.counters_by_category) {
+        if (!shouldShow(names, cat.first)) {
+            continue;
+        }
         CounterImpl::CounterType sum = 0;
         std::vector<pair<CounterImpl::CounterType, string>> sorted;
         for (auto &e : cat.second) {
@@ -222,8 +233,10 @@ string getCounterStatistics() {
         buf << '\n';
     }
 
-    buf << "\nHistograms: " << '\n';
     for (auto &hist : canon.histograms) {
+        if (!shouldShow(names, hist.first)) {
+            continue;
+        }
         CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
@@ -263,10 +276,12 @@ string getCounterStatistics() {
         buf << '\n';
     }
 
-    buf << "\nOther:\n";
     {
         vector<pair<string, string>> sortedOther;
         for (auto &e : canon.counters) {
+            if (!shouldShow(names, e.first)) {
+                continue;
+            }
             string number = to_string(e.second);
             if (number.size() < 6) {
                 number = padOrLimit(number, 6);
@@ -276,6 +291,7 @@ string getCounterStatistics() {
         }
         sort(sortedOther.begin(), sortedOther.end(),
              [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+
         for (auto &e : sortedOther) {
             buf << e.second;
         }

@@ -683,7 +683,8 @@ cxxopts::Options buildOptions() {
 
     options.add_options("dev")("max-threads", "Set number of threads",
                                cxxopts::value<int>()->default_value(to_string(defaultThreads)), "int");
-    options.add_options("dev")("counters", "Print internal counters");
+    options.add_options("dev")("counter", "Print internal counter", cxxopts::value<vector<string>>(), "counter");
+    options.add_options("dev")("counters", "Print all internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
@@ -945,8 +946,16 @@ int realmain(int argc, char **argv) {
         FileOps::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(*gs));
     }
 
+    if (options.count("counter") != 0) {
+        if (options.count("counters") != 0) {
+            console->error("Don't pass both --counters and --counter");
+            return 1;
+        }
+        auto names = options["counter"].as<vector<string>>();
+        console_err->warn("" + core::getCounterStatistics(names));
+    }
     if (options.count("counters") != 0) {
-        console_err->warn("" + core::getCounterStatistics());
+        console_err->warn("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
     }
 
     if (options.count("statsd-host") != 0) {

@@ -61,6 +61,10 @@ private:
     std::unique_ptr<CounterImpl> counters;
 };
 
+struct Counters {
+    static const std::vector<std::string> ALL_COUNTERS;
+};
+
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
@@ -70,7 +74,7 @@ void categoryCounterInc(ConstExprStr category, ConstExprStr counter);
 void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value);
 void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
-std::string getCounterStatistics();
+std::string getCounterStatistics(std::vector<std::string> names);
 bool submitCountersToStatsd(std::string host, int port, std::string prefix);
 bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
                               const std::string &branch, const std::string &sha, const std::string &status);
