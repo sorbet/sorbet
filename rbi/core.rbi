@@ -8127,8 +8127,32 @@ class Numeric
   sig(
       arg0: Numeric,
   )
+  .returns(T.any(TrueClass, FalseClass))
+  def <(arg0); end
+
+  sig(
+      arg0: Numeric,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <=(arg0); end
+
+  sig(
+      arg0: Numeric,
+  )
   .returns(Integer)
   def <=>(arg0); end
+
+  sig(
+      arg0: Numeric,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def >(arg0); end
+
+  sig(
+      arg0: Numeric,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def >=(arg0); end
 
   sig.returns(Numeric)
   def abs(); end
