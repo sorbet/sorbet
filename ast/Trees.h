@@ -54,10 +54,6 @@ public:
         return symbol.data(ctx).parent(ctx);
     }
 
-    inline std::vector<core::SymbolRef> &mixins(core::MutableContext ctx) {
-        return symbol.data(ctx).mixins(ctx);
-    }
-
     static constexpr int EXPECTED_RHS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
 

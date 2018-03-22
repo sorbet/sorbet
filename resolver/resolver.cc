@@ -145,8 +145,8 @@ public:
         nesting_ = move(nesting_->parent);
 
         core::SymbolRef klass = original->symbol;
-        if (original->kind == ast::Module && klass.data(ctx).mixins(ctx).empty()) {
-            klass.data(ctx).mixins(ctx).emplace_back(core::Symbols::BasicObject());
+        if (original->kind == ast::Module && klass.data(ctx).mixins().empty()) {
+            klass.data(ctx).mixins().emplace_back(core::Symbols::BasicObject());
         }
 
         for (auto &ancst : original->ancestors) {
@@ -168,7 +168,7 @@ public:
                     }
                 }
             } else {
-                klass.data(ctx).mixins(ctx).emplace_back(sym);
+                klass.data(ctx).mixins().emplace_back(sym);
             }
         }
 
@@ -176,7 +176,7 @@ public:
         for (auto &ancst : original->singleton_ancestors) {
             auto sym = resolveAncestor(ctx, singleton, ancst);
             if (sym.exists()) {
-                singleton.data(ctx).mixins(ctx).emplace_back(sym);
+                singleton.data(ctx).mixins().emplace_back(sym);
             }
         }
 

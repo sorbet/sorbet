@@ -186,12 +186,12 @@ public:
     std::shared_ptr<Type> selfType(const GlobalState &gs) const;
     std::shared_ptr<Type> externalType(const GlobalState &gs) const;
 
-    inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
+    inline std::vector<SymbolRef> &mixins() {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
 
-    inline const std::vector<SymbolRef> &mixins(GlobalState &gs) const {
+    inline const std::vector<SymbolRef> &mixins() const {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
