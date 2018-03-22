@@ -206,7 +206,8 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
         }
         os << " (";
         bool first = true;
-        for (SymbolRef thing : myInfo.argumentsOrMixins) {
+        auto list = myInfo.isClass() ? myInfo.mixins() : myInfo.arguments();
+        for (SymbolRef thing : list) {
             if (first) {
                 first = false;
             } else {

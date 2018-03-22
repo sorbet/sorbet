@@ -93,7 +93,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
         }
     }
 
-    for (core::SymbolRef mixin : inSym.mixins(gs)) {
+    for (core::SymbolRef mixin : inSym.mixins()) {
         for (core::SymbolRef tp : mixin.data(gs).typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym);
         }
@@ -139,7 +139,7 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
 
         core::SymbolRef singleton;
-        for (auto ancst : sym.data(gs).mixins(gs)) {
+        for (auto ancst : sym.data(gs).mixins()) {
             auto classMethods = ancst.data(gs).findMember(gs, core::Names::classMethods());
             if (!classMethods.exists()) {
                 continue;
@@ -147,7 +147,7 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             if (!singleton.exists()) {
                 singleton = sym.data(gs).singletonClass(gs);
             }
-            singleton.data(gs).mixins(gs).emplace_back(classMethods);
+            singleton.data(gs).mixins().emplace_back(classMethods);
         }
     }
     for (int i = 1; i < gs.symbolsUsed(); ++i) {

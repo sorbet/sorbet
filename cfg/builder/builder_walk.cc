@@ -202,7 +202,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::SymbolRef sym = s->block->symbol;
                     const core::Symbol &data = sym.data(cctx.ctx);
 
-                    for (int i = 0; i < data.argumentsOrMixins.size(); ++i) {
+                    for (int i = 0; i < data.arguments().size(); ++i) {
                         auto &arg = s->block->args[i];
 
                         if (auto id = ast::cast_tree<ast::Local>(arg.get())) {

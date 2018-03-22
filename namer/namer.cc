@@ -227,7 +227,7 @@ public:
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
                 core::SymbolRef sym = arg2Symbol(ctx, arg.get());
-                ctx.owner.data(ctx).argumentsOrMixins.push_back(sym);
+                ctx.owner.data(ctx).arguments().push_back(sym);
                 name = sym.data(ctx).name;
             }
 
@@ -243,13 +243,13 @@ public:
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
             core::SymbolRef method = ctx.owner.data(ctx).enclosingMethod(ctx);
-            if (method.exists()) {
-                for (auto arg : ctx.owner.data(ctx).enclosingMethod(ctx).data(ctx).argumentsOrMixins) {
+            if (method.data(ctx).isMethod()) {
+                for (auto arg : method.data(ctx).arguments()) {
                     original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
                 }
             } else {
                 if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
-                    e.setHeader("super outside of method");
+                    e.setHeader("`{}` outside of method", "super");
                 }
             }
         }
@@ -599,7 +599,7 @@ public:
             blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
             blockArg.data(ctx).setBlockArgument();
             blockArg.data(ctx).resultType = core::Types::dynamic();
-            method.data(ctx).argumentsOrMixins.push_back(blockArg);
+            method.data(ctx).arguments().push_back(blockArg);
 
             // Also put it in the MethodDef since we rely on that being correct for blocks
             core::LocalVariable local = enterLocal(ctx, name);
