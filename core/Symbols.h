@@ -151,18 +151,6 @@ public:
         1; // used as a counter for local variables inside CFG. not shared by design TODO: check that is actually isn't
     u4 flags;
 
-    /*
-     * mixins and superclasses: `superClass` is *not* included in the
-     *   `argumentsOrMixins` list. `superClass` may not exist even if
-     *   `isClass()`, which implies that this symbol is either a module or one
-     *   of our magic synthetic classes. During parsing+naming, `superClass ==
-     *   todo()` iff every definition we've seen for this class has had an
-     *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
-     *   Resolver::finalize(), these will be rewritten to `Object()`.
-     */
-    // TODO: make into tiny
-    std::vector<SymbolRef> argumentsOrMixins;
-
     /** Type aliases are introduced by resolver and SHOULD NOT be serialized */
     std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;
     SymbolRef superClass;
@@ -186,12 +174,12 @@ public:
     std::shared_ptr<Type> selfType(const GlobalState &gs) const;
     std::shared_ptr<Type> externalType(const GlobalState &gs) const;
 
-    inline std::vector<SymbolRef> &mixins(GlobalState &gs) {
+    inline std::vector<SymbolRef> &mixins() {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
 
-    inline const std::vector<SymbolRef> &mixins(GlobalState &gs) const {
+    inline const std::vector<SymbolRef> &mixins() const {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
@@ -505,6 +493,18 @@ public:
 
 private:
     friend class serialize::GlobalStateSerializer;
+
+    /*
+     * mixins and superclasses: `superClass` is *not* included in the
+     *   `argumentsOrMixins` list. `superClass` may not exist even if
+     *   `isClass()`, which implies that this symbol is either a module or one
+     *   of our magic synthetic classes. During parsing+naming, `superClass ==
+     *   todo()` iff every definition we've seen for this class has had an
+     *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
+     *   Resolver::finalize(), these will be rewritten to `Object()`.
+     */
+    // TODO: make into tiny
+    std::vector<SymbolRef> argumentsOrMixins;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class

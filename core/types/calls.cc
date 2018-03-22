@@ -267,7 +267,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             core::SymbolRef candidate = *it;
-            auto args = candidate.data(ctx).argumentsOrMixins;
+            auto args = candidate.data(ctx).arguments();
             if (args.empty()) {
                 if (hasBlock) {
                     it = leftCandidates.erase(it);

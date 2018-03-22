@@ -406,13 +406,13 @@ SymbolRef GlobalState::enterMethodSymbol(Loc loc, SymbolRef owner, NameRef name)
 SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 num) {
     NameRef name = freshNameUnique(UniqueNameKind::Overload, original.data(*this).name, num);
     SymbolRef res = enterMethodSymbol(loc, original.data(*this).owner, name);
-    res.data(*this).argumentsOrMixins.reserve(original.data(*this).argumentsOrMixins.size());
-    for (auto &arg : original.data(*this).argumentsOrMixins) {
+    res.data(*this).arguments().reserve(original.data(*this).arguments().size());
+    for (auto &arg : original.data(*this).arguments()) {
         Loc loc = arg.data(*this).definitionLoc;
         NameRef nm = arg.data(*this).name;
         SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
         newArg.data(*this).flags = arg.data(*this).flags;
-        res.data(*this).argumentsOrMixins.push_back(newArg);
+        res.data(*this).arguments().push_back(newArg);
     }
     return res;
 }
