@@ -185,7 +185,7 @@ NameDef names[] = {
     //  |(x,y)|; end
     {"destructureArg", "<destructure>", Desugar},
 
-    {"lambda", Parser},
+    {"lambda", Parser | DSL},
     {"nil_p", "nil?", Desugar | Infer},
     {"nil", DSL | Infer},
     {"NilClass", DSL},

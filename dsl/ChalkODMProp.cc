@@ -72,12 +72,33 @@ ast::Expression *getHashValue(core::MutableContext ctx, ast::Hash *hash, core::N
     return nullptr;
 }
 
+unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node) {
+    auto send = ast::cast_tree<ast::Send>(node);
+    if (send == nullptr) {
+        return nullptr;
+    }
+    if (send->fun != core::Names::lambda()) {
+        return nullptr;
+    }
+    if (!ast::isa_tree<ast::Self>(send->recv.get())) {
+        return nullptr;
+    }
+    if (send->block == nullptr) {
+        return nullptr;
+    }
+    if (!send->block->args.empty()) {
+        return nullptr;
+    }
+    return move(send->block->body);
+}
+
 vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     bool isOptional = false;  // Can the setter be passed nil?
     bool isImmutable = false; // Are there no setters?
     bool isNilable = true;    // Can the getter return nil?
     vector<unique_ptr<ast::Expression>> empty;
     unique_ptr<ast::Expression> type;
+    unique_ptr<ast::Expression> foreign;
     core::NameRef name = core::NameRef::noName();
 
     if (send->fun == core::Names::optional()) {
@@ -123,8 +144,20 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (!send->args.empty()) {
         rules = ast::cast_tree<ast::Hash>(send->args.back().get());
     }
-    if (rules == nullptr && (send->args.size() == 3 || type == nullptr)) {
-        return empty;
+    if (rules == nullptr) {
+        if (type == nullptr) {
+            // No type, and rules isn't a hash: This isn't a T::Props prop
+            return empty;
+        }
+        if (send->args.size() == 3) {
+            // Three args. We need name, type, and either rules, or, for
+            // DataInterface, a foreign type, wrapped in a thunk.
+            if (auto thunk = thunkBody(ctx, send->args.back().get())) {
+                foreign = move(thunk);
+            } else {
+                return empty;
+            }
+        }
     }
 
     if (type == nullptr) {
