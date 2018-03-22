@@ -17,6 +17,13 @@ class MyTest
         end
     end
 
+    describe Object do
+        it Object do
+        end
+        it Object do # error: Method redefined
+        end
+    end
+
     def self.it(*args)
     end
     it "ignores methods without a block"

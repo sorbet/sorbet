@@ -27,6 +27,23 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
     return body;
 }
 
+string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
+    auto argLit = ast::cast_tree<ast::Literal>(arg.get());
+    std::string argString;
+    if (argLit != nullptr) {
+        if (argLit->isString(ctx)) {
+            return argLit->asString(ctx).toString(ctx);
+        } else if (argLit->isSymbol(ctx)) {
+            return argLit->asSymbol(ctx).toString(ctx);
+        }
+    }
+    auto argConstant = ast::cast_tree<ast::ConstantLit>(arg.get());
+    if (argConstant != nullptr) {
+        return argConstant->cnst.toString(ctx);
+    }
+    return arg->toString(ctx);
+}
+
 unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send *send) {
     if (send->args.size() != 1 || send->block == nullptr) {
         return nullptr;
@@ -37,10 +54,8 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    auto arg = ast::cast_tree<ast::Literal>(send->args[0].get());
-    if (arg == nullptr || !arg->isString(ctx)) {
-        return nullptr;
-    }
+    auto &arg = send->args[0];
+    auto argString = to_s(ctx, arg);
 
     vector<unique_ptr<ast::Expression>> stats;
     if (send->fun == core::Names::describe()) {
@@ -49,10 +64,10 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(prepareBody(ctx, move(send->block->body)));
         auto name = ast::MK::Constant(arg->loc, ast::MK::EmptyTree(arg->loc),
-                                      ctx.state.enterNameConstant("<class_" + arg->asString(ctx).toString(ctx) + ">"));
+                                      ctx.state.enterNameConstant("<class_" + argString + ">"));
         return ast::MK::Class(send->loc, move(name), move(ancestors), move(rhs), ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
-        auto name = ctx.state.enterNameUTF8("<test_" + arg->asString(ctx).toString(ctx) + ">");
+        auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
         return ast::MK::Method0(send->loc, move(name), prepareBody(ctx, move(send->block->body)));
     }
 

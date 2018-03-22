@@ -23,6 +23,17 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
 
+      class <emptyTree>::<constant:<class_<constant:Object>>><<constant:<todo sym>>> < (self(<constant:<todo sym>>))
+        begin
+          def <test_<constant:Object>><<constant:<todo sym>>>()
+            <emptyTree>
+          end
+          def <test_<constant:Object>><<constant:<todo sym>>>()
+            <emptyTree>
+          end
+        end
+      end
+
       def self.it<<constant:<todo sym>>>(*args)
         <emptyTree>
       end
