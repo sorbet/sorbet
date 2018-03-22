@@ -477,6 +477,10 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         tp.origins.emplace_back(loc);
         tp.type = core::Types::dropSubtypesOf(ctx, core::Types::dropSubtypesOf(ctx, tp.type, core::Symbols::NilClass()),
                                               core::Symbols::FalseClass());
+        if (tp.type->isBottom()) {
+            isDead = true;
+            return;
+        }
         setTypeAndOrigin(cond, tp);
     }
 

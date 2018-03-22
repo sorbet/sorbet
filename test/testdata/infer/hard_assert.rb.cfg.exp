@@ -110,7 +110,7 @@ subgraph "cluster_::<constant:Main>#with_storytime" {
   Symbol(:\"storytime\") => Integer(42)
 }
 <returnMethodTemp>$2 = <statTemp>$4.hard_assert(<statTemp>$5, <statTemp>$6) : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
+<finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
     "bb::<constant:Main>#with_storytime_0" -> "bb::<constant:Main>#with_storytime_1" [style="bold"];

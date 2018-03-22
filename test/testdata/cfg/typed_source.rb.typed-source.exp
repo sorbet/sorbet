@@ -56,11 +56,7 @@ class Examples
           # a: Integer(1)
           #
           # <ifTemp>$7: FalseClass
-            # a: Integer(1)
-        b = 1 # not-yet-an-error: This code is unreachable
-            # a: Integer(1)
-            #
-            # b: Integer(1)
+        b = 1 # error: This code is unreachable
       else
             # a: Integer(1)
         b = 2
@@ -69,12 +65,12 @@ class Examples
             # b: Integer(2)
       end
 
-      # b: Integer
+      # b: Integer(2)
       #
       # a: Integer(1)
       a + b
       # dead=1
-      # b: Integer
+      # b: Integer(2)
       #
       # a: Integer(1)
       #
@@ -271,8 +267,7 @@ class Examples
          # i: untyped
          #
          # <ifTemp>$4: FalseClass
-       2 # not-yet-an-error: This code is unreachable
-       # <returnMethodTemp>$2: Integer(2)
+       2 # error: This code is unreachable
       else
        # i: untyped
        i

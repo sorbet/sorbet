@@ -33,7 +33,7 @@ class Examples
       end
 
       if (false)
-        b = 1 # not-yet-an-error: This code is unreachable
+        b = 1 # error: This code is unreachable
       else
         b = 2
       end
@@ -75,7 +75,7 @@ class Examples
 
     def take_arguments(i)
       if(false)
-       2 # not-yet-an-error: This code is unreachable
+       2 # error: This code is unreachable
       else
        i
       end

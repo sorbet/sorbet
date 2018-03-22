@@ -62,7 +62,7 @@ class Main
   end
 
   def unify_with_metatype(cond)
-      a = cond ? 1 : T::Array[Integer] # error: Unsupported usage of bare type
+      a = cond ? 1 : T::Array[Integer]
       while cond
           a = 2
       end

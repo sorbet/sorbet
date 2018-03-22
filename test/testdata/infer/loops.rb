@@ -8,14 +8,14 @@ class HasLoops
 
   def incorrect_assignment
     a = "s"
-    while(false)
+    while(true)
       a = 1 # error: Changing type of a variable in a loop
     end
   end
 
   def correct_assignment
     a = "s"
-    while(false)
+    while(true)
       a = "a"
     end
   end

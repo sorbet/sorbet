@@ -23,6 +23,6 @@ class Main
     end
 
     def with_storytime
-        hard_assert(false, storytime: 42)
+        hard_assert(false, storytime: 42) # error: Hard assert is always false
     end
 end
