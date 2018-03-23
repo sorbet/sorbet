@@ -178,7 +178,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
             auto arr = ast::cast_tree<ast::Array>(send->args[0].get());
             if (arr == nullptr) {
                 // TODO(pay-server) unsilence this error and support enums from pay-server
-                { return core::Types::bottom(); }
+                { return core::Types::Object(); }
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("enum must be passed a literal array. e.g. enum([1,\"foo\",MyClass])");
                 }

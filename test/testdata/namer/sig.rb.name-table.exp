@@ -3,7 +3,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig.rb:49
       argument a<> -> untyped @ test/testdata/namer/sig.rb:34
       argument b<> -> untyped @ test/testdata/namer/sig.rb:35
-      argument c<> -> <impossible> @ test/testdata/namer/sig.rb:36
+      argument c<> -> Object @ test/testdata/namer/sig.rb:36
       argument d<> -> untyped @ test/testdata/namer/sig.rb:37
       argument e<> -> untyped @ test/testdata/namer/sig.rb:38
       argument f<> -> untyped @ test/testdata/namer/sig.rb:39
