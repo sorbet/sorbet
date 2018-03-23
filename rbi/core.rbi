@@ -6965,6 +6965,18 @@ module Kernel
   def proc(&blk); end
 
   sig(
+      blk: BasicObject,
+  )
+  .returns(Proc)
+  def lambda(&blk); end
+
+  sig(
+      blk: BasicObject,
+  )
+  .returns(Proc)
+  def self.lambda(&blk); end
+
+  sig(
       arg0: Integer,
   )
   .returns(Integer)

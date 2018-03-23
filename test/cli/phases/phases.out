@@ -5990,6 +5990,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument msg<optional> -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
       argument opts<keyword, repeated> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
       argument predicate<> -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
+    method lambda (blk) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      argument blk<block> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method load (filename, arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument filename<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -11363,6 +11365,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method iterator? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    method lambda (blk) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      argument blk<block> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method load (filename, arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<optional> -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument filename<> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__

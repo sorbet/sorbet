@@ -17,7 +17,7 @@ class Main
     end
 
     def main
-        l = lambda {|x| puts x; 3} # error: Method `lambda` does not exist on `Main`
+        l = lambda {|x| puts x; 3}
         yielder &l
         blockpass &l
         mixed &l

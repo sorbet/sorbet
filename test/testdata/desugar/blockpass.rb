@@ -6,7 +6,7 @@ class HasMeth
 end
 
 def returns_lambda
-    lambda do |x| 'returns_lambda' end # error: Method `lambda` does not exist on `Object`
+    lambda do |x| 'returns_lambda' end
 end
 
 class HasToProc

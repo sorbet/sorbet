@@ -44,7 +44,7 @@ subgraph "cluster_::<constant:Object>#returns_lambda" {
 
     "bb::<constant:Object>#returns_lambda_0" [label = "block[id=0]()
 <statTemp>$5 = self : Object
-<returnMethodTemp>$3 = <statTemp>$5.lambda() : untyped
+<returnMethodTemp>$3 = <statTemp>$5.lambda() : Proc
 <unconditional>"];
 
     "bb::<constant:Object>#returns_lambda_0" -> "bb::<constant:Object>#returns_lambda_2" [style="bold"];
