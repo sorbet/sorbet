@@ -456,6 +456,10 @@ private:
         auto *cast = ast::cast_tree<ast::Cast>(asgn->rhs.get());
         if (cast == nullptr) {
             return false;
+        } else if (cast->cast != core::Names::let()) {
+            if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+                e.setHeader("Use T.let() to specify the type of constants.");
+            }
         }
 
         core::SymbolRef scope;
