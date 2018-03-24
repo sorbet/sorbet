@@ -11833,6 +11833,9 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <singleton class:<constant:SystemExit>> < ::<singleton class:<constant:Exception>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:SystemStackError>> < ::<singleton class:<constant:Exception>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:T>> < ::<singleton class:<constant:Object>> () @ ???
+    method dynamic_cast (obj, type) -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
+      argument obj<> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
+      argument type<> -> Class @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
     method unsafe (x) -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
       argument x<> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
   class <singleton class:<constant:Thread>> < ::<singleton class:<constant:Object>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
