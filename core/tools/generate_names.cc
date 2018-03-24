@@ -40,7 +40,7 @@ struct NameDef {
 };
 
 NameDef names[] = {
-    {"initialize", Core},
+    {"initialize", Core | DSL},
     {"andAnd", "&&", Desugar},
     {"orOr", "||", Desugar},
     {"to_s", Desugar},
@@ -151,6 +151,7 @@ NameDef names[] = {
 
     {"describe", DSL},
     {"it", DSL},
+    {"before", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning
