@@ -241,6 +241,13 @@ void GlobalState::initEmpty() {
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = core::Types::dynamic();
 
+    // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this).resultType = core::Types::Object();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = core::Types::Boolean();
+
     // TODO(pay-server) Synthesize ::M = ::Opus::DB::Model
     //
     // This is a hack to handle that specific alias in pay-server; More-general

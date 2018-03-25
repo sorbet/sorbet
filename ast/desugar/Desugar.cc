@@ -1230,9 +1230,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
-                // TODO: if defined->value isn't defined, with this
-                // implementation we will still raise an undefined error
-                auto res = MK::Send1(loc, MK::Self(loc), core::Names::defined_p(),
+                auto res = MK::Send1(loc, MK::Ident(loc, core::Symbols::Magic()), core::Names::defined_p(),
                                      node2TreeImpl(ctx, move(defined->value), uniqueCounter));
                 result.swap(res);
             },

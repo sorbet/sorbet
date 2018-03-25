@@ -130,8 +130,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <constant:<<RESERVED>>84> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>85> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>86> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>87> < ::<constant:Object> () @ ???
-  class <constant:<<RESERVED>>88> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>8> < ::<constant:Object> () @ ???
   class <constant:<<RESERVED>>9> < ::<constant:Object> () @ ???
   class <constant:<Magic>> < ::<constant:Object> () -> <Magic> @ ???
@@ -158,6 +156,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
           <constant:Elem> = untyped
         ]
       } @ ???
+    method defined? (arg0) -> TrueClass | FalseClass @ ???
+      argument arg0<> -> Object @ ???
   class <constant:<any>> () @ ???
   class <constant:<impossible>> () @ ???
   class <constant:<none>> () @ ???

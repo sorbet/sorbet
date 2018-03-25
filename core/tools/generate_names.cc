@@ -64,7 +64,7 @@ NameDef names[] = {
     {"orOp", "|", Desugar},
     {"backtick", "`", Desugar},
     {"slice", Desugar},
-    {"defined_p", "defined?", Desugar},
+    {"defined_p", "defined?", Core | Desugar},
     {"each", Desugar},
 
     // used in CFG for temporaries

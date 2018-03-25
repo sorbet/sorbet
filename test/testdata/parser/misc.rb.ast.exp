@@ -77,7 +77,7 @@ class <emptyTree><<constant:<root>>> < ()
     next(<emptyTree>)
     next(1)
     next([1, 2])
-    self(<constant:<todo sym>>).defined?(<emptyTree>::<constant:X>)
+    ::<constant:<Magic>>.defined?(<emptyTree>::<constant:X>)
     self(<constant:<todo sym>>).super(ZSuperArgs)
     def kwfoo<<constant:<todo sym>>>(x:, y: = 1, *z:)
       <emptyTree>
