@@ -180,15 +180,16 @@ public:
         return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), self);
     }
 
-    static std::unique_ptr<Expression> Method0(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> rhs) {
-        return Method(loc, name, {}, move(rhs));
+    static std::unique_ptr<Expression> Method0(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> rhs,
+                                               bool self = false) {
+        return Method(loc, name, {}, move(rhs), self);
     }
 
     static std::unique_ptr<Expression> Method1(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> arg0,
-                                               std::unique_ptr<Expression> rhs) {
+                                               std::unique_ptr<Expression> rhs, bool self = false) {
         MethodDef::ARGS_store args;
         args.emplace_back(move(arg0));
-        return Method(loc, name, move(args), move(rhs));
+        return Method(loc, name, move(args), move(rhs), self);
     }
 
     static std::unique_ptr<ClassDef> Class(core::Loc loc, std::unique_ptr<Expression> name,
@@ -238,6 +239,10 @@ public:
 
     static std::unique_ptr<Expression> Cast(core::Loc loc, std::unique_ptr<Expression> type) {
         return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Nil(loc), move(type));
+    }
+
+    static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {
+        return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::unsafe(), move(inner));
     }
 };
 

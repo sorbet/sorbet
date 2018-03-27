@@ -5,6 +5,7 @@
 #include "core/Names/dsl.h"
 #include "core/core.h"
 #include "dsl/dsl.h"
+#include "dsl/util.h"
 
 using namespace std;
 
@@ -21,55 +22,6 @@ unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<
 
 unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
     return ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::nilable(), move(type));
-}
-
-unique_ptr<ast::Expression> dupType(ast::Expression *orig) {
-    auto send = ast::cast_tree<ast::Send>(orig);
-    if (send) {
-        ast::Send::ARGS_store args;
-        auto dupRecv = dupType(send->recv.get());
-        if (!dupRecv) {
-            return nullptr;
-        }
-        for (auto &arg : send->args) {
-            auto dupArg = dupType(arg.get());
-            if (!dupArg) {
-                // This isn't a Type signature, bail out
-                return nullptr;
-            }
-            args.emplace_back(move(dupArg));
-        }
-        return ast::MK::Send(send->loc, move(dupRecv), send->fun, move(args));
-    }
-
-    auto ident = ast::cast_tree<ast::Ident>(orig);
-    if (ident) {
-        return ast::MK::Ident(ident->loc, ident->symbol);
-    }
-
-    auto cons = ast::cast_tree<ast::ConstantLit>(orig);
-    if (!cons) {
-        return nullptr;
-    }
-
-    auto scopeCnst = ast::cast_tree<ast::ConstantLit>(cons->scope.get());
-    if (!scopeCnst) {
-        ENFORCE(ast::isa_tree<ast::EmptyTree>(cons->scope.get()));
-        return ast::MK::Constant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
-    }
-    return ast::MK::Constant(cons->loc, dupType(scopeCnst), cons->cnst);
-}
-
-ast::Expression *getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
-    int i = -1;
-    for (auto &keyExpr : hash->keys) {
-        i++;
-        auto *key = ast::cast_tree<ast::Literal>(keyExpr.get());
-        if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
-            return hash->values[i].get();
-        }
-    }
-    return nullptr;
 }
 
 unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node) {
@@ -150,7 +102,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         if (send->args.size() == 1) {
             type = ast::MK::Ident(loc, core::Symbols::Object());
         } else {
-            type = dupType(send->args[1].get());
+            type = ASTUtil::dupType(send->args[1].get());
         }
     }
 
@@ -175,11 +127,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        type = dupType(getHashValue(ctx, rules, core::Names::type()));
+        type = ASTUtil::dupType(ASTUtil::getHashValue(ctx, rules, core::Names::type()));
     }
 
     if (type == nullptr) {
-        if (getHashValue(ctx, rules, core::Names::enum_()) != nullptr) {
+        if (ASTUtil::getHashValue(ctx, rules, core::Names::enum_()) != nullptr) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
             type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
@@ -189,7 +141,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        auto arrayType = dupType(getHashValue(ctx, rules, core::Names::array()));
+        auto arrayType = ASTUtil::dupType(ASTUtil::getHashValue(ctx, rules, core::Names::array()));
         if (arrayType) {
             type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),
                                   move(arrayType));
@@ -214,21 +166,21 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     // Compute the getters
 
     if (rules) {
-        auto optional = getHashValue(ctx, rules, core::Names::optional());
+        auto optional = ASTUtil::getHashValue(ctx, rules, core::Names::optional());
         auto boolOptional = ast::cast_tree<ast::Literal>(optional);
         if (boolOptional && boolOptional->isTrue(ctx)) {
             isOptional = true;
         }
 
-        auto immutable = ast::cast_tree<ast::Literal>(getHashValue(ctx, rules, core::Names::immutable()));
+        auto immutable = ast::cast_tree<ast::Literal>(ASTUtil::getHashValue(ctx, rules, core::Names::immutable()));
         if (immutable && immutable->isTrue(ctx)) {
             isImmutable = true;
         }
 
-        if (getHashValue(ctx, rules, core::Names::default_())) {
+        if (ASTUtil::getHashValue(ctx, rules, core::Names::default_())) {
             isNilable = false;
         }
-        if (getHashValue(ctx, rules, core::Names::factory())) {
+        if (ASTUtil::getHashValue(ctx, rules, core::Names::factory())) {
             isNilable = false;
         }
 
@@ -236,11 +188,11 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // we don't falsify any booleans here
     }
 
-    auto getType = dupType(type.get());
+    auto getType = ASTUtil::dupType(type.get());
     if (isNilable) {
         getType = mkNilable(loc, move(getType));
     }
-    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), dupType(getType.get())));
+    stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
     stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, move(getType))));
 
     // Compute the setters
@@ -251,9 +203,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             setType = mkNilable(loc, move(setType));
         }
 
-        stats.emplace_back(
-            ast::MK::Sig(loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), dupType(setType.get())),
-                         dupType(setType.get())));
+        stats.emplace_back(ast::MK::Sig(
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
+            ASTUtil::dupType(setType.get())));
         core::NameRef setName = name.addEq(ctx);
         stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
     }

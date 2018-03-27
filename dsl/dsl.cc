@@ -1,6 +1,7 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/DSLBuilder.h"
 #include "dsl/Minitest.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
@@ -40,6 +41,12 @@ public:
                          }
 
                          nodes = Minitest::replaceDSL(ctx, send);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
+                         }
+
+                         nodes = DSLBuilder::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
                              return;

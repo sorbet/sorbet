@@ -115,6 +115,7 @@ NameDef names[] = {
     {"assertType", "assert_type!", Resolver | CFG | Infer},
     {"cast", DSL | Resolver | CFG | Infer},
     {"let", Resolver | CFG | Infer},
+    {"unsafe", DSL},
     // end T keywords
 
     // Ruby DSL methods which we understand
@@ -154,6 +155,9 @@ NameDef names[] = {
     {"describe", DSL},
     {"it", DSL},
     {"before", DSL},
+
+    {"dslOptional", "dsl_optional", DSL},
+    {"dslRequired", "dsl_required", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning

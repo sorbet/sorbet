@@ -1,0 +1,80 @@
+class <emptyTree><<constant:<root>>> < ()
+  begin
+    class <emptyTree>::<constant:TestDSLBuilder><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      self(<constant:<todo sym>>).sig({:"opt_string" => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
+
+      def self.opt_string<<constant:<todo sym>>>(opt_string)
+        <emptyTree>
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+      def self.get_opt_string<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+      def opt_string<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+
+      self(<constant:<todo sym>>).sig({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::<constant:NilClass>)
+
+      def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted)
+        <emptyTree>
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
+
+      def self.get_opt_int_defaulted<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
+
+      def opt_int_defaulted<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+
+      self(<constant:<todo sym>>).sig({:"req_string" => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
+
+      def self.req_string<<constant:<todo sym>>>(req_string)
+        <emptyTree>
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+      def self.get_req_string<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+
+      self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+      def req_string<<constant:<todo sym>>>()
+        ::<constant:T>.unsafe(nil)
+      end
+    end
+    class <emptyTree>::<constant:TestChild><<constant:<todo sym>>> < (<emptyTree>::<constant:TestDSLBuilder>)
+      self(<constant:<todo sym>>).opt_string("hi")
+
+      self(<constant:<todo sym>>).opt_string(:"nope")
+
+      self(<constant:<todo sym>>).opt_int_defaulted(17)
+
+      <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+
+      <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_int_defaulted(), <emptyTree>::<constant:Integer>)
+
+      <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_req_string(), <emptyTree>::<constant:String>)
+
+      def test_instance_methods<<constant:<todo sym>>>()
+        begin
+          <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+          <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).opt_int_defaulted(), <emptyTree>::<constant:Integer>)
+          <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).req_string(), <emptyTree>::<constant:String>)
+        end
+      end
+    end
+  end
+end
