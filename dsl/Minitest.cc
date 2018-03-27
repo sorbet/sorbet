@@ -45,7 +45,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
 }
 
 unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send *send) {
-    if (send->args.size() != 1 || send->block == nullptr) {
+    if (send->block == nullptr) {
         return nullptr;
     }
 
@@ -54,6 +54,13 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
+    if (send->args.size() == 0 && send->fun == core::Names::before()) {
+        return ast::MK::Method0(send->loc, core::Names::initialize(), prepareBody(ctx, move(send->block->body)));
+    }
+
+    if (send->args.size() != 1) {
+        return nullptr;
+    }
     auto &arg = send->args[0];
     auto argString = to_s(ctx, arg);
 
