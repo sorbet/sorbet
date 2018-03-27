@@ -124,12 +124,19 @@ unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",  
                                      "dsl-tree-raw", "name-table",      "name-tree",   "name-tree-raw", "cfg",
                                      "cfg-raw",      "infer",           "typed-source"};
 
+unique_ptr<ruby_typer::ast::Expression> testSerialize(ruby_typer::core::GlobalState &gs,
+                                                      unique_ptr<ruby_typer::ast::Expression> expr) {
+    auto saved = ruby_typer::core::serialize::Serializer::store(gs, expr);
+    auto restored = ruby_typer::core::serialize::Serializer::loadExpression(gs, saved.data());
+    return restored;
+}
+
 TEST(CorpusTest, CloneSubstitutePayload) {
     auto logger = spd::stderr_color_mt("ClonePayload");
-    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
     ruby_typer::core::GlobalState gs(errorQueue);
-    ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
+    ruby_typer::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
 
     auto c1 = gs.deepCopy();
     auto c2 = gs.deepCopy();
@@ -164,9 +171,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
     ruby_typer::core::GlobalState gs(errorQueue);
-    ruby_typer::core::serialize::GlobalStateSerializer::load(gs, getNameTablePayload);
+    ruby_typer::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     ruby_typer::core::MutableContext ctx(gs, ruby_typer::core::Symbols::root());
 
     // Parser
@@ -217,7 +224,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            desugared = ruby_typer::ast::desugar::node2Tree(ctx, move(nodes));
+            desugared = testSerialize(gs, ruby_typer::ast::desugar::node2Tree(ctx, move(nodes)));
         }
 
         expectation = test.expectations.find("ast");
@@ -241,7 +248,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            dslUnwound = ruby_typer::dsl::DSL::run(ctx, move(desugared));
+            dslUnwound = testSerialize(gs, ruby_typer::dsl::DSL::run(ctx, move(desugared)));
         }
 
         expectation = test.expectations.find("dsl-tree");
@@ -265,7 +272,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         {
             ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = ruby_typer::namer::Namer::run(ctx, move(dslUnwound));
+            namedTree = testSerialize(gs, ruby_typer::namer::Namer::run(ctx, move(dslUnwound)));
         }
         trees.emplace_back(move(namedTree));
     }
@@ -311,7 +318,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).source_type != ruby_typer::core::File::Typed) {
+            if (!file.data(ctx).isTyped) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `@typed` pragma. Sources with ." << ext << ".exp expectations must specify @typed.";

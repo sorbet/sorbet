@@ -21,7 +21,7 @@ class ErrorRegion;
 struct ErrorQueue;
 
 namespace serialize {
-class GlobalStateSerializer;
+class Serializer;
 }
 
 class GlobalState final {
@@ -34,7 +34,7 @@ class GlobalState final {
     friend GlobalSubstitution;
     friend ErrorRegion;
     friend ErrorBuilder;
-    friend serialize::GlobalStateSerializer;
+    friend serialize::Serializer;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
     friend class UnfreezeFileTable;
@@ -70,7 +70,7 @@ public:
     FileRef enterFile(absl::string_view path, absl::string_view source);
     FileRef enterFileAt(absl::string_view path, absl::string_view source, int id);
     FileRef enterFile(std::shared_ptr<File> file);
-    FileRef enterFileAt(std::shared_ptr<File> file, int id);
+    FileRef enterNewFileAt(std::shared_ptr<File> file, int id);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
 
@@ -98,11 +98,15 @@ public:
 
     int totalErrors() const;
     void flushErrors();
+    bool wasModified() const;
 
     int globalStateId;
     bool silenceErrors = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
+    mutable std::shared_ptr<ErrorQueue> errorQueue;
+
+    void trace(const std::string &msg) const;
 
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
@@ -114,11 +118,10 @@ private:
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
+    bool wasModified_ = false;
 
     mutable std::mutex annotations_mtx;
     mutable std::vector<Annotation> annotations;
-
-    mutable std::shared_ptr<ErrorQueue> errorQueue;
 
     bool freezeSymbolTable();
     bool freezeNameTable();

@@ -21,7 +21,7 @@ namespace infer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("infer_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
 class InferFixture : public ::testing::Test {
 public:

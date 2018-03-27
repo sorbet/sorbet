@@ -20,7 +20,7 @@ std::vector<std::unique_ptr<BasicError>> ErrorQueue::drainErrors() {
     return res;
 }
 
-ErrorQueue::ErrorQueue(spd::logger &logger) : logger(logger) {
+ErrorQueue::ErrorQueue(spd::logger &logger, spd::logger &tracer) : logger(logger), tracer(tracer) {
     owner = std::this_thread::get_id();
 }
 

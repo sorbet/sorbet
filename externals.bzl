@@ -39,6 +39,13 @@ def externals():
         urls = ["https://github.com/google/protobuf/archive/v3.5.1.zip"],
     )
 
+    new_git_repository(
+        name="lmdb",
+        remote="https://github.com/LMDB/lmdb.git",
+        commit="4d5e2d2a2ac38b9d56b6ba73187c325024718167",
+        build_file="//:lmdb.BUILD",
+    )
+
 
     new_git_repository(
         name="lizard",

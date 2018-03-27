@@ -37,3 +37,81 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
+test/cli/errors/errors.rb:4: Stubbing out unknown constant http://go/e/5002
+     4 |    MissingConstant
+            ^^^^^^^^^^^^^^^
+test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
+    12 |    raise arg # raise is defined by stdlib
+            ^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
+    7069 |      arg0: String,
+                ^^^^^
+  Got Integer originating from:
+    test/cli/errors/errors.rb:9:
+     9 |  sig(arg: Integer).returns(NilClass)
+              ^^^^
+test/cli/errors/errors.rb:16: Expression passed as an argument `arg` to method `foo` does not match expected type http://go/e/7002
+    16 |    foo("foo")
+            ^^^^^^^^^^
+    test/cli/errors/errors.rb:9: Method `foo` has specified type of argument `arg` as `Integer`
+     9 |  sig(arg: Integer).returns(NilClass)
+              ^^^^
+  Got String("foo") originating from:
+    test/cli/errors/errors.rb:16:
+    16 |    foo("foo")
+                ^^^^^
+test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `bar` does not match expected type http://go/e/7002
+    28 |    bar(a)
+            ^^^^^^
+    test/cli/errors/errors.rb:31: Method `bar` has specified type of argument `a` as `Integer`
+    31 |  sig(a: Integer).returns(Integer)
+              ^^
+  Got T.nilable(Integer) originating from:
+    test/cli/errors/errors.rb:24:
+    24 |          nil
+                  ^^^
+    test/cli/errors/errors.rb:21:
+    21 |  def main(foo)
+          ^^^^^^^^^^^^^
+    test/cli/errors/errors.rb:26:
+    26 |          2
+                  ^
+test/cli/errors/errors.rb:4: Stubbing out unknown constant http://go/e/5002
+     4 |    MissingConstant
+            ^^^^^^^^^^^^^^^
+test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
+    12 |    raise arg # raise is defined by stdlib
+            ^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
+    7069 |      arg0: String,
+                ^^^^^
+  Got Integer originating from:
+    test/cli/errors/errors.rb:9:
+     9 |  sig(arg: Integer).returns(NilClass)
+              ^^^^
+test/cli/errors/errors.rb:16: Expression passed as an argument `arg` to method `foo` does not match expected type http://go/e/7002
+    16 |    foo("foo")
+            ^^^^^^^^^^
+    test/cli/errors/errors.rb:9: Method `foo` has specified type of argument `arg` as `Integer`
+     9 |  sig(arg: Integer).returns(NilClass)
+              ^^^^
+  Got String("foo") originating from:
+    test/cli/errors/errors.rb:16:
+    16 |    foo("foo")
+                ^^^^^
+test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `bar` does not match expected type http://go/e/7002
+    28 |    bar(a)
+            ^^^^^^
+    test/cli/errors/errors.rb:31: Method `bar` has specified type of argument `a` as `Integer`
+    31 |  sig(a: Integer).returns(Integer)
+              ^^
+  Got T.nilable(Integer) originating from:
+    test/cli/errors/errors.rb:24:
+    24 |          nil
+                  ^^^
+    test/cli/errors/errors.rb:21:
+    21 |  def main(foo)
+          ^^^^^^^^^^^^^
+    test/cli/errors/errors.rb:26:
+    26 |          2
+                  ^

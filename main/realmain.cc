@@ -5,6 +5,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "common/ConcurrentQueue.h"
+#include "common/KeyValueStore.h"
 #include "common/ProgressIndicator.h"
 #include "common/WorkerPool.h"
 #include "core/ErrorQueue.h"
@@ -73,6 +74,7 @@ struct Options {
     bool storeState = false;
     int threads = 0;
     string typedSource = "";
+    string cacheDir = "";
     std::vector<string> configatronDirs;
     std::vector<string> configatronFiles;
 };
@@ -100,6 +102,8 @@ shared_ptr<spd::logger> console;
 const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 
 int returnCode = 0;
+
+const string GLOBAL_STATE_KEY = "GlobalState";
 
 struct {
     string option;
@@ -167,7 +171,7 @@ public:
     CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file.data(ctx).source_type != core::File::Typed) {
+        if (!m->loc.file.data(ctx).isTyped) {
             return m;
         }
         auto &print = opts.print;
@@ -198,9 +202,20 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::GlobalState> &lgs, core::FileRef file) {
+unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::GlobalState> &lgs, core::FileRef file,
+                                     std::unique_ptr<KeyValueStore> &kvstore,
+                                     const shared_ptr<core::GlobalState> &pgs) {
     auto &print = opts.print;
     try {
+        if (kvstore && file.id() < pgs->filesUsed()) {
+            auto maybeCached = kvstore->read(file.data(*pgs).hashKey());
+            if (maybeCached) {
+                auto t = core::serialize::Serializer::loadExpression(*pgs, maybeCached);
+                t->loc.file.data(*pgs).cachedParseTree = true;
+                return t;
+            }
+        }
+
         std::unique_ptr<parser::Node> nodes;
         {
             tracer->trace("Parsing: {}", file.data(*lgs).path());
@@ -263,10 +278,9 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::Globa
 
 vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std::vector<std::string> frs,
                                           std::vector<core::FileRef> mainThreadFiles, const Options &opts,
-                                          WorkerPool &workers) {
-    vector<unique_ptr<ast::Expression>> result;
+                                          WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore) {
+    vector<unique_ptr<ast::Expression>> ret;
     vector<unique_ptr<ast::Expression>> empty;
-    vector<unique_ptr<ast::Expression>> trees;
 
     if (opts.stopAfterPhase == Phase::INIT) {
         return empty;
@@ -298,7 +312,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-        workers.multiplexJob([cgs, opts, fileq, resultq]() {
+        workers.multiplexJob([cgs, opts, fileq, resultq, &kvstore]() {
             tracer->trace("worker deep copying global state");
             auto lgs = cgs->deepCopy();
             tracer->trace("worker done deep copying global state");
@@ -340,14 +354,16 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         bool forceTypedSource = !opts.typedSource.empty() &&
                                                 file.data(*lgs).path().find(opts.typedSource) != std::string::npos;
                         if (forceTypedSource || opts.forceTyped) {
-                            file.data(*lgs).source_type = core::File::Typed;
+                            file.data(*lgs).isTyped = true;
                         } else if (opts.forceUntyped) {
-                            file.data(*lgs).source_type = core::File::Untyped;
-                        } else if (opts.storeState) {
+                            file.data(*lgs).isTyped = false;
+                        }
+
+                        if (opts.storeState) {
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
-                        threadResult.trees.emplace_back(indexOne(opts, lgs, file));
+                        threadResult.trees.emplace_back(indexOne(opts, lgs, file, kvstore, cgs));
                     }
                 }
             }
@@ -364,7 +380,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
         tracer->trace("Done deep copying global state");
 
         for (auto f : mainThreadFiles) {
-            trees.emplace_back(indexOne(opts, mainTheadGs, f));
+            ret.emplace_back(indexOne(opts, mainTheadGs, f, kvstore, cgs));
         }
 
         gs = move(mainTheadGs);
@@ -382,7 +398,17 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                     core::MutableContext ctx(*gs, core::Symbols::root());
                     tracer->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
-                        trees.emplace_back(ast::Substitute::run(ctx, substitution, move(tree)));
+                        auto file = tree->loc.file;
+                        if (!file.data(*gs).cachedParseTree) {
+                            auto subst = ast::Substitute::run(ctx, substitution, move(tree));
+                            if (kvstore) {
+                                kvstore->write(file.data(*gs).hashKey(),
+                                               core::serialize::Serializer::store(*gs, subst));
+                            }
+                            ret.emplace_back(move(subst));
+                        } else {
+                            ret.emplace_back(move(tree));
+                        }
                     }
                     tracer->trace("Tree substitution done");
                 }
@@ -392,43 +418,9 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
             tracer->trace("Done collecting results from indexing threads");
         }
     }
+    ENFORCE(mainThreadFiles.size() + frs.size() == ret.size());
 
-    ENFORCE(mainThreadFiles.size() + frs.size() == trees.size());
-    {
-        core::UnfreezeNameTable nameTableAccess(*gs);     // creates names from config
-        core::UnfreezeSymbolTable symbolTableAccess(*gs); // creates methods for them
-        ProgressIndicator namingProgress(opts.showProgress, "Configatron", 1);
-        namer::configatron::fillInFromFileSystem(*gs, opts.configatronDirs, opts.configatronFiles);
-    }
-
-    {
-        ProgressIndicator namingProgress(opts.showProgress, "Naming", frs.size());
-
-        Timer timeit(console_err, "naming");
-        for (auto &tree : trees) {
-            auto file = tree->loc.file;
-            try {
-                unique_ptr<ast::Expression> ast;
-                {
-                    core::MutableContext ctx(*gs, core::Symbols::root());
-                    tracer->trace("Naming: {}", file.data(*gs).path());
-                    core::ErrorRegion errs(*gs, file);
-                    core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
-                    core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
-                    ast = namer::Namer::run(ctx, move(tree));
-                }
-                result.emplace_back(move(ast));
-                gs->flushErrors();
-                namingProgress.reportProgress(result.size());
-            } catch (...) {
-                returnCode = 13;
-                if (auto e = gs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(*gs).path());
-                }
-            }
-        }
-    }
-    return result;
+    return ret;
 }
 
 unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts) {
@@ -475,6 +467,43 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 
     try {
+        {
+            core::UnfreezeNameTable nameTableAccess(*gs);     // creates names from config
+            core::UnfreezeSymbolTable symbolTableAccess(*gs); // creates methods for them
+            ProgressIndicator namingProgress(opts.showProgress, "Configatron", 1);
+            namer::configatron::fillInFromFileSystem(*gs, opts.configatronDirs, opts.configatronFiles);
+        }
+
+        {
+            ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
+
+            Timer timeit(console_err, "naming");
+            int i = 0;
+            for (auto &tree : what) {
+                auto file = tree->loc.file;
+                try {
+                    unique_ptr<ast::Expression> ast;
+                    {
+                        core::MutableContext ctx(*gs, core::Symbols::root());
+                        tracer->trace("Naming: {}", file.data(*gs).path());
+                        core::ErrorRegion errs(*gs, file);
+                        core::UnfreezeNameTable nameTableAccess(*gs);     // creates singletons and class names
+                        core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters symbols
+                        tree = namer::Namer::run(ctx, move(tree));
+                    }
+                    gs->flushErrors();
+                    namingProgress.reportProgress(i);
+                    i++;
+                } catch (...) {
+                    returnCode = 13;
+                    if (auto e =
+                            gs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                        e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(*gs).path());
+                    }
+                }
+            }
+        }
+
         core::MutableContext ctx(*gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
@@ -501,69 +530,74 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
             cout << resolved->showRaw(*gs) << '\n';
         }
     }
-    shared_ptr<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>> fileq;
-    shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
-
     {
-        Timer timeit(console_err, "creating typecheck queues");
-        fileq = make_shared<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>>(what.size());
-        resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
-    }
+        Timer timeit(console_err, "Infer+CFG");
 
-    core::Context ctx(*gs, core::Symbols::root());
-    for (auto &resolved : what) {
-        tracer->trace("enqueue-typer {}", resolved->loc.file.data(*gs).path());
-        fileq->push(move(resolved), 1);
-    }
+        shared_ptr<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>> fileq;
+        shared_ptr<BlockingBoundedQueue<typecheck_thread_result>> resultq;
 
-    {
-        ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-        workers.multiplexJob([ctx, opts, fileq, resultq]() {
-            typecheck_thread_result threadResult;
-            unique_ptr<ast::Expression> job;
-            int processedByThread = 0;
+        {
+            Timer timeit(console_err, "creating typecheck queues");
+            fileq = make_shared<ConcurrentBoundedQueue<unique_ptr<ast::Expression>>>(what.size());
+            resultq = make_shared<BlockingBoundedQueue<typecheck_thread_result>>(what.size());
+        }
 
-            {
-                for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
-                    if (result.gotItem()) {
-                        processedByThread++;
-                        core::FileRef file = job->loc.file;
-                        core::ErrorRegion errs(ctx, file);
-                        try {
-                            threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts));
-                        } catch (...) {
-                            console_err->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
+        core::Context ctx(*gs, core::Symbols::root());
+        for (auto &resolved : what) {
+            tracer->trace("enqueue-typer {}", resolved->loc.file.data(*gs).path());
+            fileq->push(move(resolved), 1);
+        }
+
+        {
+            ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
+            workers.multiplexJob([ctx, opts, fileq, resultq]() {
+                typecheck_thread_result threadResult;
+                unique_ptr<ast::Expression> job;
+                int processedByThread = 0;
+
+                {
+                    for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                        if (result.gotItem()) {
+                            processedByThread++;
+                            core::FileRef file = job->loc.file;
+                            core::ErrorRegion errs(ctx, file);
+                            try {
+                                threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts));
+                            } catch (...) {
+                                console_err->error("Exception typing file: {} (backtrace is above)",
+                                                   file.data(ctx).path());
+                            }
                         }
                     }
                 }
-            }
-            if (processedByThread > 0) {
-                threadResult.counters = core::getAndClearThreadCounters();
-                resultq->push(move(threadResult), processedByThread);
-            }
-        });
-
-        typecheck_thread_result threadResult;
-        {
-            for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-                 result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
-                if (result.gotItem()) {
-                    counterConsume(move(threadResult.counters));
-                    typecheck_result.emplace_back(move(threadResult.trees));
+                if (processedByThread > 0) {
+                    threadResult.counters = core::getAndClearThreadCounters();
+                    resultq->push(move(threadResult), processedByThread);
                 }
-                cfgInferProgress.reportProgress(fileq->doneEstimate());
-                gs->flushErrors();
+            });
+
+            typecheck_thread_result threadResult;
+            {
+                for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+                     result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+                    if (result.gotItem()) {
+                        counterConsume(move(threadResult.counters));
+                        typecheck_result.emplace_back(move(threadResult.trees));
+                    }
+                    cfgInferProgress.reportProgress(fileq->doneEstimate());
+                    gs->flushErrors();
+                }
             }
         }
-    }
 
-    if (opts.print.NameTable) {
-        cout << gs->toString() << '\n';
+        if (opts.print.NameTable) {
+            cout << gs->toString() << '\n';
+        }
+        if (opts.print.NameTableFull) {
+            cout << gs->toString(true) << '\n';
+        }
+        return;
     }
-    if (opts.print.NameTableFull) {
-        cout << gs->toString(true) << '\n';
-    }
-    return;
 }
 
 std::vector<std::string> split(const std::string &s, char delimiter) {
@@ -673,6 +707,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
                                cxxopts::value<string>(), "file");
+    options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
+                               cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
     options.add_options("dev")("trace", "Trace phases");
 
@@ -706,7 +742,16 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Options &options) {
+void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Options &options,
+                              std::unique_ptr<KeyValueStore> &kvstore) {
+    if (kvstore) {
+        auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
+        if (maybeGsBytes) {
+            Timer timeit(console_err, "Read cached global state");
+            core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
+            return;
+        }
+    }
     if (options.noStdlib) {
         gs->initEmpty();
         return;
@@ -733,11 +778,12 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         auto oldSilence = gs->silenceErrors;
         gs->silenceErrors = true;
 
-        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers), emptyOpts, workers); // result is thrown away
+        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers, kvstore), emptyOpts,
+                  workers); // result is thrown away
         gs->silenceErrors = oldSilence;
     } else {
         Timer timeit(console_err, "Read serialized payload");
-        core::serialize::GlobalStateSerializer::load(*gs, nameTablePayload);
+        core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
 }
 
@@ -862,6 +908,7 @@ int realmain(int argc, char **argv) {
     opts.forceTyped = typed == "always";
     opts.forceUntyped = typed == "never";
     opts.showProgress = options.count("P") != 0;
+    opts.cacheDir = options["cache-dir"].as<string>();
     opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
     opts.configatronFiles = options["configatron-file"].as<vector<string>>();
     opts.storeState = options.count("store-state") != 0;
@@ -899,10 +946,14 @@ int realmain(int argc, char **argv) {
     auto formatter = make_shared<spd::pattern_formatter>("%v", spd::pattern_time_type::local, "");
     typeErrorsConsole->set_formatter(formatter);
     shared_ptr<core::GlobalState> gs =
-        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*typeErrorsConsole)));
+        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*typeErrorsConsole, *tracer)));
 
     tracer->trace("building initial global state");
-    createInitialGlobalState(gs, opts);
+    unique_ptr<KeyValueStore> kvstore;
+    if (!opts.cacheDir.empty()) {
+        kvstore = std::make_unique<KeyValueStore>(core::serialize::Serializer::VERSION, opts.cacheDir);
+    }
+    createInitialGlobalState(gs, opts, kvstore);
     if (options.count("q") != 0) {
         gs->silenceErrors = true;
     }
@@ -925,25 +976,27 @@ int realmain(int argc, char **argv) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
                 return 1;
             }
-            file.data(*gs).source_type = core::File::Typed;
+            file.data(*gs).isTyped = true;
         }
     }
 
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(gs, files, inputFiles, opts, workers);
+        indexed = index(gs, files, inputFiles, opts, workers, kvstore);
     }
 
-    {
-        Timer timeit(console_err, "typecheck");
-        typecheck(gs, move(indexed), opts, workers);
+    if (kvstore && gs->wasModified()) {
+        Timer timeit(console_err, "caching global state");
+        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::store(*gs));
     }
+
+    { typecheck(gs, move(indexed), opts, workers); }
     tracer->trace("ruby-typer done");
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
-        FileOps::write(outfile.c_str(), core::serialize::GlobalStateSerializer::store(*gs));
+        FileOps::write(outfile.c_str(), core::serialize::Serializer::store(*gs));
     }
 
     if (options.count("counter") != 0) {

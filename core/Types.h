@@ -218,7 +218,7 @@ private:
     friend std::shared_ptr<Type> Types::falsyTypes();
     friend std::shared_ptr<Type> Types::Boolean();
     friend class core::GlobalSubstitution;
-    friend class core::serialize::GlobalStateSerializer;
+    friend class core::serialize::Serializer;
     friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> Types::_lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
@@ -256,7 +256,7 @@ private:
     AndType(std::shared_ptr<Type> left, std::shared_ptr<Type> right);
 
     friend class core::GlobalSubstitution;
-    friend class core::serialize::GlobalStateSerializer;
+    friend class core::serialize::Serializer;
 
     friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);

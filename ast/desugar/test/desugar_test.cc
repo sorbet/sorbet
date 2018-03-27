@@ -13,7 +13,7 @@
 
 namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("desugar_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
     ruby_typer::core::GlobalState gs(errorQueue);

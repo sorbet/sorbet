@@ -3,7 +3,6 @@
 #include "Types.h"
 #include "core/Names/core.h"
 #include "core/errors/errors.h"
-#include <regex>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
@@ -349,6 +348,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     } else {
         owner.data(*this, true).members.push_back(make_pair(name, ret));
     }
+    wasModified_ = true;
     return ret;
 }
 
@@ -500,6 +500,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
     names[idx].raw.utf8 = enterString(nm);
     core::categoryCounterInc("names", "utf8");
 
+    wasModified_ = true;
     return NameRef(*this, idx);
 }
 
@@ -552,6 +553,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     names[idx].kind = CONSTANT;
     names[idx].cnst.original = original;
+    wasModified_ = true;
     core::categoryCounterInc("names", "constant");
     return NameRef(*this, idx);
 }
@@ -664,38 +666,9 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
+    wasModified_ = true;
     core::categoryCounterInc("names", "unique");
     return NameRef(*this, idx);
-}
-
-bool fileIsTyped(absl::string_view source) {
-    static regex sigil("^\\s*#\\s*@typed\\s*$");
-    size_t off = 0;
-    // std::regex appears to be ludicrously slow, to the point where running
-    // this regex is as slow as running the entirety of the remainder of our
-    // pipeline.
-    //
-    // Help it out by manually scanning for the `@typed` literal, and then
-    // running the regex only over the single line.
-    while (true) {
-        off = source.find("@typed", off);
-        if (off == absl::string_view::npos) {
-            return false;
-        }
-
-        size_t line_start = source.rfind('\n', off);
-        if (line_start == absl::string_view::npos) {
-            line_start = 0;
-        }
-        size_t line_end = source.find('\n', off);
-        if (line_end == absl::string_view::npos) {
-            line_end = source.size();
-        }
-        if (regex_search(source.data() + line_start, source.data() + line_end, sigil)) {
-            return true;
-        }
-        off = line_end;
-    }
 }
 
 FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
@@ -706,27 +679,27 @@ FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
-    File::Type source_type = File::Untyped;
-    if (fileIsTyped(source)) {
-        source_type = File::Typed;
-    }
-
-    return GlobalState::enterFile(
-        std::make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type));
+    return GlobalState::enterFile(std::make_shared<File>(string(path.begin(), path.end()),
+                                                         string(source.begin(), source.end()), File::Type::Normal));
 }
 
 FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, int id) {
-    File::Type source_type = File::Untyped;
-    if (fileIsTyped(source)) {
-        source_type = File::Typed;
+    int i = -1;
+    for (auto &f : this->files) {
+        ++i;
+        if (f && f->source_type != File::Type::TombStone) {
+            if (f->path() == path && f->source() == source) {
+                return i;
+            }
+        }
     }
 
-    return GlobalState::enterFileAt(
-        std::make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), source_type),
-        id);
+    return GlobalState::enterNewFileAt(std::make_shared<File>(string(path.begin(), path.end()),
+                                                              string(source.begin(), source.end()), File::Type::Normal),
+                                       id);
 }
 
-FileRef GlobalState::enterFileAt(std::shared_ptr<File> file, int id) {
+FileRef GlobalState::enterNewFileAt(std::shared_ptr<File> file, int id) {
     ENFORCE(id >= this->files.size() || this->files[id]->source_type == File::Type::TombStone);
     if (id >= this->files.size()) {
         while (id > this->files.size()) {
@@ -1004,9 +977,9 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
-    File::Type source_type = File::Typed;
+    bool isTyped = true;
     if (loc.file.exists()) {
-        source_type = loc.file.data(*this).source_type;
+        isTyped = loc.file.data(*this).isTyped;
     }
 
     switch (what.code) {
@@ -1021,8 +994,16 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
             return !this->silenceErrors;
 
         default:
-            return !this->silenceErrors && source_type == File::Typed;
+            return !this->silenceErrors && isTyped;
     }
+}
+
+bool GlobalState::wasModified() const {
+    return wasModified_;
+}
+
+void GlobalState::trace(const std::string &msg) const {
+    errorQueue->tracer.trace(msg);
 }
 
 } // namespace core

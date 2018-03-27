@@ -31,14 +31,14 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;
     }
-    auto it = std::lower_bound(file.line_breaks.begin(), file.line_breaks.end(), off);
-    if (it == file.line_breaks.begin()) {
+    auto it = std::lower_bound(file.line_breaks().begin(), file.line_breaks().end(), off);
+    if (it == file.line_breaks().begin()) {
         pos.line = 1;
         pos.column = off + 1;
         return pos;
     }
     --it;
-    pos.line = (it - file.line_breaks.begin()) + 1;
+    pos.line = (it - file.line_breaks().begin()) + 1;
     pos.column = off - *it;
     return pos;
 }
@@ -77,11 +77,11 @@ string Loc::toString(const core::GlobalState &gs, int tabs) const {
     while (lineIt != pos.second.line) {
         printTabs(buf, tabs);
         buf << rang::fgB::black << leftPad(to_string(lineIt + 1), posWidth) << " |" << rang::style::reset;
-        auto endPos = filed.line_breaks[lineIt + 1];
+        auto endPos = filed.line_breaks()[lineIt + 1];
         if (filed.source()[endPos] == '\n') {
             endPos -= 1;
         }
-        buf.write(filed.source().data() + filed.line_breaks[lineIt] + 1, endPos - filed.line_breaks[lineIt]);
+        buf.write(filed.source().data() + filed.line_breaks()[lineIt] + 1, endPos - filed.line_breaks()[lineIt]);
         buf << endl;
         lineIt++;
     }

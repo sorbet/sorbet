@@ -11,7 +11,7 @@ using namespace std;
 namespace ruby_typer {
 namespace core {
 auto logger = spd::stderr_color_mt("parse");
-auto errorQueue = make_shared<core::ErrorQueue>(*logger);
+auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
 
 struct Offset2PosTest {
     string src;

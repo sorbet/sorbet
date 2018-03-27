@@ -15,7 +15,7 @@ using ruby_typer::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
 TEST(ParserTest, SimpleParse) { // NOLINT
     ruby_typer::core::GlobalState gs(errorQueue);

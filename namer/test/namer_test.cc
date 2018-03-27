@@ -18,7 +18,7 @@ namespace namer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("namer_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
 class NamerFixture : public ::testing::Test {
 public:
@@ -40,7 +40,7 @@ unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     ruby_typer::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto tree = parser::Parser::run(gs, "<test>", str);
-    tree->loc.file.data(gs).source_type = core::File::Typed;
+    tree->loc.file.data(gs).isTyped = true;
     ruby_typer::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
     ast = dsl::DSL::run(ctx, move(ast));

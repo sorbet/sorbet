@@ -14,7 +14,7 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("hello-test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger);
+auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
 
 namespace ruby_typer {
 using namespace ast;

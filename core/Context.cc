@@ -3,7 +3,6 @@
 #include "Types.h"
 #include "Unfreeze.h"
 
-#include "../common/common.h"
 #include "common/common.h"
 #include <algorithm>
 #include <sstream>
@@ -74,7 +73,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                 continue;
             }
             ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->source_type == core::File::TombStone);
-            to.enterFileAt(from.files[fileIdx], fileIdx);
+            to.enterNewFileAt(from.files[fileIdx], fileIdx);
         }
     }
 

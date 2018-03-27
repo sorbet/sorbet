@@ -46,6 +46,9 @@ public:
         r.frozenConstraint = true;
         return r;
     }
+    void trace(const std::string &msg) const {
+        state.trace(msg);
+    }
 };
 
 class MutableContext final {
@@ -87,6 +90,9 @@ public:
         MutableContext r = MutableContext(*this);
         r.frozenConstraint = true;
         return r;
+    }
+    void trace(const std::string &msg) const {
+        state.trace(msg);
     }
 };
 

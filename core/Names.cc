@@ -16,7 +16,11 @@ NameRef::NameRef(const GlobalState &gs, unsigned int id) : _id(id) {
 }
 
 bool NameRef::isWellKnownName() const {
-    return _id <= Names::LAST_WELL_KNOWN_NAME;
+    bool def = false;
+#ifdef DEBUG_MODE
+    def = def || (globalStateId == -1);
+#endif
+    return def || (_id <= Names::LAST_WELL_KNOWN_NAME);
 }
 
 core::Name::~Name() noexcept {

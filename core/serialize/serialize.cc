@@ -1,5 +1,8 @@
 #include "serialize.h"
 #include "absl/base/casts.h"
+#include "ast/Helpers.h"
+#include "core/ErrorQueue.h"
+#include "core/GlobalState.h"
 #include "core/Symbols.h"
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
@@ -9,11 +12,11 @@ template class std::vector<ruby_typer::u4>;
 namespace ruby_typer {
 namespace core {
 namespace serialize {
+const u4 Serializer::VERSION;
+const u1 Serializer::GLOBAL_STATE_COMPRESSION_DEGREE;
+const u1 Serializer::FILE_COMPRESSION_DEGREE;
 
-const u4 VERSION = 2;
-const u1 COMPRESSION_DEGREE = 19; // >20 introduce decompression slowdown
-
-void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
+void Serializer::Pickler::putStr(const absl::string_view s) {
     putU4(s.size());
 
     for (char c : s) {
@@ -23,7 +26,7 @@ void GlobalStateSerializer::Pickler::putStr(const absl::string_view s) {
 
 constexpr size_t SIZE_BYTES = sizeof(int) / sizeof(u1);
 
-std::vector<u1> GlobalStateSerializer::Pickler::result() {
+std::vector<u1> Serializer::Pickler::result(int compressionDegree) {
     if (zeroCounter != 0) {
         data.emplace_back(zeroCounter);
         zeroCounter = 0;
@@ -36,7 +39,7 @@ std::vector<u1> GlobalStateSerializer::Pickler::result() {
                                                  // and returns too small sizes for small inputs,
                                                  // where compressed size is bigger than original size
     int resultCode = Lizard_compress((const char *)data.data(), (char *)(compressed_data.data() + SIZE_BYTES * 2),
-                                     data.size(), (compressed_data.size() - SIZE_BYTES * 2), COMPRESSION_DEGREE);
+                                     data.size(), (compressed_data.size() - SIZE_BYTES * 2), compressionDegree);
     if (resultCode == 0) {
         // did not compress!
         Error::raise("uncompressable picker?");
@@ -51,7 +54,7 @@ std::vector<u1> GlobalStateSerializer::Pickler::result() {
     return compressed_data;
 }
 
-GlobalStateSerializer::UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
+Serializer::UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
     int compressedSize;
     memcpy(&compressedSize, compressed, SIZE_BYTES);
     int uncompressedSize;
@@ -66,16 +69,15 @@ GlobalStateSerializer::UnPickler::UnPickler(const u1 *const compressed) : pos(0)
     }
 }
 
-std::string GlobalStateSerializer::UnPickler::getStr() {
+absl::string_view Serializer::UnPickler::getStr() {
     int sz = getU4();
-    std::string result(sz, '\0');
-    for (int i = 0; i < sz; i++) {
-        result[i] = absl::bit_cast<char>(getU1());
-    }
+    absl::string_view result((char *)&data[pos], sz);
+    pos += sz;
+
     return result;
 }
 
-void GlobalStateSerializer::Pickler::putU1(u1 u) {
+void Serializer::Pickler::putU1(u1 u) {
     if (zeroCounter != 0) {
         data.push_back(zeroCounter);
         zeroCounter = 0;
@@ -83,12 +85,13 @@ void GlobalStateSerializer::Pickler::putU1(u1 u) {
     data.push_back(u);
 }
 
-u1 GlobalStateSerializer::UnPickler::getU1() {
+u1 Serializer::UnPickler::getU1() {
     ENFORCE(zeroCounter == 0);
-    return data[pos++];
+    auto res = data[pos++];
+    return res;
 }
 
-void GlobalStateSerializer::Pickler::putU4(u4 u) {
+void Serializer::Pickler::putU4(u4 u) {
     if (u == 0) {
         if (zeroCounter != 0) {
             if (zeroCounter == UCHAR_MAX) {
@@ -116,7 +119,7 @@ void GlobalStateSerializer::Pickler::putU4(u4 u) {
     }
 }
 
-u4 GlobalStateSerializer::UnPickler::getU4() {
+u4 Serializer::UnPickler::getU4() {
     if (zeroCounter != 0) {
         zeroCounter--;
         return 0;
@@ -157,7 +160,7 @@ u4 GlobalStateSerializer::UnPickler::getU4() {
     }
 }
 
-void GlobalStateSerializer::Pickler::putS8(const int64_t i) {
+void Serializer::Pickler::putS8(const int64_t i) {
     u8 u = absl::bit_cast<u8>(i);
     while (u > 127) {
         putU1((u & 127) | 128);
@@ -166,7 +169,7 @@ void GlobalStateSerializer::Pickler::putS8(const int64_t i) {
     putU1(u & 127);
 }
 
-int64_t GlobalStateSerializer::UnPickler::getS8() {
+int64_t Serializer::UnPickler::getS8() {
     u8 res = 0;
     u8 vle = 128;
     int i = 0;
@@ -178,18 +181,18 @@ int64_t GlobalStateSerializer::UnPickler::getS8() {
     return absl::bit_cast<int64_t>(res);
 }
 
-void GlobalStateSerializer::pickle(Pickler &p, File &what) {
+void Serializer::pickle(Pickler &p, const File &what) {
     p.putStr(what.path());
     p.putStr(what.source());
 }
 
-std::shared_ptr<File> GlobalStateSerializer::unpickleFile(UnPickler &p) {
-    std::string path = p.getStr();
-    std::string source = p.getStr();
+std::shared_ptr<File> Serializer::unpickleFile(UnPickler &p) {
+    auto path = (std::string)p.getStr();
+    auto source = (std::string)p.getStr();
     return std::make_shared<File>(move(path), move(source), File::Payload);
 }
 
-void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
+void Serializer::pickle(Pickler &p, const Name &what) {
     p.putU1(what.kind);
     switch (what.kind) {
         case NameKind::UTF8:
@@ -206,7 +209,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Name &what) {
     }
 }
 
-Name GlobalStateSerializer::unpickleName(UnPickler &p, GlobalState &gs) {
+Name Serializer::unpickleName(UnPickler &p, GlobalState &gs) {
     Name result;
     result.kind = (NameKind)p.getU1();
     switch (result.kind) {
@@ -226,7 +229,7 @@ Name GlobalStateSerializer::unpickleName(UnPickler &p, GlobalState &gs) {
     return result;
 }
 
-void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
+void Serializer::pickle(Pickler &p, Type *what) {
     if (what == nullptr) {
         p.putU4(0);
         return;
@@ -284,7 +287,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Type *what) {
     }
 }
 
-std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalState *gs) {
+std::shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
     auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that size difference after
                           // compression is small and u4 is 10% faster
     switch (tag) {
@@ -307,10 +310,9 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
         case 5: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
-            std::vector<std::shared_ptr<Type>> elems;
-            elems.reserve(sz);
-            for (int i = 0; i < sz; i++) {
-                elems.emplace_back(unpickleType(p, gs));
+            std::vector<std::shared_ptr<Type>> elems(sz);
+            for (auto &elem : elems) {
+                elem = unpickleType(p, gs);
             }
             auto result = std::make_shared<TupleType>(elems);
             result->underlying = underlying;
@@ -319,19 +321,16 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
         case 6: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
-            std::vector<std::shared_ptr<LiteralType>> keys;
-            std::vector<std::shared_ptr<Type>> values;
-            keys.reserve(sz);
-            values.reserve(sz);
-            for (int i = 0; i < sz; i++) {
-                auto key = unpickleType(p, gs);
-                if (auto *lit = cast_type<LiteralType>(key.get())) {
-                    keys.emplace_back(lit);
-                    key.reset();
+            std::vector<std::shared_ptr<LiteralType>> keys(sz);
+            std::vector<std::shared_ptr<Type>> values(sz);
+            for (auto &key : keys) {
+                auto tmp = unpickleType(p, gs);
+                if (auto *lit = cast_type<LiteralType>(tmp.get())) {
+                    key = std::shared_ptr<LiteralType>(tmp, lit);
                 }
             }
-            for (int i = 0; i < sz; i++) {
-                values.emplace_back(unpickleType(p, gs));
+            for (auto &value : values) {
+                value = unpickleType(p, gs);
             }
             auto result = std::make_shared<ShapeType>(keys, values);
             result->underlying = underlying;
@@ -347,10 +346,9 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
         case 10: {
             SymbolRef klass(gs, p.getU4());
             int sz = p.getU4();
-            std::vector<std::shared_ptr<Type>> targs;
-            targs.reserve(sz);
-            for (int i = 0; i < sz; i++) {
-                targs.emplace_back(unpickleType(p, gs));
+            std::vector<std::shared_ptr<Type>> targs(sz);
+            for (auto &t : targs) {
+                t = unpickleType(p, gs);
             }
             return std::make_shared<AppliedType>(klass, targs);
         }
@@ -359,7 +357,7 @@ std::shared_ptr<Type> GlobalStateSerializer::unpickleType(UnPickler &p, GlobalSt
     }
 }
 
-void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
+void Serializer::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.owner._id);
     p.putU4(what.name._id);
     p.putU4(what.superClass._id);
@@ -385,7 +383,7 @@ void GlobalStateSerializer::pickle(Pickler &p, Symbol &what) {
     p.putU4(what.definitionLoc.end_pos);
 }
 
-Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
+Symbol Serializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     Symbol result;
     result.owner = SymbolRef(gs, p.getU4());
     result.name = NameRef(*gs, p.getU4());
@@ -419,7 +417,7 @@ Symbol GlobalStateSerializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     return result;
 }
 
-GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
+Serializer::Pickler Serializer::pickle(const GlobalState &gs) {
     Pickler result;
     result.putU4(VERSION);
     result.putU4(gs.files.size());
@@ -433,7 +431,7 @@ GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
 
     result.putU4(gs.names.size());
     i = -1;
-    for (Name &n : gs.names) {
+    for (const Name &n : gs.names) {
         ++i;
         if (i != 0) {
             pickle(result, n);
@@ -441,12 +439,12 @@ GlobalStateSerializer::Pickler GlobalStateSerializer::pickle(GlobalState &gs) {
     }
 
     result.putU4(gs.symbols.size());
-    for (Symbol &s : gs.symbols) {
+    for (const Symbol &s : gs.symbols) {
         pickle(result, s);
     }
 
     result.putU4(gs.names_by_hash.size());
-    for (auto &s : gs.names_by_hash) {
+    for (const auto &s : gs.names_by_hash) {
         result.putU4(s.first);
         result.putU4(s.second);
     }
@@ -461,7 +459,7 @@ int nearestPowerOf2(int from) {
     return i;
 }
 
-void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
+void Serializer::unpickleGS(UnPickler &p, GlobalState &result) {
     if (p.getU4() != VERSION) {
         Error::raise("Payload version mismatch");
     }
@@ -475,6 +473,8 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash(move(result.names_by_hash));
     names_by_hash.clear();
 
+    result.trace("Reading files");
+
     int filesSize = p.getU4();
     files.reserve(filesSize);
     for (int i = 0; i < filesSize; i++) {
@@ -484,6 +484,8 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
             files.emplace_back(unpickleFile(p));
         }
     }
+
+    result.trace("Reading names");
 
     int namesSize = p.getU4();
     ENFORCE(namesSize > 0);
@@ -498,12 +500,16 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
         }
     }
 
+    result.trace("Reading symbols");
+
     int symbolSize = p.getU4();
     ENFORCE(symbolSize > 0);
     symbols.reserve(symbolSize);
     for (int i = 0; i < symbolSize; i++) {
         symbols.emplace_back(unpickleSymbol(p, &result));
     }
+
+    result.trace("Reading name table");
 
     int namesByHashSize = p.getU4();
     names_by_hash.reserve(names.capacity() * 2);
@@ -512,6 +518,7 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
         auto value = p.getU4();
         names_by_hash.emplace_back(std::make_pair(hash, value));
     }
+    result.trace("moving");
     result.files = move(files);
     result.names = move(names);
     result.symbols = move(symbols);
@@ -519,16 +526,513 @@ void GlobalStateSerializer::unpickleGS(UnPickler &p, GlobalState &result) {
     result.sanityCheck();
 }
 
-std::vector<u1> GlobalStateSerializer::store(GlobalState &gs) {
+std::vector<u1> Serializer::store(GlobalState &gs) {
     Pickler p = pickle(gs);
-    return p.result();
+    return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
 }
 
-void GlobalStateSerializer::load(GlobalState &gs, const u1 *const data) {
+void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
+    gs.trace("Starting global state deserialization");
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
     UnPickler p(data);
+    gs.trace("Decompression done");
     unpickleGS(p, gs);
+    gs.trace("Done reading GS");
+}
+
+template <class T> void pickleTree(Serializer::Pickler &p, std::unique_ptr<T> &t) {
+    T *raw = t.get();
+    std::unique_ptr<ast::Expression> tmp(t.release());
+    Serializer::pickle(p, tmp);
+    t.reset(raw);
+    tmp.release();
+}
+
+void pickleAstHeader(Serializer::Pickler &p, u1 tag, ast::Expression *tree) {
+    p.putU1(tag);
+    p.putU4(tree->loc.begin_pos);
+    p.putU4(tree->loc.end_pos);
+}
+
+void Serializer::pickle(Pickler &p, const std::unique_ptr<ast::Expression> &what) {
+    if (what == nullptr) {
+        p.putU1(1);
+        return;
+    }
+
+    typecase(what.get(),
+             [&](ast::Send *s) {
+                 pickleAstHeader(p, 2, s);
+                 p.putU4(s->fun._id);
+                 p.putU4(s->flags);
+                 p.putU4(s->args.size());
+                 pickle(p, s->recv);
+                 pickleTree(p, s->block);
+                 for (auto &arg : s->args) {
+                     pickle(p, arg);
+                 }
+             },
+             [&](ast::Block *a) {
+                 pickleAstHeader(p, 3, a);
+                 p.putU4(a->symbol._id);
+                 p.putU4(a->args.size());
+                 pickle(p, a->body);
+                 for (auto &arg : a->args) {
+                     pickle(p, arg);
+                 };
+             },
+             [&](ast::Literal *a) {
+                 pickleAstHeader(p, 4, a);
+                 serialize::Serializer::pickle(p, a->value.get());
+             },
+             [&](ast::While *a) {
+                 pickleAstHeader(p, 5, a);
+                 pickle(p, a->cond);
+                 pickle(p, a->body);
+             },
+             [&](ast::Return *a) {
+                 pickleAstHeader(p, 6, a);
+                 pickle(p, a->expr);
+             },
+             [&](ast::If *a) {
+                 pickleAstHeader(p, 7, a);
+                 pickle(p, a->cond);
+                 pickle(p, a->thenp);
+                 pickle(p, a->elsep);
+             },
+
+             [&](ast::ConstantLit *a) {
+                 pickleAstHeader(p, 8, a);
+                 p.putU4(a->cnst._id);
+                 pickle(p, a->scope);
+             },
+             [&](ast::Ident *a) {
+                 pickleAstHeader(p, 9, a);
+                 p.putU4(a->symbol._id);
+             },
+             [&](ast::Local *a) {
+                 pickleAstHeader(p, 10, a);
+                 p.putU4(a->localVariable._name._id);
+                 p.putU4(a->localVariable.unique);
+             },
+             [&](ast::Self *a) {
+                 pickleAstHeader(p, 11, a);
+                 p.putU4(a->claz._id);
+             },
+             [&](ast::Assign *a) {
+                 pickleAstHeader(p, 12, a);
+                 pickle(p, a->lhs);
+                 pickle(p, a->rhs);
+             },
+             [&](ast::InsSeq *a) {
+                 pickleAstHeader(p, 13, a);
+                 p.putU4(a->stats.size());
+                 pickle(p, a->expr);
+                 for (auto &st : a->stats) {
+                     pickle(p, st);
+                 }
+             },
+
+             [&](ast::Next *a) {
+                 pickleAstHeader(p, 14, a);
+                 pickle(p, a->expr);
+             },
+
+             [&](ast::Break *a) {
+                 pickleAstHeader(p, 15, a);
+                 pickle(p, a->expr);
+             },
+
+             [&](ast::Retry *a) { pickleAstHeader(p, 16, a); },
+
+             [&](ast::Hash *h) {
+                 pickleAstHeader(p, 17, h);
+                 ENFORCE(h->values.size() == h->keys.size());
+                 p.putU4(h->values.size());
+                 for (auto &v : h->values) {
+                     pickle(p, v);
+                 }
+                 for (auto &k : h->keys) {
+                     pickle(p, k);
+                 }
+             },
+
+             [&](ast::Array *a) {
+                 pickleAstHeader(p, 18, a);
+                 p.putU4(a->elems.size());
+                 for (auto &e : a->elems) {
+                     pickle(p, e);
+                 }
+             },
+
+             [&](ast::Cast *c) {
+                 pickleAstHeader(p, 19, c);
+                 p.putU4(c->cast._id);
+                 serialize::Serializer::pickle(p, c->type.get());
+                 pickle(p, c->arg);
+             },
+
+             [&](ast::EmptyTree *n) { pickleAstHeader(p, 20, n); },
+             [&](ast::ClassDef *c) {
+                 pickleAstHeader(p, 21, c);
+                 p.putU1(c->kind);
+                 p.putU4(c->symbol._id);
+                 p.putU4(c->ancestors.size());
+                 p.putU4(c->singleton_ancestors.size());
+                 p.putU4(c->rhs.size());
+                 pickle(p, c->name);
+                 for (auto &anc : c->ancestors) {
+                     pickle(p, anc);
+                 }
+                 for (auto &anc : c->singleton_ancestors) {
+                     pickle(p, anc);
+                 }
+                 for (auto &anc : c->rhs) {
+                     pickle(p, anc);
+                 }
+             },
+             [&](ast::MethodDef *c) {
+                 pickleAstHeader(p, 22, c);
+                 p.putU1(c->isSelf);
+                 p.putU4(c->name._id);
+                 p.putU4(c->symbol._id);
+                 p.putU4(c->args.size());
+                 pickle(p, c->rhs);
+                 for (auto &a : c->args) {
+                     pickle(p, a);
+                 }
+             },
+             [&](ast::Rescue *a) {
+                 pickleAstHeader(p, 23, a);
+                 p.putU4(a->rescueCases.size());
+                 pickle(p, a->ensure);
+                 pickle(p, a->else_);
+                 pickle(p, a->body);
+                 for (auto &rc : a->rescueCases) {
+                     pickleTree(p, rc);
+                 }
+             },
+             [&](ast::RescueCase *a) {
+                 pickleAstHeader(p, 24, a);
+                 p.putU4(a->exceptions.size());
+                 pickle(p, a->var);
+                 pickle(p, a->body);
+                 for (auto &ex : a->exceptions) {
+                     pickle(p, ex);
+                 }
+             },
+             [&](ast::RestArg *a) {
+                 pickleAstHeader(p, 25, a);
+                 pickleTree(p, a->expr);
+             },
+             [&](ast::KeywordArg *a) {
+                 pickleAstHeader(p, 26, a);
+                 pickleTree(p, a->expr);
+             },
+             [&](ast::ShadowArg *a) {
+                 pickleAstHeader(p, 27, a);
+                 pickleTree(p, a->expr);
+             },
+             [&](ast::BlockArg *a) {
+                 pickleAstHeader(p, 28, a);
+                 pickleTree(p, a->expr);
+             },
+             [&](ast::OptionalArg *a) {
+                 pickleAstHeader(p, 29, a);
+                 pickleTree(p, a->expr);
+                 pickle(p, a->default_);
+             },
+             [&](ast::Yield *a) {
+                 pickleAstHeader(p, 30, a);
+                 pickle(p, a->expr);
+             },
+             [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 31, a); },
+             [&](ast::HashSplat *a) {
+                 pickleAstHeader(p, 32, a);
+                 pickle(p, a->arg);
+             },
+             [&](ast::ArraySplat *a) {
+                 pickleAstHeader(p, 33, a);
+                 pickle(p, a->arg);
+             },
+             [&](ast::ConstDef *a) {
+                 pickleAstHeader(p, 34, a);
+                 p.putU4(a->symbol._id);
+                 pickle(p, a->rhs);
+             },
+             [&](ast::UnresolvedIdent *a) {
+                 pickleAstHeader(p, 35, a);
+                 p.putU1((int)a->kind);
+                 p.putU4(a->name._id);
+             },
+
+             [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
+}
+
+std::unique_ptr<ast::Expression> Serializer::unpickleExpr(serialize::Serializer::UnPickler &p, GlobalState &gs,
+                                                          FileRef file) {
+    u1 kind = p.getU1();
+    if (kind == 1) {
+        return nullptr;
+    }
+    core::Loc loc;
+    loc.file = file;
+    loc.begin_pos = p.getU4();
+    loc.end_pos = p.getU4();
+
+    switch (kind) {
+        case 2: {
+            NameRef fun = unpickleNameRef(p, gs);
+            auto flags = p.getU4();
+            auto argsSize = p.getU4();
+            auto recv = unpickleExpr(p, gs, file);
+            auto blkt = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Block> blk;
+            if (blkt) {
+                blk.reset(static_cast<ast::Block *>(blkt.release()));
+            }
+            ast::Send::ARGS_store store(argsSize);
+            for (auto &expr : store) {
+                expr = unpickleExpr(p, gs, file);
+            }
+            return ast::MK::Send(loc, move(recv), fun, move(store), flags, move(blk));
+        }
+        case 3: {
+            SymbolRef sym(gs, p.getU4());
+            auto argsSize = p.getU4();
+            auto body = unpickleExpr(p, gs, file);
+            ast::MethodDef::ARGS_store args(argsSize);
+            for (auto &arg : args) {
+                arg = unpickleExpr(p, gs, file);
+            }
+            return ast::MK::Block(loc, move(body), sym, move(args));
+        }
+        case 4: {
+            auto tpe = unpickleType(p, &gs);
+            return ast::MK::Literal(loc, tpe);
+        }
+        case 5: {
+            auto cond = unpickleExpr(p, gs, file);
+            auto body = unpickleExpr(p, gs, file);
+            return ast::MK::While(loc, move(cond), move(body));
+        }
+        case 6: {
+            auto expr = unpickleExpr(p, gs, file);
+            return ast::MK::Return(loc, move(expr));
+        }
+        case 7: {
+            auto cond = unpickleExpr(p, gs, file);
+            auto thenp = unpickleExpr(p, gs, file);
+            auto elsep = unpickleExpr(p, gs, file);
+            return ast::MK::If(loc, move(cond), move(thenp), move(elsep));
+        }
+        case 8: {
+            NameRef cnst = unpickleNameRef(p, gs);
+            auto scope = unpickleExpr(p, gs, file);
+            return ast::MK::Constant(loc, move(scope), cnst);
+        }
+        case 9: {
+            SymbolRef sym(gs, p.getU4());
+            return ast::MK::Ident(loc, sym);
+        }
+        case 10: {
+            NameRef nm = unpickleNameRef(p, gs);
+            auto unique = p.getU4();
+            core::LocalVariable lv(nm, unique);
+            return std::make_unique<ast::Local>(loc, lv);
+        }
+        case 11: {
+            SymbolRef clazId(gs, p.getU4());
+            return std::make_unique<ast::Self>(loc, clazId);
+        }
+        case 12: {
+            auto lhs = unpickleExpr(p, gs, file);
+            auto rhs = unpickleExpr(p, gs, file);
+            return ast::MK::Assign(loc, move(lhs), move(rhs));
+        }
+        case 13: {
+            auto insSize = p.getU4();
+            auto expr = unpickleExpr(p, gs, file);
+            ast::InsSeq::STATS_store stats(insSize);
+            for (auto &stat : stats) {
+                stat = unpickleExpr(p, gs, file);
+            }
+            return ast::MK::InsSeq(loc, move(stats), move(expr));
+        }
+        case 14: {
+            auto expr = unpickleExpr(p, gs, file);
+            return ast::MK::Next(loc, move(expr));
+        }
+        case 15: {
+            auto expr = unpickleExpr(p, gs, file);
+            return ast::MK::Break(loc, move(expr));
+        }
+        case 16: {
+            return std::make_unique<ast::Retry>(loc);
+        }
+        case 17: {
+            auto sz = p.getU4();
+            ast::Hash::ENTRY_store keys(sz);
+            ast::Hash::ENTRY_store values(sz);
+            for (auto &value : values) {
+                value = unpickleExpr(p, gs, file);
+            }
+            for (auto &key : keys) {
+                key = unpickleExpr(p, gs, file);
+            }
+            return ast::MK::Hash(loc, move(keys), move(values));
+        }
+        case 18: {
+            auto sz = p.getU4();
+            ast::Array::ENTRY_store elems(sz);
+            for (auto &elem : elems) {
+                elem = unpickleExpr(p, gs, file);
+            }
+            return ast::MK::Array(loc, move(elems));
+        }
+        case 19: {
+            NameRef kind(gs, p.getU4());
+            auto type = unpickleType(p, &gs);
+            auto arg = unpickleExpr(p, gs, file);
+            return std::make_unique<ast::Cast>(loc, move(type), move(arg), kind);
+        }
+        case 20: {
+            return ast::MK::EmptyTree(loc);
+        }
+        case 21: {
+            auto kind = p.getU1();
+            SymbolRef symbol(gs, p.getU4());
+            auto ancestorsSize = p.getU4();
+            auto singletonAncestorsSize = p.getU4();
+            auto rhsSize = p.getU4();
+            auto name = unpickleExpr(p, gs, file);
+            ast::ClassDef::ANCESTORS_store ancestors(ancestorsSize);
+            for (auto &anc : ancestors) {
+                anc = unpickleExpr(p, gs, file);
+            }
+            ast::ClassDef::ANCESTORS_store singletonAncestors(singletonAncestorsSize);
+            for (auto &sanc : singletonAncestors) {
+                sanc = unpickleExpr(p, gs, file);
+            }
+            ast::ClassDef::RHS_store rhs(rhsSize);
+            for (auto &r : rhs) {
+                r = unpickleExpr(p, gs, file);
+            }
+            auto ret = ast::MK::Class(loc, move(name), move(ancestors), move(rhs), (ast::ClassDefKind)kind);
+            ret->singleton_ancestors = move(singletonAncestors);
+            ret->symbol = symbol;
+            return ret;
+        }
+        case 22: {
+            auto isSelf = p.getU1();
+            NameRef name = unpickleNameRef(p, gs);
+            SymbolRef symbol(gs, p.getU4());
+            auto argsSize = p.getU4();
+            auto rhs = unpickleExpr(p, gs, file);
+            ast::MethodDef::ARGS_store args(argsSize);
+            for (auto &arg : args) {
+                arg = unpickleExpr(p, gs, file);
+            }
+            auto ret = ast::MK::Method(loc, name, move(args), move(rhs), isSelf);
+            ret->symbol = symbol;
+            return ret;
+        }
+        case 23: {
+            auto rescueCasesSize = p.getU4();
+            auto ensure = unpickleExpr(p, gs, file);
+            auto else_ = unpickleExpr(p, gs, file);
+            auto body_ = unpickleExpr(p, gs, file);
+            ast::Rescue::RESCUE_CASE_store cases(rescueCasesSize);
+            for (auto &case_ : cases) {
+                auto t = unpickleExpr(p, gs, file);
+                case_.reset(static_cast<ast::RescueCase *>(t.release()));
+            }
+            return std::make_unique<ast::Rescue>(loc, move(body_), move(cases), move(else_), move(ensure));
+        }
+        case 24: {
+            auto exceptionsSize = p.getU4();
+            auto var = unpickleExpr(p, gs, file);
+            auto body = unpickleExpr(p, gs, file);
+            ast::RescueCase::EXCEPTION_store exceptions(exceptionsSize);
+            for (auto &ex : exceptions) {
+                ex = unpickleExpr(p, gs, file);
+            }
+            return std::make_unique<ast::RescueCase>(loc, move(exceptions), move(var), move(body));
+        }
+        case 25: {
+            auto tmp = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
+            return std::make_unique<ast::RestArg>(loc, move(ref));
+        }
+        case 26: {
+            auto tmp = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
+            return std::make_unique<ast::KeywordArg>(loc, move(ref));
+        }
+        case 27: {
+            auto tmp = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
+            return std::make_unique<ast::ShadowArg>(loc, move(ref));
+        }
+        case 28: {
+            auto tmp = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
+            return std::make_unique<ast::BlockArg>(loc, move(ref));
+        }
+        case 29: {
+            auto tmp = unpickleExpr(p, gs, file);
+            std::unique_ptr<ast::Reference> ref(static_cast<ast::Reference *>(tmp.release()));
+            auto default_ = unpickleExpr(p, gs, file);
+            return std::make_unique<ast::OptionalArg>(loc, move(ref), move(default_));
+        }
+        case 30: {
+            auto expr = unpickleExpr(p, gs, file);
+            return ast::MK::Yield(loc, move(expr));
+        }
+        case 31: {
+            return std::make_unique<ast::ZSuperArgs>(loc);
+        }
+        case 32: {
+            auto expr = unpickleExpr(p, gs, file);
+            return std::make_unique<ast::HashSplat>(loc, move(expr));
+        }
+        case 33: {
+            auto expr = unpickleExpr(p, gs, file);
+            return std::make_unique<ast::ArraySplat>(loc, move(expr));
+        }
+        case 34: {
+            SymbolRef symbol(gs, p.getU4());
+            auto rhs = unpickleExpr(p, gs, file);
+            return std::make_unique<ast::ConstDef>(loc, symbol, move(rhs));
+        }
+        case 35: {
+            ast::UnresolvedIdent::VarKind kind = (ast::UnresolvedIdent::VarKind)p.getU1();
+            NameRef name = unpickleNameRef(p, gs);
+            return std::make_unique<ast::UnresolvedIdent>(loc, kind, name);
+        }
+    }
+    Error::raise("Not handled {}", kind);
+}
+
+std::unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p) {
+    serialize::Serializer::UnPickler up(p);
+    FileRef fileId(up.getU4());
+    return unpickleExpr(up, gs, fileId);
+}
+
+std::vector<u1> Serializer::store(GlobalState &gs, std::unique_ptr<ast::Expression> &e) {
+    serialize::Serializer::Pickler pickler;
+    pickler.putU4(e->loc.file.id());
+    pickle(pickler, e);
+    return pickler.result(FILE_COMPRESSION_DEGREE);
+}
+
+NameRef Serializer::unpickleNameRef(Serializer::UnPickler &p, GlobalState &gs) {
+    NameRef name(NameRef::WellKnown{}, p.getU4());
+    ENFORCE(name.data(gs).ref(gs) == name);
+    return name;
 }
 } // namespace serialize
+
 } // namespace core
 } // namespace ruby_typer

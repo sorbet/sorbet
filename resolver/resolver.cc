@@ -3,6 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
+#include "core/ErrorQueue.h"
 #include "core/Names/resolver.h"
 #include "core/core.h"
 #include "resolver/resolver.h"
@@ -877,6 +878,7 @@ public:
 
 std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx,
                                                             std::vector<std::unique_ptr<ast::Expression>> trees) {
+    ctx.trace("Resolving constants");
     ResolveConstantsWalk constants(ctx);
     for (auto &tree : trees) {
         tree = ast::TreeMap::apply(ctx, constants, move(tree));
@@ -884,6 +886,7 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
 
+    ctx.trace("Resolving sigs and vars");
     for (auto &tree : trees) {
         tree = ast::TreeMap::apply(ctx, sigs, move(tree));
         tree = ast::TreeMap::apply(ctx, vars, move(tree));
@@ -895,9 +898,11 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
         tree = flatten.addMethods(ctx, move(tree));
     }
 
+    ctx.trace("Finalizing resolution");
     finalizeResolution(ctx.state);
 
     if (debug_mode) {
+        ctx.trace("Sanity checking");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
             tree = ast::TreeMap::apply(ctx, sanity, move(tree));

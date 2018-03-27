@@ -52,15 +52,17 @@ public:
     enum Type {
         PayloadGeneration, // Files marked during --store-state
         Payload,           // Files loaded from the binary payload
-        Untyped,
-        Typed,
+        Normal,
         TombStone,
     };
+
+    bool cachedParseTree = false;
 
     friend class GlobalState;
 
     absl::string_view path() const;
     absl::string_view source() const;
+    absl::string_view hashKey() const;
     Type source_type;
 
     bool isPayload() const;
@@ -70,13 +72,16 @@ public:
     File(const File &other) = delete;
     File() = delete;
     File deepCopy();
+    std::vector<int> &line_breaks() const;
 
 private:
     std::string path_;
     std::string source_;
+    std::string hashKey_;
+    mutable std::shared_ptr<std::vector<int>> line_breaks_;
 
 public:
-    const std::vector<int> line_breaks;
+    bool isTyped;
 };
 } // namespace core
 } // namespace ruby_typer

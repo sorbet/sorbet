@@ -55,7 +55,20 @@ TIMEFILE1=$(mktemp)
 if [ -s "$OUT" ]; then
     exit 1
 fi
+cat "$TIMEFILE1"
 
+CACHE=$(mktemp -d)
+
+/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck --cache-dir="$CACHE" 2>&1 | tee "$OUT"
+if [ -s "$OUT" ]; then
+    exit 1
+fi
+cat "$TIMEFILE1"
+
+/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck --cache-dir="$CACHE" 2>&1 | tee "$OUT"
+if [ -s "$OUT" ]; then
+    exit 1
+fi
 cat "$TIMEFILE1"
 
 if [ "$RECORD_STATS" ]; then

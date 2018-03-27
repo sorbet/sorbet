@@ -103,7 +103,7 @@ public:
 };
 
 namespace serialize {
-class GlobalStateSerializer;
+class Serializer;
 }
 
 class Symbol final {
@@ -492,7 +492,7 @@ public:
     SymbolRef enclosingClass(const GlobalState &gs) const;
 
 private:
-    friend class serialize::GlobalStateSerializer;
+    friend class serialize::Serializer;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

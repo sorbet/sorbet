@@ -10,11 +10,36 @@ namespace ast {
 
 class MK {
 public:
+    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, core::SymbolRef symbol,
+                                        MethodDef::ARGS_store args) {
+        auto blk = std::make_unique<ast::Block>(loc, move(args), move(body));
+        blk->symbol = symbol;
+        return blk;
+    }
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
-                                            Send::ARGS_store args, u4 flags = 0, std::unique_ptr<Block> blk = nullptr) {
+                                            Send::ARGS_store args, u4 flags = 0,
+                                            std::unique_ptr<ast::Block> blk = nullptr) {
         auto send = std::make_unique<ast::Send>(loc, move(recv), fun, move(args), move(blk));
         send->flags = flags;
-        return move(send);
+        return send;
+    }
+
+    static std::unique_ptr<Literal> Literal(core::Loc loc, std::shared_ptr<core::Type> tpe) {
+        auto lit = std::make_unique<ast::Literal>(loc, tpe);
+        return lit;
+    }
+
+    static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Return>(loc, move(expr));
+    }
+    static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Next>(loc, move(expr));
+    }
+    static std::unique_ptr<Expression> Yield(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Yield>(loc, move(expr));
+    }
+    static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
+        return std::make_unique<ast::Break>(loc, move(expr));
     }
 
     static std::unique_ptr<Expression> Send0(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun) {
@@ -92,6 +117,11 @@ public:
         return std::make_unique<ast::If>(loc, move(cond), move(thenp), move(elsep));
     }
 
+    static std::unique_ptr<Expression> While(core::Loc loc, std::unique_ptr<Expression> cond,
+                                             std::unique_ptr<Expression> body) {
+        return std::make_unique<ast::While>(loc, move(cond), move(body));
+    }
+
     static std::unique_ptr<Expression> EmptyTree(core::Loc loc) {
         return std::make_unique<ast::EmptyTree>(loc);
     }
@@ -118,31 +148,31 @@ public:
     }
 
     static std::unique_ptr<Expression> True(core::Loc loc) {
-        return std::make_unique<Literal>(loc, core::Types::trueClass());
+        return std::make_unique<ast::Literal>(loc, core::Types::trueClass());
     }
 
     static std::unique_ptr<Expression> False(core::Loc loc) {
-        return std::make_unique<Literal>(loc, core::Types::falseClass());
+        return std::make_unique<ast::Literal>(loc, core::Types::falseClass());
     }
 
     static std::unique_ptr<Expression> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
-        return std::make_unique<ConstantLit>(loc, move(scope), name);
+        return std::make_unique<ast::ConstantLit>(loc, move(scope), name);
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
-        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(val));
+        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(val));
     }
 
     static std::unique_ptr<Expression> Float(core::Loc loc, double val) {
-        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(val));
+        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(val));
     }
 
     static std::unique_ptr<Expression> Symbol(core::Loc loc, core::NameRef name) {
-        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::Symbol(), name));
+        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::Symbol(), name));
     }
 
     static std::unique_ptr<Expression> String(core::Loc loc, core::NameRef value) {
-        return std::make_unique<Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::String(), value));
+        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::String(), value));
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
@@ -165,6 +195,10 @@ public:
                                            ClassDef::ANCESTORS_store ancestors, ClassDef::RHS_store rhs,
                                            ClassDefKind kind) {
         return std::make_unique<ClassDef>(loc, core::Symbols::todo(), move(name), move(ancestors), move(rhs), kind);
+    }
+
+    static std::unique_ptr<Expression> Array(core::Loc loc, Array::ENTRY_store entries) {
+        return std::make_unique<ast::Array>(loc, move(entries));
     }
 
     static std::unique_ptr<Expression> Hash(core::Loc loc, Hash::ENTRY_store keys, Hash::ENTRY_store values) {
