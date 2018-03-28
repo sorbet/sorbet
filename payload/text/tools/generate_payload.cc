@@ -39,8 +39,10 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "std::vector<std::pair<std::string, std::string>> all() {" << '\n';
     out << "  std::vector<std::pair<std::string, std::string>> result;" << '\n';
     for (auto &file : sourceFiles) {
-        string version = ruby_typer::Version::build_scm_revision;
-        if (version == "0") {
+        string version;
+        if (ruby_typer::Version::isReleaseBuild) {
+            version = ruby_typer::Version::build_scm_revision;
+        } else {
             version = "master";
         }
         string permalink = "https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/" + version + "/" + file;

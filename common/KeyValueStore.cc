@@ -1,10 +1,11 @@
 #include "KeyValueStore.h"
 using namespace std;
 namespace ruby_typer {
-const string VERSION_KEY = "VERSION";
+const string OLD_VERSION_KEY = "VERSION";
+const string VERSION_KEY = "DB_FORMAT_VERSION";
 const size_t MAX_DB_SIZE_BYTES =
     4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
-KeyValueStore::KeyValueStore(int version, string path) : path(path), writerId(this_thread::get_id()) {
+KeyValueStore::KeyValueStore(std::string version, string path) : path(path), writerId(this_thread::get_id()) {
     int rc;
     rc = mdb_env_create(&env);
     if (rc != 0)
@@ -23,18 +24,13 @@ KeyValueStore::KeyValueStore(int version, string path) : path(path), writerId(th
         goto fail;
     readers[writerId] = txn;
     {
-        auto dbVersionPtr = read(VERSION_KEY);
-        int dbVersion;
-        if (dbVersionPtr) {
-            memcpy(&dbVersion, dbVersionPtr, sizeof(dbVersion));
+        if (read(OLD_VERSION_KEY)) { // remove databases that use old(non-string) versioning scheme.
+            clear();
         }
-        if (!dbVersionPtr || dbVersion != version) {
-            if (dbVersionPtr) {
-                clear();
-            }
-            vector<u1> versionVec(sizeof(int) / sizeof(u1));
-            memcpy(versionVec.data(), &version, sizeof(version));
-            write(VERSION_KEY, move(versionVec));
+        auto dbVersion = readString(VERSION_KEY);
+        if (dbVersion != version) {
+            clear();
+            writeString(VERSION_KEY, version);
         }
         return;
     }
@@ -109,6 +105,25 @@ void KeyValueStore::clear() {
     if (rc != 0) {
         throw invalid_argument("failed to clear the database");
     }
+}
+
+absl::string_view KeyValueStore::readString(const absl::string_view key) {
+    auto rawData = read(key);
+    if (!rawData) {
+        return absl::string_view();
+    }
+    size_t sz;
+    memcpy(&sz, rawData, sizeof(sz));
+    absl::string_view result(((const char *)rawData) + sizeof(sz), sz);
+    return result;
+}
+
+void KeyValueStore::writeString(const absl::string_view key, std::string value) {
+    vector<u1> rawData(value.size() + sizeof(size_t));
+    size_t sz = value.size();
+    memcpy(rawData.data(), &sz, sizeof(sz));
+    memcpy(rawData.data() + sizeof(sz), value.data(), sz);
+    write(key, move(rawData));
 }
 
 } // namespace ruby_typer

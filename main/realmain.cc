@@ -874,8 +874,13 @@ int realmain(int argc, char **argv) {
         return 0;
     }
     if (options["version"].as<bool>()) {
-        console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
-                      Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
+        if (Version::isReleaseBuild) {
+            console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
+                          Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
+        } else {
+            console->info("Ruby Typer non-release build. Binary format version {}",
+                          core::serialize::Serializer::VERSION);
+        }
         return 0;
     }
     if (options.count("e") == 0 && files.empty()) {
@@ -951,7 +956,7 @@ int realmain(int argc, char **argv) {
     tracer->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        kvstore = std::make_unique<KeyValueStore>(core::serialize::Serializer::VERSION, opts.cacheDir);
+        kvstore = std::make_unique<KeyValueStore>(Version::build_scm_revision, opts.cacheDir);
     }
     createInitialGlobalState(gs, opts, kvstore);
     if (options.count("q") != 0) {

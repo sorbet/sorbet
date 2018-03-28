@@ -13,6 +13,7 @@ public:
     static const std::string build_scm_status;
     static const std::chrono::system_clock::time_point build_timestamp;
     static const std::string build_timestamp_string;
+    static const bool isReleaseBuild;
 };
 } // namespace ruby_typer
 
