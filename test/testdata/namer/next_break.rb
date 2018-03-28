@@ -5,10 +5,10 @@ class Test
   def test_next_break
     each do
       if rand
-        next Foo # error: unknown constant
+        next Foo # error: Unable to resolve constant
       end
       if rand
-        break Bar # error: unknown constant
+        break Bar # error: Unable to resolve constant
       end
     end
   end

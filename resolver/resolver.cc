@@ -47,7 +47,7 @@ private:
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Stubbing out unknown constant");
+                    e.setHeader("Unable to resolve constant");
 
                     // Stub out the constant only if we actually reported an
                     // error. Otherwise, we create an order dependency where a
@@ -79,7 +79,7 @@ private:
 
                 if (resolved.data(ctx).resultType.get() == nullptr || !resolved.data(ctx).resultType->isDynamic()) {
                     if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
-                        e.setHeader("Stubbing out unknown constant");
+                        e.setHeader("Unable to resolve constant");
 
                         // See comment above about stubbing
                         result = ctx.state.enterClassSymbol(c->loc, resolved, c->cnst);

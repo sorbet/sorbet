@@ -20,7 +20,7 @@ class Outer2
 
   class Inner1::Inner2
     C
-    A # error: Stubbing out unknown constant
+    A # error: Unable to resolve constant
   end
 
   class Other < Inner1::Inner2

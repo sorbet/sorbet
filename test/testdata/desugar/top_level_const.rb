@@ -1,2 +1,2 @@
 # @typed
-::TopLevelConst # error: unknown constant
+::TopLevelConst # error: Unable to resolve constant

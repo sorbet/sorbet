@@ -1,7 +1,7 @@
 # @typed
 def foo
     begin
-    rescue NotAClass => e # error: Stubbing out unknown constant
+    rescue NotAClass => e # error: Unable to resolve constant
     else
     end
 end

@@ -1,6 +1,6 @@
 # @typed
 require_relative '../../../extn'
-Opus::AutogenLoader.init(__FILE__) # error: Stubbing out unknown constant
+Opus::AutogenLoader.init(__FILE__) # error: Unable to resolve constant
 
 module Opus::CIBot::Gerald
 
@@ -15,13 +15,13 @@ module Opus::CIBot::Gerald
   end
 
   class Matcher
-    include Chalk::Log # error: Stubbing out unknown constant
+    include Chalk::Log # error: Unable to resolve constant
 
     MAX_AFFECTED_FILES = 100
 
     def initialize
       @rules, invalid_rules =  # error: undeclared variable
-              Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).  # error: Stubbing out unknown constant
+              Opus::CIBot::Model::GeraldRule.query_by(:deleted_at_is_nil).load_all({}).  # error: Unable to resolve constant
                 partition(&:valid?)
       if !invalid_rules.empty?
         invalid_rule_ids = invalid_rules.map(&:token).join(',')
@@ -144,7 +144,7 @@ module Opus::CIBot::Gerald
     end
 
     def changed_openapi?
-      changed_files.include?(Opus::CIBot::Actions::OpenAPI::SPEC_PATH) # error: Stubbing out unknown constant
+      changed_files.include?(Opus::CIBot::Actions::OpenAPI::SPEC_PATH) # error: Unable to resolve constant
     end
 
     private def parse(diff)

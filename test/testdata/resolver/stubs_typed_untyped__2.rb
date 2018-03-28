@@ -1,3 +1,3 @@
 # @typed
-Bar # error: Stubbing out unknown constant
-Foo::Bar # error: Stubbing out unknown constant
+Bar # error: Unable to resolve constant
+Foo::Bar # error: Unable to resolve constant
