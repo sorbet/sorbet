@@ -15,6 +15,13 @@ extern const char *dclass_strings[];
 using namespace std;
 
 class DiagnosticToError {
+    static u4 translatePos(size_t pos, u4 max_off) {
+        if (pos == 0) {
+            return pos;
+        }
+        return min((u4)(pos - 1), max_off);
+    }
+
 public:
     static void run(core::GlobalState &gs, core::FileRef file, ruby_parser::diagnostics_t diagnostics) {
         if (diagnostics.empty()) {
@@ -39,8 +46,8 @@ public:
             }
             std::string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
-            Loc loc(file, min((u4)(diag.location().begin_pos - 1), max_off),
-                    min((u4)(diag.location().end_pos - 1), max_off));
+            Loc loc(file, translatePos(diag.location().begin_pos, max_off),
+                    translatePos(diag.location().end_pos, max_off));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader(msg, level, diag.data());
             }

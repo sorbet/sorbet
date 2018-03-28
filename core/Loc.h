@@ -23,7 +23,7 @@ public:
     Loc join(Loc other);
 
     Loc() : file(), begin_pos(-1), end_pos(-1){};
-    Loc(FileRef file, u4 begin, u4 end) : file(file), begin_pos(begin), end_pos(end){};
+    Loc(FileRef file, u4 begin, u4 end);
 
     Loc &operator=(const Loc &rhs) = default;
     Loc &operator=(Loc &&rhs) = default;

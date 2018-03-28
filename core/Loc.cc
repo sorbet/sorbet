@@ -10,6 +10,10 @@ namespace core {
 
 using namespace std;
 
+Loc::Loc(FileRef file, u4 begin, u4 end) : file(file), begin_pos(begin), end_pos(end) {
+    ENFORCE(begin_pos <= end_pos);
+}
+
 Loc Loc::join(Loc other) {
     if (this->is_none()) {
         return other;
