@@ -126,6 +126,9 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
 }
 
 ErrorBuilder::~ErrorBuilder() {
+    if (!willBuild) {
+        return;
+    }
     unique_ptr<ComplexError> err =
         make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
     if (this->what == errors::Internal::InternalError) {

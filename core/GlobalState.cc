@@ -952,10 +952,7 @@ int GlobalState::totalErrors() const {
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
-    core::histogramAdd("error", error->what.code, 1);
-    if (!shouldReportErrorOn(error->loc, error->what)) {
-        return;
-    }
+    ENFORCE(shouldReportErrorOn(error->loc, error->what));
     ErrorQueueMessage msg;
     msg.kind = ErrorQueueMessage::Kind::Error;
     msg.whatFile = error->loc.file;
@@ -973,7 +970,12 @@ void GlobalState::flushErrors() {
 }
 
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
-    return ErrorBuilder(*this, shouldReportErrorOn(loc, what), loc, what);
+    bool report = shouldReportErrorOn(loc, what);
+    if (report) {
+        core::histogramAdd("error", what.code, 1);
+    }
+    report = report && !this->silenceErrors;
+    return ErrorBuilder(*this, report, loc, what);
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
@@ -991,10 +993,10 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
         case errors::Resolver::InvalidDeclareVariables.code:
         case errors::Resolver::DuplicateVariableDeclaration.code:
             // These are shown even for untyped source
-            return !this->silenceErrors;
+            return true;
 
         default:
-            return !this->silenceErrors && isTyped;
+            return isTyped;
     }
 }
 
