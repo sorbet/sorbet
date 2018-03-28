@@ -11,5 +11,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method baz7 (cond) @ test/testdata/infer/infer1.rb:38
       argument cond<> @ test/testdata/infer/infer1.rb:38
     method baz8 () @ test/testdata/infer/infer1.rb:46
-  method <static-init>$9 () @ test/testdata/infer/infer1.rb:2
+  method <static-init>$10 () @ test/testdata/infer/infer1.rb:2
 

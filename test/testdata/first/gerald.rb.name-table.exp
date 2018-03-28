@@ -103,5 +103,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       class <constant:Model> () -> untyped @ test/testdata/first/gerald.rb:24
       class <singleton class:<constant:Gerald>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
     class <singleton class:<constant:CIBot>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
-  method <static-init>$9 () @ test/testdata/first/gerald.rb:2
+  method <static-init>$10 () @ test/testdata/first/gerald.rb:2
 

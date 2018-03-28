@@ -3,7 +3,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:B>$1 < ::<constant:Object> () -> <Class:<constant:B>> @ test/testdata/namer/class_and_alias.rb:6
   class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/class_and_alias.rb:3
   class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/class_and_alias.rb:6
-  method <static-init>$9 () @ test/testdata/namer/class_and_alias.rb:2
+  method <static-init>$10 () @ test/testdata/namer/class_and_alias.rb:2
   static-field <constant:A>$1 -> Integer(91) @ test/testdata/namer/class_and_alias.rb:2
   static-field <constant:B> -> Integer(91) @ test/testdata/namer/class_and_alias.rb:8
 

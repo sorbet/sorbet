@@ -3,7 +3,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method some_method (array) @ test/testdata/desugar/multi_assign.rb:5
       argument array<> @ test/testdata/desugar/multi_assign.rb:5
   class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> () @ test/testdata/desugar/multi_assign.rb:4
-  method <static-init>$9 () @ test/testdata/desugar/multi_assign.rb:2
+  method <static-init>$10 () @ test/testdata/desugar/multi_assign.rb:2
   static-field <constant:A> -> untyped @ test/testdata/desugar/multi_assign.rb:2
   static-field <constant:B> -> untyped @ test/testdata/desugar/multi_assign.rb:2
   static-field <constant:C> -> untyped @ test/testdata/desugar/multi_assign.rb:2

@@ -3,5 +3,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:B> < ::<constant:Object> () -> <Class:B> @ test/testdata/deviations/superclass_implicit.rb:8
   class <singleton class:<constant:A>> < ::<singleton class:<constant:B>> () @ test/testdata/deviations/superclass_implicit.rb:11
   class <singleton class:<constant:B>> < ::<singleton class:<constant:Object>> () @ test/testdata/deviations/superclass_implicit.rb:8
-  method <static-init>$9 () @ test/testdata/deviations/superclass_implicit.rb:8
+  method <static-init>$10 () @ test/testdata/deviations/superclass_implicit.rb:8
 

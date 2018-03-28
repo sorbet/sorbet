@@ -1,19 +1,19 @@
 digraph "module_function.rb"{
-subgraph "cluster_#<static-init>$9" {
-    label = "#<static-init>$9";
+subgraph "cluster_#<static-init>$10" {
+    label = "#<static-init>$10";
     color = blue;
-    "bb#<static-init>$9_0" [shape = invhouse];
-    "bb#<static-init>$9_1" [shape = parallelogram];
+    "bb#<static-init>$10_0" [shape = invhouse];
+    "bb#<static-init>$10_1" [shape = parallelogram];
 
-    "bb#<static-init>$9_0" [label = "block[id=0]()
+    "bb#<static-init>$10_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
-    "bb#<static-init>$9_1" [label = "block[id=1]()
+    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>$10_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$9_1" -> "bb#<static-init>$9_1" [style="bold"];
+    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
 }
 
 subgraph "cluster_::<constant:Funcs>#f" {

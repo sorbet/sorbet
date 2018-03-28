@@ -39,7 +39,7 @@ ClassDef{
 --- dsl-tree-raw end ---
 --- name-table start ---
 class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  method <static-init>$9 () @ -e:1
+  method <static-init>$10 () @ -e:1
 
 --- name-table end ---
 --- name-table-full start ---
@@ -1860,11 +1860,11 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method untrust () -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method zero? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:I> -> Complex @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-  class <constant:Configatron> < ::<constant:Object> () -> <Class:Configatron> @ ???
-    class <constant:RootStore> () -> <Class:Configatron::RootStore> @ ???
-    class <constant:Store> () -> <Class:Configatron::Store> @ ???
-    class <singleton class:<constant:RootStore>> < ::<constant:Module> () @ ???
-    class <singleton class:<constant:Store>> < ::<constant:Module> () @ ???
+  class <constant:Configatron> < ::<constant:Object> (<constant:BasicObject>) -> <Class:Configatron> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/configatron.rbi#L__LINE__
+    class <constant:RootStore> < ::<constant:BasicObject> () -> <Class:Configatron::RootStore> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/configatron.rbi#L__LINE__
+    class <constant:Store> < ::<constant:BasicObject> () -> <Class:Configatron::Store> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/configatron.rbi#L__LINE__
+    class <singleton class:<constant:RootStore>> < ::<singleton class:<constant:BasicObject>> () @ ???
+    class <singleton class:<constant:Store>> < ::<singleton class:<constant:BasicObject>> () @ ???
   class <constant:Coverage> (<constant:BasicObject>) -> <Class:Coverage> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Data> < ::<constant:Object> () -> <Class:Data> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> Data @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -11987,18 +11987,18 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   class <singleton class:<constant:Warning>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:ZeroDivisionError>> < ::<singleton class:<constant:StandardError>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   method <static-init>$1 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-  method <static-init>$3 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-  method <static-init>$4 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
-  method <static-init>$5 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
-  method <static-init>$7 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
-  method <static-init>$8 () @ -e:1
+  method <static-init>$10 () @ -e:1
+  method <static-init>$4 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  method <static-init>$5 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
+  method <static-init>$6 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
+  method <static-init>$8 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
   method <static-init>$9 () @ -e:1
   static-field <constant:M> -> AliasType { symbol = ::<constant:Opus>::<constant:DB>::<constant:Model> } @ ???
 
 --- name-table-full end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$9>()
+  def self.<static-init><<static-init>$10>()
     1
   end
 end
@@ -12010,7 +12010,7 @@ ClassDef{
   rhs = [
     MethodDef{
       self = 1
-      name = <static-init><<static-init>$9>
+      name = <static-init><<static-init>$10>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -12019,22 +12019,22 @@ ClassDef{
 --- name-tree-raw end ---
 --- cfg start ---
 digraph "-e"{
-subgraph "cluster_#<static-init>$9" {
-    label = "#<static-init>$9";
+subgraph "cluster_#<static-init>$10" {
+    label = "#<static-init>$10";
     color = blue;
-    "bb#<static-init>$9_0" [shape = invhouse];
-    "bb#<static-init>$9_1" [shape = parallelogram];
+    "bb#<static-init>$10_0" [shape = invhouse];
+    "bb#<static-init>$10_1" [shape = parallelogram];
 
-    "bb#<static-init>$9_0" [label = "block[id=0]()
+    "bb#<static-init>$10_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
-    "bb#<static-init>$9_1" [label = "block[id=1]()
+    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>$10_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$9_1" -> "bb#<static-init>$9_1" [style="bold"];
+    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
 }
 
 }
@@ -12042,13 +12042,13 @@ subgraph "cluster_#<static-init>$9" {
 --- cfg end ---
 --- cfg-raw start ---
 digraph "-e"{
-subgraph "cluster_#<static-init>$9" {
-    label = "#<static-init>$9";
+subgraph "cluster_#<static-init>$10" {
+    label = "#<static-init>$10";
     color = blue;
-    "bb#<static-init>$9_0" [shape = invhouse];
-    "bb#<static-init>$9_1" [shape = parallelogram];
+    "bb#<static-init>$10_0" [shape = invhouse];
+    "bb#<static-init>$10_1" [shape = parallelogram];
 
-    "bb#<static-init>$9_0" [label = "block[id=0]()
+    "bb#<static-init>$10_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 dead=1
@@ -12058,11 +12058,11 @@ dead=1
 
 <unconditional>"];
 
-    "bb#<static-init>$9_0" -> "bb#<static-init>$9_1" [style="bold"];
-    "bb#<static-init>$9_1" [label = "block[id=1]()
+    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>$10_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$9_1" -> "bb#<static-init>$9_1" [style="bold"];
+    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
 }
 
 }
