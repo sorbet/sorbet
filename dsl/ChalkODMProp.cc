@@ -101,22 +101,36 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     unique_ptr<ast::Expression> foreign;
     core::NameRef name = core::NameRef::noName();
 
-    if (send->fun == core::Names::optional()) {
-        isOptional = true;
-    } else if (send->fun == core::Names::const_()) {
-        isImmutable = true;
-    } else if (send->fun == core::Names::prop()) {
-        // Nothing special
-    } else if (send->fun == core::Names::token_prop() || send->fun == core::Names::timestamped_token_prop()) {
-        isNilable = false;
-        name = core::Names::token();
-        type = ast::MK::Ident(send->loc, core::Symbols::String());
-    } else if (send->fun == core::Names::created_prop()) {
-        isNilable = false;
-        name = core::Names::created();
-        type = ast::MK::Ident(send->loc, core::Symbols::Float());
-    } else {
-        return empty;
+    switch (send->fun._id) {
+        case core::Names::prop()._id:
+            // Nothing special
+            break;
+        case core::Names::optional()._id:
+            isOptional = true;
+            break;
+        case core::Names::const_()._id:
+            isImmutable = true;
+            break;
+        case core::Names::token_prop()._id:
+        case core::Names::timestamped_token_prop()._id:
+            isNilable = false;
+            name = core::Names::token();
+            type = ast::MK::Ident(send->loc, core::Symbols::String());
+            break;
+        case core::Names::created_prop()._id:
+            isNilable = false;
+            name = core::Names::created();
+            type = ast::MK::Ident(send->loc, core::Symbols::Float());
+            break;
+        case core::Names::merchant_prop()._id:
+            isNilable = false;
+            isImmutable = true;
+            name = core::Names::merchant();
+            type = ast::MK::Ident(send->loc, core::Symbols::String());
+            break;
+
+        default:
+            return empty;
     }
 
     if ((!name.exists() && send->args.empty()) || send->args.size() > 3) {

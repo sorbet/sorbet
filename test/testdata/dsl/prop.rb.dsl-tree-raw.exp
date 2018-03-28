@@ -2548,6 +2548,56 @@ ClassDef{
             }
           ]
         }
+        ClassDef{
+          name = ConstantLit{
+            scope = EmptyTree
+            cnst = <constant:ShardingProp>
+          }<<constant:<todo sym>>>
+          ancestors = [Ident{
+              symbol = <constant:<todo sym>>
+            }]
+          rhs = [
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Ident{
+                  symbol = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = merchant<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  Ident{
+                    symbol = <constant:String>
+                  }
+                ]
+              }
+            }
+          ]
+        }
       ],
       expr = MethodDef{
         self = 0
@@ -3788,22 +3838,69 @@ ClassDef{
                 }
               ]
             }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:PropHelpers2>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = created=
+              block = nullptr
+              args = [
+                Literal{ value = 0.000000 }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ShardingProp>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = merchant
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
           ],
           expr = Send{
             recv = Send{
               recv = ConstantLit{
                 scope = EmptyTree
-                cnst = <constant:PropHelpers2>
+                cnst = <constant:ShardingProp>
               }
               name = new
               block = nullptr
               args = [
               ]
             }
-            name = created=
+            name = merchant=
             block = nullptr
             args = [
-              Literal{ value = 0.000000 }
+              Literal{ value = "hi" }
             ]
           }
         }

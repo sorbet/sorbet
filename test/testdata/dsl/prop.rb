@@ -57,6 +57,10 @@ class PropHelpers2
   created_prop(immutable: true)
 end
 
+class ShardingProp
+  merchant_prop
+end
+
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
     T.assert_type!(SomeODM.new.foo, String) # error: Argument does not have asserted type
@@ -114,4 +118,7 @@ def main
 
     T.assert_type!(PropHelpers2.new.created, Float)
     PropHelpers2.new.created = 0.0 # error: Method `created=` does not exist
+
+    T.assert_type!(ShardingProp.new.merchant, String)
+    ShardingProp.new.merchant = "hi" # error: Method `merchant=` does not exist
 end

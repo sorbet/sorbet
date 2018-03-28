@@ -285,6 +285,13 @@ class <emptyTree><<constant:<root>>> < ()
         ::<constant:T>.cast(nil, ::<constant:Float>)
       end
     end
+    class <emptyTree>::<constant:ShardingProp><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      self(<constant:<todo sym>>).sig({}).returns(::<constant:String>)
+
+      def merchant<<constant:<todo sym>>>()
+        ::<constant:T>.cast(nil, ::<constant:String>)
+      end
+    end
     def main<<constant:<todo sym>>>()
       begin
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
@@ -330,6 +337,8 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:PropHelpers2>.new().token=(nil)
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:PropHelpers2>.new().created(), <emptyTree>::<constant:Float>)
         <emptyTree>::<constant:PropHelpers2>.new().created=(0.000000)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:ShardingProp>.new().merchant(), <emptyTree>::<constant:String>)
+        <emptyTree>::<constant:ShardingProp>.new().merchant=("hi")
       end
     end
   end

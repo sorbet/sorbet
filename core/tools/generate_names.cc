@@ -139,6 +139,7 @@ NameDef names[] = {
     {"token_prop", DSL},
     {"timestamped_token_prop", DSL},
     {"created_prop", DSL},
+    {"merchant_prop", DSL},
     {"array", DSL},
     {"type", DSL},
     {"optional", DSL},
@@ -148,6 +149,7 @@ NameDef names[] = {
     {"const_", "const", DSL},
     {"token", DSL},
     {"created", DSL},
+    {"merchant", DSL},
 
     {"describe", DSL},
     {"it", DSL},

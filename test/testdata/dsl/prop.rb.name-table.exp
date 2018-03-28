@@ -146,7 +146,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     class <constant:IntegerParam> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/dsl/prop.rb:10
     method <static-init> () @ test/testdata/dsl/prop.rb:2
   class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8351
-    method main () @ test/testdata/dsl/prop.rb:60
+    method main () @ test/testdata/dsl/prop.rb:64
   class <constant:Opus> () -> <Class:Opus> @ ???
     class <constant:Param> () -> untyped @ test/testdata/dsl/prop.rb:11
   class <constant:PropHelpers2> < ::<constant:Object> () -> <Class:PropHelpers2> @ test/testdata/dsl/prop.rb:55
@@ -161,6 +161,8 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
     method token () -> String @ test/testdata/dsl/prop.rb:51
     method token= (arg0) -> String @ test/testdata/dsl/prop.rb:51
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:51
+  class <constant:ShardingProp> < ::<constant:Object> () -> <Class:ShardingProp> @ test/testdata/dsl/prop.rb:60
+    method merchant () -> String @ test/testdata/dsl/prop.rb:61
   class <constant:SomeODM> < ::<constant:Object> () -> <Class:SomeODM> @ test/testdata/dsl/prop.rb:15
     method foo () -> String | NilClass @ test/testdata/dsl/prop.rb:16
     method foo2 () -> String | NilClass @ test/testdata/dsl/prop.rb:19
@@ -174,6 +176,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       argument args<repeated> @ test/testdata/dsl/prop.rb:3
   class <singleton class:<constant:PropHelpers2>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:55
   class <singleton class:<constant:PropHelpers>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:50
+  class <singleton class:<constant:ShardingProp>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:60
   class <singleton class:<constant:SomeODM>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/prop.rb:15
   method <static-init>$9 () @ test/testdata/dsl/prop.rb:2
 
