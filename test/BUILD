@@ -27,14 +27,6 @@ cc_binary(
     ],
 )
 
-filegroup(
-    name = "gerald",
-    srcs = [
-        "testdata/first/gerald.rb",
-    ],
-    visibility = ["//visibility:public"],
-)
-
 cc_test(
     name = "hello-test",
     size = "small",
