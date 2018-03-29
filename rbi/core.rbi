@@ -12039,10 +12039,34 @@ class Time
   def -(arg0); end
 
   sig(
+      arg0: Time,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <(arg0); end
+
+  sig(
+      arg0: Time,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def <=(arg0); end
+
+  sig(
       other: Time,
   )
   .returns(T.nilable(Integer))
   def <=>(other); end
+
+  sig(
+      arg0: Time,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def >(arg0); end
+
+  sig(
+      arg0: Time,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def >=(arg0); end
 
   sig.returns(String)
   def asctime(); end
