@@ -78,9 +78,15 @@ class Date::Infinity < Numeric
 end
 class DateTime < Date
 end
+class Delegator < BasicObject
+end
 module DidYouMean
 end
 class DidYouMean::ClassNameChecker < Object
+end
+class SimpleDelegator < Delegator
+end
+class DidYouMean::ClassNameChecker::ClassName < SimpleDelegator
 end
 module DidYouMean::Correctable
 end

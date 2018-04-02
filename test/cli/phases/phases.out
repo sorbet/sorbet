@@ -2089,11 +2089,12 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         <constant:Elem> = untyped
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  class <constant:Delegator> < ::<constant:BasicObject> () -> <Class:Delegator> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:DidYouMean> (<constant:BasicObject>) -> <Class:DidYouMean> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:ClassNameChecker> < ::<constant:Object> () -> <Class:DidYouMean::ClassNameChecker> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      class <constant:ClassName> () -> <Class:DidYouMean::ClassNameChecker::ClassName> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      class <constant:ClassName> < ::<constant:SimpleDelegator> () -> <Class:DidYouMean::ClassNameChecker::ClassName> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
         static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      class <singleton class:<constant:ClassName>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      class <singleton class:<constant:ClassName>> < ::<singleton class:<constant:SimpleDelegator>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Correctable> (<constant:BasicObject>) -> <Class:DidYouMean::Correctable> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Formatter> < ::<constant:Object> () -> <Class:DidYouMean::Formatter> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Jaro> (<constant:BasicObject>) -> <Class:DidYouMean::Jaro> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8411,6 +8412,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method trust () -> SignalException @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untaint () -> SignalException @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untrust () -> SignalException @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  class <constant:SimpleDelegator> < ::<constant:Delegator> () -> <Class:SimpleDelegator> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:SingleForwardable> (<constant:BasicObject>) -> <Class:SingleForwardable> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:SortedSet>[<constant:Elem>] < ::<constant:Set> () -> <Class:SortedSet> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method add (o) -> AppliedType {
@@ -10320,6 +10322,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<repeated> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
     method xmlschema (arg0) -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
       argument arg0<repeated> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/date.rbi#L__LINE__
+  class <singleton class:<constant:Delegator>> < ::<singleton class:<constant:BasicObject>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:DidYouMean>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:Dir>> < ::<singleton class:<constant:Object>> (<constant:Generic>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method <overload N.1 : []> (pattern, flags, blk) -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -11813,6 +11816,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument arg0<> -> Integer | String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:SignalException>> < ::<singleton class:<constant:Exception>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  class <singleton class:<constant:SimpleDelegator>> < ::<singleton class:<constant:Delegator>> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:SingleForwardable>> < ::<constant:Module> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:SortedSet>> < ::<singleton class:<constant:Set>> (<constant:Generic>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <singleton class:<constant:StandardError>> < ::<singleton class:<constant:Exception>> () @ ???
