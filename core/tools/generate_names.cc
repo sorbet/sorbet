@@ -114,7 +114,7 @@ NameDef names[] = {
 
     {"assertType", "assert_type!", Resolver | CFG | Infer},
     {"cast", DSL | Resolver | CFG | Infer},
-    {"let", Resolver | CFG | Infer},
+    {"let", DSL | Resolver | CFG | Infer},
     {"unsafe", DSL},
     // end T keywords
 
@@ -158,6 +158,8 @@ NameDef names[] = {
 
     {"dslOptional", "dsl_optional", DSL},
     {"dslRequired", "dsl_required", DSL},
+
+    {"wrapInstance", "wrap_instance", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning

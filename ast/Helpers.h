@@ -241,6 +241,11 @@ public:
         return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Nil(loc), move(type));
     }
 
+    static std::unique_ptr<Expression> Let(core::Loc loc, std::unique_ptr<Expression> value,
+                                           std::unique_ptr<Expression> type) {
+        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::let(), move(value), move(type));
+    }
+
     static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {
         return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::unsafe(), move(inner));
     }

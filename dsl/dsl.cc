@@ -2,6 +2,7 @@
 #include "ast/treemap/treemap.h"
 #include "dsl/ChalkODMProp.h"
 #include "dsl/DSLBuilder.h"
+#include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
@@ -72,6 +73,10 @@ public:
             }
         }
         return classDef;
+    }
+
+    unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
+        return InterfaceWrapper::replaceDSL(ctx, move(send));
     }
 
 private:
