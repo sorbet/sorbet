@@ -1,0 +1,22 @@
+begin
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$10>()
+      begin
+        <emptyTree>
+        <emptyTree>
+        T.assert_type!(::<constant:Test>.new(), Test::Mixin)
+        T.assert_type!(::<constant:Test>.new(), Test::Other)
+        T.assert_type!(::<constant:Test>.new(), Other)
+      end
+    end
+  end
+  class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:Test><<constant:Test>> < (::<constant:Other>, ::<constant:Test>::<constant:Mixin>, ::<constant:Test>::<constant:Other>)
+    <emptyTree>
+
+    <emptyTree>
+  end
+  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
+  module <emptyTree>::<constant:Other><<constant:Other>> < ()  end
+  <emptyTree>
+end

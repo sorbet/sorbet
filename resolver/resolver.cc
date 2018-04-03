@@ -143,34 +143,23 @@ public:
         return original;
     }
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
-        nesting_ = move(nesting_->parent);
-
         core::SymbolRef klass = original->symbol;
         if (original->kind == ast::Module && klass.data(ctx).mixins().empty()) {
             klass.data(ctx).mixins().emplace_back(core::Symbols::BasicObject());
         }
 
+        unique_ptr<ast::Expression> *superclass = nullptr;
+
         for (auto &ancst : original->ancestors) {
+            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
+                superclass = &ancst;
+                continue;
+            }
             auto sym = resolveAncestor(ctx, klass, ancst);
             if (!sym.exists()) {
                 continue;
             }
-            if (original->kind == ast::Class && &ancst == &original->ancestors.front()) {
-                // Don't emplace the superclass onto the `mixins` list; See the
-                // comment on Symbol::argumentsOrMixins for some context.
-                if (sym == core::Symbols::todo()) {
-                    // No superclass specified
-                } else if (!klass.data(ctx).superClass.exists() ||
-                           klass.data(ctx).superClass == core::Symbols::todo() || klass.data(ctx).superClass == sym) {
-                    klass.data(ctx).superClass = sym;
-                } else {
-                    if (auto e = ctx.state.beginError(ancst->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                        e.setHeader("Class parents redefined for class `{}`", original->symbol.data(ctx).show(ctx));
-                    }
-                }
-            } else {
-                klass.data(ctx).mixins().emplace_back(sym);
-            }
+            klass.data(ctx).mixins().emplace_back(sym);
         }
 
         auto singleton = klass.data(ctx).singletonClass(ctx);
@@ -178,6 +167,25 @@ public:
             auto sym = resolveAncestor(ctx, singleton, ancst);
             if (sym.exists()) {
                 singleton.data(ctx).mixins().emplace_back(sym);
+            }
+        }
+
+        nesting_ = move(nesting_->parent);
+
+        // Now resolve the superclass in the outer scope
+        if (superclass != nullptr) {
+            auto sym = resolveAncestor(ctx, klass, *superclass);
+            // Don't emplace the superclass onto the `mixins` list; See the
+            // comment on Symbol::argumentsOrMixins for some context.
+            if (sym == core::Symbols::todo()) {
+                // No superclass specified
+            } else if (!klass.data(ctx).superClass.exists() || klass.data(ctx).superClass == core::Symbols::todo() ||
+                       klass.data(ctx).superClass == sym) {
+                klass.data(ctx).superClass = sym;
+            } else {
+                if (auto e = ctx.state.beginError((*superclass)->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                    e.setHeader("Class parents redefined for class `{}`", original->symbol.data(ctx).show(ctx));
+                }
             }
         }
 
