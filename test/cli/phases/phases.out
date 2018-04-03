@@ -6806,47 +6806,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method untaint () -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untrust () -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method untrusted? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:ARGF> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:ARGV> -> AppliedType {
-      klass = ::<constant:Array>
-      targs = [
-        <constant:Elem> = untyped
-      ]
-    } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:CROSS_COMPILING> -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:ENV> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:FALSE> -> FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:NIL> -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_COPYRIGHT> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_DESCRIPTION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_ENGINE> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_ENGINE_VERSION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_PATCHLEVEL> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_PLATFORM> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_RELEASE_DATE> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_REVISION> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:RUBY_VERSION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:STDERR> -> AppliedType {
-      klass = ::<constant:IO>
-      targs = [
-        <constant:Elem> = String
-      ]
-    } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:STDIN> -> AppliedType {
-      klass = ::<constant:IO>
-      targs = [
-        <constant:Elem> = String
-      ]
-    } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:STDOUT> -> AppliedType {
-      klass = ::<constant:IO>
-      targs = [
-        <constant:Elem> = String
-      ]
-    } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:TOPLEVEL_BINDING> -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    static-field <constant:TRUE> -> TrueClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:ObjectSpace> (<constant:BasicObject>) -> <Class:ObjectSpace> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:WeakMap>[<constant:Elem>] < ::<constant:Object> (<constant:Enumerable>) -> <Class:ObjectSpace::WeakMap> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -12005,7 +11964,48 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
   method <static-init>$6 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
   method <static-init>$8 () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/t.rbi#L__LINE__
   method <static-init>$9 () @ -e:1
+  static-field <constant:ARGF> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:ARGV> -> AppliedType {
+    klass = ::<constant:Array>
+    targs = [
+      <constant:Elem> = untyped
+    ]
+  } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:CROSS_COMPILING> -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:ENV> -> Object @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:FALSE> -> FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   static-field <constant:M> -> AliasType { symbol = ::<constant:Opus>::<constant:DB>::<constant:Model> } @ ???
+  static-field <constant:NIL> -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBYGEMS_ACTIVATION_MONITOR> -> Monitor @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_COPYRIGHT> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_DESCRIPTION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_ENGINE> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_ENGINE_VERSION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_PATCHLEVEL> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_PLATFORM> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_RELEASE_DATE> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_REVISION> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:RUBY_VERSION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:STDERR> -> AppliedType {
+    klass = ::<constant:IO>
+    targs = [
+      <constant:Elem> = String
+    ]
+  } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:STDIN> -> AppliedType {
+    klass = ::<constant:IO>
+    targs = [
+      <constant:Elem> = String
+    ]
+  } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:STDOUT> -> AppliedType {
+    klass = ::<constant:IO>
+    targs = [
+      <constant:Elem> = String
+    ]
+  } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:TOPLEVEL_BINDING> -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+  static-field <constant:TRUE> -> TrueClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
 
 --- name-table-full end ---
 --- name-tree start ---
