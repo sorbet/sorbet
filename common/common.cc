@@ -14,9 +14,6 @@
 
 using namespace std;
 
-#define MAX_STACK_FRAMES 128
-static void *stack_traces[MAX_STACK_FRAMES];
-
 string ruby_typer::FileOps::read(const absl::string_view filename) {
     string fileNameStr(filename.data(), filename.size());
     ifstream fin(fileNameStr);
@@ -107,6 +104,10 @@ string exec(string cmd) {
     return result;
 }
 
+namespace {
+#define MAX_STACK_FRAMES 128
+static void *stack_traces[MAX_STACK_FRAMES];
+
 void filter_unnecessary(string &out) {
     string::size_type i = 0;
     string::size_type j = 0;
@@ -133,8 +134,9 @@ void filter_unnecessary(string &out) {
         }
     }
 }
+} // namespace
 
-void ruby_typer::Error::print_backtrace() {
+void ruby_typer::Error::print_backtrace() noexcept {
     int trace_size = 0;
     char **messages = (char **)nullptr;
     string program_name = getProgramName();

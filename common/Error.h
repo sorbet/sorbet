@@ -22,11 +22,6 @@ public:
         return _message;
     }
 
-    /**
-     * Shows this.
-     */
-    friend std::ostream &operator<<(std::ostream &os, const SRubyException &ex);
-
 private:
     std::string _message;
 
@@ -55,7 +50,7 @@ public:
         raise("Not Implemented");
     }
 
-    static void print_backtrace();
+    static void print_backtrace() noexcept;
 
     template <typename... TArgs>
     [[noreturn]] static inline bool enforce_handler(std::string check, std::string file, int line,

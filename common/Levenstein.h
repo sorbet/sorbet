@@ -6,7 +6,7 @@ namespace ruby_typer {
 
 class Levenstein {
 public:
-    static int distance(absl::string_view s1, absl::string_view s2, int bound);
+    static int distance(absl::string_view s1, absl::string_view s2, int bound) noexcept;
 };
 
 } // namespace ruby_typer

@@ -14,13 +14,13 @@ public:
     SymbolRef owner;
     bool frozenConstraint = false;
 
-    operator const GlobalState &() const {
+    operator const GlobalState &() const noexcept {
         return state;
     }
 
-    Context(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
-    Context(const Context &other) : state(other.state), owner(other.owner) {}
-    Context(const MutableContext &other);
+    Context(GlobalState &state, SymbolRef owner) noexcept : state(state), owner(owner) {}
+    Context(const Context &other) noexcept : state(other.state), owner(other.owner) {}
+    Context(const MutableContext &other) noexcept;
 
     // Returns a SymbolRef corresponding to the class `self.class` for code
     // executed in this MutableContext, or, if `self` is a class,
@@ -64,8 +64,8 @@ public:
         return state;
     }
 
-    MutableContext(GlobalState &state, SymbolRef owner) : state(state), owner(owner) {}
-    MutableContext(const MutableContext &other) : state(other.state), owner(other.owner) {}
+    MutableContext(GlobalState &state, SymbolRef owner) noexcept : state(state), owner(owner) {}
+    MutableContext(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
     // Returns a SymbolRef corresponding to the class `self.class` for code
     // executed in this MutableContext, or, if `self` is a class,

@@ -49,7 +49,7 @@ SymbolRef Context::contextClass() const {
     return owner;
 }
 
-Context::Context(const MutableContext &other) : state(other.state), owner(other.owner) {}
+Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
 SymbolRef MutableContext::contextClass() const {
     Context self(*this);

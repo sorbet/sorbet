@@ -7,10 +7,10 @@
 struct DequeueResult {
     bool returned;
     bool shouldRetry;
-    inline bool done() {
+    inline bool done() noexcept {
         return !(returned || shouldRetry);
     }
-    inline bool gotItem() {
+    inline bool gotItem() noexcept {
         return returned;
     }
 };
@@ -23,17 +23,17 @@ template <class Elem, class Queue> class AbstractConcurrentBoundedQueue {
     std::atomic<int> elementsPopped;
 
 public:
-    AbstractConcurrentBoundedQueue(int bound) : bound(bound), elementsLeftToPush(bound), elementsPopped(0) {}
+    AbstractConcurrentBoundedQueue(int bound) noexcept : bound(bound), elementsLeftToPush(bound), elementsPopped(0) {}
     AbstractConcurrentBoundedQueue(const AbstractConcurrentBoundedQueue &other) = delete;
     AbstractConcurrentBoundedQueue(AbstractConcurrentBoundedQueue &&other) = delete;
 
-    inline void push(Elem &&elem, int count) {
+    inline void push(Elem &&elem, int count) noexcept {
         _queue.enqueue(std::move(elem));
         elementsLeftToPush.fetch_add(-count, std::memory_order_release);
         ENFORCE(elementsLeftToPush.load(std::memory_order_relaxed) >= 0);
     }
 
-    inline DequeueResult try_pop(Elem &elem) {
+    inline DequeueResult try_pop(Elem &elem) noexcept {
         DequeueResult ret;
         ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
         ret.returned = _queue.try_dequeue(elem);
@@ -44,7 +44,7 @@ public:
     }
 
     template <typename Rep, typename Period>
-    inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout) {
+    inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout) noexcept {
         DequeueResult ret;
         ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
         if (ret.shouldRetry) {
