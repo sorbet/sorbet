@@ -997,8 +997,6 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
         case errors::Parser::ParserError.code:
         case errors::Resolver::InvalidMethodSignature.code:
         case errors::Resolver::InvalidTypeDeclaration.code:
-        case errors::Resolver::InvalidDeclareVariables.code:
-        case errors::Resolver::DuplicateVariableDeclaration.code:
         case errors::Namer::ModuleKindRedefinition.code:
             // These are shown even for untyped source
             return true;
