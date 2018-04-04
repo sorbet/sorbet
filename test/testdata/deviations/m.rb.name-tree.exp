@@ -3,10 +3,10 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         <emptyTree>
-        ::<constant:Opus>::<constant:DB>::<constant:Model>::<constant:MyModel>
+        ::Opus::DB::Model::MyModel
       end
     end
   end
-  class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<todo sym>)  end
   <emptyTree>
 end

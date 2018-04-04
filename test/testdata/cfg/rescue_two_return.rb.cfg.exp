@@ -1,41 +1,41 @@
 digraph "rescue_two_return.rb"{
-subgraph "cluster_::<constant:Object>#foo" {
-    label = "::<constant:Object>#foo";
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
     color = blue;
-    "bb::<constant:Object>#foo_0" [shape = invhouse];
-    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+    "bb::Object#foo_0" [shape = invhouse];
+    "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
+    "bb::Object#foo_0" [label = "block[id=0]()
 <constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
 <rescueTemp$5 = <unanalyzable> : untyped
 <rescueTemp$5"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_3" [style="bold"];
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_4" [style="tapered"];
+    "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
+    "bb::Object#foo_0" -> "bb::Object#foo_4" [style="tapered"];
 
-    "bb::<constant:Object>#foo_1" [label = "block[id=1]()
+    "bb::Object#foo_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](<rescueTemp$5, <constant:StandardError>$9)
+    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_3" [label = "block[id=3](<rescueTemp$5, <constant:StandardError>$9)
 <rescueTemp$10 = <rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped
 <rescueTemp$10"];
 
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_8" [style="bold"];
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="tapered"];
+    "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
+    "bb::Object#foo_3" -> "bb::Object#foo_1" [style="tapered"];
 
-    "bb::<constant:Object>#foo_4" [label = "block[id=4]()
+    "bb::Object#foo_4" [label = "block[id=4]()
 <returnTemp>$6 = 1 : Integer(1)
 <statTemp>$4 = return <returnTemp>$6 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_8" [label = "block[id=8](<rescueTemp$5)
+    "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_8" [label = "block[id=8](<rescueTemp$5)
 <returnTemp>$11 = 2 : Integer(2)
 <statTemp>$4 = return <returnTemp>$11 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
 }
 
 }

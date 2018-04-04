@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:Main><<constant:Main>> < (::<constant:<todo sym>>)
+class <emptyTree>::<constant:Main><<constant:Main>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>

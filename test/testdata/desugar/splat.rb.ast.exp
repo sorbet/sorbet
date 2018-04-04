@@ -3,17 +3,17 @@ class <emptyTree><<constant:<root>>> < ()
     def bar<<constant:<todo sym>>>(a)
       a
     end
-    class <emptyTree>::<constant:Splatable><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Splatable><<constant:<todo sym>>> < (::<todo sym>)
       def to_a<<constant:<todo sym>>>()
         [1]
       end
     end
-    class <emptyTree>::<constant:Rescueable><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Rescueable><<constant:<todo sym>>> < (::<todo sym>)
       def to_a<<constant:<todo sym>>>()
         [<emptyTree>::<constant:String>, <emptyTree>::<constant:RuntimeError>]
       end
     end
-    class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Parent><<constant:<todo sym>>> < (::<todo sym>)
       def foo<<constant:<todo sym>>>(a, b)
         [b, a]
       end
@@ -22,7 +22,7 @@ class <emptyTree><<constant:<root>>> < ()
       def foo<<constant:<todo sym>>>()
         begin
           a = [1, 2]
-          self(<constant:<todo sym>>).super(::<constant:<Magic>>.<splat>(a.to_a()))
+          self(<constant:<todo sym>>).super(::<Magic>.<splat>(a.to_a()))
         end
       end
     end
@@ -32,15 +32,15 @@ class <emptyTree><<constant:<root>>> < ()
         a.to_a().concat([2])
         [1].concat(a.to_a())
         [1].concat(a.to_a()).concat([2])
-        self(<constant:<todo sym>>).bar(::<constant:<Magic>>.<splat>(a.to_a()))
-        self(<constant:<todo sym>>).bar(::<constant:<Magic>>.<splat>(<emptyTree>::<constant:Splatable>.new().to_a()))
+        self(<constant:<todo sym>>).bar(::<Magic>.<splat>(a.to_a()))
+        self(<constant:<todo sym>>).bar(::<Magic>.<splat>(<emptyTree>::<constant:Splatable>.new().to_a()))
         <emptyTree>::<constant:Child>.new().foo()
         b = <emptyTree>::<constant:Splatable>.new().to_a()
         begin
           <assignTemp$2 = begin
             1
           end
-          if ::<constant:<Magic>>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(<assignTemp$2)
+          if ::<Magic>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(<assignTemp$2)
             <emptyTree>
           else
             <emptyTree>

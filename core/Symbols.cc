@@ -363,9 +363,9 @@ string Symbol::fullName(const GlobalState &gs) const {
     }
 
     if (this->isClass()) {
-        return owner_str + "::" + this->name.toString(gs);
+        return owner_str + "::" + this->name.show(gs);
     } else {
-        return owner_str + "#" + this->name.toString(gs);
+        return owner_str + "#" + this->name.show(gs);
     }
 }
 

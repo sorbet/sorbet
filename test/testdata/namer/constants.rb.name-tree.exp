@@ -3,9 +3,9 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         <emptyTree>
-        ::<constant:A>::<constant:B>#<constant:C>
-        ::<constant:A>::<constant:B>#<constant:D>
-        ::<constant:A>
+        ::A::B#C
+        ::A::B#D
+        ::A
       end
     end
   end
@@ -14,7 +14,7 @@ begin
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()
     def self.<static-init><<static-init>>()
-      ::<constant:A>::<constant:B>#<constant:C>
+      ::A::B#C
     end
   end
   <emptyTree>

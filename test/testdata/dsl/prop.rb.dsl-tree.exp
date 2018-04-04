@@ -1,6 +1,6 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    class <emptyTree>::<constant:NotAODM><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:NotAODM><<constant:<todo sym>>> < (::<todo sym>)
       def self.prop<<constant:<todo sym>>>(*args)
         <emptyTree>
       end
@@ -23,17 +23,17 @@ class <emptyTree><<constant:<root>>> < ()
 
       self(<constant:<todo sym>>).optional(:"optional_param", <emptyTree>::<constant:IntegerParam>.new())
     end
-    class <emptyTree>::<constant:SomeODM><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+    class <emptyTree>::<constant:SomeODM><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foo<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foo=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
@@ -48,323 +48,323 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
       end
     end
-    class <emptyTree>::<constant:ForeignClass><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:ForeignClass><<constant:<todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
-    class <emptyTree>::<constant:AdvancedODM><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:AdvancedODM><<constant:<todo sym>>> < (::<todo sym>)
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def default<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def default=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def nodefault<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def nodefault=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def factory<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def factory=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def type<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def type=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(::<constant:Object>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(::Object))
 
       def object<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(::<constant:Object>))
+        ::T.cast(nil, ::T.nilable(::Object))
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:Object>}).returns(::<constant:Object>)
+      self(<constant:<todo sym>>).sig({:"arg0" => ::Object}).returns(::Object)
 
       def object=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:Object>)
+        ::T.cast(nil, ::Object)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def array<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, <emptyTree>::<constant:Array>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
 
       def array=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, <emptyTree>::<constant:Array>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T::Array.[](<emptyTree>::<constant:String>))
 
       def array_of<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T::Array.[](<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({:"arg0" => ::T::Array.[](<emptyTree>::<constant:String>)}).returns(::T::Array.[](<emptyTree>::<constant:String>))
 
       def array_of=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T::Array.[](<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def array_of_explicit<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, <emptyTree>::<constant:Array>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
 
       def array_of_explicit=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, <emptyTree>::<constant:Array>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
 
       def t_array<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::T.cast(nil, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
 
       def t_array=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+        ::T.cast(nil, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
 
       def hash_of<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+        ::T.cast(nil, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
 
       def hash_of=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+        ::T.cast(nil, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_explicit<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def optional_explicit=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_existing<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def optional_existing=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional_false<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def optional_false=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def optional<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def optional=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def const_explicit<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def const<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
 
       def no_class_arg<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, <emptyTree>::<constant:Array>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.untyped())
+      self(<constant:<todo sym>>).sig({}).returns(::T.untyped())
 
       def enum_prop<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.untyped())
+        ::T.cast(nil, ::T.untyped())
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foreign<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foreign=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"opts" => ::<constant:T>.untyped()}).returns(::<constant:T>.nilable(<emptyTree>::<constant:ForeignClass>))
+      self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
       def foreign_<<constant:<todo sym>>>(*opts:)
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foreign_lazy<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foreign_lazy=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"opts" => ::<constant:T>.untyped()}).returns(::<constant:T>.nilable(<emptyTree>::<constant:ForeignClass>))
+      self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
       def foreign_lazy_<<constant:<todo sym>>>(*opts:)
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foreign_proc<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foreign_proc=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"opts" => ::<constant:T>.untyped()}).returns(::<constant:T>.nilable(<emptyTree>::<constant:ForeignClass>))
+      self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
       def foreign_proc_<<constant:<todo sym>>>(*opts:)
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foreign_invalid<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foreign_invalid=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"opts" => ::<constant:T>.untyped()}).returns(::<constant:T>.untyped())
+      self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.untyped())
 
       def foreign_invalid_<<constant:<todo sym>>>(*opts:)
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
     end
-    class <emptyTree>::<constant:PropHelpers><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:String>)
+    class <emptyTree>::<constant:PropHelpers><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::String)
 
       def token<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:String>)
+        ::T.cast(nil, ::String)
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:String>}).returns(::<constant:String>)
+      self(<constant:<todo sym>>).sig({:"arg0" => ::String}).returns(::String)
 
       def token=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:String>)
+        ::T.cast(nil, ::String)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:Float>)
+      self(<constant:<todo sym>>).sig({}).returns(::Float)
 
       def created<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:Float>)
+        ::T.cast(nil, ::Float)
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:Float>}).returns(::<constant:Float>)
+      self(<constant:<todo sym>>).sig({:"arg0" => ::Float}).returns(::Float)
 
       def created=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:Float>)
+        ::T.cast(nil, ::Float)
       end
     end
-    class <emptyTree>::<constant:PropHelpers2><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:String>)
+    class <emptyTree>::<constant:PropHelpers2><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::String)
 
       def token<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:String>)
+        ::T.cast(nil, ::String)
       end
 
-      self(<constant:<todo sym>>).sig({:"arg0" => ::<constant:String>}).returns(::<constant:String>)
+      self(<constant:<todo sym>>).sig({:"arg0" => ::String}).returns(::String)
 
       def token=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, ::<constant:String>)
+        ::T.cast(nil, ::String)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:Float>)
+      self(<constant:<todo sym>>).sig({}).returns(::Float)
 
       def created<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:Float>)
+        ::T.cast(nil, ::Float)
       end
     end
-    class <emptyTree>::<constant:ShardingProp><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:String>)
+    class <emptyTree>::<constant:ShardingProp><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::String)
 
       def merchant<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:String>)
+        ::T.cast(nil, ::String)
       end
     end
     def main<<constant:<todo sym>>>()

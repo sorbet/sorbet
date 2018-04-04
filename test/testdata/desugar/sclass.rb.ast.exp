@@ -1,10 +1,10 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
     <emptyTree>
-    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
       class <singleton class><<constant:<todo sym>>> < ()
         def b<<constant:<todo sym>>>()
           "b"
@@ -13,7 +13,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
     $c = <emptyTree>::<constant:Object>.new()
     <emptyTree>
-    class <emptyTree>::<constant:D><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:D><<constant:<todo sym>>> < (::<todo sym>)
       class <singleton class><<constant:<todo sym>>> < ()
         class <singleton class><<constant:<todo sym>>> < ()
           def d<<constant:<todo sym>>>()
@@ -22,7 +22,7 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
     end
-    class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:E><<constant:<todo sym>>> < (::<todo sym>)
       class <singleton class><<constant:<todo sym>>> < ()
         def wrapper<<constant:<todo sym>>>()
           def e<<constant:<todo sym>>>()
@@ -33,7 +33,7 @@ class <emptyTree><<constant:<root>>> < ()
 
       self(<constant:<todo sym>>).wrapper()
     end
-    class <emptyTree>::<constant:F><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:F><<constant:<todo sym>>> < (::<todo sym>)
       class <singleton class><<constant:<todo sym>>> < ()
         def initialize<<constant:<todo sym>>>()
           @f = <emptyTree>::<constant:T>.let(0, <emptyTree>::<constant:Integer>)
@@ -44,7 +44,7 @@ class <emptyTree><<constant:<root>>> < ()
         self(<constant:<todo sym>>).attr_writer(:"f")
       end
     end
-    class <emptyTree>::<constant:G><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:G><<constant:<todo sym>>> < (::<todo sym>)
       def wrapper<<constant:<todo sym>>>()
         begin
           class <singleton class><<constant:<todo sym>>> < ()
@@ -60,9 +60,9 @@ class <emptyTree><<constant:<root>>> < ()
         "g"
       end
     end
-    class <emptyTree>::<constant:H><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:H><<constant:<todo sym>>> < (::<todo sym>)
       class <singleton class><<constant:<todo sym>>> < ()
-        class <emptyTree>::<constant:H2><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+        class <emptyTree>::<constant:H2><<constant:<todo sym>>> < (::<todo sym>)
           def self.h<<constant:<todo sym>>>()
             "h"
           end

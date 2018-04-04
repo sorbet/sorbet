@@ -1,11 +1,11 @@
 digraph "date.rb"{
-subgraph "cluster_::<constant:A>#foo" {
-    label = "::<constant:A>#foo";
+subgraph "cluster_::A#foo" {
+    label = "::A#foo";
     color = blue;
-    "bb::<constant:A>#foo_0" [shape = invhouse];
-    "bb::<constant:A>#foo_1" [shape = parallelogram];
+    "bb::A#foo_0" [shape = invhouse];
+    "bb::A#foo_1" [shape = parallelogram];
 
-    "bb::<constant:A>#foo_0" [label = "block[id=0]()
+    "bb::A#foo_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : A
 t = load_arg(<selfMethodTemp>$3#foo, 0) : Time
 <statTemp>$5 = t.to_datetime() : DateTime
@@ -14,11 +14,11 @@ t = load_arg(<selfMethodTemp>$3#foo, 0) : Time
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1" [style="bold"];
-    "bb::<constant:A>#foo_1" [label = "block[id=1]()
+    "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
+    "bb::A#foo_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:A>#foo_1" -> "bb::<constant:A>#foo_1" [style="bold"];
+    "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
 }

@@ -1,85 +1,85 @@
 digraph "module_function.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Funcs>#f" {
-    label = "::<constant:Funcs>#f";
+subgraph "cluster_::Funcs#f" {
+    label = "::Funcs#f";
     color = blue;
-    "bb::<constant:Funcs>#f_0" [shape = invhouse];
-    "bb::<constant:Funcs>#f_1" [shape = parallelogram];
+    "bb::Funcs#f_0" [shape = invhouse];
+    "bb::Funcs#f_1" [shape = parallelogram];
 
-    "bb::<constant:Funcs>#f_0" [label = "block[id=0]()
+    "bb::Funcs#f_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 x = load_arg(<selfMethodTemp>$3#f, 0) : Integer
 <finalReturn> = return x : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Funcs>#f_0" -> "bb::<constant:Funcs>#f_1" [style="bold"];
-    "bb::<constant:Funcs>#f_1" [label = "block[id=1]()
+    "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
+    "bb::Funcs#f_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Funcs>#f_1" -> "bb::<constant:Funcs>#f_1" [style="bold"];
+    "bb::Funcs#f_1" -> "bb::Funcs#f_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Funcs>#g" {
-    label = "::<constant:Funcs>#g";
+subgraph "cluster_::Funcs#g" {
+    label = "::Funcs#g";
     color = blue;
-    "bb::<constant:Funcs>#g_0" [shape = invhouse];
-    "bb::<constant:Funcs>#g_1" [shape = parallelogram];
+    "bb::Funcs#g_0" [shape = invhouse];
+    "bb::Funcs#g_1" [shape = parallelogram];
 
-    "bb::<constant:Funcs>#g_0" [label = "block[id=0]()
+    "bb::Funcs#g_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 s = load_arg(<selfMethodTemp>$3#g, 0) : Symbol
 <finalReturn> = return s : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Funcs>#g_0" -> "bb::<constant:Funcs>#g_1" [style="bold"];
-    "bb::<constant:Funcs>#g_1" [label = "block[id=1]()
+    "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
+    "bb::Funcs#g_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Funcs>#g_1" -> "bb::<constant:Funcs>#g_1" [style="bold"];
+    "bb::Funcs#g_1" -> "bb::Funcs#g_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Funcs>#h" {
-    label = "::<constant:Funcs>#h";
+subgraph "cluster_::Funcs#h" {
+    label = "::Funcs#h";
     color = blue;
-    "bb::<constant:Funcs>#h_0" [shape = invhouse];
-    "bb::<constant:Funcs>#h_1" [shape = parallelogram];
+    "bb::Funcs#h_0" [shape = invhouse];
+    "bb::Funcs#h_1" [shape = parallelogram];
 
-    "bb::<constant:Funcs>#h_0" [label = "block[id=0]()
+    "bb::Funcs#h_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Funcs
 s = load_arg(<selfMethodTemp>$3#h, 0) : String
 <finalReturn> = return s : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Funcs>#h_0" -> "bb::<constant:Funcs>#h_1" [style="bold"];
-    "bb::<constant:Funcs>#h_1" [label = "block[id=1]()
+    "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];
+    "bb::Funcs#h_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Funcs>#h_1" -> "bb::<constant:Funcs>#h_1" [style="bold"];
+    "bb::Funcs#h_1" -> "bb::Funcs#h_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Funcs>#<static-init>" {
-    label = "::<constant:Funcs>#<static-init>";
+subgraph "cluster_::Funcs#<static-init>" {
+    label = "::Funcs#<static-init>";
     color = blue;
-    "bb::<constant:Funcs>#<static-init>_0" [shape = invhouse];
-    "bb::<constant:Funcs>#<static-init>_1" [shape = parallelogram];
+    "bb::Funcs#<static-init>_0" [shape = invhouse];
+    "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
-    "bb::<constant:Funcs>#<static-init>_0" [label = "block[id=0]()
+    "bb::Funcs#<static-init>_0" [label = "block[id=0]()
 <statTemp>$5 = self : <Class:Funcs>
 <statTemp>$6 = :\"f\" : Symbol(:\"f\")
 <statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module
@@ -88,20 +88,20 @@ subgraph "cluster_::<constant:Funcs>#<static-init>" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Funcs>#<static-init>_0" -> "bb::<constant:Funcs>#<static-init>_1" [style="bold"];
-    "bb::<constant:Funcs>#<static-init>_1" [label = "block[id=1]()
+    "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_1" [style="bold"];
+    "bb::Funcs#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Funcs>#<static-init>_1" -> "bb::<constant:Funcs>#<static-init>_1" [style="bold"];
+    "bb::Funcs#<static-init>_1" -> "bb::Funcs#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:C>#test_calls" {
-    label = "::<constant:C>#test_calls";
+subgraph "cluster_::C#test_calls" {
+    label = "::C#test_calls";
     color = blue;
-    "bb::<constant:C>#test_calls_0" [shape = invhouse];
-    "bb::<constant:C>#test_calls_1" [shape = parallelogram];
+    "bb::C#test_calls_0" [shape = invhouse];
+    "bb::C#test_calls_1" [shape = parallelogram];
 
-    "bb::<constant:C>#test_calls_0" [label = "block[id=0]()
+    "bb::C#test_calls_0" [label = "block[id=0]()
 <constant:Funcs>$9 = alias <constant:Funcs> : <Class:Funcs>
 <constant:C>$24 = alias <constant:C> : <Class:C>
 <statTemp>$5 = self : C
@@ -123,11 +123,11 @@ subgraph "cluster_::<constant:C>#test_calls" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:C>#test_calls_0" -> "bb::<constant:C>#test_calls_1" [style="bold"];
-    "bb::<constant:C>#test_calls_1" [label = "block[id=1]()
+    "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
+    "bb::C#test_calls_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:C>#test_calls_1" -> "bb::<constant:C>#test_calls_1" [style="bold"];
+    "bb::C#test_calls_1" -> "bb::C#test_calls_1" [style="bold"];
 }
 
 }

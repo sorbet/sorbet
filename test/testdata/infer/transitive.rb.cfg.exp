@@ -1,56 +1,56 @@
 digraph "transitive.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:A>#foo" {
-    label = "::<constant:A>#foo";
+subgraph "cluster_::A#foo" {
+    label = "::A#foo";
     color = blue;
-    "bb::<constant:A>#foo_0" [shape = invhouse];
-    "bb::<constant:A>#foo_1" [shape = parallelogram];
+    "bb::A#foo_0" [shape = invhouse];
+    "bb::A#foo_1" [shape = parallelogram];
 
-    "bb::<constant:A>#foo_0" [label = "block[id=0]()
+    "bb::A#foo_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:A>#foo_0" -> "bb::<constant:A>#foo_1" [style="bold"];
-    "bb::<constant:A>#foo_1" [label = "block[id=1]()
+    "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
+    "bb::A#foo_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:A>#foo_1" -> "bb::<constant:A>#foo_1" [style="bold"];
+    "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Bar>#baz" {
-    label = "::<constant:Bar>#baz";
+subgraph "cluster_::Bar#baz" {
+    label = "::Bar#baz";
     color = blue;
-    "bb::<constant:Bar>#baz_0" [shape = invhouse];
-    "bb::<constant:Bar>#baz_1" [shape = parallelogram];
+    "bb::Bar#baz_0" [shape = invhouse];
+    "bb::Bar#baz_1" [shape = parallelogram];
 
-    "bb::<constant:Bar>#baz_0" [label = "block[id=0]()
+    "bb::Bar#baz_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Bar
 <statTemp>$4 = self : Bar
 <returnMethodTemp>$2 = <statTemp>$4.foo() : Integer
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Bar>#baz_0" -> "bb::<constant:Bar>#baz_1" [style="bold"];
-    "bb::<constant:Bar>#baz_1" [label = "block[id=1]()
+    "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
+    "bb::Bar#baz_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Bar>#baz_1" -> "bb::<constant:Bar>#baz_1" [style="bold"];
+    "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
 }
 
 }

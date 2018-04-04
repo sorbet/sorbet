@@ -3,11 +3,11 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         <emptyTree>
-        ::<constant:Main>.new().main()
+        ::Main.new().main()
       end
     end
   end
-  class <emptyTree>::<constant:Main><<constant:Main>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:Main><<constant:Main>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -54,16 +54,16 @@ begin
           end
         end
         self(<constant:Main>).yielder() do |<block-pass>$2$8|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$2$8.to_a()))
+          l.to_proc().call(::<Magic>.<splat>(<block-pass>$2$8.to_a()))
         end
         self(<constant:Main>).blockpass() do |<block-pass>$3$9|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$3$9.to_a()))
+          l.to_proc().call(::<Magic>.<splat>(<block-pass>$3$9.to_a()))
         end
         self(<constant:Main>).mixed() do |<block-pass>$4$10|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$4$10.to_a()))
+          l.to_proc().call(::<Magic>.<splat>(<block-pass>$4$10.to_a()))
         end
         self(<constant:Main>).blockyield() do |<block-pass>$5$11|
-          l.to_proc().call(::<constant:<Magic>>.<splat>(<block-pass>$5$11.to_a()))
+          l.to_proc().call(::<Magic>.<splat>(<block-pass>$5$11.to_a()))
         end
       end
     end

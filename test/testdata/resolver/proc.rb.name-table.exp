@@ -1,27 +1,27 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  class <constant:TestProc> < ::<constant:Object> () -> <Class:TestProc> @ test/testdata/resolver/proc.rb:3
+class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
+  class <constant:TestProc> < ::Object () -> <Class:TestProc> @ test/testdata/resolver/proc.rb:3
     method bad (x, y, z, w) -> NilClass @ test/testdata/resolver/proc.rb:22
       argument w<> -> AppliedType {
-        klass = ::<constant:Proc1>
+        klass = ::Proc1
         targs = [
           <constant:Return> = untyped
           <constant:Arg0> = untyped
         ]
       } @ test/testdata/resolver/proc.rb:20
       argument x<> -> AppliedType {
-        klass = ::<constant:Proc0>
+        klass = ::Proc0
         targs = [
           <constant:Return> = untyped
         ]
       } @ test/testdata/resolver/proc.rb:17
       argument y<> -> AppliedType {
-        klass = ::<constant:Proc0>
+        klass = ::Proc0
         targs = [
           <constant:Return> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:18
       argument z<> -> AppliedType {
-        klass = ::<constant:Proc1>
+        klass = ::Proc1
         targs = [
           <constant:Return> = untyped
           <constant:Arg0> = Integer
@@ -30,7 +30,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
     method foo () -> Integer @ test/testdata/resolver/proc.rb:26
     method foo1 (x) -> Integer @ test/testdata/resolver/proc.rb:31
       argument x<> -> AppliedType {
-        klass = ::<constant:Proc1>
+        klass = ::Proc1
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
@@ -38,7 +38,7 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       } @ test/testdata/resolver/proc.rb:29
     method good1 (blk) -> Integer @ test/testdata/resolver/proc.rb:6
       argument blk<block> -> AppliedType {
-        klass = ::<constant:Proc1>
+        klass = ::Proc1
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
@@ -46,21 +46,21 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       } @ test/testdata/resolver/proc.rb:4
     method good2 (blk) -> Integer @ test/testdata/resolver/proc.rb:12
       argument blk<block> -> AppliedType {
-        klass = ::<constant:Proc1>
+        klass = ::Proc1
         targs = [
           <constant:Return> = AppliedType {
-              klass = ::<constant:Array>
+              klass = ::Array
               targs = [
                 <constant:Elem> = Integer
               ]
             }
           <constant:Arg0> = AppliedType {
-              klass = ::<constant:Array>
+              klass = ::Array
               targs = [
                 <constant:Elem> = String
               ]
             }
         ]
       } @ test/testdata/resolver/proc.rb:10
-  class <singleton class:<constant:TestProc>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/proc.rb:3
+  class <singleton class:<constant:TestProc>> < ::<Class:Object> () @ test/testdata/resolver/proc.rb:3
 

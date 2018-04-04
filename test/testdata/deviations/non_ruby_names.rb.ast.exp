@@ -4,7 +4,7 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>
     end
     module <emptyTree>::<constant:A><<constant:<todo sym>>> < ()
-      class <emptyTree>::<constant:B>::<constant:C><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:B>::<constant:C><<constant:<todo sym>>> < (::<todo sym>)
         <emptyTree>
       end
     end

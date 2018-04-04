@@ -1,29 +1,29 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/resolver/self.rb:3
-  class <constant:TestSelf> < ::<constant:Object> () -> <Class:TestSelf> @ test/testdata/resolver/self.rb:3
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver/self.rb:3
+  class <constant:TestSelf> < ::Object () -> <Class:TestSelf> @ test/testdata/resolver/self.rb:3
     method good1 (s) -> TestSelf @ test/testdata/resolver/self.rb:6
       argument s<> -> TestSelf @ test/testdata/resolver/self.rb:4
     method pass () -> TestSelf @ test/testdata/resolver/self.rb:12
-  class <constant:TestSelfGeneric>[<constant:Elem>] < ::<constant:Object> () -> <Class:TestSelfGeneric> @ test/testdata/resolver/self.rb:18
+  class <constant:TestSelfGeneric>[<constant:Elem>] < ::Object () -> <Class:TestSelfGeneric> @ test/testdata/resolver/self.rb:18
     method good1 (s) -> AppliedType {
-      klass = ::<constant:TestSelfGeneric>
+      klass = ::TestSelfGeneric
       targs = [
-        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+        <constant:Elem> = SelfTypeParam(::TestSelfGeneric#Elem)
       ]
     } @ test/testdata/resolver/self.rb:24
       argument s<> -> AppliedType {
-        klass = ::<constant:TestSelfGeneric>
+        klass = ::TestSelfGeneric
         targs = [
-          <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+          <constant:Elem> = SelfTypeParam(::TestSelfGeneric#Elem)
         ]
       } @ test/testdata/resolver/self.rb:22
     method pass () -> AppliedType {
-      klass = ::<constant:TestSelfGeneric>
+      klass = ::TestSelfGeneric
       targs = [
-        <constant:Elem> = SelfTypeParam(::<constant:TestSelfGeneric>#<constant:Elem>)
+        <constant:Elem> = SelfTypeParam(::TestSelfGeneric#Elem)
       ]
     } @ test/testdata/resolver/self.rb:30
     typeMember(=) <constant:Elem> @ test/testdata/resolver/self.rb:21
-  class <singleton class:<constant:TestSelf>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/self.rb:3
-  class <singleton class:<constant:TestSelfGeneric>> < ::<singleton class:<constant:Object>> (<constant:Generic>) @ test/testdata/resolver/self.rb:18
+  class <singleton class:<constant:TestSelf>> < ::<Class:Object> () @ test/testdata/resolver/self.rb:3
+  class <singleton class:<constant:TestSelfGeneric>> < ::<Class:Object> (<constant:Generic>) @ test/testdata/resolver/self.rb:18
   method <static-init>$10 () @ test/testdata/resolver/self.rb:3
 

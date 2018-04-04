@@ -2,7 +2,7 @@ class <emptyTree><<constant:<root>>> < ()
   def foo<foo>()
     begin
       <emptyTree>
-    rescue ::<constant:NotAClass> => e
+    rescue ::NotAClass => e
       <emptyTree>
     end
   end

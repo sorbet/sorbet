@@ -1,11 +1,11 @@
 digraph "normalize_params.rb"{
-subgraph "cluster_::<constant:Test>#normalize_params" {
-    label = "::<constant:Test>#normalize_params";
+subgraph "cluster_::Test#normalize_params" {
+    label = "::Test#normalize_params";
     color = blue;
-    "bb::<constant:Test>#normalize_params_0" [shape = invhouse];
-    "bb::<constant:Test>#normalize_params_1" [shape = parallelogram];
+    "bb::Test#normalize_params_0" [shape = invhouse];
+    "bb::Test#normalize_params_1" [shape = parallelogram];
 
-    "bb::<constant:Test>#normalize_params_0" [label = "block[id=0]()
+    "bb::Test#normalize_params_0" [label = "block[id=0]()
 <constant:Array>$16 = alias <constant:Array> : <Class:Array>
 <constant:Hash>$8 = alias <constant:Hash> : <Class:Hash>
 <selfMethodTemp>$4 = self : Test
@@ -13,20 +13,20 @@ v = load_arg(<selfMethodTemp>$4#normalize_params, 0) : untyped
 <ifTemp>$5 = v.is_a?(<constant:Hash>$8) : untyped
 <ifTemp>$5"];
 
-    "bb::<constant:Test>#normalize_params_0" -> "bb::<constant:Test>#normalize_params_2" [style="bold"];
-    "bb::<constant:Test>#normalize_params_0" -> "bb::<constant:Test>#normalize_params_3" [style="tapered"];
+    "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_2" [style="bold"];
+    "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_3" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_1" [label = "block[id=1]()
+    "bb::Test#normalize_params_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_1" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
-    "bb::<constant:Test>#normalize_params_2" [label = "block[id=2](v)
+    "bb::Test#normalize_params_1" -> "bb::Test#normalize_params_1" [style="bold"];
+    "bb::Test#normalize_params_2" [label = "block[id=2](v)
 <statTemp>$10 = self : Test
 <statTemp>$11 = v.to_a() : AppliedType {
-  klass = ::<constant:Array>
+  klass = ::Array
   targs = [
     <constant:Elem> = AppliedType {
-        klass = ::<constant:Array>
+        klass = ::Array
         targs = [
           <constant:Elem> = untyped
         ]
@@ -37,50 +37,50 @@ v = load_arg(<selfMethodTemp>$4#normalize_params, 0) : untyped
 <returnMethodTemp>$3 = <statTemp>$9.sort() : untyped
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_2" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
-    "bb::<constant:Test>#normalize_params_3" [label = "block[id=3](<constant:Array>$16, v)
+    "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_10" [style="bold"];
+    "bb::Test#normalize_params_3" [label = "block[id=3](<constant:Array>$16, v)
 <ifTemp>$13 = v.is_a?(<constant:Array>$16) : untyped
 <ifTemp>$13"];
 
-    "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_4" [style="bold"];
-    "bb::<constant:Test>#normalize_params_3" -> "bb::<constant:Test>#normalize_params_5" [style="tapered"];
+    "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_4" [style="bold"];
+    "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_4" [label = "block[id=4](v)
+    "bb::Test#normalize_params_4" [label = "block[id=4](v)
 <returnMethodTemp>$3 = v.map() : AppliedType {
-  klass = ::<constant:Array>
+  klass = ::Array
   targs = [
     <constant:Elem> = untyped
   ]
 }
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_4" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
-    "bb::<constant:Test>#normalize_params_5" [label = "block[id=5](v)
+    "bb::Test#normalize_params_4" -> "bb::Test#normalize_params_6" [style="bold"];
+    "bb::Test#normalize_params_5" [label = "block[id=5](v)
 <returnMethodTemp>$3 = v : untyped
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_5" -> "bb::<constant:Test>#normalize_params_10" [style="bold"];
-    "bb::<constant:Test>#normalize_params_6" [label = "block[id=6](<returnMethodTemp>$3)
+    "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_10" [style="bold"];
+    "bb::Test#normalize_params_6" [label = "block[id=6](<returnMethodTemp>$3)
 outerLoops: 1
 <block-call>"];
 
-    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_8" [style="bold"];
-    "bb::<constant:Test>#normalize_params_6" -> "bb::<constant:Test>#normalize_params_10" [style="tapered"];
+    "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_8" [style="bold"];
+    "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_10" [style="tapered"];
 
-    "bb::<constant:Test>#normalize_params_8" [label = "block[id=8](<returnMethodTemp>$3)
+    "bb::Test#normalize_params_8" [label = "block[id=8](<returnMethodTemp>$3)
 outerLoops: 1
-e$2 = load_yield_param(::<constant:Test>#normalize_params#<block>$2, 0) : untyped
+e$2 = load_yield_param(::Test#normalize_params#<block>, 0) : untyped
 <statTemp>$19 = self : Test
 <blockReturnTemp>$18 = <statTemp>$19.normalize_params(e$2) : untyped
-<blockReturnTemp>$21 = blockreturn<::<constant:Test>#normalize_params#<block>$2> <blockReturnTemp>$18 : <impossible>
+<blockReturnTemp>$21 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$18 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_8" -> "bb::<constant:Test>#normalize_params_6" [style="bold"];
-    "bb::<constant:Test>#normalize_params_10" [label = "block[id=10](<returnMethodTemp>$3)
+    "bb::Test#normalize_params_8" -> "bb::Test#normalize_params_6" [style="bold"];
+    "bb::Test#normalize_params_10" [label = "block[id=10](<returnMethodTemp>$3)
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Test>#normalize_params_10" -> "bb::<constant:Test>#normalize_params_1" [style="bold"];
+    "bb::Test#normalize_params_10" -> "bb::Test#normalize_params_1" [style="bold"];
 }
 
 }

@@ -10,7 +10,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -19,57 +19,57 @@ begin
 
     def initialize<initialize>()
       begin
-        ::<constant:Parent>#@ivar = T.let(1, Integer)
-        ::<constant:Parent>#@ivar2 = T.let(2, Integer)
+        ::Parent#@ivar = T.let(1, Integer)
+        ::Parent#@ivar2 = T.let(2, Integer)
       end
     end
 
     def hi<hi>()
       begin
-        ::<constant:Parent>#@ivar = 1
-        ::<constant:Parent>#@ivar2
+        ::Parent#@ivar = 1
+        ::Parent#@ivar2
       end
     end
 
     def self.<static-init><<static-init>>()
-      ::<constant:Parent>#@@class_var = T.let("hi", String)
+      ::Parent#@@class_var = T.let("hi", String)
     end
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
     def self.<static-init><<static-init>>()
       begin
-        ::<constant:Mixin>#@@mixin_cvar = T.let(3, Integer)
-        ::<constant:Mixin>#@@mixin_cvar
+        ::Mixin#@@mixin_cvar = T.let(3, Integer)
+        ::Mixin#@@mixin_cvar
         <emptyTree>
       end
     end
   end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin)
     <emptyTree>
 
     <emptyTree>
 
     def child_method<child_method>()
       begin
-        ::<constant:Parent>#@@class_var
-        ::<constant:Mixin>#@@mixin_cvar
-        ::<constant:Parent>#@ivar2
-        ::<constant:Child>#@undefinedivar
+        ::Parent#@@class_var
+        ::Mixin#@@mixin_cvar
+        ::Parent#@ivar2
+        ::Child#@undefinedivar
       end
     end
 
     def self.<static-init><<static-init>>()
       begin
-        ::<constant:Parent>#@@class_var
-        ::<constant:Mixin>#@@mixin_cvar
-        ::<constant:Child>#@@undefined_cvar
+        ::Parent#@@class_var
+        ::Mixin#@@mixin_cvar
+        ::Child#@@undefined_cvar
         <emptyTree>
       end
     end
   end
-  class <emptyTree>::<constant:Child1><<constant:Child1>> < (::<constant:Parent>)
+  class <emptyTree>::<constant:Child1><<constant:Child1>> < (::Parent)
     def self.<static-init><<static-init>>()
-      ::<constant:Parent>#@@class_var
+      ::Parent#@@class_var
     end
   end
   <emptyTree>

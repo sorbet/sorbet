@@ -1,47 +1,47 @@
 digraph "array.rb"{
-subgraph "cluster_::<constant:TestArray>#an_int" {
-    label = "::<constant:TestArray>#an_int";
+subgraph "cluster_::TestArray#an_int" {
+    label = "::TestArray#an_int";
     color = blue;
-    "bb::<constant:TestArray>#an_int_0" [shape = invhouse];
-    "bb::<constant:TestArray>#an_int_1" [shape = parallelogram];
+    "bb::TestArray#an_int_0" [shape = invhouse];
+    "bb::TestArray#an_int_1" [shape = parallelogram];
 
-    "bb::<constant:TestArray>#an_int_0" [label = "block[id=0]()
+    "bb::TestArray#an_int_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 0 : Integer(0)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestArray>#an_int_0" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
-    "bb::<constant:TestArray>#an_int_1" [label = "block[id=1]()
+    "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
+    "bb::TestArray#an_int_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestArray>#an_int_1" -> "bb::<constant:TestArray>#an_int_1" [style="bold"];
+    "bb::TestArray#an_int_1" -> "bb::TestArray#an_int_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:TestArray>#a_string" {
-    label = "::<constant:TestArray>#a_string";
+subgraph "cluster_::TestArray#a_string" {
+    label = "::TestArray#a_string";
     color = blue;
-    "bb::<constant:TestArray>#a_string_0" [shape = invhouse];
-    "bb::<constant:TestArray>#a_string_1" [shape = parallelogram];
+    "bb::TestArray#a_string_0" [shape = invhouse];
+    "bb::TestArray#a_string_1" [shape = parallelogram];
 
-    "bb::<constant:TestArray>#a_string_0" [label = "block[id=0]()
+    "bb::TestArray#a_string_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = \"str\" : String(\"str\")
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestArray>#a_string_0" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
-    "bb::<constant:TestArray>#a_string_1" [label = "block[id=1]()
+    "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
+    "bb::TestArray#a_string_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestArray>#a_string_1" -> "bb::<constant:TestArray>#a_string_1" [style="bold"];
+    "bb::TestArray#a_string_1" -> "bb::TestArray#a_string_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:TestArray>#test_arrays" {
-    label = "::<constant:TestArray>#test_arrays";
+subgraph "cluster_::TestArray#test_arrays" {
+    label = "::TestArray#test_arrays";
     color = blue;
-    "bb::<constant:TestArray>#test_arrays_0" [shape = invhouse];
-    "bb::<constant:TestArray>#test_arrays_1" [shape = parallelogram];
+    "bb::TestArray#test_arrays_0" [shape = invhouse];
+    "bb::TestArray#test_arrays_1" [shape = parallelogram];
 
-    "bb::<constant:TestArray>#test_arrays_0" [label = "block[id=0]()
+    "bb::TestArray#test_arrays_0" [label = "block[id=0]()
 <constant:<Magic>>$5 = alias <constant:<Magic>> : <Magic>
 <statTemp>$4 = <constant:<Magic>>$5.<build-array>() : TupleType {
 }
@@ -66,11 +66,11 @@ subgraph "cluster_::<constant:TestArray>#test_arrays" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestArray>#test_arrays_0" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];
-    "bb::<constant:TestArray>#test_arrays_1" [label = "block[id=1]()
+    "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
+    "bb::TestArray#test_arrays_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestArray>#test_arrays_1" -> "bb::<constant:TestArray>#test_arrays_1" [style="bold"];
+    "bb::TestArray#test_arrays_1" -> "bb::TestArray#test_arrays_1" [style="bold"];
 }
 
 }

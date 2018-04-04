@@ -1,11 +1,11 @@
 digraph "break.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <statTemp>$5 = self : <Class:<root>>
 <statTemp>$7 = self : <Class:<root>>
 <statTemp>$6 = <statTemp>$7.foo() : untyped
@@ -13,20 +13,20 @@ subgraph "cluster_#<static-init>$10" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#foo" {
-    label = "::<constant:Object>#foo";
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
     color = blue;
-    "bb::<constant:Object>#foo_0" [shape = invhouse];
-    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+    "bb::Object#foo_0" [shape = invhouse];
+    "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
+    "bb::Object#foo_0" [label = "block[id=0]()
 <constant:<Magic>>$8 = alias <constant:<Magic>> : <Magic>
 <arrayTemp>$6 = 1 : Integer(1)
 <arrayTemp>$7 = 2 : Integer(2)
@@ -35,36 +35,36 @@ subgraph "cluster_::<constant:Object>#foo" {
   1 = Integer(2)
 }
 <returnMethodTemp>$3 = <statTemp>$5.map() : AppliedType {
-  klass = ::<constant:Array>
+  klass = ::Array
   targs = [
     <constant:Elem> = untyped
   ]
 }
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
-    "bb::<constant:Object>#foo_1" [label = "block[id=1]()
+    "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
+    "bb::Object#foo_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_2" [label = "block[id=2](<returnMethodTemp>$3)
 outerLoops: 1
 <block-call>"];
 
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
+    "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
+    "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::<constant:Object>#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::Object#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
-x$2 = load_yield_param(::<constant:Object>#foo#<block>$2, 0) : untyped
+x$2 = load_yield_param(::Object#foo#<block>, 0) : untyped
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_3" [style="bold"];
+    "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
 }
 
 }

@@ -1,65 +1,65 @@
 digraph "retry_multiple.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <statTemp>$7 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$7.main() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#main" {
-    label = "::<constant:Object>#main";
+subgraph "cluster_::Object#main" {
+    label = "::Object#main";
     color = blue;
-    "bb::<constant:Object>#main_0" [shape = invhouse];
-    "bb::<constant:Object>#main_1" [shape = parallelogram];
+    "bb::Object#main_0" [shape = invhouse];
+    "bb::Object#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0]()
+    "bb::Object#main_0" [label = "block[id=0]()
 <constant:A>$15 = alias <constant:A> : <Class:A>
 <constant:B>$25 = alias <constant:B> : <Class:B>
 try = 0 : Integer(0)
 <unconditional>"];
 
-    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_2" [style="bold"];
-    "bb::<constant:Object>#main_1" [label = "block[id=1]()
+    "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
+    "bb::Object#main_1" [label = "block[id=1]()
 <returnMethodTemp>$2 = 1
 <returnMethodTemp>$2 = 2
 <unconditional>"];
 
-    "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_2" [label = "block[id=2](<constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_2" [label = "block[id=2](<constant:A>$15, <constant:B>$25, try)
 <rescueTemp$5 = <unanalyzable> : untyped
 <rescueTemp$5"];
 
-    "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_3" [style="bold"];
-    "bb::<constant:Object>#main_2" -> "bb::<constant:Object>#main_4" [style="tapered"];
+    "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
+    "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
-    "bb::<constant:Object>#main_3" [label = "block[id=3](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_3" [label = "block[id=3](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <rescueTemp$28 = <rescueTemp$5.is_a?(<constant:A>$15) : untyped
 <rescueTemp$28"];
 
-    "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_14" [style="bold"];
-    "bb::<constant:Object>#main_3" -> "bb::<constant:Object>#main_15" [style="tapered"];
+    "bb::Object#main_3" -> "bb::Object#main_14" [style="bold"];
+    "bb::Object#main_3" -> "bb::Object#main_15" [style="tapered"];
 
-    "bb::<constant:Object>#main_4" [label = "block[id=4](<constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_4" [label = "block[id=4](<constant:A>$15, <constant:B>$25, try)
 <statTemp>$8 = 3 : Integer(3)
 <ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass
 <ifTemp>$6"];
 
-    "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_5" [style="bold"];
-    "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_6" [style="tapered"];
+    "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
+    "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
 
-    "bb::<constant:Object>#main_5" [label = "block[id=5](<constant:A>$15, try)
+    "bb::Object#main_5" [label = "block[id=5](<constant:A>$15, try)
 <statTemp>$10 = try : Integer(0)
 <statTemp>$11 = 1 : Integer(1)
 try = <statTemp>$10.+(<statTemp>$11) : Integer
@@ -68,16 +68,16 @@ try = <statTemp>$10.+(<statTemp>$11) : Integer
 <returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#main_5" -> "bb::<constant:Object>#main_13" [style="bold"];
-    "bb::<constant:Object>#main_6" [label = "block[id=6](<constant:B>$25, try)
+    "bb::Object#main_5" -> "bb::Object#main_13" [style="bold"];
+    "bb::Object#main_6" [label = "block[id=6](<constant:B>$25, try)
 <statTemp>$18 = 6 : Integer(6)
 <ifTemp>$16 = try.<(<statTemp>$18) : TrueClass | FalseClass
 <ifTemp>$16"];
 
-    "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_7" [style="bold"];
-    "bb::<constant:Object>#main_6" -> "bb::<constant:Object>#main_13" [style="tapered"];
+    "bb::Object#main_6" -> "bb::Object#main_7" [style="bold"];
+    "bb::Object#main_6" -> "bb::Object#main_13" [style="tapered"];
 
-    "bb::<constant:Object>#main_7" [label = "block[id=7](<constant:B>$25, try)
+    "bb::Object#main_7" [label = "block[id=7](<constant:B>$25, try)
 <statTemp>$20 = try : Integer(0)
 <statTemp>$21 = 1 : Integer(1)
 try = <statTemp>$20.+(<statTemp>$21) : Integer
@@ -86,33 +86,33 @@ try = <statTemp>$20.+(<statTemp>$21) : Integer
 <returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#main_7" -> "bb::<constant:Object>#main_13" [style="bold"];
-    "bb::<constant:Object>#main_13" [label = "block[id=13](<returnMethodTemp>$2)
+    "bb::Object#main_7" -> "bb::Object#main_13" [style="bold"];
+    "bb::Object#main_13" [label = "block[id=13](<returnMethodTemp>$2)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#main_13" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_14" [label = "block[id=14](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_13" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_14" [label = "block[id=14](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <statTemp>$30 = self : Object
 <statTemp>$31 = \"rescue A \" : String(\"rescue A \")
 <statTemp>$29 = <statTemp>$30.puts(<statTemp>$31) : NilClass
 <unconditional>"];
 
-    "bb::<constant:Object>#main_14" -> "bb::<constant:Object>#main_2" [style="bold"];
-    "bb::<constant:Object>#main_15" [label = "block[id=15](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_14" -> "bb::Object#main_2" [style="bold"];
+    "bb::Object#main_15" [label = "block[id=15](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <rescueTemp$34 = <rescueTemp$5.is_a?(<constant:B>$25) : untyped
 <rescueTemp$34"];
 
-    "bb::<constant:Object>#main_15" -> "bb::<constant:Object>#main_16" [style="bold"];
-    "bb::<constant:Object>#main_15" -> "bb::<constant:Object>#main_1" [style="tapered"];
+    "bb::Object#main_15" -> "bb::Object#main_16" [style="bold"];
+    "bb::Object#main_15" -> "bb::Object#main_1" [style="tapered"];
 
-    "bb::<constant:Object>#main_16" [label = "block[id=16](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
+    "bb::Object#main_16" [label = "block[id=16](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)
 <statTemp>$36 = self : Object
 <statTemp>$37 = \"rescue B \" : String(\"rescue B \")
 <statTemp>$35 = <statTemp>$36.puts(<statTemp>$37) : NilClass
 <unconditional>"];
 
-    "bb::<constant:Object>#main_16" -> "bb::<constant:Object>#main_2" [style="bold"];
+    "bb::Object#main_16" -> "bb::Object#main_2" [style="bold"];
 }
 
 }

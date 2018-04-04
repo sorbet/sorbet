@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<constant:<todo sym>>)
+class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>

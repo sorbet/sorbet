@@ -55,7 +55,7 @@ ClassDef{
                       }
                     ],
                     expr = Send{
-                      recv = Self{ claz = ::<constant:<todo sym>> }
+                      recv = Self{ claz = ::<todo sym> }
                       name = raise
                       block = nullptr
                       args = [
@@ -76,7 +76,7 @@ ClassDef{
                     body = InsSeq{
                       stats = [
                         Send{
-                          recv = Self{ claz = ::<constant:<todo sym>> }
+                          recv = Self{ claz = ::<todo sym> }
                           name = puts
                           block = nullptr
                           args = [
@@ -97,7 +97,7 @@ ClassDef{
         }
       ],
       expr = Send{
-        recv = Self{ claz = ::<constant:<todo sym>> }
+        recv = Self{ claz = ::<todo sym> }
         name = main
         block = nullptr
         args = [

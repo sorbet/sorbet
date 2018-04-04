@@ -1,7 +1,7 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    class <emptyTree>::<constant:TestDSLBuilder><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({:"opt_string" => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
+    class <emptyTree>::<constant:TestDSLBuilder><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
 
       def self.opt_string<<constant:<todo sym>>>(opt_string)
         <emptyTree>
@@ -10,16 +10,16 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
 
       def self.get_opt_string<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
 
       def opt_string<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
-      self(<constant:<todo sym>>).sig({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
 
       def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted)
         <emptyTree>
@@ -28,16 +28,16 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
 
       def self.get_opt_int_defaulted<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
 
       def opt_int_defaulted<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
-      self(<constant:<todo sym>>).sig({:"req_string" => <emptyTree>::<constant:String>}).returns(::<constant:NilClass>)
+      self(<constant:<todo sym>>).sig({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
 
       def self.req_string<<constant:<todo sym>>>(req_string)
         <emptyTree>
@@ -46,13 +46,13 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
 
       def self.get_req_string<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
 
       self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
 
       def req_string<<constant:<todo sym>>>()
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
     end
     class <emptyTree>::<constant:TestChild><<constant:<todo sym>>> < (<emptyTree>::<constant:TestDSLBuilder>)

@@ -1,10 +1,10 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/constants.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/constants.rb:2
   class <constant:A> (<constant:BasicObject>) -> <Class:A> @ test/testdata/namer/constants.rb:2
     class <constant:B> (<constant:BasicObject>) -> <Class:A::B> @ test/testdata/namer/constants.rb:5
       method <static-init> () @ test/testdata/namer/constants.rb:6
       static-field <constant:C> -> Integer(1) @ test/testdata/namer/constants.rb:3
       static-field <constant:D> -> Integer(1) @ test/testdata/namer/constants.rb:8
-    class <singleton class:<constant:B>> < ::<constant:Module> () @ test/testdata/namer/constants.rb:3
-  class <singleton class:<constant:A>> < ::<constant:Module> () @ test/testdata/namer/constants.rb:2
+    class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/constants.rb:3
+  class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/constants.rb:2
   method <static-init>$10 () @ test/testdata/namer/constants.rb:2
 

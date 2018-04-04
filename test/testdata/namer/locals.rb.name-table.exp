@@ -1,9 +1,9 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  class <constant:TestLocals> < ::<constant:Object> () -> <Class:TestLocals> @ test/testdata/namer/locals.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
+  class <constant:TestLocals> < ::Object () -> <Class:TestLocals> @ test/testdata/namer/locals.rb:2
     method method () @ test/testdata/namer/locals.rb:3
       method <block>$2 () @ test/testdata/namer/locals.rb:7
         method <block>$2 () @ test/testdata/namer/locals.rb:10
       method <block>$3 (a) @ test/testdata/namer/locals.rb:17
         argument a<> @ test/testdata/namer/locals.rb:17
-  class <singleton class:<constant:TestLocals>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/locals.rb:2
+  class <singleton class:<constant:TestLocals>> < ::<Class:Object> () @ test/testdata/namer/locals.rb:2
 

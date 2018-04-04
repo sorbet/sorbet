@@ -7,7 +7,7 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>::<constant:C> = <assignTemp$2.[](2)
       <assignTemp$2
     end
-    class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
       def some_method<<constant:<todo sym>>>(array)
         begin
           begin
@@ -31,12 +31,12 @@ class <emptyTree><<constant:<root>>> < ()
           begin
             <assignTemp$5 = array
             a = <assignTemp$5.[](0)
-            b = <assignTemp$5.slice(::<constant:Range>.new(1, -1, false))
+            b = <assignTemp$5.slice(::Range.new(1, -1, false))
             <assignTemp$5
           end
           begin
             <assignTemp$6 = array
-            a = <assignTemp$6.slice(::<constant:Range>.new(0, -1, true))
+            a = <assignTemp$6.slice(::Range.new(0, -1, true))
             b = <assignTemp$6.[](-1)
             <assignTemp$6
           end
@@ -44,7 +44,7 @@ class <emptyTree><<constant:<root>>> < ()
             <assignTemp$7 = array
             a = <assignTemp$7.[](0)
             b = <assignTemp$7.[](1)
-            c = <assignTemp$7.slice(::<constant:Range>.new(2, -2, true))
+            c = <assignTemp$7.slice(::Range.new(2, -2, true))
             d = <assignTemp$7.[](-2)
             e = <assignTemp$7.[](-1)
             <assignTemp$7

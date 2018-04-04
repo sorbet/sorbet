@@ -1,7 +1,7 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
+class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
   class <constant:A> (<constant:BasicObject>) -> <Class:A> @ test/testdata/namer/conflicting_names.rb:2
-    class <constant:Foo> < ::<constant:Object> () -> <Class:A::Foo> @ test/testdata/namer/conflicting_names.rb:6
-    class <singleton class:<constant:Foo>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/conflicting_names.rb:6
+    class <constant:Foo> < ::Object () -> <Class:A::Foo> @ test/testdata/namer/conflicting_names.rb:6
+    class <singleton class:<constant:Foo>> < ::<Class:Object> () @ test/testdata/namer/conflicting_names.rb:6
     method Foo () @ test/testdata/namer/conflicting_names.rb:3
-  class <singleton class:<constant:A>> < ::<constant:Module> () @ test/testdata/namer/conflicting_names.rb:2
+  class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/conflicting_names.rb:2
 

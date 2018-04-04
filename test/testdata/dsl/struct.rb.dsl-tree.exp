@@ -2,17 +2,17 @@ class <emptyTree><<constant:<root>>> < ()
   begin
     self(<constant:<todo sym>>).require_relative("../../t")
     module <emptyTree>::<constant:Foo><<constant:<todo sym>>> < ()
-      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
         <emptyTree>
       end
     end
-    class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<todo sym>)
       <emptyTree>::<constant:B> = <emptyTree>::<constant:Foo>::<constant:Struct>.new()
 
       var = <emptyTree>::<constant:Struct>.new(:"foo")
     end
-    class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
+    class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
         def foo<<constant:<todo sym>>>()
           <emptyTree>
         end
@@ -29,14 +29,14 @@ class <emptyTree><<constant:<root>>> < ()
           arg0
         end
 
-        self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>, :"bar" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
         def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-          ::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
+          ::T.cast(nil, <emptyTree>::<constant:A>)
         end
       end
     end
-    class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<todo sym>)
       class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
         def foo<<constant:<todo sym>>>()
           <emptyTree>
@@ -61,8 +61,8 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
     end
-    class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
+    class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
         def foo<<constant:<todo sym>>>()
           <emptyTree>
         end
@@ -71,14 +71,14 @@ class <emptyTree><<constant:<root>>> < ()
           arg0
         end
 
-        self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
         def self.new<<constant:<todo sym>>>(foo = nil)
-          ::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
+          ::T.cast(nil, <emptyTree>::<constant:A>)
         end
       end
 
-      class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<constant:Struct>)
+      class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::Struct)
         def foo<<constant:<todo sym>>>()
           <emptyTree>
         end
@@ -87,19 +87,19 @@ class <emptyTree><<constant:<root>>> < ()
           arg0
         end
 
-        self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:B>)
+        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
 
         def self.new<<constant:<todo sym>>>(foo = nil)
-          ::<constant:T>.cast(nil, <emptyTree>::<constant:B>)
+          ::T.cast(nil, <emptyTree>::<constant:B>)
         end
       end
     end
-    class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<todo sym>)
+      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
         <emptyTree>
       end
 
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<constant:Struct>)
+      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
         def foo<<constant:<todo sym>>>()
           <emptyTree>
         end
@@ -116,14 +116,14 @@ class <emptyTree><<constant:<root>>> < ()
           arg0
         end
 
-        self(<constant:<todo sym>>).sig({:"foo" => ::<constant:BasicObject>, :"bar" => ::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
         def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-          ::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
+          ::T.cast(nil, <emptyTree>::<constant:A>)
         end
       end
     end
-    class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
       def main<<constant:<todo sym>>>()
         begin
           a = <emptyTree>::<constant:Struct>.new(:"foo")

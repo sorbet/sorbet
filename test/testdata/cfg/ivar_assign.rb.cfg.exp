@@ -1,41 +1,41 @@
 digraph "ivar_assign.rb"{
-subgraph "cluster_::<constant:TestIVar>#initialize" {
-    label = "::<constant:TestIVar>#initialize";
+subgraph "cluster_::TestIVar#initialize" {
+    label = "::TestIVar#initialize";
     color = blue;
-    "bb::<constant:TestIVar>#initialize_0" [shape = invhouse];
-    "bb::<constant:TestIVar>#initialize_1" [shape = parallelogram];
+    "bb::TestIVar#initialize_0" [shape = invhouse];
+    "bb::TestIVar#initialize_1" [shape = parallelogram];
 
-    "bb::<constant:TestIVar>#initialize_0" [label = "block[id=0]()
+    "bb::TestIVar#initialize_0" [label = "block[id=0]()
 @foo$4 = alias @foo : Integer
 <castTemp$5 = 0 : Integer(0)
 @foo$4 = cast(<castTemp$5, Integer); : Integer
 <finalReturn> = return @foo$4 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestIVar>#initialize_0" -> "bb::<constant:TestIVar>#initialize_1" [style="bold"];
-    "bb::<constant:TestIVar>#initialize_1" [label = "block[id=1]()
+    "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
+    "bb::TestIVar#initialize_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestIVar>#initialize_1" -> "bb::<constant:TestIVar>#initialize_1" [style="bold"];
+    "bb::TestIVar#initialize_1" -> "bb::TestIVar#initialize_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:TestIVar>#test" {
-    label = "::<constant:TestIVar>#test";
+subgraph "cluster_::TestIVar#test" {
+    label = "::TestIVar#test";
     color = blue;
-    "bb::<constant:TestIVar>#test_0" [shape = invhouse];
-    "bb::<constant:TestIVar>#test_1" [shape = parallelogram];
+    "bb::TestIVar#test_0" [shape = invhouse];
+    "bb::TestIVar#test_1" [shape = parallelogram];
 
-    "bb::<constant:TestIVar>#test_0" [label = "block[id=0]()
+    "bb::TestIVar#test_0" [label = "block[id=0]()
 @foo$4 = alias @foo : Integer
 @foo$4 = nil : Integer
 <finalReturn> = return @foo$4 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestIVar>#test_0" -> "bb::<constant:TestIVar>#test_1" [style="bold"];
-    "bb::<constant:TestIVar>#test_1" [label = "block[id=1]()
+    "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];
+    "bb::TestIVar#test_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestIVar>#test_1" -> "bb::<constant:TestIVar>#test_1" [style="bold"];
+    "bb::TestIVar#test_1" -> "bb::TestIVar#test_1" [style="bold"];
 }
 
 }

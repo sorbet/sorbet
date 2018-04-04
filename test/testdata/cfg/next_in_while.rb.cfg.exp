@@ -1,35 +1,35 @@
 digraph "next_in_while.rb"{
-subgraph "cluster_::<constant:Object>#foo" {
-    label = "::<constant:Object>#foo";
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
     color = blue;
-    "bb::<constant:Object>#foo_0" [shape = invhouse];
-    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+    "bb::Object#foo_0" [shape = invhouse];
+    "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
+    "bb::Object#foo_0" [label = "block[id=0]()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
-    "bb::<constant:Object>#foo_1" [label = "block[id=1]()
+    "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
+    "bb::Object#foo_1" [label = "block[id=1]()
 <statTemp>$11 = self
 <statTemp>$5 = <statTemp>$11.bad()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2]()
+    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_2" [label = "block[id=2]()
 outerLoops: 1
 <whileTemp>$4 = true : TrueClass
 <whileTemp>$4"];
 
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_3" [style="tapered"];
+    "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
+    "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::<constant:Object>#foo_3" [label = "block[id=3]()
+    "bb::Object#foo_3" [label = "block[id=3]()
 <returnMethodTemp>$2 = nil
 <finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_3" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_4" [label = "block[id=4]()
+    "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_4" [label = "block[id=4]()
 outerLoops: 1
 <statTemp>$7 = self : Object
 <statTemp>$6 = <statTemp>$7.good() : untyped
@@ -37,7 +37,7 @@ outerLoops: 1
 <blockReturnTemp>$9 = <statTemp>$10.value() : untyped
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_2" [style="bold"];
+    "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];
 }
 
 }

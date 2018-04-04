@@ -7,8 +7,8 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -17,33 +17,33 @@ begin
 
     <emptyTree>
   end
-  class <emptyTree>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:C><<constant:C>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
   end
-  class <emptyTree>::<constant:A><<constant:A>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:A><<constant:A>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
       begin
-        ::<constant:Outer2>::<constant:Inner1>::<constant:A>
-        ::<constant:Outer2>::<constant:Inner1>
-        ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>
-        ::<constant:Outer1>
+        ::Outer2::Inner1::A
+        ::Outer2::Inner1
+        ::Outer2::Inner1::Inner2
+        ::Outer1
         <emptyTree>
       end
     end
   end
-  class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
       begin
-        ::<constant:Outer2>::<constant:C>
-        ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>::<constant:A>
+        ::Outer2::C
+        ::Outer2::Inner1::Inner2::A
         <emptyTree>
       end
     end
   end
-  class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:Outer2>::<constant:Inner1>::<constant:Inner2>)  end
+  class <emptyTree>::<constant:Other><<constant:Other>> < (::Outer2::Inner1::Inner2)  end
   <emptyTree>
 end

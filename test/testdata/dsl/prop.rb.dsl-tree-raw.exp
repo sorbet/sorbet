@@ -24,7 +24,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = prop
               block = nullptr
               args = [
@@ -32,7 +32,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = prop
               block = nullptr
               args = [
@@ -42,7 +42,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = prop
               block = nullptr
               args = [
@@ -55,7 +55,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = prop
               block = nullptr
               args = [
@@ -69,7 +69,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = prop
               block = nullptr
               args = [
@@ -87,7 +87,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = optional
               block = nullptr
               args = [
@@ -101,7 +101,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = optional
               block = nullptr
               args = [
@@ -132,7 +132,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = optional
               block = nullptr
               args = [
@@ -152,7 +152,7 @@ ClassDef{
                   block = nullptr
                   args = [
                     Send{
-                      recv = Self{ claz = ::<constant:<todo sym>> }
+                      recv = Self{ claz = ::<todo sym> }
                       name = how_many_cases
                       block = nullptr
                       args = [
@@ -184,7 +184,7 @@ ClassDef{
             }
 
             Send{
-              recv = Self{ claz = ::<constant:<todo sym>> }
+              recv = Self{ claz = ::<todo sym> }
               name = optional
               block = nullptr
               args = [
@@ -214,7 +214,7 @@ ClassDef{
           rhs = [
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -274,7 +274,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -326,7 +326,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -385,7 +385,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -460,7 +460,7 @@ ClassDef{
           rhs = [
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -502,7 +502,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -554,7 +554,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -614,7 +614,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -666,7 +666,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -708,7 +708,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -760,7 +760,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -802,7 +802,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -854,7 +854,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -912,7 +912,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -961,7 +961,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1003,7 +1003,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1055,7 +1055,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1115,7 +1115,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1194,7 +1194,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1236,7 +1236,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1288,7 +1288,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1356,7 +1356,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1447,7 +1447,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1523,7 +1523,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1626,7 +1626,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1668,7 +1668,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1747,7 +1747,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1789,7 +1789,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1841,7 +1841,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1883,7 +1883,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1935,7 +1935,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -1977,7 +1977,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2056,7 +2056,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2098,7 +2098,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2140,7 +2140,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2182,7 +2182,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2234,7 +2234,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2294,7 +2294,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2346,7 +2346,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2408,7 +2408,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2468,7 +2468,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2520,7 +2520,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2582,7 +2582,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2642,7 +2642,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2694,7 +2694,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2756,7 +2756,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2816,7 +2816,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2868,7 +2868,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2936,7 +2936,7 @@ ClassDef{
           rhs = [
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -2976,7 +2976,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3025,7 +3025,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3065,7 +3065,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3124,7 +3124,7 @@ ClassDef{
           rhs = [
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3164,7 +3164,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3213,7 +3213,7 @@ ClassDef{
 
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [
@@ -3263,7 +3263,7 @@ ClassDef{
           rhs = [
             Send{
               recv = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = sig
                 block = nullptr
                 args = [

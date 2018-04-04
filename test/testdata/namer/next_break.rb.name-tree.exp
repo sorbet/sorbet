@@ -1,14 +1,14 @@
-class <emptyTree>::<constant:Test><<constant:Test>> < (::<constant:<todo sym>>)
+class <emptyTree>::<constant:Test><<constant:Test>> < (::<todo sym>)
   def test_next_break<test_next_break>()
     self(<constant:Test>).each() do ||
       begin
         if self(<constant:Test>).rand()
-          next(::<constant:Test>::<constant:Foo>)
+          next(::Test::Foo)
         else
           <emptyTree>
         end
         if self(<constant:Test>).rand()
-          break(::<constant:Test>::<constant:Bar>)
+          break(::Test::Bar)
         else
           <emptyTree>
         end

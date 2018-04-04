@@ -8,6 +8,6 @@ begin
       <emptyTree>
     end
   end
-  class <emptyTree>::<constant:Foo><<constant:Foo>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:Foo><<constant:Foo>> < (::<todo sym>)  end
   <emptyTree>
 end

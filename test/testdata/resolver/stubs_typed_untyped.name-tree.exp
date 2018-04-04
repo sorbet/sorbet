@@ -3,8 +3,8 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         <emptyTree>
-        ::<constant:untyped>
-        ::<constant:untyped>
+        ::untyped
+        ::untyped
       end
     end
   end
@@ -14,8 +14,8 @@ end
 class <emptyTree><<constant:<root>>> < ()
   def self.<static-init><<static-init>$11>()
     begin
-      ::<constant:Bar>
-      ::<constant:Foo>::<constant:Bar>
+      ::Bar
+      ::Foo::Bar
     end
   end
 end

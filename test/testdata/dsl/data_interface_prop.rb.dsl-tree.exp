@@ -1,25 +1,25 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    class <emptyTree>::<constant:Other><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+    class <emptyTree>::<constant:Other><<constant:<todo sym>>> < (::<todo sym>)
       <emptyTree>
     end
-    class <emptyTree>::<constant:SomeDataInterface><<constant:<todo sym>>> < (::<constant:<todo sym>>)
-      self(<constant:<todo sym>>).sig({}).returns(::<constant:T>.nilable(<emptyTree>::<constant:String>))
+    class <emptyTree>::<constant:SomeDataInterface><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def foo<<constant:<todo sym>>>()
-        ::<constant:T>.cast(nil, ::<constant:T>.nilable(<emptyTree>::<constant:String>))
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def foo=<<constant:<todo sym>>>(arg0)
-        ::<constant:T>.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({:"opts" => ::<constant:T>.untyped()}).returns(::<constant:T>.nilable(<emptyTree>::<constant:Other>))
+      self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:Other>))
 
       def foo_<<constant:<todo sym>>>(*opts:)
-        ::<constant:T>.unsafe(nil)
+        ::T.unsafe(nil)
       end
     end
     def test<<constant:<todo sym>>>()

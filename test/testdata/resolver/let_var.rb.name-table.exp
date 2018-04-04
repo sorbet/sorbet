@@ -1,7 +1,7 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/resolver/let_var.rb:2
-  class <constant:Child1> < ::<constant:Parent> () -> <Class:Child1> @ test/testdata/resolver/let_var.rb:39
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver/let_var.rb:2
+  class <constant:Child1> < ::Parent () -> <Class:Child1> @ test/testdata/resolver/let_var.rb:39
     method <static-init> () @ test/testdata/resolver/let_var.rb:40
-  class <constant:Child> < ::<constant:Parent> (<constant:Mixin>) -> <Class:Child> @ test/testdata/resolver/let_var.rb:23
+  class <constant:Child> < ::Parent (<constant:Mixin>) -> <Class:Child> @ test/testdata/resolver/let_var.rb:23
     field @undefinedivar -> untyped @ test/testdata/resolver/let_var.rb:34
     method <static-init> () @ test/testdata/resolver/let_var.rb:23
     method child_method () @ test/testdata/resolver/let_var.rb:30
@@ -9,17 +9,17 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
   class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/resolver/let_var.rb:18
     method <static-init> () @ test/testdata/resolver/let_var.rb:18
     static-field @@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
-  class <constant:Parent> < ::<constant:Object> () -> <Class:Parent> @ test/testdata/resolver/let_var.rb:2
+  class <constant:Parent> < ::Object () -> <Class:Parent> @ test/testdata/resolver/let_var.rb:2
     field @ivar -> Integer @ test/testdata/resolver/let_var.rb:4
     field @ivar2 -> Integer @ test/testdata/resolver/let_var.rb:5
     method <static-init> () @ test/testdata/resolver/let_var.rb:2
     method hi () @ test/testdata/resolver/let_var.rb:12
     method initialize () @ test/testdata/resolver/let_var.rb:3
     static-field @@class_var -> String @ test/testdata/resolver/let_var.rb:8
-  class <singleton class:<constant:Child1>> < ::<singleton class:<constant:Parent>> () @ test/testdata/resolver/let_var.rb:39
-  class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> () @ test/testdata/resolver/let_var.rb:23
-  class <singleton class:<constant:Mixin>> < ::<constant:Module> () @ test/testdata/resolver/let_var.rb:18
-  class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/let_var.rb:2
+  class <singleton class:<constant:Child1>> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:39
+  class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:23
+  class <singleton class:<constant:Mixin>> < ::Module () @ test/testdata/resolver/let_var.rb:18
+  class <singleton class:<constant:Parent>> < ::<Class:Object> () @ test/testdata/resolver/let_var.rb:2
   method <static-init>$10 () @ test/testdata/resolver/let_var.rb:2
-  static-field <constant:Alias> -> AliasType { symbol = ::<constant:Parent> } @ test/testdata/resolver/let_var.rb:38
+  static-field <constant:Alias> -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
 

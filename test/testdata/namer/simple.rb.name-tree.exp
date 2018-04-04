@@ -12,7 +12,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -29,25 +29,25 @@ begin
       <emptyTree>
     end
   end
-  class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<todo sym>)  end
   module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()  end
   module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
     <emptyTree>
   end
-  class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>)  end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
   module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()  end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::<constant:Parent>, ::<constant:Mixin>)
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin)
     def self.<static-init><<static-init>>()
       begin
-        self(<singleton class:<constant:Child>>).include(::<constant:Mixin>, ::<constant:Mixin>)
+        self(<singleton class:<constant:Child>>).include(::Mixin, ::Mixin)
         self(<singleton class:<constant:Child>>).include(3)
-        self(<singleton class:<constant:Child>>).include(::<constant:Mixin>) do ||
+        self(<singleton class:<constant:Child>>).include(::Mixin) do ||
           <emptyTree>
         end
-        self(<singleton class:<constant:Child>>).whatever().include(::<constant:OtherMixin>)
+        self(<singleton class:<constant:Child>>).whatever().include(::OtherMixin)
         <emptyTree>
       end
     end

@@ -14,7 +14,7 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
 
-      class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<todo sym>)
         self(<constant:<todo sym>>).include(<emptyTree>::<constant:Chalk>::<constant:Log>)
 
         <emptyTree>::<constant:MAX_AFFECTED_FILES> = 100
@@ -64,7 +64,7 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
 
-      class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<todo sym>)
         self(<constant:<todo sym>>).attr_reader(:"repo")
 
         self(<constant:<todo sym>>).attr_reader(:"assignee")
@@ -99,7 +99,7 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
 
-      class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<todo sym>)
         <emptyTree>::<constant:TOTAL_TIME_MS> = 10000
 
         <emptyTree>::<constant:PER_RULE_MS> = 2000
@@ -147,7 +147,7 @@ class <emptyTree><<constant:<root>>> < ()
         end
       end
 
-      class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<constant:<todo sym>>)
+      class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<todo sym>)
         def initialize<<constant:<todo sym>>>(raw_diff)
           begin
             @raw = raw_diff
@@ -205,7 +205,7 @@ class <emptyTree><<constant:<root>>> < ()
 
         self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
             begin
-              parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](<emptyTree>::<constant:Range>.new(1, -1))
+              parts = diff.split(::Regexp.new("^diff [^\n]*\n", 0.|(4))).[](<emptyTree>::<constant:Range>.new(1, -1))
               if parts
                 parts
               else

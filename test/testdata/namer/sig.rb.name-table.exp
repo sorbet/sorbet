@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/sig.rb:2
-  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/namer/sig.rb:7
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/sig.rb:2
+  class <constant:A> < ::Object () -> <Class:A> @ test/testdata/namer/sig.rb:7
     method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig.rb:49
       argument a<> -> untyped @ test/testdata/namer/sig.rb:34
       argument b<> -> untyped @ test/testdata/namer/sig.rb:35
@@ -34,13 +34,13 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       argument d<> -> T1 | T2 @ test/testdata/namer/sig.rb:12
       argument e<> -> untyped @ test/testdata/namer/sig.rb:13
       argument f<> -> AppliedType {
-        klass = ::<constant:Array>
+        klass = ::Array
         targs = [
           <constant:Elem> = T1
         ]
       } @ test/testdata/namer/sig.rb:14
       argument g<> -> AppliedType {
-        klass = ::<constant:Hash>
+        klass = ::Hash
         targs = [
           <constant:K> = T1
           <constant:V> = T2
@@ -86,14 +86,14 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       argument <blk><block> -> untyped @ test/testdata/namer/sig.rb:104
       argument x<> -> Integer @ test/testdata/namer/sig.rb:102
   class <constant:M1> (<constant:BasicObject>) -> <Class:M1> @ test/testdata/namer/sig.rb:4
-  class <constant:T1> < ::<constant:Object> () -> <Class:T1> @ test/testdata/namer/sig.rb:2
-  class <constant:T2> < ::<constant:Object> () -> <Class:T2> @ test/testdata/namer/sig.rb:3
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/sig.rb:7
+  class <constant:T1> < ::Object () -> <Class:T1> @ test/testdata/namer/sig.rb:2
+  class <constant:T2> < ::Object () -> <Class:T2> @ test/testdata/namer/sig.rb:3
+  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/sig.rb:7
     method static : private (x) -> T1 @ test/testdata/namer/sig.rb:93
       argument x<> -> T1 @ test/testdata/namer/sig.rb:92
-  class <singleton class:<constant:M1>> < ::<constant:Module> () @ test/testdata/namer/sig.rb:4
-  class <singleton class:<constant:T1>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/sig.rb:2
-  class <singleton class:<constant:T2>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/sig.rb:3
+  class <singleton class:<constant:M1>> < ::Module () @ test/testdata/namer/sig.rb:4
+  class <singleton class:<constant:T1>> < ::<Class:Object> () @ test/testdata/namer/sig.rb:2
+  class <singleton class:<constant:T2>> < ::<Class:Object> () @ test/testdata/namer/sig.rb:3
   method <static-init>$10 () @ test/testdata/namer/sig.rb:2
-  static-field <constant:A1> -> AliasType { symbol = ::<constant:T1> } @ test/testdata/namer/sig.rb:5
+  static-field <constant:A1> -> AliasType { symbol = ::T1 } @ test/testdata/namer/sig.rb:5
 

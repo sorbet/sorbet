@@ -1,53 +1,53 @@
 digraph "complex_implications_2.rb"{
-subgraph "cluster_::<constant:Object>#foo" {
-    label = "::<constant:Object>#foo";
+subgraph "cluster_::Object#foo" {
+    label = "::Object#foo";
     color = blue;
-    "bb::<constant:Object>#foo_0" [shape = invhouse];
-    "bb::<constant:Object>#foo_1" [shape = parallelogram];
+    "bb::Object#foo_0" [shape = invhouse];
+    "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#foo_0" [label = "block[id=0]()
+    "bb::Object#foo_0" [label = "block[id=0]()
 <constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
 <selfMethodTemp>$3 = self : Object
 foo = load_arg(<selfMethodTemp>$3#foo, 0) : untyped
 foo"];
 
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_2" [style="bold"];
-    "bb::<constant:Object>#foo_0" -> "bb::<constant:Object>#foo_7" [style="tapered"];
+    "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
+    "bb::Object#foo_0" -> "bb::Object#foo_7" [style="tapered"];
 
-    "bb::<constant:Object>#foo_1" [label = "block[id=1]()
+    "bb::Object#foo_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_1" -> "bb::<constant:Object>#foo_1" [style="bold"];
-    "bb::<constant:Object>#foo_2" [label = "block[id=2](<constant:StandardError>$9, foo)
+    "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_2" [label = "block[id=2](<constant:StandardError>$9, foo)
 bar = foo.is_a?(<constant:StandardError>$9) : untyped
 bar"];
 
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_4" [style="bold"];
-    "bb::<constant:Object>#foo_2" -> "bb::<constant:Object>#foo_7" [style="tapered"];
+    "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
+    "bb::Object#foo_2" -> "bb::Object#foo_7" [style="tapered"];
 
-    "bb::<constant:Object>#foo_4" [label = "block[id=4](foo)
+    "bb::Object#foo_4" [label = "block[id=4](foo)
 e = foo : StandardError
 err = e : StandardError
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_4" -> "bb::<constant:Object>#foo_7" [style="bold"];
-    "bb::<constant:Object>#foo_7" [label = "block[id=7](err)
+    "bb::Object#foo_4" -> "bb::Object#foo_7" [style="bold"];
+    "bb::Object#foo_7" [label = "block[id=7](err)
 junk = err : NilClass | StandardError
 err"];
 
-    "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_8" [style="bold"];
-    "bb::<constant:Object>#foo_7" -> "bb::<constant:Object>#foo_10" [style="tapered"];
+    "bb::Object#foo_7" -> "bb::Object#foo_8" [style="bold"];
+    "bb::Object#foo_7" -> "bb::Object#foo_10" [style="tapered"];
 
-    "bb::<constant:Object>#foo_8" [label = "block[id=8]()
+    "bb::Object#foo_8" [label = "block[id=8]()
 <returnMethodTemp>$2 = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_8" -> "bb::<constant:Object>#foo_10" [style="bold"];
-    "bb::<constant:Object>#foo_10" [label = "block[id=10](<returnMethodTemp>$2)
+    "bb::Object#foo_8" -> "bb::Object#foo_10" [style="bold"];
+    "bb::Object#foo_10" [label = "block[id=10](<returnMethodTemp>$2)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#foo_10" -> "bb::<constant:Object>#foo_1" [style="bold"];
+    "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];
 }
 
 }

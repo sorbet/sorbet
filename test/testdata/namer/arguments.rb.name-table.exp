@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  class <constant:A> < ::<constant:Object> () -> <Class:A> @ test/testdata/namer/arguments.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
+  class <constant:A> < ::Object () -> <Class:A> @ test/testdata/namer/arguments.rb:2
     method take_arguments (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:3
       argument a<> @ test/testdata/namer/arguments.rb:3
       argument b<optional> @ test/testdata/namer/arguments.rb:3
@@ -16,5 +16,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
         argument e<optional, keyword> @ test/testdata/namer/arguments.rb:6
         argument f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
         argument g<block> @ test/testdata/namer/arguments.rb:6
-  class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/arguments.rb:2
+  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/arguments.rb:2
 

@@ -3,7 +3,7 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
-        ::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
+        ::Opus::AutogenLoader.init("__FILE__")
         <emptyTree>
       end
     end
@@ -19,23 +19,23 @@ begin
 
     <emptyTree>
   end
-  class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::<constant:StandardError>)
+  class <emptyTree>::<constant:MatchTimeout><<constant:MatchTimeout>> < (::StandardError)
     <emptyTree>
 
     <emptyTree>
 
     def rule_token<rule_token>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token
+      ::Opus::CIBot::Gerald::MatchTimeout#@rule_token
     end
 
     def initialize<initialize>(message, rule_token)
       begin
         self(<constant:MatchTimeout>).super(message)
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>#@rule_token = rule_token
+        ::Opus::CIBot::Gerald::MatchTimeout#@rule_token = rule_token
       end
     end
   end
-  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<constant:<todo sym>>, ::<constant:untyped>)
+  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<todo sym>, ::untyped)
     <emptyTree>
 
     <emptyTree>
@@ -43,10 +43,10 @@ begin
     def initialize<initialize>()
       begin
         begin
-          <assignTemp$3 = ::<constant:untyped>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2$2|
+          <assignTemp$3 = ::untyped.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2$2|
             <block-pass>$2$2.valid?()
           end
-          ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules = <assignTemp$3.[](0)
+          ::Opus::CIBot::Gerald::Matcher#@rules = <assignTemp$3.[](0)
           invalid_rules = <assignTemp$3.[](1)
           <assignTemp$3
         end
@@ -65,7 +65,7 @@ begin
 
     def match<match>(match_context)
       begin
-        if match_context.diff().affected_files().count().>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#<constant:MAX_AFFECTED_FILES>)
+        if match_context.diff().affected_files().count().>(::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES)
           begin
             self(<constant:Matcher>).log().warn("Gerald skipping large PR with ".concat(begin
                   match_context.diff().affected_files().count()
@@ -75,8 +75,8 @@ begin
         else
           <emptyTree>
         end
-        budget = ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>.new()
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Matcher>#@rules.select() do |r$5|
+        budget = ::Opus::CIBot::Gerald::MatchTimeBudget.new()
+        ::Opus::CIBot::Gerald::Matcher#@rules.select() do |r$5|
           budget.time_rule(r$5) do ||
             r$5.matches?(match_context)
           end
@@ -84,7 +84,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:MatchContext><<constant:MatchContext>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -106,55 +106,55 @@ begin
     <emptyTree>
 
     def repo<repo>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo
+      ::Opus::CIBot::Gerald::MatchContext#@repo
     end
 
     def assignee<assignee>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee
+      ::Opus::CIBot::Gerald::MatchContext#@assignee
     end
 
     def gh_user<gh_user>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user
+      ::Opus::CIBot::Gerald::MatchContext#@gh_user
     end
 
     def merge_branch<merge_branch>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch
+      ::Opus::CIBot::Gerald::MatchContext#@merge_branch
     end
 
     def body<body>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body
+      ::Opus::CIBot::Gerald::MatchContext#@body
     end
 
     def title<title>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title
+      ::Opus::CIBot::Gerald::MatchContext#@title
     end
 
     def diff<diff>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff
+      ::Opus::CIBot::Gerald::MatchContext#@diff
     end
 
     def openapi_diff<openapi_diff>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff
+      ::Opus::CIBot::Gerald::MatchContext#@openapi_diff
     end
 
     def initialize<initialize>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
       begin
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo = repo
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@assignee = assignee
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@gh_user = gh_user
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@merge_branch = merge_branch
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@body = body
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@title = title
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@diff = diff
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@openapi_diff = openapi_diff
+        ::Opus::CIBot::Gerald::MatchContext#@repo = repo
+        ::Opus::CIBot::Gerald::MatchContext#@assignee = assignee
+        ::Opus::CIBot::Gerald::MatchContext#@gh_user = gh_user
+        ::Opus::CIBot::Gerald::MatchContext#@merge_branch = merge_branch
+        ::Opus::CIBot::Gerald::MatchContext#@body = body
+        ::Opus::CIBot::Gerald::MatchContext#@title = title
+        ::Opus::CIBot::Gerald::MatchContext#@diff = diff
+        ::Opus::CIBot::Gerald::MatchContext#@openapi_diff = openapi_diff
       end
     end
 
     def user_stripe_suffix?<user_stripe_suffix?>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchContext>#@repo.start_with?("stripe-internal/").!()
+      ::Opus::CIBot::Gerald::MatchContext#@repo.start_with?("stripe-internal/").!()
     end
   end
-  class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:MatchTimeBudget><<constant:MatchTimeBudget>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -162,17 +162,17 @@ begin
     <emptyTree>
 
     def initialize<initialize>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start = ::<constant:Time>.now()
+      ::Opus::CIBot::Gerald::MatchTimeBudget#@start = ::Time.now()
     end
 
     def check!<check!>()
       begin
         dur_ms = begin
-          ::<constant:Time>.now().-(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#@start)
+          ::Time.now().-(::Opus::CIBot::Gerald::MatchTimeBudget#@start)
         end.*(1000)
-        if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>)
-          self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
-                  ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:TOTAL_TIME_MS>
+        if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS)
+          self(<constant:MatchTimeBudget>).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald match time budged exceeded ".concat(begin
+                  ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS
                 end.to_s()).concat("ms".to_s()).to_s()))
         else
           <emptyTree>
@@ -182,18 +182,18 @@ begin
 
     def time_rule<time_rule>(rule, <blk>)
       begin
-        rule_start = ::<constant:Time>.now()
+        rule_start = ::Time.now()
         res = <blk>.call(<emptyTree>)
         dur_ms = begin
-          ::<constant:Time>.now().-(rule_start)
+          ::Time.now().-(rule_start)
         end.*(1000)
-        if dur_ms.>(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>)
-          self(<constant:MatchTimeBudget>).raise(::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
+        if dur_ms.>(::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS)
+          self(<constant:MatchTimeBudget>).raise(::Opus::CIBot::Gerald::MatchTimeout.new("Gerald rule '".concat(begin
                   rule.token()
                 end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
                   dur_ms.to_i()
                 end.to_s()).concat("ms budget=".to_s()).concat(begin
-                  ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:MatchTimeBudget>#<constant:PER_RULE_MS>
+                  ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS
                 end.to_s()).concat("ms".to_s()).to_s(), {:"rule_token" => rule.token()}))
         else
           <emptyTree>
@@ -203,7 +203,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<constant:<todo sym>>)
+  class <emptyTree>::<constant:Diff><<constant:Diff>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -226,8 +226,8 @@ begin
 
     def initialize<initialize>(raw_diff)
       begin
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@raw = raw_diff
-        ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed = self(<constant:Diff>).parse(raw_diff)
+        ::Opus::CIBot::Gerald::Diff#@raw = raw_diff
+        ::Opus::CIBot::Gerald::Diff#@parsed = self(<constant:Diff>).parse(raw_diff)
       end
     end
 
@@ -236,7 +236,7 @@ begin
     end
 
     def added_files<added_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$4|
+      ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$4|
         part$4.[](:"a_name").==("/dev/null")
       end.map() do |part$5|
         part$5.[](:"b_name")
@@ -244,7 +244,7 @@ begin
     end
 
     def deleted_files<deleted_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$7|
+      ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$7|
         part$7.[](:"b_name").==("/dev/null")
       end.map() do |part$8|
         part$8.[](:"a_name")
@@ -252,7 +252,7 @@ begin
     end
 
     def changed_files<changed_files>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.select() do |part$10|
+      ::Opus::CIBot::Gerald::Diff#@parsed.select() do |part$10|
         part$10.[](:"a_name").==(part$10.[](:"b_name"))
       end.map() do |part$11|
         part$11.[](:"b_name")
@@ -260,13 +260,13 @@ begin
     end
 
     def added_lines<added_lines>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$13|
+      ::Opus::CIBot::Gerald::Diff#@parsed.map() do |part$13|
         part$13.[](:"added_lines")
       end.flatten()
     end
 
     def removed_lines<removed_lines>()
-      ::<constant:Opus>::<constant:CIBot>::<constant:Gerald>::<constant:Diff>#@parsed.map() do |part$15|
+      ::Opus::CIBot::Gerald::Diff#@parsed.map() do |part$15|
         part$15.[](:"removed_lines")
       end.flatten()
     end
@@ -276,19 +276,19 @@ begin
     end
 
     def changed_openapi?<changed_openapi?>()
-      self(<constant:Diff>).changed_files().include?(::<constant:untyped>)
+      self(<constant:Diff>).changed_files().include?(::untyped)
     end
 
     def parse<parse>(diff)
       begin
-        parts = diff.split(::<constant:Regexp>.new("^diff [^\n]*\n", 0.|(4))).[](::<constant:Range>.new(1, -1))
+        parts = diff.split(::Regexp.new("^diff [^\n]*\n", 0.|(4))).[](::Range.new(1, -1))
         if parts
           parts
         else
           parts = []
         end
         parts = T.cast(parts, AppliedType {
-          klass = ::<constant:Array>
+          klass = ::Array
           targs = [
             <constant:Elem> = String
           ]
@@ -306,13 +306,13 @@ begin
               else
                 if line$20.start_with?("---")
                   begin
-                    a_name$19 = line$20.[](::<constant:Range>.new(4, -1))
+                    a_name$19 = line$20.[](::Range.new(4, -1))
                     if if a_name$19
                         a_name$19.start_with?("a/")
                       else
                         a_name$19
                       end
-                      a_name$19 = a_name$19.[](::<constant:Range>.new(2, -1))
+                      a_name$19 = a_name$19.[](::Range.new(2, -1))
                     else
                       <emptyTree>
                     end
@@ -320,23 +320,23 @@ begin
                 else
                   if line$20.start_with?("+++")
                     begin
-                      b_name$19 = line$20.[](::<constant:Range>.new(4, -1))
+                      b_name$19 = line$20.[](::Range.new(4, -1))
                       if if b_name$19
                           b_name$19.start_with?("b/")
                         else
                           b_name$19
                         end
-                        b_name$19 = b_name$19.[](::<constant:Range>.new(2, -1))
+                        b_name$19 = b_name$19.[](::Range.new(2, -1))
                       else
                         <emptyTree>
                       end
                     end
                   else
                     if line$20.start_with?("+")
-                      added_lines$19.<<(line$20.[](::<constant:Range>.new(1, -1)))
+                      added_lines$19.<<(line$20.[](::Range.new(1, -1)))
                     else
                       if line$20.start_with?("-")
-                        removed_lines$19.<<(line$20.[](::<constant:Range>.new(1, -1)))
+                        removed_lines$19.<<(line$20.[](::Range.new(1, -1)))
                       else
                         <emptyTree>
                       end

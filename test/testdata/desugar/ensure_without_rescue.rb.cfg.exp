@@ -1,41 +1,41 @@
 digraph "ensure_without_rescue.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <statTemp>$7 = self : <Class:<root>>
 <returnMethodTemp>$2 = <statTemp>$7.main() : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#main" {
-    label = "::<constant:Object>#main";
+subgraph "cluster_::Object#main" {
+    label = "::Object#main";
     color = blue;
-    "bb::<constant:Object>#main_0" [shape = invhouse];
-    "bb::<constant:Object>#main_1" [shape = parallelogram];
+    "bb::Object#main_0" [shape = invhouse];
+    "bb::Object#main_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#main_0" [label = "block[id=0]()
+    "bb::Object#main_0" [label = "block[id=0]()
 <rescueTemp$4 = <unanalyzable> : untyped
 <rescueTemp$4"];
 
-    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_0" -> "bb::<constant:Object>#main_4" [style="tapered"];
+    "bb::Object#main_0" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_0" -> "bb::Object#main_4" [style="tapered"];
 
-    "bb::<constant:Object>#main_1" [label = "block[id=1]()
+    "bb::Object#main_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#main_1" -> "bb::<constant:Object>#main_1" [style="bold"];
-    "bb::<constant:Object>#main_4" [label = "block[id=4]()
+    "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_4" [label = "block[id=4]()
 <statTemp>$5 = self : Object
 <returnMethodTemp>$2 = <statTemp>$5.a() : untyped
 <statTemp>$7 = self : Object
@@ -43,41 +43,41 @@ subgraph "cluster_::<constant:Object>#main" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#main_4" -> "bb::<constant:Object>#main_1" [style="bold"];
+    "bb::Object#main_4" -> "bb::Object#main_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#a" {
-    label = "::<constant:Object>#a";
+subgraph "cluster_::Object#a" {
+    label = "::Object#a";
     color = blue;
-    "bb::<constant:Object>#a_0" [shape = invhouse];
-    "bb::<constant:Object>#a_1" [shape = parallelogram];
+    "bb::Object#a_0" [shape = invhouse];
+    "bb::Object#a_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#a_0" [label = "block[id=0]()
+    "bb::Object#a_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#a_0" -> "bb::<constant:Object>#a_1" [style="bold"];
-    "bb::<constant:Object>#a_1" [label = "block[id=1]()
+    "bb::Object#a_0" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#a_1" -> "bb::<constant:Object>#a_1" [style="bold"];
+    "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#b" {
-    label = "::<constant:Object>#b";
+subgraph "cluster_::Object#b" {
+    label = "::Object#b";
     color = blue;
-    "bb::<constant:Object>#b_0" [shape = invhouse];
-    "bb::<constant:Object>#b_1" [shape = parallelogram];
+    "bb::Object#b_0" [shape = invhouse];
+    "bb::Object#b_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#b_0" [label = "block[id=0]()
+    "bb::Object#b_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#b_0" -> "bb::<constant:Object>#b_1" [style="bold"];
-    "bb::<constant:Object>#b_1" [label = "block[id=1]()
+    "bb::Object#b_0" -> "bb::Object#b_1" [style="bold"];
+    "bb::Object#b_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#b_1" -> "bb::<constant:Object>#b_1" [style="bold"];
+    "bb::Object#b_1" -> "bb::Object#b_1" [style="bold"];
 }
 
 }

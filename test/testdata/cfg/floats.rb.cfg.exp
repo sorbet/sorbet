@@ -1,11 +1,11 @@
 digraph "floats.rb"{
-subgraph "cluster_::<constant:Object>#test_large_float" {
-    label = "::<constant:Object>#test_large_float";
+subgraph "cluster_::Object#test_large_float" {
+    label = "::Object#test_large_float";
     color = blue;
-    "bb::<constant:Object>#test_large_float_0" [shape = invhouse];
-    "bb::<constant:Object>#test_large_float_1" [shape = parallelogram];
+    "bb::Object#test_large_float_0" [shape = invhouse];
+    "bb::Object#test_large_float_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#test_large_float_0" [label = "block[id=0]()
+    "bb::Object#test_large_float_0" [label = "block[id=0]()
 a = 3.141593 : Float(3.141593)
 a = 0.000001 : Float(0.000001)
 a = -0.000001 : Float(-0.000001)
@@ -20,11 +20,11 @@ a = nan : Float(nan)
 <finalReturn> = return a : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#test_large_float_0" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];
-    "bb::<constant:Object>#test_large_float_1" [label = "block[id=1]()
+    "bb::Object#test_large_float_0" -> "bb::Object#test_large_float_1" [style="bold"];
+    "bb::Object#test_large_float_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#test_large_float_1" -> "bb::<constant:Object>#test_large_float_1" [style="bold"];
+    "bb::Object#test_large_float_1" -> "bb::Object#test_large_float_1" [style="bold"];
 }
 
 }

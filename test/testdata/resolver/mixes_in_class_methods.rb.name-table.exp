@@ -1,29 +1,29 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/resolver/mixes_in_class_methods.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver/mixes_in_class_methods.rb:2
   class <constant:Bad1> (<constant:BasicObject>) -> <Class:Bad1> @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class <constant:Bad2> < ::<constant:Object> () -> <Class:Bad2> @ test/testdata/resolver/mixes_in_class_methods.rb:29
+  class <constant:Bad2> < ::Object () -> <Class:Bad2> @ test/testdata/resolver/mixes_in_class_methods.rb:29
     class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Bad2::ClassMethods> @ test/testdata/resolver/mixes_in_class_methods.rb:31
-    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
   class <constant:Bad3> (<constant:BasicObject>) -> <Class:Bad3> @ test/testdata/resolver/mixes_in_class_methods.rb:35
-    class <constant:ClassMethods> < ::<constant:Object> () -> <Class:Bad3::ClassMethods> @ test/testdata/resolver/mixes_in_class_methods.rb:38
-    class <singleton class:<constant:ClassMethods>> < ::<singleton class:<constant:Object>> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class <constant:ClassMethods> < ::Object () -> <Class:Bad3::ClassMethods> @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class <singleton class:<constant:ClassMethods>> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
   class <constant:Bad4> (<constant:BasicObject>) -> <Class:Bad4> @ test/testdata/resolver/mixes_in_class_methods.rb:42
     class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Bad4::ClassMethods> @ test/testdata/resolver/mixes_in_class_methods.rb:45
-    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
   class <constant:Bad5> (<constant:BasicObject>) -> <Class:Bad5> @ test/testdata/resolver/mixes_in_class_methods.rb:50
   class <constant:Bad6> (<constant:BasicObject>) -> <Class:Bad6> @ test/testdata/resolver/mixes_in_class_methods.rb:56
   class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/resolver/mixes_in_class_methods.rb:2
     class <constant:ClassMethods> (<constant:BasicObject>) -> <Class:Mixin::ClassMethods> @ test/testdata/resolver/mixes_in_class_methods.rb:5
       method mixin_class_method () @ test/testdata/resolver/mixes_in_class_methods.rb:6
-    class <singleton class:<constant:ClassMethods>> < ::<constant:Module> () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
     method mixin_method () @ test/testdata/resolver/mixes_in_class_methods.rb:12
-  class <constant:Test> < ::<constant:Object> (<constant:Mixin>) -> <Class:Test> @ test/testdata/resolver/mixes_in_class_methods.rb:16
-  class <singleton class:<constant:Bad1>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class <singleton class:<constant:Bad2>> < ::<singleton class:<constant:Object>> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
-  class <singleton class:<constant:Bad3>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
-  class <singleton class:<constant:Bad4>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
-  class <singleton class:<constant:Bad5>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class <singleton class:<constant:Bad6>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class <singleton class:<constant:Mixin>> < ::<constant:Module> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-  class <singleton class:<constant:Test>> < ::<singleton class:<constant:Object>> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  class <constant:Test> < ::Object (<constant:Mixin>) -> <Class:Test> @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  class <singleton class:<constant:Bad1>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class <singleton class:<constant:Bad2>> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
+  class <singleton class:<constant:Bad3>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
+  class <singleton class:<constant:Bad4>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
+  class <singleton class:<constant:Bad5>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class <singleton class:<constant:Bad6>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class <singleton class:<constant:Mixin>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
+  class <singleton class:<constant:Test>> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
   method <static-init>$10 () @ test/testdata/resolver/mixes_in_class_methods.rb:2
 

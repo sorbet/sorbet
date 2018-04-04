@@ -1,11 +1,11 @@
 digraph "blocks.rb"{
-subgraph "cluster_::<constant:BlockTest>#block_pass" {
-    label = "::<constant:BlockTest>#block_pass";
+subgraph "cluster_::BlockTest#block_pass" {
+    label = "::BlockTest#block_pass";
     color = blue;
-    "bb::<constant:BlockTest>#block_pass_0" [shape = invhouse];
-    "bb::<constant:BlockTest>#block_pass_1" [shape = parallelogram];
+    "bb::BlockTest#block_pass_0" [shape = invhouse];
+    "bb::BlockTest#block_pass_1" [shape = parallelogram];
 
-    "bb::<constant:BlockTest>#block_pass_0" [label = "block[id=0]()
+    "bb::BlockTest#block_pass_0" [label = "block[id=0]()
 <statTemp>$5 = self : BlockTest
 <statTemp>$6 = 1 : Integer(1)
 <statTemp>$7 = 2 : Integer(2)
@@ -13,31 +13,31 @@ subgraph "cluster_::<constant:BlockTest>#block_pass" {
 <returnMethodTemp>$3 = <statTemp>$5.foo(<statTemp>$6, <statTemp>$7, <statTemp>$8) : untyped
 <unconditional>"];
 
-    "bb::<constant:BlockTest>#block_pass_0" -> "bb::<constant:BlockTest>#block_pass_2" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_1" [label = "block[id=1]()
+    "bb::BlockTest#block_pass_0" -> "bb::BlockTest#block_pass_2" [style="bold"];
+    "bb::BlockTest#block_pass_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:BlockTest>#block_pass_1" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_1" -> "bb::BlockTest#block_pass_1" [style="bold"];
+    "bb::BlockTest#block_pass_2" [label = "block[id=2](<returnMethodTemp>$3)
 outerLoops: 1
 <block-call>"];
 
-    "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_4" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_2" -> "bb::<constant:BlockTest>#block_pass_3" [style="tapered"];
+    "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_4" [style="bold"];
+    "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_3" [style="tapered"];
 
-    "bb::<constant:BlockTest>#block_pass_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_3" [label = "block[id=3](<returnMethodTemp>$3)
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:BlockTest>#block_pass_3" -> "bb::<constant:BlockTest>#block_pass_1" [style="bold"];
-    "bb::<constant:BlockTest>#block_pass_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_3" -> "bb::BlockTest#block_pass_1" [style="bold"];
+    "bb::BlockTest#block_pass_4" [label = "block[id=4](<returnMethodTemp>$3)
 outerLoops: 1
-x$2 = load_yield_param(::<constant:BlockTest>#block_pass#<block>$2, 0) : untyped
+x$2 = load_yield_param(::BlockTest#block_pass#<block>, 0) : untyped
 <blockReturnTemp>$9 = x$2 : untyped
-<blockReturnTemp>$10 = blockreturn<::<constant:BlockTest>#block_pass#<block>$2> <blockReturnTemp>$9 : <impossible>
+<blockReturnTemp>$10 = blockreturn<::BlockTest#block_pass#<block>> <blockReturnTemp>$9 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:BlockTest>#block_pass_4" -> "bb::<constant:BlockTest>#block_pass_2" [style="bold"];
+    "bb::BlockTest#block_pass_4" -> "bb::BlockTest#block_pass_2" [style="bold"];
 }
 
 }

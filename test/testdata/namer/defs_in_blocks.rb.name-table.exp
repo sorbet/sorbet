@@ -1,10 +1,10 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/defs_in_blocks.rb:2
-  class <constant:Object> < ::<constant:BasicObject> (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8357
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/defs_in_blocks.rb:2
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8357
     method <block>$2 () @ test/testdata/namer/defs_in_blocks.rb:2
     method a_method () @ test/testdata/namer/defs_in_blocks.rb:5
     method a_method_with_param (a) @ test/testdata/namer/defs_in_blocks.rb:8
       argument a<> @ test/testdata/namer/defs_in_blocks.rb:8
-  class <singleton class:<constant:Object>> < ::<singleton class:<constant:BasicObject>> () @ ???
+  class <singleton class:<constant:Object>> < ::<Class:BasicObject> () @ ???
     method a_static_method () @ test/testdata/namer/defs_in_blocks.rb:11
   method <static-init>$10 () @ test/testdata/namer/defs_in_blocks.rb:2
 

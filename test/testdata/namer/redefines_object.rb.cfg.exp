@@ -1,37 +1,37 @@
 digraph "redefines_object.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Trigger>#trigger" {
-    label = "::<constant:Trigger>#trigger";
+subgraph "cluster_::Trigger#trigger" {
+    label = "::Trigger#trigger";
     color = blue;
-    "bb::<constant:Trigger>#trigger_0" [shape = invhouse];
-    "bb::<constant:Trigger>#trigger_1" [shape = parallelogram];
+    "bb::Trigger#trigger_0" [shape = invhouse];
+    "bb::Trigger#trigger_1" [shape = parallelogram];
 
-    "bb::<constant:Trigger>#trigger_0" [label = "block[id=0]()
+    "bb::Trigger#trigger_0" [label = "block[id=0]()
 @__fake_logger$4 = alias @__fake_logger : untyped
 <finalReturn> = return @__fake_logger$4 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Trigger>#trigger_0" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];
-    "bb::<constant:Trigger>#trigger_1" [label = "block[id=1]()
+    "bb::Trigger#trigger_0" -> "bb::Trigger#trigger_1" [style="bold"];
+    "bb::Trigger#trigger_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Trigger>#trigger_1" -> "bb::<constant:Trigger>#trigger_1" [style="bold"];
+    "bb::Trigger#trigger_1" -> "bb::Trigger#trigger_1" [style="bold"];
 }
 
 }

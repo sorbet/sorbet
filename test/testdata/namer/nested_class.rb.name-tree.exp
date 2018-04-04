@@ -10,7 +10,7 @@ begin
   module <emptyTree>::<constant:A><<constant:A>> < ()
     <emptyTree>
   end
-  class <emptyTree>::<constant:B><<constant:B>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:C><<constant:C>> < (::<constant:<todo sym>>)  end
+  class <emptyTree>::<constant:B><<constant:B>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:C><<constant:C>> < (::<todo sym>)  end
   <emptyTree>
 end

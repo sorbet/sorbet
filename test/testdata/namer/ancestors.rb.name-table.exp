@@ -1,11 +1,11 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/ancestors.rb:2
-  class <constant:Child> < ::<constant:Parent> (<constant:Mixin2>) -> <Class:Child> @ test/testdata/namer/ancestors.rb:9
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/ancestors.rb:2
+  class <constant:Child> < ::Parent (<constant:Mixin2>) -> <Class:Child> @ test/testdata/namer/ancestors.rb:9
   class <constant:Mixin1> (<constant:BasicObject>) -> <Class:Mixin1> @ test/testdata/namer/ancestors.rb:2
   class <constant:Mixin2> (<constant:BasicObject>) -> <Class:Mixin2> @ test/testdata/namer/ancestors.rb:3
-  class <constant:Parent> < ::<constant:Object> (<constant:Mixin1>) -> <Class:Parent> @ test/testdata/namer/ancestors.rb:5
-  class <singleton class:<constant:Child>> < ::<singleton class:<constant:Parent>> () @ test/testdata/namer/ancestors.rb:9
-  class <singleton class:<constant:Mixin1>> < ::<constant:Module> () @ test/testdata/namer/ancestors.rb:2
-  class <singleton class:<constant:Mixin2>> < ::<constant:Module> () @ test/testdata/namer/ancestors.rb:3
-  class <singleton class:<constant:Parent>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/ancestors.rb:5
+  class <constant:Parent> < ::Object (<constant:Mixin1>) -> <Class:Parent> @ test/testdata/namer/ancestors.rb:5
+  class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/namer/ancestors.rb:9
+  class <singleton class:<constant:Mixin1>> < ::Module () @ test/testdata/namer/ancestors.rb:2
+  class <singleton class:<constant:Mixin2>> < ::Module () @ test/testdata/namer/ancestors.rb:3
+  class <singleton class:<constant:Parent>> < ::<Class:Object> () @ test/testdata/namer/ancestors.rb:5
   method <static-init>$10 () @ test/testdata/namer/ancestors.rb:2
 

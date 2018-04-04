@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testdata/namer/yield.rb:2
-  class <constant:Main> < ::<constant:Object> () -> <Class:Main> @ test/testdata/namer/yield.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/yield.rb:2
+  class <constant:Main> < ::Object () -> <Class:Main> @ test/testdata/namer/yield.rb:2
     method blockpass (blk) @ test/testdata/namer/yield.rb:7
       argument blk<block> @ test/testdata/namer/yield.rb:7
     method blockyield () @ test/testdata/namer/yield.rb:15
@@ -21,6 +21,6 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ test/testda
       argument blk<block> @ test/testdata/namer/yield.rb:11
     method yielder (<blk>) @ test/testdata/namer/yield.rb:3
       argument <blk><block> -> untyped @ test/testdata/namer/yield.rb:4
-  class <singleton class:<constant:Main>> < ::<singleton class:<constant:Object>> () @ test/testdata/namer/yield.rb:2
+  class <singleton class:<constant:Main>> < ::<Class:Object> () @ test/testdata/namer/yield.rb:2
   method <static-init>$10 () @ test/testdata/namer/yield.rb:2
 

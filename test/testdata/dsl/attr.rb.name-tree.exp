@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<constant:<todo sym>>)
+class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>
@@ -17,36 +17,36 @@ class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<constant:<todo
 
   def initialize<initialize>()
     begin
-      ::<constant:TestAttr>#@v1 = T.let(0, Integer)
-      ::<constant:TestAttr>#@v2 = T.let("", String)
+      ::TestAttr#@v1 = T.let(0, Integer)
+      ::TestAttr#@v2 = T.let("", String)
     end
   end
 
   def v1<v1>()
-    ::<constant:TestAttr>#@v1
+    ::TestAttr#@v1
   end
 
   def v1=<v1=>(v1)
-    ::<constant:TestAttr>#@v1 = v1
+    ::TestAttr#@v1 = v1
   end
 
   def v2<v2>()
-    ::<constant:TestAttr>#@v2
+    ::TestAttr#@v2
   end
 
   def v2=<v2=>(v2)
-    ::<constant:TestAttr>#@v2 = v2
+    ::TestAttr#@v2 = v2
   end
 
   def v3<v3>()
-    ::<constant:TestAttr>#@v3
+    ::TestAttr#@v3
   end
 
   def v4=<v4=>(v4)
-    ::<constant:TestAttr>#@v4 = v4
+    ::TestAttr#@v4 = v4
   end
 
   def v5=<v5=>(v5)
-    ::<constant:TestAttr>#@v5 = v5
+    ::TestAttr#@v5 = v5
   end
 end

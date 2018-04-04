@@ -1,29 +1,29 @@
 digraph "hash.rb"{
-subgraph "cluster_::<constant:TestHash>#something" {
-    label = "::<constant:TestHash>#something";
+subgraph "cluster_::TestHash#something" {
+    label = "::TestHash#something";
     color = blue;
-    "bb::<constant:TestHash>#something_0" [shape = invhouse];
-    "bb::<constant:TestHash>#something_1" [shape = parallelogram];
+    "bb::TestHash#something_0" [shape = invhouse];
+    "bb::TestHash#something_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#something_0" [label = "block[id=0]()
+    "bb::TestHash#something_0" [label = "block[id=0]()
 <returnMethodTemp>$2 = 17 : Integer(17)
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#something_0" -> "bb::<constant:TestHash>#something_1" [style="bold"];
-    "bb::<constant:TestHash>#something_1" [label = "block[id=1]()
+    "bb::TestHash#something_0" -> "bb::TestHash#something_1" [style="bold"];
+    "bb::TestHash#something_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#something_1" -> "bb::<constant:TestHash>#something_1" [style="bold"];
+    "bb::TestHash#something_1" -> "bb::TestHash#something_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:TestHash>#test" {
-    label = "::<constant:TestHash>#test";
+subgraph "cluster_::TestHash#test" {
+    label = "::TestHash#test";
     color = blue;
-    "bb::<constant:TestHash>#test_0" [shape = invhouse];
-    "bb::<constant:TestHash>#test_1" [shape = parallelogram];
+    "bb::TestHash#test_0" [shape = invhouse];
+    "bb::TestHash#test_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#test_0" [label = "block[id=0]()
+    "bb::TestHash#test_0" [label = "block[id=0]()
 <constant:<Magic>>$11 = alias <constant:<Magic>> : <Magic>
 <statTemp>$6 = self : TestHash
 <hashTemp>$4 = <statTemp>$6.something() : untyped
@@ -33,7 +33,7 @@ subgraph "cluster_::<constant:TestHash>#test" {
 <hashTemp>$7 = <statTemp>$9.+(<statTemp>$10) : Integer
 <hashTemp>$8 = 2 : Integer(2)
 <returnMethodTemp>$2 = <constant:<Magic>>$11.<build-hash>(<hashTemp>$4, <hashTemp>$5, <hashTemp>$7, <hashTemp>$8) : AppliedType {
-  klass = ::<constant:Hash>
+  klass = ::Hash
   targs = [
     <constant:K> = untyped
     <constant:V> = untyped
@@ -43,20 +43,20 @@ subgraph "cluster_::<constant:TestHash>#test" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_0" -> "bb::<constant:TestHash>#test_1" [style="bold"];
-    "bb::<constant:TestHash>#test_1" [label = "block[id=1]()
+    "bb::TestHash#test_0" -> "bb::TestHash#test_1" [style="bold"];
+    "bb::TestHash#test_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_1" -> "bb::<constant:TestHash>#test_1" [style="bold"];
+    "bb::TestHash#test_1" -> "bb::TestHash#test_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:TestHash>#test_shaped" {
-    label = "::<constant:TestHash>#test_shaped";
+subgraph "cluster_::TestHash#test_shaped" {
+    label = "::TestHash#test_shaped";
     color = blue;
-    "bb::<constant:TestHash>#test_shaped_0" [shape = invhouse];
-    "bb::<constant:TestHash>#test_shaped_1" [shape = parallelogram];
+    "bb::TestHash#test_shaped_0" [shape = invhouse];
+    "bb::TestHash#test_shaped_1" [shape = parallelogram];
 
-    "bb::<constant:TestHash>#test_shaped_0" [label = "block[id=0]()
+    "bb::TestHash#test_shaped_0" [label = "block[id=0]()
 <constant:<Magic>>$13 = alias <constant:<Magic>> : <Magic>
 <hashTemp>$4 = 1 : Integer(1)
 <hashTemp>$5 = 2 : Integer(2)
@@ -76,11 +76,11 @@ subgraph "cluster_::<constant:TestHash>#test_shaped" {
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_shaped_0" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];
-    "bb::<constant:TestHash>#test_shaped_1" [label = "block[id=1]()
+    "bb::TestHash#test_shaped_0" -> "bb::TestHash#test_shaped_1" [style="bold"];
+    "bb::TestHash#test_shaped_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:TestHash>#test_shaped_1" -> "bb::<constant:TestHash>#test_shaped_1" [style="bold"];
+    "bb::TestHash#test_shaped_1" -> "bb::TestHash#test_shaped_1" [style="bold"];
 }
 
 }

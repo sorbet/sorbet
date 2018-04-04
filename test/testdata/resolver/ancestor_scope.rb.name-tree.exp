@@ -4,14 +4,14 @@ begin
       begin
         <emptyTree>
         <emptyTree>
-        T.assert_type!(::<constant:Test>.new(), Test::Mixin)
-        T.assert_type!(::<constant:Test>.new(), Test::Other)
-        T.assert_type!(::<constant:Test>.new(), Other)
+        T.assert_type!(::Test.new(), Test::Mixin)
+        T.assert_type!(::Test.new(), Test::Other)
+        T.assert_type!(::Test.new(), Other)
       end
     end
   end
-  class <emptyTree>::<constant:Other><<constant:Other>> < (::<constant:<todo sym>>)  end
-  class <emptyTree>::<constant:Test><<constant:Test>> < (::<constant:Other>, ::<constant:Test>::<constant:Mixin>, ::<constant:Test>::<constant:Other>)
+  class <emptyTree>::<constant:Other><<constant:Other>> < (::<todo sym>)  end
+  class <emptyTree>::<constant:Test><<constant:Test>> < (::Other, ::Test::Mixin, ::Test::Other)
     <emptyTree>
 
     <emptyTree>

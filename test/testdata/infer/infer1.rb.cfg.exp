@@ -1,87 +1,87 @@
 digraph "infer1.rb"{
-subgraph "cluster_#<static-init>$10" {
-    label = "#<static-init>$10";
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
     color = blue;
-    "bb#<static-init>$10_0" [shape = invhouse];
-    "bb#<static-init>$10_1" [shape = parallelogram];
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>$10_0" [label = "block[id=0]()
+    "bb#<static-init>_0" [label = "block[id=0]()
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 
-    "bb#<static-init>$10_0" -> "bb#<static-init>$10_1" [style="bold"];
-    "bb#<static-init>$10_1" [label = "block[id=1]()
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb#<static-init>$10_1" -> "bb#<static-init>$10_1" [style="bold"];
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz1" {
-    label = "::<constant:Object>#baz1";
+subgraph "cluster_::Object#baz1" {
+    label = "::Object#baz1";
     color = blue;
-    "bb::<constant:Object>#baz1_0" [shape = invhouse];
-    "bb::<constant:Object>#baz1_1" [shape = parallelogram];
+    "bb::Object#baz1_0" [shape = invhouse];
+    "bb::Object#baz1_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz1_0" [label = "block[id=0]()
+    "bb::Object#baz1_0" [label = "block[id=0]()
 a = \"foo\" : String(\"foo\")
 b = a.getbyte(a) : Integer | NilClass
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz1_0" -> "bb::<constant:Object>#baz1_1" [style="bold"];
-    "bb::<constant:Object>#baz1_1" [label = "block[id=1]()
+    "bb::Object#baz1_0" -> "bb::Object#baz1_1" [style="bold"];
+    "bb::Object#baz1_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz1_1" -> "bb::<constant:Object>#baz1_1" [style="bold"];
+    "bb::Object#baz1_1" -> "bb::Object#baz1_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz2" {
-    label = "::<constant:Object>#baz2";
+subgraph "cluster_::Object#baz2" {
+    label = "::Object#baz2";
     color = blue;
-    "bb::<constant:Object>#baz2_0" [shape = invhouse];
-    "bb::<constant:Object>#baz2_1" [shape = parallelogram];
+    "bb::Object#baz2_0" [shape = invhouse];
+    "bb::Object#baz2_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz2_0" [label = "block[id=0]()
+    "bb::Object#baz2_0" [label = "block[id=0]()
 a = \"foo\" : String(\"foo\")
 <statTemp>$6 = \"foo\" : String(\"foo\")
 b = a.getbyte(<statTemp>$6) : Integer | NilClass
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz2_0" -> "bb::<constant:Object>#baz2_1" [style="bold"];
-    "bb::<constant:Object>#baz2_1" [label = "block[id=1]()
+    "bb::Object#baz2_0" -> "bb::Object#baz2_1" [style="bold"];
+    "bb::Object#baz2_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz2_1" -> "bb::<constant:Object>#baz2_1" [style="bold"];
+    "bb::Object#baz2_1" -> "bb::Object#baz2_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz3" {
-    label = "::<constant:Object>#baz3";
+subgraph "cluster_::Object#baz3" {
+    label = "::Object#baz3";
     color = blue;
-    "bb::<constant:Object>#baz3_0" [shape = invhouse];
-    "bb::<constant:Object>#baz3_1" [shape = parallelogram];
+    "bb::Object#baz3_0" [shape = invhouse];
+    "bb::Object#baz3_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz3_0" [label = "block[id=0]()
+    "bb::Object#baz3_0" [label = "block[id=0]()
 <statTemp>$4 = \"foo\" : String(\"foo\")
 <statTemp>$5 = \"foo\" : String(\"foo\")
 b = <statTemp>$4.getbyte(<statTemp>$5) : Integer | NilClass
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz3_0" -> "bb::<constant:Object>#baz3_1" [style="bold"];
-    "bb::<constant:Object>#baz3_1" [label = "block[id=1]()
+    "bb::Object#baz3_0" -> "bb::Object#baz3_1" [style="bold"];
+    "bb::Object#baz3_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz3_1" -> "bb::<constant:Object>#baz3_1" [style="bold"];
+    "bb::Object#baz3_1" -> "bb::Object#baz3_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz4" {
-    label = "::<constant:Object>#baz4";
+subgraph "cluster_::Object#baz4" {
+    label = "::Object#baz4";
     color = blue;
-    "bb::<constant:Object>#baz4_0" [shape = invhouse];
-    "bb::<constant:Object>#baz4_1" [shape = parallelogram];
+    "bb::Object#baz4_0" [shape = invhouse];
+    "bb::Object#baz4_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz4_0" [label = "block[id=0]()
+    "bb::Object#baz4_0" [label = "block[id=0]()
 <statTemp>$5 = self : Object
 <statTemp>$4 = <statTemp>$5.a() : untyped
 <statTemp>$6 = \"foo\" : String(\"foo\")
@@ -89,156 +89,156 @@ b = <statTemp>$4.getbyte(<statTemp>$6) : untyped
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz4_0" -> "bb::<constant:Object>#baz4_1" [style="bold"];
-    "bb::<constant:Object>#baz4_1" [label = "block[id=1]()
+    "bb::Object#baz4_0" -> "bb::Object#baz4_1" [style="bold"];
+    "bb::Object#baz4_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz4_1" -> "bb::<constant:Object>#baz4_1" [style="bold"];
+    "bb::Object#baz4_1" -> "bb::Object#baz4_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz5" {
-    label = "::<constant:Object>#baz5";
+subgraph "cluster_::Object#baz5" {
+    label = "::Object#baz5";
     color = blue;
-    "bb::<constant:Object>#baz5_0" [shape = invhouse];
-    "bb::<constant:Object>#baz5_1" [shape = parallelogram];
+    "bb::Object#baz5_0" [shape = invhouse];
+    "bb::Object#baz5_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz5_0" [label = "block[id=0]()
+    "bb::Object#baz5_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Object
 cond = load_arg(<selfMethodTemp>$3#baz5, 0) : untyped
 cond"];
 
-    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_2" [style="bold"];
-    "bb::<constant:Object>#baz5_0" -> "bb::<constant:Object>#baz5_3" [style="tapered"];
+    "bb::Object#baz5_0" -> "bb::Object#baz5_2" [style="bold"];
+    "bb::Object#baz5_0" -> "bb::Object#baz5_3" [style="tapered"];
 
-    "bb::<constant:Object>#baz5_1" [label = "block[id=1]()
+    "bb::Object#baz5_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_1" -> "bb::<constant:Object>#baz5_1" [style="bold"];
-    "bb::<constant:Object>#baz5_2" [label = "block[id=2]()
+    "bb::Object#baz5_1" -> "bb::Object#baz5_1" [style="bold"];
+    "bb::Object#baz5_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_2" -> "bb::<constant:Object>#baz5_4" [style="bold"];
-    "bb::<constant:Object>#baz5_3" [label = "block[id=3]()
+    "bb::Object#baz5_2" -> "bb::Object#baz5_4" [style="bold"];
+    "bb::Object#baz5_3" [label = "block[id=3]()
 b = \"foo\" : String(\"foo\")
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_3" -> "bb::<constant:Object>#baz5_4" [style="bold"];
-    "bb::<constant:Object>#baz5_4" [label = "block[id=4](b)
+    "bb::Object#baz5_3" -> "bb::Object#baz5_4" [style="bold"];
+    "bb::Object#baz5_4" [label = "block[id=4](b)
 <statTemp>$6 = b : Integer | String
 <statTemp>$7 = 1 : Integer(1)
 b = <statTemp>$6.getbyte(<statTemp>$7) : untyped
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz5_4" -> "bb::<constant:Object>#baz5_1" [style="bold"];
+    "bb::Object#baz5_4" -> "bb::Object#baz5_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz6" {
-    label = "::<constant:Object>#baz6";
+subgraph "cluster_::Object#baz6" {
+    label = "::Object#baz6";
     color = blue;
-    "bb::<constant:Object>#baz6_0" [shape = invhouse];
-    "bb::<constant:Object>#baz6_1" [shape = parallelogram];
+    "bb::Object#baz6_0" [shape = invhouse];
+    "bb::Object#baz6_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz6_0" [label = "block[id=0]()
+    "bb::Object#baz6_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Object
 cond = load_arg(<selfMethodTemp>$3#baz6, 0) : untyped
 cond"];
 
-    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_2" [style="bold"];
-    "bb::<constant:Object>#baz6_0" -> "bb::<constant:Object>#baz6_3" [style="tapered"];
+    "bb::Object#baz6_0" -> "bb::Object#baz6_2" [style="bold"];
+    "bb::Object#baz6_0" -> "bb::Object#baz6_3" [style="tapered"];
 
-    "bb::<constant:Object>#baz6_1" [label = "block[id=1]()
+    "bb::Object#baz6_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_1" -> "bb::<constant:Object>#baz6_1" [style="bold"];
-    "bb::<constant:Object>#baz6_2" [label = "block[id=2]()
+    "bb::Object#baz6_1" -> "bb::Object#baz6_1" [style="bold"];
+    "bb::Object#baz6_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_2" -> "bb::<constant:Object>#baz6_4" [style="bold"];
-    "bb::<constant:Object>#baz6_3" [label = "block[id=3]()
+    "bb::Object#baz6_2" -> "bb::Object#baz6_4" [style="bold"];
+    "bb::Object#baz6_3" [label = "block[id=3]()
 b = \"foo\" : String(\"foo\")
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_3" -> "bb::<constant:Object>#baz6_4" [style="bold"];
-    "bb::<constant:Object>#baz6_4" [label = "block[id=4](b)
+    "bb::Object#baz6_3" -> "bb::Object#baz6_4" [style="bold"];
+    "bb::Object#baz6_4" [label = "block[id=4](b)
 <statTemp>$6 = \"foo\" : String(\"foo\")
 <statTemp>$7 = b : Integer | String
 b = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz6_4" -> "bb::<constant:Object>#baz6_1" [style="bold"];
+    "bb::Object#baz6_4" -> "bb::Object#baz6_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz7" {
-    label = "::<constant:Object>#baz7";
+subgraph "cluster_::Object#baz7" {
+    label = "::Object#baz7";
     color = blue;
-    "bb::<constant:Object>#baz7_0" [shape = invhouse];
-    "bb::<constant:Object>#baz7_1" [shape = parallelogram];
+    "bb::Object#baz7_0" [shape = invhouse];
+    "bb::Object#baz7_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz7_0" [label = "block[id=0]()
+    "bb::Object#baz7_0" [label = "block[id=0]()
 <selfMethodTemp>$3 = self : Object
 cond = load_arg(<selfMethodTemp>$3#baz7, 0) : untyped
 cond"];
 
-    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_2" [style="bold"];
-    "bb::<constant:Object>#baz7_0" -> "bb::<constant:Object>#baz7_4" [style="tapered"];
+    "bb::Object#baz7_0" -> "bb::Object#baz7_2" [style="bold"];
+    "bb::Object#baz7_0" -> "bb::Object#baz7_4" [style="tapered"];
 
-    "bb::<constant:Object>#baz7_1" [label = "block[id=1]()
+    "bb::Object#baz7_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_1" -> "bb::<constant:Object>#baz7_1" [style="bold"];
-    "bb::<constant:Object>#baz7_2" [label = "block[id=2]()
+    "bb::Object#baz7_1" -> "bb::Object#baz7_1" [style="bold"];
+    "bb::Object#baz7_2" [label = "block[id=2]()
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_2" -> "bb::<constant:Object>#baz7_4" [style="bold"];
-    "bb::<constant:Object>#baz7_4" [label = "block[id=4](b)
+    "bb::Object#baz7_2" -> "bb::Object#baz7_4" [style="bold"];
+    "bb::Object#baz7_4" [label = "block[id=4](b)
 <statTemp>$6 = \"foo\" : String(\"foo\")
 <statTemp>$7 = b : NilClass | Integer
 b = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass
 <finalReturn> = return b : <impossible>
 <unconditional>"];
 
-    "bb::<constant:Object>#baz7_4" -> "bb::<constant:Object>#baz7_1" [style="bold"];
+    "bb::Object#baz7_4" -> "bb::Object#baz7_1" [style="bold"];
 }
 
-subgraph "cluster_::<constant:Object>#baz8" {
-    label = "::<constant:Object>#baz8";
+subgraph "cluster_::Object#baz8" {
+    label = "::Object#baz8";
     color = blue;
-    "bb::<constant:Object>#baz8_0" [shape = invhouse];
-    "bb::<constant:Object>#baz8_1" [shape = parallelogram];
+    "bb::Object#baz8_0" [shape = invhouse];
+    "bb::Object#baz8_1" [shape = parallelogram];
 
-    "bb::<constant:Object>#baz8_0" [label = "block[id=0]()
+    "bb::Object#baz8_0" [label = "block[id=0]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_0" -> "bb::<constant:Object>#baz8_2" [style="bold"];
-    "bb::<constant:Object>#baz8_1" [label = "block[id=1]()
+    "bb::Object#baz8_0" -> "bb::Object#baz8_2" [style="bold"];
+    "bb::Object#baz8_1" [label = "block[id=1]()
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_1" -> "bb::<constant:Object>#baz8_1" [style="bold"];
-    "bb::<constant:Object>#baz8_2" [label = "block[id=2]()
+    "bb::Object#baz8_1" -> "bb::Object#baz8_1" [style="bold"];
+    "bb::Object#baz8_2" [label = "block[id=2]()
 outerLoops: 1
 <whileTemp>$4 = true : TrueClass
 <whileTemp>$4"];
 
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_4" [style="bold"];
-    "bb::<constant:Object>#baz8_2" -> "bb::<constant:Object>#baz8_3" [style="tapered"];
+    "bb::Object#baz8_2" -> "bb::Object#baz8_4" [style="bold"];
+    "bb::Object#baz8_2" -> "bb::Object#baz8_3" [style="tapered"];
 
-    "bb::<constant:Object>#baz8_3" [label = "block[id=3]()
+    "bb::Object#baz8_3" [label = "block[id=3]()
 <returnMethodTemp>$2 = nil
 <finalReturn> = return <returnMethodTemp>$2
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_3" -> "bb::<constant:Object>#baz8_1" [style="bold"];
-    "bb::<constant:Object>#baz8_4" [label = "block[id=4]()
+    "bb::Object#baz8_3" -> "bb::Object#baz8_1" [style="bold"];
+    "bb::Object#baz8_4" [label = "block[id=4]()
 outerLoops: 1
 b = 1 : Integer(1)
 <unconditional>"];
 
-    "bb::<constant:Object>#baz8_4" -> "bb::<constant:Object>#baz8_2" [style="bold"];
+    "bb::Object#baz8_4" -> "bb::Object#baz8_2" [style="bold"];
 }
 
 }

@@ -13,7 +13,7 @@ ClassDef{
             ],
             expr = Rescue{
               body = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = a
                 block = nullptr
                 args = [
@@ -28,7 +28,7 @@ ClassDef{
                     name = <rescueTemp$2
                   }
                   body = Send{
-                    recv = Self{ claz = ::<constant:<todo sym>> }
+                    recv = Self{ claz = ::<todo sym> }
                     name = b
                     block = nullptr
                     args = [
@@ -37,14 +37,14 @@ ClassDef{
                 }
               ]
               else = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = c
                 block = nullptr
                 args = [
                 ]
               }
               ensure = Send{
-                recv = Self{ claz = ::<constant:<todo sym>> }
+                recv = Self{ claz = ::<todo sym> }
                 name = d
                 block = nullptr
                 args = [
@@ -79,12 +79,12 @@ ClassDef{
         }
       ],
       expr = Send{
-        recv = Self{ claz = ::<constant:<todo sym>> }
+        recv = Self{ claz = ::<todo sym> }
         name = puts
         block = nullptr
         args = [
           Send{
-            recv = Self{ claz = ::<constant:<todo sym>> }
+            recv = Self{ claz = ::<todo sym> }
             name = foo
             block = nullptr
             args = [

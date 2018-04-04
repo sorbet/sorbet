@@ -1,5 +1,5 @@
-class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
-  class <constant:TestAttr> < ::<constant:Object> () -> <Class:TestAttr> @ test/testdata/dsl/attr.rb:2
+class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
+  class <constant:TestAttr> < ::Object () -> <Class:TestAttr> @ test/testdata/dsl/attr.rb:2
     field @v1 -> Integer @ test/testdata/dsl/attr.rb:4
     field @v2 -> String @ test/testdata/dsl/attr.rb:5
     field @v3 -> untyped @ test/testdata/dsl/attr.rb:17
@@ -17,5 +17,5 @@ class <constant:<root>> < ::<constant:Object> () -> <Class:<root>> @ -e:1
       argument v4<> @ test/testdata/dsl/attr.rb:19
     method v5= (v5) @ test/testdata/dsl/attr.rb:19
       argument v5<> @ test/testdata/dsl/attr.rb:19
-  class <singleton class:<constant:TestAttr>> < ::<singleton class:<constant:Object>> () @ test/testdata/dsl/attr.rb:2
+  class <singleton class:<constant:TestAttr>> < ::<Class:Object> () @ test/testdata/dsl/attr.rb:2
 
