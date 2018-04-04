@@ -3,10 +3,6 @@ set -e
 
 dot=$(mktemp)
 svg=$(mktemp)
-cleanup() {
-    rm -r "$dot" "$svg"
-}
-trap cleanup EXIT
 
 src=$1
 if [ ! -f "$src" ]; then
