@@ -398,8 +398,13 @@ int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
         return nextFree;
     } else {
         currentBB->fwdId = -2;
-        nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
-        nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+        if (currentBB->bexit.thenb->outerLoops > currentBB->bexit.elseb->outerLoops) {
+            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
+        } else {
+            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.thenb);
+            nextFree = topoSortFwd(target, nextFree, currentBB->bexit.elseb);
+        }
         target[nextFree] = currentBB;
         currentBB->fwdId = nextFree;
         return nextFree + 1;
