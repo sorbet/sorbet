@@ -21,6 +21,9 @@ class SomeODM
     def foo2=(arg0); T.cast(nil, String); end
 end
 
+class ForeignClass
+end
+
 class AdvancedODM
     prop :default, String, default: ""
     prop :nodefault, String
@@ -45,6 +48,11 @@ class AdvancedODM
     prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, default: ""
 
     prop :enum_prop, enum: ["hello", "goodbye"]
+
+    prop :foreign, String, foreign: ForeignClass
+    prop :foreign_lazy, String, foreign: -> {ForeignClass}
+    prop :foreign_proc, String, foreign: proc {ForeignClass}
+    prop :foreign_invalid, String, foreign: proc { :not_a_type }
 end
 
 class PropHelpers
@@ -103,6 +111,13 @@ def main
 
     # T.assert_type!(AdvancedODM.new.enum_prop, T.noreturn) # no longer true
     AdvancedODM.new.enum_prop = "hello" # error: Method `enum_prop=` does not exist
+
+    T.assert_type!(AdvancedODM.new.foreign_, T.nilable(ForeignClass))
+    T.assert_type!(AdvancedODM.new.foreign_, ForeignClass) # error: Argument does not have asserted type
+    T.assert_type!(AdvancedODM.new.foreign_lazy_, T.nilable(ForeignClass))
+
+    # Check that the method still exists even if we can't parse the type
+    AdvancedODM.new.foreign_invalid_
 
     T.assert_type!(PropHelpers.new.token, String)
     PropHelpers.new.token = "tok_token"

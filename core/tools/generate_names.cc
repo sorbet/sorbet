@@ -103,7 +103,7 @@ NameDef names[] = {
     {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver | DSL},
     {"nilable", Resolver | Desugar | Infer | Core},
-    {"proc", Resolver},
+    {"proc", Resolver | Desugar},
     {"untyped", Resolver | Infer | Core},
     {"Array", Infer},
     {"Hash", Infer},
@@ -151,6 +151,7 @@ NameDef names[] = {
     {"token", DSL},
     {"created", DSL},
     {"merchant", DSL},
+    {"foreign", DSL},
 
     {"describe", DSL},
     {"it", DSL},
@@ -205,6 +206,7 @@ NameDef names[] = {
     {"buildArray", "<build-array>", CFG | Core},
     {"splat", "<splat>", Desugar | Core | Resolver},
     {"arg0", Core | Resolver | DSL},
+    {"opts", DSL},
 
     {"is_a_p", "is_a?", Infer | CFG},
     {"kind_of", "kind_of?", Infer},

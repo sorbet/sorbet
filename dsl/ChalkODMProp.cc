@@ -29,7 +29,7 @@ unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression 
     if (send == nullptr) {
         return nullptr;
     }
-    if (send->fun != core::Names::lambda()) {
+    if (send->fun != core::Names::lambda() && send->fun != core::Names::proc()) {
         return nullptr;
     }
     if (!ast::isa_tree<ast::Self>(send->recv.get())) {
@@ -127,7 +127,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        type = ASTUtil::dupType(ASTUtil::getHashValue(ctx, rules, core::Names::type()));
+        type = ASTUtil::getHashValue(ctx, rules, core::Names::type());
     }
 
     if (type == nullptr) {
@@ -141,7 +141,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     }
 
     if (type == nullptr) {
-        auto arrayType = ASTUtil::dupType(ASTUtil::getHashValue(ctx, rules, core::Names::array()));
+        auto arrayType = ASTUtil::getHashValue(ctx, rules, core::Names::array());
         if (arrayType) {
             type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),
                                   move(arrayType));
@@ -167,13 +167,14 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     if (rules) {
         auto optional = ASTUtil::getHashValue(ctx, rules, core::Names::optional());
-        auto boolOptional = ast::cast_tree<ast::Literal>(optional);
+        auto boolOptional = ast::cast_tree<ast::Literal>(optional.get());
         if (boolOptional && boolOptional->isTrue(ctx)) {
             isOptional = true;
         }
 
-        auto immutable = ast::cast_tree<ast::Literal>(ASTUtil::getHashValue(ctx, rules, core::Names::immutable()));
-        if (immutable && immutable->isTrue(ctx)) {
+        auto immutable = ASTUtil::getHashValue(ctx, rules, core::Names::immutable());
+        auto immutableBool = ast::cast_tree<ast::Literal>(immutable.get());
+        if (immutableBool && immutableBool->isTrue(ctx)) {
             isImmutable = true;
         }
 
@@ -182,6 +183,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         }
         if (ASTUtil::getHashValue(ctx, rules, core::Names::factory())) {
             isNilable = false;
+        }
+
+        if (foreign == nullptr) {
+            foreign = ASTUtil::getHashValue(ctx, rules, core::Names::foreign());
+            if (auto body = thunkBody(ctx, foreign.get())) {
+                foreign = move(body);
+            }
         }
 
         // In Chalk::ODM `optional String, optional: false` IS optional so
@@ -208,6 +216,28 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             ASTUtil::dupType(setType.get())));
         core::NameRef setName = name.addEq(ctx);
         stats.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
+    }
+
+    // Compute the `_` foreign accessor
+    if (foreign) {
+        unique_ptr<ast::Expression> type;
+        if (ASTUtil::dupType(foreign.get()) == nullptr) {
+            // If it's not a valid type, just use untyped
+            type = ast::MK::Untyped(loc);
+        } else {
+            type = ast::MK::Nilable(loc, move(foreign));
+        }
+        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx).toString(ctx) + "_");
+        // sig(opts: T.untyped).returns(T.nilable($foreign))
+        // def $fk_method(**opts)
+        //  T.unsafe(nil)
+        // end
+        stats.emplace_back(
+            ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::opts()), ast::MK::Untyped(loc), move(type)));
+
+        unique_ptr<ast::Expression> arg =
+            ast::MK::RestArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, core::Names::opts())));
+        stats.emplace_back(ast::MK::Method1(loc, fk_method, move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
     }
 
     return stats;

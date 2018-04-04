@@ -84,6 +84,14 @@ public:
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Local, name);
     }
 
+    static std::unique_ptr<Reference> KeywordArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::KeywordArg>(loc, move(inner));
+    }
+
+    static std::unique_ptr<Reference> RestArg(core::Loc loc, std::unique_ptr<Reference> inner) {
+        return std::make_unique<ast::RestArg>(loc, move(inner));
+    }
+
     static std::unique_ptr<Reference> Instance(core::Loc loc, core::NameRef name) {
         return std::make_unique<UnresolvedIdent>(loc, UnresolvedIdent::Instance, name);
     }
@@ -248,6 +256,14 @@ public:
 
     static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {
         return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::unsafe(), move(inner));
+    }
+
+    static std::unique_ptr<Expression> Untyped(core::Loc loc) {
+        return Send0(loc, Ident(loc, core::Symbols::T()), core::Names::untyped());
+    }
+
+    static std::unique_ptr<Expression> Nilable(core::Loc loc, std::unique_ptr<Expression> arg) {
+        return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::nilable(), move(arg));
     }
 };
 

@@ -10,7 +10,7 @@ namespace dsl {
 class ASTUtil {
 public:
     static std::unique_ptr<ast::Expression> dupType(ast::Expression *orig);
-    static ast::Expression *getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name);
+    static std::unique_ptr<ast::Expression> getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name);
 
     ASTUtil() = delete;
 };

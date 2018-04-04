@@ -440,6 +440,18 @@ ClassDef{
         ClassDef{
           name = ConstantLit{
             scope = EmptyTree
+            cnst = <constant:ForeignClass>
+          }<<constant:<todo sym>>>
+          ancestors = [Ident{
+              symbol = <constant:<todo sym>>
+            }]
+          rhs = [
+            EmptyTree
+          ]
+        }
+        ClassDef{
+          name = ConstantLit{
+            scope = EmptyTree
             cnst = <constant:AdvancedODM>
           }<<constant:<todo sym>>>
           ancestors = [Ident{
@@ -2219,6 +2231,698 @@ ClassDef{
                 ]
               }
             }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = Ident{
+                            symbol = <constant:T>
+                          }
+                          name = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_<<constant:<todo sym>>>
+              args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = opts
+                } } }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_lazy<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_lazy=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = Ident{
+                            symbol = <constant:T>
+                          }
+                          name = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_lazy_<<constant:<todo sym>>>
+              args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = opts
+                } } }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_proc<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_proc=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = Ident{
+                            symbol = <constant:T>
+                          }
+                          name = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_proc_<<constant:<todo sym>>>
+              args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = opts
+                } } }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_invalid<<constant:<todo sym>>>
+              args = []
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  Send{
+                    recv = Ident{
+                      symbol = <constant:T>
+                    }
+                    name = nilable
+                    block = nullptr
+                    args = [
+                      ConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:String>
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_invalid=<<constant:<todo sym>>>
+              args = [UnresolvedIdent{
+                  kind = Local
+                  name = arg0
+                }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = cast
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                  ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            }
+
+            Send{
+              recv = Send{
+                recv = Self{ claz = ::<constant:<todo sym>> }
+                name = sig
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = Ident{
+                            symbol = <constant:T>
+                          }
+                          name = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              name = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = Ident{
+                    symbol = <constant:T>
+                  }
+                  name = untyped
+                  block = nullptr
+                  args = [
+                  ]
+                }
+              ]
+            }
+
+            MethodDef{
+              self = 0
+              name = foreign_invalid_<<constant:<todo sym>>>
+              args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = opts
+                } } }]
+              rhs = Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+            }
           ]
         }
         ClassDef{
@@ -3614,6 +4318,132 @@ ClassDef{
               block = nullptr
               args = [
                 Literal{ value = "hello" }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:AdvancedODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = foreign_
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                Send{
+                  recv = ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:AdvancedODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = foreign_
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:ForeignClass>
+                }
+              ]
+            }
+            Send{
+              recv = ConstantLit{
+                scope = EmptyTree
+                cnst = <constant:T>
+              }
+              name = assert_type!
+              block = nullptr
+              args = [
+                Send{
+                  recv = Send{
+                    recv = ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:AdvancedODM>
+                    }
+                    name = new
+                    block = nullptr
+                    args = [
+                    ]
+                  }
+                  name = foreign_lazy_
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                Send{
+                  recv = ConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:T>
+                  }
+                  name = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
+                }
+              ]
+            }
+            Send{
+              recv = Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:AdvancedODM>
+                }
+                name = new
+                block = nullptr
+                args = [
+                ]
+              }
+              name = foreign_invalid_
+              block = nullptr
+              args = [
               ]
             }
             Send{

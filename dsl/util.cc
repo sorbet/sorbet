@@ -43,16 +43,20 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
         ENFORCE(ast::isa_tree<ast::EmptyTree>(cons->scope.get()));
         return ast::MK::Constant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
     }
-    return ast::MK::Constant(cons->loc, dupType(scopeCnst), cons->cnst);
+    auto scope = dupType(scopeCnst);
+    if (scope == nullptr) {
+        return nullptr;
+    }
+    return ast::MK::Constant(cons->loc, move(scope), cons->cnst);
 }
 
-ast::Expression *ASTUtil::getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
+unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
     int i = -1;
     for (auto &keyExpr : hash->keys) {
         i++;
         auto *key = ast::cast_tree<ast::Literal>(keyExpr.get());
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
-            return hash->values[i].get();
+            return move(hash->values[i]);
         }
     }
     return nullptr;
