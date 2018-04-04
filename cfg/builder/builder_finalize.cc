@@ -405,45 +405,5 @@ int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
         return nextFree + 1;
     }
 }
-
-int CFGBuilder::topoSortBwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {
-    // We're not looking for an arbitrary topo-sort.
-    // First of all topo sort does not exist, as the graph has loops.
-    // We are looking for a sort that has all outer loops dominating loop headers that dominate loop bodies.
-    //
-    // This method is a big cache invalidator and should be removed if we become slow
-    // Instead we will build this sort the fly during construction of the CFG, but it will make it hard to add new nodes
-    // much harder.
-
-    if (currentBB->bwdId != -1) {
-        return nextFree;
-    } else {
-        currentBB->bwdId = -2;
-        int i = 0;
-        // iterate over outer loops
-        while (i < currentBB->backEdges.size() && currentBB->fwdId < currentBB->backEdges[i]->fwdId) {
-            nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
-            i++;
-        }
-        if (i > 0) { // This is a loop header!
-            target[nextFree] = currentBB;
-            currentBB->bwdId = nextFree;
-            nextFree = nextFree + 1;
-            while (i < currentBB->backEdges.size()) {
-                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
-                i++;
-            }
-        } else {
-            while (i < currentBB->backEdges.size()) {
-                nextFree = topoSortBwd(target, nextFree, currentBB->backEdges[i]);
-                i++;
-            }
-            target[nextFree] = currentBB;
-            currentBB->bwdId = nextFree;
-            nextFree = nextFree + 1;
-        }
-        return nextFree;
-    }
-}
 } // namespace cfg
 } // namespace ruby_typer
