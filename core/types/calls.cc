@@ -55,13 +55,6 @@ shared_ptr<Type> AppliedType::dispatchCall(core::Context ctx, core::NameRef name
     return ct.dispatchCallWithTargs(ctx, name, callLoc, args, fullType, this->targs, block);
 }
 
-shared_ptr<Type> TypeVar::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<Type> *block) {
-    ENFORCE(isInstantiated);
-    return instantiation->dispatchCall(ctx, name, callLoc, args, instantiation, fullType, block);
-}
-
 shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                        vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                                        shared_ptr<Type> fullType, shared_ptr<Type> *block) {

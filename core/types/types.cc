@@ -595,10 +595,6 @@ int MetaType::kind() {
     return 7;
 }
 
-int TypeVar::kind() {
-    return 8;
-}
-
 int AliasType::kind() {
     return 9;
 }
@@ -646,8 +642,6 @@ bool AndType::isFullyDefined() {
 bool OrType::isFullyDefined() {
     return this->left->isFullyDefined() && this->right->isFullyDefined();
 }
-
-core::TypeVar::TypeVar(NameRef name) : name(name) {}
 
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
@@ -703,83 +697,6 @@ std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::Symbo
         return res1;
     }
     return original.resultType;
-}
-
-bool core::TypeVar::isFullyDefined() {
-    return this->isInstantiated;
-}
-
-std::shared_ptr<Type> core::TypeVar::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    ENFORCE(isInstantiated);
-    return instantiation->getCallArgumentType(ctx, name, i);
-}
-
-bool TypeVar::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
-    ENFORCE(isInstantiated);
-    return instantiation->derivesFrom(gs, klass);
-}
-
-std::string TypeVar::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "TypeVar(" + name.toString(gs) + ") {" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "instantiated = " + std::to_string(static_cast<int>(isInstantiated)) << '\n';
-    if (isInstantiated) {
-        printTabs(buf, tabs + 1);
-        buf << "instantiation = " << this->instantiation->toString(gs, tabs + 1) << '\n';
-    }
-    if (!this->upperConstraints.empty()) {
-        printTabs(buf, tabs + 1);
-        buf << "upperConstraints = [" << '\n';
-        int i = 0;
-        for (auto &el : this->upperConstraints) {
-            printTabs(buf, tabs + 2);
-            buf << i++ << " = " << el->toString(gs, tabs + 3) << '\n';
-        }
-        printTabs(buf, tabs + 1);
-        buf << "]" << '\n';
-    }
-    if (!this->lowerConstraints.empty()) {
-        printTabs(buf, tabs + 1);
-        buf << "lowerConstraints = [" << '\n';
-        int i = 0;
-        for (auto &el : this->lowerConstraints) {
-            printTabs(buf, tabs + 2);
-            buf << i++ << " = " << el->toString(gs, tabs + 3) << '\n';
-        }
-        printTabs(buf, tabs + 1);
-        buf << "]" << '\n';
-    }
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
-}
-
-std::string TypeVar::show(const GlobalState &gs) {
-    if (isInstantiated) {
-        return this->instantiation->show(gs);
-    } else {
-        return name.toString(gs);
-    }
-}
-
-std::string TypeVar::typeName() {
-    return "TypeVar";
-}
-
-void TypeVar::_sanityCheck(core::Context ctx) {
-    ENFORCE(this->name.exists());
-    for (auto &t : this->upperConstraints) {
-        t->_sanityCheck(ctx);
-    }
-    for (auto &t : this->lowerConstraints) {
-        t->_sanityCheck(ctx);
-    }
-}
-
-std::shared_ptr<Type> TypeVar::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                           const std::vector<std::shared_ptr<Type>> &targs) {
-    Error::notImplemented();
 }
 
 std::shared_ptr<Type> ClassType::instantiate(core::Context ctx, std::vector<SymbolRef> params,

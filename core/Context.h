@@ -12,7 +12,6 @@ class Context {
 public:
     const GlobalState &state;
     SymbolRef owner;
-    bool frozenConstraint = false;
 
     operator const GlobalState &() const noexcept {
         return state;
@@ -41,11 +40,6 @@ public:
         return r;
     }
 
-    Context withFrozenConstraint() const {
-        Context r = Context(*this);
-        r.frozenConstraint = true;
-        return r;
-    }
     void trace(const std::string &msg) const {
         state.trace(msg);
     }
@@ -55,7 +49,6 @@ class MutableContext final {
 public:
     GlobalState &state;
     SymbolRef owner;
-    bool frozenConstraint = false;
     operator GlobalState &() {
         return state;
     }
@@ -86,11 +79,6 @@ public:
         return r;
     }
 
-    MutableContext withFrozenConstraint() {
-        MutableContext r = MutableContext(*this);
-        r.frozenConstraint = true;
-        return r;
-    }
     void trace(const std::string &msg) const {
         state.trace(msg);
     }

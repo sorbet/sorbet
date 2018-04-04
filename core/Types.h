@@ -26,7 +26,7 @@ public:
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
     static bool isSubTypeWhenFrozen(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
-        return isSubType(ctx.withFrozenConstraint(), t1, t2);
+        return isSubType(ctx, t1, t2);
     }
 
     static bool equiv(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
@@ -346,30 +346,6 @@ public:
                                                std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
     void _sanityCheck(core::Context ctx) final;
     virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                              const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-};
-
-class TypeVar final : public Type {
-public:
-    std::vector<std::shared_ptr<Type>> upperConstraints; // todo: make sure this does not build cycles
-    std::vector<std::shared_ptr<Type>> lowerConstraints; // todo: make sure this does not build cycles
-    std::shared_ptr<Type> instantiation;
-    bool isInstantiated = false;
-    NameRef name;
-    TypeVar(NameRef name);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
-    virtual std::string show(const GlobalState &gs) final;
-    virtual std::string typeName() final;
-    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                               std::shared_ptr<Type> fullType, std::shared_ptr<Type> *block) final;
-    void _sanityCheck(core::Context ctx) final;
-    virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
-    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
 
     virtual std::shared_ptr<Type> instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                               const std::vector<std::shared_ptr<Type>> &targs) override;

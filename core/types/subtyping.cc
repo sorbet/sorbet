@@ -816,26 +816,6 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         }
     }
 
-    if (TypeVar *tv1 = cast_type<TypeVar>(t1.get())) {
-        if (tv1->isInstantiated) {
-            return Types::isSubType(ctx, tv1->instantiation, t2);
-        }
-        bool already = false;
-        for (auto &upperB : tv1->upperConstraints) {
-            already = already || Types::isSubTypeWhenFrozen(ctx, upperB, t2);
-        }
-        if (already) {
-            return true;
-        }
-        if (ctx.frozenConstraint) {
-            return false;
-        }
-        tv1->upperConstraints.push_back(t2);
-        // TODO: check upper constraint for validity?
-
-        return true;
-    }
-
     //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
 
@@ -858,24 +838,6 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         return self1->definition == self2->definition;
     }
 
-    if (TypeVar *tv2 = cast_type<TypeVar>(t2.get())) {
-        if (tv2->isInstantiated) {
-            return Types::isSubType(ctx, t1, tv2->instantiation);
-        }
-        bool already = false;
-        for (auto &lowerB : tv2->lowerConstraints) {
-            already = already || Types::isSubTypeWhenFrozen(ctx, t1, lowerB);
-        }
-        if (already) {
-            return true;
-        }
-        if (ctx.frozenConstraint) {
-            return false;
-        }
-
-        tv2->lowerConstraints.push_back(t1);
-        return true;
-    }
     if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
         AppliedType *a2 = cast_type<AppliedType>(t2.get());
         bool result;
