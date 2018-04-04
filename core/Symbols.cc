@@ -157,9 +157,9 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
     } else if (myInfo.isMethodArgument()) {
         type = "argument";
     } else if (myInfo.isTypeMember()) {
-        type = "typeMember";
+        type = "type-member";
     } else if (myInfo.isTypeArgument()) {
-        type = "type argument";
+        type = "type-argument";
     }
 
     if (myInfo.isTypeArgument() || myInfo.isTypeMember()) {

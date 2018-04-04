@@ -22,7 +22,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver
         <constant:Elem> = SelfTypeParam(::TestSelfGeneric#Elem)
       ]
     } @ test/testdata/resolver/self.rb:30
-    typeMember(=) <constant:Elem> @ test/testdata/resolver/self.rb:21
+    type-member(=) <constant:Elem> @ test/testdata/resolver/self.rb:21
   class <singleton class:<constant:TestSelf>> < ::<Class:Object> () @ test/testdata/resolver/self.rb:3
   class <singleton class:<constant:TestSelfGeneric>> < ::<Class:Object> (<constant:Generic>) @ test/testdata/resolver/self.rb:18
   method <static-init>$10 () @ test/testdata/resolver/self.rb:3

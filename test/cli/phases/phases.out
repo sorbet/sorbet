@@ -1280,7 +1280,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
           <constant:Elem> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Base64> (<constant:BasicObject>) -> <Class:Base64> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:BasicObject> () -> <Class:BasicObject> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method ! () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -1594,12 +1594,12 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     method untrust () -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:CSV>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:CSV> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:FieldInfo>[<constant:Elem>] < ::Struct () -> <Class:CSV::FieldInfo> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:MalformedCSVError> < ::RuntimeError () -> <Class:CSV::MalformedCSVError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Row>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:CSV::Row> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Table>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:CSV::Table> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:FieldInfo>> < ::<Class:Struct> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:MalformedCSVError>> < ::<Class:RuntimeError> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:Row>> < ::<Class:Object> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -1690,7 +1690,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:VERSION> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> AppliedType {
+    type-member(=) <constant:Elem> -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
@@ -2238,7 +2238,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
         <constant:Elem> = String
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:EOFError> < ::IOError () -> <Class:EOFError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> EOFError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method dup () -> EOFError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3280,12 +3280,12 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
           }
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Enumerator>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:Enumerator> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Generator>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:Enumerator::Generator> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Lazy>[<constant:Elem>] < ::Enumerator () -> <Class:Enumerator::Lazy> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Yielder> < ::Object () -> <Class:Enumerator::Yielder> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:Generator>> < ::<Class:Object> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:Lazy>> < ::<Class:Enumerator> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3479,7 +3479,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
           <constant:Arg1> = untyped
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Errno> (<constant:BasicObject>) -> <Class:Errno> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:E2BIG> < ::SystemCallError () -> <Class:Errno::E2BIG> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:EACCES> < ::SystemCallError () -> <Class:Errno::EACCES> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -4088,7 +4088,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     static-field <constant:TMPFILE> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:TRUNC> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:WRONLY> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:FileTest> (<constant:BasicObject>) -> <Class:FileTest> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:FileUtils> (<constant:BasicObject>) -> <Class:FileUtils> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Float> < ::Numeric () -> <Class:Float> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -4365,7 +4365,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     class <constant:InstallError> < ::Gem::Exception () -> <Class:Gem::InstallError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:InvalidSpecificationException> < ::Gem::Exception () -> <Class:Gem::InvalidSpecificationException> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:List>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:Gem::List> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:LoadError> < ::LoadError () -> <Class:Gem::LoadError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:MissingSpecError> < ::Gem::LoadError () -> <Class:Gem::MissingSpecError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:MissingSpecVersionError> < ::Gem::MissingSpecError () -> <Class:Gem::MissingSpecVersionError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -5084,9 +5084,9 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument arg0<repeated> -> LambdaParam(::Hash#K) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:K> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:V> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:K> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:V> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:IO>[<constant:Elem>] < ::Object (<constant:Constants>, <constant:Enumerable>) -> <Class:IO> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:EAGAINWaitReadable> < ::Errno::EAGAIN (<constant:WaitReadable>) -> <Class:IO::EAGAINWaitReadable> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:EAGAINWaitWritable> < ::Errno::EAGAIN (<constant:WaitWritable>) -> <Class:IO::EAGAINWaitWritable> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -5538,7 +5538,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     static-field <constant:TMPFILE> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:TRUNC> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     static-field <constant:WRONLY> -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:IOError> < ::StandardError () -> <Class:IOError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> IOError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method dup () -> IOError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -6808,7 +6808,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     method untrusted? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:ObjectSpace> (<constant:BasicObject>) -> <Class:ObjectSpace> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:WeakMap>[<constant:Elem>] < ::Object (<constant:Enumerable>) -> <Class:ObjectSpace::WeakMap> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <singleton class:<constant:WeakMap>> < ::<Class:Object> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Opus> () -> <Class:Opus> @ ???
     class <constant:DB> () -> <Class:Opus::DB> @ ???
@@ -7101,7 +7101,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc0#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method call () -> LambdaParam(::Proc0#Return) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc10>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>, <constant:Arg5>, <constant:Arg6>, <constant:Arg7>, <constant:Arg8>, <constant:Arg9>] < ::Proc () -> <Class:Proc10> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc10#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7116,33 +7116,33 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg7<> -> LambdaParam(::Proc10#Arg7) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg8<> -> LambdaParam(::Proc10#Arg8) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg9<> -> LambdaParam(::Proc10#Arg9) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg8> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg9> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg8> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg9> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc1>[<constant:Return>, <constant:Arg0>] < ::Proc () -> <Class:Proc1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc1#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method call (arg0) -> LambdaParam(::Proc1#Return) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::Proc1#Arg0) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc2>[<constant:Return>, <constant:Arg0>, <constant:Arg1>] < ::Proc () -> <Class:Proc2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc2#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method call (arg0, arg1) -> LambdaParam(::Proc2#Return) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg0<> -> LambdaParam(::Proc2#Arg0) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg1<> -> LambdaParam(::Proc2#Arg1) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc3>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>] < ::Proc () -> <Class:Proc3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc3#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7150,10 +7150,10 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg0<> -> LambdaParam(::Proc3#Arg0) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg1<> -> LambdaParam(::Proc3#Arg1) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg2<> -> LambdaParam(::Proc3#Arg2) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc4>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>] < ::Proc () -> <Class:Proc4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc4#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7162,11 +7162,11 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg1<> -> LambdaParam(::Proc4#Arg1) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg2<> -> LambdaParam(::Proc4#Arg2) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg3<> -> LambdaParam(::Proc4#Arg3) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc5>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>] < ::Proc () -> <Class:Proc5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc5#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7176,12 +7176,12 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg2<> -> LambdaParam(::Proc5#Arg2) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg3<> -> LambdaParam(::Proc5#Arg3) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg4<> -> LambdaParam(::Proc5#Arg4) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc6>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>, <constant:Arg5>] < ::Proc () -> <Class:Proc6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc6#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7192,13 +7192,13 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg3<> -> LambdaParam(::Proc6#Arg3) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg4<> -> LambdaParam(::Proc6#Arg4) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg5<> -> LambdaParam(::Proc6#Arg5) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc7>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>, <constant:Arg5>, <constant:Arg6>] < ::Proc () -> <Class:Proc7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc7#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7210,14 +7210,14 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg4<> -> LambdaParam(::Proc7#Arg4) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg5<> -> LambdaParam(::Proc7#Arg5) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg6<> -> LambdaParam(::Proc7#Arg6) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc8>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>, <constant:Arg5>, <constant:Arg6>, <constant:Arg7>] < ::Proc () -> <Class:Proc8> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc8#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7230,15 +7230,15 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg5<> -> LambdaParam(::Proc8#Arg5) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg6<> -> LambdaParam(::Proc8#Arg6) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg7<> -> LambdaParam(::Proc8#Arg7) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc9>[<constant:Return>, <constant:Arg0>, <constant:Arg1>, <constant:Arg2>, <constant:Arg3>, <constant:Arg4>, <constant:Arg5>, <constant:Arg6>, <constant:Arg7>, <constant:Arg8>] < ::Proc () -> <Class:Proc9> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method <static-init> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
     method [] () -> AliasType { symbol = ::Proc9#call } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
@@ -7252,16 +7252,16 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       argument arg6<> -> LambdaParam(::Proc9#Arg6) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg7<> -> LambdaParam(::Proc9#Arg7) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
       argument arg8<> -> LambdaParam(::Proc9#Arg8) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Arg8> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
-    typeMember(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg0> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg1> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg2> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg3> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg4> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg5> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg6> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg7> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Arg8> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
+    type-member(=) <constant:Return> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L__LINE__
   class <constant:Proc> < ::Object () -> <Class:Proc> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method arity () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method binding () -> Binding @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -7317,7 +7317,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
       method to_s () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Sys> (<constant:BasicObject>) -> <Class:Process::Sys> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Tms>[<constant:Elem>] < ::Struct () -> <Class:Process::Tms> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-      typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+      type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:UID> (<constant:BasicObject>) -> <Class:Process::UID> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     class <constant:Waiter> < ::Thread () -> <Class:Process::Waiter> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       method pid () -> Integer @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -7672,7 +7672,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
         <constant:Elem> = untyped
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:RangeError> < ::StandardError () -> <Class:RangeError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> RangeError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method dup () -> RangeError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -7992,7 +7992,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
     method untrust () -> RegexpError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:RubyTyper> () -> <Class:RubyTyper> @ ???
     class <constant:DynamicStruct>[<constant:Elem>] < ::Struct () -> <Class:RubyTyper::DynamicStruct> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
-      typeMember(=) <constant:Elem> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
+      type-member(=) <constant:Elem> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
     class <constant:StubClass> < ::Object () -> <Class:RubyTyper::StubClass> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
     class <singleton class:<constant:DynamicStruct>> < ::<Class:Struct> () @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/ruby_typer.rbi#L__LINE__
       method new (arg1) -> AppliedType {
@@ -8361,7 +8361,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
           <constant:Elem> = LambdaParam(::Set#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Signal> (<constant:BasicObject>) -> <Class:Signal> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:SignalException> < ::Exception () -> <Class:SignalException> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> SignalException @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8499,7 +8499,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
         <constant:Elem> = untyped
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:StandardError> < ::Exception () -> <Class:StandardError> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method clone () -> StandardError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method dup () -> StandardError @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -9078,7 +9078,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
         <constant:Elem> = String
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:StringScanner> < ::Object () -> <Class:StringScanner> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method eos? () -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method getch () -> String @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -9127,7 +9127,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
         <constant:Elem> = untyped
       ]
     } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
-    typeMember(=) <constant:Elem> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
+    type-member(=) <constant:Elem> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
   class <constant:Symbol> < ::Object (<constant:Comparable>) -> <Class:Symbol> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method <=> (other) -> Integer | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument other<> -> Symbol @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
