@@ -419,7 +419,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
         case core::Names::untyped()._id:
         case core::Names::any()._id:
         case core::Names::all()._id:
-            if (this->symbol != core::Symbols::T()) {
+            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
                 return nullptr;
             }
             if (name == core::Names::untyped()) {
@@ -452,6 +452,34 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             }
             return core::Types::classClass();
         }
+
+        case core::Names::must()._id:
+            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
+                return nullptr;
+            }
+            if (args.size() < 1 || args.size() > 2) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
+                                name.toString(ctx), "1-2", args.size());
+                }
+                return Types::dynamic();
+            }
+            if (!args[0].type->isFullyDefined()) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
+                    e.setHeader("T.must() applied to incomplete type `{}`", args[0].type->show(ctx));
+                }
+                return Types::dynamic();
+            }
+            if (args.size() > 1 && !Types::isSubType(ctx, args[1].type, Types::String())) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader(
+                        "Expression passed as an argument `{}` to method `{}` does not match expected type String",
+                        "msg", name.toString(ctx));
+                    e.addErrorSection(core::ErrorSection("Got " + args[1].type->show(ctx) + " originating from:",
+                                                         args[1].origins2Explanations(ctx)));
+                }
+            }
+            return Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
         default:
             return nullptr;
     }

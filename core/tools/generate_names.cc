@@ -116,6 +116,7 @@ NameDef names[] = {
     {"cast", DSL | Resolver | CFG | Infer},
     {"let", DSL | Resolver | CFG | Infer},
     {"unsafe", DSL},
+    {"must", Core},
     // end T keywords
 
     // Ruby DSL methods which we understand
