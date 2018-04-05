@@ -323,7 +323,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -414,7 +414,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -521,7 +521,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -758,7 +758,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -778,7 +778,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -865,7 +865,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -950,7 +950,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -963,7 +963,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -1058,7 +1058,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -1071,7 +1071,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -1165,7 +1165,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Array#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2457,7 +2457,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2465,7 +2465,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2544,7 +2544,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2658,7 +2658,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2666,7 +2666,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2735,7 +2735,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2934,7 +2934,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -2955,7 +2955,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3011,7 +3011,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3025,7 +3025,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3162,7 +3162,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3179,7 +3179,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3205,7 +3205,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -3245,7 +3245,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Enumerable#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -4654,7 +4654,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -4734,7 +4734,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -4864,7 +4864,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -4947,7 +4947,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -4966,7 +4966,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -4985,7 +4985,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc2
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Hash#K)
           <constant:Arg1> = LambdaParam(::Hash#V)
         ]
@@ -5976,7 +5976,7 @@ class <constant:<root>> < ::Object () @ -e:1
     method hard_assert (predicate, msg, opts) -> NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
       argument msg<optional> -> String | NilClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
       argument opts<keyword, repeated> -> untyped @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
-      argument predicate<> -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
+      argument predicate<> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/assertions.rbi#L__LINE__
     method lambda (blk) -> Proc @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
       argument blk<block> -> BasicObject @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
     method load (filename, arg0) -> TrueClass | FalseClass @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8159,7 +8159,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Set#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8232,7 +8232,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Set#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8267,7 +8267,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Set#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8282,7 +8282,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::Set#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8395,7 +8395,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::SortedSet#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__
@@ -8433,7 +8433,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = TrueClass | FalseClass
+          <constant:Return> = BasicObject
           <constant:Arg0> = LambdaParam(::SortedSet#Elem)
         ]
       } @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__

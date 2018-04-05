@@ -2351,7 +2351,7 @@ class Array
   )
   .returns(Integer)
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
   def count(arg0=_, &blk); end
@@ -2384,7 +2384,7 @@ class Array
   def delete_at(arg0); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -2397,7 +2397,7 @@ class Array
   def drop(arg0); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -2495,7 +2495,7 @@ class Array
   )
   .returns(Integer)
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
   sig.returns(Enumerator[Elem])
@@ -2530,7 +2530,7 @@ class Array
   def join(arg0=_); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   def keep_if(&blk); end
@@ -2602,14 +2602,14 @@ class Array
   def rassoc(arg0); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
   def reject(&blk); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -2655,7 +2655,7 @@ class Array
   )
   .returns(Elem)
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
   sig.returns(Enumerator[Elem])
@@ -2681,14 +2681,14 @@ class Array
   def sample(arg0=_); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
   def select(&blk); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -2753,7 +2753,7 @@ class Array
   def take(arg0); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -4145,14 +4145,14 @@ module Enumerable
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.any(TrueClass, FalseClass))
   def all?(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.any(TrueClass, FalseClass))
   def any?(&blk); end
@@ -4176,7 +4176,7 @@ module Enumerable
   )
   .returns(Integer)
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
   def count(arg0=_, &blk); end
@@ -4194,7 +4194,7 @@ module Enumerable
 
   sig(
       ifnone: Proc,
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.nilable(Elem))
   sig(
@@ -4210,7 +4210,7 @@ module Enumerable
   def drop(n); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -4238,7 +4238,7 @@ module Enumerable
   def entries(); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -4249,7 +4249,7 @@ module Enumerable
   )
   .returns(T.nilable(Integer))
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.nilable(Integer))
   sig.returns(Enumerator[Elem])
@@ -4386,27 +4386,27 @@ module Enumerable
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.any(TrueClass, FalseClass))
   def none?(&blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.any(TrueClass, FalseClass))
   def one?(&blk); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns([T::Array[Elem], T::Array[Elem]])
   sig.returns(Enumerator[Elem])
   def partition(&blk); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -4440,7 +4440,7 @@ module Enumerable
   def take(n); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -4462,7 +4462,7 @@ module Enumerable
 
   sig(
       ifnone: Proc,
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.nilable(Elem))
   sig(
@@ -4511,7 +4511,7 @@ module Enumerable
   def reduce(initial=_, arg0=_, &blk); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -5580,7 +5580,7 @@ class Hash
   def delete(arg0, &blk); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   sig.returns(Enumerator[[K, V]])
@@ -5658,7 +5658,7 @@ class Hash
   def invert(); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   sig.returns(Enumerator[[K, V]])
@@ -5710,25 +5710,25 @@ class Hash
 
   sig.returns(Enumerator[[K, V]])
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def reject(&blk); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def reject!(&blk); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def select(&blk); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def select!(&blk); end
@@ -10581,7 +10581,7 @@ class Set
   def delete?(o); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Set)
   def delete_if(&blk); end
@@ -10639,7 +10639,7 @@ class Set
   def intersection(enum); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Set)
   def keep_if(&blk); end
@@ -10675,7 +10675,7 @@ class Set
   def proper_superset?(set); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.nilable(T.untyped))
   def reject!(&blk); end
@@ -10687,7 +10687,7 @@ class Set
   def replace(enum); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.nilable(T.untyped))
   def select!(&blk); end
@@ -10866,7 +10866,7 @@ class SortedSet
   def delete(o); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(SortedSet)
   def delete_if(&blk); end
@@ -10884,7 +10884,7 @@ class SortedSet
   def freeze(); end
 
   sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+      blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(SortedSet)
   def keep_if(&blk); end

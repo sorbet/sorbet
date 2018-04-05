@@ -1,6 +1,6 @@
 module Kernel
   sig(
-    predicate: T.any(TrueClass, FalseClass),
+    predicate: BasicObject,
     msg: T.nilable(String),
     opts: T.untyped,
   )
