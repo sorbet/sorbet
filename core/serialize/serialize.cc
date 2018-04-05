@@ -182,14 +182,16 @@ int64_t Serializer::UnPickler::getS8() {
 }
 
 void Serializer::pickle(Pickler &p, const File &what) {
+    p.putU1((u1)what.source_type);
     p.putStr(what.path());
     p.putStr(what.source());
 }
 
 std::shared_ptr<File> Serializer::unpickleFile(UnPickler &p) {
+    File::Type t = (File::Type)p.getU1();
     auto path = (std::string)p.getStr();
     auto source = (std::string)p.getStr();
-    return std::make_shared<File>(move(path), move(source), File::Payload);
+    return std::make_shared<File>(move(path), move(source), t);
 }
 
 void Serializer::pickle(Pickler &p, const Name &what) {

@@ -1014,5 +1014,17 @@ void GlobalState::trace(const std::string &msg) const {
     errorQueue->tracer.trace(msg);
 }
 
+void GlobalState::markAsPayload() {
+    bool seenEmpty = false;
+    for (auto &f : files) {
+        if (!seenEmpty) {
+            ENFORCE(!f);
+            seenEmpty = true;
+            continue;
+        }
+        f->source_type = File::Type::Payload;
+    }
+}
+
 } // namespace core
 } // namespace ruby_typer

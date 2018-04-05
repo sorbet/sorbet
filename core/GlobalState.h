@@ -80,6 +80,7 @@ public:
     unsigned int filesUsed() const;
 
     void sanityCheck() const;
+    void markAsPayload();
 
     std::string toString(bool showHidden = false) const;
     std::string showAnnotatedSource(FileRef file) const;

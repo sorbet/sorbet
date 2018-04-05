@@ -9,7 +9,7 @@ namespace core {
 namespace serialize {
 class Serializer {
 public:
-    static const u4 VERSION = 3;
+    static const u4 VERSION = 4;
     static const u1 GLOBAL_STATE_COMPRESSION_DEGREE =
         10; // >20 introduce decompression slowdown, >10 introduces compression slowdown
     static const u1 FILE_COMPRESSION_DEGREE =

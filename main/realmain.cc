@@ -1001,6 +1001,7 @@ int realmain(int argc, char **argv) {
 
     if (options.count("store-state") != 0) {
         string outfile = options["store-state"].as<string>();
+        gs->markAsPayload();
         FileOps::write(outfile.c_str(), core::serialize::Serializer::store(*gs));
     }
 
