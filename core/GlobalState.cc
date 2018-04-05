@@ -399,7 +399,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
     SymbolRef result = enterSymbol(loc, owner, name, flags);
-    owner.data(*this).typeMembers().emplace_back(result);
+    owner.data(*this).typeArguments().emplace_back(result);
     return result;
 }
 

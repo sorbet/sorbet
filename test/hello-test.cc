@@ -148,7 +148,15 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     auto name = ctx.state.enterNameUTF8(foo_str);
     auto classSym =
         ctx.state.enterClassSymbol(loc, ruby_typer::core::Symbols::root(), ctx.state.enterNameConstant(name));
+
+    // see if it crashes via failed ENFORCE
+    ctx.state.enterTypeMember(loc, classSym, ctx.state.enterNameConstant(name), ruby_typer::core::Variance::CoVariant);
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
+
+    // see if it crashes via failed ENFORCE
+    ctx.state.enterTypeArgument(loc, methodSym, ctx.state.enterNameConstant(name),
+                                ruby_typer::core::Variance::CoVariant);
+
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
     unique_ptr<Expression> rhs(ast::MK::Int(loc, 5));
