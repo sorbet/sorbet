@@ -1,7 +1,7 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/module_function.rb:2
-  class <constant:C> < ::Object (<constant:Funcs>) -> <Class:C> @ test/testdata/namer/module_function.rb:17
+class <constant:<root>> < ::Object () @ test/testdata/namer/module_function.rb:2
+  class <constant:C> < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:17
     method test_calls () @ test/testdata/namer/module_function.rb:20
-  class <constant:Funcs> (<constant:BasicObject>) -> <Class:Funcs> @ test/testdata/namer/module_function.rb:2
+  class <constant:Funcs> (<constant:BasicObject>) @ test/testdata/namer/module_function.rb:2
     method <static-init> () @ test/testdata/namer/module_function.rb:2
     method f (x) -> Integer @ test/testdata/namer/module_function.rb:4
       argument x<> -> Integer @ test/testdata/namer/module_function.rb:3

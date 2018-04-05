@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/sig.rb:2
-  class <constant:A> < ::Object () -> <Class:A> @ test/testdata/namer/sig.rb:7
+class <constant:<root>> < ::Object () @ test/testdata/namer/sig.rb:2
+  class <constant:A> < ::Object () @ test/testdata/namer/sig.rb:7
     method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig.rb:49
       argument a<> -> untyped @ test/testdata/namer/sig.rb:34
       argument b<> -> untyped @ test/testdata/namer/sig.rb:35
@@ -85,9 +85,9 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/si
     method test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/namer/sig.rb:103
       argument <blk><block> -> untyped @ test/testdata/namer/sig.rb:104
       argument x<> -> Integer @ test/testdata/namer/sig.rb:102
-  class <constant:M1> (<constant:BasicObject>) -> <Class:M1> @ test/testdata/namer/sig.rb:4
-  class <constant:T1> < ::Object () -> <Class:T1> @ test/testdata/namer/sig.rb:2
-  class <constant:T2> < ::Object () -> <Class:T2> @ test/testdata/namer/sig.rb:3
+  class <constant:M1> (<constant:BasicObject>) @ test/testdata/namer/sig.rb:4
+  class <constant:T1> < ::Object () @ test/testdata/namer/sig.rb:2
+  class <constant:T2> < ::Object () @ test/testdata/namer/sig.rb:3
   class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/sig.rb:7
     method static : private (x) -> T1 @ test/testdata/namer/sig.rb:93
       argument x<> -> T1 @ test/testdata/namer/sig.rb:92

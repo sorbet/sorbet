@@ -1,6 +1,6 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/deviations/superclass_implicit.rb:8
-  class <constant:A> < ::B () -> <Class:A> @ test/testdata/deviations/superclass_implicit.rb:14
-  class <constant:B> < ::Object () -> <Class:B> @ test/testdata/deviations/superclass_implicit.rb:8
+class <constant:<root>> < ::Object () @ test/testdata/deviations/superclass_implicit.rb:8
+  class <constant:A> < ::B () @ test/testdata/deviations/superclass_implicit.rb:14
+  class <constant:B> < ::Object () @ test/testdata/deviations/superclass_implicit.rb:8
   class <singleton class:<constant:A>> < ::<Class:B> () @ test/testdata/deviations/superclass_implicit.rb:11
   class <singleton class:<constant:B>> < ::<Class:Object> () @ test/testdata/deviations/superclass_implicit.rb:8
   method <static-init>$10 () @ test/testdata/deviations/superclass_implicit.rb:8

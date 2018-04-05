@@ -1,8 +1,8 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/ancestors.rb:2
-  class <constant:Child> < ::Parent (<constant:Mixin2>) -> <Class:Child> @ test/testdata/namer/ancestors.rb:9
-  class <constant:Mixin1> (<constant:BasicObject>) -> <Class:Mixin1> @ test/testdata/namer/ancestors.rb:2
-  class <constant:Mixin2> (<constant:BasicObject>) -> <Class:Mixin2> @ test/testdata/namer/ancestors.rb:3
-  class <constant:Parent> < ::Object (<constant:Mixin1>) -> <Class:Parent> @ test/testdata/namer/ancestors.rb:5
+class <constant:<root>> < ::Object () @ test/testdata/namer/ancestors.rb:2
+  class <constant:Child> < ::Parent (<constant:Mixin2>) @ test/testdata/namer/ancestors.rb:9
+  class <constant:Mixin1> (<constant:BasicObject>) @ test/testdata/namer/ancestors.rb:2
+  class <constant:Mixin2> (<constant:BasicObject>) @ test/testdata/namer/ancestors.rb:3
+  class <constant:Parent> < ::Object (<constant:Mixin1>) @ test/testdata/namer/ancestors.rb:5
   class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/namer/ancestors.rb:9
   class <singleton class:<constant:Mixin1>> < ::Module () @ test/testdata/namer/ancestors.rb:2
   class <singleton class:<constant:Mixin2>> < ::Module () @ test/testdata/namer/ancestors.rb:3

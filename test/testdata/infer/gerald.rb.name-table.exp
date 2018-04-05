@@ -1,10 +1,10 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/infer/gerald.rb:2
-  class <constant:Opus> () -> <Class:Opus> @ ???
+class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
+  class <constant:Opus> () @ ???
     class <constant:AutogenLoader> () -> untyped @ test/testdata/infer/gerald.rb:3
-    class <constant:CIBot> () -> <Class:Opus::CIBot> @ test/testdata/infer/gerald.rb:5
+    class <constant:CIBot> () @ test/testdata/infer/gerald.rb:5
       class <constant:Actions> () -> untyped @ test/testdata/infer/gerald.rb:147
-      class <constant:Gerald> (<constant:BasicObject>) -> <Class:Opus::CIBot::Gerald> @ test/testdata/infer/gerald.rb:5
-        class <constant:Diff> < ::Object () -> <Class:Opus::CIBot::Gerald::Diff> @ test/testdata/infer/gerald.rb:111
+      class <constant:Gerald> (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
+        class <constant:Diff> < ::Object () @ test/testdata/infer/gerald.rb:111
           field @parsed -> untyped @ test/testdata/infer/gerald.rb:115
           field @raw -> untyped @ test/testdata/infer/gerald.rb:114
           method added_files () @ test/testdata/infer/gerald.rb:122
@@ -39,7 +39,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/infer/ge
           method removed_lines () @ test/testdata/infer/gerald.rb:138
             method <block>$2 (part) @ test/testdata/infer/gerald.rb:139
               argument part<> @ test/testdata/infer/gerald.rb:139
-        class <constant:MatchContext> < ::Object () -> <Class:Opus::CIBot::Gerald::MatchContext> @ test/testdata/infer/gerald.rb:51
+        class <constant:MatchContext> < ::Object () @ test/testdata/infer/gerald.rb:51
           field @assignee -> untyped @ test/testdata/infer/gerald.rb:53
           field @body -> untyped @ test/testdata/infer/gerald.rb:56
           field @diff -> untyped @ test/testdata/infer/gerald.rb:58
@@ -66,7 +66,7 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/infer/ge
           method repo () @ test/testdata/infer/gerald.rb:52
           method title () @ test/testdata/infer/gerald.rb:57
           method user_stripe_suffix? () @ test/testdata/infer/gerald.rb:73
-        class <constant:MatchTimeBudget> < ::Object () -> <Class:Opus::CIBot::Gerald::MatchTimeBudget> @ test/testdata/infer/gerald.rb:79
+        class <constant:MatchTimeBudget> < ::Object () @ test/testdata/infer/gerald.rb:79
           field @start -> untyped @ test/testdata/infer/gerald.rb:85
           method check! () @ test/testdata/infer/gerald.rb:89
           method initialize () @ test/testdata/infer/gerald.rb:84
@@ -75,13 +75,13 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/infer/ge
             argument rule<> @ test/testdata/infer/gerald.rb:96
           static-field <constant:PER_RULE_MS> -> Integer(2000) @ test/testdata/infer/gerald.rb:82
           static-field <constant:TOTAL_TIME_MS> -> Integer(10000) @ test/testdata/infer/gerald.rb:81
-        class <constant:MatchTimeout> < ::StandardError () -> <Class:Opus::CIBot::Gerald::MatchTimeout> @ test/testdata/infer/gerald.rb:7
+        class <constant:MatchTimeout> < ::StandardError () @ test/testdata/infer/gerald.rb:7
           field @rule_token -> untyped @ test/testdata/infer/gerald.rb:9
           method initialize (message, rule_token) @ test/testdata/infer/gerald.rb:11
             argument message<> @ test/testdata/infer/gerald.rb:11
             argument rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
           method rule_token () @ test/testdata/infer/gerald.rb:9
-        class <constant:Matcher> < ::Object (<constant:untyped>) -> <Class:Opus::CIBot::Gerald::Matcher> @ test/testdata/infer/gerald.rb:17
+        class <constant:Matcher> < ::Object (<constant:untyped>) @ test/testdata/infer/gerald.rb:17
           class <constant:Chalk> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:18
           field @rules -> untyped @ test/testdata/infer/gerald.rb:23
           method initialize () @ test/testdata/infer/gerald.rb:22

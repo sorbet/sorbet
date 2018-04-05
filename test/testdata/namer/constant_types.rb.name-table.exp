@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:Constants> (<constant:BasicObject>) -> <Class:Constants> @ test/testdata/namer/constant_types.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:Constants> (<constant:BasicObject>) @ test/testdata/namer/constant_types.rb:2
     static-field <constant:A> -> Integer(1) @ test/testdata/namer/constant_types.rb:3
     static-field <constant:B> -> String("hi") @ test/testdata/namer/constant_types.rb:4
     static-field <constant:C> -> Symbol(:"hi") @ test/testdata/namer/constant_types.rb:5

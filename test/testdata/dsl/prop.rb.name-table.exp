@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/dsl/prop.rb:2
-  class <constant:AdvancedODM> < ::Object () -> <Class:AdvancedODM> @ test/testdata/dsl/prop.rb:27
+class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
+  class <constant:AdvancedODM> < ::Object () @ test/testdata/dsl/prop.rb:27
     method array () -> AppliedType {
       klass = ::Array
       targs = [
@@ -161,30 +161,30 @@ class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/dsl/prop
     method type () -> String @ test/testdata/dsl/prop.rb:32
     method type= (arg0) -> String @ test/testdata/dsl/prop.rb:32
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:32
-  class <constant:ForeignClass> < ::Object () -> <Class:ForeignClass> @ test/testdata/dsl/prop.rb:24
-  class <constant:NotAODM> < ::Object () -> <Class:NotAODM> @ test/testdata/dsl/prop.rb:2
+  class <constant:ForeignClass> < ::Object () @ test/testdata/dsl/prop.rb:24
+  class <constant:NotAODM> < ::Object () @ test/testdata/dsl/prop.rb:2
     class <constant:Default> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:11
     class <constant:IntegerParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:10
     method <static-init> () @ test/testdata/dsl/prop.rb:2
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) -> <Class:Object> @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8357
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8357
     method main () @ test/testdata/dsl/prop.rb:72
-  class <constant:Opus> () -> <Class:Opus> @ ???
+  class <constant:Opus> () @ ???
     class <constant:Param> () -> untyped @ test/testdata/dsl/prop.rb:11
-  class <constant:PropHelpers2> < ::Object () -> <Class:PropHelpers2> @ test/testdata/dsl/prop.rb:63
+  class <constant:PropHelpers2> < ::Object () @ test/testdata/dsl/prop.rb:63
     method created () -> Float @ test/testdata/dsl/prop.rb:65
     method token () -> String @ test/testdata/dsl/prop.rb:64
     method token= (arg0) -> String @ test/testdata/dsl/prop.rb:64
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:64
-  class <constant:PropHelpers> < ::Object () -> <Class:PropHelpers> @ test/testdata/dsl/prop.rb:58
+  class <constant:PropHelpers> < ::Object () @ test/testdata/dsl/prop.rb:58
     method created () -> Float @ test/testdata/dsl/prop.rb:60
     method created= (arg0) -> Float @ test/testdata/dsl/prop.rb:60
       argument arg0<> -> Float @ test/testdata/dsl/prop.rb:60
     method token () -> String @ test/testdata/dsl/prop.rb:59
     method token= (arg0) -> String @ test/testdata/dsl/prop.rb:59
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:59
-  class <constant:ShardingProp> < ::Object () -> <Class:ShardingProp> @ test/testdata/dsl/prop.rb:68
+  class <constant:ShardingProp> < ::Object () @ test/testdata/dsl/prop.rb:68
     method merchant () -> String @ test/testdata/dsl/prop.rb:69
-  class <constant:SomeODM> < ::Object () -> <Class:SomeODM> @ test/testdata/dsl/prop.rb:15
+  class <constant:SomeODM> < ::Object () @ test/testdata/dsl/prop.rb:15
     method foo () -> String | NilClass @ test/testdata/dsl/prop.rb:16
     method foo2 () -> String | NilClass @ test/testdata/dsl/prop.rb:19
     method foo2= (arg0) -> String @ test/testdata/dsl/prop.rb:21

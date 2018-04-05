@@ -1,15 +1,15 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver/let_var.rb:2
-  class <constant:Child1> < ::Parent () -> <Class:Child1> @ test/testdata/resolver/let_var.rb:39
+class <constant:<root>> < ::Object () @ test/testdata/resolver/let_var.rb:2
+  class <constant:Child1> < ::Parent () @ test/testdata/resolver/let_var.rb:39
     method <static-init> () @ test/testdata/resolver/let_var.rb:40
-  class <constant:Child> < ::Parent (<constant:Mixin>) -> <Class:Child> @ test/testdata/resolver/let_var.rb:23
+  class <constant:Child> < ::Parent (<constant:Mixin>) @ test/testdata/resolver/let_var.rb:23
     field @undefinedivar -> untyped @ test/testdata/resolver/let_var.rb:34
     method <static-init> () @ test/testdata/resolver/let_var.rb:23
     method child_method () @ test/testdata/resolver/let_var.rb:30
     static-field @@undefined_cvar -> untyped @ test/testdata/resolver/let_var.rb:28
-  class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/resolver/let_var.rb:18
+  class <constant:Mixin> (<constant:BasicObject>) @ test/testdata/resolver/let_var.rb:18
     method <static-init> () @ test/testdata/resolver/let_var.rb:18
     static-field @@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
-  class <constant:Parent> < ::Object () -> <Class:Parent> @ test/testdata/resolver/let_var.rb:2
+  class <constant:Parent> < ::Object () @ test/testdata/resolver/let_var.rb:2
     field @ivar -> Integer @ test/testdata/resolver/let_var.rb:4
     field @ivar2 -> Integer @ test/testdata/resolver/let_var.rb:5
     method <static-init> () @ test/testdata/resolver/let_var.rb:2

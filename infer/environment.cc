@@ -711,8 +711,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 core::SymbolRef symbol = a->what.data(ctx).dealias(ctx);
                 const core::Symbol &data = symbol.data(ctx);
                 if (data.isClass()) {
-                    ENFORCE(data.resultType.get(), "Type should have been filled in by the namer");
-                    tp.type = data.resultType;
+                    if (!data.resultType) { // common case
+                        tp.type = data.lookupSingletonClass(ctx).data(ctx).externalType(ctx);
+                    } else {
+                        tp.type = data.resultType;
+                    }
                     tp.origins.push_back(symbol.data(ctx).definitionLoc);
                 } else if (data.isField() || data.isStaticField() || data.isMethodArgument() || data.isTypeMember()) {
                     if (data.resultType.get() != nullptr) {

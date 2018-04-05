@@ -1,6 +1,6 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/circular_mixin.rb:2
-  class <constant:A> (<constant:BasicObject>, <constant:B>) -> <Class:A> @ test/testdata/namer/circular_mixin.rb:11
-  class <constant:B> (<constant:BasicObject>) -> <Class:B> @ test/testdata/namer/circular_mixin.rb:7
+class <constant:<root>> < ::Object () @ test/testdata/namer/circular_mixin.rb:2
+  class <constant:A> (<constant:BasicObject>, <constant:B>) @ test/testdata/namer/circular_mixin.rb:11
+  class <constant:B> (<constant:BasicObject>) @ test/testdata/namer/circular_mixin.rb:7
   class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/circular_mixin.rb:2
   class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/circular_mixin.rb:3
   method <static-init>$10 () @ test/testdata/namer/circular_mixin.rb:2

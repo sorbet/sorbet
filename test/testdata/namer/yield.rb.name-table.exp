@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/yield.rb:2
-  class <constant:Main> < ::Object () -> <Class:Main> @ test/testdata/namer/yield.rb:2
+class <constant:<root>> < ::Object () @ test/testdata/namer/yield.rb:2
+  class <constant:Main> < ::Object () @ test/testdata/namer/yield.rb:2
     method blockpass (blk) @ test/testdata/namer/yield.rb:7
       argument blk<block> @ test/testdata/namer/yield.rb:7
     method blockyield () @ test/testdata/namer/yield.rb:15

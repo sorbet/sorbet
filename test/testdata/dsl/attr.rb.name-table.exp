@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:TestAttr> < ::Object () -> <Class:TestAttr> @ test/testdata/dsl/attr.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:TestAttr> < ::Object () @ test/testdata/dsl/attr.rb:2
     field @v1 -> Integer @ test/testdata/dsl/attr.rb:4
     field @v2 -> String @ test/testdata/dsl/attr.rb:5
     field @v3 -> untyped @ test/testdata/dsl/attr.rb:17

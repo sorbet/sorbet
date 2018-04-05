@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:BlockTest> < ::Object () -> <Class:BlockTest> @ test/testdata/cfg/blocks.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:BlockTest> < ::Object () @ test/testdata/cfg/blocks.rb:2
     method block_pass () @ test/testdata/cfg/blocks.rb:3
       method <block>$2 (x, y) @ test/testdata/cfg/blocks.rb:4
         argument x<> @ test/testdata/cfg/blocks.rb:4

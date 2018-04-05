@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:Examples> < ::Object () -> <Class:Examples> @ test/testdata/cfg/examples.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:Examples> < ::Object () @ test/testdata/cfg/examples.rb:2
     method i_like_exps () @ test/testdata/cfg/examples.rb:11
     method i_like_ifs () @ test/testdata/cfg/examples.rb:3
     method return_in_one_branch1 () @ test/testdata/cfg/examples.rb:19

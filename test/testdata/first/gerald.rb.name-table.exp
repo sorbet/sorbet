@@ -1,0 +1,107 @@
+class <constant:<root>> < ::<constant:Object> () @ test/testdata/first/gerald.rb:2
+  class <constant:Opus> () @ ???
+    class <constant:AutogenLoader> () -> untyped @ test/testdata/first/gerald.rb:3
+    class <constant:CIBot> () @ test/testdata/first/gerald.rb:5
+      class <constant:Actions> () -> untyped @ test/testdata/first/gerald.rb:147
+      class <constant:Gerald> (<constant:BasicObject>) @ test/testdata/first/gerald.rb:5
+        class <constant:Chalk> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/first/gerald.rb:18
+        class <constant:Diff> < ::<constant:Object> () @ test/testdata/first/gerald.rb:111
+          field @parsed -> untyped @ test/testdata/first/gerald.rb:115
+          field @raw -> untyped @ test/testdata/first/gerald.rb:114
+          method added_files () @ test/testdata/first/gerald.rb:122
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:123
+              argument part<> @ test/testdata/first/gerald.rb:123
+            method <block>$3 (part) @ test/testdata/first/gerald.rb:123
+              argument part<> @ test/testdata/first/gerald.rb:123
+          method added_lines () @ test/testdata/first/gerald.rb:134
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:135
+              argument part<> @ test/testdata/first/gerald.rb:135
+          method affected_files () @ test/testdata/first/gerald.rb:118
+          method changed_files () @ test/testdata/first/gerald.rb:130
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:131
+              argument part<> @ test/testdata/first/gerald.rb:131
+            method <block>$3 (part) @ test/testdata/first/gerald.rb:131
+              argument part<> @ test/testdata/first/gerald.rb:131
+          method changed_lines () @ test/testdata/first/gerald.rb:142
+          method changed_openapi? () @ test/testdata/first/gerald.rb:146
+          method deleted_files () @ test/testdata/first/gerald.rb:126
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:127
+              argument part<> @ test/testdata/first/gerald.rb:127
+            method <block>$3 (part) @ test/testdata/first/gerald.rb:127
+              argument part<> @ test/testdata/first/gerald.rb:127
+          method initialize (raw_diff) @ test/testdata/first/gerald.rb:113
+            argument raw_diff<> @ test/testdata/first/gerald.rb:113
+          method parse : private (diff) @ test/testdata/first/gerald.rb:150
+            argument diff<> @ test/testdata/first/gerald.rb:150
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:155
+              argument part<> @ test/testdata/first/gerald.rb:155
+              method <block>$2 (line) @ test/testdata/first/gerald.rb:161
+                argument line<> @ test/testdata/first/gerald.rb:161
+          method removed_lines () @ test/testdata/first/gerald.rb:138
+            method <block>$2 (part) @ test/testdata/first/gerald.rb:139
+              argument part<> @ test/testdata/first/gerald.rb:139
+        class <constant:MatchContext> < ::<constant:Object> () @ test/testdata/first/gerald.rb:51
+          field @assignee -> untyped @ test/testdata/first/gerald.rb:53
+          field @body -> untyped @ test/testdata/first/gerald.rb:56
+          field @diff -> untyped @ test/testdata/first/gerald.rb:58
+          field @gh_user -> untyped @ test/testdata/first/gerald.rb:54
+          field @merge_branch -> untyped @ test/testdata/first/gerald.rb:55
+          field @openapi_diff -> untyped @ test/testdata/first/gerald.rb:59
+          field @repo -> untyped @ test/testdata/first/gerald.rb:52
+          field @title -> untyped @ test/testdata/first/gerald.rb:57
+          method assignee () @ test/testdata/first/gerald.rb:53
+          method body () @ test/testdata/first/gerald.rb:56
+          method diff () @ test/testdata/first/gerald.rb:58
+          method gh_user () @ test/testdata/first/gerald.rb:54
+          method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff) @ test/testdata/first/gerald.rb:61
+            argument assignee<> @ test/testdata/first/gerald.rb:61
+            argument body<> @ test/testdata/first/gerald.rb:61
+            argument diff<> @ test/testdata/first/gerald.rb:61
+            argument gh_user<> @ test/testdata/first/gerald.rb:61
+            argument merge_branch<> @ test/testdata/first/gerald.rb:61
+            argument openapi_diff<> @ test/testdata/first/gerald.rb:61
+            argument repo<> @ test/testdata/first/gerald.rb:61
+            argument title<> @ test/testdata/first/gerald.rb:61
+          method merge_branch () @ test/testdata/first/gerald.rb:55
+          method openapi_diff () @ test/testdata/first/gerald.rb:59
+          method repo () @ test/testdata/first/gerald.rb:52
+          method title () @ test/testdata/first/gerald.rb:57
+          method user_stripe_suffix? () @ test/testdata/first/gerald.rb:73
+        class <constant:MatchTimeBudget> < ::<constant:Object> () @ test/testdata/first/gerald.rb:79
+          field @start -> untyped @ test/testdata/first/gerald.rb:85
+          method check! () @ test/testdata/first/gerald.rb:89
+          method initialize () @ test/testdata/first/gerald.rb:84
+          method time_rule (rule, <blk>) @ test/testdata/first/gerald.rb:96
+            argument <blk><block> -> untyped @ test/testdata/first/gerald.rb:98
+            argument rule<> @ test/testdata/first/gerald.rb:96
+          static-field <constant:PER_RULE_MS> -> Integer(2000) @ test/testdata/first/gerald.rb:82
+          static-field <constant:TOTAL_TIME_MS> -> Integer(10000) @ test/testdata/first/gerald.rb:81
+        class <constant:MatchTimeout> < ::<constant:StandardError> () @ test/testdata/first/gerald.rb:7
+          field @rule_token -> untyped @ test/testdata/first/gerald.rb:9
+          method initialize (message, rule_token) @ test/testdata/first/gerald.rb:11
+            argument message<> @ test/testdata/first/gerald.rb:11
+            argument rule_token<optional, keyword> @ test/testdata/first/gerald.rb:11
+          method rule_token () @ test/testdata/first/gerald.rb:9
+        class <constant:Matcher> < ::<constant:Object> (<constant:untyped>) @ test/testdata/first/gerald.rb:17
+          field @rules -> untyped @ test/testdata/first/gerald.rb:23
+          method initialize () @ test/testdata/first/gerald.rb:22
+            method <block>$2 (<block-pass>$2) @ test/testdata/first/gerald.rb:25
+              argument <block-pass>$2<> @ test/testdata/first/gerald.rb:25
+            method <block>$3 (<block-pass>$4) @ test/testdata/first/gerald.rb:27
+              argument <block-pass>$4<> @ test/testdata/first/gerald.rb:27
+          method match (match_context) @ test/testdata/first/gerald.rb:33
+            argument match_context<> @ test/testdata/first/gerald.rb:33
+            method <block>$2 (r) @ test/testdata/first/gerald.rb:43
+              argument r<> @ test/testdata/first/gerald.rb:43
+              method <block>$2 () @ test/testdata/first/gerald.rb:44
+          static-field <constant:MAX_AFFECTED_FILES> -> Integer(100) @ test/testdata/first/gerald.rb:20
+        class <singleton class:<constant:Diff>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:111
+        class <singleton class:<constant:MatchContext>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:51
+        class <singleton class:<constant:MatchTimeBudget>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:79
+        class <singleton class:<constant:MatchTimeout>> < ::<singleton class:<constant:StandardError>> () @ test/testdata/first/gerald.rb:7
+        class <singleton class:<constant:Matcher>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/gerald.rb:17
+      class <constant:Model> () -> untyped @ test/testdata/first/gerald.rb:24
+      class <singleton class:<constant:Gerald>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
+    class <singleton class:<constant:CIBot>> < ::<constant:Module> () @ test/testdata/first/gerald.rb:5
+  method <static-init>$10 () @ test/testdata/first/gerald.rb:2
+

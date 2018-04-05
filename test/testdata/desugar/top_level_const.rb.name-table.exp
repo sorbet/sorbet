@@ -1,4 +1,4 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/desugar/top_level_const.rb:2
+class <constant:<root>> < ::Object () @ test/testdata/desugar/top_level_const.rb:2
   class <constant:TopLevelConst> () -> untyped @ test/testdata/desugar/top_level_const.rb:2
   method <static-init>$10 () @ test/testdata/desugar/top_level_const.rb:2
 

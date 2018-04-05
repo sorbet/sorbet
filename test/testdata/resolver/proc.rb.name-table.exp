@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:TestProc> < ::Object () -> <Class:TestProc> @ test/testdata/resolver/proc.rb:3
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:TestProc> < ::Object () @ test/testdata/resolver/proc.rb:3
     method bad (x, y, z, w) -> NilClass @ test/testdata/resolver/proc.rb:22
       argument w<> -> AppliedType {
         klass = ::Proc1

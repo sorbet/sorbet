@@ -1,0 +1,19 @@
+class <constant:<root>> < ::<constant:Object> () @ test/testdata/first/resolver.rb:2
+  class <constant:Outer1> < ::<constant:Object> () @ test/testdata/first/resolver.rb:2
+  class <constant:Outer2> < ::<constant:Object> () @ test/testdata/first/resolver.rb:5
+    class <constant:C> < ::<constant:Object> () @ test/testdata/first/resolver.rb:6
+    class <constant:Inner1> < ::<constant:Object> () @ test/testdata/first/resolver.rb:9
+      class <constant:A> < ::<constant:Object> () @ test/testdata/first/resolver.rb:10
+      class <constant:Inner2> < ::<constant:Object> () @ test/testdata/first/resolver.rb:21
+        class <constant:A> < ::<constant:RubyTyper>::<constant:StubClass> () -> untyped @ test/testdata/first/resolver.rb:23
+        method <static-init> () @ test/testdata/first/resolver.rb:13
+      class <singleton class:<constant:A>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:10
+      class <singleton class:<constant:Inner2>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:13
+    class <constant:Other> < ::<constant:Outer2>::<constant:Inner1>::<constant:Inner2> () @ test/testdata/first/resolver.rb:26
+    class <singleton class:<constant:C>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:6
+    class <singleton class:<constant:Inner1>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:9
+    class <singleton class:<constant:Other>> < ::<constant:Outer2>::<constant:Inner1>::<singleton class:<constant:Inner2>> () @ test/testdata/first/resolver.rb:26
+  class <singleton class:<constant:Outer1>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:2
+  class <singleton class:<constant:Outer2>> < ::<singleton class:<constant:Object>> () @ test/testdata/first/resolver.rb:5
+  method <static-init>$10 () @ test/testdata/first/resolver.rb:2
+

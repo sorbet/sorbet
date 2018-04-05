@@ -1,15 +1,15 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/resolver/class_instance_vars.rb:2
-  class <constant:Child1> < ::Parent () -> <Class:Child1> @ test/testdata/resolver/class_instance_vars.rb:36
+class <constant:<root>> < ::Object () @ test/testdata/resolver/class_instance_vars.rb:2
+  class <constant:Child1> < ::Parent () @ test/testdata/resolver/class_instance_vars.rb:36
     method <static-init> () @ test/testdata/resolver/class_instance_vars.rb:37
-  class <constant:Child> < ::Parent (<constant:Mixin>) -> <Class:Child> @ test/testdata/resolver/class_instance_vars.rb:20
+  class <constant:Child> < ::Parent (<constant:Mixin>) @ test/testdata/resolver/class_instance_vars.rb:20
     field @undefinedivar -> untyped @ test/testdata/resolver/class_instance_vars.rb:31
     method <static-init> () @ test/testdata/resolver/class_instance_vars.rb:20
     method child_method () @ test/testdata/resolver/class_instance_vars.rb:27
     static-field @@undefined_cvar -> untyped @ test/testdata/resolver/class_instance_vars.rb:25
-  class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/resolver/class_instance_vars.rb:15
+  class <constant:Mixin> (<constant:BasicObject>) @ test/testdata/resolver/class_instance_vars.rb:15
     method <static-init> () @ test/testdata/resolver/class_instance_vars.rb:15
     static-field @@mixin_cvar -> Integer @ test/testdata/resolver/class_instance_vars.rb:16
-  class <constant:Parent> < ::Object () -> <Class:Parent> @ test/testdata/resolver/class_instance_vars.rb:2
+  class <constant:Parent> < ::Object () @ test/testdata/resolver/class_instance_vars.rb:2
     field @ivar -> Integer @ test/testdata/resolver/class_instance_vars.rb:4
     field @ivar2 -> Integer @ test/testdata/resolver/class_instance_vars.rb:5
     method <static-init> () @ test/testdata/resolver/class_instance_vars.rb:7

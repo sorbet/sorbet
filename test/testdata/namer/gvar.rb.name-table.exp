@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/gvar.rb:2
-  class <constant:A> < ::Object () -> <Class:A> @ test/testdata/namer/gvar.rb:4
+class <constant:<root>> < ::Object () @ test/testdata/namer/gvar.rb:2
+  class <constant:A> < ::Object () @ test/testdata/namer/gvar.rb:4
     method <static-init> () @ test/testdata/namer/gvar.rb:4
     method meth () @ test/testdata/namer/gvar.rb:7
   class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/gvar.rb:4

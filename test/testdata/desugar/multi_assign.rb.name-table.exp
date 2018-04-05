@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/desugar/multi_assign.rb:2
-  class <constant:Test> < ::Object () -> <Class:Test> @ test/testdata/desugar/multi_assign.rb:4
+class <constant:<root>> < ::Object () @ test/testdata/desugar/multi_assign.rb:2
+  class <constant:Test> < ::Object () @ test/testdata/desugar/multi_assign.rb:4
     method some_method (array) @ test/testdata/desugar/multi_assign.rb:5
       argument array<> @ test/testdata/desugar/multi_assign.rb:5
   class <singleton class:<constant:Test>> < ::<Class:Object> () @ test/testdata/desugar/multi_assign.rb:4

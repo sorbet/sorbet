@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:F> < ::Object () -> <Class:F> @ test/testdata/namer/dynamic_method_with_class.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:F> < ::Object () @ test/testdata/namer/dynamic_method_with_class.rb:2
     method bar (baz) @ test/testdata/namer/dynamic_method_with_class.rb:8
       argument baz<> @ test/testdata/namer/dynamic_method_with_class.rb:8
     method bla () @ test/testdata/namer/dynamic_method_with_class.rb:6

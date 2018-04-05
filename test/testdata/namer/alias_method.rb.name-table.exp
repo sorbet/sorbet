@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:Alias> (<constant:BasicObject>) -> <Class:Alias> @ test/testdata/namer/alias_method.rb:2
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:Alias> (<constant:BasicObject>) @ test/testdata/namer/alias_method.rb:2
     method <static-init> () @ test/testdata/namer/alias_method.rb:2
     method f () @ test/testdata/namer/alias_method.rb:3
     method f_alias () -> AliasType { symbol = ::Alias#f } @ test/testdata/namer/alias_method.rb:3

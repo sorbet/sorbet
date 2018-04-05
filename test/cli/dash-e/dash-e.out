@@ -1,4 +1,4 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ -e:1
-  class <constant:Foo> < ::Object () -> <Class:Foo> @ -e:1
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:Foo> < ::Object () @ -e:1
   class <singleton class:<constant:Foo>> < ::<Class:Object> () @ -e:1
 

@@ -131,6 +131,7 @@ NameDef names[] = {
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
     {"typeMember", "type_member", DSL | Namer | Resolver},
+    {"typeTemplate", "type_template", DSL | Namer | Resolver},
     {"T", DSL | Namer},
     {"covariant", "out", Namer},
     {"contravariant", "in", Namer},

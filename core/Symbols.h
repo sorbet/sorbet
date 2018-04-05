@@ -716,22 +716,23 @@ public:
 
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
-        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY - 1);
+        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
     }
 
     static SymbolRef Proc(int argc) {
         if (argc > MAX_PROC_ARITY) {
             return noSymbol();
         }
-        return SymbolRef(nullptr, Proc0()._id + argc);
+        return SymbolRef(nullptr, Proc0()._id + argc * 2);
     }
 
     static SymbolRef last_proc() {
-        return SymbolRef(nullptr, Proc0()._id + MAX_PROC_ARITY + 1);
+        return Proc(MAX_PROC_ARITY);
     }
 
     // Keep as last and update to match the last entry
     static SymbolRef last_synthetic_sym() {
+        ENFORCE(last_proc()._id == MAX_SYNTHETIC_SYMBOLS - 2);
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
     }
 

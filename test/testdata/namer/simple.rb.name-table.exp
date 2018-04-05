@@ -1,20 +1,20 @@
-class <constant:<root>> < ::Object () -> <Class:<root>> @ test/testdata/namer/simple.rb:2
-  class <constant:ANamespace> (<constant:BasicObject>) -> <Class:ANamespace> @ test/testdata/namer/simple.rb:13
-    class <constant:ClassInNamespace> < ::Object () -> <Class:ANamespace::ClassInNamespace> @ test/testdata/namer/simple.rb:17
-    class <constant:ObviousChild> < ::Object () -> <Class:ANamespace::ObviousChild> @ test/testdata/namer/simple.rb:14
+class <constant:<root>> < ::Object () @ test/testdata/namer/simple.rb:2
+  class <constant:ANamespace> (<constant:BasicObject>) @ test/testdata/namer/simple.rb:13
+    class <constant:ClassInNamespace> < ::Object () @ test/testdata/namer/simple.rb:17
+    class <constant:ObviousChild> < ::Object () @ test/testdata/namer/simple.rb:14
     class <singleton class:<constant:ClassInNamespace>> < ::<Class:Object> () @ test/testdata/namer/simple.rb:17
     class <singleton class:<constant:ObviousChild>> < ::<Class:Object> () @ test/testdata/namer/simple.rb:14
-  class <constant:Child> < ::Parent (<constant:Mixin>) -> <Class:Child> @ test/testdata/namer/simple.rb:26
+  class <constant:Child> < ::Parent (<constant:Mixin>) @ test/testdata/namer/simple.rb:26
     method <static-init> () @ test/testdata/namer/simple.rb:26
-  class <constant:Mixin> (<constant:BasicObject>) -> <Class:Mixin> @ test/testdata/namer/simple.rb:22
-  class <constant:NormalClass> < ::Object () -> <Class:NormalClass> @ test/testdata/namer/simple.rb:2
-    class <constant:InnerClass> < ::Object () -> <Class:NormalClass::InnerClass> @ test/testdata/namer/simple.rb:7
-    class <constant:InnerModule> (<constant:BasicObject>) -> <Class:NormalClass::InnerModule> @ test/testdata/namer/simple.rb:9
+  class <constant:Mixin> (<constant:BasicObject>) @ test/testdata/namer/simple.rb:22
+  class <constant:NormalClass> < ::Object () @ test/testdata/namer/simple.rb:2
+    class <constant:InnerClass> < ::Object () @ test/testdata/namer/simple.rb:7
+    class <constant:InnerModule> (<constant:BasicObject>) @ test/testdata/namer/simple.rb:9
     class <singleton class:<constant:InnerClass>> < ::<Class:Object> () @ test/testdata/namer/simple.rb:7
     class <singleton class:<constant:InnerModule>> < ::Module () @ test/testdata/namer/simple.rb:9
     method normal_method () @ test/testdata/namer/simple.rb:3
-  class <constant:OtherMixin> (<constant:BasicObject>) -> <Class:OtherMixin> @ test/testdata/namer/simple.rb:24
-  class <constant:Parent> < ::Object () -> <Class:Parent> @ test/testdata/namer/simple.rb:20
+  class <constant:OtherMixin> (<constant:BasicObject>) @ test/testdata/namer/simple.rb:24
+  class <constant:Parent> < ::Object () @ test/testdata/namer/simple.rb:20
   class <singleton class:<constant:ANamespace>> < ::Module () @ test/testdata/namer/simple.rb:13
   class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/namer/simple.rb:26
     method <block>$2 () @ test/testdata/namer/simple.rb:30

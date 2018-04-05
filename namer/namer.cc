@@ -34,7 +34,7 @@ class NameInserter {
             return existing;
         }
         auto sym = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
-        sym.data(ctx).resultType = make_unique<core::ClassType>(sym.data(ctx).singletonClass(ctx));
+        sym.data(ctx).singletonClass(ctx); // force singleton class into existance
         return sym;
     }
 
@@ -200,7 +200,7 @@ public:
             remove_if(klass->rhs.begin(), klass->rhs.end(),
                       [this, ctx, &klass](unique_ptr<ast::Expression> &line) { return addAncestor(ctx, klass, line); });
         klass->symbol.data(ctx).definitionLoc = klass->loc;
-        klass->symbol.data(ctx).resultType = make_unique<core::ClassType>(klass->symbol.data(ctx).singletonClass(ctx));
+        klass->symbol.data(ctx).singletonClass(ctx); // force singleton class into existance
         klass->rhs.erase(toRemove, klass->rhs.end());
         return klass;
     }
@@ -482,6 +482,88 @@ public:
         return asgn;
     }
 
+    unique_ptr<ast::Expression> handleTypeMemberDefinition(core::MutableContext ctx, bool makeAlias,
+                                                           core::SymbolRef onSymbol, ast::Send *send,
+                                                           unique_ptr<ast::Assign> asgn, ast::ConstantLit *typeName) {
+        core::Variance variance = core::Variance::Invariant;
+
+        if (!send->args.empty()) {
+            if (send->args.size() > 2) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Too many args in type definition");
+                }
+                return make_unique<ast::EmptyTree>(asgn->loc);
+            }
+
+            auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
+            if (lit != nullptr && lit->isSymbol(ctx)) {
+                core::NameRef name = lit->asSymbol(ctx);
+
+                if (name == core::Names::covariant()) {
+                    variance = core::Variance::CoVariant;
+                } else if (name == core::Names::contravariant()) {
+                    variance = core::Variance::ContraVariant;
+                } else if (name == core::Names::invariant()) {
+                    variance = core::Variance::Invariant;
+                } else {
+                    if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Invalid variance kind, only :{} and :{} are supported",
+                                    core::Names::covariant().toString(ctx), core::Names::contravariant().toString(ctx));
+                    }
+                }
+            } else {
+                if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
+                    if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                        e.setHeader("Invalid param, must be a :symbol");
+                    }
+                }
+            }
+        }
+
+        auto members = onSymbol.data(ctx).typeMembers();
+        auto it =
+            find_if(members.begin(), members.end(), [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
+        if (it != members.end()) {
+            if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx).show(ctx));
+            }
+            return make_unique<ast::EmptyTree>(asgn->loc);
+        }
+        auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
+        if (makeAlias) {
+            auto alias =
+                ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst);
+            alias.data(ctx).resultType = make_shared<core::AliasType>(sym);
+        }
+
+        if (!send->args.empty()) {
+            auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
+            if (hash) {
+                int i = -1;
+                for (auto &keyExpr : hash->keys) {
+                    i++;
+                    auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
+                    core::NameRef name;
+                    if (key != nullptr && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::fixed()) {
+                        // Leave it in the tree for the resolver to chew on.
+                        sym.data(ctx).setFixed();
+
+                        // TODO(nelhage): This creates an order
+                        // dependency in the resolver. See RUBYPLAT-520
+                        sym.data(ctx).resultType = core::Types::dynamic();
+
+                        asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
+                        return asgn;
+                    }
+                }
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
+                    e.setHeader("Missing required param :fixed");
+                }
+            }
+        }
+        return make_unique<ast::EmptyTree>(asgn->loc);
+    }
+
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
@@ -503,82 +585,13 @@ public:
         }
 
         switch (send->fun._id) {
-            case core::Names::typeMember()._id: {
-                core::Variance variance = core::Variance::Invariant;
-
-                if (!send->args.empty()) {
-                    if (send->args.size() > 2) {
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                            e.setHeader("Too many args in type definition");
-                        }
-                        return make_unique<ast::EmptyTree>(asgn->loc);
-                    }
-
-                    auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
-                    if (lit != nullptr && lit->isSymbol(ctx)) {
-                        core::NameRef name = lit->asSymbol(ctx);
-
-                        if (name == core::Names::covariant()) {
-                            variance = core::Variance::CoVariant;
-                        } else if (name == core::Names::contravariant()) {
-                            variance = core::Variance::ContraVariant;
-                        } else if (name == core::Names::invariant()) {
-                            variance = core::Variance::Invariant;
-                        } else {
-                            if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                                e.setHeader("Invalid variance kind, only :{} and :{} are supported",
-                                            core::Names::covariant().toString(ctx),
-                                            core::Names::contravariant().toString(ctx));
-                            }
-                        }
-                    } else {
-                        if (send->args.size() != 1 || ast::cast_tree<ast::Hash>(send->args[0].get()) == nullptr) {
-                            if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                                e.setHeader("Invalid param, must be a :symbol");
-                            }
-                        }
-                    }
-                }
-
-                auto members = ctx.owner.data(ctx).typeMembers();
-                auto it = find_if(members.begin(), members.end(),
-                                  [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
-                if (it != members.end()) {
-                    if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx).show(ctx));
-                    }
-                    return make_unique<ast::EmptyTree>(asgn->loc);
-                }
-                auto sym = ctx.state.enterTypeMember(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst,
-                                                     variance);
-
-                if (!send->args.empty()) {
-                    auto *hash = ast::cast_tree<ast::Hash>(send->args.back().get());
-                    if (hash) {
-                        int i = -1;
-                        for (auto &keyExpr : hash->keys) {
-                            i++;
-                            auto key = ast::cast_tree<ast::Literal>(keyExpr.get());
-                            core::NameRef name;
-                            if (key != nullptr && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::fixed()) {
-                                // Leave it in the tree for the resolver to chew on.
-                                sym.data(ctx).setFixed();
-
-                                // TODO(nelhage): This creates an order
-                                // dependency in the resolver. See RUBYPLAT-520
-                                sym.data(ctx).resultType = core::Types::dynamic();
-
-                                asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
-                                return asgn;
-                            }
-                        }
-                        if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                            e.setHeader("Missing required param :fixed");
-                        }
-                    }
-                }
-                return make_unique<ast::EmptyTree>(asgn->loc);
-            }
+            case core::Names::typeTemplate()._id:
+                return handleTypeMemberDefinition(ctx, true,
+                                                  ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).singletonClass(ctx),
+                                                  send, move(asgn), typeName);
+            case core::Names::typeMember()._id:
+                return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx).enclosingClass(ctx), send, move(asgn),
+                                                  typeName);
             default:
                 return fillAssign(ctx, lhs, move(asgn));
         }

@@ -268,23 +268,19 @@ void GlobalState::initEmpty() {
     // Set the correct resultTypes for all synthesized classes
     // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
     // iterator
-    vector<SymbolRef> needsResultType;
-    for (auto &data : symbols) {
-        auto ref = data.ref(*this);
-        if (ref._id < Symbols::root()._id) {
-            // These aren't real classes and won't have singleton classes
-            continue;
-        }
-        if (data.isClass() && !data.resultType) {
-            needsResultType.emplace_back(data.ref(*this));
+    vector<core::SymbolRef> needSingletons;
+    for (auto &sym : symbols) {
+        auto ref = sym.ref(*this);
+        if (ref.exists() && sym.isClass()) {
+            needSingletons.emplace_back(ref);
         }
     }
-    for (auto sym : needsResultType) {
-        Symbol &data = sym.data(*this);
-        data.resultType = make_unique<core::ClassType>(data.singletonClass(*this));
+    for (auto sym : needSingletons) {
+        sym.data(*this).singletonClass(*this);
     }
 
-    while (symbols.size() < Symbols::MAX_SYNTHETIC_SYMBOLS - Symbols::MAX_PROC_ARITY - 1) {
+    ENFORCE(symbols.size() < Symbols::Proc0()._id);
+    while (symbols.size() < Symbols::Proc0()._id) {
         std::string res(reserved_str);
         res = res + to_string(reservedCount);
         synthesizeClass(res);
@@ -293,16 +289,19 @@ void GlobalState::initEmpty() {
 
     for (int arity = 0; arity <= Symbols::MAX_PROC_ARITY; ++arity) {
         auto id = synthesizeClass(absl::StrCat("Proc", arity), Symbols::Proc()._id);
-        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity);
+        ENFORCE(id == Symbols::Proc(arity), "Proc creation failed for arity: ", arity, " got: ", id._id,
+                " expected: ", Symbols::Proc(arity)._id);
+        id.data(*this).singletonClass(*this);
     }
+
+    ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
+            "Too many synthetic symbols? have: ", symbols.size(), " expected: ", Symbols::last_synthetic_sym()._id + 1);
 
     // First file is used to indicate absence of a file
     files.emplace_back();
-
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
-    ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1, "Too many synthetic symbols?");
     sanityCheck();
 }
 
