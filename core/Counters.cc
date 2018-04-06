@@ -156,7 +156,7 @@ void histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
 }
 
 const int MAX_WIDTH = 100;
-const int PAD_LIMIT = 20;
+const int PAD_LIMIT = 30;
 const int MAX_STAT_WIDTH = MAX_WIDTH - PAD_LIMIT;
 const float HIST_CUTOFF = 0.1;
 

@@ -475,6 +475,8 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
                 core::counterInc("names.utf8.hit");
                 return nm2.ref(*this);
+            } else {
+                core::counterInc("names.hash_collision.utf8");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -504,6 +506,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 
     names[idx].kind = NameKind::UTF8;
     names[idx].raw.utf8 = enterString(nm);
+    ENFORCE(names[idx].hash(*this) == hs);
     core::categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
@@ -527,6 +530,8 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
                 core::counterInc("names.constant.hit");
                 return nm2.ref(*this);
+            } else {
+                core::counterInc("names.hash_collision.constant");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -559,6 +564,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
 
     names[idx].kind = CONSTANT;
     names[idx].cnst.original = original;
+    ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
     core::categoryCounterInc("names", "constant");
     return NameRef(*this, idx);
@@ -614,6 +620,8 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
                 nm2.unique.original == original) {
                 core::counterInc("names.unique.hit");
                 return nm2.ref(*this);
+            } else {
+                core::counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -638,6 +646,8 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
                 nm2.unique.original == original) {
                 core::counterInc("names.unique.hit");
                 return nm2.ref(*this);
+            } else {
+                core::counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -672,6 +682,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.num = num;
     names[idx].unique.uniqueNameKind = uniqueNameKind;
     names[idx].unique.original = original;
+    ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
     core::categoryCounterInc("names", "unique");
     return NameRef(*this, idx);
