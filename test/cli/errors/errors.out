@@ -5,7 +5,7 @@ test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method 
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
-    7075 |      arg0: String,
+    7078 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:
@@ -44,7 +44,7 @@ test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method 
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
-    7075 |      arg0: String,
+    7078 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:
@@ -83,7 +83,7 @@ test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method 
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
-    7075 |      arg0: String,
+    7078 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:

@@ -6778,6 +6778,9 @@ module Kernel
   sig.returns(Kernel)
   def clone(); end
 
+  sig.returns(T.any(TrueClass, FalseClass))
+  def nil?(); end
+
   sig(
       arg0: T.any(String, Symbol),
       arg1: BasicObject,
@@ -8479,9 +8482,6 @@ class Object
   )
   .returns(T::Array[Symbol])
   def methods(regular=_); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def nil?(); end
 
   sig(
       all: T.any(TrueClass, FalseClass),
