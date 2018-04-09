@@ -171,6 +171,7 @@ public:
             if (!klass->symbol.data(ctx).isClass()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx).show(ctx));
+                    e.addErrorLine(klass->symbol.data(ctx).definitionLoc, "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name, core::UniqueNameKind::Namer);
                 klass->symbol = squashNames(ctx, ctx.owner, klass->name);
@@ -473,6 +474,7 @@ public:
         if (sym.exists() && !sym.data(ctx).isStaticField()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx).show(ctx));
+                e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
             }
             ctx.state.mangleRenameSymbol(sym, sym.data(ctx).name, core::UniqueNameKind::Namer);
         }
