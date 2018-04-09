@@ -413,7 +413,9 @@ string AliasType::toString(const GlobalState &gs, int tabs) {
 }
 
 string AliasType::show(const GlobalState &gs) {
-    Error::raise("should never happen");
+    stringstream buf;
+    buf << "<Alias:" << this->symbol.data(gs).fullName(gs) << ">";
+    return buf.str();
 }
 
 string AndType::toString(const GlobalState &gs, int tabs) {

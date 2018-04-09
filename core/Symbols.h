@@ -55,6 +55,7 @@ public:
     }
 
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string toJSON(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass) const;
 
     u4 _id;

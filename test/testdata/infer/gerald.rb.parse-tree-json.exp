@@ -11,7 +11,7 @@
           "nodes" : [
             {
               "type" : "String",
-              "val" : "..\/..\/..\/extn"
+              "val" : "../../../extn"
             }
           ]
         }
@@ -800,7 +800,7 @@
                           "nodes" : [
                             {
                               "type" : "String",
-                              "val" : "stripe-internal\/"
+                              "val" : "stripe-internal/"
                             }
                           ]
                         }
@@ -1368,7 +1368,7 @@
                               "nodes" : [
                                 {
                                   "type" : "String",
-                                  "val" : "\/dev\/null"
+                                  "val" : "/dev/null"
                                 }
                               ]
                             }
@@ -1456,7 +1456,7 @@
                               "nodes" : [
                                 {
                                   "type" : "String",
-                                  "val" : "\/dev\/null"
+                                  "val" : "/dev/null"
                                 }
                               ]
                             }
@@ -2122,7 +2122,7 @@
                                                       "nodes" : [
                                                         {
                                                           "type" : "String",
-                                                          "val" : "a\/"
+                                                          "val" : "a/"
                                                         }
                                                       ]
                                                     }
@@ -2234,7 +2234,7 @@
                                                         "nodes" : [
                                                           {
                                                             "type" : "String",
-                                                            "val" : "b\/"
+                                                            "val" : "b/"
                                                           }
                                                         ]
                                                       }

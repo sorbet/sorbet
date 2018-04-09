@@ -1,6 +1,7 @@
 #include "Symbols.h"
 #include "Context.h"
 #include "Types.h"
+#include "common/JSON.h"
 #include "core/Names/core.h"
 #include "core/errors/internal.h"
 #include <sstream>
@@ -248,6 +249,177 @@ string SymbolRef::toString(const GlobalState &gs, int tabs, bool showHidden) con
     for (auto row : children) {
         os << row;
     }
+    return os.str();
+}
+
+string SymbolRef::toJSON(const GlobalState &gs, int tabs, bool showHidden) const {
+    ostringstream os;
+    const Symbol &myInfo = data(gs, true);
+    auto &members = myInfo.members;
+
+    vector<string> children;
+    children.reserve(members.size());
+    for (auto pair : members) {
+        if (pair.first == Names::singleton() || pair.first == Names::attached() ||
+            pair.first == Names::classMethods()) {
+            continue;
+        }
+
+        auto str = pair.second.toJSON(gs, tabs + 1, showHidden);
+        if (!str.empty()) {
+            children.push_back(str);
+        }
+    }
+
+    if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
+        return "";
+    }
+
+    os << "{" << endl;
+    printTabs(os, tabs + 1);
+
+    string name = myInfo.name.show(gs);
+    os << "\"name\" : \"" << core::JSON::escape(name) << "\"," << endl;
+    printTabs(os, tabs + 1);
+
+    string type = "unknown";
+    if (myInfo.isClass()) {
+        type = "class";
+    } else if (myInfo.isStaticField()) {
+        type = "static-field";
+    } else if (myInfo.isField()) {
+        type = "field";
+    } else if (myInfo.isMethod()) {
+        type = "method";
+    } else if (myInfo.isMethodArgument()) {
+        type = "argument";
+    } else if (myInfo.isTypeMember()) {
+        type = "type-member";
+    } else if (myInfo.isTypeArgument()) {
+        type = "type-argument";
+    }
+    os << "\"type\" : \"" << type << "\"," << endl;
+    printTabs(os, tabs + 1);
+
+    if (myInfo.isTypeArgument() || myInfo.isTypeMember()) {
+        char variance;
+        if (myInfo.isCovariant()) {
+            variance = '+';
+        } else if (myInfo.isContravariant()) {
+            variance = '-';
+        } else if (myInfo.isInvariant()) {
+            variance = '=';
+        } else {
+            Error::raise("type without variance");
+        }
+        os << "\"variance\" : \"" << variance << "\"," << endl;
+        printTabs(os, tabs + 1);
+    }
+
+    if (myInfo.isClass() || myInfo.isMethod()) {
+        if (myInfo.isMethod()) {
+            string visibility = "public";
+            if (myInfo.isPrivate()) {
+                visibility = "private";
+            } else if (myInfo.isProtected()) {
+                visibility = "protected";
+            }
+            os << "\"visibility\" : \"" << visibility << "\"," << endl;
+            printTabs(os, tabs + 1);
+        }
+
+        auto typeMembers = myInfo.isClass() ? myInfo.typeMembers() : myInfo.typeArguments();
+        if (!typeMembers.empty()) {
+            os << "\"typeMembers\" : [" << endl;
+            printTabs(os, tabs + 1);
+            bool first = true;
+            for (SymbolRef thing : typeMembers) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                printTabs(os, 1);
+                os << "\"" << core::JSON::escape(thing.data(gs).name.show(gs)) << "\"" << endl;
+                printTabs(os, tabs + 1);
+            }
+            os << "]," << endl;
+            printTabs(os, tabs + 1);
+        }
+
+        string superclass = "null";
+        if (myInfo.superClass.exists()) {
+            superclass = "\"" + core::JSON::escape(myInfo.superClass.data(gs).fullName(gs)) + "\"";
+        }
+        os << "\"superclass\" : " << superclass << "," << endl;
+        printTabs(os, tabs + 1);
+
+        bool first = true;
+        auto list = myInfo.isClass() ? myInfo.mixins() : myInfo.arguments();
+        auto key = myInfo.isClass() ? "mixins" : "arguments";
+        os << "\"" << key << "\" : [" << endl;
+        printTabs(os, tabs + 1);
+        for (SymbolRef thing : list) {
+            if (first) {
+                first = false;
+            } else {
+                os << ", ";
+            }
+            printTabs(os, 1);
+            os << "\"" << core::JSON::escape(thing.data(gs).name.show(gs)) << "\"" << endl;
+            printTabs(os, tabs + 1);
+        }
+        os << "]," << endl;
+        printTabs(os, tabs + 1);
+    }
+    if (myInfo.isMethodArgument()) {
+        vector<pair<int, const char *>> methodFlags = {
+            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"},
+            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"},
+            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"},
+            {Symbol::Flags::ARGUMENT_BLOCK, "block"},
+        };
+        os << "\"flags\" : [" << endl;
+        printTabs(os, tabs + 1);
+        bool first = true;
+        for (auto &flag : methodFlags) {
+            if ((myInfo.flags & flag.first) != 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    os << ", ";
+                }
+                printTabs(os, 1);
+                os << "\"" << flag.second << "\"";
+                printTabs(os, tabs + 1);
+            }
+        }
+        os << "]," << endl;
+        printTabs(os, tabs + 1);
+    }
+    if (myInfo.resultType) {
+        string resultType = core::JSON::escape(myInfo.resultType->show(gs));
+        os << "\"resultType\" : \"" << resultType << "\"," << endl;
+        printTabs(os, tabs + 1);
+    }
+    string loc = myInfo.definitionLoc.toJSON(gs, tabs + 1);
+    os << "\"loc\" : " << loc << "," << endl;
+    printTabs(os, tabs + 1);
+
+    sort(children.begin(), children.end());
+    os << "\"children\" : [";
+    bool first = true;
+    for (auto row : children) {
+        if (first) {
+            first = false;
+        } else {
+            os << ", ";
+        }
+        os << row;
+    }
+    os << "]" << endl;
+    printTabs(os, tabs);
+    os << "}";
     return os.str();
 }
 

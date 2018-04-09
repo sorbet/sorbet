@@ -110,6 +110,72 @@ string Loc::toString(const core::GlobalState &gs, int tabs) const {
     return buf.str();
 }
 
+string Loc::toJSON(const core::GlobalState &gs, int tabs) const {
+    stringstream buf;
+    buf << "{" << endl;
+    printTabs(buf, tabs + 1);
+
+    if (this->is_none()) {
+        buf << "\"path\" : \"???\"," << endl;
+
+        printTabs(buf, tabs + 1);
+        buf << "\"position\" : {" << endl;
+
+        printTabs(buf, tabs + 2);
+        buf << "\"start\" : {" << endl;
+        printTabs(buf, tabs + 3);
+        buf << "\"line\" : 0," << endl;
+        printTabs(buf, tabs + 3);
+        buf << "\"column\" : 0" << endl;
+        printTabs(buf, tabs + 2);
+        buf << "}," << endl;
+
+        printTabs(buf, tabs + 2);
+        buf << "\"end\" : {" << endl;
+        printTabs(buf, tabs + 3);
+        buf << "\"line\" : 0," << endl;
+        printTabs(buf, tabs + 3);
+        buf << "\"column\" : 0" << endl;
+        printTabs(buf, tabs + 2);
+        buf << "}" << endl;
+        printTabs(buf, tabs + 1);
+        buf << "}" << endl;
+        printTabs(buf, tabs);
+        buf << "}";
+        return buf.str();
+    }
+
+    auto path = this->file.data(gs).path();
+    buf << "\"path\" : \"" << path << "\"," << endl;
+
+    auto pos = this->position(gs);
+    printTabs(buf, tabs + 1);
+    buf << "\"position\" : {" << endl;
+
+    printTabs(buf, tabs + 2);
+    buf << "\"start\" : {" << endl;
+    printTabs(buf, tabs + 3);
+    buf << "\"line\" : " << pos.first.line << "," << endl;
+    printTabs(buf, tabs + 3);
+    buf << "\"column\" : " << pos.first.column << endl;
+    printTabs(buf, tabs + 2);
+    buf << "}," << endl;
+
+    printTabs(buf, tabs + 2);
+    buf << "\"end\" : {" << endl;
+    printTabs(buf, tabs + 3);
+    buf << "\"line\" : " << pos.first.line << "," << endl;
+    printTabs(buf, tabs + 3);
+    buf << "\"column\" : " << pos.first.column << endl;
+    printTabs(buf, tabs + 2);
+    buf << "}" << endl;
+    printTabs(buf, tabs + 1);
+    buf << "}" << endl;
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
 string Loc::filePosToString(const GlobalState &gs) const {
     stringstream buf;
     if (is_none()) {

@@ -134,6 +134,7 @@ std::string strprintf(const char *__restrict, ...) __attribute__((format(printf,
 std::string demangle(const char *mangled);
 
 #include "Error.h"
+#include "JSON.h"
 #include "Levenstein.h"
 #include "typecase.h"
 

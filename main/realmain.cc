@@ -48,6 +48,7 @@ struct Printers {
     bool NameTree = false;
     bool NameTreeRaw = false;
     bool NameTable = false;
+    bool NameTableJson = false;
     bool NameTableFull = false;
     bool CFG = false;
     bool CFGRaw = false;
@@ -116,6 +117,7 @@ struct {
     {"dsl-tree", &Printers::DSLTree},
     {"dsl-tree-raw", &Printers::DSLTreeRaw},
     {"name-table", &Printers::NameTable},
+    {"name-table-json", &Printers::NameTableJson},
     {"name-table-full", &Printers::NameTableFull},
     {"name-tree", &Printers::NameTree},
     {"name-tree-raw", &Printers::NameTreeRaw},
@@ -592,6 +594,9 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
 
         if (opts.print.NameTable) {
             cout << gs->toString() << '\n';
+        }
+        if (opts.print.NameTableJson) {
+            cout << gs->toJSON() << '\n';
         }
         if (opts.print.NameTableFull) {
             cout << gs->toString(true) << '\n';

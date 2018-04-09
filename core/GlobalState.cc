@@ -777,6 +777,10 @@ string GlobalState::toString(bool showHidden) const {
     return Symbols::root().toString(*this, 0, showHidden);
 }
 
+string GlobalState::toJSON() const {
+    return Symbols::root().toJSON(*this, 0, true);
+}
+
 void GlobalState::sanityCheck() const {
     if (!debug_mode) {
         return;
