@@ -47,30 +47,30 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
     ENFORCE(o1 != nullptr);
     shared_ptr<core::Type> n1 = Types::lub(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "t1");
+        core::categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
     shared_ptr<core::Type> n2 = Types::lub(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "n2'");
+        core::categoryCounterInc("lubDistributeOr.outcome", "n2'");
         return n2;
     }
     if (n2.get() == o1->right.get()) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "t1'");
+        core::categoryCounterInc("lubDistributeOr.outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "n1'");
+        core::categoryCounterInc("lubDistributeOr.outcome", "n1'");
         return n1;
     }
     if (Types::isSubTypeWhenFrozen(ctx, n1, n2)) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "n2''");
+        core::categoryCounterInc("lubDistributeOr.outcome", "n2''");
         return n2;
     } else if (Types::isSubTypeWhenFrozen(ctx, n2, n1)) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "n1'''");
+        core::categoryCounterInc("lubDistributeOr.outcome", "n1'''");
         return n1;
     }
-    core::categoryCounterInc("lub_distribute_or.outcome", "worst");
+    core::categoryCounterInc("lubDistributeOr.outcome", "worst");
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
@@ -79,7 +79,7 @@ shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, 
     ENFORCE(t1 != nullptr);
     shared_ptr<core::Type> n1 = Types::glb(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
-        core::categoryCounterInc("lub_distribute_or.outcome", "t1");
+        core::categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
     shared_ptr<core::Type> n2 = Types::glb(ctx, a1->right, t2);
