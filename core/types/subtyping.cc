@@ -275,7 +275,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = make_shared<TupleType>(elemLubs);
+                                result = make_shared<TupleType>(ctx, elemLubs);
                             }
                         } else {
                             result = core::Types::arrayOfUntyped();
@@ -589,7 +589,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
                                  }
                                  elemGlbs.emplace_back(glbe);
                              }
-                             result = make_shared<TupleType>(elemGlbs);
+                             result = make_shared<TupleType>(ctx, elemGlbs);
                          } else {
                              result = Types::bottom();
                          }

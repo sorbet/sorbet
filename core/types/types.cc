@@ -189,6 +189,19 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
     return result;
 }
 
+shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elements) {
+    shared_ptr<Type> acc = Types::bottom();
+    for (auto &el : elements) {
+        acc = Types::lub(ctx, acc, el);
+    }
+    return acc;
+}
+
+shared_ptr<Type> Types::arrayOf(core::Context ctx, shared_ptr<Type> elem) {
+    vector<shared_ptr<Type>> targs{move(elem)};
+    return make_shared<AppliedType>(core::Symbols::Array(), targs);
+}
+
 core::ClassType::ClassType(core::SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
@@ -228,8 +241,15 @@ core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
 core::LiteralType::LiteralType(bool val)
     : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
-core::TupleType::TupleType(vector<shared_ptr<Type>> elements)
-    : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
+core::TupleType::TupleType() : ProxyType(Types::arrayOfUntyped()){};
+
+core::TupleType::TupleType(core::Context ctx, vector<shared_ptr<Type>> elements)
+    : ProxyType(Types::arrayOf(ctx, Types::lubAll(ctx, elements))), elems(move(elements)) {}
+
+shared_ptr<core::TupleType> core::TupleType::makeRaw() {
+    std::shared_ptr<TupleType> res(new TupleType());
+    return res;
+}
 
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(std::move(left)), right(std::move(right)) {}
 

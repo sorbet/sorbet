@@ -342,7 +342,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             for (auto &el : arr->elems) {
                 elems.emplace_back(getResultType(ctx, el, sigBeingParsed));
             }
-            result = make_shared<core::TupleType>(elems);
+            result = make_shared<core::TupleType>(ctx, elems);
         },
         [&](ast::Hash *hash) {
             vector<shared_ptr<core::LiteralType>> keys;

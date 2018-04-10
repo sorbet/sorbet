@@ -86,6 +86,9 @@ public:
     static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     /** Internal implementation. You should probably use any(). */
     static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+
+    static std::shared_ptr<Type> lubAll(core::Context ctx, std::vector<std::shared_ptr<core::Type>> &elements);
+    static std::shared_ptr<Type> arrayOf(core::Context ctx, std::shared_ptr<core::Type> elem);
 };
 
 class TypeAndOrigins final {
@@ -353,9 +356,10 @@ public:
 };
 
 class TupleType final : public ProxyType {
+    TupleType();
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    TupleType(std::vector<std::shared_ptr<Type>> elements);
+    TupleType(core::Context ctx, std::vector<std::shared_ptr<Type>> elements);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -373,6 +377,7 @@ public:
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
+    static std::shared_ptr<TupleType> makeRaw();
 };
 
 // MagicType is the type of the built-in core::Symbols::Magic()
