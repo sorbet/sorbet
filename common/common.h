@@ -39,8 +39,8 @@ constexpr bool debug_mode = false;
 constexpr bool debug_mode = true;
 #endif
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
-#define ENFORCE(x, ...)                  \
-    (::ruby_typer::debug_mode && !(x) && \
+#define ENFORCE(x, ...)                                                 \
+    (::ruby_typer::debug_mode && !(x) && (!stopInDebugger() || !(x)) && \
      ::ruby_typer::Error::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)))
 
 #define DEBUG_ONLY(X) \
