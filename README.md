@@ -43,14 +43,14 @@ We build using [bazel](https://bazel.build/); Run `./bazel test
   [clang-format](https://clang.llvm.org/docs/ClangFormat.html) at
   least version 5.0.0;
 - [autoconf](https://www.gnu.org/software/autoconf/autoconf.html) for building jemalloc from source;
-- [gnu coreutils](http://www.gnu.org/software/coreutils/coreutils.html) used by some of bash scripts;
+- [gnu coreutils](http://www.gnu.org/software/coreutils/coreutils.html) and [gnu parallel](https://www.gnu.org/software/parallel/) are used by some of bash scripts;
 - platform headers for [ncurses5](https://www.gnu.org/software/ncurses/).
 
 
 ### On macOS
 
 ```
-brew install ragel bison autoconf coreutils
+brew install ragel bison autoconf coreutils parallel
 ```
 
 ### On Ubuntu 16.04

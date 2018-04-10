@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+COMMAND_FILE=$(mktemp)
+
 passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw cfg cfg-raw typed-source)
 
 bazel build //main:ruby-typer -c opt
@@ -28,8 +30,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
         for pass in "${passes[@]}" ; do
             candidate="$basename.$pass.exp"
             if [ -e "$candidate" ]; then
-                echo "bazel-bin/main/ruby-typer --print $pass" "${srcs[@]}" " > $candidate"
-                bazel-bin/main/ruby-typer  --suppress-non-critical --print "$pass" --max-threads 1 "${srcs[@]}" > "$candidate" 2>/dev/null
+                echo bazel-bin/main/ruby-typer  --suppress-non-critical --print "$pass" --max-threads 1 "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
             fi
         done
     fi
@@ -37,6 +38,8 @@ for this_src in "${rb_src[@]}" DUMMY; do
     basename="$this_base"
     srcs=("$this_src")
 done
+
+parallel --joblog - < "$COMMAND_FILE"
 
 # Not all versions of bash have mapfile and read -r isn't reading in all the lines
 # shellcheck disable=SC2207
