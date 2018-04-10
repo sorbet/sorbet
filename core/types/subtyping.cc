@@ -344,15 +344,29 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
             ENFORCE(result.get() != nullptr);
             return result;
         } else {
+            bool allowProxyInLub = isa_type<TupleType>(p1) || isa_type<ShapeType>(p1);
             // only 1st is proxy
             shared_ptr<Type> und = p1->underlying;
-            return lub(ctx, und, t2);
+            if (isSubType(ctx, und, t2)) {
+                return t2;
+            } else if (allowProxyInLub) {
+                return OrType::make_shared(t1, t2);
+            } else {
+                return lub(ctx, t2, und);
+            }
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
-        core::categoryCounterInc("lub", "proxy>");
         // only 2nd is proxy
+        bool allowProxyInLub = isa_type<TupleType>(p2) || isa_type<ShapeType>(p2);
+        // only 1st is proxy
         shared_ptr<Type> und = p2->underlying;
-        return lub(ctx, t1, und);
+        if (isSubType(ctx, und, t1)) {
+            return t1;
+        } else if (allowProxyInLub) {
+            return OrType::make_shared(t1, t2);
+        } else {
+            return lub(ctx, t1, und);
+        }
     }
 
     LambdaParam *p1 = cast_type<LambdaParam>(t1.get());
