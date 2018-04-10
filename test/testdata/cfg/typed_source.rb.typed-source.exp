@@ -124,7 +124,8 @@ class Examples
         if (cond)
               # b: NilClass
               #
-              # cond: untyped
+              # cond: untyped (and truthy)
+              #
               #   Being truthy entails:
               #     cond to be untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
@@ -136,7 +137,8 @@ class Examples
           b = 1 # error: Changing type of a variable in a loop
               # b: untyped
               #
-              # cond: untyped
+              # cond: untyped (and truthy)
+              #
               #   Being truthy entails:
               #     cond to be untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
@@ -208,7 +210,8 @@ class Examples
         if (cond)
               # b: NilClass
               #
-              # cond: untyped
+              # cond: untyped (and truthy)
+              #
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
@@ -220,7 +223,8 @@ class Examples
           b = 1 # error: Changing type of a variable in a loop
               # b: untyped
               #
-              # cond: untyped
+              # cond: untyped (and truthy)
+              #
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples

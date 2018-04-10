@@ -40,6 +40,10 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
                 }
             }
+            if (thenb == elseb) {
+                // Remove condition from unconditional jumps
+                bb->bexit.cond = core::LocalVariable::noVariable();
+            }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
                     bb->exprs.insert(bb->exprs.end(), std::make_move_iterator(thenb->exprs.begin()),

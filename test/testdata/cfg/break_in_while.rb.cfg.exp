@@ -39,7 +39,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_2" [label = "block[id=2]()
 outerLoops: 1
 <whileTemp>$4 = true : TrueClass
-<whileTemp>$4"];
+<unconditional>"];
 
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_3" [label = "block[id=3]()

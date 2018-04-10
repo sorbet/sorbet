@@ -100,9 +100,30 @@ public:
 
     bool isDead = false;
     cfg::BasicBlock *bb;
+
+    /*
+     * These four vectors represent the core state store of the environment,
+     * modeling a map from local variables to (type, knowledge, known-truthy)
+     * tuples.
+     *
+     * As we learn flow-dependent information through the CFG, we normally
+     * represent that information in the type of a variable; For instance, "v is
+     * falsy" is equivalent to "v : T.any(NilClass, FalseClass)", and "v is
+     * truthy" can strip `NilClass` from an OrType.
+     *
+     * However, some types, such as Object, are inhabited by both truthy and
+     * falsy value but are not explicit unions. For these types, there is no
+     * type that represents (e.g.) "Object \ T.any(NilClass,
+     * FalseClass)". Instead of augmenting the type system with some hack to
+     * represent such types, we carry an extra bit of information in the
+     * inferencer. There's no need for the inverse "known falsy" bit because a
+     * simple subtyping check suffices to represent that one.
+     */
     std::vector<core::LocalVariable> vars;
     std::vector<core::TypeAndOrigins> types;
     std::vector<TestedKnowledge> knowledge;
+    std::vector<bool> knownTruthy;
+
     std::unordered_map<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
     std::unordered_map<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
@@ -117,6 +138,7 @@ public:
     core::TypeAndOrigins getOrCreateTypeAndOrigin(core::Context ctx, core::LocalVariable symbol);
 
     const TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) const;
+    bool getKnownTruthy(core::LocalVariable var) const;
 
     TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) {
         return const_cast<TestedKnowledge &>(const_cast<const Environment *>(this)->getKnowledge(symbol, shouldFail));

@@ -57,6 +57,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         current.vars.reserve(bb->args.size());
         current.types.resize(bb->args.size());
         current.knowledge.resize(bb->args.size());
+        current.knownTruthy.resize(bb->args.size());
         for (core::LocalVariable arg : bb->args) {
             current.vars.push_back(arg);
         }

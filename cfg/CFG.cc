@@ -87,6 +87,20 @@ void CFG::sanityCheck(core::Context ctx) {
 
     for (auto &bb : this->basicBlocks) {
         ENFORCE(bb->bexit.isCondSet(), "Block exit condition left unset for block " + bb->toString(ctx));
+
+        if (bb.get() == deadBlock()) {
+            continue;
+        }
+
+        auto thenCount = count(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
+        auto elseCount = count(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
+        ENFORCE(thenCount == 1, "bb id=", bb->id, "; then has ", thenCount, " back edges");
+        ENFORCE(elseCount == 1, "bb id=", bb->id, "; else has ", elseCount, " back edges");
+        if (bb->bexit.thenb == bb->bexit.elseb) {
+            ENFORCE(!bb->bexit.cond.exists());
+        } else {
+            ENFORCE(bb->bexit.cond.exists());
+        }
     }
 
     // check that synthetic variable that is read is ever written to.
