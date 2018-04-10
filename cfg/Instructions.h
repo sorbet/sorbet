@@ -91,7 +91,7 @@ public:
 class Unanalyzable : public Instruction {
 public:
     Unanalyzable() {
-        core::categoryCounterInc("cfg", "Unanalyzable");
+        core::categoryCounterInc("cfg", "unanalyzable");
     };
     virtual std::string toString(core::Context ctx);
 };
