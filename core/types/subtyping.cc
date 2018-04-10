@@ -419,7 +419,7 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
         core::categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
     } else {
-        core::categoryCounterInc("lub.class>.collapsed", "no");
+        core::categoryCounterInc("lub.<class>.collapsed", "no");
         return OrType::make_shared(t1, t2);
     }
 }
