@@ -811,7 +811,8 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         }
         if (mayBeSpecial1->symbol == core::Symbols::top()) {
             if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-                return mayBeSpecial2->symbol == core::Symbols::top();
+                return mayBeSpecial2->symbol == core::Symbols::top() ||
+                       mayBeSpecial2->symbol == core::Symbols::untyped();
             } else {
                 return false;
             }
