@@ -726,7 +726,17 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
     if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
         AppliedType *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
-            return AndType::make_shared(t1, t2);
+            auto *c2 = cast_type<ClassType>(t2.get());
+            if (a1->klass.data(ctx).isClassModule() || c2 == nullptr) {
+                return AndType::make_shared(t1, t2);
+            }
+            if (a1->klass.data(ctx).derivesFrom(ctx, c2->symbol)) {
+                return t1;
+            }
+            if (c2->symbol.data(ctx).isClassModule()) {
+                return AndType::make_shared(t1, t2);
+            }
+            return Types::bottom();
         }
         bool rtl = a1->klass == a2->klass || a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
         bool ltr = !rtl && a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
