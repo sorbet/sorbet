@@ -422,6 +422,11 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
     }
     ENFORCE(mainThreadFiles.size() + frs.size() == ret.size());
 
+    auto by_file = [](unique_ptr<ast::Expression> const &a, unique_ptr<ast::Expression> const &b) {
+        return a->loc.file < b->loc.file;
+    };
+    std::sort(ret.begin(), ret.end(), by_file);
+
     return ret;
 }
 
