@@ -953,6 +953,11 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                      },
                      [&](LiteralType *l1) {
                          LiteralType *l2 = cast_type<LiteralType>(p2);
+                         if (l2 == nullptr) {
+                             // is a literal a subtype of a different kind of proxy
+                             result = false;
+                             return;
+                         }
                          ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
                          ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
