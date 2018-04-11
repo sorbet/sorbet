@@ -366,7 +366,8 @@ string SymbolRef::toJSON(const GlobalState &gs, int tabs, bool showHidden) const
                 os << ", ";
             }
             printTabs(os, 1);
-            os << "\"" << core::JSON::escape(thing.data(gs).name.show(gs)) << "\"" << endl;
+            auto name = myInfo.isClass() ? thing.data(gs).show(gs) : thing.data(gs).name.show(gs);
+            os << "\"" << core::JSON::escape(name) << "\"" << endl;
             printTabs(os, tabs + 1);
         }
         os << "]," << endl;
