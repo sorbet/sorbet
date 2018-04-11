@@ -995,7 +995,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (report) {
         core::histogramAdd("error", what.code, 1);
     }
-    report = report && !this->silenceErrors;
+    report = (what == errors::Internal::InternalError) || (report && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
 }
 
