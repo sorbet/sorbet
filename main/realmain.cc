@@ -109,21 +109,22 @@ const string GLOBAL_STATE_KEY = "GlobalState";
 struct {
     string option;
     bool Printers::*flag;
+    bool supportsCaching = false;
 } print_options[] = {
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJSON},
     {"ast", &Printers::Desugared},
     {"ast-raw", &Printers::DesugaredRaw},
-    {"dsl-tree", &Printers::DSLTree},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw},
-    {"name-table", &Printers::NameTable},
-    {"name-table-json", &Printers::NameTableJson},
-    {"name-table-full", &Printers::NameTableFull},
-    {"name-tree", &Printers::NameTree},
-    {"name-tree-raw", &Printers::NameTreeRaw},
-    {"cfg", &Printers::CFG},
-    {"cfg-raw", &Printers::CFGRaw},
-    {"typed-source", &Printers::TypedSource},
+    {"dsl-tree", &Printers::DSLTree, true},
+    {"dsl-tree-raw", &Printers::DSLTreeRaw, true},
+    {"name-table", &Printers::NameTable, true},
+    {"name-table-json", &Printers::NameTableJson, true},
+    {"name-table-full", &Printers::NameTableFull, true},
+    {"name-tree", &Printers::NameTree, true},
+    {"name-tree-raw", &Printers::NameTreeRaw, true},
+    {"cfg", &Printers::CFG, true},
+    {"cfg-raw", &Printers::CFGRaw, true},
+    {"typed-source", &Printers::TypedSource, true},
 };
 
 struct {
@@ -208,67 +209,72 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::Globa
                                      std::unique_ptr<KeyValueStore> &kvstore,
                                      const shared_ptr<core::GlobalState> &pgs) {
     auto &print = opts.print;
+    std::unique_ptr<ast::Expression> dslsInlined;
+
     try {
         if (kvstore && file.id() < pgs->filesUsed()) {
             auto maybeCached = kvstore->read(file.data(*pgs).hashKey());
             if (maybeCached) {
                 auto t = core::serialize::Serializer::loadExpression(*pgs, maybeCached);
                 t->loc.file.data(*pgs).cachedParseTree = true;
-                return t;
+                dslsInlined = move(t);
             }
         }
+        if (!dslsInlined) {
+            // tree isn't cached. Need to start from parser
 
-        std::unique_ptr<parser::Node> nodes;
-        {
-            tracer->trace("Parsing: {}", file.data(*lgs).path());
-            core::ErrorRegion errs(*lgs, file);
-            core::UnfreezeNameTable nameTableAccess(*lgs); // enters strings from source code as names
-            nodes = parser::Parser::run(*lgs, file);
-        }
-        if (print.ParseTree) {
-            cout << nodes->toString(*lgs, 0) << '\n';
-        }
-        if (print.ParseTreeJSON) {
-            cout << nodes->toJSON(*lgs, 0) << '\n';
-        }
-        if (opts.stopAfterPhase == Phase::PARSER) {
-            return make_unique<ast::EmptyTree>(core::Loc::none(file));
-        }
+            std::unique_ptr<parser::Node> nodes;
+            {
+                tracer->trace("Parsing: {}", file.data(*lgs).path());
+                core::ErrorRegion errs(*lgs, file);
+                core::UnfreezeNameTable nameTableAccess(*lgs); // enters strings from source code as names
+                nodes = parser::Parser::run(*lgs, file);
+            }
+            if (print.ParseTree) {
+                cout << nodes->toString(*lgs, 0) << '\n';
+            }
+            if (print.ParseTreeJSON) {
+                cout << nodes->toJSON(*lgs, 0) << '\n';
+            }
+            if (opts.stopAfterPhase == Phase::PARSER) {
+                return make_unique<ast::EmptyTree>(core::Loc::none(file));
+            }
 
-        core::MutableContext ctx(*lgs, core::Symbols::root());
-        std::unique_ptr<ast::Expression> ast;
-        {
-            tracer->trace("Desugaring: {}", file.data(*lgs).path());
-            core::ErrorRegion errs(*lgs, file);
-            core::UnfreezeNameTable nameTableAccess(*lgs); // creates temporaries during desugaring
-            ast = ast::desugar::node2Tree(ctx, move(nodes));
-        }
-        if (print.Desugared) {
-            cout << ast->toString(*lgs, 0) << '\n';
-        }
-        if (print.DesugaredRaw) {
-            cout << ast->showRaw(*lgs) << '\n';
-        }
-        if (opts.stopAfterPhase == Phase::DESUGARER) {
-            return make_unique<ast::EmptyTree>(core::Loc::none(file));
-        }
+            std::unique_ptr<ast::Expression> ast;
+            core::MutableContext ctx(*lgs, core::Symbols::root());
+            {
+                tracer->trace("Desugaring: {}", file.data(*lgs).path());
+                core::ErrorRegion errs(*lgs, file);
+                core::UnfreezeNameTable nameTableAccess(*lgs); // creates temporaries during desugaring
+                ast = ast::desugar::node2Tree(ctx, move(nodes));
+            }
+            if (print.Desugared) {
+                cout << ast->toString(*lgs, 0) << '\n';
+            }
+            if (print.DesugaredRaw) {
+                cout << ast->showRaw(*lgs) << '\n';
+            }
+            if (opts.stopAfterPhase == Phase::DESUGARER) {
+                return make_unique<ast::EmptyTree>(core::Loc::none(file));
+            }
 
-        {
-            tracer->trace("Inlining DSLs: {}", file.data(*lgs).path());
-            core::ErrorRegion errs(*lgs, file);
-            ast = dsl::DSL::run(ctx, move(ast));
+            {
+                tracer->trace("Inlining DSLs: {}", file.data(*lgs).path());
+                core::ErrorRegion errs(*lgs, file);
+                dslsInlined = dsl::DSL::run(ctx, move(ast));
+            }
         }
         if (print.DSLTree) {
-            cout << ast->toString(*lgs, 0) << '\n';
+            cout << dslsInlined->toString(*lgs, 0) << '\n';
         }
         if (print.DSLTreeRaw) {
-            cout << ast->showRaw(*lgs) << '\n';
+            cout << dslsInlined->showRaw(*lgs) << '\n';
         }
         if (opts.stopAfterPhase == Phase::DSL) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
-        return ast;
+        return dslsInlined;
     } catch (...) {
         if (auto e = lgs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(*lgs).path());
@@ -797,13 +803,19 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
     }
 }
 
-bool extractPrinters(cxxopts::Options &opts, Printers &print) {
-    vector<string> printOpts = opts["print"].as<vector<string>>();
+bool extractPrinters(cxxopts::Options &raw, Options &opts) {
+    vector<string> printOpts = raw["print"].as<vector<string>>();
     for (auto opt : printOpts) {
         bool found = false;
         for (auto &known : print_options) {
             if (known.option == opt) {
-                print.*(known.flag) = true;
+                opts.print.*(known.flag) = true;
+                if (!known.supportsCaching) {
+                    if (!opts.cacheDir.empty()) {
+                        console_err->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                        opts.cacheDir = "";
+                    }
+                }
                 found = true;
                 break;
             }
@@ -864,7 +876,8 @@ int realmain(int argc, char **argv) {
     vector<string> files = options["files"].as<vector<string>>();
 
     Options opts;
-    if (!extractPrinters(options, opts.print)) {
+    opts.cacheDir = options["cache-dir"].as<string>();
+    if (!extractPrinters(options, opts)) {
         return 1;
     }
     opts.stopAfterPhase = extractStopAfter(options);
@@ -923,7 +936,6 @@ int realmain(int argc, char **argv) {
     opts.forceTyped = typed == "always";
     opts.forceUntyped = typed == "never";
     opts.showProgress = options.count("P") != 0;
-    opts.cacheDir = options["cache-dir"].as<string>();
     opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
     opts.configatronFiles = options["configatron-file"].as<vector<string>>();
     opts.storeState = options.count("store-state") != 0;

@@ -1,8 +1,0 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:CCCCCCCCC> < ::Object () @ test/cli/cache-keeps-name-table/cache-keeps-name-table.rb:1
-  class <singleton class:<constant:CCCCCCCCC>> < ::<Class:Object> () @ test/cli/cache-keeps-name-table/cache-keeps-name-table.rb:1
-
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:CCCCCCCCC> < ::Object () @ test/cli/cache-keeps-name-table/cache-keeps-name-table.rb:1
-  class <singleton class:<constant:CCCCCCCCC>> < ::<Class:Object> () @ test/cli/cache-keeps-name-table/cache-keeps-name-table.rb:1
-
