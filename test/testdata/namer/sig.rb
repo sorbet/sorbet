@@ -24,10 +24,11 @@ class A
       foo: String,
       bar: T.nilable(Integer),
     },
-    p: {}
+    p: {},
+    q: {"hi" => String, :bye => String},
   )
   .returns(T2)
-  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p)
+  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
   end
 
   sig(
@@ -42,7 +43,7 @@ class A
     i: T.class_of(T1, T2), # error: class_of only takes a single argument
     j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
     k: T.class_of(1), # error: T.class_of needs a Class as its argument
-    l: {1 => String}, # error: Shape keys must be Symbol literals.
+    l: {[] => String}, # error: Shape keys must be literals.
     m: {foo: 0} # error: Unsupported type syntax
   )
   .returns(T2)

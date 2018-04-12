@@ -255,12 +255,14 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
                 auto val = getResultType(ctx, vtree);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
-                if (lit && lit->isSymbol(ctx)) {
-                    keys.emplace_back(std::dynamic_pointer_cast<core::LiteralType>(lit->value));
+                if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
+                    auto keytype = std::dynamic_pointer_cast<core::LiteralType>(lit->value);
+                    ENFORCE(keytype);
+                    keys.emplace_back(keytype);
                     values.emplace_back(val);
                 } else {
                     if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("Malformed type declaration. Shape keys must be Symbol literals.");
+                        e.setHeader("Malformed type declaration. Shape keys must be literals.");
                     }
                 }
             }
