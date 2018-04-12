@@ -1,5 +1,6 @@
 #include "Instructions.h"
-
+#include "core/Names/cfg.h"
+#include "core/TypeConstraint.h"
 // helps debugging
 template class std::unique_ptr<ruby_typer::cfg::Instruction>;
 
@@ -12,20 +13,26 @@ Return::Return(core::LocalVariable what) : what(what) {
     core::categoryCounterInc("cfg", "return");
 }
 
+string SolveConstraint::toString(core::Context ctx) {
+    return "Solve<" + this->link->block.data(ctx).fullName(ctx) + ">";
+}
+
 string Return::toString(core::Context ctx) {
     return "return " + this->what.toString(ctx);
 }
 
-BlockReturn::BlockReturn(core::SymbolRef block, core::LocalVariable what) : block(block), what(what) {
+BlockReturn::BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what)
+    : link(link), what(what) {
     core::categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(core::Context ctx) {
-    return "blockreturn<" + this->block.data(ctx).fullName(ctx) + "> " + this->what.toString(ctx);
+    return "blockreturn<" + this->link->block.data(ctx).fullName(ctx) + "> " + this->what.toString(ctx);
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args, core::SymbolRef block)
-    : recv(recv), fun(fun), args(move(args)), block(block) {
+Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args,
+           std::shared_ptr<core::SendAndBlockLink> link)
+    : recv(recv), fun(fun), args(move(args)), link(link) {
     core::categoryCounterInc("cfg", "send");
     core::histogramInc("cfg.send.args", this->args.size());
 }
@@ -70,6 +77,7 @@ string Alias::toString(core::Context ctx) {
 
 string Send::toString(core::Context ctx) {
     stringstream buf;
+
     buf << this->recv.toString(ctx) << "." << this->fun.data(ctx).toString(ctx) << "(";
     bool isFirst = true;
     for (auto arg : this->args) {
@@ -108,7 +116,7 @@ string LoadArg::toString(core::Context ctx) {
 string LoadYieldParam::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_yield_param(";
-    buf << this->block.data(ctx).fullName(ctx);
+    buf << this->link->block.data(ctx).fullName(ctx);
     buf << ", " << this->arg << ")";
     return buf.str();
 }
@@ -134,6 +142,5 @@ string Cast::toString(core::Context ctx) {
 string DebugEnvironment::toString(core::Context ctx) {
     return str;
 }
-
 } // namespace cfg
 } // namespace ruby_typer

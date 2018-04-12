@@ -1,0 +1,222 @@
+#include "TypeConstraint.h"
+namespace ruby_typer {
+namespace core {
+
+bool TypeConstraint::isEmpty() const {
+    return upperBounds.empty() && lowerBounds.empty();
+}
+
+void TypeConstraint::defineDomain(Context ctx, const std::vector<SymbolRef> &typeParams) {
+    // ENFORCE(isEmpty()); // unfortunately this is false. See
+    // test/testdata/infer/generic_methods/countraints_crosstalk.rb
+    for (const auto &tp : typeParams) {
+        ENFORCE(tp.data(ctx).isTypeArgument());
+        auto typ = cast_type<TypeVar>(tp.data(ctx).resultType.get());
+        ENFORCE(typ != nullptr);
+
+        if (tp.data(ctx).isCovariant()) {
+            findLowerBound(typ->sym);
+        } else {
+            findUpperBound(typ->sym);
+        }
+    }
+}
+bool TypeConstraint::solve(Context ctx) {
+    if (cantSolve) {
+        return false;
+    }
+    if (wasSolved) {
+        return true;
+    }
+
+    // instatiate types to upper bound approximations
+    for (auto &k : upperBounds) {
+        auto &tv = k.first;
+        auto &bound = k.second;
+        if (!bound) {
+            continue;
+        }
+        auto approximation = bound->_approximate(ctx, *this);
+        if (approximation) {
+            findSolution(tv) = approximation;
+        } else {
+            ENFORCE(bound->isFullyDefined());
+            findSolution(tv) = bound;
+        }
+    }
+    // or lower bound approximation, if there is no upper bound
+    for (auto &k : lowerBounds) {
+        auto &tv = k.first;
+        auto &bound = k.second;
+        auto &sol = findSolution(tv);
+        if (sol) {
+            continue;
+        }
+        if (!bound) {
+            bound = Types::bottom();
+        }
+        auto approximation = bound->_approximate(ctx, *this);
+        if (approximation) {
+            sol = approximation;
+        } else {
+            ENFORCE(bound->isFullyDefined());
+            sol = bound;
+        }
+    }
+
+    for (auto &k : lowerBounds) {
+        auto &tv = k.first;
+        auto &lowerBound = k.second;
+
+        cantSolve = !Types::isSubType(ctx, lowerBound, findSolution(tv));
+        if (cantSolve) {
+            return false;
+        }
+    }
+    for (auto &k : upperBounds) {
+        auto &tv = k.first;
+        auto &upperBound = k.second;
+
+        cantSolve = !Types::isSubType(ctx, findSolution(tv), upperBound);
+        if (cantSolve) {
+            return false;
+        }
+    }
+    wasSolved = true;
+    return true;
+}
+
+bool TypeConstraint::rememberIsSubtype(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
+    ENFORCE(!wasSolved);
+    if (auto t1p = core::cast_type<TypeVar>(t1.get())) {
+        auto &entry = findUpperBound(t1p->sym);
+        if (!entry) {
+            entry = t2;
+        } else if (t2->isFullyDefined()) {
+            entry = Types::glb(ctx, entry, t2);
+        } else {
+            entry = AndType::make_shared(entry, t2);
+        }
+    } else {
+        auto t2p = core::cast_type<TypeVar>(t2.get());
+        ENFORCE(t2p != nullptr);
+        auto &entry = findLowerBound(t2p->sym);
+        if (!entry) {
+            entry = t1;
+        } else if (t1->isFullyDefined()) {
+            entry = Types::lub(ctx, entry, t1);
+        } else {
+            entry = AndType::make_shared(entry, t1);
+        }
+    }
+    return true;
+}
+
+bool TypeConstraint::isAlreadyASubType(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) const {
+    if (auto t1p = core::cast_type<TypeVar>(t1.get())) {
+        if (!hasLowerBound(t1p->sym)) {
+            return Types::isSubType(ctx, Types::top(), t2);
+        }
+        return Types::isSubType(ctx, findLowerBound(t1p->sym), t2);
+    } else {
+        auto t2p = core::cast_type<TypeVar>(t2.get());
+        ENFORCE(t2p != nullptr);
+        if (!hasUpperBound(t2p->sym)) {
+            return Types::isSubType(ctx, t1, Types::bottom());
+        }
+        return Types::isSubType(ctx, t1, findUpperBound(t2p->sym));
+    }
+}
+
+std::shared_ptr<Type> TypeConstraint::getInstantiation(core::SymbolRef sym) const {
+    ENFORCE(wasSolved);
+    return findSolution(sym);
+}
+
+std::shared_ptr<TypeConstraint> TypeConstraint::deepCopy() const {
+    ENFORCE(!wasSolved);
+    auto res = std::make_shared<TypeConstraint>();
+    res->lowerBounds = this->lowerBounds;
+    res->upperBounds = this->upperBounds;
+    return res;
+}
+TypeConstraint TypeConstraint::makeEmptyFrozenConstraint() {
+    TypeConstraint res;
+    res.wasSolved = true;
+    return res;
+}
+
+TypeConstraint TypeConstraint::EmptyFrozenConstraint(makeEmptyFrozenConstraint());
+
+bool TypeConstraint::hasUpperBound(core::SymbolRef forWhat) const {
+    for (auto &entry : this->upperBounds) {
+        if (entry.first == forWhat)
+            return true;
+    }
+    return false;
+}
+
+bool TypeConstraint::hasLowerBound(core::SymbolRef forWhat) const {
+    for (auto &entry : this->lowerBounds) {
+        if (entry.first == forWhat)
+            return true;
+    }
+    return false;
+}
+
+std::shared_ptr<Type> &TypeConstraint::findUpperBound(core::SymbolRef forWhat) {
+    for (auto &entry : this->upperBounds) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    this->upperBounds.emplace_back();
+    this->upperBounds.back().first = forWhat;
+    return this->upperBounds.back().second;
+}
+
+std::shared_ptr<Type> &TypeConstraint::findLowerBound(core::SymbolRef forWhat) {
+    for (auto &entry : this->lowerBounds) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    this->lowerBounds.emplace_back();
+    this->lowerBounds.back().first = forWhat;
+    return this->lowerBounds.back().second;
+}
+
+std::shared_ptr<Type> &TypeConstraint::findSolution(core::SymbolRef forWhat) {
+    for (auto &entry : this->solution) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    this->solution.emplace_back();
+    this->solution.back().first = forWhat;
+    return this->solution.back().second;
+}
+
+std::shared_ptr<Type> TypeConstraint::findUpperBound(core::SymbolRef forWhat) const {
+    for (auto &entry : this->upperBounds) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    Error::raise("should never happen");
+}
+
+std::shared_ptr<Type> TypeConstraint::findLowerBound(core::SymbolRef forWhat) const {
+    for (auto &entry : this->lowerBounds) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    Error::raise("should never happen");
+}
+
+std::shared_ptr<Type> TypeConstraint::findSolution(core::SymbolRef forWhat) const {
+    for (auto &entry : this->solution) {
+        if (entry.first == forWhat)
+            return entry.second;
+    }
+    Error::raise("should never happen");
+}
+
+} // namespace core
+} // namespace ruby_typer

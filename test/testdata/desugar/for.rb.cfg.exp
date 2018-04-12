@@ -110,12 +110,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_1" [shape = parallelogram];
 
     "bb::<Class:Main>#main_0" [label = "block[id=0]()
-<constant:E>$100 = alias <constant:E> : <Class:E>
+<constant:E>$105 = alias <constant:E> : <Class:E>
 <constant:A>$12 = alias <constant:A> : <Class:A>
-@a$84 = alias @a : untyped
-@@b$88 = alias @@b : untyped
-$c$92 = alias $c : untyped
-<statTemp>$10 = <constant:A>$12.each() : untyped
+@a$89 = alias @a : untyped
+@@b$93 = alias @@b : untyped
+$c$97 = alias $c : untyped
+<block-pre-call-temp>$13 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_0" -> "bb::<Class:Main>#main_2" [style="bold"];
@@ -123,207 +123,213 @@ $c$92 = alias $c : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_1" -> "bb::<Class:Main>#main_1" [style="bold"];
-    "bb::<Class:Main>#main_2" [label = "block[id=2](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_2" [label = "block[id=2](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_2" -> "bb::<Class:Main>#main_4" [style="bold"];
     "bb::<Class:Main>#main_2" -> "bb::<Class:Main>#main_3" [style="tapered"];
 
-    "bb::<Class:Main>#main_3" [label = "block[id=3](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
-<statTemp>$23 = <constant:A>$12.each() : untyped
+    "bb::<Class:Main>#main_3" [label = "block[id=3](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
+<statTemp>$10 = Solve<::<Class:Main>#main#<block>> : untyped
+<block-pre-call-temp>$26 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_3" -> "bb::<Class:Main>#main_5" [style="bold"];
-    "bb::<Class:Main>#main_4" [label = "block[id=4](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_4" [label = "block[id=4](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$2$2 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
-<statTemp>$18 = 0 : Integer(0)
-a$2 = forTemp$2$2.[](<statTemp>$18) : untyped
-<statTemp>$19 = self : <Class:Main>
-<statTemp>$20 = a$2.inspect() : untyped
-<blockReturnTemp>$13 = <statTemp>$19.puts(<statTemp>$20) : NilClass
-<blockReturnTemp>$22 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$13 : <impossible>
+<statTemp>$19 = 0 : Integer(0)
+a$2 = forTemp$2$2.[](<statTemp>$19) : untyped
+<statTemp>$20 = self : <Class:Main>
+<statTemp>$21 = a$2.inspect() : untyped
+<blockReturnTemp>$14 = <statTemp>$20.puts(<statTemp>$21) : NilClass
+<blockReturnTemp>$23 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$14 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_4" -> "bb::<Class:Main>#main_2" [style="bold"];
-    "bb::<Class:Main>#main_5" [label = "block[id=5](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_5" [label = "block[id=5](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_5" -> "bb::<Class:Main>#main_7" [style="bold"];
     "bb::<Class:Main>#main_5" -> "bb::<Class:Main>#main_6" [style="tapered"];
 
-    "bb::<Class:Main>#main_6" [label = "block[id=6](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
-<statTemp>$36 = <constant:A>$12.each() : untyped
+    "bb::<Class:Main>#main_6" [label = "block[id=6](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
+<statTemp>$24 = Solve<::<Class:Main>#main#<block>> : untyped
+<block-pre-call-temp>$40 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_6" -> "bb::<Class:Main>#main_8" [style="bold"];
-    "bb::<Class:Main>#main_7" [label = "block[id=7](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_7" [label = "block[id=7](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$3 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
 <assignTemp$4$3 = forTemp$3.to_a() : untyped
-<statTemp>$31 = 0 : Integer(0)
-a$3 = <assignTemp$4$3.[](<statTemp>$31) : untyped
-<statTemp>$32 = self : <Class:Main>
-<statTemp>$33 = a$3.inspect() : untyped
-<blockReturnTemp>$25 = <statTemp>$32.puts(<statTemp>$33) : NilClass
-<blockReturnTemp>$35 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$25 : <impossible>
+<statTemp>$33 = 0 : Integer(0)
+a$3 = <assignTemp$4$3.[](<statTemp>$33) : untyped
+<statTemp>$34 = self : <Class:Main>
+<statTemp>$35 = a$3.inspect() : untyped
+<blockReturnTemp>$27 = <statTemp>$34.puts(<statTemp>$35) : NilClass
+<blockReturnTemp>$37 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$27 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_7" -> "bb::<Class:Main>#main_5" [style="bold"];
-    "bb::<Class:Main>#main_8" [label = "block[id=8](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_8" [label = "block[id=8](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_8" -> "bb::<Class:Main>#main_10" [style="bold"];
     "bb::<Class:Main>#main_8" -> "bb::<Class:Main>#main_9" [style="tapered"];
 
-    "bb::<Class:Main>#main_9" [label = "block[id=9](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
-<statTemp>$55 = <constant:A>$12.each() : untyped
+    "bb::<Class:Main>#main_9" [label = "block[id=9](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
+<statTemp>$38 = Solve<::<Class:Main>#main#<block>> : untyped
+<block-pre-call-temp>$60 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_9" -> "bb::<Class:Main>#main_11" [style="bold"];
-    "bb::<Class:Main>#main_10" [label = "block[id=10](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_10" [label = "block[id=10](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$5$4 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
-<statTemp>$43 = 0 : Integer(0)
-a$4 = forTemp$5$4.[](<statTemp>$43) : untyped
-<statTemp>$46 = 1 : Integer(1)
-b$4 = forTemp$5$4.[](<statTemp>$46) : untyped
-<statTemp>$48 = self : <Class:Main>
-<statTemp>$49 = a$4.inspect() : untyped
-<statTemp>$47 = <statTemp>$48.puts(<statTemp>$49) : NilClass
+<statTemp>$46 = 0 : Integer(0)
+a$4 = forTemp$5$4.[](<statTemp>$46) : untyped
+<statTemp>$49 = 1 : Integer(1)
+b$4 = forTemp$5$4.[](<statTemp>$49) : untyped
 <statTemp>$51 = self : <Class:Main>
-<statTemp>$52 = b$4.inspect() : untyped
-<blockReturnTemp>$38 = <statTemp>$51.puts(<statTemp>$52) : NilClass
-<blockReturnTemp>$54 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$38 : <impossible>
+<statTemp>$52 = a$4.inspect() : untyped
+<statTemp>$50 = <statTemp>$51.puts(<statTemp>$52) : NilClass
+<statTemp>$54 = self : <Class:Main>
+<statTemp>$55 = b$4.inspect() : untyped
+<blockReturnTemp>$41 = <statTemp>$54.puts(<statTemp>$55) : NilClass
+<blockReturnTemp>$57 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$41 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_10" -> "bb::<Class:Main>#main_8" [style="bold"];
-    "bb::<Class:Main>#main_11" [label = "block[id=11](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_11" [label = "block[id=11](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_11" -> "bb::<Class:Main>#main_13" [style="bold"];
     "bb::<Class:Main>#main_11" -> "bb::<Class:Main>#main_12" [style="tapered"];
 
-    "bb::<Class:Main>#main_12" [label = "block[id=12](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
-<statTemp>$76 = self : <Class:Main>
-<statTemp>$77 = \"main\" : String(\"main\")
-<statTemp>$75 = <statTemp>$76.puts(<statTemp>$77) : NilClass
-<statTemp>$78 = <constant:A>$12.each() : untyped
+    "bb::<Class:Main>#main_12" [label = "block[id=12](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
+<statTemp>$58 = Solve<::<Class:Main>#main#<block>> : untyped
+<statTemp>$80 = self : <Class:Main>
+<statTemp>$81 = \"main\" : String(\"main\")
+<statTemp>$79 = <statTemp>$80.puts(<statTemp>$81) : NilClass
+<block-pre-call-temp>$84 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_12" -> "bb::<Class:Main>#main_14" [style="bold"];
-    "bb::<Class:Main>#main_13" [label = "block[id=13](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_13" [label = "block[id=13](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$5 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
 <assignTemp$7$5 = forTemp$5.to_a() : untyped
-<statTemp>$63 = 0 : Integer(0)
-a$5 = <assignTemp$7$5.[](<statTemp>$63) : untyped
-<statTemp>$66 = 1 : Integer(1)
-b$5 = <assignTemp$7$5.[](<statTemp>$66) : untyped
-<statTemp>$68 = self : <Class:Main>
-<statTemp>$69 = a$5.inspect() : untyped
-<statTemp>$67 = <statTemp>$68.puts(<statTemp>$69) : NilClass
-<statTemp>$71 = self : <Class:Main>
-<statTemp>$72 = b$5.inspect() : untyped
-<blockReturnTemp>$57 = <statTemp>$71.puts(<statTemp>$72) : NilClass
-<blockReturnTemp>$74 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$57 : <impossible>
+<statTemp>$67 = 0 : Integer(0)
+a$5 = <assignTemp$7$5.[](<statTemp>$67) : untyped
+<statTemp>$70 = 1 : Integer(1)
+b$5 = <assignTemp$7$5.[](<statTemp>$70) : untyped
+<statTemp>$72 = self : <Class:Main>
+<statTemp>$73 = a$5.inspect() : untyped
+<statTemp>$71 = <statTemp>$72.puts(<statTemp>$73) : NilClass
+<statTemp>$75 = self : <Class:Main>
+<statTemp>$76 = b$5.inspect() : untyped
+<blockReturnTemp>$61 = <statTemp>$75.puts(<statTemp>$76) : NilClass
+<blockReturnTemp>$78 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$61 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_13" -> "bb::<Class:Main>#main_11" [style="bold"];
-    "bb::<Class:Main>#main_14" [label = "block[id=14](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_14" [label = "block[id=14](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_14" -> "bb::<Class:Main>#main_16" [style="bold"];
     "bb::<Class:Main>#main_14" -> "bb::<Class:Main>#main_15" [style="tapered"];
 
-    "bb::<Class:Main>#main_15" [label = "block[id=15](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
-<returnMethodTemp>$8 = <constant:A>$12.each() : untyped
+    "bb::<Class:Main>#main_15" [label = "block[id=15](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
+<statTemp>$82 = Solve<::<Class:Main>#main#<block>> : untyped
+<block-pre-call-temp>$131 = <constant:A>$12.each() : untyped
 <unconditional>"];
 
     "bb::<Class:Main>#main_15" -> "bb::<Class:Main>#main_17" [style="bold"];
-    "bb::<Class:Main>#main_16" [label = "block[id=16](<constant:E>$100, <constant:A>$12, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_16" [label = "block[id=16](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$8$6 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
-<statTemp>$86 = 0 : Integer(0)
-@a$84 = forTemp$8$6.[](<statTemp>$86) : untyped
-<statTemp>$90 = 1 : Integer(1)
-@@b$88 = forTemp$8$6.[](<statTemp>$90) : untyped
-<statTemp>$94 = 2 : Integer(2)
-$c$92 = forTemp$8$6.[](<statTemp>$94) : untyped
-<statTemp>$97 = 3 : Integer(3)
-d$6 = forTemp$8$6.[](<statTemp>$97) : untyped
-<statTemp>$103 = 4 : Integer(4)
-<statTemp>$101 = forTemp$8$6.[](<statTemp>$103) : untyped
-<statTemp>$98 = <constant:E>$100.e=(<statTemp>$101) : untyped
-<statTemp>$105 = self : <Class:Main>
-<statTemp>$106 = @a$84.inspect() : untyped
-<statTemp>$104 = <statTemp>$105.puts(<statTemp>$106) : NilClass
-<statTemp>$109 = self : <Class:Main>
-<statTemp>$110 = @@b$88.inspect() : untyped
-<statTemp>$108 = <statTemp>$109.puts(<statTemp>$110) : NilClass
-<statTemp>$113 = self : <Class:Main>
-<statTemp>$114 = $c$92.inspect() : untyped
-<statTemp>$112 = <statTemp>$113.puts(<statTemp>$114) : NilClass
-<statTemp>$117 = self : <Class:Main>
-<statTemp>$118 = d$6.inspect() : untyped
-<statTemp>$116 = <statTemp>$117.puts(<statTemp>$118) : NilClass
-<statTemp>$120 = self : <Class:Main>
-<statTemp>$122 = <constant:E>$100.e() : untyped
-<statTemp>$121 = <statTemp>$122.inspect() : untyped
-<blockReturnTemp>$80 = <statTemp>$120.puts(<statTemp>$121) : NilClass
-<blockReturnTemp>$124 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$80 : <impossible>
+<statTemp>$91 = 0 : Integer(0)
+@a$89 = forTemp$8$6.[](<statTemp>$91) : untyped
+<statTemp>$95 = 1 : Integer(1)
+@@b$93 = forTemp$8$6.[](<statTemp>$95) : untyped
+<statTemp>$99 = 2 : Integer(2)
+$c$97 = forTemp$8$6.[](<statTemp>$99) : untyped
+<statTemp>$102 = 3 : Integer(3)
+d$6 = forTemp$8$6.[](<statTemp>$102) : untyped
+<statTemp>$108 = 4 : Integer(4)
+<statTemp>$106 = forTemp$8$6.[](<statTemp>$108) : untyped
+<statTemp>$103 = <constant:E>$105.e=(<statTemp>$106) : untyped
+<statTemp>$110 = self : <Class:Main>
+<statTemp>$111 = @a$89.inspect() : untyped
+<statTemp>$109 = <statTemp>$110.puts(<statTemp>$111) : NilClass
+<statTemp>$114 = self : <Class:Main>
+<statTemp>$115 = @@b$93.inspect() : untyped
+<statTemp>$113 = <statTemp>$114.puts(<statTemp>$115) : NilClass
+<statTemp>$118 = self : <Class:Main>
+<statTemp>$119 = $c$97.inspect() : untyped
+<statTemp>$117 = <statTemp>$118.puts(<statTemp>$119) : NilClass
+<statTemp>$122 = self : <Class:Main>
+<statTemp>$123 = d$6.inspect() : untyped
+<statTemp>$121 = <statTemp>$122.puts(<statTemp>$123) : NilClass
+<statTemp>$125 = self : <Class:Main>
+<statTemp>$127 = <constant:E>$105.e() : untyped
+<statTemp>$126 = <statTemp>$127.inspect() : untyped
+<blockReturnTemp>$85 = <statTemp>$125.puts(<statTemp>$126) : NilClass
+<blockReturnTemp>$129 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$85 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_16" -> "bb::<Class:Main>#main_14" [style="bold"];
-    "bb::<Class:Main>#main_17" [label = "block[id=17](<returnMethodTemp>$8, <constant:E>$100, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_17" [label = "block[id=17](<constant:E>$105, @a$89, @@b$93, $c$97)
 outerLoops: 1
 <block-call>"];
 
     "bb::<Class:Main>#main_17" -> "bb::<Class:Main>#main_19" [style="bold"];
     "bb::<Class:Main>#main_17" -> "bb::<Class:Main>#main_18" [style="tapered"];
 
-    "bb::<Class:Main>#main_18" [label = "block[id=18](<returnMethodTemp>$8)
+    "bb::<Class:Main>#main_18" [label = "block[id=18]()
+<returnMethodTemp>$8 = Solve<::<Class:Main>#main#<block>> : untyped
 <finalReturn> = return <returnMethodTemp>$8 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_18" -> "bb::<Class:Main>#main_1" [style="bold"];
-    "bb::<Class:Main>#main_19" [label = "block[id=19](<returnMethodTemp>$8, <constant:E>$100, @a$84, @@b$88, $c$92)
+    "bb::<Class:Main>#main_19" [label = "block[id=19](<constant:E>$105, @a$89, @@b$93, $c$97)
 outerLoops: 1
 forTemp$7 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped
 <assignTemp$10$7 = forTemp$7.to_a() : untyped
-<statTemp>$132 = 0 : Integer(0)
-@a$84 = <assignTemp$10$7.[](<statTemp>$132) : untyped
-<statTemp>$135 = 1 : Integer(1)
-@@b$88 = <assignTemp$10$7.[](<statTemp>$135) : untyped
-<statTemp>$138 = 2 : Integer(2)
-$c$92 = <assignTemp$10$7.[](<statTemp>$138) : untyped
-<statTemp>$141 = 3 : Integer(3)
-d$7 = <assignTemp$10$7.[](<statTemp>$141) : untyped
-<statTemp>$146 = 4 : Integer(4)
-<statTemp>$144 = <assignTemp$10$7.[](<statTemp>$146) : untyped
-<statTemp>$142 = <constant:E>$100.e=(<statTemp>$144) : untyped
-<statTemp>$148 = self : <Class:Main>
-<statTemp>$149 = @a$84.inspect() : untyped
-<statTemp>$147 = <statTemp>$148.puts(<statTemp>$149) : NilClass
-<statTemp>$152 = self : <Class:Main>
-<statTemp>$153 = @@b$88.inspect() : untyped
-<statTemp>$151 = <statTemp>$152.puts(<statTemp>$153) : NilClass
-<statTemp>$156 = self : <Class:Main>
-<statTemp>$157 = $c$92.inspect() : untyped
-<statTemp>$155 = <statTemp>$156.puts(<statTemp>$157) : NilClass
-<statTemp>$160 = self : <Class:Main>
-<statTemp>$161 = d$7.inspect() : untyped
-<statTemp>$159 = <statTemp>$160.puts(<statTemp>$161) : NilClass
-<statTemp>$163 = self : <Class:Main>
-<statTemp>$165 = <constant:E>$100.e() : untyped
-<statTemp>$164 = <statTemp>$165.inspect() : untyped
-<blockReturnTemp>$126 = <statTemp>$163.puts(<statTemp>$164) : NilClass
-<blockReturnTemp>$167 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$126 : <impossible>
+<statTemp>$138 = 0 : Integer(0)
+@a$89 = <assignTemp$10$7.[](<statTemp>$138) : untyped
+<statTemp>$141 = 1 : Integer(1)
+@@b$93 = <assignTemp$10$7.[](<statTemp>$141) : untyped
+<statTemp>$144 = 2 : Integer(2)
+$c$97 = <assignTemp$10$7.[](<statTemp>$144) : untyped
+<statTemp>$147 = 3 : Integer(3)
+d$7 = <assignTemp$10$7.[](<statTemp>$147) : untyped
+<statTemp>$152 = 4 : Integer(4)
+<statTemp>$150 = <assignTemp$10$7.[](<statTemp>$152) : untyped
+<statTemp>$148 = <constant:E>$105.e=(<statTemp>$150) : untyped
+<statTemp>$154 = self : <Class:Main>
+<statTemp>$155 = @a$89.inspect() : untyped
+<statTemp>$153 = <statTemp>$154.puts(<statTemp>$155) : NilClass
+<statTemp>$158 = self : <Class:Main>
+<statTemp>$159 = @@b$93.inspect() : untyped
+<statTemp>$157 = <statTemp>$158.puts(<statTemp>$159) : NilClass
+<statTemp>$162 = self : <Class:Main>
+<statTemp>$163 = $c$97.inspect() : untyped
+<statTemp>$161 = <statTemp>$162.puts(<statTemp>$163) : NilClass
+<statTemp>$166 = self : <Class:Main>
+<statTemp>$167 = d$7.inspect() : untyped
+<statTemp>$165 = <statTemp>$166.puts(<statTemp>$167) : NilClass
+<statTemp>$169 = self : <Class:Main>
+<statTemp>$171 = <constant:E>$105.e() : untyped
+<statTemp>$170 = <statTemp>$171.inspect() : untyped
+<blockReturnTemp>$132 = <statTemp>$169.puts(<statTemp>$170) : NilClass
+<blockReturnTemp>$173 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$132 : <impossible>
 <unconditional>"];
 
     "bb::<Class:Main>#main_19" -> "bb::<Class:Main>#main_17" [style="bold"];

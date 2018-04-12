@@ -37,8 +37,11 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
 }
 
 bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
+    bool sawSig = false;
     while (send != nullptr) {
-        if (send->fun == core::Names::sig() && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
+        sawSig = sawSig || send->fun == core::Names::sig();
+        if ((send->fun == core::Names::sig() || send->fun == core::Names::typeParameters()) && sawSig &&
+            ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
             return true;
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
@@ -46,8 +49,53 @@ bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
     return false;
 }
 
-ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
+ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent) {
     ParsedSig sig;
+
+    {
+        ast::Send *tsend = send;
+        // extract type parameters early
+        while (tsend != nullptr) {
+            if (tsend->fun == core::Names::typeParameters()) {
+                if (parent != nullptr) {
+                    if (auto e = ctx.state.beginError(tsend->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                        e.setHeader("Malformed signature; Type parameters can only be specified in outer sig");
+                    }
+                    break;
+                }
+                for (auto &arg : tsend->args) {
+                    if (auto c = ast::cast_tree<ast::Literal>(arg.get())) {
+                        if (c->isSymbol(ctx)) {
+                            auto name = c->asSymbol(ctx);
+                            auto &typeArgSpec = sig.enterTypeArgByName(name);
+                            if (typeArgSpec.type) {
+                                if (auto e = ctx.state.beginError(arg->loc,
+                                                                  core::errors::Resolver::InvalidMethodSignature)) {
+                                    e.setHeader("Malformed signature; Type Argument {} was specified twice.",
+                                                name.toString(ctx));
+                                }
+                            }
+                            typeArgSpec.type = std::make_shared<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.loc = arg->loc;
+                        } else {
+                            if (auto e =
+                                    ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                                e.setHeader("Malformed signature; Type parameters are specified with symbols.");
+                            }
+                        }
+                    } else {
+                        if (auto e = ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            e.setHeader("Malformed signature; Type parameters are specified with symbols.");
+                        }
+                    }
+                }
+            }
+            tsend = ast::cast_tree<ast::Send>(tsend->recv.get());
+        }
+    }
+    if (parent == nullptr) {
+        parent = &sig;
+    }
 
     while (send != nullptr) {
         switch (send->fun._id) {
@@ -91,11 +139,15 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                     auto lit = ast::cast_tree<ast::Literal>(key.get());
                     if (lit && lit->isSymbol(ctx)) {
                         core::NameRef name = lit->asSymbol(ctx);
-                        sig.argTypes.emplace_back(ParsedSig::ArgSpec{key->loc, name, getResultType(ctx, value)});
+                        sig.argTypes.emplace_back(
+                            ParsedSig::ArgSpec{key->loc, name, getResultType(ctx, value, *parent)});
                     }
                 }
                 break;
             }
+            case core::Names::typeParameters()._id:
+                // was handled above
+                break;
             case core::Names::abstract()._id:
                 sig.seen.abstract = true;
                 break;
@@ -127,7 +179,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
                     break;
                 }
 
-                sig.returns = getResultType(ctx, send->args.front());
+                sig.returns = getResultType(ctx, send->args.front(), *parent);
 
                 break;
             }
@@ -146,27 +198,51 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send) {
     return sig;
 }
 
-shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send) {
+shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0]), core::Types::nilClass());
+            return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig),
+                                        core::Types::nilClass());
         case core::Names::all()._id: {
-            auto result = TypeSyntax::getResultType(ctx, send->args[0]);
+            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::buildAnd(ctx, result, TypeSyntax::getResultType(ctx, send->args[i]));
+                result = core::Types::buildAnd(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
                 i++;
             }
             return result;
         }
         case core::Names::any()._id: {
-            auto result = TypeSyntax::getResultType(ctx, send->args[0]);
+            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::buildOr(ctx, result, TypeSyntax::getResultType(ctx, send->args[i]));
+                result = core::Types::buildOr(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
                 i++;
             }
             return result;
+        }
+        case core::Names::typeParameter()._id: {
+            if (send->args.size() != 1) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("type_parameter only takes a single argument");
+                }
+                return core::Types::dynamic();
+            }
+            auto arr = ast::cast_tree<ast::Literal>(send->args[0].get());
+            if (!arr || !arr->isSymbol(ctx)) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("type_parameter requires a symbol");
+                }
+                return core::Types::dynamic();
+            }
+            auto fnd = sig.findTypeArgByName(arr->asSymbol(ctx));
+            if (!fnd.type) {
+                if (auto e = ctx.state.beginError(arr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Unspecified type parameter");
+                }
+                return core::Types::dynamic();
+            }
+            return fnd.type;
         }
         case core::Names::enum_()._id: {
             if (send->args.size() != 1) {
@@ -236,14 +312,15 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
     }
 }
 
-shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
+shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+                                                 const ParsedSig &sigBeingParsed) {
     shared_ptr<core::Type> result;
     typecase(
         expr.get(),
         [&](ast::Array *arr) {
             vector<shared_ptr<core::Type>> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultType(ctx, el));
+                elems.emplace_back(getResultType(ctx, el, sigBeingParsed));
             }
             result = make_shared<core::TupleType>(elems);
         },
@@ -253,7 +330,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultType(ctx, vtree);
+                auto val = getResultType(ctx, vtree, sigBeingParsed);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
                     auto keytype = std::dynamic_pointer_cast<core::LiteralType>(lit->value);
@@ -293,7 +370,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
         },
         [&](ast::Send *s) {
             if (isTProc(ctx, s)) {
-                auto sig = parseSig(ctx, s);
+                auto sig = parseSig(ctx, s, &sigBeingParsed);
 
                 vector<shared_ptr<core::Type>> targs;
 
@@ -333,7 +410,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 return;
             }
             if (recvi->symbol == core::Symbols::T()) {
-                result = interpretTCombinator(ctx, s);
+                result = interpretTCombinator(ctx, s, sigBeingParsed);
                 return;
             }
 
@@ -362,7 +439,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
-                ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg));
+                ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg, sigBeingParsed));
                 targs.emplace_back(ty);
             }
             auto ctype = make_shared<core::ClassType>(recvi->symbol.data(ctx).singletonClass(ctx));
@@ -397,5 +474,26 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
     return result;
 }
 
+ParsedSig::TypeArgSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
+    for (auto &current : typeArgs) {
+        if (current.name == name) {
+            return current;
+        }
+    }
+    typeArgs.emplace_back();
+    typeArgs.back().name = name;
+    return typeArgs.back();
+}
+
+const ParsedSig::TypeArgSpec emptyTypeArgSpec;
+
+const ParsedSig::TypeArgSpec &ParsedSig::findTypeArgByName(core::NameRef name) const {
+    for (auto &current : typeArgs) {
+        if (current.name == name) {
+            return current;
+        }
+    }
+    return emptyTypeArgSpec;
+}
 } // namespace resolver
 } // namespace ruby_typer

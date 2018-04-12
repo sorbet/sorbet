@@ -284,6 +284,9 @@ void Serializer::pickle(Pickler &p, Type *what) {
         for (auto &t : at->targs) {
             pickle(p, t.get());
         }
+    } else if (auto *tp = cast_type<TypeVar>(what)) {
+        p.putU4(11);
+        p.putU4(tp->sym._id);
     } else {
         Error::notImplemented();
     }
@@ -353,6 +356,10 @@ std::shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
                 t = unpickleType(p, gs);
             }
             return std::make_shared<AppliedType>(klass, targs);
+        }
+        case 11: {
+            SymbolRef sym(gs, p.getU4());
+            return std::make_shared<TypeVar>(sym);
         }
         default:
             Error::raise("Uknown type tag {}", tag);

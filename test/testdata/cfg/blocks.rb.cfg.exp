@@ -10,7 +10,7 @@ subgraph "cluster_::BlockTest#block_pass" {
 <statTemp>$6 = 1 : Integer(1)
 <statTemp>$7 = 2 : Integer(2)
 <statTemp>$8 = 3 : Integer(3)
-<returnMethodTemp>$3 = <statTemp>$5.foo(<statTemp>$6, <statTemp>$7, <statTemp>$8) : untyped
+<block-pre-call-temp>$9 = <statTemp>$5.foo(<statTemp>$6, <statTemp>$7, <statTemp>$8) : untyped
 <unconditional>"];
 
     "bb::BlockTest#block_pass_0" -> "bb::BlockTest#block_pass_2" [style="bold"];
@@ -18,23 +18,24 @@ subgraph "cluster_::BlockTest#block_pass" {
 <unconditional>"];
 
     "bb::BlockTest#block_pass_1" -> "bb::BlockTest#block_pass_1" [style="bold"];
-    "bb::BlockTest#block_pass_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_2" [label = "block[id=2]()
 outerLoops: 1
 <block-call>"];
 
     "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_4" [style="bold"];
     "bb::BlockTest#block_pass_2" -> "bb::BlockTest#block_pass_3" [style="tapered"];
 
-    "bb::BlockTest#block_pass_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::BlockTest#block_pass#<block>> : untyped
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::BlockTest#block_pass_3" -> "bb::BlockTest#block_pass_1" [style="bold"];
-    "bb::BlockTest#block_pass_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::BlockTest#block_pass_4" [label = "block[id=4]()
 outerLoops: 1
 x$2 = load_yield_param(::BlockTest#block_pass#<block>, 0) : untyped
-<blockReturnTemp>$9 = x$2 : untyped
-<blockReturnTemp>$10 = blockreturn<::BlockTest#block_pass#<block>> <blockReturnTemp>$9 : <impossible>
+<blockReturnTemp>$10 = x$2 : untyped
+<blockReturnTemp>$11 = blockreturn<::BlockTest#block_pass#<block>> <blockReturnTemp>$10 : <impossible>
 <unconditional>"];
 
     "bb::BlockTest#block_pass_4" -> "bb::BlockTest#block_pass_2" [style="bold"];

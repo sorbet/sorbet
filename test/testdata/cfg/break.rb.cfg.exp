@@ -34,10 +34,10 @@ subgraph "cluster_::Object#foo" {
   0 = Integer(1)
   1 = Integer(2)
 }
-<returnMethodTemp>$3 = <statTemp>$5.map() : AppliedType {
+<block-pre-call-temp>$9 = <statTemp>$5.map() : AppliedType {
   klass = ::Array
   targs = [
-    <constant:Elem> = untyped
+    <constant:Elem> = TypeVar(U$1)
   ]
 }
 <unconditional>"];
@@ -47,19 +47,25 @@ subgraph "cluster_::Object#foo" {
 <unconditional>"];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::Object#foo_2" [label = "block[id=2]()
 outerLoops: 1
 <block-call>"];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::Object#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::Object#foo_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : AppliedType {
+  klass = ::Array
+  targs = [
+    <constant:Elem> = <impossible>
+  ]
+}
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::Object#foo_4" [label = "block[id=4]()
 outerLoops: 1
 x$2 = load_yield_param(::Object#foo#<block>, 0) : untyped
 <unconditional>"];

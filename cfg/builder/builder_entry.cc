@@ -129,6 +129,12 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
+CFGContext CFGContext::withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link) {
+    auto ret = CFGContext(*this);
+    ret.link = move(link);
+    return ret;
+}
+
 unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CFG> cfg) {
     for (auto &bb : cfg->basicBlocks) {
         if (bb->exprs.empty()) {

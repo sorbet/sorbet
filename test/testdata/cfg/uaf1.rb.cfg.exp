@@ -6,10 +6,10 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_1" [shape = parallelogram];
 
     "bb::A#initialize_0" [label = "block[id=0]()
-<constant:StandardError>$11 = alias <constant:StandardError> : <Class:StandardError>
+<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>
 <statTemp>$6 = self : A
 <statTemp>$5 = <statTemp>$6.spec_list() : untyped
-<returnMethodTemp>$3 = <statTemp>$5.map() : untyped
+<block-pre-call-temp>$7 = <statTemp>$5.map() : untyped
 <unconditional>"];
 
     "bb::A#initialize_0" -> "bb::A#initialize_2" [style="bold"];
@@ -17,49 +17,50 @@ subgraph "cluster_::A#initialize" {
 <unconditional>"];
 
     "bb::A#initialize_1" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_2" [label = "block[id=2](<returnMethodTemp>$3, <constant:StandardError>$11)
+    "bb::A#initialize_2" [label = "block[id=2](<constant:StandardError>$12)
 outerLoops: 1
 <block-call>"];
 
     "bb::A#initialize_2" -> "bb::A#initialize_5" [style="bold"];
     "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
 
-    "bb::A#initialize_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::A#initialize_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::A#initialize#<block>> : untyped
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_5" [label = "block[id=5](<returnMethodTemp>$3, <constant:StandardError>$11)
+    "bb::A#initialize_5" [label = "block[id=5](<constant:StandardError>$12)
 outerLoops: 1
-<rescueTemp$8 = <unanalyzable> : untyped
-<rescueTemp$8"];
+<rescueTemp$9 = <unanalyzable> : untyped
+<rescueTemp$9"];
 
     "bb::A#initialize_5" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
-    "bb::A#initialize_6" [label = "block[id=6](<returnMethodTemp>$3, <rescueTemp$8, <constant:StandardError>$11)
+    "bb::A#initialize_6" [label = "block[id=6](<rescueTemp$9, <constant:StandardError>$12)
 outerLoops: 1
-<rescueTemp$12 = <rescueTemp$8.is_a?(<constant:StandardError>$11) : untyped
-<rescueTemp$12"];
+<rescueTemp$13 = <rescueTemp$9.is_a?(<constant:StandardError>$12) : untyped
+<rescueTemp$13"];
 
     "bb::A#initialize_6" -> "bb::A#initialize_11" [style="bold"];
     "bb::A#initialize_6" -> "bb::A#initialize_1" [style="tapered"];
 
-    "bb::A#initialize_7" [label = "block[id=7](<returnMethodTemp>$3, <constant:StandardError>$11)
+    "bb::A#initialize_7" [label = "block[id=7](<constant:StandardError>$12)
 outerLoops: 1
-<blockReturnTemp>$7 = 1 : Integer(1)
+<blockReturnTemp>$8 = 1 : Integer(1)
 <unconditional>"];
 
     "bb::A#initialize_7" -> "bb::A#initialize_10" [style="bold"];
-    "bb::A#initialize_10" [label = "block[id=10](<returnMethodTemp>$3, <blockReturnTemp>$7, <constant:StandardError>$11)
+    "bb::A#initialize_10" [label = "block[id=10](<blockReturnTemp>$8, <constant:StandardError>$12)
 outerLoops: 1
-<blockReturnTemp>$13 = blockreturn<::A#initialize#<block>> <blockReturnTemp>$7 : <impossible>
+<blockReturnTemp>$14 = blockreturn<::A#initialize#<block>> <blockReturnTemp>$8 : <impossible>
 <unconditional>"];
 
     "bb::A#initialize_10" -> "bb::A#initialize_2" [style="bold"];
-    "bb::A#initialize_11" [label = "block[id=11](<returnMethodTemp>$3, <rescueTemp$8, <constant:StandardError>$11)
+    "bb::A#initialize_11" [label = "block[id=11](<rescueTemp$9, <constant:StandardError>$12)
 outerLoops: 1
-<blockReturnTemp>$7 = 2 : Integer(2)
+<blockReturnTemp>$8 = 2 : Integer(2)
 <unconditional>"];
 
     "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];

@@ -46,10 +46,10 @@ v = load_arg(<selfMethodTemp>$4#normalize_params, 0) : untyped
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
     "bb::Test#normalize_params_4" [label = "block[id=4](v)
-<returnMethodTemp>$3 = v.map() : AppliedType {
+<block-pre-call-temp>$18 = v.map() : AppliedType {
   klass = ::Array
   targs = [
-    <constant:Elem> = untyped
+    <constant:Elem> = TypeVar(U$1)
   ]
 }
 <unconditional>"];
@@ -60,19 +60,29 @@ v = load_arg(<selfMethodTemp>$4#normalize_params, 0) : untyped
 <unconditional>"];
 
     "bb::Test#normalize_params_5" -> "bb::Test#normalize_params_10" [style="bold"];
-    "bb::Test#normalize_params_6" [label = "block[id=6](<returnMethodTemp>$3)
+    "bb::Test#normalize_params_6" [label = "block[id=6]()
 outerLoops: 1
 <block-call>"];
 
     "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_8" [style="bold"];
-    "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_10" [style="tapered"];
+    "bb::Test#normalize_params_6" -> "bb::Test#normalize_params_7" [style="tapered"];
 
-    "bb::Test#normalize_params_8" [label = "block[id=8](<returnMethodTemp>$3)
+    "bb::Test#normalize_params_7" [label = "block[id=7]()
+<returnMethodTemp>$3 = Solve<::Test#normalize_params#<block>> : AppliedType {
+  klass = ::Array
+  targs = [
+    <constant:Elem> = untyped
+  ]
+}
+<unconditional>"];
+
+    "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_10" [style="bold"];
+    "bb::Test#normalize_params_8" [label = "block[id=8]()
 outerLoops: 1
 e$2 = load_yield_param(::Test#normalize_params#<block>, 0) : untyped
-<statTemp>$19 = self : Test
-<blockReturnTemp>$18 = <statTemp>$19.normalize_params(e$2) : untyped
-<blockReturnTemp>$21 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$18 : <impossible>
+<statTemp>$20 = self : Test
+<blockReturnTemp>$19 = <statTemp>$20.normalize_params(e$2) : untyped
+<blockReturnTemp>$22 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$19 : <impossible>
 <unconditional>"];
 
     "bb::Test#normalize_params_8" -> "bb::Test#normalize_params_6" [style="bold"];

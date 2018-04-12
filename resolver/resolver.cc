@@ -224,9 +224,8 @@ class ResolveSignaturesWalk {
 private:
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
-        auto &methodInfo = method.data(ctx);
 
-        auto sig = TypeSyntax::parseSig(ctx, send);
+        auto sig = TypeSyntax::parseSig(ctx, send, nullptr);
 
         if (!sig.seen.returns) {
             if (sig.seen.args || !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation ||
@@ -240,6 +239,18 @@ private:
         if (sig.seen.abstract) {
             method.data(ctx).setAbstract();
         }
+        if (!sig.typeArgs.empty()) {
+            method.data(ctx).setGenericMethod();
+            for (auto &typeSpec : sig.typeArgs) {
+                if (typeSpec.type) {
+                    auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
+                    auto sym = ctx.state.enterTypeArgument(typeSpec.loc, method, name, core::Variance::CoVariant);
+                    typeSpec.type->sym = sym;
+                    sym.data(ctx).resultType = typeSpec.type;
+                }
+            }
+        }
+        auto &methodInfo = method.data(ctx);
 
         methodInfo.resultType = sig.returns;
 
@@ -548,7 +559,8 @@ public:
                     i++;
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
-                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i]);
+                        ParsedSig emptySig;
+                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig);
                     }
                 }
             }
@@ -588,7 +600,8 @@ public:
                 }
 
                 auto expr = move(send->args[0]);
-                auto type = TypeSyntax::getResultType(ctx, send->args[1]);
+                ParsedSig emptySig;
+                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig);
                 return make_unique<ast::Cast>(send->loc, type, move(expr), send->fun);
             }
             default:

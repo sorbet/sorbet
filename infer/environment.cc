@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
 
 template struct std::pair<ruby_typer::core::LocalVariable, std::shared_ptr<ruby_typer::core::Type>>;
@@ -622,15 +623,6 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
             }
         }
     }
-
-    for (auto &blk : other.blockTypes) {
-        auto mine = this->blockTypes.find(blk.first);
-        if (mine == this->blockTypes.end()) {
-            this->blockTypes[blk.first] = blk.second;
-        } else {
-            ENFORCE(mine->second == blk.second);
-        }
-    }
 }
 
 void Environment::computePins(core::Context ctx, const vector<Environment> &envs, const cfg::CFG &inWhat,
@@ -685,7 +677,6 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
         knownTruthy[i] = other.getKnownTruthy(var);
     }
 
-    this->blockTypes = other.blockTypes;
     this->pinnedTypes = other.pinnedTypes;
 }
 
@@ -702,11 +693,14 @@ shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<
 }
 
 shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount,
-                                                   int bindMinLoops, KnowledgeFilter &knowledgeFilter) {
+                                                   int bindMinLoops, KnowledgeFilter &knowledgeFilter,
+                                                   core::TypeConstraint &constr) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking =
             cfg::isa_instruction<cfg::Alias>(bind.value.get()) || cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
+
+        bool checkFullyDefined = true;
 
         typecase(
             bind.value.get(),
@@ -719,20 +713,18 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
-
+                if (send->link) {
+                    send->link->returnTp = core::Types::dynamic();
+                    send->link->blockPreType = core::Types::dynamic();
+                    send->link->sendTp = core::Types::dynamic();
+                    checkFullyDefined = false;
+                }
                 if (send->fun == core::Names::super()) {
                     // TODO
-                    if (send->block.exists()) {
-                        this->blockTypes[send->block] = core::Types::dynamic();
-                    }
                     tp.type = core::Types::dynamic();
                 } else {
-                    shared_ptr<core::Type> *blockTy = nullptr;
-                    if (send->block.exists()) {
-                        blockTy = &this->blockTypes[send->block];
-                    }
                     tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, recvType.type,
-                                                          blockTy);
+                                                          send->link);
                 }
                 tp.origins.push_back(bind.loc);
             },
@@ -771,19 +763,28 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
                 pinnedTypes[bind.bind] = tp;
             },
+            [&](cfg::SolveConstraint *i) {
+                if (!i->link->constr->solve(ctx)) {
+                    if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
+                        e.setHeader("Could not find valid instantiation of type parameters");
+                    }
+                }
+
+                tp.type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
+                tp.origins.push_back(bind.loc);
+            },
             [&](cfg::Self *i) {
                 tp.type = i->klass.data(ctx).selfType(ctx);
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                tp.type = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                tp.type = core::Types::instantiate(
+                    ctx, getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg), constr);
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::LoadYieldParam *i) {
-                auto it = this->blockTypes.find(i->block);
-                ENFORCE(it != this->blockTypes.end(), "Inside a block we never entered!");
-                auto &procType = it->second;
+                auto &procType = i->link->blockPreType;
                 if (procType == nullptr) {
                     tp.type = core::Types::dynamic();
                 } else {
@@ -797,9 +798,12 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 if (!expectedType) {
                     expectedType = core::Types::dynamic();
                 } else {
-                    expectedType = core::Types::resultTypeAsSeenFrom(
-                        ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
-                        ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx));
+                    expectedType = core::Types::instantiate(
+                        ctx,
+                        core::Types::resultTypeAsSeenFrom(
+                            ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
+                            ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx)),
+                        constr);
                 }
                 tp.type = core::Types::bottom();
                 tp.origins.push_back(bind.loc);
@@ -822,25 +826,22 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
             },
             [&](cfg::BlockReturn *i) {
-                auto it = this->blockTypes.find(i->block);
-                ENFORCE(it != this->blockTypes.end(), "Returning from a block we never entered!");
-                auto &procType = it->second;
-                if (procType != nullptr) {
-                    auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
-                    auto expectedType = getReturnType(ctx, procType);
-                    if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                        // TODO(nelhage): We should somehow report location
-                        // information about the `send` and/or the
-                        // definition of the block type
-                        if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
-                            if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
-                                e.setHeader("Returning value that does not conform to block result type");
-                                e.addErrorSection(core::ErrorSection("Expected " + expectedType->toString(ctx)));
-                                e.addErrorSection(core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) +
-                                                                         " originating from:",
-                                                                     typeAndOrigin.origins2Explanations(ctx)));
-                            }
-                        }
+                ENFORCE(i->link);
+                ENFORCE(i->link->returnTp != nullptr);
+
+                auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                auto expectedType = i->link->returnTp;
+                if (!core::Types::isSubTypeUnderConstraint(ctx, *i->link->constr, typeAndOrigin.type, expectedType)) {
+                    // TODO(nelhage): We should somehow report location
+                    // information about the `send` and/or the
+                    // definition of the block type
+
+                    if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
+                        e.setHeader("Returning value that does not conform to block result type");
+                        e.addErrorSection(core::ErrorSection("Expected " + expectedType->toString(ctx)));
+                        e.addErrorSection(
+                            core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                                               typeAndOrigin.origins2Explanations(ctx)));
                     }
                 }
 
@@ -857,11 +858,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::Cast *c) {
                 auto klass = ctx.owner.data(ctx).enclosingClass(ctx);
-                auto castType =
-                    c->type->instantiate(ctx, klass.data(ctx).typeMembers(), klass.data(ctx).selfTypeArgs(ctx));
-                if (castType == nullptr) {
-                    castType = c->type;
-                }
+                auto castType = core::Types::instantiate(ctx, c->type, klass.data(ctx).typeMembers(),
+                                                         klass.data(ctx).selfTypeArgs(ctx));
 
                 tp.type = castType;
                 tp.origins.push_back(bind.loc);
@@ -901,7 +899,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
         ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
         tp.type->sanityCheck(ctx);
 
-        if (!tp.type->isFullyDefined()) {
+        if (checkFullyDefined && !tp.type->isFullyDefined()) {
             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::IncompleteType)) {
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");
@@ -909,11 +907,6 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             tp.type = core::Types::dynamic();
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
-        if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-            if (send->block.exists()) {
-                ENFORCE(this->blockTypes.find(send->block) != this->blockTypes.end());
-            }
-        }
 
         core::TypeAndOrigins cur = getOrCreateTypeAndOrigin(ctx, bind.bind);
 

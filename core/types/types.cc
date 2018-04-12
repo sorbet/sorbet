@@ -1,9 +1,9 @@
 #include "core/Types.h"
 #include "absl/base/casts.h"
-#include "absl/strings/escaping.h"
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Names.h"
+#include "core/TypeConstraint.h"
 #include "core/Types.h"
 
 using namespace ruby_typer;
@@ -12,6 +12,8 @@ using namespace std;
 
 // improve debugging.
 template class std::shared_ptr<core::Type>;
+template class std::shared_ptr<core::TypeConstraint>;
+template class std::shared_ptr<core::SendAndBlockLink>;
 template class std::vector<core::Loc>;
 
 shared_ptr<Type> Types::top() {
@@ -183,18 +185,6 @@ core::ClassType::ClassType(core::SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-string core::ClassType::toString(const GlobalState &gs, int tabs) {
-    return this->symbol.data(gs).show(gs);
-}
-
-string core::ClassType::show(const GlobalState &gs) {
-    return this->symbol.data(gs).show(gs);
-}
-
-string core::ClassType::typeName() {
-    return "ClassType";
-}
-
 core::ProxyType::ProxyType(shared_ptr<core::Type> underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(core::Context ctx) {
@@ -230,107 +220,12 @@ core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
 core::LiteralType::LiteralType(bool val)
     : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
-string LiteralType::typeName() {
-    return "LiteralType";
-}
-
-string LiteralType::toString(const GlobalState &gs, int tabs) {
-    return this->underlying->toString(gs, tabs) + "(" + showValue(gs) + ")";
-}
-
-string LiteralType::show(const GlobalState &gs) {
-    return this->underlying->show(gs) + "(" + showValue(gs) + ")";
-}
-
-string LiteralType::showValue(const GlobalState &gs) {
-    string value;
-    SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
-    if (undSymbol == Symbols::String()) {
-        value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
-    } else if (undSymbol == Symbols::Symbol()) {
-        value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
-    } else if (undSymbol == Symbols::Integer()) {
-        value = to_string(this->value);
-    } else if (undSymbol == Symbols::Float()) {
-        value = to_string(absl::bit_cast<double>(this->value));
-    } else if (undSymbol == Symbols::TrueClass()) {
-        value = "true";
-    } else if (undSymbol == Symbols::FalseClass()) {
-        value = "false";
-    } else {
-        Error::raise("should not be reachable");
-    }
-    return value;
-}
-
 core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
-
-string TupleType::typeName() {
-    return "TupleType";
-}
-
-string ShapeType::typeName() {
-    return "ShapeType";
-}
-
-string MagicType::typeName() {
-    return "MagicType";
-}
-
-string AliasType::typeName() {
-    return "AliasType";
-}
-
-string AndType::typeName() {
-    return "AndType";
-}
 
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
 
 OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
-
-string OrType::typeName() {
-    return "OrType";
-}
-
-void printTabs(stringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
-}
-
-string TupleType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "TupleType {" << '\n';
-    int i = -1;
-    for (auto &el : this->elems) {
-        i++;
-        printTabs(buf, tabs + 1);
-        buf << i << " = " << el->toString(gs, tabs + 3) << '\n';
-    }
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
-}
-
-string TupleType::show(const GlobalState &gs) {
-    stringstream buf;
-    buf << "[";
-    bool first = true;
-    for (auto &el : this->elems) {
-        if (first) {
-            first = false;
-        } else {
-            buf << ", ";
-        }
-        buf << el->show(gs);
-    }
-    buf << "]";
-    return buf.str();
-}
 
 void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
@@ -340,44 +235,6 @@ core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
 
 core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
     : ProxyType(core::Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
-
-string ShapeType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "ShapeType {" << '\n';
-    auto valueIterator = this->values.begin();
-    for (auto &el : this->keys) {
-        printTabs(buf, tabs + 1);
-        buf << el->toString(gs, tabs + 2) << " => " << (*valueIterator)->toString(gs, tabs + 2) << '\n';
-        ++valueIterator;
-    }
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
-}
-
-string ShapeType::show(const GlobalState &gs) {
-    stringstream buf;
-    buf << "{";
-    auto valueIterator = this->values.begin();
-    bool first = true;
-    for (auto &key : this->keys) {
-        if (first) {
-            first = false;
-        } else {
-            buf << ", ";
-        }
-        SymbolRef undSymbol = cast_type<ClassType>(key->underlying.get())->symbol;
-        if (undSymbol == Symbols::Symbol()) {
-            buf << NameRef(gs, key->value).toString(gs) << ": ";
-        } else {
-            buf << key->show(gs) << " => ";
-        }
-        buf << (*valueIterator)->show(gs);
-        ++valueIterator;
-    }
-    buf << "}";
-    return buf.str();
-}
 
 void ShapeType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
@@ -392,136 +249,11 @@ void ShapeType::_sanityCheck(core::Context ctx) {
 
 MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::Symbols::Magic())) {}
 
-string MagicType::toString(const GlobalState &gs, int tabs) {
-    return underlying->toString(gs, tabs);
-}
-
-string MagicType::show(const GlobalState &gs) {
-    return underlying->show(gs);
-}
-
 void MagicType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
 }
 
 AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
-
-string AliasType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "AliasType { symbol = " << this->symbol.data(gs).fullName(gs) << " }";
-    return buf.str();
-}
-
-string AliasType::show(const GlobalState &gs) {
-    stringstream buf;
-    buf << "<Alias:" << this->symbol.data(gs).fullName(gs) << ">";
-    return buf.str();
-}
-
-string AndType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    bool leftBrace = isa_type<OrType>(this->left.get());
-    bool rightBrace = isa_type<OrType>(this->right.get());
-
-    if (leftBrace) {
-        buf << "(";
-    }
-    buf << this->left->toString(gs, tabs + 2);
-    if (leftBrace) {
-        buf << ")";
-    }
-    buf << " & ";
-    if (rightBrace) {
-        buf << "(";
-    }
-    buf << this->right->toString(gs, tabs + 2);
-    if (rightBrace) {
-        buf << ")";
-    }
-    return buf.str();
-}
-
-string AndType::show(const GlobalState &gs) {
-    stringstream buf;
-
-    buf << "T.all(";
-    buf << this->left->show(gs);
-    buf << ", ";
-    buf << this->right->show(gs);
-    buf << ")";
-    return buf.str();
-}
-
-string OrType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    bool leftBrace = isa_type<AndType>(this->left.get());
-    bool rightBrace = isa_type<AndType>(this->right.get());
-
-    if (leftBrace) {
-        buf << "(";
-    }
-    buf << this->left->toString(gs, tabs + 2);
-    if (leftBrace) {
-        buf << ")";
-    }
-    buf << " | ";
-    if (rightBrace) {
-        buf << "(";
-    }
-    buf << this->right->toString(gs, tabs + 2);
-    if (rightBrace) {
-        buf << ")";
-    }
-    return buf.str();
-}
-
-string showOrs(const GlobalState &gs, shared_ptr<Type> left, shared_ptr<Type> right) {
-    stringstream buf;
-    auto *lt = cast_type<OrType>(left.get());
-    if (lt != nullptr) {
-        buf << showOrs(gs, lt->left, lt->right);
-    } else {
-        buf << left->show(gs);
-    }
-    buf << ", ";
-
-    auto *rt = cast_type<OrType>(right.get());
-    if (rt != nullptr) {
-        buf << showOrs(gs, rt->left, rt->right);
-    } else {
-        buf << right->show(gs);
-    }
-    return buf.str();
-}
-
-string showOrSpecialCase(const GlobalState &gs, shared_ptr<Type> type, shared_ptr<Type> rest) {
-    auto *ct = cast_type<ClassType>(type.get());
-    if (ct != nullptr && ct->symbol == core::Symbols::NilClass()) {
-        stringstream buf;
-        buf << "T.nilable(";
-        buf << rest->show(gs);
-        buf << ")";
-        return buf.str();
-    }
-    return "";
-}
-
-string OrType::show(const GlobalState &gs) {
-    stringstream buf;
-
-    string ret;
-    if (!(ret = showOrSpecialCase(gs, this->left, this->right)).empty()) {
-        return ret;
-    }
-    if (!(ret = showOrSpecialCase(gs, this->right, this->left)).empty()) {
-        return ret;
-    }
-
-    buf << "T.any(";
-    buf << showOrs(gs, this->left, this->right);
-    buf << ")";
-    return buf.str();
-}
 
 void AndType::_sanityCheck(core::Context ctx) {
     left->_sanityCheck(ctx);
@@ -537,10 +269,10 @@ void AndType::_sanityCheck(core::Context ctx) {
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
     // TODO: reenable
-    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, left, right),
+    //    ENFORCE(!Types::isSubType(ctx, left, right),
     //            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " +
     //            right->toString(ctx));
-    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, right, left),
+    //    ENFORCE(!Types::isSubType(ctx, right, left),
     //            this->toString(ctx) + " should have collapsed: " + right->toString(ctx) + " <: " +
     //            left->toString(ctx));
 }
@@ -553,10 +285,10 @@ void OrType::_sanityCheck(core::Context ctx) {
     ENFORCE(!left->isDynamic());
     ENFORCE(!right->isDynamic());
     //  TODO: @dmitry, reenable
-    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, left, right),
+    //    ENFORCE(!Types::isSubType(ctx, left, right),
     //            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " +
     //            right->toString(ctx));
-    //    ENFORCE(!Types::isSubTypeWhenFrozen(ctx, right, left),
+    //    ENFORCE(!Types::isSubType(ctx, right, left),
     //            this->toString(ctx) + " should have collapsed: " + right->toString(ctx) + " <: " +
     //            left->toString(ctx));
 }
@@ -595,6 +327,10 @@ int SelfTypeParam::kind() {
 
 int MetaType::kind() {
     return 7;
+}
+
+int TypeVar::kind() {
+    return 8;
 }
 
 int AliasType::kind() {
@@ -694,163 +430,41 @@ std::shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::Symbo
 
     std::vector<core::SymbolRef> currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
-    auto res1 = original.resultType->instantiate(ctx, currentAlignment, targs);
-    if (res1) {
-        return res1;
-    }
-    return original.resultType;
+    return instantiate(ctx, original.resultType, currentAlignment, targs);
 }
 
-std::shared_ptr<Type> ClassType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
-    return nullptr;
+shared_ptr<core::Type> Types::getProcReturnType(core::Context ctx, shared_ptr<core::Type> procType) {
+    if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
+        return core::Types::dynamic();
+    }
+    auto *applied = core::cast_type<core::AppliedType>(procType.get());
+    if (applied == nullptr || applied->targs.empty()) {
+        return core::Types::dynamic();
+    }
+    // Proc types have their return type as the first targ
+    return applied->targs.front();
 }
 
-std::shared_ptr<Type> LiteralType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) {
-    return nullptr;
+bool Types::isSubType(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2) {
+    return isSubTypeUnderConstraint(ctx, core::TypeConstraint::EmptyFrozenConstraint, t1, t2);
 }
 
-std::shared_ptr<Type> MagicType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
-    return nullptr;
+bool core::TypeVar::isFullyDefined() {
+    return false;
 }
 
-std::shared_ptr<Type> TupleType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
-    bool changed = false;
-    std::vector<std::shared_ptr<Type>> newElems;
-    for (auto &a : this->elems) {
-        auto t = a->instantiate(ctx, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newElems.push_back(t);
-        } else {
-            newElems.push_back(nullptr);
-        }
-    }
-    if (changed) {
-        int i = 0;
-        while (!newElems[i]) {
-            newElems[i] = this->elems[i];
-            i++;
-        }
-        return make_shared<TupleType>(newElems);
-    }
-    return nullptr;
+std::shared_ptr<Type> core::TypeVar::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+    Error::raise("should never happen");
 }
 
-std::shared_ptr<Type> ShapeType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
-    bool changed = false;
-    std::vector<std::shared_ptr<Type>> newValues;
-    for (auto &a : this->values) {
-        auto t = a->instantiate(ctx, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newValues.push_back(t);
-        } else {
-            newValues.push_back(nullptr);
-        }
-    }
-    if (changed) {
-        int i = 0;
-        while (!newValues[i]) {
-            newValues[i] = this->values[i];
-            i++;
-        }
-        return make_shared<ShapeType>(this->keys, newValues);
-    }
-    return nullptr;
+bool TypeVar::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+    Error::raise("should never happen");
 }
 
-std::shared_ptr<Type> OrType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                          const std::vector<std::shared_ptr<Type>> &targs) {
-    auto left = this->left->instantiate(ctx, params, targs);
-    auto right = this->right->instantiate(ctx, params, targs);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::buildOr(ctx, left, right);
-    }
-    return nullptr;
-}
+TypeVar::TypeVar(SymbolRef sym) : sym(sym) {}
 
-std::shared_ptr<Type> AndType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                           const std::vector<std::shared_ptr<Type>> &targs) {
-    auto left = this->left->instantiate(ctx, params, targs);
-    auto right = this->right->instantiate(ctx, params, targs);
-    if (left || right) {
-        if (!left) {
-            left = this->left;
-        }
-        if (!right) {
-            right = this->right;
-        }
-        return Types::buildAnd(ctx, left, right);
-    }
-    return nullptr;
-}
-
-std::string AppliedType::toString(const GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << "AppliedType {" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "klass = " << this->klass.data(gs).fullName(gs) << '\n';
-
-    printTabs(buf, tabs + 1);
-    buf << "targs = [" << '\n';
-    int i = -1;
-    for (auto &targ : this->targs) {
-        ++i;
-        printTabs(buf, tabs + 2);
-        auto tyMem = this->klass.data(gs).typeMembers()[i];
-        buf << tyMem.data(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << '\n';
-    }
-    printTabs(buf, tabs + 1);
-    buf << "]" << '\n';
-
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
-}
-
-std::string AppliedType::show(const GlobalState &gs) {
-    stringstream buf;
-    if (this->klass == core::Symbols::Array()) {
-        buf << "T::Array";
-    } else if (this->klass == core::Symbols::Hash()) {
-        buf << "T::Hash";
-    } else {
-        buf << this->klass.data(gs).show(gs);
-    }
-    buf << "[";
-
-    bool first = true;
-    for (auto &targ : this->targs) {
-        if (this->klass == core::Symbols::Hash() && &targ == &this->targs.back()) {
-            break;
-        }
-        if (first) {
-            first = false;
-        } else {
-            buf << ", ";
-        }
-        buf << targ->show(gs);
-    }
-
-    buf << "]";
-    return buf.str();
+void TypeVar::_sanityCheck(core::Context ctx) {
+    ENFORCE(this->sym.exists());
 }
 
 bool AppliedType::isFullyDefined() {
@@ -860,10 +474,6 @@ bool AppliedType::isFullyDefined() {
         }
     }
     return true;
-}
-
-std::string AppliedType::typeName() {
-    return "AppliedType";
 }
 
 void AppliedType::_sanityCheck(core::Context ctx) {
@@ -877,35 +487,6 @@ void AppliedType::_sanityCheck(core::Context ctx) {
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);
     }
-}
-
-std::shared_ptr<Type> AppliedType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) {
-    bool changed = false;
-    std::vector<std::shared_ptr<Type>> newTargs;
-    // TODO: make it not allocate if returns nullptr
-    for (auto &a : this->targs) {
-        auto t = a->instantiate(ctx, params, targs);
-        if (changed || t) {
-            changed = true;
-            if (!t) {
-                t = a;
-            }
-            newTargs.push_back(t);
-        } else {
-            newTargs.push_back(nullptr);
-        }
-    }
-    if (changed) {
-        int i = 0;
-        while (!newTargs[i]) {
-            newTargs[i] = this->targs[i];
-            i++;
-        }
-        return make_shared<AppliedType>(this->klass, newTargs);
-    }
-
-    return nullptr;
 }
 
 std::shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -937,30 +518,6 @@ bool AppliedType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {}
 
-std::string LambdaParam::toString(const GlobalState &gs, int tabs) {
-    return "LambdaParam(" + this->definition.data(gs).fullName(gs) + ")";
-}
-
-std::string LambdaParam::show(const GlobalState &gs) {
-    return this->definition.data(gs).show(gs);
-}
-
-std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) {
-    return "SelfTypeParam(" + this->definition.data(gs).fullName(gs) + ")";
-}
-
-std::string SelfTypeParam::show(const GlobalState &gs) {
-    return this->definition.data(gs).show(gs);
-}
-
-std::string LambdaParam::typeName() {
-    return "LambdaParam";
-}
-
-std::string SelfTypeParam::typeName() {
-    return "SelfTypeParam";
-}
-
 bool LambdaParam::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
@@ -979,13 +536,13 @@ std::shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core
 
 std::shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                 std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfType,
-                                                std::shared_ptr<Type> fullType, shared_ptr<Type> *block) {
+                                                std::shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 std::shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                   std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfType,
-                                                  std::shared_ptr<Type> fullType, shared_ptr<Type> *block) {
+                                                  std::shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     return Types::dynamic()->dispatchCall(ctx, name, callLoc, args, selfType, fullType, block);
 }
 
@@ -1000,20 +557,6 @@ bool SelfTypeParam::isFullyDefined() {
     return true;
 }
 
-std::shared_ptr<Type> SelfTypeParam::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                                 const std::vector<std::shared_ptr<Type>> &targs) {
-    return nullptr;
-}
-
-std::shared_ptr<Type> LambdaParam::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) {
-    for (auto &el : params) {
-        if (el == this->definition) {
-            return targs[&el - &params.front()];
-        }
-    }
-    return nullptr;
-}
 bool Type::hasUntyped() {
     return false;
 }
@@ -1029,6 +572,7 @@ bool OrType::hasUntyped() {
 bool AndType::hasUntyped() {
     return left->hasUntyped() || right->hasUntyped();
 }
+
 bool AppliedType::hasUntyped() {
     for (auto &arg : this->targs) {
         if (arg->hasUntyped()) {
@@ -1045,7 +589,7 @@ bool TupleType::hasUntyped() {
         }
     }
     return false;
-};
+}
 
 bool ShapeType::hasUntyped() {
     for (auto &arg : this->values) {
@@ -1055,3 +599,4 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
+SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
