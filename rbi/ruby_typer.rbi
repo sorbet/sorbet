@@ -16,7 +16,7 @@ class RubyTyper::DynamicStruct < Struct
       args: BasicObject,
   )
   .returns(RubyTyper::DynamicStruct)
-  def self.new(*arg1); end
+  def self.new(*args); end
 end
 
 class RubyTyper::StubClass
