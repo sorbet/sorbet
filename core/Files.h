@@ -73,6 +73,7 @@ public:
     File() = delete;
     File deepCopy();
     std::vector<int> &line_breaks() const;
+    int lineCount() const;
 
 private:
     std::string path_;

@@ -350,13 +350,18 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                             // to one output tree
                         }
                         core::counterAdd("types.input.bytes", src.size());
-                        core::counterAdd("types.input.lines", count(src.begin(), src.end(), '\n'));
                         core::counterInc("types.input.files");
 
                         core::FileRef file;
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
                             file = lgs->enterFileAt(fileName, src, fileId);
+                        }
+                        if (core::enable_counters) {
+                            core::counterAdd("types.input.lines", file.data(*lgs).lineCount());
+                        }
+                        if (file.data(*lgs).isTyped) {
+                            core::counterInc("types.input.files.marked_typed");
                         }
 
                         bool forceTypedSource = !opts.typedSource.empty() &&

@@ -21,8 +21,6 @@ using namespace std;
 
 namespace ruby_typer {
 namespace core {
-static constexpr bool enable_counters = debug_mode;
-
 CounterState::CounterState(unique_ptr<CounterImpl> counters) : counters(move(counters)) {}
 
 CounterState::CounterState() = default;

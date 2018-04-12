@@ -10,6 +10,8 @@
 namespace ruby_typer {
 namespace core {
 
+constexpr bool enable_counters = debug_mode;
+
 // A common on the use of strings in this API
 //
 // We have the following goals for our counters API:

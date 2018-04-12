@@ -95,5 +95,9 @@ std::vector<int> &File::line_breaks() const {
     }
 }
 
+int File::lineCount() const {
+    return line_breaks().size() - 1;
+}
+
 } // namespace core
 } // namespace ruby_typer
