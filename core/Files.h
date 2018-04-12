@@ -74,14 +74,17 @@ public:
     File deepCopy();
     std::vector<int> &line_breaks() const;
     int lineCount() const;
+    bool hadErrors() const;
 
 private:
     std::string path_;
     std::string source_;
     std::string hashKey_;
     mutable std::shared_ptr<std::vector<int>> line_breaks_;
+    mutable bool hadErrors_ = false;
 
 public:
+    const bool hasTypedSigil;
     bool isTyped;
 };
 } // namespace core

@@ -52,7 +52,8 @@ bool fileIsTyped(absl::string_view source) {
 
 File::File(std::string &&path_, std::string &&source_, Type source_type)
     : source_type(source_type), path_(path_), source_(source_),
-      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), isTyped(fileIsTyped(this->source())) {}
+      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), hasTypedSigil(fileIsTyped(this->source())),
+      isTyped(hasTypedSigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
 
@@ -78,6 +79,10 @@ absl::string_view File::source() const {
 
 absl::string_view File::hashKey() const {
     return this->hashKey_;
+}
+
+bool File::hadErrors() const {
+    return hadErrors_;
 }
 
 bool File::isPayload() const {

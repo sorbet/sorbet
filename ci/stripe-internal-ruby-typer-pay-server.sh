@@ -96,7 +96,7 @@ env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/b
     UBSAN_OPTIONS=print_stacktrace=1 \
     LSAN_OPTIONS=verbosity=1:log_threads=1 \
     /usr/bin/time -o "$TIMEFILE2" \
-    ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=always \
+    ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=always --suggest-typed \
       --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
       --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/pay-server --metrics-sha="$PAY_SERVER_SHA"
 

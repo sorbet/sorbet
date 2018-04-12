@@ -991,6 +991,9 @@ void GlobalState::flushErrors() {
 }
 
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
+    if (loc.file.exists()) {
+        loc.file.data(*this).hadErrors_ = true;
+    }
     bool report = shouldReportErrorOn(loc, what);
     if (report) {
         core::histogramAdd("error", what.code, 1);

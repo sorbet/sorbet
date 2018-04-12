@@ -73,6 +73,7 @@ struct Options {
     bool forceUntyped = false;
     bool showProgress = false;
     bool storeState = false;
+    bool suggestTyped = false;
     int threads = 0;
     string typedSource = "";
     string cacheDir = "";
@@ -464,6 +465,11 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << '\n' << '\n';
         }
+        if (opts.suggestTyped && !f.data(ctx).hadErrors() && !f.data(ctx).hasTypedSigil) {
+            core::counterInc("types.input.files.suggest_typed");
+            console_err->error("Suggest adding @typed to: {}", f.data(ctx).path());
+        }
+
     } catch (...) {
         if (auto e = ctx.state.beginError(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
@@ -740,8 +746,9 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("max-threads", "Set number of threads",
                                cxxopts::value<int>()->default_value(to_string(defaultThreads)), "int");
     options.add_options("dev")("counter", "Print internal counter", cxxopts::value<vector<string>>(), "counter");
-    options.add_options("dev")("counters", "Print all internal counters");
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
+    options.add_options("dev")("counters", "Print all internal counters");
+    options.add_options("dev")("suggest-typed", "Suggest which files to add @typed to");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
     options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
@@ -939,6 +946,7 @@ int realmain(int argc, char **argv) {
     opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
     opts.configatronFiles = options["configatron-file"].as<vector<string>>();
     opts.storeState = options.count("store-state") != 0;
+    opts.suggestTyped = options.count("suggest-typed") != 0;
     if (typed != "always" && typed != "never" && typed != "auto") {
         console->error("Invalid value for `--typed`: {}", typed);
     }
@@ -965,6 +973,10 @@ int realmain(int argc, char **argv) {
         core::ErrorColors::enableColors();
     } else if (options["color"].as<string>() == "never") {
         core::ErrorColors::disableColors();
+    }
+    if (opts.suggestTyped && !opts.forceTyped) {
+        console_err->error("--suggest-typed requires --typed=always.");
+        return 1;
     }
 
     WorkerPool workers(opts.threads, tracer);
