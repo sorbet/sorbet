@@ -147,11 +147,11 @@ const Name &NameRef::data(const GlobalState &gs) const {
 #endif
     return gs.names[_id];
 }
-string NameRef::show(const GlobalState &gs) const {
-    return data(gs).show(gs);
-}
 string NameRef::toString(const GlobalState &gs) const {
     return data(gs).toString(gs);
+}
+string NameRef::show(const GlobalState &gs) const {
+    return data(gs).show(gs);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {

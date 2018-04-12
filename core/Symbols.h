@@ -40,9 +40,6 @@ public:
 
     bool isSynthetic() const;
 
-    /** Not printed when showing name table */
-    bool isHiddenFromPrinting(const GlobalState &gs) const;
-
     Symbol &data(GlobalState &gs, bool allowNone = false) const;
     const Symbol &data(const GlobalState &gs, bool allowNone = false) const;
 
@@ -55,7 +52,8 @@ public:
     }
 
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
-    std::string toJSON(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string show(const GlobalState &gs) const;
+
     SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass) const;
 
     u4 _id;
@@ -466,6 +464,10 @@ public:
 
     std::string fullName(const GlobalState &gs) const;
 
+    // Not printed when showing name table
+    bool isHiddenFromPrinting(const GlobalState &gs) const;
+    std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
+    std::string toJSON(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     // Renders the full name of this Symbol in a form suitable for user display.
     std::string show(const GlobalState &gs) const;
 

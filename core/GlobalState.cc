@@ -778,7 +778,7 @@ string GlobalState::toString(bool showHidden) const {
 }
 
 string GlobalState::toJSON() const {
-    return Symbols::root().toJSON(*this, 0, true);
+    return Symbols::root().data(*this).toJSON(*this, 0, true);
 }
 
 void GlobalState::sanityCheck() const {
