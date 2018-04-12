@@ -1,4 +1,4 @@
-module Configatron
+class Configatron
   class Store < BasicObject
   end
   class RootStore < BasicObject
