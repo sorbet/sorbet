@@ -1166,37 +1166,6 @@ class File
   def self.mtime(file); end
 
   sig(
-      file: BasicObject,
-      modearg: String,
-      perm: String,
-      opt: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-  )
-  .returns(File)
-  type_parameters(:T).sig(
-      file: BasicObject,
-      modearg: String,
-      perm: String,
-      opt: Integer,
-      mode: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      blk: T.proc(arg0: File).returns(T.type_parameter(:T)),
-  )
-  .returns(T.type_parameter(:T))
-  def self.open(file, modearg=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
-
-  sig(
       file: String,
   )
   .returns(T.any(TrueClass, FalseClass))
@@ -1463,7 +1432,7 @@ class File
   )
   .returns(File)
   sig(
-      ext_enc: T.any(String, Encoding),
+      ext_or_ext_int_enc: T.any(String, Encoding),
       int_enc: T.any(String, Encoding),
   )
   .returns(File)
@@ -1763,15 +1732,15 @@ class IO
   def readpartial(maxlen, outbuf=_); end
 
   sig(
-      other_IO: IO,
+      other_IO_or_path: IO,
   )
   .returns(IO)
   sig(
-      path: String,
+      other_IO_or_path: String,
       mode_str: String,
   )
   .returns(IO)
-  def reopen(other_IO, mode_str=_); end
+  def reopen(other_IO_or_path, mode_str=_); end
 
   sig.returns(Integer)
   def rewind(); end
@@ -1788,7 +1757,7 @@ class IO
   )
   .returns(IO)
   sig(
-      ext_enc: T.any(String, Encoding),
+      ext_or_ext_int_enc: T.any(String, Encoding),
       int_enc: T.any(String, Encoding),
   )
   .returns(IO)
@@ -1896,112 +1865,6 @@ class IO
   )
   .returns(Integer)
   def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
-
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(NilClass)
-  sig(
-      name: String,
-      sep: String,
-      limit: Integer,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(Enumerator[String])
-  def self.foreach(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
-
-  sig(
-      fd: Integer,
-      modearg: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns(IO)
-  type_parameters(:T).sig(
-      fd: Integer,
-      modearg: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: IO).returns(T.type_parameter(:T)),
-  )
-  .returns(T.type_parameter(:T))
-  def self.open(fd, modearg=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
-
-  sig(
-      ext_or_ext_int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns([IO, IO])
-  sig(
-      ext_enc: String,
-      int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-  )
-  .returns([IO, IO])
-  type_parameters(:T).sig(
-      ext_or_ext_int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(T.type_parameter(:T)),
-  )
-  .returns(T.type_parameter(:T))
-  type_parameters(:T).sig(
-      ext_enc: String,
-      int_enc: String,
-      external_encoding: String,
-      internal_encoding: String,
-      encoding: String,
-      textmode: BasicObject,
-      binmode: BasicObject,
-      autoclose: BasicObject,
-      mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(T.type_parameter(:T)),
-  )
-  .returns(T.type_parameter(:T))
-  def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
       name: String,
@@ -2312,7 +2175,7 @@ class Array
   sig.returns(T::Array[Elem])
   def clear(); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def clone(); end
 
   type_parameters(:U).sig(
@@ -2403,7 +2266,7 @@ class Array
   sig.returns(Enumerator[Elem])
   def drop_while(&blk); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def dup(); end
 
   sig.returns(Enumerator[Elem])
@@ -2481,7 +2344,7 @@ class Array
   sig.returns(T::Array[T.untyped])
   def flatten(); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def freeze(); end
 
   type_parameters(:U).sig(
@@ -2743,7 +2606,7 @@ class Array
   sig.returns(Enumerator[Elem])
   def sort_by!(&blk); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def taint(); end
 
   sig(
@@ -2768,7 +2631,7 @@ class Array
   sig.returns(T::Array[Elem])
   def transpose(); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def trust(); end
 
   sig.returns(T::Array[Elem])
@@ -2783,10 +2646,10 @@ class Array
   .returns(T::Array[Elem])
   def unshift(*arg0); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def untaint(); end
 
-  sig.returns(Array)
+  sig.returns(T::Array[Elem])
   def untrust(); end
 
   sig(
@@ -4525,17 +4388,17 @@ class Enumerator
   extend T::Generic
   Elem = type_member
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def clone(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def dup(); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.untyped)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def each(&blk); end
 
   sig(
@@ -4562,7 +4425,7 @@ class Enumerator
   .returns(NilClass)
   def feed(arg0); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def freeze(); end
 
   type_parameters(:U).sig(
@@ -4592,22 +4455,22 @@ class Enumerator
   sig.returns(T::Array[Elem])
   def peek_values(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def rewind(); end
 
   sig.returns(T.nilable(T.any(Integer, Float)))
   def size(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def taint(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def trust(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def untaint(); end
 
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Elem])
   def untrust(); end
 
   sig(
@@ -5542,7 +5405,7 @@ class Hash
   sig.returns(T::Hash[K, V])
   def clear(); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def clone(); end
 
   sig.returns(T::Hash[K, V])
@@ -5586,7 +5449,7 @@ class Hash
   sig.returns(Enumerator[[K, V]])
   def delete_if(&blk); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def dup(); end
 
   sig(
@@ -5636,7 +5499,7 @@ class Hash
   .returns(V)
   def fetch(arg0, arg1=_, &blk); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def freeze(); end
 
   type_parameters(:T).sig(
@@ -5746,7 +5609,7 @@ class Hash
   .returns(V)
   def store(arg0, arg1); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def taint(); end
 
   sig.returns(T::Array[T::Array[T.any(K, V)]])
@@ -5758,13 +5621,13 @@ class Hash
   sig.returns(String)
   def to_s(); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def trust(); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def untaint(); end
 
-  sig.returns(Hash)
+  sig.returns(T::Hash[K, V])
   def untrust(); end
 
   type_parameters(:T).sig(
@@ -6175,7 +6038,7 @@ class Integer
   def divmod(arg0); end
 
   sig(
-      arg0: Integer,
+      limit: Integer,
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(Integer)
@@ -6183,7 +6046,7 @@ class Integer
       limit: Integer,
   )
   .returns(Enumerator[Integer])
-  def downto(arg0, &blk); end
+  def downto(limit, &blk); end
 
   sig.returns(Integer)
   def dup(); end
@@ -6557,26 +6420,26 @@ module Kernel
   def self.block_given?(); end
 
   sig(
-      start: Integer,
+      start_or_range: Integer,
       length: Integer,
   )
   .returns(T.nilable(T::Array[String]))
   sig(
-      arg0: Range,
+      start_or_range: Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
-  def self.caller(start=_, length=_); end
+  def self.caller(start_or_range=_, length=_); end
 
   sig(
-      start: Integer,
+      start_or_range: Integer,
       length: Integer,
   )
   .returns(T.nilable(T::Array[String]))
   sig(
-      arg0: Range,
+      start_or_range: Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
-  def self.caller_locations(start=_, length=_); end
+  def self.caller_locations(start_or_range=_, length=_); end
 
   sig(
       arg0: String,
@@ -6702,7 +6565,7 @@ module Kernel
   def self.raise(arg0=_, arg1=_, arg2=_); end
 
   sig(
-      max: T.any(Integer, Range),
+      max: T.any(Integer, Range[Integer]),
   )
   .returns(Numeric)
   def self.rand(max); end
@@ -7192,23 +7055,23 @@ class MatchData
   def ==(arg0); end
 
   sig(
-      i: Integer,
+      i_or_start_or_range_or_name: Integer,
   )
   .returns(T.nilable(String))
   sig(
-      start: Integer,
+      i_or_start_or_range_or_name: Integer,
       length: Integer,
   )
   .returns(T::Array[String])
   sig(
-      range: Range[Integer],
+      i_or_start_or_range_or_name: Range[Integer],
   )
   .returns(T::Array[String])
   sig(
-      name: T.any(String, Symbol),
+      i_or_start_or_range_or_name: T.any(String, Symbol),
   )
   .returns(T.nilable(String))
-  def [](i, length=_); end
+  def [](i_or_start_or_range_or_name, length=_); end
 
   sig(
       n: Integer,
@@ -9651,7 +9514,7 @@ class Range
   .returns(T.nilable(T.type_parameter(:U)))
   def bsearch(&blk); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def clone(); end
 
   sig(
@@ -9660,13 +9523,13 @@ class Range
   .returns(T.any(TrueClass, FalseClass))
   def cover?(obj); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def dup(); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Range)
+  .returns(Range[Elem])
   sig.returns(Enumerator[Elem])
   def each(&blk); end
 
@@ -9683,7 +9546,7 @@ class Range
   .returns(T::Array[Elem])
   def first(n=_); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def freeze(); end
 
   sig.returns(Integer)
@@ -9752,26 +9615,26 @@ class Range
       n: Integer,
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Range)
+  .returns(Range[Elem])
   sig(
       n: Integer,
   )
   .returns(Enumerator[Elem])
   def step(n=_, &blk); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def taint(); end
 
   sig.returns(String)
   def to_s(); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def trust(); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def untaint(); end
 
-  sig.returns(Range)
+  sig.returns(Range[Elem])
   def untrust(); end
 
   sig(
@@ -10547,7 +10410,7 @@ class Set
   sig(
       o: Elem,
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def add(o); end
 
   type_parameters(:Self).sig(
@@ -10562,16 +10425,16 @@ class Set
   .returns(T::Hash[T.type_parameter(:U), Set[Elem]])
   def classify(&blk); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def clear(); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def clone(); end
 
   sig(
       o: Elem,
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def delete(o); end
 
   type_parameters(:Self).sig(
@@ -10583,7 +10446,7 @@ class Set
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def delete_if(&blk); end
 
   sig(
@@ -10598,13 +10461,13 @@ class Set
   .returns(T.any(TrueClass, FalseClass))
   def disjoint?(set); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def dup(); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Set)
+  .returns(Set[Elem])
   sig.returns(Enumerator[Elem])
   def each(&blk); end
 
@@ -10617,7 +10480,7 @@ class Set
   type_parameters(:Self).sig.returns(T.nilable(T.type_parameter(:Self)))
   def flatten!(); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def freeze(); end
 
   type_parameters(:U).sig(
@@ -10641,7 +10504,7 @@ class Set
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def keep_if(&blk); end
 
   type_parameters(:U).sig(
@@ -10659,7 +10522,7 @@ class Set
   sig(
       enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def merge(enum); end
 
   sig(
@@ -10704,7 +10567,7 @@ class Set
   sig(
       enum: Enumerable[Elem],
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def subtract(enum); end
 
   sig(
@@ -10713,19 +10576,19 @@ class Set
   .returns(T.any(TrueClass, FalseClass))
   def superset?(set); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def taint(); end
 
   sig.returns(T::Array[Elem])
   def to_a(); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def trust(); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def untaint(); end
 
-  sig.returns(Set)
+  sig.returns(Set[Elem])
   def untrust(); end
 
   sig(
@@ -10749,7 +10612,7 @@ class Set
   sig(
       o: Elem,
   )
-  .returns(Set)
+  .returns(Set[Elem])
   def <<(o); end
 
   sig(
@@ -10850,67 +10713,67 @@ class SortedSet
   sig(
       o: Elem,
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def add(o); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def clear(); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def clone(); end
 
   sig(
       o: Elem,
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def delete(o); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def delete_if(&blk); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def dup(); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def each(&blk); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def freeze(); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def keep_if(&blk); end
 
   sig(
       enum: Enumerable[Elem],
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def merge(enum); end
 
   sig(
       enum: Enumerable[Elem],
   )
-  .returns(SortedSet)
+  .returns(SortedSet[Elem])
   def subtract(enum); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def taint(); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def trust(); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def untaint(); end
 
-  sig.returns(SortedSet)
+  sig.returns(SortedSet[Elem])
   def untrust(); end
 end
 
@@ -11162,32 +11025,32 @@ class String
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(String)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def each_byte(&blk); end
 
   sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[String])
   def each_char(&blk); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(String)
-  sig.returns(Enumerator)
+  sig.returns(Enumerator[Integer])
   def each_codepoint(&blk); end
 
   sig(
       arg0: String,
-      blk: T.proc(arg0: Integer).returns(BasicObject),
+      blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
   sig(
       arg0: String,
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def each_line(arg0=_, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -11241,7 +11104,7 @@ class String
   sig(
       arg0: T.any(Regexp, String),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   sig(
       arg0: T.any(Regexp, String),
   )
@@ -11261,7 +11124,7 @@ class String
   sig(
       arg0: T.any(Regexp, String),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   def gsub!(arg0, arg1=_, &blk); end
 
   sig.returns(Integer)
@@ -11616,7 +11479,7 @@ class String
       arg0: String,
       arg1: T.type_parameter(:Bool),
   )
-  .returns(Enumerator)
+  .returns(Enumerator[String])
   type_parameters(:Bool).sig(
       arg0: String,
       arg1: T.type_parameter(:Bool),
@@ -11704,19 +11567,19 @@ class Symbol
   def =~(obj); end
 
   sig(
-      idx: Integer,
+      idx_or_range: Integer,
   )
   .returns(String)
   sig(
-      b: Integer,
+      idx_or_range: Integer,
       n: Integer,
   )
   .returns(String)
   sig(
-      arg0: Range[Integer],
+      idx_or_range: Range[Integer],
   )
   .returns(String)
-  def [](idx, n=_); end
+  def [](idx_or_range, n=_); end
 
   sig.returns(Symbol)
   def capitalize(); end
@@ -11791,19 +11654,19 @@ class Symbol
   def size(); end
 
   sig(
-      idx: Integer,
+      idx_or_range: Integer,
   )
   .returns(String)
   sig(
-      b: Integer,
+      idx_or_range: Integer,
       n: Integer,
   )
   .returns(String)
   sig(
-      arg0: Range[Integer],
+      idx_or_range: Range[Integer],
   )
   .returns(String)
-  def slice(idx, n=_); end
+  def slice(idx_or_range, n=_); end
 
   sig.returns(String)
   def to_s(); end

@@ -795,12 +795,8 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, tracer);
         vector<std::string> empty;
-        auto oldSilence = gs->silenceErrors;
-        gs->silenceErrors = true;
-
         typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers, kvstore), emptyOpts,
                   workers); // result is thrown away
-        gs->silenceErrors = oldSilence;
     } else {
         Timer timeit(console_err, "Read serialized payload");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);

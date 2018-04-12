@@ -63,6 +63,6 @@ genrule(
     outs = [
         "state-payload-raw",
     ],
-    cmd = "$(location //main:ruby-typer-orig) --store-state $(location state-payload-raw) -e 1 --suppress-non-critical",
+    cmd = "$(location //main:ruby-typer-orig) --store-state $(location state-payload-raw) -e 1",
     tools = ["//main:ruby-typer-orig"],
 )

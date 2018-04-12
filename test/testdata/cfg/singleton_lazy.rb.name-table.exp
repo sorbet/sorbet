@@ -1,6 +1,6 @@
 class <constant:<root>> < ::Object () @ test/testdata/cfg/singleton_lazy.rb:2
   class <constant:A> < ::Object () @ test/testdata/cfg/singleton_lazy.rb:2
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8360
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8223
     method main () @ test/testdata/cfg/singleton_lazy.rb:4
   class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/cfg/singleton_lazy.rb:2
   method <static-init>$10 () @ test/testdata/cfg/singleton_lazy.rb:2
