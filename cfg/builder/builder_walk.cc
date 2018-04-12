@@ -193,13 +193,20 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 if (s->block) {
                     blockSym = s->block->symbol;
                 }
-                current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args, blockSym));
 
                 if (s->block != nullptr) {
+                    vector<core::LocalVariable> argsCopy = args;
+                    core::SymbolRef sym = s->block->symbol;
+                    auto link = make_shared<core::SendAndBlockLink>(sym);
+                    auto send = make_unique<Send>(recv, s->fun, argsCopy, link);
+                    auto solveConstraint = make_unique<SolveConstraint>(link);
+                    core::LocalVariable sendTemp =
+                        cctx.ctx.state.newTemporary(core::Names::blockPreCallTemp(), cctx.inWhat.symbol);
+                    current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
-                    core::SymbolRef sym = s->block->symbol;
+
                     const core::Symbol &data = sym.data(cctx.ctx);
 
                     for (int i = 0; i < data.arguments().size(); ++i) {
@@ -207,8 +214,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         if (auto id = ast::cast_tree<ast::Local>(arg.get())) {
                             core::LocalVariable argLoc = id->localVariable;
-                            bodyBlock->exprs.emplace_back(argLoc, arg->loc,
-                                                          make_unique<LoadYieldParam>(s->block->symbol, i));
+                            bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadYieldParam>(link, i));
                         } else {
                             Error::raise("Should have been removed by namer");
                         }
@@ -221,19 +227,22 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     core::LocalVariable blockrv =
                         cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                    auto blockLast =
-                        walk(cctx.withTarget(blockrv).withLoopScope(headerBlock, postBlock, s->block->symbol),
-                             s->block->body.get(), bodyBlock);
+                    auto blockLast = walk(cctx.withTarget(blockrv)
+                                              .withLoopScope(headerBlock, postBlock, s->block->symbol)
+                                              .withSendAndBlockLink(link),
+                                          s->block->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         core::LocalVariable dead =
                             cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                        blockLast->exprs.emplace_back(dead, s->block->loc,
-                                                      make_unique<BlockReturn>(s->block->symbol, blockrv));
+                        blockLast->exprs.emplace_back(dead, s->block->loc, make_unique<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s->loc);
 
                     current = postBlock;
+                    current->exprs.emplace_back(cctx.target, s->loc, move(solveConstraint));
+                } else {
+                    current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args));
                 }
 
                 ret = current;
@@ -248,7 +257,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 if (afterNext != cctx.inWhat.deadBlock() && cctx.rubyBlock.exists()) {
                     core::LocalVariable dead =
                         cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
-                    afterNext->exprs.emplace_back(dead, a->loc, make_unique<BlockReturn>(cctx.rubyBlock, exprSym));
+                    ENFORCE(cctx.link.get() != nullptr);
+                    afterNext->exprs.emplace_back(dead, a->loc, make_unique<BlockReturn>(cctx.link, exprSym));
                 }
 
                 if (cctx.nextScope == nullptr) {

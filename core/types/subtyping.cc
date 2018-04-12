@@ -1,4 +1,5 @@
 #include "common/common.h"
+#include "core/TypeConstraint.h"
 #include "core/Types.h"
 #include <algorithm> // find_if
 #include <unordered_map>
@@ -19,14 +20,14 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubType(ctx, t2, t1) || ret == t1 || ret->isDynamic(),
+    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t1 || ret->isDynamic(),
     //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
     //
     //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
     //
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense!
-    //                !Types::isSubType(ctx, t1, t2) || ret == t2 || ret->isDynamic() || ret == t1 ||
-    //                Types::isSubType(ctx, t2, t1),
+    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                Types::isSubTypeUnderConstraint(ctx, t2, t1),
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
     //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
 
@@ -63,10 +64,10 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
         core::categoryCounterInc("lubDistributeOr.outcome", "n1'");
         return n1;
     }
-    if (Types::isSubTypeWhenFrozen(ctx, n1, n2)) {
+    if (Types::isSubType(ctx, n1, n2)) {
         core::categoryCounterInc("lubDistributeOr.outcome", "n2''");
         return n2;
-    } else if (Types::isSubTypeWhenFrozen(ctx, n2, n1)) {
+    } else if (Types::isSubType(ctx, n2, n1)) {
         core::categoryCounterInc("lubDistributeOr.outcome", "n1'''");
         return n1;
     }
@@ -95,10 +96,10 @@ shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, 
         core::categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
-    if (Types::isSubTypeWhenFrozen(ctx, n1, n2)) {
+    if (Types::isSubType(ctx, n1, n2)) {
         core::categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
         return n2;
-    } else if (Types::isSubTypeWhenFrozen(ctx, n2, n1)) {
+    } else if (Types::isSubType(ctx, n2, n1)) {
         core::categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
         return n1;
     }
@@ -112,8 +113,8 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
     if (AndType *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
-        auto subl = Types::isSubTypeWhenFrozen(ctx, a1a, t2);
-        auto subr = Types::isSubTypeWhenFrozen(ctx, a1b, t2);
+        auto subl = Types::isSubType(ctx, a1a, t2);
+        auto subr = Types::isSubType(ctx, a1b, t2);
         if (subl || subr) {
             return Types::bottom();
         }
@@ -121,8 +122,8 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
             return Types::buildAnd(ctx, a1a, a1b);
         }
     } else if (OrType *o1 = cast_type<OrType>(t1.get())) {
-        auto subl = Types::isSubTypeWhenFrozen(ctx, o1->left, t2);
-        auto subr = Types::isSubTypeWhenFrozen(ctx, o1->right, t2);
+        auto subl = Types::isSubType(ctx, o1->left, t2);
+        auto subr = Types::isSubType(ctx, o1->right, t2);
         if (subl && subr) {
             return Types::bottom();
         } else if (subl) {
@@ -376,6 +377,12 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
         return OrType::make_shared(t1, t2);
     }
 
+    TypeVar *tv1 = cast_type<TypeVar>(t1.get());
+    TypeVar *tv2 = cast_type<TypeVar>(t2.get());
+    if (tv1 != nullptr || tv2 != nullptr) {
+        return OrType::make_shared(t1, t2);
+    }
+
     SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
     SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
 
@@ -498,14 +505,14 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
                                                 " was glbbing with " + t1->toString(ctx));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubType(ctx, t1, t2) || ret == t1 || ret->isDynamic(),
+    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t1 || ret->isDynamic(),
     //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
     //
     //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
     //
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubType(ctx, t2, t1) || ret == t2 || ret->isDynamic() || ret == t1 ||
-    //                Types::isSubType(ctx, t1, t2),
+    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                Types::isSubTypeUnderConstraint(ctx, t1, t2),
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
     //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
 
@@ -642,7 +649,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
             return result;
         } else {
             // only 1st is proxy
-            if (Types::isSubTypeWhenFrozen(ctx, t1, t2)) {
+            if (Types::isSubType(ctx, t1, t2)) {
                 return t1;
             } else {
                 return Types::bottom();
@@ -650,7 +657,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         // only 1st is proxy
-        if (Types::isSubTypeWhenFrozen(ctx, t2, t1)) {
+        if (Types::isSubType(ctx, t2, t1)) {
             return t2;
         } else {
             return Types::bottom();
@@ -658,13 +665,13 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
     }
 
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
-        bool collapseInLeft = Types::isSubTypeWhenFrozen(ctx, t1, t2);
+        bool collapseInLeft = Types::isSubType(ctx, t1, t2);
         if (collapseInLeft) {
             core::categoryCounterInc("glb", "Zor");
             return t1;
         }
 
-        bool collapseInRight = Types::isSubTypeWhenFrozen(ctx, t2, t1);
+        bool collapseInRight = Types::isSubType(ctx, t2, t1);
         if (collapseInRight) {
             core::categoryCounterInc("glb", "ZZor");
             return t2;
@@ -672,12 +679,12 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
 
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
             auto lft = Types::glb(ctx, t1, o2->left);
-            if (Types::isSubTypeWhenFrozen(ctx, lft, o2->right)) {
+            if (Types::isSubType(ctx, lft, o2->right)) {
                 core::categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::glb(ctx, t1, o2->right);
-            if (Types::isSubTypeWhenFrozen(ctx, rght, o2->left)) {
+            if (Types::isSubType(ctx, rght, o2->left)) {
                 core::categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
@@ -786,6 +793,12 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         return make_shared<AppliedType>(a1->klass, newTargs);
     }
 
+    TypeVar *tv1 = cast_type<TypeVar>(t1.get());
+    TypeVar *tv2 = cast_type<TypeVar>(t2.get());
+    if (tv1 != nullptr || tv2 != nullptr) {
+        return AndType::make_shared(t1, t2);
+    }
+
     SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
     SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
 
@@ -808,10 +821,20 @@ bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRe
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, shared_ptr<Type> t1,
+                                    shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
+
+    if (isa_type<TypeVar>(t1.get()) || isa_type<TypeVar>(t2.get())) {
+        if (constr.isSolved()) {
+            return constr.isAlreadyASubType(ctx, t1, t2);
+        } else {
+            return constr.rememberIsSubtype(ctx, t1, t2);
+        }
+    }
+
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             return true;
@@ -840,7 +863,6 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
             return true;
         }
     }
-
     //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
 
@@ -887,11 +909,11 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                 ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
 
                 if (idx.data(ctx).isCovariant()) {
-                    result = Types::isSubType(ctx, a1->targs[i], a2->targs[j]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a1->targs[i], a2->targs[j]);
                 } else if (idx.data(ctx).isInvariant()) {
                     result = Types::equiv(ctx, a1->targs[i], a2->targs[j]);
                 } else if (idx.data(ctx).isContravariant()) {
-                    result = Types::isSubType(ctx, a2->targs[j], a1->targs[i]);
+                    result = Types::isSubTypeUnderConstraint(ctx, constr, a2->targs[j], a1->targs[i]);
                 }
                 if (!result) {
                     break;
@@ -904,7 +926,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
     }
     if (AppliedType *a2 = cast_type<AppliedType>(t2.get())) {
         if (ProxyType *pt = cast_type<ProxyType>(t1.get())) {
-            return Types::isSubType(ctx, pt->underlying, t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying, t2);
         }
         return false;
     }
@@ -921,7 +943,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                              int i = -1;
                              for (auto &el2 : a2->elems) {
                                  ++i;
-                                 result = Types::isSubType(ctx, a1->elems[i], el2);
+                                 result = Types::isSubTypeUnderConstraint(ctx, constr, a1->elems[i], el2);
                                  if (!result) {
                                      break;
                                  }
@@ -945,7 +967,8 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                                  return candidate->value == el2->value && u1 == u2; // from lambda
                              });
                              result = fnd != h1->keys.end() &&
-                                      Types::isSubType(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                      Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],
+                                                                      h2->values[i]);
                              if (!result) {
                                  return;
                              }
@@ -968,7 +991,7 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
         } else {
             // only 1st is proxy
             shared_ptr<Type> und = p1->underlying;
-            return isSubTypeSingle(ctx, und, t2);
+            return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
         }
     } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
@@ -984,11 +1007,12 @@ bool isSubTypeSingle(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2
                 return classSymbolIsAsGoodAs(ctx, c1->symbol, c2->symbol);
             }
         }
-        Error::raise("isSubType(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
+        Error::raise("isSubTypeUnderConstraint(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
     }
 }
 
-bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, shared_ptr<Type> t1,
+                                           shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1006,11 +1030,13 @@ bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<T
 
     // Note: order of cases here matters!
     if (auto *o1 = cast_type<OrType>(t1.get())) { // 7, 8, 9
-        return Types::isSubType(ctx, o1->left, t2) && Types::isSubType(ctx, o1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, o1->left, t2) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, o1->right, t2);
     }
 
     if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 5
-        return Types::isSubType(ctx, t1, a2->left) && Types::isSubType(ctx, t1, a2->right);
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->left) &&
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, a2->right);
     }
 
     auto *a1 = cast_type<AndType>(t1.get());
@@ -1027,8 +1053,8 @@ bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<T
         auto *a2o = cast_type<OrType>(l.get());
         if (a2o != nullptr) {
             // This handles `(A | B) & C` -> `(A & C) | (B & C)`
-            return Types::isSubType(ctx, glb(ctx, a2o->left, r), t2) &&
-                   Types::isSubType(ctx, glb(ctx, a2o->right, r), t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->left, r), t2) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, glb(ctx, a2o->right, r), t2);
         }
     }
     if (o2 != nullptr) {
@@ -1042,20 +1068,22 @@ bool core::Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<T
         auto *o2a = cast_type<AndType>(l.get());
         if (o2a != nullptr) {
             // This handles `(A & B) | C` -> `(A | C) & (B | C)`
-            return Types::isSubType(ctx, t1, lub(ctx, o2a->left, r)) &&
-                   Types::isSubType(ctx, t1, lub(ctx, o2a->right, r));
+            return Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->left, r)) &&
+                   Types::isSubTypeUnderConstraint(ctx, constr, t1, lub(ctx, o2a->right, r));
         }
     }
 
     // This order matters
-    if (o2 != nullptr) {
-        return Types::isSubType(ctx, t1, o2->left) || Types::isSubType(ctx, t1, o2->right); // 3
+    if (o2 != nullptr) { // 3
+        return Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->left) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, t1, o2->right);
     }
     if (a1 != nullptr) { // 4
-        return Types::isSubType(ctx, a1->left, t2) || Types::isSubType(ctx, a1->right, t2);
+        return Types::isSubTypeUnderConstraint(ctx, constr, a1->left, t2) ||
+               Types::isSubTypeUnderConstraint(ctx, constr, a1->right, t2);
     }
 
-    return isSubTypeSingle(ctx, t1, t2); // 1
+    return isSubTypeUnderConstraintSingle(ctx, constr, t1, t2); // 1
 }
 
 bool core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
@@ -1089,8 +1117,8 @@ void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> AliasType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
+                                              const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
@@ -1118,11 +1146,16 @@ bool MetaType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> MetaType::instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                            const std::vector<std::shared_ptr<Type>> &targs) {
+std::shared_ptr<Type> MetaType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
 MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(wrapped) {}
+
+std::shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+    // dispatchCall is invoked on them in resolver
+    return nullptr;
+}
 } // namespace core
 } // namespace ruby_typer

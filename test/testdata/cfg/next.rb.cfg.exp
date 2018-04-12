@@ -11,40 +11,46 @@ subgraph "cluster_::Object#foo" {
 <statTemp>$5 = <constant:<Magic>>$7.<build-array>(<arrayTemp>$6) : TupleType {
   0 = Integer(1)
 }
-<returnMethodTemp>$3 = <statTemp>$5.map() : AppliedType {
+<block-pre-call-temp>$8 = <statTemp>$5.map() : AppliedType {
   klass = ::Array
   targs = [
-    <constant:Elem> = untyped
+    <constant:Elem> = TypeVar(U$1)
   ]
 }
 <unconditional>"];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [label = "block[id=1]()
-<statTemp>$14 = self
-<blockReturnTemp>$8 = <statTemp>$14.bad()
+<statTemp>$15 = self
+<blockReturnTemp>$9 = <statTemp>$15.bad()
 <unconditional>"];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::Object#foo_2" [label = "block[id=2]()
 outerLoops: 1
 <block-call>"];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::Object#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::Object#foo_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : AppliedType {
+  klass = ::Array
+  targs = [
+    <constant:Elem> = untyped
+  ]
+}
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::Object#foo_4" [label = "block[id=4]()
 outerLoops: 1
 x$2 = load_yield_param(::Object#foo#<block>, 0) : untyped
-<statTemp>$10 = self : Object
-<statTemp>$9 = <statTemp>$10.good() : untyped
-<blockReturnTemp>$12 = x$2 : untyped
-<blockReturnTemp>$13 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$12 : <impossible>
+<statTemp>$11 = self : Object
+<statTemp>$10 = <statTemp>$11.good() : untyped
+<blockReturnTemp>$13 = x$2 : untyped
+<blockReturnTemp>$14 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$13 : <impossible>
 <unconditional>"];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];

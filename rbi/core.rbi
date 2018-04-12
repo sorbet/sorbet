@@ -735,9 +735,9 @@ class CSV
   extend T::Generic
   Elem = type_member(fixed: T::Array[String])
 
-  sig(
+  type_parameters(:U).sig(
       path: T.any(String, File),
-      options: T::Hash[Symbol, BasicObject],
+      options: T::Hash[Symbol, T.type_parameter(:U)],
       blk: T.proc(arg0: T::Array[String]).returns(BasicObject),
   )
   .returns(NilClass)
@@ -773,11 +773,11 @@ class Dir
       arg0: T.any(String, Pathname),
   )
   .returns(Integer)
-  sig(
+  type_parameters(:U).sig(
       arg0: T.any(String, Pathname),
-      blk: T.proc(arg0: String).returns(BasicObject),
+      blk: T.proc(arg0: String).returns(T.type_parameter(:U)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:U))
   def self.chdir(arg0=_, &blk); end
 
   sig(
@@ -852,12 +852,12 @@ class Dir
       arg1: Encoding,
   )
   .returns(Dir)
-  sig(
+  type_parameters(:U).sig(
       arg0: String,
       arg1: Encoding,
-      blk: T.proc(arg0: Dir).returns(BasicObject),
+      blk: T.proc(arg0: Dir).returns(T.type_parameter(:U)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:U))
   def self.open(arg0, arg1=_, &blk); end
 
   sig.returns(String)
@@ -1179,7 +1179,7 @@ class File
       autoclose: BasicObject,
   )
   .returns(File)
-  sig(
+  type_parameters(:T).sig(
       file: BasicObject,
       modearg: String,
       perm: String,
@@ -1191,9 +1191,9 @@ class File
       textmode: BasicObject,
       binmode: BasicObject,
       autoclose: BasicObject,
-      blk: T.proc(arg0: File).returns(BasicObject),
+      blk: T.proc(arg0: File).returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def self.open(file, modearg=_, perm=_, opt=_, mode: _, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, &blk); end
 
   sig(
@@ -1938,7 +1938,7 @@ class IO
       mode: String,
   )
   .returns(IO)
-  sig(
+  type_parameters(:T).sig(
       fd: Integer,
       modearg: String,
       external_encoding: String,
@@ -1948,9 +1948,9 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: T.proc(arg0: IO).returns(BasicObject),
+      blk: T.proc(arg0: IO).returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def self.open(fd, modearg=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
@@ -1976,7 +1976,7 @@ class IO
       mode: String,
   )
   .returns([IO, IO])
-  sig(
+  type_parameters(:T).sig(
       ext_or_ext_int_enc: String,
       external_encoding: String,
       internal_encoding: String,
@@ -1985,10 +1985,10 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
+      blk: T.proc(arg0: [IO, IO]).returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
-  sig(
+  .returns(T.type_parameter(:T))
+  type_parameters(:T).sig(
       ext_enc: String,
       int_enc: String,
       external_encoding: String,
@@ -1998,9 +1998,9 @@ class IO
       binmode: BasicObject,
       autoclose: BasicObject,
       mode: String,
-      blk: T.proc(arg0: [IO, IO]).returns(BasicObject),
+      blk: T.proc(arg0: [IO, IO]).returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def self.pipe(ext_or_ext_int_enc=_, int_enc=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _, &blk); end
 
   sig(
@@ -2220,10 +2220,10 @@ class Array
   extend T::Generic
   Elem = type_member
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   def self.[](*arg0); end
 
   sig(
@@ -2315,10 +2315,10 @@ class Array
   sig.returns(Array)
   def clone(); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   sig.returns(Enumerator[Elem])
   def collect(&blk); end
 
@@ -2484,14 +2484,14 @@ class Array
   sig.returns(Array)
   def freeze(); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
   .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
   .returns(Integer)
   sig(
@@ -2545,17 +2545,17 @@ class Array
   sig.returns(Integer)
   def length(); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   sig.returns(Enumerator[Elem])
   def map(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   sig.returns(Enumerator[Elem])
   def map!(&blk); end
 
@@ -2583,10 +2583,10 @@ class Array
   sig.returns(Elem)
   def pop(arg0=_); end
 
-  sig(
-      arg0: T::Array[BasicObject],
+  type_parameters(:U).sig(
+      arg0: T::Array[T.type_parameter(:U)],
   )
-  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
+  .returns(T::Array[T::Array[T.any(Elem, T.type_parameter(:U))]])
   def product(*arg0); end
 
   sig(
@@ -2595,8 +2595,8 @@ class Array
   .returns(T::Array[Elem])
   def push(*arg0); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
   .returns(Elem)
   def rassoc(arg0); end
@@ -2736,8 +2736,8 @@ class Array
   .returns(T::Array[Elem])
   def sort!(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
   .returns(T::Array[Elem])
   sig.returns(Enumerator[Elem])
@@ -2795,10 +2795,10 @@ class Array
   .returns(T::Array[Elem])
   def values_at(*arg0); end
 
-  sig(
-      arg0: T::Array[BasicObject],
+  type_parameters(:U).sig(
+      arg0: T::Array[T.type_parameter(:U)],
   )
-  .returns(T::Array[T::Array[T.any(Elem, T.untyped)]])
+  .returns(T::Array[T::Array[T.any(Elem, T.type_parameter(:U))]])
   def zip(*arg0); end
 
   sig(
@@ -4157,17 +4157,17 @@ module Enumerable
   .returns(T.any(TrueClass, FalseClass))
   def any?(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   sig.returns(Enumerator[Elem])
   def collect(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(Enumerator[T.type_parameter(:U)]),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   def collect_concat(&blk); end
 
   sig.returns(Integer)
@@ -4266,17 +4266,17 @@ module Enumerable
       arg0: BasicObject,
   )
   .returns(T::Array[Elem])
-  sig(
+  type_parameters(:U).sig(
       arg0: BasicObject,
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   def grep(arg0, &blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Hash[T.untyped, T::Array[Elem]])
+  .returns(T::Hash[T.type_parameter(:U), T::Array[Elem]])
   sig.returns(Enumerator[Elem])
   def group_by(&blk); end
 
@@ -4286,8 +4286,8 @@ module Enumerable
   .returns(T.any(TrueClass, FalseClass))
   def include?(arg0); end
 
-  sig(
-      initial: BasicObject,
+  type_parameters(:Any).sig(
+      initial: T.type_parameter(:Any),
       arg0: Symbol,
   )
   .returns(T.untyped)
@@ -4471,16 +4471,16 @@ module Enumerable
   .returns(Enumerator[Elem])
   def find(ifnone=_, &blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(Enumerator[BasicObject]),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(Enumerator[T.type_parameter(:U)]),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   def flat_map(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:U)])
   sig.returns(Enumerator[Elem])
   def map(&blk); end
 
@@ -4490,8 +4490,8 @@ module Enumerable
   .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
 
-  sig(
-      initial: BasicObject,
+  type_parameters(:Any).sig(
+      initial: T.type_parameter(:Any),
       arg0: Symbol,
   )
   .returns(T.untyped)
@@ -4545,15 +4545,15 @@ class Enumerator
   sig.returns(Enumerator[[Elem, Integer]])
   def each_with_index(&blk); end
 
-  sig(
-      arg0: BasicObject,
-      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
+      blk: T.proc(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
   )
   .returns(T.untyped)
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
-  .returns(Enumerator[[Elem, T.untyped]])
+  .returns(Enumerator[[Elem, T.type_parameter(:U)]])
   def each_with_object(arg0, &blk); end
 
   sig(
@@ -4565,14 +4565,14 @@ class Enumerator
   sig.returns(Enumerator)
   def freeze(); end
 
-  sig(
+  type_parameters(:U).sig(
       arg0: Integer,
-      blk: T.proc(arg0: T::Array[T.untyped]).returns(BasicObject),
+      blk: T.proc(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
   )
   .returns(Object)
-  sig(
+  type_parameters(:U).sig(
       arg0: Proc,
-      blk: T.proc(arg0: T::Array[T.untyped]).returns(BasicObject),
+      blk: T.proc(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
   )
   .returns(Object)
   def initialize(arg0=_, &blk); end
@@ -4617,15 +4617,15 @@ class Enumerator
   sig.returns(Enumerator[[Elem, Integer]])
   def with_index(&blk); end
 
-  sig(
-      arg0: BasicObject,
-      blk: T.proc(arg0: Elem, arg1: T.untyped).returns(BasicObject),
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
+      blk: T.proc(arg0: Elem, arg1: T.type_parameter(:U)).returns(BasicObject),
   )
   .returns(T.untyped)
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
-  .returns(Enumerator[[Elem, T.untyped]])
+  .returns(Enumerator[[Elem, T.type_parameter(:U)]])
   def with_object(arg0, &blk); end
 end
 
@@ -5514,10 +5514,10 @@ class Hash
   V = type_member
   Elem = type_member
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:U).sig(
+      arg0: T.type_parameter(:U),
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:U)])
   def self.[](*arg0); end
 
   sig(
@@ -5572,11 +5572,11 @@ class Hash
       arg0: K,
   )
   .returns(T.nilable(V))
-  sig(
+  type_parameters(:U).sig(
       arg0: K,
-      blk: T.proc(arg0: K).returns(BasicObject),
+      blk: T.proc(arg0: K).returns(T.type_parameter(:U)),
   )
-  .returns(T.any(T.untyped, V))
+  .returns(T.any(T.type_parameter(:U), V))
   def delete(arg0, &blk); end
 
   sig(
@@ -5639,14 +5639,14 @@ class Hash
   sig.returns(Hash)
   def freeze(); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_key?(arg0); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_value?(arg0); end
@@ -5664,14 +5664,14 @@ class Hash
   sig.returns(Enumerator[[K, V]])
   def keep_if(&blk); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(K)
   def key(arg0); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(T.any(TrueClass, FalseClass))
   def key?(arg0); end
@@ -5682,21 +5682,21 @@ class Hash
   sig.returns(Integer)
   def length(); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
 
-  sig(
-      arg0: T::Hash[BasicObject, BasicObject],
+  type_parameters(:A ,:B).sig(
+      arg0: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
   )
-  .returns(T::Hash[T.any(T.untyped, K), T.any(T.untyped, V)])
-  sig(
-      arg0: T::Hash[BasicObject, BasicObject],
-      blk: T.proc(arg0: K, arg1: V, arg2: T.untyped).returns(T.any(V, BasicObject)),
+  .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
+  type_parameters(:A ,:B).sig(
+      arg0: T::Hash[T.type_parameter(:A), T.type_parameter(:B)],
+      blk: T.proc(arg0: K, arg1: V, arg2: T.type_parameter(:B)).returns(T.any(V, T.type_parameter(:B))),
   )
-  .returns(T::Hash[T.any(T.untyped, K), T.any(T.untyped, V)])
+  .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
   def merge(arg0, &blk); end
 
   sig(
@@ -5767,8 +5767,8 @@ class Hash
   sig.returns(Hash)
   def untrust(); end
 
-  sig(
-      arg0: BasicObject,
+  type_parameters(:T).sig(
+      arg0: T.type_parameter(:T),
   )
   .returns(T.any(TrueClass, FalseClass))
   def value?(arg0); end
@@ -6457,10 +6457,10 @@ class Interrupt
 end
 
 module Kernel
-  sig(
+  type_parameters(:T).sig(
       x: Object,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:T)])
   def self.Array(x); end
 
   sig(
@@ -6480,10 +6480,10 @@ module Kernel
   .returns(Float)
   def self.Float(x); end
 
-  sig(
+  type_parameters(:K ,:V).sig(
       x: Object,
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[T.type_parameter(:K), T.type_parameter(:V)])
   def self.Hash(x); end
 
   sig(
@@ -6797,10 +6797,10 @@ module Kernel
   sig.returns(String)
   def to_s(); end
 
-  sig(
+  type_parameters(:T).sig(
       x: Object,
   )
-  .returns(T::Array[T.untyped])
+  .returns(T::Array[T.type_parameter(:T)])
   def Array(x); end
 
   sig(
@@ -6820,10 +6820,10 @@ module Kernel
   .returns(Float)
   def Float(x); end
 
-  sig(
+  type_parameters(:K ,:V).sig(
       x: Object,
   )
-  .returns(T::Hash[T.untyped, T.untyped])
+  .returns(T::Hash[T.type_parameter(:K), T.type_parameter(:V)])
   def Hash(x); end
 
   sig(
@@ -8262,7 +8262,7 @@ class Numeric
   .returns(T.any(Integer, Float, Rational, BigDecimal))
   def modulo(arg0); end
 
-  sig.returns(T.nilable(T.untyped))
+  type_parameters(:Self).sig.returns(T.nilable(T.type_parameter(:Self)))
   def nonzero?(); end
 
   sig.returns(Integer)
@@ -8832,24 +8832,24 @@ class Pathname
       opt: Integer,
   )
   .returns(File)
-  sig(
+  type_parameters(:T).sig(
       mode: String,
       perm: String,
       opt: Integer,
-      blk: T.proc(arg0: File).returns(BasicObject),
+      blk: T.proc(arg0: File).returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def open(mode=_, perm=_, opt=_, &blk); end
 
   sig(
       arg0: Encoding,
   )
   .returns(Dir)
-  sig(
+  type_parameters(:U).sig(
       arg0: Encoding,
-      blk: T.proc(arg0: Dir).returns(BasicObject),
+      blk: T.proc(arg0: Dir).returns(T.type_parameter(:U)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:U))
   def opendir(arg0=_, &blk); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -9355,10 +9355,10 @@ module Process::GID
   def self.sid_available?(); end
 
   sig.returns(Integer)
-  sig(
-      blk: T.proc().returns(BasicObject),
+  type_parameters(:T).sig(
+      blk: T.proc().returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def self.switch(&blk); end
 
   sig(
@@ -9539,10 +9539,10 @@ module Process::UID
   def self.sid_available?(); end
 
   sig.returns(Integer)
-  sig(
-      blk: T.proc().returns(BasicObject),
+  type_parameters(:T).sig(
+      blk: T.proc().returns(T.type_parameter(:T)),
   )
-  .returns(T.untyped)
+  .returns(T.type_parameter(:T))
   def self.switch(&blk); end
 
   sig(
@@ -9645,10 +9645,10 @@ class Range
   sig.returns(Elem)
   def begin(); end
 
-  sig(
+  type_parameters(:U).sig(
       blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
   )
-  .returns(T.nilable(T.untyped))
+  .returns(T.nilable(T.type_parameter(:U)))
   def bsearch(&blk); end
 
   sig.returns(Range)
@@ -10526,10 +10526,10 @@ class Set
   extend T::Generic
   Elem = type_member
 
-  sig(
-      ary: BasicObject,
+  type_parameters(:U).sig(
+      ary: T.type_parameter(:U),
   )
-  .returns(Set[T.untyped])
+  .returns(Set[T.type_parameter(:U)])
   def self.[](*ary); end
 
   sig(
@@ -10550,16 +10550,16 @@ class Set
   .returns(Set)
   def add(o); end
 
-  sig(
+  type_parameters(:Self).sig(
       o: Elem,
   )
-  .returns(T.nilable(T.untyped))
+  .returns(T.nilable(T.type_parameter(:Self)))
   def add?(o); end
 
-  sig(
-      blk: T.proc(arg0: T.untyped).returns(Elem),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: T.type_parameter(:U)).returns(Elem),
   )
-  .returns(T::Hash[T.untyped, Set[Elem]])
+  .returns(T::Hash[T.type_parameter(:U), Set[Elem]])
   def classify(&blk); end
 
   sig.returns(Set)
@@ -10574,10 +10574,10 @@ class Set
   .returns(Set)
   def delete(o); end
 
-  sig(
+  type_parameters(:Self).sig(
       o: Elem,
   )
-  .returns(T.nilable(T.untyped))
+  .returns(T.nilable(T.type_parameter(:Self)))
   def delete?(o); end
 
   sig(
@@ -10614,14 +10614,14 @@ class Set
   sig.returns(Set)
   def flatten(); end
 
-  sig.returns(T.nilable(T.untyped))
+  type_parameters(:Self).sig.returns(T.nilable(T.type_parameter(:Self)))
   def flatten!(); end
 
   sig.returns(Set)
   def freeze(); end
 
-  sig(
-      enum: Enumerable[BasicObject],
+  type_parameters(:U).sig(
+      enum: Enumerable[T.type_parameter(:U)],
   )
   .returns(Object)
   def initialize(enum=_); end
@@ -10644,10 +10644,10 @@ class Set
   .returns(Set)
   def keep_if(&blk); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(Set[T.untyped])
+  .returns(Set[T.type_parameter(:U)])
   def map!(&blk); end
 
   sig(
@@ -10674,22 +10674,22 @@ class Set
   .returns(T.any(TrueClass, FalseClass))
   def proper_superset?(set); end
 
-  sig(
+  type_parameters(:Self).sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T.nilable(T.untyped))
+  .returns(T.nilable(T.type_parameter(:Self)))
   def reject!(&blk); end
 
-  sig(
-      enum: Enumerable[BasicObject],
+  type_parameters(:U).sig(
+      enum: Enumerable[T.type_parameter(:U)],
   )
-  .returns(Set[T.untyped])
+  .returns(Set[T.type_parameter(:U)])
   def replace(enum); end
 
-  sig(
+  type_parameters(:Self).sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T.nilable(T.untyped))
+  .returns(T.nilable(T.type_parameter(:Self)))
   def select!(&blk); end
 
   sig.returns(Integer)
@@ -10770,10 +10770,10 @@ class Set
   .returns(T.any(TrueClass, FalseClass))
   def >=(set); end
 
-  sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(Set[T.untyped])
+  .returns(Set[T.type_parameter(:U)])
   def collect!(&blk); end
 
   sig(
@@ -11612,14 +11612,14 @@ class String
   sig.returns(T.nilable(String))
   def upcase!(); end
 
-  sig(
+  type_parameters(:Bool).sig(
       arg0: String,
-      arg1: BasicObject,
+      arg1: T.type_parameter(:Bool),
   )
   .returns(Enumerator)
-  sig(
+  type_parameters(:Bool).sig(
       arg0: String,
-      arg1: BasicObject,
+      arg1: T.type_parameter(:Bool),
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)

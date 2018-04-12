@@ -17,6 +17,7 @@ constexpr ErrorClass GenericArgumentCountMismatch = 7010;
 constexpr ErrorClass IncompleteType = 7011;
 constexpr ErrorClass GlobalReassignmentTypeMismatch = 7012;
 constexpr ErrorClass FieldReassignmentTypeMismatch = 7013;
+constexpr ErrorClass GenericMethodConstaintUnsolved = 7013;
 
 } // namespace Infer
 } // namespace errors

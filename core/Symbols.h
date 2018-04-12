@@ -136,6 +136,7 @@ public:
         static constexpr int METHOD_PRIVATE = 0x0080;
         static constexpr int METHOD_OVERLOADED = 0x0040;
         static constexpr int METHOD_ABSTRACT = 0x0020;
+        static constexpr int METHOD_GENERIC = 0x0010;
 
         // Type flags
         static constexpr int TYPE_COVARIANT = 0x0100;
@@ -256,13 +257,18 @@ public:
     }
 
     inline bool isOverloaded() const {
-        DEBUG_ONLY(Error::check(isMethod()));
+        ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERLOADED) != 0;
     }
 
     inline bool isAbstract() const {
-        DEBUG_ONLY(Error::check(isMethod()));
+        ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_ABSTRACT) != 0;
+    }
+
+    inline bool isGenericMethod() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_GENERIC) != 0;
     }
 
     inline bool isKeyword() const {
@@ -420,13 +426,18 @@ public:
     }
 
     inline void setOverloaded() {
-        DEBUG_ONLY(Error::check(isMethod()));
+        ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_OVERLOADED;
     }
 
     inline void setAbstract() {
-        DEBUG_ONLY(Error::check(isMethod()));
+        ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_ABSTRACT;
+    }
+
+    inline void setGenericMethod() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_GENERIC;
     }
 
     inline void setBlockArgument() {

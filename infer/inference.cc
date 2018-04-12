@@ -1,3 +1,4 @@
+#include "core/TypeConstraint.h"
 #include "environment.h"
 #include "infer.h"
 
@@ -37,6 +38,19 @@ bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     core::counterInc("infer.methods_typechecked");
     const int startErrorCount = ctx.state.totalErrors();
+    unique_ptr<core::TypeConstraint> _constr;
+    core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
+    if (cfg->symbol.data(ctx).isGenericMethod()) {
+        _constr = make_unique<core::TypeConstraint>();
+        constr = _constr.get();
+        for (core::SymbolRef typeArgument : cfg->symbol.data(ctx).typeArguments()) {
+            constr->rememberIsSubtype(ctx, typeArgument.data(ctx).resultType,
+                                      make_shared<core::SelfTypeParam>(typeArgument));
+        }
+        if (!constr->solve(ctx)) {
+            Error::raise("should never happen");
+        }
+    }
     vector<Environment> outEnvironments;
     outEnvironments.resize(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
@@ -113,7 +127,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         for (cfg::Binding &bind : bb->exprs) {
             if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
                 current.ensureGoodAssignTarget(ctx, bind.bind);
-                bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter);
+                bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
+                                                  *constr);
                 bind.tpe->sanityCheck(ctx);
                 if (bind.tpe->isBottom()) {
                     current.isDead = true;

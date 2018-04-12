@@ -188,7 +188,7 @@ public:
     std::shared_ptr<core::Type> getReturnType(core::Context ctx, std::shared_ptr<core::Type> procType);
 
     std::shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                                               KnowledgeFilter &knowledgeFilter);
+                                               KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr);
 
     void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
     void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}

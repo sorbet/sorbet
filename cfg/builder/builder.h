@@ -34,11 +34,13 @@ public:
     BasicBlock *nextScope;
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
+    std::shared_ptr<core::SendAndBlockLink> link;
     std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
 
     CFGContext withTarget(core::LocalVariable target);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
                              core::SymbolRef rubyBlock = core::Symbols::noSymbol());
+    CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link);
 
 private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);

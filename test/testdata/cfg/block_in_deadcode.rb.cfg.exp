@@ -7,31 +7,32 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_0" [label = "block[id=0]()
 <statTemp>$5 = self : Object
-<returnMethodTemp>$3 = <statTemp>$5.outer() : untyped
+<block-pre-call-temp>$6 = <statTemp>$5.outer() : untyped
 <unconditional>"];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [label = "block[id=1]()
-<statTemp>$9 = self
-<blockReturnTemp>$6 = <statTemp>$9.inner()
+<statTemp>$10 = self
+<block-pre-call-temp>$11 = <statTemp>$10.inner()
 <unconditional>"];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::Object#foo_2" [label = "block[id=2]()
 outerLoops: 1
 <block-call>"];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::Object#foo_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::Object#foo_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : untyped
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [label = "block[id=4]()
 outerLoops: 1
-<statTemp>$7 = return <returnTemp>$8 : <impossible>
+<statTemp>$8 = return <returnTemp>$9 : <impossible>
 <unconditional>"];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];

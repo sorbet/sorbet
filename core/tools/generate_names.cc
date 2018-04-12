@@ -92,6 +92,8 @@ NameDef names[] = {
 
     // T keywords
     {"sig", Resolver | DSL},
+    {"typeParameters", "type_parameters", Resolver | DSL},
+    {"typeParameter", "type_parameter", Resolver | DSL},
     {"abstract", Resolver},
     {"implementation", Resolver},
     {"override_", "override", Resolver},
@@ -187,6 +189,8 @@ NameDef names[] = {
     {"mixesInClassMethods", "mixes_in_class_methods", Resolver},
 
     {"blockTemp", "<block>", Core | Namer | Resolver},
+    {"blockRetrunType", "<block-return-type>", Core},
+    {"blockPreCallTemp", "<block-pre-call-temp>", CFG},
     {"blockPassTemp", "<block-pass>", Desugar},
     {"forTemp", Desugar},
     {"new_", "new", Core | Desugar},

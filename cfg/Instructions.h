@@ -50,15 +50,22 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
+class SolveConstraint final : public Instruction {
+public:
+    std::shared_ptr<core::SendAndBlockLink> link;
+    SolveConstraint(std::shared_ptr<core::SendAndBlockLink> link) : link(link){};
+    virtual std::string toString(core::Context ctx);
+};
+
 class Send final : public Instruction {
 public:
     core::LocalVariable recv;
     core::NameRef fun;
     std::vector<core::LocalVariable> args;
-    core::SymbolRef block;
+    std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args,
-         core::SymbolRef block = core::Symbols::noSymbol());
+         std::shared_ptr<core::SendAndBlockLink> link = nullptr);
 
     virtual std::string toString(core::Context ctx);
 };
@@ -73,10 +80,10 @@ public:
 
 class BlockReturn final : public Instruction {
 public:
-    core::SymbolRef block;
+    std::shared_ptr<core::SendAndBlockLink> link;
     core::LocalVariable what;
 
-    BlockReturn(core::SymbolRef block, core::LocalVariable what);
+    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -150,10 +157,10 @@ public:
 
 class LoadYieldParam final : public Instruction {
 public:
-    core::SymbolRef block;
+    std::shared_ptr<core::SendAndBlockLink> link;
     u4 arg;
 
-    LoadYieldParam(core::SymbolRef block, u4 arg) : block(block), arg(arg) {
+    LoadYieldParam(std::shared_ptr<core::SendAndBlockLink> link, u4 arg) : link(link), arg(arg) {
         core::categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);

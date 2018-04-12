@@ -47,7 +47,7 @@ subgraph "cluster_::Bar#baz" {
 <selfMethodTemp>$4 = self : Bar
 b = load_arg(<selfMethodTemp>$4#baz, 0) : untyped
 <statTemp>$5 = self : Bar
-<returnMethodTemp>$3 = <statTemp>$5.super(b) : untyped
+<block-pre-call-temp>$7 = <statTemp>$5.super(b) : untyped
 <unconditional>"];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_2" [style="bold"];
@@ -55,24 +55,25 @@ b = load_arg(<selfMethodTemp>$4#baz, 0) : untyped
 <unconditional>"];
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
-    "bb::Bar#baz_2" [label = "block[id=2](<returnMethodTemp>$3)
+    "bb::Bar#baz_2" [label = "block[id=2]()
 outerLoops: 1
 <block-call>"];
 
     "bb::Bar#baz_2" -> "bb::Bar#baz_4" [style="bold"];
     "bb::Bar#baz_2" -> "bb::Bar#baz_3" [style="tapered"];
 
-    "bb::Bar#baz_3" [label = "block[id=3](<returnMethodTemp>$3)
+    "bb::Bar#baz_3" [label = "block[id=3]()
+<returnMethodTemp>$3 = Solve<::Bar#baz#<block>> : untyped
 <finalReturn> = return <returnMethodTemp>$3 : <impossible>
 <unconditional>"];
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
-    "bb::Bar#baz_4" [label = "block[id=4](<returnMethodTemp>$3)
+    "bb::Bar#baz_4" [label = "block[id=4]()
 outerLoops: 1
 a$2 = load_yield_param(::Bar#baz#<block>, 0) : untyped
-<statTemp>$8 = self : Bar
-<blockReturnTemp>$7 = <statTemp>$8.puts(a$2) : NilClass
-<blockReturnTemp>$10 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$7 : <impossible>
+<statTemp>$9 = self : Bar
+<blockReturnTemp>$8 = <statTemp>$9.puts(a$2) : NilClass
+<blockReturnTemp>$11 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$8 : <impossible>
 <unconditional>"];
 
     "bb::Bar#baz_4" -> "bb::Bar#baz_2" [style="bold"];

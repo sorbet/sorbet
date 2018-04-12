@@ -15,6 +15,13 @@ struct ParsedSig {
     std::vector<ArgSpec> argTypes;
     std::shared_ptr<core::Type> returns;
 
+    struct TypeArgSpec {
+        core::Loc loc;
+        core::NameRef name;
+        std::shared_ptr<core::TypeVar> type;
+    };
+    std::vector<TypeArgSpec> typeArgs;
+
     struct {
         bool sig = false;
         bool proc = false;
@@ -26,13 +33,17 @@ struct ParsedSig {
         bool returns = false;
         bool checked = false;
     } seen;
+
+    TypeArgSpec &enterTypeArgByName(core::NameRef name);
+    const TypeArgSpec &findTypeArgByName(core::NameRef name) const;
 };
 
 class TypeSyntax {
 public:
     static bool isSig(core::MutableContext ctx, ast::Send *send);
-    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send);
-    static std::shared_ptr<core::Type> getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr);
+    static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent);
+    static std::shared_ptr<core::Type> getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr,
+                                                     const ParsedSig &);
 
     TypeSyntax() = delete;
 };
