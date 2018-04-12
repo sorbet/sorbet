@@ -5,11 +5,10 @@ extern "C" {
 }
 #include "absl/strings/str_cat.h"
 #include "common/Random.h"
-#include "proto/SourceMetrics.pb.h"
+#include "proto/pay-server/SourceMetrics.pb.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
-#include <google/protobuf/util/json_util.h>
 #include <iomanip> // setw
 #include <map>
 #include <sstream>
@@ -410,14 +409,7 @@ bool storeCountersToProtoFile(const std::string &fileName, const std::string &pr
         metric->set_value(e.second);
     }
 
-    std::string json_string;
-
-    // Create a json_string from sr.
-    google::protobuf::util::JsonPrintOptions options;
-    options.add_whitespace = true;
-    options.always_print_primitive_fields = true;
-    options.preserve_proto_field_names = true;
-    google::protobuf::util::MessageToJsonString(metrics, &json_string, options);
+    std::string json_string = core::JSON::fromProto(metrics);
     FileOps::write(fileName, json_string);
     return true;
 }

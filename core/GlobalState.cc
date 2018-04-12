@@ -778,7 +778,7 @@ string GlobalState::toString(bool showHidden) const {
 }
 
 string GlobalState::toJSON() const {
-    return Symbols::root().data(*this).toJSON(*this, 0, true);
+    return core::JSON::fromProto(Symbols::root().data(*this).toProto(*this));
 }
 
 void GlobalState::sanityCheck() const {

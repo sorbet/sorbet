@@ -2,6 +2,7 @@
 #define SRUBY_AST_LOC_H
 
 #include "Files.h"
+#include "proto/Loc.pb.h"
 
 namespace ruby_typer {
 namespace core {
@@ -36,7 +37,7 @@ public:
 
     std::pair<Detail, Detail> position(const core::GlobalState &gs) const;
     std::string toString(const core::GlobalState &gs, int tabs = 0) const;
-    std::string toJSON(const core::GlobalState &gs, int tabs = 0) const;
+    com::stripe::rubytyper::Loc toProto(const core::GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;

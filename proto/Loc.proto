@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package com.stripe.rubytyper;
+
+message Loc {
+
+    message Position {
+        message LC {
+            int32 line = 1;
+            int32 column = 2;
+        }
+
+        LC start = 1;
+        LC end = 2;
+    }
+
+    string path = 1;
+    Position position = 2;
+}

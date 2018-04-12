@@ -110,70 +110,26 @@ string Loc::toString(const core::GlobalState &gs, int tabs) const {
     return buf.str();
 }
 
-string Loc::toJSON(const core::GlobalState &gs, int tabs) const {
-    stringstream buf;
-    buf << "{" << endl;
-    printTabs(buf, tabs + 1);
+com::stripe::rubytyper::Loc Loc::toProto(const core::GlobalState &gs) const {
+    com::stripe::rubytyper::Loc loc;
+    auto position = loc.mutable_position();
+    auto start = position->mutable_start();
+    auto end = position->mutable_end();
 
     if (this->is_none()) {
-        buf << "\"path\" : \"???\"," << endl;
+        loc.set_path("???");
+    } else {
+        auto path = this->file.data(gs).path();
+        loc.set_path(std::string(path));
 
-        printTabs(buf, tabs + 1);
-        buf << "\"position\" : {" << endl;
-
-        printTabs(buf, tabs + 2);
-        buf << "\"start\" : {" << endl;
-        printTabs(buf, tabs + 3);
-        buf << "\"line\" : 0," << endl;
-        printTabs(buf, tabs + 3);
-        buf << "\"column\" : 0" << endl;
-        printTabs(buf, tabs + 2);
-        buf << "}," << endl;
-
-        printTabs(buf, tabs + 2);
-        buf << "\"end\" : {" << endl;
-        printTabs(buf, tabs + 3);
-        buf << "\"line\" : 0," << endl;
-        printTabs(buf, tabs + 3);
-        buf << "\"column\" : 0" << endl;
-        printTabs(buf, tabs + 2);
-        buf << "}" << endl;
-        printTabs(buf, tabs + 1);
-        buf << "}" << endl;
-        printTabs(buf, tabs);
-        buf << "}";
-        return buf.str();
+        auto pos = this->position(gs);
+        start->set_line(pos.first.line);
+        start->set_column(pos.first.column);
+        end->set_line(pos.second.line);
+        end->set_column(pos.second.column);
     }
 
-    auto path = this->file.data(gs).path();
-    buf << "\"path\" : \"" << path << "\"," << endl;
-
-    auto pos = this->position(gs);
-    printTabs(buf, tabs + 1);
-    buf << "\"position\" : {" << endl;
-
-    printTabs(buf, tabs + 2);
-    buf << "\"start\" : {" << endl;
-    printTabs(buf, tabs + 3);
-    buf << "\"line\" : " << pos.first.line << "," << endl;
-    printTabs(buf, tabs + 3);
-    buf << "\"column\" : " << pos.first.column << endl;
-    printTabs(buf, tabs + 2);
-    buf << "}," << endl;
-
-    printTabs(buf, tabs + 2);
-    buf << "\"end\" : {" << endl;
-    printTabs(buf, tabs + 3);
-    buf << "\"line\" : " << pos.first.line << "," << endl;
-    printTabs(buf, tabs + 3);
-    buf << "\"column\" : " << pos.first.column << endl;
-    printTabs(buf, tabs + 2);
-    buf << "}" << endl;
-    printTabs(buf, tabs + 1);
-    buf << "}" << endl;
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
+    return loc;
 }
 
 string Loc::filePosToString(const GlobalState &gs) const {

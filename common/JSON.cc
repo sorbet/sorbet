@@ -44,5 +44,15 @@ std::string JSON::escape(std::string from) {
     return ss.str();
 }
 
+std::string JSON::fromProto(const google::protobuf::Message &message) {
+    std::string json_string;
+    google::protobuf::util::JsonPrintOptions options;
+    options.add_whitespace = true;
+    options.always_print_primitive_fields = true;
+    options.preserve_proto_field_names = true;
+    google::protobuf::util::MessageToJsonString(message, &json_string, options);
+    return json_string;
+}
+
 } // namespace core
 } // namespace ruby_typer

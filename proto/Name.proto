@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package com.stripe.rubytyper;
+
+message Name {
+    enum Kind {
+        UNKNOWN_KIND = 0;
+        UTF8 = 1;
+        UNIQUE = 2;
+        CONSTANT = 3;
+    };
+
+    Kind kind = 1;
+    string name = 2;
+}

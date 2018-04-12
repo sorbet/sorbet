@@ -375,175 +375,108 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     return os.str();
 }
 
-string Symbol::toJSON(const GlobalState &gs, int tabs, bool showHidden) const {
-    ostringstream os;
-    auto &members = this->members;
+com::stripe::rubytyper::Symbol Symbol::toProto(const core::GlobalState &gs) const {
+    com::stripe::rubytyper::Symbol symbol;
 
-    vector<string> children;
-    children.reserve(members.size());
+    symbol.set_id(ref(gs)._id);
+    *symbol.mutable_name() = name.data(gs).toProto(gs);
+
+    if (isClass()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::CLASS);
+    } else if (isStaticField()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
+    } else if (isField()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::FIELD);
+    } else if (isMethod()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::METHOD);
+    } else if (isMethodArgument()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::ARGUMENT);
+    } else if (isTypeMember()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
+    } else if (isTypeArgument()) {
+        symbol.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
+    }
+
+    if (isTypeArgument() || isTypeMember()) {
+        if (isCovariant()) {
+            symbol.set_variance(com::stripe::rubytyper::Symbol::COVARIANT);
+        } else if (isContravariant()) {
+            symbol.set_variance(com::stripe::rubytyper::Symbol::CONTRAVARIANT);
+        } else if (isInvariant()) {
+            symbol.set_variance(com::stripe::rubytyper::Symbol::INVARIANT);
+        }
+    }
+
+    if (isClass() || isMethod()) {
+        if (isMethod()) {
+            if (isPrivate()) {
+                symbol.set_visibility(com::stripe::rubytyper::Symbol::PRIVATE);
+            } else if (isProtected()) {
+                symbol.set_visibility(com::stripe::rubytyper::Symbol::PROTECTED);
+            } else {
+                symbol.set_visibility(com::stripe::rubytyper::Symbol::PUBLIC);
+            }
+        }
+
+        if (isClass()) {
+            for (auto thing : typeMembers()) {
+                symbol.add_typemembers(thing._id);
+            }
+            for (auto thing : mixins()) {
+                symbol.add_mixins(thing._id);
+            }
+        } else {
+            for (auto thing : typeArguments()) {
+                symbol.add_typearguments(thing._id);
+            }
+            for (auto thing : arguments()) {
+                symbol.add_arguments(thing._id);
+            }
+        }
+
+        if (superClass.exists()) {
+            symbol.set_superclass(superClass._id);
+        }
+    }
+
+    if (isMethodArgument()) {
+        vector<pair<int, com::stripe::rubytyper::Symbol_Flag>> methodFlags = {
+            {Symbol::Flags::ARGUMENT_OPTIONAL, com::stripe::rubytyper::Symbol::OPTIONAL},
+            {Symbol::Flags::ARGUMENT_KEYWORD, com::stripe::rubytyper::Symbol::KEYWORD},
+            {Symbol::Flags::ARGUMENT_REPEATED, com::stripe::rubytyper::Symbol::REPEATED},
+            {Symbol::Flags::ARGUMENT_BLOCK, com::stripe::rubytyper::Symbol::BLOCK},
+        };
+        for (auto &flag : methodFlags) {
+            if ((flags & flag.first) != 0) {
+                symbol.add_flags(flag.second);
+            }
+        }
+    }
+    if (resultType) {
+        symbol.set_resulttype(resultType->show(gs));
+    }
+    *symbol.mutable_loc() = definitionLoc.toProto(gs);
+
+    vector<pair<string, com::stripe::rubytyper::Symbol>> children;
     for (auto pair : members) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
             continue;
         }
 
-        auto str = pair.second.data(gs, true).toJSON(gs, tabs + 1, showHidden);
-        if (!str.empty()) {
-            children.push_back(str);
-        }
-    }
-
-    if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
-        return "";
-    }
-
-    os << "{" << endl;
-    printTabs(os, tabs + 1);
-
-    string name = this->name.show(gs);
-    os << "\"name\" : \"" << core::JSON::escape(name) << "\"," << endl;
-    printTabs(os, tabs + 1);
-
-    string type = "unknown";
-    if (this->isClass()) {
-        type = "class";
-    } else if (this->isStaticField()) {
-        type = "static-field";
-    } else if (this->isField()) {
-        type = "field";
-    } else if (this->isMethod()) {
-        type = "method";
-    } else if (this->isMethodArgument()) {
-        type = "argument";
-    } else if (this->isTypeMember()) {
-        type = "type-member";
-    } else if (this->isTypeArgument()) {
-        type = "type-argument";
-    }
-    os << "\"type\" : \"" << type << "\"," << endl;
-    printTabs(os, tabs + 1);
-
-    if (this->isTypeArgument() || this->isTypeMember()) {
-        char variance;
-        if (this->isCovariant()) {
-            variance = '+';
-        } else if (this->isContravariant()) {
-            variance = '-';
-        } else if (this->isInvariant()) {
-            variance = '=';
-        } else {
-            Error::raise("type without variance");
-        }
-        os << "\"variance\" : \"" << variance << "\"," << endl;
-        printTabs(os, tabs + 1);
-    }
-
-    if (this->isClass() || this->isMethod()) {
-        if (this->isMethod()) {
-            string visibility = "public";
-            if (this->isPrivate()) {
-                visibility = "private";
-            } else if (this->isProtected()) {
-                visibility = "protected";
-            }
-            os << "\"visibility\" : \"" << visibility << "\"," << endl;
-            printTabs(os, tabs + 1);
+        if (!pair.second.exists()) {
+            continue;
         }
 
-        auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
-        if (!typeMembers.empty()) {
-            os << "\"typeMembers\" : [" << endl;
-            printTabs(os, tabs + 1);
-            bool first = true;
-            for (SymbolRef thing : typeMembers) {
-                if (first) {
-                    first = false;
-                } else {
-                    os << ", ";
-                }
-                printTabs(os, 1);
-                os << "\"" << core::JSON::escape(thing.data(gs).name.show(gs)) << "\"" << endl;
-                printTabs(os, tabs + 1);
-            }
-            os << "]," << endl;
-            printTabs(os, tabs + 1);
-        }
-
-        string superclass = "null";
-        if (this->superClass.exists()) {
-            superclass = "\"" + core::JSON::escape(this->superClass.data(gs).fullName(gs)) + "\"";
-        }
-        os << "\"superclass\" : " << superclass << "," << endl;
-        printTabs(os, tabs + 1);
-
-        bool first = true;
-        auto list = this->isClass() ? this->mixins() : this->arguments();
-        auto key = this->isClass() ? "mixins" : "arguments";
-        os << "\"" << key << "\" : [" << endl;
-        printTabs(os, tabs + 1);
-        for (SymbolRef thing : list) {
-            if (first) {
-                first = false;
-            } else {
-                os << ", ";
-            }
-            printTabs(os, 1);
-            auto name = this->isClass() ? thing.data(gs).show(gs) : thing.data(gs).name.show(gs);
-            os << "\"" << core::JSON::escape(name) << "\"" << endl;
-            printTabs(os, tabs + 1);
-        }
-        os << "]," << endl;
-        printTabs(os, tabs + 1);
+        children.emplace_back(pair.second.data(gs).show(gs), pair.second.data(gs).toProto(gs));
     }
-    if (this->isMethodArgument()) {
-        vector<pair<int, const char *>> methodFlags = {
-            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"},
-            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"},
-            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"},
-            {Symbol::Flags::ARGUMENT_BLOCK, "block"},
-        };
-        os << "\"flags\" : [" << endl;
-        printTabs(os, tabs + 1);
-        bool first = true;
-        for (auto &flag : methodFlags) {
-            if ((this->flags & flag.first) != 0) {
-                if (first) {
-                    first = false;
-                } else {
-                    os << ", ";
-                }
-                printTabs(os, 1);
-                os << "\"" << flag.second << "\"";
-                printTabs(os, tabs + 1);
-            }
-        }
-        os << "]," << endl;
-        printTabs(os, tabs + 1);
+    auto by_name = [](pair<string, com::stripe::rubytyper::Symbol> const &a,
+                      pair<string, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
+    std::sort(children.begin(), children.end(), by_name);
+    for (auto pair : children) {
+        *symbol.add_children() = pair.second;
     }
-    if (this->resultType) {
-        string resultType = core::JSON::escape(this->resultType->show(gs));
-        os << "\"resultType\" : \"" << resultType << "\"," << endl;
-        printTabs(os, tabs + 1);
-    }
-    string loc = this->definitionLoc.toJSON(gs, tabs + 1);
-    os << "\"loc\" : " << loc << "," << endl;
-    printTabs(os, tabs + 1);
-
-    sort(children.begin(), children.end());
-    os << "\"children\" : [";
-    bool first = true;
-    for (auto row : children) {
-        if (first) {
-            first = false;
-        } else {
-            os << ", ";
-        }
-        os << row;
-    }
-    os << "]" << endl;
-    printTabs(os, tabs);
-    os << "}";
-    return os.str();
+    return symbol;
 }
 
 string Symbol::show(const GlobalState &gs) const {

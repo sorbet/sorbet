@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package com.stripe.rubytyper;
+import "proto/Name.proto";
+import "proto/Loc.proto";
+
+message Symbol {
+    enum Kind {
+        UNKNOWN_TYPE = 0;
+        CLASS = 1;
+        STATIC_FIELD = 2;
+        FIELD = 3;
+        METHOD = 4;
+        ARGUMENT = 5;
+        TYPE_MEMBER = 6;
+        TYPE_ARGUMENT = 7;
+    }
+
+    enum Variance {
+        UNKNOWN_VARIANCE = 0;
+        COVARIANT = 1;
+        CONTRAVARIANT = 2;
+        INVARIANT = 3;
+    }
+
+    enum Visibility {
+        UNKNOWN_VISIBILITY = 0;
+        PUBLIC = 1;
+        PRIVATE = 2;
+        PROTECTED = 3;
+    }
+
+    enum Flag {
+        NO_FLAG = 0;
+        OPTIONAL = 1;
+        KEYWORD = 2;
+        REPEATED = 3;
+        BLOCK = 4;
+    }
+
+    int32 id = 1;
+
+    Name name = 2;
+    Kind kind = 3;
+
+    // TYPE_ARGUMENT or TYPE_MEMBER
+    Variance variance = 4;
+
+    // CLASS or METHOD
+    Visibility visibility = 5;
+    int32 superClass = 6;
+
+    // CLASS
+    repeated int32 typeMembers = 7;
+    repeated int32 mixins = 8;
+
+    // METHOD
+    repeated int32 typeArguments = 9;
+    repeated int32 arguments = 10;
+
+    // METHOD_ARGUMENT
+    repeated Flag flags = 11;
+
+    // ALL
+    string resultType = 12;
+    Loc loc = 13;
+    repeated Symbol children = 14;
+}
