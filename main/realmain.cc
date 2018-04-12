@@ -483,7 +483,6 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
         {
             core::UnfreezeNameTable nameTableAccess(*gs);     // creates names from config
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // creates methods for them
-            ProgressIndicator namingProgress(opts.showProgress, "Configatron", 1);
             namer::configatron::fillInFromFileSystem(*gs, opts.configatronDirs, opts.configatronFiles);
         }
 
