@@ -1,0 +1,40 @@
+class <constant:<root>> < ::Object () @ test/testdata/namer/sig_misc.rb:2
+  class <constant:A> < ::Object () @ test/testdata/namer/sig_misc.rb:5
+    method f1 (x) -> T1 @ test/testdata/namer/sig_misc.rb:20
+      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:20
+    method f2 (x) -> T2 @ test/testdata/namer/sig_misc.rb:24
+      argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:23
+    method f3 () -> T1 @ test/testdata/namer/sig_misc.rb:28
+    method f4 (y) -> T1 @ test/testdata/namer/sig_misc.rb:53
+      argument y<> -> T1 @ test/testdata/namer/sig_misc.rb:51
+    method no_params () -> T1 @ test/testdata/namer/sig_misc.rb:11
+    method noreturn () -> <impossible> @ test/testdata/namer/sig_misc.rb:7
+    method private : private (x) -> T1 @ test/testdata/namer/sig_misc.rb:32
+      argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:31
+    method protected : protected (x) -> T1 @ test/testdata/namer/sig_misc.rb:37
+      argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:36
+    method public (x) -> T1 @ test/testdata/namer/sig_misc.rb:42
+      argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:41
+    method test_abstract () -> T1 @ test/testdata/namer/sig_misc.rb:62
+    method test_abstract_untyped () @ test/testdata/namer/sig_misc.rb:76
+    method test_implementation (x, y) @ test/testdata/namer/sig_misc.rb:65
+      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:65
+      argument y<> -> untyped @ test/testdata/namer/sig_misc.rb:65
+    method test_kwargs (returns) -> T2 @ test/testdata/namer/sig_misc.rb:16
+      argument returns<> -> T1 @ test/testdata/namer/sig_misc.rb:14
+    method test_overridable () -> T1 @ test/testdata/namer/sig_misc.rb:71
+    method test_overridable_implementation () -> T1 @ test/testdata/namer/sig_misc.rb:74
+    method test_override () -> T1 @ test/testdata/namer/sig_misc.rb:68
+    method test_standard_untyped () @ test/testdata/namer/sig_misc.rb:77
+    method test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/namer/sig_misc.rb:57
+      argument <blk><block> -> untyped @ test/testdata/namer/sig_misc.rb:58
+      argument x<> -> Integer @ test/testdata/namer/sig_misc.rb:56
+  class <constant:T1> < ::Object () @ test/testdata/namer/sig_misc.rb:2
+  class <constant:T2> < ::Object () @ test/testdata/namer/sig_misc.rb:3
+  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/sig_misc.rb:5
+    method static : private (x) -> T1 @ test/testdata/namer/sig_misc.rb:47
+      argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:46
+  class <singleton class:<constant:T1>> < ::<Class:Object> () @ test/testdata/namer/sig_misc.rb:2
+  class <singleton class:<constant:T2>> < ::<Class:Object> () @ test/testdata/namer/sig_misc.rb:3
+  method <static-init>$10 () @ test/testdata/namer/sig_misc.rb:2
+
