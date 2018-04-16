@@ -58,6 +58,8 @@ class A
     yield x
   end
 
+  abstract!
+
   sig.abstract.returns(T1)
   def test_abstract; end
 

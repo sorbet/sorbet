@@ -3,9 +3,15 @@
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"
 
+#include <map>
+#include <vector>
+
+using namespace std;
+
 namespace ruby_typer {
 namespace resolver {
 
+namespace {
 bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
                        core::SymbolRef sym) {
     core::NameRef name = parentTypeMember.data(gs).name;
@@ -102,6 +108,53 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
 }
 
+void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+                      core::SymbolRef sym) {
+    vector<core::SymbolRef> abstract;
+
+    auto superclass = sym.data(gs).superClass;
+    auto fnd = abstractCache.find(superclass);
+    if (fnd != abstractCache.end()) {
+        abstract.insert(abstract.end(), fnd->second.begin(), fnd->second.end());
+    }
+    for (auto ancst : sym.data(gs).mixins()) {
+        auto fnd = abstractCache.find(ancst);
+        if (fnd != abstractCache.end()) {
+            abstract.insert(abstract.end(), fnd->second.begin(), fnd->second.end());
+        }
+    }
+
+    auto isAbstract = sym.data(gs).isClassAbstract();
+    if (isAbstract) {
+        for (auto mem : sym.data(gs).members) {
+            if (mem.second.data(gs).isMethod() && mem.second.data(gs).isAbstract()) {
+                abstract.push_back(mem.second);
+            }
+        }
+    }
+
+    if (abstract.empty()) {
+        return;
+    }
+
+    for (auto proto : abstract) {
+        if (proto.data(gs).owner == sym) {
+            continue;
+        }
+
+        auto mem = sym.data(gs).findConcreteMethodTransitive(gs, proto.data(gs).name);
+        if (!isAbstract && !mem.exists()) {
+            if (auto e = gs.beginError(sym.data(gs).definitionLoc, core::errors::Resolver::BadAbstractMethod)) {
+                e.setHeader("Missing definition for abstract method `{}`", proto.data(gs).show(gs));
+                e.addErrorLine(proto.data(gs).definitionLoc, "defined here");
+            }
+        }
+    }
+
+    abstractCache[sym] = move(abstract);
+}
+}; // namespace
+
 void Resolver::finalizeResolution(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &data = core::SymbolRef(&gs, i).data(gs);
@@ -154,6 +207,15 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs).isClass()) {
             resolveTypeMembers(gs, sym);
+        }
+    }
+
+    unordered_map<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto sym = core::SymbolRef(&gs, i);
+        if (sym.data(gs).isClass()) {
+            validateAbstract(gs, abstractCache, sym);
         }
     }
 }

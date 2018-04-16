@@ -114,6 +114,8 @@ public:
 
     class Flags {
     public:
+        static constexpr int NONE = 0;
+
         static constexpr int CLASS = 0x8000;
         static constexpr int METHOD = 0x4000;
         static constexpr int FIELD = 0x2000;
@@ -125,6 +127,8 @@ public:
         // Class flags
         static constexpr int CLASS_CLASS = 0x0100;
         static constexpr int CLASS_MODULE = 0x0080;
+        static constexpr int CLASS_ABSTRACT = 0x0040;
+        static constexpr int CLASS_INTERFACE = 0x0020;
 
         // Method argument flags
         static constexpr int ARGUMENT_OPTIONAL = 0x0100;
@@ -347,6 +351,16 @@ public:
         return !isClassModule();
     }
 
+    inline bool isClassAbstract() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_ABSTRACT) != 0;
+    }
+
+    inline bool isClassInterface() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_INTERFACE) != 0;
+    }
+
     inline void setClass() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
@@ -462,8 +476,20 @@ public:
         flags |= Symbol::Flags::METHOD_PRIVATE;
     }
 
+    inline void setClassAbstract() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_ABSTRACT;
+    }
+
+    inline void setClassInterface() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_INTERFACE;
+    }
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
-    SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name, int MaxDepth = 100) const;
+    SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
+    SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
+
     /* transitively finds a member with the most similar name */
 
     struct FuzzySearchResult {
@@ -527,6 +553,9 @@ private:
      * for method - ordered type generic type arguments of the class
      */
     std::vector<SymbolRef> typeParams;
+
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
+                                           int MaxDepth = 100) const;
 };
 
 // CheckSize(Symbol, 152, 8); // This is under too much churn to be worth checking

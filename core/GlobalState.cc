@@ -1015,6 +1015,9 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
         case errors::Resolver::InvalidMethodSignature.code:
         case errors::Resolver::InvalidTypeDeclaration.code:
         case errors::Namer::ModuleKindRedefinition.code:
+        case errors::Namer::InterfaceClass.code:
+        case errors::Resolver::AbstractMethodOutsideAbstract.code:
+        case errors::Resolver::ConcreteMethodInInterface.code:
             // These are shown even for untyped source
             return true;
 

@@ -401,7 +401,12 @@ private:
 
                         fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()), isOverloaded);
 
-                        if (mdef->symbol.data(ctx).isAbstract() && !ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
+                        // OVERLOAD
+                        lastSig.clear();
+                    }
+
+                    if (mdef->symbol.data(ctx).isAbstract()) {
+                        if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
                             if (auto e = ctx.state.beginError(mdef->rhs->loc,
                                                               core::errors::Resolver::AbstractMethodWithBody)) {
                                 e.setHeader("Abstract methods must not contain any code in their body.");
@@ -409,9 +414,18 @@ private:
 
                             mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
                         }
-
-                        // OVERLOAD
-                        lastSig.clear();
+                        if (!mdef->symbol.data(ctx).enclosingClass(ctx).data(ctx).isClassAbstract()) {
+                            if (auto e = ctx.state.beginError(mdef->loc,
+                                                              core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                                e.setHeader("Before declaring an abstract method, you must mark your class/module "
+                                            "as abstract using `abstract!` or `interface!`.");
+                            }
+                        }
+                    } else if (mdef->symbol.data(ctx).enclosingClass(ctx).data(ctx).isClassInterface()) {
+                        if (auto e =
+                                ctx.state.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                            e.setHeader("All methods in an interface must be declared abstract.");
+                        }
                     }
                 },
                 [&](ast::ClassDef *cdef) {

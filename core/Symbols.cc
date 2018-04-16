@@ -132,7 +132,16 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     return Symbols::noSymbol();
 }
 
-SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int maxDepth) const {
+SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) const {
+    return findMemberTransitiveInternal(gs, name, Flags::NONE, Flags::NONE, 100);
+}
+
+SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const {
+    return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ABSTRACT, Flags::METHOD, 100);
+}
+
+SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
+                                               int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
         if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
@@ -160,17 +169,19 @@ SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name, int 
 
     SymbolRef result = findMember(gs, name);
     if (result.exists()) {
-        return result;
+        if (mask == 0 || (result.data(gs).flags & mask) == flags) {
+            return result;
+        }
     }
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
         ENFORCE(it->exists());
-        result = it->data(gs).findMemberTransitive(gs, name, maxDepth - 1);
+        result = it->data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
         if (result.exists()) {
             return result;
         }
     }
     if (this->superClass.exists()) {
-        return this->superClass.data(gs).findMemberTransitive(gs, name, maxDepth - 1);
+        return this->superClass.data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
     }
     return Symbols::noSymbol();
 }

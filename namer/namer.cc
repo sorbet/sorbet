@@ -190,6 +190,34 @@ public:
         return klass;
     }
 
+    bool handleNamerDSL(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass, unique_ptr<ast::Expression> &line) {
+        if (addAncestor(ctx, klass, line)) {
+            return true;
+        }
+
+        auto *send = ast::cast_tree<ast::Send>(line.get());
+        if (send == nullptr) {
+            return false;
+        }
+        if (send->fun != core::Names::declareInterface() && send->fun != core::Names::declareAbstract()) {
+            return false;
+        }
+
+        klass->symbol.data(ctx).setClassAbstract();
+        klass->symbol.data(ctx).singletonClass(ctx).data(ctx).setClassAbstract();
+
+        if (send->fun == core::Names::declareInterface()) {
+            klass->symbol.data(ctx).setClassInterface();
+
+            if (klass->kind == ast::Class) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
+                    e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`.");
+                }
+            }
+        }
+        return true;
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
@@ -197,11 +225,11 @@ public:
             klass->symbol.data(ctx).superClass = core::Symbols::todo();
         }
 
-        auto toRemove =
-            remove_if(klass->rhs.begin(), klass->rhs.end(),
-                      [this, ctx, &klass](unique_ptr<ast::Expression> &line) { return addAncestor(ctx, klass, line); });
         klass->symbol.data(ctx).definitionLoc = klass->loc;
         klass->symbol.data(ctx).singletonClass(ctx); // force singleton class into existance
+
+        auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
+                                  [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
         klass->rhs.erase(toRemove, klass->rhs.end());
         return klass;
     }

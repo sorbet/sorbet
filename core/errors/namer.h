@@ -16,6 +16,7 @@ constexpr ErrorClass InvalidAlias = 4009;
 constexpr ErrorClass RedefinitionOfMethod = 4010;
 constexpr ErrorClass InvalidTypeDefinition = 4011;
 constexpr ErrorClass ModuleKindRedefinition = 4012;
+constexpr ErrorClass InterfaceClass = 4013;
 } // namespace Namer
 } // namespace errors
 } // namespace core

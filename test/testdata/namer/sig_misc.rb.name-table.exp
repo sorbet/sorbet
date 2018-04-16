@@ -15,17 +15,17 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/sig_misc.rb:2
       argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:36
     method public (x) -> T1 @ test/testdata/namer/sig_misc.rb:42
       argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:41
-    method test_abstract () -> T1 @ test/testdata/namer/sig_misc.rb:62
-    method test_abstract_untyped () @ test/testdata/namer/sig_misc.rb:76
-    method test_implementation (x, y) @ test/testdata/namer/sig_misc.rb:65
-      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:65
-      argument y<> -> untyped @ test/testdata/namer/sig_misc.rb:65
+    method test_abstract () -> T1 @ test/testdata/namer/sig_misc.rb:64
+    method test_abstract_untyped () @ test/testdata/namer/sig_misc.rb:78
+    method test_implementation (x, y) @ test/testdata/namer/sig_misc.rb:67
+      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:67
+      argument y<> -> untyped @ test/testdata/namer/sig_misc.rb:67
     method test_kwargs (returns) -> T2 @ test/testdata/namer/sig_misc.rb:16
       argument returns<> -> T1 @ test/testdata/namer/sig_misc.rb:14
-    method test_overridable () -> T1 @ test/testdata/namer/sig_misc.rb:71
-    method test_overridable_implementation () -> T1 @ test/testdata/namer/sig_misc.rb:74
-    method test_override () -> T1 @ test/testdata/namer/sig_misc.rb:68
-    method test_standard_untyped () @ test/testdata/namer/sig_misc.rb:77
+    method test_overridable () -> T1 @ test/testdata/namer/sig_misc.rb:73
+    method test_overridable_implementation () -> T1 @ test/testdata/namer/sig_misc.rb:76
+    method test_override () -> T1 @ test/testdata/namer/sig_misc.rb:70
+    method test_standard_untyped () @ test/testdata/namer/sig_misc.rb:79
     method test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/namer/sig_misc.rb:57
       argument <blk><block> -> untyped @ test/testdata/namer/sig_misc.rb:58
       argument x<> -> Integer @ test/testdata/namer/sig_misc.rb:56

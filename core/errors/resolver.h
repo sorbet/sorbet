@@ -26,6 +26,9 @@ constexpr ErrorClass TypeMembersInWrongOrder = 5017;
 constexpr ErrorClass NotATypeVariable = 5018;
 constexpr ErrorClass AbstractMethodWithBody = 5019;
 constexpr ErrorClass InvalidMixinDeclaration = 5020;
+constexpr ErrorClass AbstractMethodOutsideAbstract = 5021;
+constexpr ErrorClass ConcreteMethodInInterface = 5022;
+constexpr ErrorClass BadAbstractMethod = 5023;
 } // namespace Resolver
 } // namespace errors
 } // namespace core

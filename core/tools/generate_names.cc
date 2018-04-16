@@ -119,6 +119,8 @@ NameDef names[] = {
     {"let", DSL | Resolver | CFG | Infer},
     {"unsafe", DSL},
     {"must", Core},
+    {"declareInterface", "interface!", Namer},
+    {"declareAbstract", "abstract!", Namer},
     // end T keywords
 
     // Ruby DSL methods which we understand
