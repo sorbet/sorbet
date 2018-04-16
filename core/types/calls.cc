@@ -495,24 +495,19 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             return special;
         }
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
-            string maybeComponent;
-            core::Symbol::FuzzySearchResult alternative;
-
             if (fullType.get() != this) {
-                maybeComponent = " component of " + fullType->show(ctx);
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", fun.data(ctx).toString(ctx),
+                            this->show(ctx), fullType->show(ctx));
             } else {
-                alternative = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
-            }
-
-            if (alternative.symbol.exists()) {
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
-                e.addErrorSection(core::ErrorSection({
-                    core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: `{}`?",
-                                          alternative.name.toString(ctx)),
-                }));
-            } else {
-                e.setHeader("Method `{}` does not exist on `{}`{}", fun.data(ctx).toString(ctx), this->show(ctx),
-                            maybeComponent);
+                core::Symbol::FuzzySearchResult alternative;
+                alternative = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
+                if (alternative.symbol.exists()) {
+                    e.addErrorSection(core::ErrorSection({
+                        core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: `{}`?",
+                                              alternative.name.toString(ctx)),
+                    }));
+                }
             }
         }
         return Types::dynamic();
