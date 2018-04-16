@@ -15,7 +15,7 @@ class A
     i: T.class_of(T1, T2), # error: class_of only takes a single argument
     j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
     k: T.class_of(1), # error: T.class_of needs a Class as its argument
-    l: {[] => String}, # error: Shape keys must be literals.
+    l: {[] => String}, # error: Shape keys must be literals
     m: {foo: 0} # error: Unsupported type syntax
   )
   .returns(T2)

@@ -120,7 +120,7 @@ private:
         ast::Ident *id = ast::cast_tree<ast::Ident>(tree.get());
         if (id == nullptr || !id->symbol.data(ctx).isClass()) {
             if (auto e = ctx.state.beginError(tree->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically resolved.");
+                e.setHeader("Superclasses and mixins must be statically resolved");
             }
             return core::Symbols::noSymbol();
         }
@@ -300,7 +300,7 @@ private:
     void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
         if (!ctx.owner.data(ctx).isClassModule()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class.", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx).show(ctx));
             }
             // Keep processing it anyways
         }
@@ -314,14 +314,14 @@ private:
         auto *id = ast::cast_tree<ast::Ident>(send->args.front().get());
         if (id == nullptr || !id->symbol.data(ctx).isClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Argument to `{}` must be statically resolvable to a module.",
+                e.setHeader("Argument to `{}` must be statically resolvable to a module",
                             send->fun.data(ctx).show(ctx));
             }
             return;
         }
         if (id->symbol.data(ctx).isClassClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` is a class, not a module; Only modules may be mixins.",
+                e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
                             id->symbol.data(ctx).show(ctx));
             }
             return;
@@ -354,8 +354,8 @@ private:
                             if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
                                 if (auto e = ctx.state.beginError(lastSig[0]->loc,
                                                                   core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Unused type annotation. No method def before next annotation.");
-                                    e.addErrorLine(send->loc, "Type annotation that will be used instead.");
+                                    e.setHeader("Unused type annotation. No method def before next annotation");
+                                    e.addErrorLine(send->loc, "Type annotation that will be used instead");
                                 }
                             }
                         }
@@ -409,7 +409,7 @@ private:
                         if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
                             if (auto e = ctx.state.beginError(mdef->rhs->loc,
                                                               core::errors::Resolver::AbstractMethodWithBody)) {
-                                e.setHeader("Abstract methods must not contain any code in their body.");
+                                e.setHeader("Abstract methods must not contain any code in their body");
                             }
 
                             mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
@@ -418,13 +418,13 @@ private:
                             if (auto e = ctx.state.beginError(mdef->loc,
                                                               core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                                 e.setHeader("Before declaring an abstract method, you must mark your class/module "
-                                            "as abstract using `abstract!` or `interface!`.");
+                                            "as abstract using `abstract!` or `interface!`");
                             }
                         }
                     } else if (mdef->symbol.data(ctx).enclosingClass(ctx).data(ctx).isClassInterface()) {
                         if (auto e =
                                 ctx.state.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
-                            e.setHeader("All methods in an interface must be declared abstract.");
+                            e.setHeader("All methods in an interface must be declared abstract");
                         }
                     }
                 },
@@ -447,7 +447,7 @@ private:
 
         if (!lastSig.empty()) {
             if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed sig. No method def following it.");
+                e.setHeader("Malformed sig. No method def following it");
             }
         }
 
@@ -468,7 +468,7 @@ private:
                  [&](ast::Cast *cast) {
                      if (cast->cast != core::Names::let()) {
                          if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                             e.setHeader("Use T.let() to specify the type of constants.");
+                             e.setHeader("Use T.let() to specify the type of constants");
                          }
                      }
                      result = cast->type;
@@ -492,7 +492,7 @@ private:
             return false;
         } else if (cast->cast != core::Names::let()) {
             if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                e.setHeader("Use T.let() to specify the type of constants.");
+                e.setHeader("Use T.let() to specify the type of constants");
             }
         }
 
@@ -500,7 +500,7 @@ private:
         if (uid->kind == ast::UnresolvedIdent::Class) {
             if (!ctx.owner.data(ctx).isClass()) {
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
-                    e.setHeader("Class variables must be declared at class scope.");
+                    e.setHeader("Class variables must be declared at class scope");
                 }
             }
 

@@ -872,11 +872,10 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     auto ty = getTypeAndOrigin(ctx, c->value);
                     if (c->cast == core::Names::assertType() && ty.type->isDynamic()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
-                            e.setHeader("The typechecker was unable to infer the type of the asserted value.");
+                            e.setHeader("The typechecker was unable to infer the type of the asserted value");
                             e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx)));
-                            e.addErrorSection(core::ErrorSection("You may need to add additional `sig` "
-                                                                 "annotations."));
+                            e.addErrorSection(core::ErrorSection("You may need to add additional `sig` annotations"));
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {

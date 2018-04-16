@@ -20,7 +20,7 @@ std::unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableConte
 
     if (!ast::isa_tree<ast::ConstantLit>(send->recv.get())) {
         if (auto e = ctx.state.beginError(send->recv->loc, core::errors::DSL::BadWrapInstance)) {
-            e.setHeader("Unsupported wrap_instance() on a non-constant-literal.");
+            e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
         }
         return send;
     }
