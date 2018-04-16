@@ -604,7 +604,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 parser::Self *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::InvalidSingletonDef)) {
-                        e.setHeader("`def EXPRESSION.method' is only supported for `def self.method'");
+                        e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
                     }
                     unique_ptr<Expression> res = MK::EmptyTree(loc);
                     result.swap(res);
@@ -623,7 +623,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 parser::Self *self = parser::cast_node<parser::Self>(sclass->expr.get());
                 if (self == nullptr) {
                     if (auto e = ctx.state.beginError(sclass->loc, core::errors::Desugar::InvalidSingletonDef)) {
-                        e.setHeader("`class << EXPRESSION' is only supported for `class << self'");
+                        e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                     }
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
