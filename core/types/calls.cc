@@ -460,8 +460,8 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             if (args.size() > 1 && !Types::isSubType(ctx, args[1].type, Types::String())) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
                     e.setHeader(
-                        "Expression passed as an argument `{}` to method `{}` does not match expected type String",
-                        "msg", name.toString(ctx));
+                        "Expression passed as an argument `{}` to method `{}` does not match expected type `{}`", "msg",
+                        name.toString(ctx), "String");
                     e.addErrorSection(core::ErrorSection("Got " + args[1].type->show(ctx) + " originating from:",
                                                          args[1].origins2Explanations(ctx)));
                 }
