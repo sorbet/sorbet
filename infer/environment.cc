@@ -879,7 +879,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         }
                     } else if (!core::Types::isSubType(ctx, ty.type, castType)) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
-                            e.setHeader("Argument does not have asserted type {}", castType->show(ctx));
+                            e.setHeader("Argument does not have asserted type `{}`", castType->show(ctx));
                             e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx)));
                         }
