@@ -120,8 +120,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
 
                 if (send->args.size() > 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Got {}, expected 0-1", send->fun.toString(ctx),
-                                    send->args.size());
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, , got: {}", send->fun.toString(ctx),
+                                    "0-1", send->args.size());
                     }
                 }
                 auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
@@ -164,7 +164,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `sig.returns`. Got {}, expected 1", send->args.size());
+                        e.setHeader("Wrong number of args to `sig.returns`. Expected: `{}`, got: `{}`", 1,
+                                    send->args.size());
                     }
                     break;
                 }

@@ -27,7 +27,8 @@ std::unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableConte
 
     if (send->args.size() != 1) {
         if (auto e = ctx.state.beginError(send->loc, core::errors::DSL::BadWrapInstance)) {
-            e.setHeader("Wrong number of arguments to wrap_instance(): expected 0, got {}", send->args.size());
+            e.setHeader("Wrong number of arguments to `{}`. Expected: `{}`, got: `{}`", "wrap_instance", 0,
+                        send->args.size());
         }
         return send;
     }
