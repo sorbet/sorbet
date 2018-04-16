@@ -45,10 +45,10 @@ module Main
     ret = T.cast(nil, T.all(Object, T::Hash[String, String]))
     T.assert_type!(ret, T::Hash[String, String])
 
-    T.assert_type!(0, T.all(Object, T::Hash[String, String])) # error: does not have asserted type T::Hash[String, String]
+    T.assert_type!(0, T.all(Object, T::Hash[String, String])) # error: does not have asserted type `T::Hash[String, String]`
   end
 
   def generic_class_module_glb
-    T.assert_type!(0, T.all(A, T::Hash[String, String])) # error: does not have asserted type T.all(T::Hash[String, String], A)
+    T.assert_type!(0, T.all(A, T::Hash[String, String])) # error: does not have asserted type `T.all(T::Hash[String, String], A)`
   end
 end
