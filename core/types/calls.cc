@@ -340,7 +340,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             // one in userland
             if (!args.empty()) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments for constructor. Expected: 0, found: `{}`", args.size());
+                    e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
                 }
             }
             return core::Types::dynamic();
@@ -377,7 +377,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
 
             if (args.size() != arity) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of type parameters for `{}`. Expected `{}`, got `{}`",
+                    e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                                 attachedClass.data(ctx).show(ctx), arity, args.size());
                 }
             }
@@ -446,7 +446,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             }
             if (args.size() < 1 || args.size() > 2) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
+                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                                 name.toString(ctx), "1-2", args.size());
                 }
                 return Types::dynamic();
@@ -569,7 +569,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
               pit->data(ctx).isBlockArgument())) {
             if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
+                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             fun.toString(ctx),
                             // TODO(nelhage): report actual counts of required arguments,
                             // and account for keyword arguments
@@ -675,8 +675,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, provided: `{}`",
-                        fun.toString(ctx),
+            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", fun.toString(ctx),
 
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments

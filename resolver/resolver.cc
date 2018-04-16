@@ -307,7 +307,8 @@ private:
 
         if (send->args.size() != 1) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Wrong number of arguments to `{}`: Expected 1", send->fun.data(ctx).show(ctx));
+                e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
+                            send->fun.data(ctx).show(ctx), 1, send->args.size());
             }
             return;
         }
@@ -607,8 +608,8 @@ public:
             case core::Names::cast()._id: {
                 if (send->args.size() < 2) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidCast)) {
-                        e.setHeader("Not enough arguments to T.{}: got `{}`, expected 2", send->fun.toString(ctx),
-                                    send->args.size());
+                        e.setHeader("Not enough arguments to `{}`: Expected: `{}`, got: `{}`",
+                                    "T." + send->fun.toString(ctx), 2, send->args.size());
                     }
                     return send;
                 }

@@ -349,7 +349,8 @@ public:
                     }
                     if (original->args.size() != 2) {
                         if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
-                            e.setHeader("Wrong number of arguments to `{}`; Expected 2", original->fun.toString(ctx));
+                            e.setHeader("Wrong number of arguments to `{}`; Expected: `{}`, got: `{}`",
+                                        original->fun.toString(ctx), 2, original->args.size());
                         }
                         break;
                     }
