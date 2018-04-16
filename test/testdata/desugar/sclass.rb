@@ -2,7 +2,7 @@
 class A
 end
 
-class << A # error: `class << EXPRESSION' is only supported for `class << self'
+class << A # error: `class << EXPRESSION` is only supported for `class << self`
     def a
         'a'
     end
@@ -17,7 +17,7 @@ class B
 end
 
 $c = Object.new
-class << $c # error: `class << EXPRESSION' is only supported for `class << self'
+class << $c # error: `class << EXPRESSION` is only supported for `class << self`
     def c
         "c"
     end
