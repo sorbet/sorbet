@@ -71,7 +71,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                             if (typeArgSpec.type) {
                                 if (auto e = ctx.state.beginError(arg->loc,
                                                                   core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Malformed signature; Type Argument {} was specified twice.",
+                                    e.setHeader("Malformed signature; Type Argument {} was specified twice",
                                                 name.toString(ctx));
                                 }
                             }
@@ -80,12 +80,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                         } else {
                             if (auto e =
                                     ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                                e.setHeader("Malformed signature; Type parameters are specified with symbols.");
+                                e.setHeader("Malformed signature; Type parameters are specified with symbols");
                             }
                         }
                     } else {
                         if (auto e = ctx.state.beginError(arg->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                            e.setHeader("Malformed signature; Type parameters are specified with symbols.");
+                            e.setHeader("Malformed signature; Type parameters are specified with symbols");
                         }
                     }
                 }
@@ -127,7 +127,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                 if (hash == nullptr) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`; Expected a hash of arguments => types.", send->fun.toString(ctx),
+                        e.setHeader("Malformed `{}`; Expected a hash of arguments => types", send->fun.toString(ctx),
                                     send->args.size());
                     }
                     break;
@@ -188,7 +188,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Unknown `sig` builder method `{}`.", send->fun.toString(ctx));
+                    e.setHeader("Unknown `sig` builder method `{}`", send->fun.toString(ctx));
                 }
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
@@ -339,7 +339,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                     values.emplace_back(val);
                 } else {
                     if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("Malformed type declaration. Shape keys must be literals.");
+                        e.setHeader("Malformed type declaration. Shape keys must be literals");
                     }
                 }
             }
@@ -376,7 +376,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
                 if (sig.returns == nullptr) {
                     if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("Malformed T.proc: You must specify a return type.");
+                        e.setHeader("Malformed T.proc: You must specify a return type");
                     }
                     targs.emplace_back(core::Types::dynamic());
                 } else {

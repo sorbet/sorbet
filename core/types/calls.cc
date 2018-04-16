@@ -166,7 +166,7 @@ void matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc cal
 
 void missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`.", arg.data(ctx).name.toString(ctx),
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx).name.toString(ctx),
                     method.toString(ctx));
     }
 }
@@ -649,7 +649,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 NameRef arg(ctx.state, key->value);
 
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`.", arg.toString(ctx),
+                    e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.toString(ctx),
                                 fun.toString(ctx));
                 }
             }

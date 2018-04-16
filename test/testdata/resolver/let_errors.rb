@@ -1,7 +1,7 @@
 # @typed
 class LetErrors
   def initialize
-    @@cvar = T.let(0, Integer) # error: Class variables must be declared at class scope.
+    @@cvar = T.let(0, Integer) # error: Class variables must be declared at class scope
     @ivar = T.cast(0, Integer) # error: Use T.let() to specify the type of constants
   end
 

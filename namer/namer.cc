@@ -111,7 +111,7 @@ class NameInserter {
 
         if (send->args.size() != 1) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` should only be passed a single constant. You passed `{}` parameters.",
+                e.setHeader("`{}` should only be passed a single constant. You passed `{}` parameters",
                             send->fun.data(ctx).show(ctx), send->args.size());
             }
             return false;
@@ -119,13 +119,13 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::ConstantLit>(send->args[0].get());
         if (constLit == nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeNotConstant)) {
-                e.setHeader("`{}` must be passed a constant literal.", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` must be passed a constant literal", send->fun.data(ctx).show(ctx));
             }
             return false;
         }
         if (send->block != nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block.", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx).show(ctx));
             }
             return false;
         }
@@ -211,7 +211,7 @@ public:
 
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
-                    e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`.");
+                    e.setHeader("Classes can't be interfaces. Use `abstract!` instead of `interface!`");
                 }
             }
         }

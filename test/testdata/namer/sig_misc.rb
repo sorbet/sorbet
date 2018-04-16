@@ -78,5 +78,5 @@ class A
   sig.abstract; def test_abstract_untyped; end
   sig; def test_standard_untyped; end # error: No return type specified
 
-  sig(z: T1).returns(T1) # error: Malformed sig. No method def following it.
+  sig(z: T1).returns(T1) # error: Malformed sig. No method def following it
 end
