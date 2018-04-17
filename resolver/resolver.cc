@@ -47,7 +47,7 @@ private:
             core::SymbolRef result = resolveLhs(ctx, c->cnst);
             if (!result.exists()) {
                 if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant");
+                    e.setHeader("Unable to resolve constant `{}`", c->cnst.show(ctx));
 
                     // Stub out the constant only if we actually reported an
                     // error. Otherwise, we create an order dependency where a

@@ -1,4 +1,4 @@
-test/cli/errors/errors.rb:4: Unable to resolve constant http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
@@ -37,7 +37,7 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-test/cli/errors/errors.rb:4: Unable to resolve constant http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
@@ -76,7 +76,7 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-test/cli/errors/errors.rb:4: Unable to resolve constant http://go/e/5002
+test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
