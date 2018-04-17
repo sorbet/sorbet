@@ -53,7 +53,11 @@ cc_binary(
 cc_library(
     name = "realmain",
     srcs = [
+        "FileFlatMapper.cc",
+        "FileFlatMapper.h",
+        "options.cc",
         "realmain.cc",
+        "realmain.h",
     ],
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],

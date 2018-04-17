@@ -3,8 +3,8 @@
 #include <climits>
 #include <pthread.h>
 
-// 8 Megabytes
-constexpr int REQUIRED_STACK_SIZE = 8 * 1024 * 1024;
+// 16 Megabytes
+constexpr int REQUIRED_STACK_SIZE = 16 * 1024 * 1024;
 
 void *Joinable::trampoline(void *ptr) {
     static_cast<Joinable *>(ptr)->realFunction();

@@ -1,3 +1,4 @@
+#include "main/realmain.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
@@ -19,67 +20,20 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
-#include "rang.hpp"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
-#include "spdlog/spdlog.h"
 #include "version/version.h"
 #include <algorithm> // find
-#include <ctime>
-#include <cxxopts.hpp>
 #include <iostream>
-#include <memory>
-#include <string>
-#include <thread>
-#include <vector>
-
 namespace spd = spdlog;
 using namespace std;
 
 namespace ruby_typer {
-
-struct Printers {
-    bool ParseTree = false;
-    bool ParseTreeJSON = false;
-    bool Desugared = false;
-    bool DesugaredRaw = false;
-    bool DSLTree = false;
-    bool DSLTreeRaw = false;
-    bool NameTree = false;
-    bool NameTreeRaw = false;
-    bool NameTable = false;
-    bool NameTableJson = false;
-    bool NameTableFull = false;
-    bool CFG = false;
-    bool CFGRaw = false;
-    bool TypedSource = false;
-};
-
-enum Phase {
-    INIT,
-    PARSER,
-    DESUGARER,
-    DSL,
-    NAMER,
-    CFG,
-    INFERENCER,
-};
-
-struct Options {
-    Printers print;
-    Phase stopAfterPhase = Phase::INFERENCER;
-    bool noStdlib = false;
-    bool forceTyped = false;
-    bool forceUntyped = false;
-    bool showProgress = false;
-    bool storeState = false;
-    bool suggestTyped = false;
-    int threads = 0;
-    string typedSource = "";
-    string cacheDir = "";
-    std::vector<string> configatronDirs;
-    std::vector<string> configatronFiles;
-};
+namespace realmain {
+std::shared_ptr<spdlog::logger> console_err;
+std::shared_ptr<spdlog::logger> tracer;
+std::shared_ptr<spdlog::logger> console;
+int returnCode;
 
 shared_ptr<spdlog::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
     auto color_sink = make_shared<spdlog::sinks::ansicolor_stderr_sink_mt>();
@@ -97,48 +51,9 @@ shared_ptr<spd::logger> make_tracer() {
     return tracer;
 }
 
-shared_ptr<spd::logger> console_err;
-shared_ptr<spd::logger> tracer = make_tracer();
-shared_ptr<spd::logger> console;
-
 const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 
-int returnCode = 0;
-
 const string GLOBAL_STATE_KEY = "GlobalState";
-
-struct {
-    string option;
-    bool Printers::*flag;
-    bool supportsCaching = false;
-} print_options[] = {
-    {"parse-tree", &Printers::ParseTree},
-    {"parse-tree-json", &Printers::ParseTreeJSON},
-    {"ast", &Printers::Desugared},
-    {"ast-raw", &Printers::DesugaredRaw},
-    {"dsl-tree", &Printers::DSLTree, true},
-    {"dsl-tree-raw", &Printers::DSLTreeRaw, true},
-    {"name-table", &Printers::NameTable, true},
-    {"name-table-json", &Printers::NameTableJson, true},
-    {"name-table-full", &Printers::NameTableFull, true},
-    {"name-tree", &Printers::NameTree, true},
-    {"name-tree-raw", &Printers::NameTreeRaw, true},
-    {"cfg", &Printers::CFG, true},
-    {"cfg-raw", &Printers::CFGRaw, true},
-    {"typed-source", &Printers::TypedSource, true},
-};
-
-struct {
-    string option;
-    Phase flag;
-} stop_after_options[] = {
-    {"init", Phase::INIT},   {"parser", Phase::PARSER}, {"desugarer", Phase::DESUGARER},   {"dsl", Phase::DSL},
-    {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
-};
-
-long timespec_delta(struct timespec *start, struct timespec *stop) {
-    return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
-}
 
 bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file) {
     if (opts.print.TypedSource) {
@@ -149,24 +64,6 @@ bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file)
     }
     return file.data(ctx).path().find(opts.typedSource) != string::npos;
 }
-
-class Timer {
-public:
-    Timer(shared_ptr<spd::logger> log, const std::string &msg) : log(log), msg(msg) {
-        clock_gettime(CLOCK_REALTIME, &begin);
-    }
-
-    ~Timer() {
-        struct timespec end;
-        clock_gettime(CLOCK_REALTIME, &end);
-        log->debug("{}: {}ms", this->msg, timespec_delta(&begin, &end) / 1000000);
-    }
-
-private:
-    shared_ptr<spd::logger> log;
-    const std::string msg;
-    struct timespec begin;
-};
 
 class CFG_Collector_and_Typer {
     const Options &opts;
@@ -373,7 +270,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                             file.data(*lgs).isTyped = false;
                         }
 
-                        if (opts.storeState) {
+                        if (!opts.storeState.empty()) {
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
@@ -626,149 +523,6 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     }
 }
 
-std::vector<std::string> split(const std::string &s, char delimiter) {
-    std::vector<std::string> tokens;
-    std::string token;
-    std::istringstream tokenStream(s);
-    while (std::getline(tokenStream, token, delimiter)) {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
-
-/** read @file arguments and put them explicitly
- *  Steals the original arguments and will put them back on destruction.
- * */
-class FileFlatMapper {
-    int origArgc;
-    char **origArgv;
-    int &argc;
-    char **&argv;
-    std::vector<char *> args;
-
-public:
-    FileFlatMapper(int &argc, char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
-        for (int i = 0; i < argc; i++) {
-            if (argv[i][0] == '@') {
-                try {
-                    string argsP = FileOps::read(argv[i] + 1);
-                    for (string arg : split(argsP, '\n')) {
-                        char *c_arg = (char *)malloc(arg.size() + 1);
-                        memcpy(c_arg, arg.c_str(), arg.size() + 1);
-                        args.push_back(c_arg);
-                    }
-                } catch (FileNotFoundException e) {
-                    console_err->error("File Not Found: {}", argv[i]);
-                    returnCode = 11;
-                    continue;
-                }
-            } else {
-                int length = strlen(argv[i]);
-                char *c_arg = (char *)malloc(length + 1);
-                memcpy(c_arg, argv[i], length);
-                c_arg[length] = '\0';
-                args.push_back(c_arg);
-            }
-        }
-        argc = args.size();
-        argv = args.data();
-    }
-
-    ~FileFlatMapper() {
-        argc = origArgc;
-        argv = origArgv;
-        for (char *c : args) {
-            free(c);
-        }
-    }
-};
-
-cxxopts::Options buildOptions() {
-    cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
-
-    // Common user options in order of use
-    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
-    options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
-    options.add_options()("q,quiet", "Silence all non-critical errors");
-    options.add_options()("P,progress", "Draw progressbar");
-    options.add_options()("v,verbose", "Verbosity level [0-3]");
-    options.add_options()("h,help", "Show long help");
-    options.add_options()("version", "Show version");
-    options.add_options()("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
-                          "{always,never,[auto]}");
-
-    stringstream all_prints;
-    all_prints << "Print: [";
-    for (auto &pr : print_options) {
-        if (&pr != &print_options[0]) {
-            all_prints << ", ";
-        }
-        all_prints << pr.option;
-    }
-    all_prints << "]";
-
-    stringstream all_stop_after;
-    all_stop_after << "Stop After: [";
-    for (auto &pr : stop_after_options) {
-        if (&pr != &stop_after_options[0]) {
-            all_stop_after << ", ";
-        }
-        all_stop_after << pr.option;
-    }
-    all_stop_after << "]";
-
-    // Advanced options
-    options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
-                                    cxxopts::value<vector<string>>(), "path");
-    options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
-                                    cxxopts::value<vector<string>>(), "path");
-
-    // Developer options
-    options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
-    options.add_options("dev")("stop-after", all_stop_after.str(),
-                               cxxopts::value<string>()->default_value("inferencer"), "phase");
-    options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
-                               cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
-    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
-    options.add_options("dev")("typed-source", "Print the specified file with type annotations",
-                               cxxopts::value<string>(), "file");
-    options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
-                               cxxopts::value<string>()->default_value(""), "dir");
-    options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
-    options.add_options("dev")("trace", "Trace phases");
-
-    int defaultThreads = std::thread::hardware_concurrency();
-    if (defaultThreads == 0) {
-        defaultThreads = 2;
-    }
-
-    options.add_options("dev")("max-threads", "Set number of threads",
-                               cxxopts::value<int>()->default_value(to_string(defaultThreads)), "int");
-    options.add_options("dev")("counter", "Print internal counter", cxxopts::value<vector<string>>(), "counter");
-    options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>(), "host");
-    options.add_options("dev")("counters", "Print all internal counters");
-    options.add_options("dev")("suggest-typed", "Suggest which files to add @typed to");
-    options.add_options("dev")("statsd-prefix", "StatsD prefix",
-                               cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
-    options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
-                               "port");
-    options.add_options("dev")("metrics-file", "File to export metrics to", cxxopts::value<string>(), "file");
-    options.add_options("dev")("metrics-prefix", "Prefix to use in metrics",
-                               cxxopts::value<string>()->default_value("ruby_typer.unknown."), "file");
-    options.add_options("dev")("metrics-branch", "Branch to report in metrics export",
-                               cxxopts::value<string>()->default_value("none"), "branch");
-    options.add_options("dev")("metrics-sha", "Sha1 to report in metrics export",
-                               cxxopts::value<string>()->default_value("none"), "sha1");
-    options.add_options("dev")("metrics-repo", "Repo to report in metrics export",
-                               cxxopts::value<string>()->default_value("none"), "repo");
-
-    // Positional params
-    options.parse_positional("files");
-    options.positional_help("<file1.rb> <file2.rb> ...");
-    return options;
-}
-
 void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Options &options,
                               std::unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
@@ -809,177 +563,16 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
 }
-
-bool extractPrinters(cxxopts::Options &raw, Options &opts) {
-    vector<string> printOpts = raw["print"].as<vector<string>>();
-    for (auto opt : printOpts) {
-        bool found = false;
-        for (auto &known : print_options) {
-            if (known.option == opt) {
-                opts.print.*(known.flag) = true;
-                if (!known.supportsCaching) {
-                    if (!opts.cacheDir.empty()) {
-                        console_err->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
-                        opts.cacheDir = "";
-                    }
-                }
-                found = true;
-                break;
-            }
-        }
-        if (!found) {
-            stringstream all;
-            for (auto &known : print_options) {
-                if (&known != &print_options[0]) {
-                    all << ", ";
-                }
-                all << known.option;
-            }
-            console_err->error("Unknown --print option: {}\nValid values: {}", opt, all.str());
-            return false;
-        }
-    }
-    return true;
-}
-
-Phase extractStopAfter(cxxopts::Options &opts) {
-    string opt = opts["stop-after"].as<string>();
-    for (auto &known : stop_after_options) {
-        if (known.option == opt) {
-            return known.flag;
-        }
-    }
-    stringstream all;
-    for (auto &known : stop_after_options) {
-        if (&known != &stop_after_options[0]) {
-            all << ", ";
-        }
-        all << known.option;
-    }
-    console_err->error("Unknown --stop-after option: {}\nValid values: {}", opt, all.str());
-    return Phase::INIT;
-}
-
 int realmain(int argc, char **argv) {
+    returnCode = 0;
     console = spd::details::registry::instance().create("console", stderr_color_sink);
     console->set_pattern("%v");
     console_err = spd::stderr_color_mt("");
     console_err->set_pattern("%v");
-
-    FileFlatMapper flatMapper(argc, argv);
-    if (returnCode != 0) {
-        return returnCode;
-    }
-
-    cxxopts::Options options = buildOptions();
-
-    try {
-        options.parse(argc, argv);
-    } catch (cxxopts::OptionParseException &e) {
-        console->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
-        return 1;
-    }
-
-    vector<string> files = options["files"].as<vector<string>>();
-
-    Options opts;
-    opts.cacheDir = options["cache-dir"].as<string>();
-    if (!extractPrinters(options, opts)) {
-        return 1;
-    }
-    opts.stopAfterPhase = extractStopAfter(options);
-    opts.noStdlib = options["no-stdlib"].as<bool>();
-
-    opts.threads = min(options["max-threads"].as<int>(), int(files.size() / 2));
-    if (opts.threads == 0) {
-        opts.threads = 1;
-    }
-
-    if (files.size() > 10) {
-        //        spd::set_async_mode(1024); // makes logging asyncronous but adds 60ms to startup time.
-    }
-
-    if (options["h"].as<bool>()) {
-        console->info("{}", options.help({"", "advanced", "dev"}));
-        return 0;
-    }
-    if (options["version"].as<bool>()) {
-        if (Version::isReleaseBuild) {
-            console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
-                          Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
-        } else {
-            console->info("Ruby Typer non-release build. Binary format version {}",
-                          core::serialize::Serializer::VERSION);
-        }
-        return 0;
-    }
-    if (options.count("e") == 0 && files.empty()) {
-        console->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
-        return 1;
-    }
-
-    switch (options.count("v")) {
-        case 0:
-            break;
-        case 1:
-            spd::set_level(spd::level::debug);
-            console->debug("Debug logging enabled");
-            break;
-        default:
-            spd::set_level(spd::level::trace);
-            console->trace("Trace logging enabled");
-            break;
-    }
-
-    if (options.count("q") != 0) {
-        console->set_level(spd::level::critical);
-    }
-
-    if (options.count("trace") != 0) {
-        tracer->set_level(spd::level::trace);
-    }
-
-    string typed = options["typed"].as<string>();
-    opts.forceTyped = typed == "always";
-    opts.forceUntyped = typed == "never";
-    opts.showProgress = options.count("P") != 0;
-    opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
-    opts.configatronFiles = options["configatron-file"].as<vector<string>>();
-    opts.storeState = options.count("store-state") != 0;
-    opts.suggestTyped = options.count("suggest-typed") != 0;
-    if (typed != "always" && typed != "never" && typed != "auto") {
-        console->error("Invalid value for `--typed`: {}", typed);
-    }
-    opts.typedSource = options["typed-source"].as<string>();
-    if (!opts.typedSource.empty()) {
-        if (opts.print.TypedSource) {
-            console_err->error("`--typed-source " + opts.typedSource +
-                               "` and `-p typed-source` are incompatible. Either print out one file or all files.");
-            return 1;
-        }
-        auto found = any_of(files.begin(), files.end(),
-                            [&](string &path) { return path.find(opts.typedSource) != string::npos; });
-        if (!found) {
-            console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
-            return 1;
-        }
-    }
-
-    if (options["color"].as<string>() == "auto") {
-        if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
-            core::ErrorColors::enableColors();
-        }
-    } else if (options["color"].as<string>() == "always") {
-        core::ErrorColors::enableColors();
-    } else if (options["color"].as<string>() == "never") {
-        core::ErrorColors::disableColors();
-    }
-    if (opts.suggestTyped && !opts.forceTyped) {
-        console_err->error("--suggest-typed requires --typed=always.");
-        return 1;
-    }
-
+    tracer = make_tracer();
+    Options opts = readOptions(argc, argv);
     WorkerPool workers(opts.threads, tracer);
+
     auto typeErrorsConsole = spd::details::registry::instance().create("type-errors", stderr_color_sink);
     // Use a custom formatter so we don't get a default newline
     auto formatter = make_shared<spd::pattern_formatter>("%v", spd::pattern_time_type::local, "");
@@ -993,7 +586,7 @@ int realmain(int argc, char **argv) {
         kvstore = std::make_unique<KeyValueStore>(Version::build_scm_revision, opts.cacheDir);
     }
     createInitialGlobalState(gs, opts, kvstore);
-    if (options.count("q") != 0) {
+    if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
     tracer->trace("done building initial global state");
@@ -1004,12 +597,11 @@ int realmain(int argc, char **argv) {
     {
         Timer timeit(console_err, "reading files");
         core::UnfreezeFileTable fileTableAccess(*gs);
-        if (options.count("e") != 0) {
-            string src = options["e"].as<string>();
-            core::counterAdd("types.input.bytes", src.size());
+        if (!opts.inlineInput.empty()) {
+            core::counterAdd("types.input.bytes", opts.inlineInput.size());
             core::counterInc("types.input.lines");
             core::counterInc("types.input.files");
-            auto file = gs->enterFile(string("-e"), src + "\n");
+            auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
             inputFiles.push_back(file);
             if (opts.forceUntyped) {
                 console->error("`-e` implies `--typed always` and you passed `--typed never`");
@@ -1022,7 +614,7 @@ int realmain(int argc, char **argv) {
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(console_err, "index");
-        indexed = index(gs, files, inputFiles, opts, workers, kvstore);
+        indexed = index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore);
     }
 
     if (kvstore && gs->wasModified()) {
@@ -1033,30 +625,28 @@ int realmain(int argc, char **argv) {
     { typecheck(gs, move(indexed), opts, workers); }
     tracer->trace("ruby-typer done");
 
-    if (options.count("store-state") != 0) {
-        string outfile = options["store-state"].as<string>();
+    if (!opts.storeState.empty()) {
         gs->markAsPayload();
-        FileOps::write(outfile.c_str(), core::serialize::Serializer::store(*gs));
+        FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
     }
 
-    if (options.count("counter") != 0) {
-        if (options.count("counters") != 0) {
+    if (opts.someCounters.size() != 0) {
+        if (opts.enableCounters) {
             console->error("Don't pass both --counters and --counter");
             return 1;
         }
-        auto names = options["counter"].as<vector<string>>();
-        console_err->warn("" + core::getCounterStatistics(names));
+        console_err->warn("" + core::getCounterStatistics(opts.someCounters));
     }
-    if (options.count("counters") != 0) {
+
+    if (opts.enableCounters) {
         console_err->warn("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
     }
 
-    if (options.count("statsd-host") != 0) {
-        core::submitCountersToStatsd(options["statsd-host"].as<string>(), options["statsd-port"].as<int>(),
-                                     options["statsd-prefix"].as<string>() + ".counters");
+    if (!opts.statsdHost.empty()) {
+        core::submitCountersToStatsd(opts.statsdHost, opts.statsdPort, opts.statsdPrefix + ".counters");
     }
 
-    if (options.count("metrics-file") != 0) {
+    if (!opts.metricsFile.empty()) {
         string status;
         if (gs->hadCriticalError()) {
             status = "Error";
@@ -1066,19 +656,18 @@ int realmain(int argc, char **argv) {
             status = "Success";
         }
 
-        core::storeCountersToProtoFile(options["metrics-file"].as<string>(), options["metrics-prefix"].as<string>(),
-                                       options["metrics-repo"].as<string>(), options["metrics-branch"].as<string>(),
-                                       options["metrics-sha"].as<string>(), status);
+        core::storeCountersToProtoFile(opts.metricsFile, opts.metricsPrefix, opts.metricsRepo, opts.metricsBranch,
+                                       opts.metricsSha, status);
     }
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
     if (gs->hadCriticalError()) {
         returnCode = 10;
-    } else if (returnCode == 0 && gs->totalErrors() > 0 && !options.count("suppress-non-critical")) {
+    } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
     }
 
     return returnCode;
 }
-
+} // namespace realmain
 } // namespace ruby_typer

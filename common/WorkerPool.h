@@ -77,11 +77,14 @@ class WorkerPool {
         }
     };
     typedef std::function<void()> Task;
-    typedef moodycamel::BlockingConcurrentQueue<Task, ConcurrentQueueCustomTraits> Queue;
+    typedef std::function<bool()> Task_; // return value indicates if the worker should continie gathering jobs
+    typedef moodycamel::BlockingConcurrentQueue<Task_, ConcurrentQueueCustomTraits> Queue;
     // ORDER IS IMPORTANT. threads must be killed before Queues.
     std::vector<std::unique_ptr<Queue>> threadQueues;
     std::vector<std::unique_ptr<Joinable>> threads;
     std::shared_ptr<spd::logger> logger;
+
+    void multiplexJob_(Task_ _t);
 
 public:
     WorkerPool(int size, std::shared_ptr<spd::logger> logger);

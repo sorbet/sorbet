@@ -7,11 +7,12 @@ WorkerPool::WorkerPool(int size, std::shared_ptr<spd::logger> logger) : size(siz
         auto &last = threadQueues.back();
         auto *ptr = last.get();
         threads.emplace_back(runInAThread([ptr, logger]() {
-            while (true) {
-                Task task;
+            bool repeat = true;
+            while (repeat) {
+                Task_ task;
                 ptr->wait_dequeue(task);
                 logger->trace("Worker got task");
-                task();
+                repeat = task();
             }
         }));
     }
@@ -20,14 +21,21 @@ WorkerPool::WorkerPool(int size, std::shared_ptr<spd::logger> logger) : size(siz
 
 WorkerPool::~WorkerPool() {
     auto logger = this->logger;
-    multiplexJob([logger]() {
+    multiplexJob_([logger]() {
         logger->trace("Killing worker thread");
-        pthread_exit(nullptr);
+        return false;
     });
     // join will be called when destructing joinable;
 }
 
 void WorkerPool::multiplexJob(WorkerPool::Task t) {
+    multiplexJob_([t{move(t)}] {
+        t();
+        return true;
+    });
+}
+
+void WorkerPool::multiplexJob_(WorkerPool::Task_ t) {
     logger->trace("Multiplexing job");
     for (int i = 0; i < size; i++) {
         threadQueues[i]->enqueue(t);

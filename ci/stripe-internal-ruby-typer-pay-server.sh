@@ -5,6 +5,7 @@ set -eux
 
 DIR=./pay-server
 
+
 export TIME='cmd: "%C"
 wall: %e
 user: %U
@@ -14,6 +15,17 @@ maxrss: %M
 
 # This is what we'll ship to our users
 bazel build main:ruby-typer --config=release
+
+ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer"
+export ASAN_SYMBOLIZER_PATH
+ASAN_OPTIONS=detect_leaks=0
+export ASAN_OPTIONS
+UBSAN_OPTIONS=print_stacktrace=1
+export UBSAN_OPTIONS
+LSAN_OPTIONS=verbosity=1:log_threads=1
+export LSAN_OPTIONS
+
+
 
 mkdir -p /build/bin
 cp bazel-bin/main/ruby-typer /build/bin
@@ -57,15 +69,13 @@ if [ -s "$OUT" ]; then
 fi
 cat "$TIMEFILE1"
 
-CACHE=$(mktemp -d)
-
-/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck --cache-dir="$CACHE" 2>&1 | tee "$OUT"
+/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
 cat "$TIMEFILE1"
 
-/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck --cache-dir="$CACHE" 2>&1 | tee "$OUT"
+/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
@@ -91,11 +101,7 @@ TIMEFILE2=$(mktemp)
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-env ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer" \
-    ASAN_OPTIONS=detect_leaks=0 \
-    UBSAN_OPTIONS=print_stacktrace=1 \
-    LSAN_OPTIONS=verbosity=1:log_threads=1 \
-    /usr/bin/time -o "$TIMEFILE2" \
+/usr/bin/time -o "$TIMEFILE2" \
     ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=always --suggest-typed \
       --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
       --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/pay-server --metrics-sha="$PAY_SERVER_SHA"
