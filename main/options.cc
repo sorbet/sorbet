@@ -308,7 +308,7 @@ Options readOptions(int argc, char **argv) {
     }
 
     opts.inlineInput = options["e"].as<string>();
-    opts.supressNonCriticalErrors = options.count("q") > 0;
+    opts.supressNonCriticalErrors = options.count("suppress-non-critical") > 0;
 
     return opts;
 }
