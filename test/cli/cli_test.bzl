@@ -11,6 +11,7 @@ def cli_test(path):
         data = native.glob([
             "{}/*.rb".format(name),
             "{}/*.yaml".format(name),
+            "{}/*.input".format(name),
         ]) + ["//main:ruby-typer"]
     )
 
