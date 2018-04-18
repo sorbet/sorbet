@@ -563,7 +563,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
 }
-int realmain(int argc, char **argv) {
+int realmain(int argc, const char *argv[]) {
     returnCode = 0;
     console = spd::details::registry::instance().create("console", stderr_color_sink);
     console->set_pattern("%v");

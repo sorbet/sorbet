@@ -9,7 +9,7 @@
 
 namespace ruby_typer {
 namespace realmain {
-int realmain(int argc, char **argv);
+int realmain(int argc, const char *argv[]);
 
 extern int returnCode;
 
@@ -77,7 +77,7 @@ struct Options {
     std::string inlineInput; // passed via -e
 };
 
-Options readOptions(int argc, char **argv);
+Options readOptions(int argc, const char *argv[]);
 } // namespace realmain
 } // namespace ruby_typer
 #endif // RUBY_TYPER_REAL_MAIN_H

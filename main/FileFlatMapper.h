@@ -10,13 +10,13 @@ namespace realmain {
  * */
 class FileFlatMapper {
     int origArgc;
-    char **origArgv;
+    const char **origArgv;
     int &argc;
-    char **&argv;
-    std::vector<char *> args;
+    const char **&argv;
+    std::vector<const char *> args;
 
 public:
-    FileFlatMapper(int &argc, char **&argv);
+    FileFlatMapper(int &argc, const char **&argv);
     ~FileFlatMapper();
 };
 } // namespace realmain

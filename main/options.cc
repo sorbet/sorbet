@@ -46,7 +46,7 @@ cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
 
     // Common user options in order of use
-    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>(), "string");
+    options.add_options()("e", "Parse an inline ruby string", cxxopts::value<string>()->default_value(""), "string");
     options.add_options()("files", "Input files", cxxopts::value<vector<string>>());
     options.add_options()("q,quiet", "Silence all non-critical errors");
     options.add_options()("P,progress", "Draw progressbar");
@@ -89,9 +89,10 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
                                cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
-    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>(), "file");
+    options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>()->default_value(""),
+                               "file");
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
-                               cxxopts::value<string>(), "file");
+                               cxxopts::value<string>()->default_value(""), "file");
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
@@ -113,7 +114,8 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
     options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
                                "port");
-    options.add_options("dev")("metrics-file", "File to export metrics to", cxxopts::value<string>(), "file");
+    options.add_options("dev")("metrics-file", "File to export metrics to", cxxopts::value<string>()->default_value(""),
+                               "file");
     options.add_options("dev")("metrics-prefix", "Prefix to use in metrics",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown."), "file");
     options.add_options("dev")("metrics-branch", "Branch to report in metrics export",
@@ -129,7 +131,10 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-bool extractPrinters(cxxopts::Options &raw, Options &opts) {
+bool extractPrinters(cxxopts::ParseResult &raw, Options &opts) {
+    if (raw.count("print") == 0) {
+        return true;
+    }
     vector<string> printOpts = raw["print"].as<vector<string>>();
     for (auto opt : printOpts) {
         bool found = false;
@@ -161,8 +166,8 @@ bool extractPrinters(cxxopts::Options &raw, Options &opts) {
     return true;
 }
 
-Phase extractStopAfter(cxxopts::Options &opts) {
-    string opt = opts["stop-after"].as<string>();
+Phase extractStopAfter(cxxopts::ParseResult &raw) {
+    string opt = raw["stop-after"].as<string>();
     for (auto &known : stop_after_options) {
         if (known.option == opt) {
             return known.flag;
@@ -179,7 +184,7 @@ Phase extractStopAfter(cxxopts::Options &opts) {
     return Phase::INIT;
 }
 
-Options readOptions(int argc, char **argv) {
+Options readOptions(int argc, const char *argv[]) {
     Options opts;
     FileFlatMapper flatMapper(argc, argv);
     if (returnCode != 0) {
@@ -187,129 +192,133 @@ Options readOptions(int argc, char **argv) {
     }
 
     cxxopts::Options options = buildOptions();
-
     try {
-        options.parse(argc, argv);
+        cxxopts::ParseResult raw = options.parse(argc, argv);
+
+        if (raw.count("files") > 0) {
+            opts.inputFileNames = raw["files"].as<vector<string>>();
+        }
+
+        opts.cacheDir = raw["cache-dir"].as<string>();
+        if (!extractPrinters(raw, opts)) {
+            returnCode = 1;
+            return opts;
+        }
+        opts.stopAfterPhase = extractStopAfter(raw);
+        opts.noStdlib = raw["no-stdlib"].as<bool>();
+
+        opts.threads = min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
+        if (opts.threads == 0) {
+            opts.threads = 1;
+        }
+
+        if (raw["h"].as<bool>()) {
+            console->info("{}", options.help({"", "advanced", "dev"}));
+            returnCode = 2;
+            return opts;
+        }
+        if (raw["version"].as<bool>()) {
+            if (Version::isReleaseBuild) {
+                console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
+                              Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
+            } else {
+                console->info("Ruby Typer non-release build. Binary format version {}",
+                              core::serialize::Serializer::VERSION);
+            }
+            returnCode = 2;
+            return opts;
+        }
+        if (raw.count("e") == 0 && opts.inputFileNames.empty()) {
+            console->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
+            returnCode = 1;
+            return opts;
+        }
+
+        switch (raw.count("v")) {
+            case 0:
+                break;
+            case 1:
+                spd::set_level(spd::level::debug);
+                console->debug("Debug logging enabled");
+                break;
+            default:
+                spd::set_level(spd::level::trace);
+                console->trace("Trace logging enabled");
+                break;
+        }
+
+        if (raw.count("q") != 0) {
+            console->set_level(spd::level::critical);
+        }
+
+        if (raw.count("trace") != 0) {
+            tracer->set_level(spd::level::trace);
+        }
+
+        string typed = raw["typed"].as<string>();
+        opts.forceTyped = typed == "always";
+        opts.forceUntyped = typed == "never";
+        opts.showProgress = raw.count("P") != 0;
+        if (raw.count("configatron-dir") > 0) {
+            opts.configatronDirs = raw["configatron-dir"].as<vector<string>>();
+        }
+        if (raw.count("configatron-file")) {
+            opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
+        }
+        opts.storeState = raw["store-state"].as<string>();
+        opts.suggestTyped = raw.count("suggest-typed") != 0;
+        opts.silenceErrors = raw.count("q") != 0;
+        opts.enableCounters = raw.count("counters") != 0;
+        opts.statsdHost = raw["statsd-host"].as<string>();
+        opts.statsdPort = raw["statsd-port"].as<int>();
+        opts.statsdPrefix = raw["statsd-prefix"].as<string>();
+        opts.metricsSha = raw["metrics-sha"].as<string>();
+        opts.metricsFile = raw["metrics-file"].as<string>();
+        opts.metricsRepo = raw["metrics-repo"].as<string>();
+        opts.metricsBranch = raw["metrics-branch"].as<string>();
+        opts.metricsPrefix = raw["metrics-prefix"].as<string>();
+        if (typed != "always" && typed != "never" && typed != "auto") {
+            console->error("Invalid value for `--typed`: {}", typed);
+        }
+        opts.typedSource = raw["typed-source"].as<string>();
+        if (!opts.typedSource.empty()) {
+            if (opts.print.TypedSource) {
+                console_err->error("`--typed-source " + opts.typedSource +
+                                   "` and `-p typed-source` are incompatible. Either print out one file or all files.");
+                returnCode = 1;
+                return opts;
+            }
+            auto found = any_of(opts.inputFileNames.begin(), opts.inputFileNames.end(),
+                                [&](string &path) { return path.find(opts.typedSource) != string::npos; });
+            if (!found) {
+                console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
+                returnCode = 1;
+                return opts;
+            }
+        }
+
+        if (raw["color"].as<string>() == "auto") {
+            if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
+                core::ErrorColors::enableColors();
+            }
+        } else if (raw["color"].as<string>() == "always") {
+            core::ErrorColors::enableColors();
+        } else if (raw["color"].as<string>() == "never") {
+            core::ErrorColors::disableColors();
+        }
+        if (opts.suggestTyped && !opts.forceTyped) {
+            console_err->error("--suggest-typed requires --typed=always.");
+            returnCode = 1;
+            return opts;
+        }
+
+        opts.inlineInput = raw["e"].as<string>();
+        opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
     } catch (cxxopts::OptionParseException &e) {
         console->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         returnCode = 1;
         return opts;
     }
-
-    opts.inputFileNames = options["files"].as<vector<string>>();
-
-    opts.cacheDir = options["cache-dir"].as<string>();
-    if (!extractPrinters(options, opts)) {
-        returnCode = 1;
-        return opts;
-    }
-    opts.stopAfterPhase = extractStopAfter(options);
-    opts.noStdlib = options["no-stdlib"].as<bool>();
-
-    opts.threads = min(options["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
-    if (opts.threads == 0) {
-        opts.threads = 1;
-    }
-
-    if (options["h"].as<bool>()) {
-        console->info("{}", options.help({"", "advanced", "dev"}));
-        returnCode = 2;
-        return opts;
-    }
-    if (options["version"].as<bool>()) {
-        if (Version::isReleaseBuild) {
-            console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
-                          Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
-        } else {
-            console->info("Ruby Typer non-release build. Binary format version {}",
-                          core::serialize::Serializer::VERSION);
-        }
-        returnCode = 2;
-        return opts;
-    }
-    if (options.count("e") == 0 && opts.inputFileNames.empty()) {
-        console->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
-        returnCode = 1;
-        return opts;
-    }
-
-    switch (options.count("v")) {
-        case 0:
-            break;
-        case 1:
-            spd::set_level(spd::level::debug);
-            console->debug("Debug logging enabled");
-            break;
-        default:
-            spd::set_level(spd::level::trace);
-            console->trace("Trace logging enabled");
-            break;
-    }
-
-    if (options.count("q") != 0) {
-        console->set_level(spd::level::critical);
-    }
-
-    if (options.count("trace") != 0) {
-        tracer->set_level(spd::level::trace);
-    }
-
-    string typed = options["typed"].as<string>();
-    opts.forceTyped = typed == "always";
-    opts.forceUntyped = typed == "never";
-    opts.showProgress = options.count("P") != 0;
-    opts.configatronDirs = options["configatron-dir"].as<vector<string>>();
-    opts.configatronFiles = options["configatron-file"].as<vector<string>>();
-    opts.storeState = options["store-state"].as<string>();
-    opts.suggestTyped = options.count("suggest-typed") != 0;
-    opts.silenceErrors = options.count("q") != 0;
-    opts.enableCounters = options.count("counters") != 0;
-    opts.statsdHost = options["statsd-host"].as<string>();
-    opts.statsdPort = options["statsd-port"].as<int>();
-    opts.statsdPrefix = options["statsd-prefix"].as<string>();
-    opts.metricsSha = options["metrics-sha"].as<string>();
-    opts.metricsFile = options["metrics-file"].as<string>();
-    opts.metricsRepo = options["metrics-repo"].as<string>();
-    opts.metricsBranch = options["metrics-branch"].as<string>();
-    opts.metricsPrefix = options["metrics-prefix"].as<string>();
-    if (typed != "always" && typed != "never" && typed != "auto") {
-        console->error("Invalid value for `--typed`: {}", typed);
-    }
-    opts.typedSource = options["typed-source"].as<string>();
-    if (!opts.typedSource.empty()) {
-        if (opts.print.TypedSource) {
-            console_err->error("`--typed-source " + opts.typedSource +
-                               "` and `-p typed-source` are incompatible. Either print out one file or all files.");
-            returnCode = 1;
-            return opts;
-        }
-        auto found = any_of(opts.inputFileNames.begin(), opts.inputFileNames.end(),
-                            [&](string &path) { return path.find(opts.typedSource) != string::npos; });
-        if (!found) {
-            console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
-            returnCode = 1;
-            return opts;
-        }
-    }
-
-    if (options["color"].as<string>() == "auto") {
-        if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
-            core::ErrorColors::enableColors();
-        }
-    } else if (options["color"].as<string>() == "always") {
-        core::ErrorColors::enableColors();
-    } else if (options["color"].as<string>() == "never") {
-        core::ErrorColors::disableColors();
-    }
-    if (opts.suggestTyped && !opts.forceTyped) {
-        console_err->error("--suggest-typed requires --typed=always.");
-        returnCode = 1;
-        return opts;
-    }
-
-    opts.inlineInput = options["e"].as<string>();
-    opts.supressNonCriticalErrors = options.count("suppress-non-critical") > 0;
-
     return opts;
 }
 

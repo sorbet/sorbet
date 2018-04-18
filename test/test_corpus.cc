@@ -652,16 +652,16 @@ vector<Expectations> getInputs(int myId, int totalShards) {
     return result;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, const char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
     options.add_options()("shards_total", "Number of parallel test workers", cxxopts::value<int>()->default_value("1"),
                           "shards");
     options.add_options()("my_id", "ID of this worker across parallel shards. Should be in [0..shards_total)",
                           cxxopts::value<int>()->default_value("0"), "id");
-    options.parse(argc, argv);
-    shardId = options["my_id"].as<int>();
-    totalShards = options["shards_total"].as<int>();
+    auto res = options.parse(argc, argv);
+    shardId = res["my_id"].as<int>();
+    totalShards = res["shards_total"].as<int>();
 
-    ::testing::InitGoogleTest(&argc, argv);
+    ::testing::InitGoogleTest(&argc, (char **)argv);
     return RUN_ALL_TESTS();
 }

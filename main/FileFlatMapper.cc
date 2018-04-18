@@ -15,7 +15,7 @@ vector<string> split(const string &s, char delimiter) {
     return tokens;
 }
 
-FileFlatMapper::FileFlatMapper(int &argc, char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+FileFlatMapper::FileFlatMapper(int &argc, const char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
     for (int i = 0; i < argc; i++) {
         if (argv[i][0] == '@') {
             try {
@@ -45,8 +45,8 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv) : origArgc(argc), origAr
 FileFlatMapper::~FileFlatMapper() {
     argc = origArgc;
     argv = origArgv;
-    for (char *c : args) {
-        free(c);
+    for (const char *c : args) {
+        free((void *)c);
     }
 }
 

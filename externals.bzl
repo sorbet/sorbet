@@ -15,10 +15,10 @@ def externals():
 
     native.new_http_archive(
         name = "yaml_cpp",
-        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.1.zip",
-        sha256 = "2faaf686c140d9e690100a2e98ca0f4d325b0c13a67a26fd4b3b3a27fc476798",
+        url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.zip",
+        sha256 = "292c8de66bfda19a2ca08a32a8c1ec39b709ac75f54e6be0735940db2dbdff76",
         build_file = "//:yaml_cpp.BUILD",
-        strip_prefix = "yaml-cpp-yaml-cpp-0.6.1",
+        strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     )
 
     # their zip archive has symlinks that bazel does not like
@@ -42,7 +42,7 @@ def externals():
     new_git_repository(
         name="lmdb",
         remote="https://github.com/LMDB/lmdb.git",
-        commit="4d5e2d2a2ac38b9d56b6ba73187c325024718167",
+        commit="0a2622317f189c7062d03d050be6766586a548b2",
         build_file="//:lmdb.BUILD",
     )
 
@@ -57,7 +57,7 @@ def externals():
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
-        commit="ae0f5d5c3f29beb9977148dedb58575757139586",
+        commit="0fadf4a2e3e629b9fa43888f9754aea5327d038f",
         build_file="//:jemalloc.BUILD",
     )
 
@@ -71,7 +71,7 @@ def externals():
     new_git_repository(
         name="concurrentqueue",
         remote="https://github.com/cameron314/concurrentqueue.git",
-        commit="a5d7dd873c94b52973a8a2baab204034db0799bc",
+        commit="3e0eac9b7a611bb8142db82789f307f2f0ad1c33",
         build_file="//:concurrentqueue.BUILD",
     )
 
@@ -82,11 +82,12 @@ def externals():
         build_file="//:statsd.BUILD",
     )
 
-    new_git_repository(
+    native.new_http_archive(
         name="cxxopts",
-        remote="https://github.com/jarro2783/cxxopts.git",
-        commit="0b7686949d01f6475cc13ba0693725aefb76fc0c",
+        url="https://github.com/jarro2783/cxxopts/archive/v2.1.0.zip",
+        sha256="9cd036f58b147d21d43b27144c811b06f32dfa63a4bba89e8dace4699428a8b1",
         build_file="//:cxxopts.BUILD",
+        strip_prefix = "cxxopts-2.1.0",
     )
 
     native.new_http_archive(
@@ -100,12 +101,12 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="055cc7dce10aa6bd7cc2ef64e0fe453fb792da62"
+        commit="a7e522daf1ec9cda69b356472f662142dd0c1215"
     )
 
     new_git_repository(
         name = "compdb",
-        commit = "f9febfc7091e2585bafb1a96599ff517e169c3c4",
+        commit = "03c5a0a234a3c9e5973d1d506069a15612ef446e",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
         build_file_content = (
         """
