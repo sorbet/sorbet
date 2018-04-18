@@ -4,6 +4,7 @@
 #include "os/os.h"
 #include <cstdio>
 #include <string>
+
 namespace ruby_typer {
 class SRubyException {
 public:

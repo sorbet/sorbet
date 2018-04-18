@@ -184,12 +184,9 @@ Phase extractStopAfter(cxxopts::ParseResult &raw) {
     return Phase::INIT;
 }
 
-Options readOptions(int argc, const char *argv[]) {
+Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
     Options opts;
     FileFlatMapper flatMapper(argc, argv);
-    if (returnCode != 0) {
-        return opts;
-    }
 
     cxxopts::Options options = buildOptions();
     try {
@@ -201,8 +198,7 @@ Options readOptions(int argc, const char *argv[]) {
 
         opts.cacheDir = raw["cache-dir"].as<string>();
         if (!extractPrinters(raw, opts)) {
-            returnCode = 1;
-            return opts;
+            throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw);
         opts.noStdlib = raw["no-stdlib"].as<bool>();
@@ -214,8 +210,7 @@ Options readOptions(int argc, const char *argv[]) {
 
         if (raw["h"].as<bool>()) {
             console->info("{}", options.help({"", "advanced", "dev"}));
-            returnCode = 2;
-            return opts;
+            throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
             if (Version::isReleaseBuild) {
@@ -225,13 +220,11 @@ Options readOptions(int argc, const char *argv[]) {
                 console->info("Ruby Typer non-release build. Binary format version {}",
                               core::serialize::Serializer::VERSION);
             }
-            returnCode = 2;
-            return opts;
+            throw EarlyReturnWithCode(0);
         }
         if (raw.count("e") == 0 && opts.inputFileNames.empty()) {
             console->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
-            returnCode = 1;
-            return opts;
+            throw EarlyReturnWithCode(1);
         }
 
         switch (raw.count("v")) {
@@ -285,15 +278,13 @@ Options readOptions(int argc, const char *argv[]) {
             if (opts.print.TypedSource) {
                 console_err->error("`--typed-source " + opts.typedSource +
                                    "` and `-p typed-source` are incompatible. Either print out one file or all files.");
-                returnCode = 1;
-                return opts;
+                throw EarlyReturnWithCode(1);
             }
             auto found = any_of(opts.inputFileNames.begin(), opts.inputFileNames.end(),
                                 [&](string &path) { return path.find(opts.typedSource) != string::npos; });
             if (!found) {
                 console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
-                returnCode = 1;
-                return opts;
+                throw EarlyReturnWithCode(1);
             }
         }
 
@@ -308,16 +299,14 @@ Options readOptions(int argc, const char *argv[]) {
         }
         if (opts.suggestTyped && !opts.forceTyped) {
             console_err->error("--suggest-typed requires --typed=always.");
-            returnCode = 1;
-            return opts;
+            throw EarlyReturnWithCode(1);
         }
 
         opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
     } catch (cxxopts::OptionParseException &e) {
         console->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
-        returnCode = 1;
-        return opts;
+        throw EarlyReturnWithCode(1);
     }
     return opts;
 }

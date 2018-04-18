@@ -659,15 +659,18 @@ int realmain(int argc, const char *argv[]) {
         core::storeCountersToProtoFile(opts.metricsFile, opts.metricsPrefix, opts.metricsRepo, opts.metricsBranch,
                                        opts.metricsSha, status);
     }
-
-    // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
     if (gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {
         returnCode = 1;
     }
 
+    // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
+
     return returnCode;
 }
+
+EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
+    : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 } // namespace realmain
 } // namespace ruby_typer

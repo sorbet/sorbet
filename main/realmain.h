@@ -1,5 +1,6 @@
 #ifndef RUBY_TYPER_REAL_MAIN_H
 #include "common/Timer.h"
+#include "common/common.h"
 #include "spdlog/spdlog.h"
 #include <cxxopts.hpp>
 #include <memory>
@@ -11,7 +12,12 @@ namespace ruby_typer {
 namespace realmain {
 int realmain(int argc, const char *argv[]);
 
-extern int returnCode;
+// Terminate execution of ruby-typer with specific return code
+class EarlyReturnWithCode : public SRubyException {
+public:
+    EarlyReturnWithCode(int returnCode);
+    const int returnCode;
+};
 
 extern std::shared_ptr<spdlog::logger> console_err;
 extern std::shared_ptr<spdlog::logger> tracer;
@@ -77,7 +83,7 @@ struct Options {
     std::string inlineInput; // passed via -e
 };
 
-Options readOptions(int argc, const char *argv[]);
+Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode);
 } // namespace realmain
 } // namespace ruby_typer
 #endif // RUBY_TYPER_REAL_MAIN_H
