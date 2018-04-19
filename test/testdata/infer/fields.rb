@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   def initialize
     @ivar = T.let(0, Integer)

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class MyProc1
   Return = type_member
   Arg0 = type_member

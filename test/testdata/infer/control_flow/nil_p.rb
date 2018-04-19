@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A
   sig(s: T.nilable(String)).returns(NilClass)
   def test_return(s)

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Main
     sig.returns(nil) # error: You probably meant .returns(NilClass)
     def returns_nil; end

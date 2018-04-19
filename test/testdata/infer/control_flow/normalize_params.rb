@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Test
   def normalize_params(v)
     if v.is_a?(Hash)

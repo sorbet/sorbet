@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 # Test that putting a MataType into various erroneous places doesn't
 # crash us (and raises appropriate user-level errors)

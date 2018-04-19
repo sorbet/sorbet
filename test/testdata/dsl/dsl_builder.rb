@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestDSLBuilder
   dsl_optional :opt_string, String
   dsl_optional :opt_int_defaulted, Integer, default: 0

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 def test_must
   x = T.cast(nil, T.nilable(String))

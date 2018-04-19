@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 $a = 1
 
 class A

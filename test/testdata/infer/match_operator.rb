@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestMatch
   def test_match(x)
     if Integer === x

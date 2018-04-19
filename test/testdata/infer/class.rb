@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestCase
   def self.class_method
   end

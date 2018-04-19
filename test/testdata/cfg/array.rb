@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestArray
   sig.returns(Integer)
   def an_int; 0; end

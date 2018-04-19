@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   sig(value: T.any(A, B)).returns(NilClass)
   private def serialize_value(value)

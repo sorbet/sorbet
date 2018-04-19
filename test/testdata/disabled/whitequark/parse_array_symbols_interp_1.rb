@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 %I[foo#{bar}]

@@ -66,22 +66,32 @@ TEST(ASTTest, SymbolRef) { // NOLINT
     EXPECT_EQ(ref, ref.data(gs).ref(gs));
 }
 
-extern bool fileIsTyped(absl::string_view source);
+extern StrictLevel fileSigil(absl::string_view source);
 struct FileIsTypedCase {
     absl::string_view src;
-    bool isTyped;
+    StrictLevel strict;
 };
 
 TEST(CoreTest, FileIsTyped) { // NOLINT
     vector<FileIsTypedCase> cases = {
-        {"", false},
-        {"# @typed", true},
-        {"\n# @typed\n", true},
-        {"not an @typed sigil\n# @typed\n", true},
-        {"@typed\n# @typed some noise\n", false},
+        {"", StrictLevel::Ruby},
+        {"# typed: true", StrictLevel::Typed},
+        {"\n# typed: true\n", StrictLevel::Typed},
+        {"not a typed: sigil\n# typed: true\n", StrictLevel::Typed},
+        {"typed:\n# typed: nonsense\n", StrictLevel::Ruby},
+        {"# typed: strict\n", StrictLevel::Strict},
+        {"# typed: strong\n", StrictLevel::Strong},
+        {"# typed: false\n", StrictLevel::Ruby},
+        {"# typed: lax\n", StrictLevel::Ruby},
+
+        // Test the old sigil
+        {"# @typed", StrictLevel::Strict},
+        {"\n# @typed\n", StrictLevel::Strict},
+        {"not an @typed sigil\n# @typed\n", StrictLevel::Strict},
+        {"@typed\n# @typed some noise\n", StrictLevel::Ruby},
     };
     for (auto &tc : cases) {
-        EXPECT_EQ(tc.isTyped, core::fileIsTyped(tc.src));
+        EXPECT_EQ(tc.strict, fileSigil(tc.src));
     }
 }
 

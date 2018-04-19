@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 meth rescue bar

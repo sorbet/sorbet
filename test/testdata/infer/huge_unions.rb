@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class C1; end;
 class C2; end;
 class C3; end;

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class Box
     Elem = type_member

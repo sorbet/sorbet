@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   def bar()
     yield(1);

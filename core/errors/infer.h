@@ -4,20 +4,20 @@ namespace ruby_typer {
 namespace core {
 namespace errors {
 namespace Infer {
-constexpr ErrorClass PinnedVariableMismatch = 7001;
-constexpr ErrorClass MethodArgumentMismatch = 7002;
-constexpr ErrorClass UnknownMethod = 7003;
-constexpr ErrorClass MethodArgumentCountMismatch = 7004;
-constexpr ErrorClass ReturnTypeMismatch = 7005;
-constexpr ErrorClass DeadBranchInferencer = 7006;
-constexpr ErrorClass CastTypeMismatch = 7007;
-constexpr ErrorClass OverloadedArgumentCountMismatch = 7008;
-constexpr ErrorClass BareTypeUsage = 7009;
-constexpr ErrorClass GenericArgumentCountMismatch = 7010;
-constexpr ErrorClass IncompleteType = 7011;
-constexpr ErrorClass GlobalReassignmentTypeMismatch = 7012;
-constexpr ErrorClass FieldReassignmentTypeMismatch = 7013;
-constexpr ErrorClass GenericMethodConstaintUnsolved = 7013;
+constexpr ErrorClass PinnedVariableMismatch{7001, core::StrictLevel::Typed};
+constexpr ErrorClass MethodArgumentMismatch{7002, core::StrictLevel::Typed};
+constexpr ErrorClass UnknownMethod{7003, core::StrictLevel::Typed};
+constexpr ErrorClass MethodArgumentCountMismatch{7004, core::StrictLevel::Typed};
+constexpr ErrorClass ReturnTypeMismatch{7005, core::StrictLevel::Typed};
+constexpr ErrorClass DeadBranchInferencer{7006, core::StrictLevel::Typed};
+constexpr ErrorClass CastTypeMismatch{7007, core::StrictLevel::Typed};
+constexpr ErrorClass OverloadedArgumentCountMismatch{7008, core::StrictLevel::Typed};
+constexpr ErrorClass BareTypeUsage{7009, core::StrictLevel::Typed};
+constexpr ErrorClass GenericArgumentCountMismatch{7010, core::StrictLevel::Typed};
+constexpr ErrorClass IncompleteType{7011, core::StrictLevel::Typed};
+constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, core::StrictLevel::Typed};
+constexpr ErrorClass FieldReassignmentTypeMismatch{7013, core::StrictLevel::Typed};
+constexpr ErrorClass GenericMethodConstaintUnsolved{7013, core::StrictLevel::Typed};
 
 } // namespace Infer
 } // namespace errors

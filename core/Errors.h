@@ -2,6 +2,7 @@
 #define SRUBY_REPORTER_H
 
 #include "Loc.h"
+#include "StrictLevel.h"
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
 #include <memory>
@@ -12,8 +13,9 @@ namespace core {
 class ErrorClass {
 public:
     u2 code;
+    StrictLevel minLevel;
 
-    constexpr ErrorClass(u2 code) : code(code){};
+    constexpr ErrorClass(u2 code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
     ErrorClass(const ErrorClass &rhs) = default;
     ErrorClass &operator=(const ErrorClass &rhs) = default;
 

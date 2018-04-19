@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   # Test that we resolve inside next/break (mostly a test of TreeMap,
   # which used to not recurse into these)

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Main
     sig.returns(Junk) # error: Unable to resolve constant
     def foo

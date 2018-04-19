@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Main
     def yielder
         a = yield 1

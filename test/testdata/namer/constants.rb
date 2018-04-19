@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module A
   B::C = 1
 

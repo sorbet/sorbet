@@ -1003,27 +1003,15 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
 }
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
-    bool isTyped = true;
+    StrictLevel level = StrictLevel::Strong;
     if (loc.file.exists()) {
-        isTyped = loc.file.data(*this).isTyped;
+        level = loc.file.data(*this).strict;
+    }
+    if (what.code == errors::Internal::InternalError.code) {
+        return true;
     }
 
-    switch (what.code) {
-        case errors::Internal::InternalError.code:
-            return true;
-        case errors::Parser::ParserError.code:
-        case errors::Resolver::InvalidMethodSignature.code:
-        case errors::Resolver::InvalidTypeDeclaration.code:
-        case errors::Namer::ModuleKindRedefinition.code:
-        case errors::Namer::InterfaceClass.code:
-        case errors::Resolver::AbstractMethodOutsideAbstract.code:
-        case errors::Resolver::ConcreteMethodInInterface.code:
-            // These are shown even for untyped source
-            return true;
-
-        default:
-            return isTyped;
-    }
+    return level >= what.minLevel;
 }
 
 bool GlobalState::wasModified() const {

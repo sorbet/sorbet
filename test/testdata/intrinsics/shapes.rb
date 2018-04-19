@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestShapes
    def takesHash(a:)
    end

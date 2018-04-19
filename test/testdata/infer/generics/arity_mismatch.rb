@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Generic
   T1 = type_member
   T2 = type_member

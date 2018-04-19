@@ -1,4 +1,4 @@
- # @typed
+ # typed: strict
  module MyEnumerable
     A = type_member
     sig(a: MyEnumerable[A]).returns(MyEnumerable[A])

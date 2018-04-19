@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Mixin1; end
 module Mixin2; end
 

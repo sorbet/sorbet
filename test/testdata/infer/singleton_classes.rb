@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo;
   def self.bar
   end; 

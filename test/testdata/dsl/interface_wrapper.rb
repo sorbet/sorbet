@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 module Interface
   def some_method

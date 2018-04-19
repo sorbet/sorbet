@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def foo
   while true
     1

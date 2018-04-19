@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Constants
   A = 1
   B = "hi"

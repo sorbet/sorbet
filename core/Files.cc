@@ -20,19 +20,27 @@ vector<int> findLineBreaks(const std::string &s) {
     res.push_back(i);
     return res;
 }
-bool fileIsTyped(absl::string_view source) {
-    static regex sigil("^\\s*#\\s*@typed\\s*$");
+
+StrictLevel fileSigil(absl::string_view source) {
+    /*
+     * StrictLevel::Ruby: <none> | # typed: false
+     * StrictLevel::Typed: # typed: true
+     * StrictLevel::Strict: # typed: strict
+     * StrictLevel::String: # typed: strong
+     */
+    static regex old_sigil("^\\s*#\\s*@typed\\s*$");
+    static regex sigil("^\\s*#\\s*typed:\\s*(\\w+)?\\s*$");
     size_t off = 0;
     // std::regex appears to be ludicrously slow, to the point where running
     // this regex is as slow as running the entirety of the remainder of our
     // pipeline.
     //
-    // Help it out by manually scanning for the `@typed` literal, and then
-    // running the regex only over the single line.
+    // Help it out by manually scanning for the word `typed`, and then running
+    // the regex only over the single line.
     while (true) {
-        off = source.find("@typed", off);
+        off = source.find("typed", off);
         if (off == absl::string_view::npos) {
-            return false;
+            return StrictLevel::Ruby;
         }
 
         size_t line_start = source.rfind('\n', off);
@@ -43,8 +51,30 @@ bool fileIsTyped(absl::string_view source) {
         if (line_end == absl::string_view::npos) {
             line_end = source.size();
         }
-        if (regex_search(source.data() + line_start, source.data() + line_end, sigil)) {
-            return true;
+
+        // Support the old @typed sigil for compatibility until we remove it
+        // from source.
+        if (regex_search(source.data() + line_start, source.data() + line_end, old_sigil)) {
+            return StrictLevel::Strict;
+        }
+
+        match_results<const char *> match;
+        if (regex_search(source.data() + line_start, source.data() + line_end, match, sigil)) {
+            absl::string_view suffix(match[1].first, match[1].second - match[1].first);
+            if (suffix == "true") {
+                return StrictLevel::Typed;
+            } else if (suffix == "strict") {
+                return StrictLevel::Strict;
+            } else if (suffix == "strong") {
+                return StrictLevel::Strong;
+            } else if (suffix == "false") {
+                return StrictLevel::Ruby;
+            } else {
+                // TODO(nelhage): We should report an error here to help catch
+                // typos. This would require refactoring so this function has
+                // access to GlobalState or can return errors to someone who
+                // does.
+            }
         }
         off = line_end;
     }
@@ -52,8 +82,7 @@ bool fileIsTyped(absl::string_view source) {
 
 File::File(std::string &&path_, std::string &&source_, Type source_type)
     : source_type(source_type), path_(path_), source_(source_),
-      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), hasTypedSigil(fileIsTyped(this->source())),
-      isTyped(hasTypedSigil) {}
+      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), sigil(fileSigil(this->source())), strict(sigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
 

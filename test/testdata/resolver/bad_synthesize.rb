@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def main
   T.assert_type!(Opus, Module)
   # T.assert_type!(T::Array, Module) # temporary disabled while we polish generic syntax

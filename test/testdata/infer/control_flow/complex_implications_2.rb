@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 def foo(foo)
     if foo

@@ -1,2 +1,2 @@
-# @typed
+# typed: strict
 -5r

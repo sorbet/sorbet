@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestNext
   def _; end
   def done?; end

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A < Object
 end
 class B

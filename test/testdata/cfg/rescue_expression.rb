@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class MyException < Exception
 end
 

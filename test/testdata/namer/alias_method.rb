@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Alias
   def f
   end

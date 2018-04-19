@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def test_large_float
    a = 3.1415926535
    a = 0.000001

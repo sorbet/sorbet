@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Side
   def foo(cond)
     a = 1

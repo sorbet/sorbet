@@ -72,7 +72,7 @@ public:
     CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (!m->loc.file.data(ctx).isTyped) {
+        if (m->loc.file.data(ctx).strict == core::StrictLevel::Ruby) {
             return m;
         }
         auto &print = opts.print;
@@ -258,17 +258,29 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         if (core::enable_counters) {
                             core::counterAdd("types.input.lines", file.data(*lgs).lineCount());
                         }
-                        if (file.data(*lgs).isTyped) {
-                            core::counterInc("types.input.files.marked_typed");
+
+                        switch (file.data(*lgs).strict) {
+                            case core::StrictLevel::Ruby:
+                                core::categoryCounterInc("types.input.files.sigil", "none");
+                                break;
+                            case core::StrictLevel::Typed:
+                                core::categoryCounterInc("types.input.files.sigil", "typed");
+                                break;
+                            case core::StrictLevel::Strict:
+                                core::categoryCounterInc("types.input.files.sigil", "strict");
+                                break;
+                            case core::StrictLevel::Strong:
+                                core::categoryCounterInc("types.input.files.sigil", "strong");
+                                break;
                         }
 
-                        bool forceTypedSource = !opts.typedSource.empty() &&
-                                                file.data(*lgs).path().find(opts.typedSource) != std::string::npos;
-                        if (forceTypedSource || opts.forceTyped) {
-                            file.data(*lgs).isTyped = true;
-                        } else if (opts.forceUntyped) {
-                            file.data(*lgs).isTyped = false;
+                        core::StrictLevel minStrict = opts.forceMinStrict;
+                        core::StrictLevel maxStrict = opts.forceMaxStrict;
+                        if (!opts.typedSource.empty() &&
+                            file.data(*lgs).path().find(opts.typedSource) != std::string::npos) {
+                            minStrict = core::StrictLevel::Typed;
                         }
+                        file.data(*lgs).strict = std::max(std::min(file.data(*lgs).sigil, maxStrict), minStrict);
 
                         if (!opts.storeState.empty()) {
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
@@ -362,9 +374,9 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << '\n' << '\n';
         }
-        if (opts.suggestTyped && !f.data(ctx).hadErrors() && !f.data(ctx).hasTypedSigil) {
+        if (opts.suggestTyped && !f.data(ctx).hadErrors() && f.data(ctx).sigil == core::StrictLevel::Ruby) {
             core::counterInc("types.input.files.suggest_typed");
-            console_err->error("Suggest adding @typed to: {}", f.data(ctx).path());
+            console_err->error("Suggest adding # typed: true to: {}", f.data(ctx).path());
         }
 
     } catch (...) {
@@ -603,11 +615,11 @@ int realmain(int argc, const char *argv[]) {
             core::counterInc("types.input.files");
             auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
             inputFiles.push_back(file);
-            if (opts.forceUntyped) {
-                console->error("`-e` implies `--typed always` and you passed `--typed never`");
+            if (opts.forceMaxStrict < core::StrictLevel::Typed) {
+                console->error("`-e` is incompatible with `--typed=never`");
                 return 1;
             }
-            file.data(*gs).isTyped = true;
+            file.data(*gs).strict = core::StrictLevel::Strict;
         }
     }
 

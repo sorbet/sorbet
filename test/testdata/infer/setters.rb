@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   sig(a: String).returns(NilClass)
   def foo=(a)

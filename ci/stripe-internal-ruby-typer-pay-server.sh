@@ -52,7 +52,7 @@ rbenv exec bundle exec rake build:FileListStep
 
 # Make sure these specific files are typed
 while IFS= read -r f; do
-    echo "# @typed" >> "$f"
+    echo "# typed: strict" >> "$f"
 done < ../ci/stripe-internal-ruby-typer-pay-server-typechecked
 
 RECORD_STATS=
@@ -102,7 +102,7 @@ TIMEFILE2=$(mktemp)
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
 /usr/bin/time -o "$TIMEFILE2" \
-    ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=always --suggest-typed \
+    ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=strict --suggest-typed \
       --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
       --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/pay-server --metrics-sha="$PAY_SERVER_SHA"
 

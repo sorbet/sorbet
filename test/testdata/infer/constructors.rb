@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo1
 end
 

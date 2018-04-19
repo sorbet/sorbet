@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestSubtyping
   class Parent
     extend T::Generic

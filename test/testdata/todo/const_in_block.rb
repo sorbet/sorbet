@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   some_dsl 'this is a class-building DSL' do
     class A

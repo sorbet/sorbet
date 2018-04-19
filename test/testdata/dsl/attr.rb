@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestAttr
   def initialize
     @v1 = T.let(0, Integer)

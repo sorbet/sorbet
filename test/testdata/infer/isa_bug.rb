@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestIsA
   class T1; end
   class T2; end

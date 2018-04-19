@@ -1,6 +1,8 @@
 #ifndef RUBY_TYPER_REAL_MAIN_H
 #include "common/Timer.h"
 #include "common/common.h"
+#include "core/StrictLevel.h"
+
 #include "spdlog/spdlog.h"
 #include <cxxopts.hpp>
 #include <memory>
@@ -54,8 +56,10 @@ struct Options {
     Printers print;
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
-    bool forceTyped = false;
-    bool forceUntyped = false;
+
+    core::StrictLevel forceMinStrict = core::StrictLevel::Ruby;
+    core::StrictLevel forceMaxStrict = core::StrictLevel::Strong;
+
     bool showProgress = false;
     bool suggestTyped = false;
     bool silenceErrors = false;

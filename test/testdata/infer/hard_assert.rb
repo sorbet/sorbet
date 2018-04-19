@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class Main
     sig(a: T.any(Integer, String)).returns(NilClass)

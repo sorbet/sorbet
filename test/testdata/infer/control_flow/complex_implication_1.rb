@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module ModuleMethods
 
   def instrumented_request(final_attempt, foo)
