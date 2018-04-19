@@ -18,9 +18,10 @@ export ASAN_SYMBOLIZER_PATH
 bazel test --config=ci --config=dbg --config=sanitize //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" --test_env="UBSAN_OPTIONS=print_stacktrace=1" || err=$?
 
 mkdir -p /log/junit
-find bazel-testlogs/ -name '*.xml' | while read -r line; do
-    # shellcheck disable=SC2001
-    cp "$line" /log/junit/"$(echo "${line#bazel-testlogs/}" | sed s,/,_,g)"
+bazel query  'tests(//...)' | while read -r line; do
+    path="${line/://}"
+    path="${path#//}"
+    cp "bazel-testlogs/$path/test.xml" /log/junit/"${path//\//_}.xml"
 done
 
 if [ "$err" -ne 0 ]; then
