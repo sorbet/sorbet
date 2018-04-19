@@ -155,9 +155,12 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     ENFORCE(type != nullptr, "No obvious type AST for this prop");
 
     if (auto send = ast::cast_tree<ast::Send>(type.get())) {
-        if (isOptional && send->fun == core::Names::new_()) {
-            // A huristic for detecting the API Param Spec
-            return empty;
+        // A heuristic for detecting the API Param Spec
+        if (isOptional && send->fun != core::Names::squareBrackets()) {
+            auto cnst = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+            if (cnst->cnst != core::Symbols::T().data(ctx).name) {
+                return empty;
+            }
         }
     }
 

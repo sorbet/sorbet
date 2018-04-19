@@ -19,6 +19,8 @@ class <emptyTree><<constant:<root>>> < ()
 
       self(<constant:<todo sym>>).optional(:"day", <emptyTree>::<constant:IntegerParam>.new({:"min" => 1, :"max" => 31}))
 
+      self(<constant:<todo sym>>).optional(:"name", <emptyTree>::<constant:StringParam>.alphanumeric())
+
       self(<constant:<todo sym>>).optional(:"how_many", <emptyTree>::<constant:Opus>::<constant:Param>::<constant:CaseParam>.new(self(<constant:<todo sym>>).how_many_cases(), <emptyTree>::<constant:Opus>::<constant:Param>::<constant:ParamSpecsParam>.new(<emptyTree>::<constant:Default>)))
 
       self(<constant:<todo sym>>).optional(:"optional_param", <emptyTree>::<constant:IntegerParam>.new())
@@ -220,6 +222,18 @@ class <emptyTree><<constant:<root>>> < ()
         ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
+
+      def optional_nilable<<constant:<todo sym>>>()
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
+      end
+
+      self(<constant:<todo sym>>).sig({:"arg0" => ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))}).returns(::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
+
+      def optional_nilable=<<constant:<todo sym>>>(arg0)
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)))
+      end
+
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def const_explicit<<constant:<todo sym>>>()
@@ -394,6 +408,7 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:AdvancedODM>.new().optional=("b")
         <emptyTree>::<constant:AdvancedODM>.new().optional=(nil)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_nilable(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().const_explicit(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:AdvancedODM>.new().const_explicit=("b")
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().const(), <emptyTree>::<constant:String>)

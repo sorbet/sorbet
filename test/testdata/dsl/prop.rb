@@ -8,6 +8,7 @@ class NotAODM
     prop "too", String, {}, "many"
     optional :company_name, String, :nonempty_string # error: Method `optional` does not exist
     optional :day, IntegerParam.new(min: 1, max: 31) # error: MULTI
+    optional :name, StringParam.alphanumeric # error: MULTI
     optional :how_many, Opus::Param::CaseParam.new(self.how_many_cases, Opus::Param::ParamSpecsParam.new(Default)) # error: MULTI
     optional :optional_param, IntegerParam.new # error: Method `optional` does not exist
 end
@@ -41,6 +42,7 @@ class AdvancedODM
     prop :optional_existing, String, optional: :existing, default: ""
     prop :optional_false, String, optional: false, default: ""
     optional :optional, String, default: ""
+    optional :optional_nilable, T.nilable(String)
 
     prop :const_explicit, String, immutable: true, default: ""
     const :const, String, default: ""
@@ -100,6 +102,7 @@ def main
     T.assert_type!(AdvancedODM.new.optional, T.nilable(String))
     AdvancedODM.new.optional = 'b'
     AdvancedODM.new.optional = nil
+    T.assert_type!(AdvancedODM.new.optional_nilable, T.nilable(String))
 
     T.assert_type!(AdvancedODM.new.const_explicit, String)
     AdvancedODM.new.const_explicit = 'b' # error: Method `const_explicit=` does not exist on `AdvancedODM`
