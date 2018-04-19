@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def main
   @a = 3 # error: Use of undeclared variable `@a`
 # ^^

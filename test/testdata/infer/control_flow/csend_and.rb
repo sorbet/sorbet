@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   sig(failures: T::Array[T::Hash[String, String]])
   .returns(T.nilable(String))

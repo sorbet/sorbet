@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A
   def initialize
     spec_list.map do # error: Method `spec_list` does not exist on `A`

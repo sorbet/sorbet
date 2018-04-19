@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   def self.foo; end
 

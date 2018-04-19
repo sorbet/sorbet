@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Funcs
   sig(x: Integer).returns(Integer)
   def f(x); x; end

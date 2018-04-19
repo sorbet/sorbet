@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   def baz
   a = self.does_not_exist # error: does not exist

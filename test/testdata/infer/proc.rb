@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestProcType
   sig(
     blk: T.proc(i: Integer).returns(String),

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def foo
   outer do # error: Method `outer` does not exist on `Object`
     return

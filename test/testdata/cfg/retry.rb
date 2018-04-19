@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def main
   try = 0
   begin

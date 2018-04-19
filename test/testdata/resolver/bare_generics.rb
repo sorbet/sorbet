@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   A = type_member
 end

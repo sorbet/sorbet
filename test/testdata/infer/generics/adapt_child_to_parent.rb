@@ -1,4 +1,4 @@
- # @typed
+ # typed: strict
  class Parent
     A = type_member
     sig(a: A).returns(A)

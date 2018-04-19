@@ -6,29 +6,29 @@ namespace ruby_typer {
 namespace core {
 namespace errors {
 namespace Resolver {
-constexpr ErrorClass DynamicConstant = 5001;
-constexpr ErrorClass StubConstant = 5002;
-constexpr ErrorClass InvalidMethodSignature = 5003;
-constexpr ErrorClass InvalidTypeDeclaration = 5004;
-constexpr ErrorClass InvalidDeclareVariables = 5005;
-constexpr ErrorClass DuplicateVariableDeclaration = 5006;
-constexpr ErrorClass UndeclaredVariable = 5007;
-constexpr ErrorClass DynamicSuperclass = 5008;
-constexpr ErrorClass InvalidAttr = 5009;
-constexpr ErrorClass InvalidCast = 5010;
-constexpr ErrorClass CircularDependency = 5011;
-constexpr ErrorClass RedefinitionOfParents = 5012;
-constexpr ErrorClass ConstantAssertType = 5013;
-constexpr ErrorClass ParentTypeNotDeclared = 5014;
-constexpr ErrorClass ParentVarianceMismatch = 5015;
-constexpr ErrorClass VariantTypeMemberInClass = 5016;
-constexpr ErrorClass TypeMembersInWrongOrder = 5017;
-constexpr ErrorClass NotATypeVariable = 5018;
-constexpr ErrorClass AbstractMethodWithBody = 5019;
-constexpr ErrorClass InvalidMixinDeclaration = 5020;
-constexpr ErrorClass AbstractMethodOutsideAbstract = 5021;
-constexpr ErrorClass ConcreteMethodInInterface = 5022;
-constexpr ErrorClass BadAbstractMethod = 5023;
+constexpr ErrorClass DynamicConstant{5001, StrictLevel::Typed};
+constexpr ErrorClass StubConstant{5002, StrictLevel::Typed};
+constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::Ruby};
+constexpr ErrorClass InvalidTypeDeclaration{5004, StrictLevel::Ruby};
+constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::Typed};
+constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::Typed};
+constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
+constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::Typed};
+/* constexpr ErrorClass InvalidAttr{5009, StrictLevel::Typed}; */
+constexpr ErrorClass InvalidCast{5010, StrictLevel::Typed};
+constexpr ErrorClass CircularDependency{5011, StrictLevel::Ruby};
+constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::Ruby};
+constexpr ErrorClass ConstantAssertType{5013, StrictLevel::Ruby};
+constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::Typed};
+constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::Typed};
+constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::Typed};
+constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::Typed};
+constexpr ErrorClass NotATypeVariable{5018, StrictLevel::Typed};
+constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::Typed};
+constexpr ErrorClass InvalidMixinDeclaration{5020, StrictLevel::Typed};
+constexpr ErrorClass AbstractMethodOutsideAbstract{5021, StrictLevel::Ruby};
+constexpr ErrorClass ConcreteMethodInInterface{5022, StrictLevel::Ruby};
+constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::Typed};
 } // namespace Resolver
 } // namespace errors
 } // namespace core

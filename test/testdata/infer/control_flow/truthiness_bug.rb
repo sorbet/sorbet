@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class Test
   def set_approval_status(_, from_self)

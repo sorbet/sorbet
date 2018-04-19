@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   extend T::Generic
   Self_Type_Member = type_template()

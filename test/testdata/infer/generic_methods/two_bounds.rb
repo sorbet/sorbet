@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A
   class Foo
     sig.returns(T.any(String, NilClass))

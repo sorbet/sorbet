@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class Main
     sig(val: T::Array[String]).returns(String)

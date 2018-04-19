@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestCase
   def f(x)
     case x

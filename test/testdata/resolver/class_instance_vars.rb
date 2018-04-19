@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Parent
   def initialize
     @ivar = T.let(1, Integer)

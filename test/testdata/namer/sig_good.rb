@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class T1; end
 class T2; end
 module M1; end

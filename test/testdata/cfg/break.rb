@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def foo
   [1,2].map do |x|
     3

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class A
     def self.hi

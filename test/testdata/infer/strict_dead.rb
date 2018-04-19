@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 module Main
   def foo

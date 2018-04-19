@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 ::A, foo = foo

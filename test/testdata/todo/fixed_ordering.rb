@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class C
   sig(f: Fixed).returns(NilClass)

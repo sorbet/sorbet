@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Main
     sig(a: Integer).returns(Integer)
     def foo(a)

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A
   sig(t: Time).returns(Time)
   def foo(t)

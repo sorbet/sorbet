@@ -2,6 +2,7 @@
 #define SRUBY_AST_FILES_H
 
 #include "Names.h"
+#include "StrictLevel.h"
 #include "absl/strings/string_view.h"
 #include <string>
 
@@ -84,8 +85,8 @@ private:
     mutable bool hadErrors_ = false;
 
 public:
-    const bool hasTypedSigil;
-    bool isTyped;
+    const StrictLevel sigil;
+    StrictLevel strict;
 };
 } // namespace core
 } // namespace ruby_typer

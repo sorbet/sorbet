@@ -87,4 +87,4 @@ class RubyTyper::ENVClass
   .returns(T::Hash[String, T.nilable(String)])
   def update(key, &blk); end
 end
-::ENV = T.cast(nil, RubyTyper::ENVClass)
+::ENV = T.let(nil, RubyTyper::ENVClass)

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Mod
   A = type_member
    sig(

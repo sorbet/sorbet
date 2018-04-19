@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class TestSelf
   sig(s: self)

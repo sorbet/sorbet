@@ -19,7 +19,7 @@ def main
     next unless match
     code = match[1]
     code = code.gsub('\n', "\n").gsub('\\"', "\"")
-    File.write(cur_file, "# @typed\n\n" + code.to_s)
+    File.write(cur_file, "# typed: true\n\n" + code.to_s)
     File.write(cur_file + '.infer.exp', '')
     cur_file = nil
   end

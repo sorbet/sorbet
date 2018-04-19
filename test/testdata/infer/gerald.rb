@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 require_relative '../../../extn'
 Opus::AutogenLoader.init(__FILE__) # error: Unable to resolve constant
 

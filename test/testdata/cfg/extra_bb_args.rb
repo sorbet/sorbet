@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 def main
   name = T.let(nil, T.nilable(String))

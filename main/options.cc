@@ -87,8 +87,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("stop-after", all_stop_after.str(),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
-    options.add_options("dev")("typed", "Run full checks and report errors on all/no/only @typed code",
-                               cxxopts::value<string>()->default_value("auto"), "{always,never,[auto]}");
+    options.add_options("dev")("typed", "Force all code to specified strictness level",
+                               cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>()->default_value(""),
                                "file");
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
@@ -249,8 +249,19 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         }
 
         string typed = raw["typed"].as<string>();
-        opts.forceTyped = typed == "always";
-        opts.forceUntyped = typed == "never";
+        if (typed == "auto") {
+        } else if (typed == "ruby") {
+            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Ruby;
+        } else if (typed == "typed") {
+            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Typed;
+        } else if (typed == "strict") {
+            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strict;
+        } else if (typed == "strong") {
+            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strong;
+        } else {
+            console->error("Invalid value for `--typed`: {}", typed);
+        }
+
         opts.showProgress = raw.count("P") != 0;
         if (raw.count("configatron-dir") > 0) {
             opts.configatronDirs = raw["configatron-dir"].as<vector<string>>();
@@ -270,9 +281,6 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         opts.metricsRepo = raw["metrics-repo"].as<string>();
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
-        if (typed != "always" && typed != "never" && typed != "auto") {
-            console->error("Invalid value for `--typed`: {}", typed);
-        }
         opts.typedSource = raw["typed-source"].as<string>();
         if (!opts.typedSource.empty()) {
             if (opts.print.TypedSource) {
@@ -297,8 +305,8 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         } else if (raw["color"].as<string>() == "never") {
             core::ErrorColors::disableColors();
         }
-        if (opts.suggestTyped && !opts.forceTyped) {
-            console_err->error("--suggest-typed requires --typed=always.");
+        if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Ruby) {
+            console_err->error("--suggest-typed requires --typed=typed or higher.");
             throw EarlyReturnWithCode(1);
         }
 

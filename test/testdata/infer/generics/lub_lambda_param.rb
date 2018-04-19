@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 def _; end
 

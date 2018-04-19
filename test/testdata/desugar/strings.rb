@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def test_strings
   %q{}
   "foo"

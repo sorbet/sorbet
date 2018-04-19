@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class LetErrors
   def initialize
     @@cvar = T.let(0, Integer) # error: Class variables must be declared at class scope

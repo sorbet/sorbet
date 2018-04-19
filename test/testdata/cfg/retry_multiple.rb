@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class A < Exception; end
 class B < Exception; end
 def main

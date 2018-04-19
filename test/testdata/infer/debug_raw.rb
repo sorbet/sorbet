@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def main(a)
     if (a)
         a = 2

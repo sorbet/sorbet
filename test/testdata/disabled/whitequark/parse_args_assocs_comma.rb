@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 foo[:baz => 1,]

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class HasLoops
   def variable_only_inside_loop
     while(true)

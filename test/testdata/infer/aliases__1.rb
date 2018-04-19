@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module Types
   class T1
   end

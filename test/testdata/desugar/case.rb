@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Test
   def test_case
     case a

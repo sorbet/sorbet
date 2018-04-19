@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module A
   def Foo()
   end

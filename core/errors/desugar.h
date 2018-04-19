@@ -4,10 +4,10 @@ namespace ruby_typer {
 namespace core {
 namespace errors {
 namespace Desugar {
-constexpr ErrorClass InvalidSingletonDef = 3001;
-constexpr ErrorClass IntegerOutOfRange = 3002;
-constexpr ErrorClass UnsupportedNode = 3003;
-constexpr ErrorClass FloatOutOfRange = 3004;
+constexpr ErrorClass InvalidSingletonDef{3001, StrictLevel::Typed};
+constexpr ErrorClass IntegerOutOfRange{3002, StrictLevel::Typed};
+constexpr ErrorClass UnsupportedNode{3003, StrictLevel::Ruby};
+constexpr ErrorClass FloatOutOfRange{3004, StrictLevel::Typed};
 } // namespace Desugar
 } // namespace errors
 } // namespace core

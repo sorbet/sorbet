@@ -318,10 +318,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (!file.data(ctx).isTyped) {
+            if (file.data(ctx).sigil == ruby_typer::core::StrictLevel::Ruby) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `@typed` pragma. Sources with ." << ext << ".exp expectations must specify @typed.";
+                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp expectations must specify # typed:";
             }
         };
         // CFG

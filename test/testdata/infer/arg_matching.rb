@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class TestArgs
   def any; end
 

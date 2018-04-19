@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
   type_parameters(:A).sig(a: T.type_parameter(:A)).returns(T.type_parameter(:A))
   def id(a)

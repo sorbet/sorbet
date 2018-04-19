@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def foo
     begin
     rescue NotAClass => e # error: Unable to resolve constant

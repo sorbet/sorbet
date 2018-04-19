@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class ControlFlow
 
   sig(a: T.any(Integer, NilClass)).returns(Integer)

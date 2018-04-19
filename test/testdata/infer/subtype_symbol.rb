@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 
 class TestSubtype
   def test_subtype(a)

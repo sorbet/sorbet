@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Foo
     def bla(arr)
       bla(arr) || (arr.each {|item| return :invalid_expandable_array if item.empty?}; nil)

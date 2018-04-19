@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 def loop_it
   f = T.let(nil,T.nilable(String))
 

@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 %w[foo bar]

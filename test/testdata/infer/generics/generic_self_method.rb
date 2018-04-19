@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Identity
   extend T::Generic
 

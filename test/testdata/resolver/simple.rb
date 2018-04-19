@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class Outer1
 end
 

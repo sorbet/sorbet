@@ -1,4 +1,4 @@
- # @typed
+ # typed: strict
  module Foo
     sig().returns(Integer)
     def bar()

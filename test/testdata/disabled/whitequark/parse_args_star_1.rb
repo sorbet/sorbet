@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 fun(*bar, &baz)

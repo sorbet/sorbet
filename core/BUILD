@@ -43,7 +43,13 @@ cc_library(
 cc_test(
     name = "core_test",
     size = "small",
-    srcs = glob(["test/*.cc"]),
+    srcs = glob(
+        ["test/*.cc"],
+        exclude = [
+            # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
+            "**/flycheck_*",
+        ],
+    ),
     linkstatic = select({
         "//tools/config:fastbuild": 0,
         "//conditions:default": 1,

@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 class NotAODM
     def self.prop(*args); end
     prop

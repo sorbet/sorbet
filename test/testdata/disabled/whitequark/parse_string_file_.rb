@@ -1,3 +1,3 @@
-# @typed
+# typed: strict
 
 __FILE__
