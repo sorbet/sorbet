@@ -54,6 +54,18 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>
     end
     class <emptyTree>::<constant:AdvancedODM><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+
+      def default_without_migrate<<constant:<todo sym>>>()
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+
+      def default_without_migrate=<<constant:<todo sym>>>(arg0)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
+      end
+
       self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
 
       def default<<constant:<todo sym>>>()
@@ -75,6 +87,18 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
       def nodefault=<<constant:<todo sym>>>(arg0)
+        ::T.cast(nil, <emptyTree>::<constant:String>)
+      end
+
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
+
+      def factory_without_migrate<<constant:<todo sym>>>()
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+
+      def factory_without_migrate=<<constant:<todo sym>>>(arg0)
         ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
@@ -174,10 +198,10 @@ class <emptyTree><<constant:<root>>> < ()
         ::T.cast(nil, <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def optional_explicit<<constant:<todo sym>>>()
-        ::T.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
@@ -186,10 +210,10 @@ class <emptyTree><<constant:<root>>> < ()
         ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def optional_existing<<constant:<todo sym>>>()
-        ::T.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
@@ -198,10 +222,10 @@ class <emptyTree><<constant:<root>>> < ()
         ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:String>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
       def optional_false<<constant:<todo sym>>>()
-        ::T.cast(nil, <emptyTree>::<constant:String>)
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
       end
 
       self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
@@ -246,10 +270,10 @@ class <emptyTree><<constant:<root>>> < ()
         ::T.cast(nil, <emptyTree>::<constant:String>)
       end
 
-      self(<constant:<todo sym>>).sig({}).returns(<emptyTree>::<constant:Array>)
+      self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:Array>))
 
       def no_class_arg<<constant:<todo sym>>>()
-        ::T.cast(nil, <emptyTree>::<constant:Array>)
+        ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:Array>))
       end
 
       self(<constant:<todo sym>>).sig({}).returns(::T.untyped())
@@ -389,9 +413,11 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:SomeODM>.new().foo2=("b"), <emptyTree>::<constant:String>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().default_without_migrate(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().default(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().nodefault(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().nodefault(), <emptyTree>::<constant:String>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().factory_without_migrate(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().factory(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().type(), <emptyTree>::<constant:String>)
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().object(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Object>))
@@ -404,7 +430,7 @@ class <emptyTree><<constant:<root>>> < ()
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_existing(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:AdvancedODM>.new().optional_existing=("b")
         <emptyTree>::<constant:AdvancedODM>.new().optional_existing=(nil)
-        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_false(), <emptyTree>::<constant:String>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional_false(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:AdvancedODM>.new().optional(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
         <emptyTree>::<constant:AdvancedODM>.new().optional=("b")
         <emptyTree>::<constant:AdvancedODM>.new().optional=(nil)

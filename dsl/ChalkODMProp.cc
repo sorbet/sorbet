@@ -170,8 +170,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     if (rules) {
         auto optional = ASTUtil::getHashValue(ctx, rules, core::Names::optional());
-        auto boolOptional = ast::cast_tree<ast::Literal>(optional.get());
-        if (boolOptional && boolOptional->isTrue(ctx)) {
+        auto optionalLit = ast::cast_tree<ast::Literal>(optional.get());
+        if (optionalLit && optionalLit->isTrue(ctx)) {
             isOptional = true;
         }
 
@@ -181,11 +181,13 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             isImmutable = true;
         }
 
-        if (ASTUtil::getHashValue(ctx, rules, core::Names::default_())) {
-            isNilable = false;
-        }
-        if (ASTUtil::getHashValue(ctx, rules, core::Names::factory())) {
-            isNilable = false;
+        if (optionalLit && optionalLit->isSymbol(ctx) && optionalLit->asSymbol(ctx) == core::Names::migrate()) {
+            if (ASTUtil::getHashValue(ctx, rules, core::Names::default_())) {
+                isNilable = false;
+            }
+            if (ASTUtil::getHashValue(ctx, rules, core::Names::factory())) {
+                isNilable = false;
+            }
         }
 
         if (foreign == nullptr) {

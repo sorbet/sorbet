@@ -5,44 +5,8 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
       targs = [
         <constant:Elem> = untyped
       ]
-    } @ test/testdata/dsl/prop.rb:35
-    method array= (arg0) -> AppliedType {
-      klass = ::Array
-      targs = [
-        <constant:Elem> = untyped
-      ]
-    } @ test/testdata/dsl/prop.rb:35
-      argument arg0<> -> AppliedType {
-        klass = ::Array
-        targs = [
-          <constant:Elem> = untyped
-        ]
-      } @ test/testdata/dsl/prop.rb:35
-    method array_of () -> AppliedType {
-      klass = ::Array
-      targs = [
-        <constant:Elem> = String
-      ]
-    } @ test/testdata/dsl/prop.rb:36
-    method array_of= (arg0) -> AppliedType {
-      klass = ::Array
-      targs = [
-        <constant:Elem> = String
-      ]
-    } @ test/testdata/dsl/prop.rb:36
-      argument arg0<> -> AppliedType {
-        klass = ::Array
-        targs = [
-          <constant:Elem> = String
-        ]
-      } @ test/testdata/dsl/prop.rb:36
-    method array_of_explicit () -> AppliedType {
-      klass = ::Array
-      targs = [
-        <constant:Elem> = untyped
-      ]
     } @ test/testdata/dsl/prop.rb:37
-    method array_of_explicit= (arg0) -> AppliedType {
+    method array= (arg0) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = untyped
@@ -54,102 +18,13 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
           <constant:Elem> = untyped
         ]
       } @ test/testdata/dsl/prop.rb:37
-    method const () -> String @ test/testdata/dsl/prop.rb:48
-    method const_explicit () -> String @ test/testdata/dsl/prop.rb:47
-    method default () -> String @ test/testdata/dsl/prop.rb:29
-    method default= (arg0) -> String @ test/testdata/dsl/prop.rb:29
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:29
-    method enum_prop () -> untyped @ test/testdata/dsl/prop.rb:52
-    method factory () -> String @ test/testdata/dsl/prop.rb:31
-    method factory= (arg0) -> String @ test/testdata/dsl/prop.rb:31
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:31
-    method foreign () -> String | NilClass @ test/testdata/dsl/prop.rb:54
-    method foreign= (arg0) -> String @ test/testdata/dsl/prop.rb:54
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:54
-    method foreign_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:54
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:54
-    method foreign_invalid () -> String | NilClass @ test/testdata/dsl/prop.rb:57
-    method foreign_invalid= (arg0) -> String @ test/testdata/dsl/prop.rb:57
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:57
-    method foreign_invalid_ (opts) -> untyped @ test/testdata/dsl/prop.rb:57
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:57
-    method foreign_lazy () -> String | NilClass @ test/testdata/dsl/prop.rb:55
-    method foreign_lazy= (arg0) -> String @ test/testdata/dsl/prop.rb:55
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:55
-    method foreign_lazy_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:55
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:55
-    method foreign_proc () -> String | NilClass @ test/testdata/dsl/prop.rb:56
-    method foreign_proc= (arg0) -> String @ test/testdata/dsl/prop.rb:56
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:56
-    method foreign_proc_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:56
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:56
-    method hash_of () -> AppliedType {
-      klass = ::Hash
-      targs = [
-        <constant:K> = Symbol
-        <constant:V> = String
-        <constant:Elem> = TupleType {
-            0 = Symbol
-            1 = String
-          }
-      ]
-    } @ test/testdata/dsl/prop.rb:39
-    method hash_of= (arg0) -> AppliedType {
-      klass = ::Hash
-      targs = [
-        <constant:K> = Symbol
-        <constant:V> = String
-        <constant:Elem> = TupleType {
-            0 = Symbol
-            1 = String
-          }
-      ]
-    } @ test/testdata/dsl/prop.rb:39
-      argument arg0<> -> AppliedType {
-        klass = ::Hash
-        targs = [
-          <constant:K> = Symbol
-          <constant:V> = String
-          <constant:Elem> = TupleType {
-              0 = Symbol
-              1 = String
-            }
-        ]
-      } @ test/testdata/dsl/prop.rb:39
-    method no_class_arg () -> AppliedType {
-      klass = ::Array
-      targs = [
-        <constant:Elem> = untyped
-      ]
-    } @ test/testdata/dsl/prop.rb:50
-    method nodefault () -> String | NilClass @ test/testdata/dsl/prop.rb:30
-    method nodefault= (arg0) -> String @ test/testdata/dsl/prop.rb:30
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:30
-    method object () -> Object @ test/testdata/dsl/prop.rb:34
-    method object= (arg0) -> Object @ test/testdata/dsl/prop.rb:34
-      argument arg0<> -> Object @ test/testdata/dsl/prop.rb:34
-    method optional () -> String @ test/testdata/dsl/prop.rb:44
-    method optional= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:44
-      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:44
-    method optional_existing () -> String @ test/testdata/dsl/prop.rb:42
-    method optional_existing= (arg0) -> String @ test/testdata/dsl/prop.rb:42
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:42
-    method optional_explicit () -> String @ test/testdata/dsl/prop.rb:41
-    method optional_explicit= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:41
-      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:41
-    method optional_false () -> String @ test/testdata/dsl/prop.rb:43
-    method optional_false= (arg0) -> String @ test/testdata/dsl/prop.rb:43
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:43
-    method optional_nilable () -> String | NilClass @ test/testdata/dsl/prop.rb:45
-    method optional_nilable= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:45
-      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:45
-    method t_array () -> AppliedType {
+    method array_of () -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
       ]
     } @ test/testdata/dsl/prop.rb:38
-    method t_array= (arg0) -> AppliedType {
+    method array_of= (arg0) -> AppliedType {
       klass = ::Array
       targs = [
         <constant:Elem> = String
@@ -161,9 +36,140 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
           <constant:Elem> = String
         ]
       } @ test/testdata/dsl/prop.rb:38
-    method type () -> String @ test/testdata/dsl/prop.rb:33
-    method type= (arg0) -> String @ test/testdata/dsl/prop.rb:33
+    method array_of_explicit () -> AppliedType {
+      klass = ::Array
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    } @ test/testdata/dsl/prop.rb:39
+    method array_of_explicit= (arg0) -> AppliedType {
+      klass = ::Array
+      targs = [
+        <constant:Elem> = untyped
+      ]
+    } @ test/testdata/dsl/prop.rb:39
+      argument arg0<> -> AppliedType {
+        klass = ::Array
+        targs = [
+          <constant:Elem> = untyped
+        ]
+      } @ test/testdata/dsl/prop.rb:39
+    method const () -> String @ test/testdata/dsl/prop.rb:50
+    method const_explicit () -> String @ test/testdata/dsl/prop.rb:49
+    method default () -> String @ test/testdata/dsl/prop.rb:30
+    method default= (arg0) -> String @ test/testdata/dsl/prop.rb:30
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:30
+    method default_without_migrate () -> String | NilClass @ test/testdata/dsl/prop.rb:29
+    method default_without_migrate= (arg0) -> String @ test/testdata/dsl/prop.rb:29
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:29
+    method enum_prop () -> untyped @ test/testdata/dsl/prop.rb:54
+    method factory () -> String @ test/testdata/dsl/prop.rb:33
+    method factory= (arg0) -> String @ test/testdata/dsl/prop.rb:33
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:33
+    method factory_without_migrate () -> String | NilClass @ test/testdata/dsl/prop.rb:32
+    method factory_without_migrate= (arg0) -> String @ test/testdata/dsl/prop.rb:32
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:32
+    method foreign () -> String | NilClass @ test/testdata/dsl/prop.rb:56
+    method foreign= (arg0) -> String @ test/testdata/dsl/prop.rb:56
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:56
+    method foreign_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:56
+      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:56
+    method foreign_invalid () -> String | NilClass @ test/testdata/dsl/prop.rb:59
+    method foreign_invalid= (arg0) -> String @ test/testdata/dsl/prop.rb:59
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:59
+    method foreign_invalid_ (opts) -> untyped @ test/testdata/dsl/prop.rb:59
+      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:59
+    method foreign_lazy () -> String | NilClass @ test/testdata/dsl/prop.rb:57
+    method foreign_lazy= (arg0) -> String @ test/testdata/dsl/prop.rb:57
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:57
+    method foreign_lazy_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:57
+      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:57
+    method foreign_proc () -> String | NilClass @ test/testdata/dsl/prop.rb:58
+    method foreign_proc= (arg0) -> String @ test/testdata/dsl/prop.rb:58
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:58
+    method foreign_proc_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:58
+      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:58
+    method hash_of () -> AppliedType {
+      klass = ::Hash
+      targs = [
+        <constant:K> = Symbol
+        <constant:V> = String
+        <constant:Elem> = TupleType {
+            0 = Symbol
+            1 = String
+          }
+      ]
+    } @ test/testdata/dsl/prop.rb:41
+    method hash_of= (arg0) -> AppliedType {
+      klass = ::Hash
+      targs = [
+        <constant:K> = Symbol
+        <constant:V> = String
+        <constant:Elem> = TupleType {
+            0 = Symbol
+            1 = String
+          }
+      ]
+    } @ test/testdata/dsl/prop.rb:41
+      argument arg0<> -> AppliedType {
+        klass = ::Hash
+        targs = [
+          <constant:K> = Symbol
+          <constant:V> = String
+          <constant:Elem> = TupleType {
+              0 = Symbol
+              1 = String
+            }
+        ]
+      } @ test/testdata/dsl/prop.rb:41
+    method no_class_arg () -> AppliedType {
+          klass = ::Array
+          targs = [
+            <constant:Elem> = untyped
+          ]
+        } | NilClass @ test/testdata/dsl/prop.rb:52
+    method nodefault () -> String | NilClass @ test/testdata/dsl/prop.rb:31
+    method nodefault= (arg0) -> String @ test/testdata/dsl/prop.rb:31
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:31
+    method object () -> Object @ test/testdata/dsl/prop.rb:36
+    method object= (arg0) -> Object @ test/testdata/dsl/prop.rb:36
+      argument arg0<> -> Object @ test/testdata/dsl/prop.rb:36
+    method optional () -> String @ test/testdata/dsl/prop.rb:46
+    method optional= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:46
+      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:46
+    method optional_existing () -> String | NilClass @ test/testdata/dsl/prop.rb:44
+    method optional_existing= (arg0) -> String @ test/testdata/dsl/prop.rb:44
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:44
+    method optional_explicit () -> String | NilClass @ test/testdata/dsl/prop.rb:43
+    method optional_explicit= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:43
+      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:43
+    method optional_false () -> String | NilClass @ test/testdata/dsl/prop.rb:45
+    method optional_false= (arg0) -> String @ test/testdata/dsl/prop.rb:45
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:45
+    method optional_nilable () -> String | NilClass @ test/testdata/dsl/prop.rb:47
+    method optional_nilable= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:47
+      argument arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:47
+    method t_array () -> AppliedType {
+      klass = ::Array
+      targs = [
+        <constant:Elem> = String
+      ]
+    } @ test/testdata/dsl/prop.rb:40
+    method t_array= (arg0) -> AppliedType {
+      klass = ::Array
+      targs = [
+        <constant:Elem> = String
+      ]
+    } @ test/testdata/dsl/prop.rb:40
+      argument arg0<> -> AppliedType {
+        klass = ::Array
+        targs = [
+          <constant:Elem> = String
+        ]
+      } @ test/testdata/dsl/prop.rb:40
+    method type () -> String @ test/testdata/dsl/prop.rb:35
+    method type= (arg0) -> String @ test/testdata/dsl/prop.rb:35
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:35
   class <constant:ForeignClass> < ::Object () @ test/testdata/dsl/prop.rb:25
   class <constant:NotAODM> < ::Object () @ test/testdata/dsl/prop.rb:2
     class <constant:Default> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:12
@@ -171,23 +177,23 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     class <constant:StringParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:11
     method <static-init> () @ test/testdata/dsl/prop.rb:2
   class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8223
-    method main () @ test/testdata/dsl/prop.rb:74
+    method main () @ test/testdata/dsl/prop.rb:76
   class <constant:Opus> () @ ???
     class <constant:Param> () -> untyped @ test/testdata/dsl/prop.rb:12
-  class <constant:PropHelpers2> < ::Object () @ test/testdata/dsl/prop.rb:65
-    method created () -> Float @ test/testdata/dsl/prop.rb:67
-    method token () -> String @ test/testdata/dsl/prop.rb:66
-    method token= (arg0) -> String @ test/testdata/dsl/prop.rb:66
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:66
-  class <constant:PropHelpers> < ::Object () @ test/testdata/dsl/prop.rb:60
-    method created () -> Float @ test/testdata/dsl/prop.rb:62
-    method created= (arg0) -> Float @ test/testdata/dsl/prop.rb:62
-      argument arg0<> -> Float @ test/testdata/dsl/prop.rb:62
-    method token () -> String @ test/testdata/dsl/prop.rb:61
-    method token= (arg0) -> String @ test/testdata/dsl/prop.rb:61
-      argument arg0<> -> String @ test/testdata/dsl/prop.rb:61
-  class <constant:ShardingProp> < ::Object () @ test/testdata/dsl/prop.rb:70
-    method merchant () -> String @ test/testdata/dsl/prop.rb:71
+  class <constant:PropHelpers2> < ::Object () @ test/testdata/dsl/prop.rb:67
+    method created () -> Float @ test/testdata/dsl/prop.rb:69
+    method token () -> String @ test/testdata/dsl/prop.rb:68
+    method token= (arg0) -> String @ test/testdata/dsl/prop.rb:68
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:68
+  class <constant:PropHelpers> < ::Object () @ test/testdata/dsl/prop.rb:62
+    method created () -> Float @ test/testdata/dsl/prop.rb:64
+    method created= (arg0) -> Float @ test/testdata/dsl/prop.rb:64
+      argument arg0<> -> Float @ test/testdata/dsl/prop.rb:64
+    method token () -> String @ test/testdata/dsl/prop.rb:63
+    method token= (arg0) -> String @ test/testdata/dsl/prop.rb:63
+      argument arg0<> -> String @ test/testdata/dsl/prop.rb:63
+  class <constant:ShardingProp> < ::Object () @ test/testdata/dsl/prop.rb:72
+    method merchant () -> String @ test/testdata/dsl/prop.rb:73
   class <constant:SomeODM> < ::Object () @ test/testdata/dsl/prop.rb:16
     method foo () -> String | NilClass @ test/testdata/dsl/prop.rb:17
     method foo2 () -> String | NilClass @ test/testdata/dsl/prop.rb:20
@@ -200,9 +206,9 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
   class <singleton class:<constant:NotAODM>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:2
     method prop (args) @ test/testdata/dsl/prop.rb:3
       argument args<repeated> @ test/testdata/dsl/prop.rb:3
-  class <singleton class:<constant:PropHelpers2>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:65
-  class <singleton class:<constant:PropHelpers>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:60
-  class <singleton class:<constant:ShardingProp>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:70
+  class <singleton class:<constant:PropHelpers2>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:67
+  class <singleton class:<constant:PropHelpers>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:62
+  class <singleton class:<constant:ShardingProp>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:72
   class <singleton class:<constant:SomeODM>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:16
   method <static-init>$10 () @ test/testdata/dsl/prop.rb:2
 
