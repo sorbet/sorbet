@@ -1,8 +1,8 @@
 class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
   class <constant:Opus> () @ ???
-    class <constant:AutogenLoader> () -> untyped @ test/testdata/infer/gerald.rb:3
+    class <constant:AutogenLoader> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:3
     class <constant:CIBot> () @ test/testdata/infer/gerald.rb:5
-      class <constant:Actions> () -> untyped @ test/testdata/infer/gerald.rb:147
+      class <constant:Actions> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:147
       class <constant:Gerald> (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
         class <constant:Diff> < ::Object () @ test/testdata/infer/gerald.rb:111
           field @parsed -> untyped @ test/testdata/infer/gerald.rb:115
@@ -81,7 +81,7 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
             argument message<> @ test/testdata/infer/gerald.rb:11
             argument rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
           method rule_token () @ test/testdata/infer/gerald.rb:9
-        class <constant:Matcher> < ::Object (<constant:untyped>) @ test/testdata/infer/gerald.rb:17
+        class <constant:Matcher> < ::Object () @ test/testdata/infer/gerald.rb:17
           class <constant:Chalk> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:18
           field @rules -> untyped @ test/testdata/infer/gerald.rb:23
           method initialize () @ test/testdata/infer/gerald.rb:22
@@ -100,7 +100,7 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
         class <singleton class:<constant:MatchTimeBudget>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:79
         class <singleton class:<constant:MatchTimeout>> < ::<Class:StandardError> () @ test/testdata/infer/gerald.rb:7
         class <singleton class:<constant:Matcher>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:17
-      class <constant:Model> () -> untyped @ test/testdata/infer/gerald.rb:24
+      class <constant:Model> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:24
       class <singleton class:<constant:Gerald>> < ::Module () @ test/testdata/infer/gerald.rb:5
     class <singleton class:<constant:CIBot>> < ::Module () @ test/testdata/infer/gerald.rb:5
   method <static-init>$10 () @ test/testdata/infer/gerald.rb:2

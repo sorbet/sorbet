@@ -3,8 +3,8 @@ begin
     def self.<static-init><<static-init>$10>()
       begin
         <emptyTree>
-        ::untyped
-        ::untyped
+        ::Bar
+        ::Foo::Bar
       end
     end
   end
