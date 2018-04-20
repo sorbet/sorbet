@@ -21,9 +21,7 @@ public:
     const int returnCode;
 };
 
-extern std::shared_ptr<spdlog::logger> console_err;
-extern std::shared_ptr<spdlog::logger> tracer;
-extern std::shared_ptr<spdlog::logger> console;
+extern std::shared_ptr<spdlog::logger> logger;
 
 struct Printers {
     bool ParseTree = false;
@@ -65,6 +63,7 @@ struct Options {
     bool silenceErrors = false;
     bool supressNonCriticalErrors = false;
     int threads = 0;
+    int logLevel = 0; // number of time -v was passed
     std::string typedSource = "";
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;
@@ -85,6 +84,7 @@ struct Options {
 
     std::vector<std::string> inputFileNames;
     std::string inlineInput; // passed via -e
+    std::string debugLogFile;
 };
 
 Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode);

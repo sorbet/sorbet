@@ -2,10 +2,13 @@
 #define SRUBY_ERRO_H
 
 #include "os/os.h"
+#include "spdlog/spdlog.h"
 #include <cstdio>
+#include <memory>
 #include <string>
 
 namespace ruby_typer {
+extern std::shared_ptr<spdlog::logger> fatalLogger;
 class SRubyException {
 public:
     /**
@@ -75,9 +78,9 @@ template <typename... TArgs>
     _raise(message, args...);
 
     if (message.str().size() > 0) {
-        fprintf(stderr, "Error::raise(): %s\n", message.str().c_str());
+        fatalLogger->error("Error::raise(): {}\n", message.str().c_str());
     } else {
-        fprintf(stderr, "Error::raise() (sadly without a message)\n");
+        fatalLogger->error("Error::raise() (sadly without a message)\n");
     }
     print_backtrace();
     stopInDebugger();

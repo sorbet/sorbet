@@ -1,4 +1,5 @@
 #include "common.h"
+#include "Error.h"
 #include "os/os.h"
 #include <array>
 #include <csignal>
@@ -13,6 +14,17 @@
 #include <vector>
 
 using namespace std;
+
+namespace {
+shared_ptr<spdlog::logger> makeFatalLogger() {
+    auto alreadyExists = spdlog::get("fatalFallback");
+    if (!alreadyExists) {
+        return spdlog::stdout_color_mt("fatalFallback");
+    }
+    return alreadyExists;
+}
+} // namespace
+shared_ptr<spdlog::logger> ruby_typer::fatalLogger = makeFatalLogger();
 
 string ruby_typer::FileOps::read(const absl::string_view filename) {
     string fileNameStr(filename.data(), filename.size());
@@ -146,7 +158,7 @@ void ruby_typer::Error::print_backtrace() noexcept {
 
     string res = addr2line(program_name, stack_traces, trace_size);
     filter_unnecessary(res);
-    fprintf(stderr, "Backtrace:\n%s", res.c_str());
+    fatalLogger->error("Backtrace:\n{}", res.c_str());
 
     if (messages != nullptr) {
         free(messages);

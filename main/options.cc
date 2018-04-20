@@ -81,6 +81,8 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("configatron-file", "Path to configatron yaml files",
                                     cxxopts::value<vector<string>>(), "path");
+    options.add_options("advanced")("debug-log-file", "Path to debug log file",
+                                    cxxopts::value<string>()->default_value(""), "file");
 
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
@@ -96,7 +98,6 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("cache-dir", "Use the specified folder to cache data",
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
-    options.add_options("dev")("trace", "Trace phases");
 
     int defaultThreads = std::thread::hardware_concurrency();
     if (defaultThreads == 0) {
@@ -143,7 +144,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts) {
                 opts.print.*(known.flag) = true;
                 if (!known.supportsCaching) {
                     if (!opts.cacheDir.empty()) {
-                        console_err->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
+                        logger->error("--print={} is incompatible with --cacheDir. Ignoring cache", opt);
                         opts.cacheDir = "";
                     }
                 }
@@ -159,7 +160,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts) {
                 }
                 all << known.option;
             }
-            console_err->error("Unknown --print option: {}\nValid values: {}", opt, all.str());
+            logger->error("Unknown --print option: {}\nValid values: {}", opt, all.str());
             return false;
         }
     }
@@ -180,7 +181,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw) {
         }
         all << known.option;
     }
-    console_err->error("Unknown --stop-after option: {}\nValid values: {}", opt, all.str());
+    logger->error("Unknown --stop-after option: {}\nValid values: {}", opt, all.str());
     return Phase::INIT;
 }
 
@@ -209,46 +210,26 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         }
 
         if (raw["h"].as<bool>()) {
-            console->info("{}", options.help({"", "advanced", "dev"}));
+            logger->info("{}", options.help({"", "advanced", "dev"}));
             throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
             if (Version::isReleaseBuild) {
-                console->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
-                              Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
+                logger->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
+                             Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
             } else {
-                console->info("Ruby Typer non-release build. Binary format version {}",
-                              core::serialize::Serializer::VERSION);
+                logger->info("Ruby Typer non-release build. Binary format version {}",
+                             core::serialize::Serializer::VERSION);
             }
             throw EarlyReturnWithCode(0);
         }
         if (raw.count("e") == 0 && opts.inputFileNames.empty()) {
-            console->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
+            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
             throw EarlyReturnWithCode(1);
         }
 
-        switch (raw.count("v")) {
-            case 0:
-                break;
-            case 1:
-                spd::set_level(spd::level::debug);
-                console->debug("Debug logging enabled");
-                break;
-            default:
-                spd::set_level(spd::level::trace);
-                console->trace("Trace logging enabled");
-                break;
-        }
-
-        if (raw.count("q") != 0) {
-            console->set_level(spd::level::critical);
-        }
-
-        if (raw.count("trace") != 0) {
-            tracer->set_level(spd::level::trace);
-        }
-
         string typed = raw["typed"].as<string>();
+        opts.logLevel = raw.count("v");
         if (typed == "auto") {
         } else if (typed == "ruby") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Ruby;
@@ -259,7 +240,7 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         } else if (typed == "strong") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strong;
         } else {
-            console->error("Invalid value for `--typed`: {}", typed);
+            logger->error("Invalid value for `--typed`: {}", typed);
         }
 
         opts.showProgress = raw.count("P") != 0;
@@ -281,17 +262,21 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         opts.metricsRepo = raw["metrics-repo"].as<string>();
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
+        opts.debugLogFile = raw["debug-log-file"].as<string>();
+        if (typed != "always" && typed != "never" && typed != "auto") {
+            logger->error("Invalid value for `--typed`: {}", typed);
+        }
         opts.typedSource = raw["typed-source"].as<string>();
         if (!opts.typedSource.empty()) {
             if (opts.print.TypedSource) {
-                console_err->error("`--typed-source " + opts.typedSource +
-                                   "` and `-p typed-source` are incompatible. Either print out one file or all files.");
+                logger->error("`--typed-source " + opts.typedSource +
+                              "` and `-p typed-source` are incompatible. Either print out one file or all files.");
                 throw EarlyReturnWithCode(1);
             }
             auto found = any_of(opts.inputFileNames.begin(), opts.inputFileNames.end(),
                                 [&](string &path) { return path.find(opts.typedSource) != string::npos; });
             if (!found) {
-                console_err->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
+                logger->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
                 throw EarlyReturnWithCode(1);
             }
         }
@@ -306,14 +291,14 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
             core::ErrorColors::disableColors();
         }
         if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Ruby) {
-            console_err->error("--suggest-typed requires --typed=typed or higher.");
+            logger->error("--suggest-typed requires --typed=typed or higher.");
             throw EarlyReturnWithCode(1);
         }
 
         opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
     } catch (cxxopts::OptionParseException &e) {
-        console->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
+        logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         throw EarlyReturnWithCode(1);
     }
     return opts;

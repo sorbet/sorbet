@@ -26,7 +26,7 @@ FileFlatMapper::FileFlatMapper(int &argc, const char **&argv) : origArgc(argc), 
                     args.push_back(c_arg);
                 }
             } catch (FileNotFoundException e) {
-                console_err->error("File Not Found: {}", argv[i]);
+                logger->error("File Not Found: {}", argv[i]);
                 throw new EarlyReturnWithCode(11);
                 continue;
             }
