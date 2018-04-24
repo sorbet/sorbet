@@ -85,7 +85,7 @@ NameDef names[] = {
     {"cfgAlias", "<cfgAlias>", CFG | Infer | Core},
     // end CFG temporaries
 
-    {"include", Namer | Resolver},
+    {"include", Namer | Resolver | DSL},
     {"extend", Namer | Resolver},
     {"currentFile", "__FILE__", Desugar},
     {"merge", Desugar},
@@ -168,6 +168,10 @@ NameDef names[] = {
     {"dslRequired", "dsl_required", DSL},
 
     {"wrapInstance", "wrap_instance", DSL},
+
+    {"registered", DSL},
+    {"instanceRegistered", "<instance_registered>", DSL},
+    {"helpers", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning

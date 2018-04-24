@@ -1,0 +1,22 @@
+module <emptyTree>::<constant:MyRoutes><<constant:<todo sym>>> < ()
+  self(<constant:<todo sym>>).include(<emptyTree>::<constant:Sinatra>::<constant:Base>)
+
+  self(<constant:<todo sym>>).include(<emptyTree>::<constant:Helpers>)
+
+  def <instance_registered><<constant:<todo sym>>>(app)
+    begin
+      app.get("/route/") do ||
+        begin
+          self(<constant:<todo sym>>).params()
+          self(<constant:<todo sym>>).my_helper()
+        end
+      end
+    end
+  end
+
+  module <emptyTree>::<constant:Helpers><<constant:<todo sym>>> < ()
+    def my_helper<<constant:<todo sym>>>()
+      <emptyTree>
+    end
+  end
+end
