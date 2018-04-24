@@ -71,8 +71,8 @@ struct CounterImpl {
         this->counters_by_category[category][counter] += value;
     }
 
-    void counterAdd(const char *counter, unsigned int value) {
-        if (!enable_counters) {
+    void counterAdd(const char *counter, unsigned int value, bool isProdCounter) {
+        if (!enable_counters && !isProdCounter) {
             return;
         }
         this->counters[counter] += value;
@@ -124,16 +124,24 @@ void counterConsume(CounterState cs) {
     }
 
     for (auto &e : cs.counters->counters) {
-        counterState.counterAdd(e.first, e.second);
+        counterState.counterAdd(e.first, e.second, true);
     }
 }
 
 void counterAdd(ConstExprStr counter, unsigned int value) {
-    counterState.counterAdd(counter.str, value);
+    counterState.counterAdd(counter.str, value, false);
 }
 
 void counterInc(ConstExprStr counter) {
     counterAdd(counter, 1);
+}
+
+void prodCounterAdd(ConstExprStr counter, unsigned int value) {
+    counterState.counterAdd(counter.str, value, true);
+}
+
+void prodCounterInc(ConstExprStr counter) {
+    prodCounterAdd(counter, 1);
 }
 
 void categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
@@ -183,7 +191,7 @@ CounterImpl CounterImpl::canonicalize() {
     }
 
     for (auto &e : this->counters) {
-        out.counterAdd(internKey(e.first), e.second);
+        out.counterAdd(internKey(e.first), e.second, true);
     }
     return out;
 }
@@ -197,9 +205,6 @@ bool shouldShow(vector<string> &wantNames, string name) {
 }
 
 string getCounterStatistics(vector<string> names) {
-    if (!enable_counters) {
-        return "Statistics collection is not available in production build. Use debug build.";
-    }
     stringstream buf;
 
     buf << "Counters and Histograms: " << '\n';

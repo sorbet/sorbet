@@ -70,6 +70,8 @@ struct Counters {
 CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
+void prodCounterInc(ConstExprStr counter);
+void prodCounterAdd(ConstExprStr counter, unsigned int value);
 void counterInc(ConstExprStr counter);
 void counterAdd(ConstExprStr counter, unsigned int value);
 void categoryCounterInc(ConstExprStr category, ConstExprStr counter);

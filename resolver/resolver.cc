@@ -542,7 +542,7 @@ private:
 
                 [&](ast::MethodDef *mdef) {
                     if (!lastSig.empty()) {
-                        core::counterInc("types.sig.count");
+                        core::prodCounterInc("types.sig.count");
 
                         bool isOverloaded =
                             lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();

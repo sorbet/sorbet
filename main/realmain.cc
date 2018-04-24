@@ -238,8 +238,8 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                             // assertion below requires every input file to map
                             // to one output tree
                         }
-                        core::counterAdd("types.input.bytes", src.size());
-                        core::counterInc("types.input.files");
+                        core::prodCounterAdd("types.input.bytes", src.size());
+                        core::prodCounterInc("types.input.files");
 
                         core::FileRef file;
                         {
@@ -253,15 +253,19 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         switch (file.data(*lgs).strict) {
                             case core::StrictLevel::Ruby:
                                 core::categoryCounterInc("types.input.files.sigil", "none");
+                                core::prodCounterInc("types.input.files.sigil.none");
                                 break;
                             case core::StrictLevel::Typed:
                                 core::categoryCounterInc("types.input.files.sigil", "typed");
+                                core::prodCounterInc("types.input.files.sigil.typed");
                                 break;
                             case core::StrictLevel::Strict:
                                 core::categoryCounterInc("types.input.files.sigil", "strict");
+                                core::prodCounterInc("types.input.files.sigil.strict");
                                 break;
                             case core::StrictLevel::Strong:
                                 core::categoryCounterInc("types.input.files.sigil", "strong");
+                                core::prodCounterInc("types.input.files.sigil.strong");
                                 break;
                         }
 
@@ -649,9 +653,9 @@ int realmain(int argc, const char *argv[]) {
         Timer timeit(logger, "reading files");
         core::UnfreezeFileTable fileTableAccess(*gs);
         if (!opts.inlineInput.empty()) {
-            core::counterAdd("types.input.bytes", opts.inlineInput.size());
-            core::counterInc("types.input.lines");
-            core::counterInc("types.input.files");
+            core::prodCounterAdd("types.input.bytes", opts.inlineInput.size());
+            core::prodCounterInc("types.input.lines");
+            core::prodCounterInc("types.input.files");
             auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
             inputFiles.push_back(file);
             if (opts.forceMaxStrict < core::StrictLevel::Typed) {
@@ -691,6 +695,8 @@ int realmain(int argc, const char *argv[]) {
 
     if (opts.enableCounters) {
         logger->warn("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
+    } else {
+        logger->debug("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
     }
 
     if (!opts.statsdHost.empty()) {
