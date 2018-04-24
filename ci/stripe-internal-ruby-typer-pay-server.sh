@@ -32,6 +32,7 @@ cp bazel-bin/main/ruby-typer /build/bin
 
 PATH=$PATH:"$(pwd)/bazel-bin/main/"
 export PATH
+GIT_SHA=$(git rev-parse HEAD)
 
 if [ ! -d $DIR ]; then
     echo "$DIR doesn't exist"
@@ -58,6 +59,7 @@ done < ../ci/stripe-internal-ruby-typer-pay-server-typechecked
 RECORD_STATS=
 if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
     RECORD_STATS=1
+    echo Will submit metrics for "$GIT_SHA"
 fi
 
 OUT=$(mktemp)
@@ -104,7 +106,7 @@ TIMEFILE2=$(mktemp)
 /usr/bin/time -o "$TIMEFILE2" \
     ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=strict --suggest-typed \
       --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
-      --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/pay-server --metrics-sha="$PAY_SERVER_SHA"
+      --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/ruby-typer --metrics-sha="$GIT_SHA"
 
 cat "$TIMEFILE2"
 
