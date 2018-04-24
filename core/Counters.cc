@@ -219,7 +219,9 @@ string getCounterStatistics(vector<string> names) {
         sort(sorted.begin(), sorted.end(), [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
         buf << " " << cat.first << "    Total: " << sum << '\n';
-
+        if (sum == 0) {
+            sum = 1;
+        }
         for (auto &e : sorted) {
             string number = padOrLimit(to_string(e.first), 6);
             string perc = padOrLimit(to_string(round(e.first * 1000.0 / sum) / 10.0), 3);
