@@ -263,9 +263,6 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         opts.metricsBranch = raw["metrics-branch"].as<string>();
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
-        if (typed != "always" && typed != "never" && typed != "auto") {
-            logger->error("Invalid value for `--typed`: {}", typed);
-        }
         opts.typedSource = raw["typed-source"].as<string>();
         if (!opts.typedSource.empty()) {
             if (opts.print.TypedSource) {
