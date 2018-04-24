@@ -74,21 +74,21 @@ struct FileIsTypedCase {
 
 TEST(CoreTest, FileIsTyped) { // NOLINT
     vector<FileIsTypedCase> cases = {
-        {"", StrictLevel::Ruby},
+        {"", StrictLevel::Stripe},
         {"# typed: true", StrictLevel::Typed},
         {"\n# typed: true\n", StrictLevel::Typed},
         {"not a typed: sigil\n# typed: true\n", StrictLevel::Typed},
-        {"typed:\n# typed: nonsense\n", StrictLevel::Ruby},
+        {"typed:\n# typed: nonsense\n", StrictLevel::Stripe},
         {"# typed: strict\n", StrictLevel::Strict},
         {"# typed: strong\n", StrictLevel::Strong},
-        {"# typed: false\n", StrictLevel::Ruby},
-        {"# typed: lax\n", StrictLevel::Ruby},
+        {"# typed: false\n", StrictLevel::Stripe},
+        {"# typed: lax\n", StrictLevel::Stripe},
 
         // Test the old sigil
         {"# @typed", StrictLevel::Strict},
         {"\n# @typed\n", StrictLevel::Strict},
         {"not an @typed sigil\n# @typed\n", StrictLevel::Strict},
-        {"@typed\n# @typed some noise\n", StrictLevel::Ruby},
+        {"@typed\n# @typed some noise\n", StrictLevel::Stripe},
     };
     for (auto &tc : cases) {
         EXPECT_EQ(tc.strict, fileSigil(tc.src));

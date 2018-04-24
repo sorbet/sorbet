@@ -231,8 +231,8 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         string typed = raw["typed"].as<string>();
         opts.logLevel = raw.count("v");
         if (typed == "auto") {
-        } else if (typed == "ruby") {
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Ruby;
+        } else if (typed == "ruby" || typed == "stripe") {
+            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Stripe;
         } else if (typed == "typed") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Typed;
         } else if (typed == "strict") {
@@ -287,7 +287,7 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         } else if (raw["color"].as<string>() == "never") {
             core::ErrorColors::disableColors();
         }
-        if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Ruby) {
+        if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Stripe) {
             logger->error("--suggest-typed requires --typed=typed or higher.");
             throw EarlyReturnWithCode(1);
         }

@@ -63,7 +63,7 @@ public:
     CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file.data(ctx).strict == core::StrictLevel::Ruby) {
+        if (m->loc.file.data(ctx).strict == core::StrictLevel::Stripe) {
             return m;
         }
         auto &print = opts.print;
@@ -251,7 +251,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         }
 
                         switch (file.data(*lgs).strict) {
-                            case core::StrictLevel::Ruby:
+                            case core::StrictLevel::Stripe:
                                 core::categoryCounterInc("types.input.files.sigil", "none");
                                 core::prodCounterInc("types.input.files.sigil.none");
                                 break;
@@ -369,7 +369,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << '\n' << '\n';
         }
-        if (opts.suggestTyped && !f.data(ctx).hadErrors() && f.data(ctx).sigil == core::StrictLevel::Ruby) {
+        if (opts.suggestTyped && !f.data(ctx).hadErrors() && f.data(ctx).sigil == core::StrictLevel::Stripe) {
             core::counterInc("types.input.files.suggest_typed");
             logger->error("Suggest adding # typed: true to: {}", f.data(ctx).path());
         }

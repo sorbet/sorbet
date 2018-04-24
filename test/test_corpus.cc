@@ -318,7 +318,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).sigil == ruby_typer::core::StrictLevel::Ruby) {
+            if (file.data(ctx).sigil == ruby_typer::core::StrictLevel::Stripe) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp expectations must specify # typed:";

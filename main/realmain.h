@@ -55,7 +55,7 @@ struct Options {
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 
-    core::StrictLevel forceMinStrict = core::StrictLevel::Ruby;
+    core::StrictLevel forceMinStrict = core::StrictLevel::Stripe;
     core::StrictLevel forceMaxStrict = core::StrictLevel::Strong;
 
     bool showProgress = false;

@@ -23,7 +23,7 @@ vector<int> findLineBreaks(const std::string &s) {
 
 StrictLevel fileSigil(absl::string_view source) {
     /*
-     * StrictLevel::Ruby: <none> | # typed: false
+     * StrictLevel::Stripe: <none> | # typed: false
      * StrictLevel::Typed: # typed: true
      * StrictLevel::Strict: # typed: strict
      * StrictLevel::String: # typed: strong
@@ -40,7 +40,7 @@ StrictLevel fileSigil(absl::string_view source) {
     while (true) {
         off = source.find("typed", off);
         if (off == absl::string_view::npos) {
-            return StrictLevel::Ruby;
+            return StrictLevel::Stripe;
         }
 
         size_t line_start = source.rfind('\n', off);
@@ -68,7 +68,7 @@ StrictLevel fileSigil(absl::string_view source) {
             } else if (suffix == "strong") {
                 return StrictLevel::Strong;
             } else if (suffix == "false") {
-                return StrictLevel::Ruby;
+                return StrictLevel::Stripe;
             } else {
                 // TODO(nelhage): We should report an error here to help catch
                 // typos. This would require refactoring so this function has

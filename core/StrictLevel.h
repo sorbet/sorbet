@@ -4,7 +4,8 @@
 namespace ruby_typer {
 namespace core {
 enum class StrictLevel {
-    Ruby = 0,
+    Stripe = 0, // Temporary; A level defined as "whatever Stripe needs it to be
+                // right now". Eventually this will be named "Ruby" and contain even fewer checks.
     Typed = 1,
     Strict = 2,
     Strong = 3,
