@@ -703,6 +703,8 @@ private:
     }
 
 public:
+    int sendCount = 0;
+
     unique_ptr<ast::Assign> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         if (handleDeclaration(ctx, asgn)) {
             return asgn;
@@ -759,9 +761,11 @@ public:
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         auto *id = ast::cast_tree<ast::Ident>(send->recv.get());
         if (id == nullptr) {
+            sendCount++;
             return send;
         }
         if (id->symbol != core::Symbols::T()) {
+            sendCount++;
             return send;
         }
         switch (send->fun._id) {
@@ -1092,6 +1096,7 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
         tree = flatten.addClasses(ctx, move(tree));
         tree = flatten.addMethods(ctx, move(tree));
     }
+    core::prodCounterAdd("types.input.sends.total", sigs.sendCount);
 
     ctx.trace("Finalizing resolution");
     finalizeResolution(ctx.state);

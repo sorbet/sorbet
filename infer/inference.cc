@@ -37,6 +37,7 @@ bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     core::prodCounterInc("types.input.methods.typechecked");
+    int typedSendCount = 0;
     const int startErrorCount = ctx.state.totalErrors();
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
@@ -129,6 +130,9 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                 current.ensureGoodAssignTarget(ctx, bind.bind);
                 bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
                                                   *constr);
+                if (bind.tpe && !bind.tpe->isDynamic() && cfg::isa_instruction<cfg::Send>(bind.value.get())) {
+                    typedSendCount++;
+                }
                 bind.tpe->sanityCheck(ctx);
                 if (bind.tpe->isBottom()) {
                     current.isDead = true;
@@ -149,6 +153,9 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
     if (startErrorCount == ctx.state.totalErrors()) {
         core::counterInc("infer.methods_typechecked.no_errors");
     }
+
+    core::prodCounterAdd("types.input.sends.typed", typedSendCount);
+
     return cfg;
 }
 } // namespace ruby_typer

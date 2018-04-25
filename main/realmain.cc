@@ -252,19 +252,15 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
 
                         switch (file.data(*lgs).strict) {
                             case core::StrictLevel::Stripe:
-                                core::categoryCounterInc("types.input.files.sigil", "none");
                                 core::prodCounterInc("types.input.files.sigil.none");
                                 break;
                             case core::StrictLevel::Typed:
-                                core::categoryCounterInc("types.input.files.sigil", "typed");
                                 core::prodCounterInc("types.input.files.sigil.typed");
                                 break;
                             case core::StrictLevel::Strict:
-                                core::categoryCounterInc("types.input.files.sigil", "strict");
                                 core::prodCounterInc("types.input.files.sigil.strict");
                                 break;
                             case core::StrictLevel::Strong:
-                                core::categoryCounterInc("types.input.files.sigil", "strong");
                                 core::prodCounterInc("types.input.files.sigil.strong");
                                 break;
                         }

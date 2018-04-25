@@ -91,9 +91,6 @@ struct CounterImpl {
 thread_local CounterImpl counterState;
 
 CounterState getAndClearThreadCounters() {
-    if (!enable_counters) {
-        return CounterState(make_unique<CounterImpl>());
-    }
     auto state = make_unique<CounterImpl>(move(counterState));
     counterState.clear();
     return CounterState(move(state));
@@ -108,9 +105,6 @@ void CounterImpl::clear() {
 }
 
 void counterConsume(CounterState cs) {
-    if (!enable_counters) {
-        return;
-    }
     for (auto &cat : cs.counters->counters_by_category) {
         for (auto &e : cat.second) {
             counterState.categoryCounterAdd(cat.first, e.first, e.second);
@@ -323,10 +317,6 @@ public:
 };
 
 bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
-    if (!enable_counters) {
-        return false;
-    }
-
     StatsdClientWrapper statsd(host, port, prefix);
 
     auto canon = counterState.canonicalize();
@@ -359,9 +349,6 @@ bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
 
 bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
                               const std::string &branch, const std::string &sha, const std::string &status) {
-    if (!enable_counters) {
-        return false;
-    }
     com::stripe::payserver::events::cibot::SourceMetrics metrics;
     metrics.set_repo(repo);
     metrics.set_branch(branch);
