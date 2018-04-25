@@ -156,11 +156,22 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
 }; // namespace
 
 void Resolver::finalizeResolution(core::GlobalState &gs) {
+    int methodCount = 0;
+    int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &data = core::SymbolRef(&gs, i).data(gs);
+        if (data.definitionLoc.file.exists() &&
+            data.definitionLoc.file.data(gs).source_type == core::File::Type::Normal) {
+            if (data.isMethod()) {
+                methodCount++;
+            } else if (data.isClass()) {
+                classCount++;
+            }
+        }
         if (!data.isClass()) {
             continue;
         }
+        classCount++;
         if (!data.isClassModuleSet()) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             data.setIsModule(true);
@@ -218,6 +229,8 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             validateAbstract(gs, abstractCache, sym);
         }
     }
+    core::prodCounterAdd("types.input.classes.total", classCount);
+    core::prodCounterAdd("types.input.methods.total", methodCount);
 }
 }; // namespace resolver
 

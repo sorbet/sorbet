@@ -36,7 +36,7 @@ bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
 }
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
-    core::counterInc("infer.methods_typechecked");
+    core::prodCounterInc("types.input.methods.typechecked");
     const int startErrorCount = ctx.state.totalErrors();
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
