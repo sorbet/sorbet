@@ -15,20 +15,20 @@ constexpr ErrorClass DuplicateVariableDeclaration{5006, StrictLevel::Typed};
 constexpr ErrorClass UndeclaredVariable{5007, StrictLevel::Strict};
 constexpr ErrorClass DynamicSuperclass{5008, StrictLevel::Typed};
 /* constexpr ErrorClass InvalidAttr{5009, StrictLevel::Typed}; */
-constexpr ErrorClass InvalidCast{5010, StrictLevel::Typed};
+constexpr ErrorClass InvalidCast{5010, StrictLevel::Stripe};
 constexpr ErrorClass CircularDependency{5011, StrictLevel::Stripe};
 constexpr ErrorClass RedefinitionOfParents{5012, StrictLevel::Stripe};
 constexpr ErrorClass ConstantAssertType{5013, StrictLevel::Stripe};
 constexpr ErrorClass ParentTypeNotDeclared{5014, StrictLevel::Typed};
-constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::Typed};
-constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::Typed};
-constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::Typed};
-constexpr ErrorClass NotATypeVariable{5018, StrictLevel::Typed};
-constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::Typed};
-constexpr ErrorClass InvalidMixinDeclaration{5020, StrictLevel::Typed};
+constexpr ErrorClass ParentVarianceMismatch{5015, StrictLevel::Stripe};
+constexpr ErrorClass VariantTypeMemberInClass{5016, StrictLevel::Stripe};
+constexpr ErrorClass TypeMembersInWrongOrder{5017, StrictLevel::Stripe};
+constexpr ErrorClass NotATypeVariable{5018, StrictLevel::Stripe};
+constexpr ErrorClass AbstractMethodWithBody{5019, StrictLevel::Stripe};
+constexpr ErrorClass InvalidMixinDeclaration{5020, StrictLevel::Stripe};
 constexpr ErrorClass AbstractMethodOutsideAbstract{5021, StrictLevel::Stripe};
 constexpr ErrorClass ConcreteMethodInInterface{5022, StrictLevel::Stripe};
-constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::Typed};
+constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::Typed}; // there are violations.
 } // namespace Resolver
 } // namespace errors
 } // namespace core

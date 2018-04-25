@@ -4,6 +4,7 @@ namespace ruby_typer {
 namespace core {
 namespace errors {
 namespace Infer {
+// N.B infer does not run for untyped call at all. Level::Ruby here would be meaningless
 constexpr ErrorClass PinnedVariableMismatch{7001, core::StrictLevel::Typed};
 constexpr ErrorClass MethodArgumentMismatch{7002, core::StrictLevel::Typed};
 constexpr ErrorClass UnknownMethod{7003, core::StrictLevel::Typed};
