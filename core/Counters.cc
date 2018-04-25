@@ -243,7 +243,8 @@ string getCounterStatistics(vector<string> names) {
 
         CounterImpl::CounterType header = 0;
         auto it = hist.second.begin();
-        while (it != hist.second.end() && (header + it->second) * 1.0 / sum < HIST_CUTOFF) {
+        auto cutoff = hist.second.size() > 30 ? HIST_CUTOFF : 0.0;
+        while (it != hist.second.end() && (header + it->second) * 1.0 / sum < cutoff) {
             header += it->second;
             it++;
         }
@@ -255,7 +256,7 @@ string getCounterStatistics(vector<string> names) {
                 << hashes << '\n';
         }
 
-        while (it != hist.second.end() && (sum - header) * 1.0 / sum > HIST_CUTOFF) {
+        while (it != hist.second.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
             string number = padOrLimit(to_string(it->second), 6);
             string perc = padOrLimit(to_string(round(it->second * 1000.0 / sum) / 10.0), 3);
