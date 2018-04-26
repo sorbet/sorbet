@@ -103,5 +103,5 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
       class <constant:Model> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:24
       class <singleton class:<constant:Gerald>> < ::Module () @ test/testdata/infer/gerald.rb:5
     class <singleton class:<constant:CIBot>> < ::Module () @ test/testdata/infer/gerald.rb:5
-  method <static-init>$10 () @ test/testdata/infer/gerald.rb:2
+  method <static-init>$11 () @ test/testdata/infer/gerald.rb:2
 

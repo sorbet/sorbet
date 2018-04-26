@@ -14,5 +14,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/module_function.rb:2
     method f () -> AliasType { symbol = ::Funcs#f } @ test/testdata/namer/module_function.rb:4
     method g () -> AliasType { symbol = ::Funcs#g } @ test/testdata/namer/module_function.rb:9
     method h () -> AliasType { symbol = ::Funcs#h } @ test/testdata/namer/module_function.rb:14
-  method <static-init>$10 () @ test/testdata/namer/module_function.rb:2
+  method <static-init>$11 () @ test/testdata/namer/module_function.rb:2
 

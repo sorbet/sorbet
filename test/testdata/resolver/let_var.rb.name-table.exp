@@ -20,6 +20,6 @@ class <constant:<root>> < ::Object () @ test/testdata/resolver/let_var.rb:2
   class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:23
   class <singleton class:<constant:Mixin>> < ::Module () @ test/testdata/resolver/let_var.rb:18
   class <singleton class:<constant:Parent>> < ::<Class:Object> () @ test/testdata/resolver/let_var.rb:2
-  method <static-init>$10 () @ test/testdata/resolver/let_var.rb:2
+  method <static-init>$11 () @ test/testdata/resolver/let_var.rb:2
   static-field <constant:Alias> -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
 

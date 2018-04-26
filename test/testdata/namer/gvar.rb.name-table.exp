@@ -6,5 +6,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/gvar.rb:2
   field $a @ test/testdata/namer/gvar.rb:2
   field $b @ test/testdata/namer/gvar.rb:5
   field $c @ test/testdata/namer/gvar.rb:8
-  method <static-init>$10 () @ test/testdata/namer/gvar.rb:2
+  method <static-init>$11 () @ test/testdata/namer/gvar.rb:2
 

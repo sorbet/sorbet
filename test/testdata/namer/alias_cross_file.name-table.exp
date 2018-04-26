@@ -4,6 +4,6 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/alias_cross_file__02
     method test_resolve () -> T1 @ test/testdata/namer/alias_cross_file__01.rb:3
   class <singleton class:<constant:T1>> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__02.rb:1
   class <singleton class:<constant:TestSig>> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__01.rb:1
-  method <static-init>$11 () @ test/testdata/namer/alias_cross_file__02.rb:1
+  method <static-init>$12 () @ test/testdata/namer/alias_cross_file__02.rb:1
   static-field <constant:T2> -> AliasType { symbol = ::T1 } @ test/testdata/namer/alias_cross_file__02.rb:2
 
