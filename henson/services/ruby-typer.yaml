@@ -15,4 +15,4 @@ deploy:
   disable_autobootstrap: true
 announce:
   slack_channels:
-  - ruby-typer
+  - ruby-types
