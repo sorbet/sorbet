@@ -12,7 +12,8 @@ deploy:
   - mydev
   environments:
   - qa
-  disable_autobootstrap: true
+  disable_autobootstrap: false
 announce:
   slack_channels:
   - ruby-types
+autobootstrap: true
