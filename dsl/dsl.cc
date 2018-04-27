@@ -4,6 +4,7 @@
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
+#include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
 
@@ -48,6 +49,14 @@ public:
                          }
 
                          nodes = DSLBuilder::replaceDSL(ctx, send);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
+                         }
+                     },
+
+                     [&](ast::MethodDef *mdef) {
+                         auto nodes = Sinatra::replaceDSL(ctx, mdef);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
                              return;
