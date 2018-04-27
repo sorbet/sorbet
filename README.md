@@ -39,9 +39,8 @@ We build using [bazel](https://bazel.build/); Run `./bazel test
 - [ragel](http://www.colm.net/open-source/ragel/);
 - [bison](https://www.gnu.org/software/bison/);
 - [ruby](https://www.ruby-lang.org/en/);
-- [clang](https://clang.llvm.org/) at least version 4.0.0, and
-  [clang-format](https://clang.llvm.org/docs/ClangFormat.html) at
-  least version 5.0.0;
+- [clang](https://clang.llvm.org/), but we download it as part of the build.
+  [clang-format](https://clang.llvm.org/docs/ClangFormat.html), but we download it as part of hte build.
 - [autoconf](https://www.gnu.org/software/autoconf/autoconf.html) for building jemalloc from source;
 - [gnu coreutils](http://www.gnu.org/software/coreutils/coreutils.html) and [gnu parallel](https://www.gnu.org/software/parallel/) are used by some of bash scripts;
 - platform headers for [ncurses5](https://www.gnu.org/software/ncurses/).
@@ -56,7 +55,7 @@ brew install ragel bison autoconf coreutils parallel
 ### On Ubuntu 16.04
 
 ```
-sudo apt install ragel bison clang-4.0 libncurses5-dev autoconf
+sudo apt install ragel bison libncurses5-dev autoconf
 ```
 
 And then copy `bazelrc-ubuntu` to `.bazelrc` to configure bazel to use
