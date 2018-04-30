@@ -101,6 +101,7 @@ NameDef names[] = {
 
     {"returns", Resolver | DSL},
     {"checked", Resolver},
+    {"soft", Resolver},
     {"all", Resolver | Infer | Core},
     {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver | DSL},

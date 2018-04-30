@@ -187,6 +187,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
             case core::Names::checked()._id:
                 sig.seen.checked = true;
                 break;
+            case core::Names::soft()._id:
+                break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Unknown `sig` builder method `{}`", send->fun.toString(ctx));
