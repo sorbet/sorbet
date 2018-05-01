@@ -24,7 +24,16 @@ class NameInserter {
     core::SymbolRef squashNames(core::MutableContext ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
         if (constLit == nullptr) {
-            ENFORCE(node.get() != nullptr);
+            if (auto *id = ast::cast_tree<ast::Ident>(node.get())) {
+                return id->symbol;
+            }
+            if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
+                // emitted via `class << self` blocks
+                ENFORCE(uid->kind == ast::UnresolvedIdent::Class);
+                ENFORCE(uid->name == core::Names::singleton());
+            } else {
+                ENFORCE(ast::isa_tree<ast::EmptyTree>(node.get()), "scope is a ", node->nodeName());
+            }
             return owner;
         }
 
