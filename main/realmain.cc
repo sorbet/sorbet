@@ -209,7 +209,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-        workers.multiplexJob([cgs, opts, fileq, resultq, &kvstore]() {
+        workers.multiplexJob([cgs, &opts, fileq, resultq, &kvstore]() {
             logger->trace("worker deep copying global state");
             auto lgs = cgs->deepCopy();
             logger->trace("worker done deep copying global state");
@@ -342,7 +342,8 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
     return ret;
 }
 
-unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved, Options opts) {
+unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Expression> resolved,
+                                          const Options &opts) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
     if (opts.stopAfterPhase == Phase::NAMER) {
@@ -473,7 +474,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob([ctx, opts, fileq, resultq]() {
+            workers.multiplexJob([ctx, &opts, fileq, resultq]() {
                 typecheck_thread_result threadResult;
                 unique_ptr<ast::Expression> job;
                 int processedByThread = 0;
@@ -575,7 +576,8 @@ int realmain(int argc, const char *argv[]) {
 
     auto typeErrorsConsole = spd::details::registry::instance().create("typeErrors", stderr_color_sink);
 
-    Options opts = readOptions(argc, argv);
+    Options opts;
+    readOptions(opts, argc, argv);
     if (!opts.debugLogFile.empty()) {
         auto fileSink = std::make_shared<spd::sinks::simple_file_sink_mt>(opts.debugLogFile);
         fileSink->set_level(spd::level::debug);

@@ -185,8 +185,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw) {
     return Phase::INIT;
 }
 
-Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
-    Options opts;
+void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnWithCode) {
     FileFlatMapper flatMapper(argc, argv);
 
     cxxopts::Options options = buildOptions();
@@ -298,7 +297,6 @@ Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         throw EarlyReturnWithCode(1);
     }
-    return opts;
 }
 
 } // namespace realmain

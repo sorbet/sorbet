@@ -85,9 +85,15 @@ struct Options {
     std::vector<std::string> inputFileNames;
     std::string inlineInput; // passed via -e
     std::string debugLogFile;
+
+    Options() = default;
+    Options(const Options &) = delete;
+    Options(Options &&) = default;
+    const Options &operator=(const Options &) = delete;
+    const Options &operator=(Options &&) = delete;
 };
 
-Options readOptions(int argc, const char *argv[]) throw(EarlyReturnWithCode);
+void readOptions(Options &, int argc, const char *argv[]) throw(EarlyReturnWithCode);
 } // namespace realmain
 } // namespace ruby_typer
 #endif // RUBY_TYPER_REAL_MAIN_H
