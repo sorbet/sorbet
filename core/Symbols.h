@@ -221,6 +221,7 @@ public:
         return superClass;
     }
 
+    // TODO(dmitry) perf: most calls to this method could be eliminated as part of perf work.
     SymbolRef ref(const GlobalState &gs) const;
 
     inline bool isClass() const {

@@ -1,0 +1,21 @@
+class <constant:<root>> < ::Object () @ test/testdata/resolver/resolution_order.rb:8
+  class <constant:A> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:10
+    static-field <constant:AB> -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:11
+    static-field <constant:AV> -> Integer @ test/testdata/resolver/resolution_order.rb:13
+  class <constant:B> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:16
+    static-field <constant:BC> -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:17
+  class <constant:C> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:20
+  class <constant:D> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:37
+    static-field <constant:DA> -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:38
+  class <constant:E> (<constant:BasicObject>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:32
+    static-field <constant:EA> -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:34
+  class <constant:F> (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_order.rb:23
+    method <static-init> () @ test/testdata/resolver/resolution_order.rb:29
+  class <singleton class:<constant:A>> < ::Module () @ test/testdata/resolver/resolution_order.rb:10
+  class <singleton class:<constant:B>> < ::Module () @ test/testdata/resolver/resolution_order.rb:16
+  class <singleton class:<constant:C>> < ::Module () @ test/testdata/resolver/resolution_order.rb:20
+  class <singleton class:<constant:D>> < ::Module () @ test/testdata/resolver/resolution_order.rb:37
+  class <singleton class:<constant:E>> < ::Module () @ test/testdata/resolver/resolution_order.rb:32
+  class <singleton class:<constant:F>> < ::Module () @ test/testdata/resolver/resolution_order.rb:23
+  method <static-init>$11 () @ test/testdata/resolver/resolution_order.rb:8
+

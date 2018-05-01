@@ -44,6 +44,9 @@ namespace {
  * potentially renders additional constants resolvable, and so if any constant
  * on the second list succeeds, we need to keep looping in the outer loop.
  *
+ * We also track aliases to constants that we were not yet able to resolve and
+ * define those aliases when their right hand sides resolve successfully.
+ *
  * The resolveConstants static method function at the bottom of this class
  * implements the iterate-to-fixpoint outer loop.
  */
@@ -83,8 +86,22 @@ private:
         AncestorResolutionItem(const AncestorResolutionItem &rhs) = delete;
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
     };
+
+    struct AliasResolutionItem {
+        core::SymbolRef lhs;
+        unique_ptr<ast::Ident> rhs;
+
+        AliasResolutionItem() = default;
+        AliasResolutionItem(AliasResolutionItem &&) = default;
+        AliasResolutionItem &operator=(AliasResolutionItem &&rhs) = default;
+
+        AliasResolutionItem(const AliasResolutionItem &) = delete;
+        const AliasResolutionItem &operator=(const AliasResolutionItem &) = delete;
+    };
+
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todo_ancestors_;
+    vector<AliasResolutionItem> todo_aliases_;
 
     static core::SymbolRef resolveLhs(core::MutableContext ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
@@ -112,7 +129,7 @@ private:
         }
 
         if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
-            core::SymbolRef resolved = id->symbol;
+            core::SymbolRef resolved = id->symbol.data(ctx).dealias(ctx);
             if (resolved.data(ctx).resultType != nullptr && resolved.data(ctx).resultType->isDynamic()) {
                 return core::Symbols::untyped();
             }
@@ -137,6 +154,14 @@ private:
         }
         job.out->symbol = resolved;
         return true;
+    }
+
+    static bool resolveAliasJob(core::MutableContext ctx, AliasResolutionItem &it) {
+        if (it.rhs->symbol != core::Symbols::todo()) {
+            it.lhs.data(ctx).resultType = make_unique<core::AliasType>(it.rhs->symbol);
+            return true;
+        }
+        return false;
     }
 
     static bool resolveJob(core::MutableContext ctx, AncestorResolutionItem &job) {
@@ -270,15 +295,16 @@ public:
             return asgn;
         }
 
-        if (rhs->symbol == core::Symbols::todo()) {
-            // TODO(nelhage): This is an order-dependency; We're aliasing a
-            // constant we haven't yet resolved. For now just stub it as
-            // untyped; This will be fixed by RUBYPLAT-781
-            id->symbol.data(ctx).resultType = make_unique<core::AliasType>(core::Symbols::untyped());
-            return asgn;
-        }
+        auto item = AliasResolutionItem{id->symbol, unique_ptr<ast::Ident>(rhs)};
+        asgn->rhs.release();
 
-        id->symbol.data(ctx).resultType = make_unique<core::AliasType>(rhs->symbol);
+        if (resolveAliasJob(ctx, item)) {
+            core::categoryCounterInc("resolve.constants.aliases", "firstpass");
+        } else {
+            // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
+            // We may be able to get some perf by using this
+            this->todo_aliases_.emplace_back(move(item));
+        }
         return make_unique<ast::EmptyTree>(asgn->loc);
     }
 
@@ -293,10 +319,15 @@ public:
 
         auto todo = move(constants.todo_);
         auto todo_ancestors = move(constants.todo_ancestors_);
+        auto todo_aliases = move(constants.todo_aliases_);
         bool progress = true;
+
         while (!(todo.empty() && todo_ancestors.empty()) && progress) {
             core::counterInc("resolve.constants.retries");
             {
+                // This is an optimization. The order should not matter semantically
+                // We try to resolve most ancestors second because this makes us much more likely to resolve everything
+                // else.
                 int orig_size = todo_ancestors.size();
                 auto it = remove_if(todo_ancestors.begin(), todo_ancestors.end(),
                                     [ctx](AncestorResolutionItem &job) -> bool { return resolveJob(ctx, job); });
@@ -311,7 +342,29 @@ public:
                 todo.erase(it, todo.end());
                 core::categoryCounterAdd("resolve.constants.nonancestor", "retry", orig_size - todo.size());
             }
+            {
+                // This is an optimization. The order should not matter semantically
+                // This is done as a "pre-step" because the first iteration of this effectively ran in TreeMap.
+                // every item in todo_aliases implicitly depends on an item in item in todo
+                // there would be no point in running the todo_aliases step before todo
+
+                int orig_size = todo_aliases.size();
+                auto it = remove_if(todo_aliases.begin(), todo_aliases.end(),
+                                    [ctx](AliasResolutionItem &it) -> bool { return resolveAliasJob(ctx, it); });
+                todo_aliases.erase(it, todo_aliases.end());
+                progress = progress || (orig_size != todo_aliases.size());
+                core::categoryCounterAdd("resolve.constants.aliases", "retry", orig_size - todo_aliases.size());
+            }
         }
+
+        // fill in unresolved aliases with untyped. Errors for their rhs will be reported.
+
+        for (auto &e : todo_aliases) {
+            e.lhs.data(ctx).resultType = make_shared<core::AliasType>(core::Symbols::untyped());
+        }
+
+        // We can no longer resolve new constants. All the code below reports errors
+
         core::categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
         core::categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
 
@@ -353,6 +406,7 @@ public:
             }
             return lhs.cnst->loc.end_pos < rhs.cnst->loc.end_pos;
         });
+
         for (auto &job : todo) {
             if (!resolveJob(ctx, job)) {
                 ast::ConstantLit *inner = job.cnst.get();
