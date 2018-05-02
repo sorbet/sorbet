@@ -21,11 +21,11 @@
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
+#include "signal.h"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
 #include <algorithm> // find
 #include <iostream>
-
 #include <poll.h>
 
 namespace spd = spdlog;
