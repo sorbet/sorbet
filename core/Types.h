@@ -357,6 +357,7 @@ public:
 
 class TupleType final : public ProxyType {
     TupleType();
+
 public:
     std::vector<std::shared_ptr<Type>> elems;
     TupleType(core::Context ctx, std::vector<std::shared_ptr<Type>> elements);
