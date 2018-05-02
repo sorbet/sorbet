@@ -7,17 +7,27 @@
 # ruby-typer.
 A::AB::BC
 
+class HasError
+ include D::DA::DOES_NOT_EXIST # error: Unable to resolve constant
+end
+
+class TestInheritace1 < A::AB
+end
+
+class TestInheritace2 < E::EA
+end
+
 module A
   AB = B
 
   AV = T.let(1, Integer)
 end
 
-module B
+class B
   BC = C
 end
 
-module C
+class C < B
 end
 
 module F

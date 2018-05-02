@@ -71,11 +71,11 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
     "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [shape = parallelogram];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_0" [label = "block[id=0]()
-<constant:untyped>$11 = alias <constant:untyped> : untyped
 <constant:<Magic>>$14 = alias <constant:<Magic>> : <Magic>
 @rules$20 = alias @rules : untyped
+<constant:GeraldRule>$11 = alias <constant:GeraldRule> : untyped
 <statTemp>$12 = :\"deleted_at_is_nil\" : Symbol(:\"deleted_at_is_nil\")
-<statTemp>$9 = <constant:untyped>$11.query_by(<statTemp>$12) : untyped
+<statTemp>$9 = <constant:GeraldRule>$11.query_by(<statTemp>$12) : untyped
 <statTemp>$13 = <constant:<Magic>>$14.<build-hash>() : ShapeType {
 }
 <statTemp>$8 = <statTemp>$9.load_all(<statTemp>$13) : untyped
@@ -945,10 +945,10 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?" {
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [shape = parallelogram];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_0" [label = "block[id=0]()
-<constant:untyped>$7 = alias <constant:untyped> : untyped
+<constant:SPEC_PATH>$7 = alias <constant:SPEC_PATH> : untyped
 <statTemp>$5 = self : Opus::CIBot::Gerald::Diff
 <statTemp>$4 = <statTemp>$5.changed_files() : untyped
-<returnMethodTemp>$2 = <statTemp>$4.include?(<constant:untyped>$7) : untyped
+<returnMethodTemp>$2 = <statTemp>$4.include?(<constant:SPEC_PATH>$7) : untyped
 <finalReturn> = return <returnMethodTemp>$2 : <impossible>
 <unconditional>"];
 

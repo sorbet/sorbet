@@ -1,8 +1,8 @@
 class <constant:<root>> < ::Object () @ -e:1
   class <constant:NS> (<constant:BasicObject>) @ test/testdata/resolver/inherit_alias.rb:2
-    class <constant:C1> < ::RubyTyper::StubClass () @ test/testdata/resolver/inherit_alias.rb:3
+    class <constant:C1> < ::NS::Dest () @ test/testdata/resolver/inherit_alias.rb:3
     class <constant:Dest> < ::Object () @ test/testdata/resolver/inherit_alias.rb:6
-    class <singleton class:<constant:C1>> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/inherit_alias.rb:3
+    class <singleton class:<constant:C1>> < ::NS::<Class:Dest> () @ test/testdata/resolver/inherit_alias.rb:3
     class <singleton class:<constant:Dest>> < ::<Class:Object> () @ test/testdata/resolver/inherit_alias.rb:6
     static-field <constant:Alias> -> AliasType { symbol = ::NS::Dest } @ test/testdata/resolver/inherit_alias.rb:9
   class <singleton class:<constant:NS>> < ::Module () @ test/testdata/resolver/inherit_alias.rb:2

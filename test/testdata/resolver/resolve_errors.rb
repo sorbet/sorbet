@@ -1,5 +1,6 @@
 # typed: true
 Foo # error: Unable to resolve constant `Foo`
-Baz::Bar # error: Unable to resolve constant `Baz`
+Baz:: # error: MULTI
+Bar # error: Unable to resolve constant `Bar`
 module A; end
 A::Quux # error: Unable to resolve constant `Quux`

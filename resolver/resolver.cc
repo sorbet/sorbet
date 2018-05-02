@@ -63,7 +63,11 @@ private:
 
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
+        // setting cnst to nullptr indicates that Ident was already resolved. This is used in two cases:
+        // - when Ident enters resolver already resolved, in particular for class parents
+        // - when we resolved constant to an Alias, but the alias was not yet resolved.
         unique_ptr<ast::ConstantLit> cnst;
+
         ast::Ident *out;
 
         ResolutionItem() = default;
@@ -130,9 +134,6 @@ private:
 
         if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
             core::SymbolRef resolved = id->symbol.data(ctx).dealias(ctx);
-            if (resolved.data(ctx).resultType != nullptr && resolved.data(ctx).resultType->isDynamic()) {
-                return core::Symbols::untyped();
-            }
 
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             return result;
@@ -145,14 +146,37 @@ private:
         }
     }
 
-    static bool resolveJob(core::MutableContext ctx, ResolutionItem &job) {
+    static bool resolveJob(core::MutableContext ctx, ResolutionItem &job, bool lastRun) {
         ENFORCE(job.out->symbol == core::Symbols::todo());
 
         core::SymbolRef resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.cnst.get());
         if (!resolved.exists()) {
-            return false;
+            if (!lastRun) {
+                return false;
+            }
+            ast::ConstantLit *inner = job.cnst.get();
+            while (auto *scope = ast::cast_tree<ast::ConstantLit>(inner->scope.get())) {
+                inner = scope;
+            }
+            if (auto e = ctx.state.beginError(inner->loc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", inner->cnst.show(ctx));
+            }
+
+            core::SymbolRef scope;
+            if (auto *id = ast::cast_tree<ast::Ident>(inner->scope.get())) {
+                scope = id->symbol.data(ctx).dealias(ctx);
+            } else {
+                scope = job.scope->scope;
+            }
+            core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, inner->cnst);
+            stub.data(ctx).superClass = core::Symbols::StubClass();
+            stub.data(ctx).resultType = core::Types::dynamic();
+            stub.data(ctx).setIsModule(false);
+            bool resolved = resolveJob(ctx, job, true);
+            return resolved;
         }
         job.out->symbol = resolved;
+        job.cnst = nullptr; // see comment on cnst field
         return true;
     }
 
@@ -164,27 +188,31 @@ private:
         return false;
     }
 
-    static bool resolveJob(core::MutableContext ctx, AncestorResolutionItem &job) {
+    static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job, bool lastRun) {
         // It's possible for ancestors to enter the resolver as Idents. We will
         // see those with resolve.out->symbol already populated, and resolve.cnst
         // == nullptr. We skip resolving the constant in that case, but still
         // handle the rest of the ancestor-population mechanism here.
+        // This also happens when we were able to resolve the Ident to an alias that was not yet resolved.
         if (job.resolve.cnst != nullptr) {
-            if (!resolveJob(ctx, job.resolve)) {
+            if (!resolveJob(ctx, job.resolve, lastRun)) {
                 return false;
             }
         }
-        auto resolved = job.resolve.out->symbol;
+        auto resolved = job.resolve.out->symbol.data(ctx).dealias(ctx);
 
         if (!resolved.data(ctx).isClass()) {
-            if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+            if (!lastRun) {
+                return false;
+            }
+            if (auto e = ctx.state.beginError(job.resolve.out->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins must be statically resolved to classes");
             }
             resolved = core::Symbols::StubClass();
         }
 
         if (resolved == job.klass || resolved.data(ctx).derivesFrom(ctx, job.klass)) {
-            if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.state.beginError(job.resolve.out->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx).show(ctx), resolved.data(ctx).show(ctx));
             }
@@ -200,11 +228,12 @@ private:
                 job.klass.data(ctx).superClass = resolved;
             } else {
                 if (auto e =
-                        ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                        ctx.state.beginError(job.resolve.out->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx).show(ctx));
                 }
             }
         } else {
+            ENFORCE(resolved.data(ctx).isClass());
             job.klass.data(ctx).mixins().emplace_back(resolved);
         }
 
@@ -238,7 +267,7 @@ private:
             return;
         }
 
-        if (resolveJob(ctx, job)) {
+        if (resolveAncestorJob(ctx, job, false)) {
             core::categoryCounterInc("resolve.constants.ancestor", "firstpass");
         } else {
             todo_ancestors_.emplace_back(move(job));
@@ -276,7 +305,7 @@ public:
     unique_ptr<ast::Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> c) {
         auto id = make_unique<ast::Ident>(c->loc, core::Symbols::todo());
         ResolutionItem job{nesting_, move(c), id.get()};
-        if (resolveJob(ctx, job)) {
+        if (resolveJob(ctx, job, false)) {
             core::categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
             todo_.emplace_back(move(job));
@@ -308,6 +337,29 @@ public:
         return make_unique<ast::EmptyTree>(asgn->loc);
     }
 
+    static bool compareLocs(core::Context ctx, core::Loc lhs, core::Loc rhs) {
+        core::StrictLevel left = core::StrictLevel::Strong;
+        core::StrictLevel right = core::StrictLevel::Strong;
+
+        if (lhs.file.exists()) {
+            left = lhs.file.data(ctx).strict;
+        }
+        if (rhs.file.exists()) {
+            right = rhs.file.data(ctx).strict;
+        }
+
+        if (left != right) {
+            return right < left;
+        }
+        if (lhs.file != rhs.file) {
+            return lhs.file < rhs.file;
+        }
+        if (lhs.begin_pos != rhs.begin_pos) {
+            return lhs.begin_pos < rhs.begin_pos;
+        }
+        return lhs.end_pos < rhs.end_pos;
+    }
+
     static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,
                                                                 vector<unique_ptr<ast::Expression>> trees) {
         ctx.trace("Resolving constants");
@@ -329,8 +381,10 @@ public:
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
                 // else.
                 int orig_size = todo_ancestors.size();
-                auto it = remove_if(todo_ancestors.begin(), todo_ancestors.end(),
-                                    [ctx](AncestorResolutionItem &job) -> bool { return resolveJob(ctx, job); });
+                auto it =
+                    remove_if(todo_ancestors.begin(), todo_ancestors.end(), [ctx](AncestorResolutionItem &job) -> bool {
+                        return resolveAncestorJob(ctx, job, false);
+                    });
                 todo_ancestors.erase(it, todo_ancestors.end());
                 progress = (orig_size != todo_ancestors.size());
                 core::categoryCounterAdd("resolve.constants.ancestor", "retry", orig_size - todo_ancestors.size());
@@ -338,7 +392,7 @@ public:
             {
                 int orig_size = todo.size();
                 auto it = remove_if(todo.begin(), todo.end(),
-                                    [ctx](ResolutionItem &job) -> bool { return resolveJob(ctx, job); });
+                                    [ctx](ResolutionItem &job) -> bool { return resolveJob(ctx, job, false); });
                 todo.erase(it, todo.end());
                 core::categoryCounterAdd("resolve.constants.nonancestor", "retry", orig_size - todo.size());
             }
@@ -356,21 +410,11 @@ public:
                 core::categoryCounterAdd("resolve.constants.aliases", "retry", orig_size - todo_aliases.size());
             }
         }
-
-        // fill in unresolved aliases with untyped. Errors for their rhs will be reported.
-
-        for (auto &e : todo_aliases) {
-            e.lhs.data(ctx).resultType = make_shared<core::AliasType>(core::Symbols::untyped());
-        }
-
         // We can no longer resolve new constants. All the code below reports errors
 
         core::categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
         core::categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
 
-        for (auto &it : todo_ancestors) {
-            todo.emplace_back(move(it.resolve));
-        }
         /*
          * Sort errors so we choose a deterministic error to report for each
          * missing constant:
@@ -385,51 +429,21 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        std::sort(todo.begin(), todo.end(), [ctx](auto &lhs, auto &rhs) -> bool {
-            core::StrictLevel left = core::StrictLevel::Strong;
-            core::StrictLevel right = core::StrictLevel::Strong;
-            if (lhs.cnst->loc.file.exists()) {
-                left = lhs.cnst->loc.file.data(ctx).strict;
-            }
-            if (rhs.cnst->loc.file.exists()) {
-                right = rhs.cnst->loc.file.data(ctx).strict;
-            }
+        std::sort(todo.begin(), todo.end(),
+                  [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
 
-            if (left != right) {
-                return right < left;
-            }
-            if (lhs.cnst->loc.file != rhs.cnst->loc.file) {
-                return lhs.cnst->loc.file < rhs.cnst->loc.file;
-            }
-            if (lhs.cnst->loc.begin_pos != rhs.cnst->loc.begin_pos) {
-                return lhs.cnst->loc.begin_pos < rhs.cnst->loc.begin_pos;
-            }
-            return lhs.cnst->loc.end_pos < rhs.cnst->loc.end_pos;
+        std::sort(todo_ancestors.begin(), todo_ancestors.end(), [ctx](auto &lhs, auto &rhs) -> bool {
+            return compareLocs(ctx, lhs.resolve.out->loc, rhs.resolve.out->loc);
         });
 
         for (auto &job : todo) {
-            if (!resolveJob(ctx, job)) {
-                ast::ConstantLit *inner = job.cnst.get();
-                while (auto *scope = ast::cast_tree<ast::ConstantLit>(inner->scope.get())) {
-                    inner = scope;
-                }
-                if (auto e = ctx.state.beginError(job.cnst->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant `{}`", inner->cnst.show(ctx));
-                }
+            auto resolved = resolveJob(ctx, job, true);
+            ENFORCE(resolved);
+        }
 
-                core::SymbolRef scope;
-                if (auto *id = ast::cast_tree<ast::Ident>(inner->scope.get())) {
-                    scope = id->symbol;
-                } else {
-                    scope = job.scope->scope;
-                }
-                core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, inner->cnst);
-                stub.data(ctx).superClass = core::Symbols::StubClass();
-                stub.data(ctx).resultType = core::Types::dynamic();
-                stub.data(ctx).setIsModule(false);
-                bool resolved = resolveJob(ctx, job);
-                ENFORCE(resolved);
-            }
+        for (auto &job : todo_ancestors) {
+            auto resolved = resolveAncestorJob(ctx, job, true);
+            ENFORCE(resolved);
         }
 
         return trees;
