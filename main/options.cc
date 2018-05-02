@@ -235,7 +235,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         if (typed == "auto") {
         } else if (typed == "ruby" || typed == "stripe") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Stripe;
-        } else if (typed == "typed") {
+        } else if (typed == "typed" || typed == "true") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Typed;
         } else if (typed == "strict") {
             opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strict;
