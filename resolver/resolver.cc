@@ -74,7 +74,7 @@ private:
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
     };
     struct AncestorResolutionItem {
-        ResolutionItem resolv;
+        ResolutionItem resolve;
         core::SymbolRef klass;
 
         bool isSuperclass; // true if superclass, false for mixin
@@ -166,25 +166,25 @@ private:
 
     static bool resolveJob(core::MutableContext ctx, AncestorResolutionItem &job) {
         // It's possible for ancestors to enter the resolver as Idents. We will
-        // see those with resolv.out->symbol already populated, and resolv.cnst
+        // see those with resolve.out->symbol already populated, and resolve.cnst
         // == nullptr. We skip resolving the constant in that case, but still
         // handle the rest of the ancestor-population mechanism here.
-        if (job.resolv.cnst != nullptr) {
-            if (!resolveJob(ctx, job.resolv)) {
+        if (job.resolve.cnst != nullptr) {
+            if (!resolveJob(ctx, job.resolve)) {
                 return false;
             }
         }
-        auto resolved = job.resolv.out->symbol;
+        auto resolved = job.resolve.out->symbol;
 
         if (!resolved.data(ctx).isClass()) {
-            if (auto e = ctx.state.beginError(job.resolv.cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+            if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins must be statically resolved to classes");
             }
             resolved = core::Symbols::StubClass();
         }
 
         if (resolved == job.klass || resolved.data(ctx).derivesFrom(ctx, job.klass)) {
-            if (auto e = ctx.state.beginError(job.resolv.cnst->loc, core::errors::Resolver::CircularDependency)) {
+            if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx).show(ctx), resolved.data(ctx).show(ctx));
             }
@@ -200,7 +200,7 @@ private:
                 job.klass.data(ctx).superClass = resolved;
             } else {
                 if (auto e =
-                        ctx.state.beginError(job.resolv.cnst->loc, core::errors::Resolver::RedefinitionOfParents)) {
+                        ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::RedefinitionOfParents)) {
                     e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx).show(ctx));
                 }
             }
@@ -214,23 +214,23 @@ private:
     void transformAncestor(core::MutableContext ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
                            bool isSuperclass = false) {
         AncestorResolutionItem job;
-        job.resolv.scope = isSuperclass ? nesting_->parent : nesting_;
+        job.resolve.scope = isSuperclass ? nesting_->parent : nesting_;
         job.klass = klass;
         job.isSuperclass = isSuperclass;
 
         if (ast::ConstantLit *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
-            job.resolv.cnst.reset(cnst);
+            job.resolve.cnst.reset(cnst);
             ancestor.release();
 
             auto id = make_unique<ast::Ident>(cnst->loc, core::Symbols::todo());
-            job.resolv.out = id.get();
+            job.resolve.out = id.get();
             ancestor = move(id);
         } else if (ast::Self *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             auto id = make_unique<ast::Ident>(self->loc, ctx.contextClass());
-            job.resolv.out = id.get();
+            job.resolve.out = id.get();
             ancestor = move(id);
         } else if (ast::Ident *id = ast::cast_tree<ast::Ident>(ancestor.get())) {
-            job.resolv.out = id;
+            job.resolve.out = id;
         } else {
             if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins must be statically resolved");
@@ -369,7 +369,7 @@ public:
         core::categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
 
         for (auto &it : todo_ancestors) {
-            todo.emplace_back(move(it.resolv));
+            todo.emplace_back(move(it.resolve));
         }
         /*
          * Sort errors so we choose a deterministic error to report for each
