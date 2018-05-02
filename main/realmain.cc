@@ -355,7 +355,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << FileOps::getFileName(f.data(ctx).path()) << "\"{" << '\n';
+            cout << "digraph \"" << FileOps::getFileName(f.data(ctx).path()) << "\" {" << '\n';
         }
         CFG_Collector_and_Typer collector(opts);
         {

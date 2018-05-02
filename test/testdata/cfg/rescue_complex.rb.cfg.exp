@@ -1,18 +1,18 @@
-digraph "rescue_complex.rb"{
+digraph "rescue_complex.rb" {
 subgraph "cluster_::TestRescue#meth" {
     label = "::TestRescue#meth";
     color = blue;
     "bb::TestRescue#meth_0" [shape = invhouse];
     "bb::TestRescue#meth_1" [shape = parallelogram];
 
-    "bb::TestRescue#meth_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = 0 : Integer(0)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#meth_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 0 : Integer(0)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#meth_0" -> "bb::TestRescue#meth_1" [style="bold"];
-    "bb::TestRescue#meth_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#meth_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#meth_1" -> "bb::TestRescue#meth_1" [style="bold"];
 }
@@ -23,14 +23,14 @@ subgraph "cluster_::TestRescue#foo" {
     "bb::TestRescue#foo_0" [shape = invhouse];
     "bb::TestRescue#foo_1" [shape = parallelogram];
 
-    "bb::TestRescue#foo_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = 1 : Integer(1)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#foo_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#foo_0" -> "bb::TestRescue#foo_1" [style="bold"];
-    "bb::TestRescue#foo_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#foo_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#foo_1" -> "bb::TestRescue#foo_1" [style="bold"];
 }
@@ -41,14 +41,14 @@ subgraph "cluster_::TestRescue#bar" {
     "bb::TestRescue#bar_0" [shape = invhouse];
     "bb::TestRescue#bar_1" [shape = parallelogram];
 
-    "bb::TestRescue#bar_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = 2 : Integer(2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#bar_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 2 : Integer(2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#bar_0" -> "bb::TestRescue#bar_1" [style="bold"];
-    "bb::TestRescue#bar_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#bar_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#bar_1" -> "bb::TestRescue#bar_1" [style="bold"];
 }
@@ -59,14 +59,14 @@ subgraph "cluster_::TestRescue#baz" {
     "bb::TestRescue#baz_0" [shape = invhouse];
     "bb::TestRescue#baz_1" [shape = parallelogram];
 
-    "bb::TestRescue#baz_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = 3 : Integer(3)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#baz_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 3 : Integer(3)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#baz_0" -> "bb::TestRescue#baz_1" [style="bold"];
-    "bb::TestRescue#baz_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#baz_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#baz_1" -> "bb::TestRescue#baz_1" [style="bold"];
 }
@@ -77,15 +77,14 @@ subgraph "cluster_::TestRescue#take_arg" {
     "bb::TestRescue#take_arg_0" [shape = invhouse];
     "bb::TestRescue#take_arg_1" [shape = parallelogram];
 
-    "bb::TestRescue#take_arg_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : TestRescue
-x = load_arg(<selfMethodTemp>$3#take_arg, 0) : untyped
-<finalReturn> = return x : <impossible>
-<unconditional>"];
+    "bb::TestRescue#take_arg_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : TestRescue\lx = load_arg(<selfMethodTemp>$3#take_arg, 0) : untyped\l<finalReturn> = return x : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#take_arg_0" -> "bb::TestRescue#take_arg_1" [style="bold"];
-    "bb::TestRescue#take_arg_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#take_arg_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#take_arg_1" -> "bb::TestRescue#take_arg_1" [style="bold"];
 }
@@ -96,16 +95,14 @@ subgraph "cluster_::TestRescue#initialize" {
     "bb::TestRescue#initialize_0" [shape = invhouse];
     "bb::TestRescue#initialize_1" [shape = parallelogram];
 
-    "bb::TestRescue#initialize_0" [label = "block[id=0]()
-@ex$4 = alias @ex : StandardError | NilClass
-<castTemp$5 = nil : NilClass
-@ex$4 = cast(<castTemp$5, StandardError | NilClass); : StandardError | NilClass
-<finalReturn> = return @ex$4 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#initialize_0" [
+        label = "block[id=0]()\l@ex$4 = alias @ex : StandardError | NilClass\l<castTemp$5 = nil : NilClass\l@ex$4 = cast(<castTemp$5, StandardError | NilClass); : StandardError | NilClass\l<finalReturn> = return @ex$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#initialize_0" -> "bb::TestRescue#initialize_1" [style="bold"];
-    "bb::TestRescue#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#initialize_1" -> "bb::TestRescue#initialize_1" [style="bold"];
 }
@@ -116,53 +113,50 @@ subgraph "cluster_::TestRescue#multiple_rescue" {
     "bb::TestRescue#multiple_rescue_0" [shape = invhouse];
     "bb::TestRescue#multiple_rescue_1" [shape = parallelogram];
 
-    "bb::TestRescue#multiple_rescue_0" [label = "block[id=0]()
-<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#multiple_rescue_0" [
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_0" -> "bb::TestRescue#multiple_rescue_3" [style="bold"];
     "bb::TestRescue#multiple_rescue_0" -> "bb::TestRescue#multiple_rescue_4" [style="tapered"];
 
-    "bb::TestRescue#multiple_rescue_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_1" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#multiple_rescue_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_3" -> "bb::TestRescue#multiple_rescue_8" [style="bold"];
     "bb::TestRescue#multiple_rescue_3" -> "bb::TestRescue#multiple_rescue_9" [style="tapered"];
 
-    "bb::TestRescue#multiple_rescue_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_4" -> "bb::TestRescue#multiple_rescue_7" [style="bold"];
-    "bb::TestRescue#multiple_rescue_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_7" -> "bb::TestRescue#multiple_rescue_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$10 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$10.baz() : untyped
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$10 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$10.baz() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_8" -> "bb::TestRescue#multiple_rescue_7" [style="bold"];
-    "bb::TestRescue#multiple_rescue_9" [label = "block[id=9](<rescueTemp$4, <constant:StandardError>$8)
-<rescueTemp$12 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$12"];
+    "bb::TestRescue#multiple_rescue_9" [
+        label = "block[id=9](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$12 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$12\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_10" [style="bold"];
     "bb::TestRescue#multiple_rescue_9" -> "bb::TestRescue#multiple_rescue_1" [style="tapered"];
 
-    "bb::TestRescue#multiple_rescue_10" [label = "block[id=10](<rescueTemp$4)
-<statTemp>$13 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$13.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_10" [
+        label = "block[id=10](<rescueTemp$4)\l<statTemp>$13 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$13.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_10" -> "bb::TestRescue#multiple_rescue_7" [style="bold"];
 }
@@ -173,46 +167,43 @@ subgraph "cluster_::TestRescue#multiple_rescue_classes" {
     "bb::TestRescue#multiple_rescue_classes_0" [shape = invhouse];
     "bb::TestRescue#multiple_rescue_classes_1" [shape = parallelogram];
 
-    "bb::TestRescue#multiple_rescue_classes_0" [label = "block[id=0]()
-<constant:Foo>$8 = alias <constant:Foo> : untyped
-<constant:Bar>$11 = alias <constant:Bar> : untyped
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#multiple_rescue_classes_0" [
+        label = "block[id=0]()\l<constant:Foo>$8 = alias <constant:Foo> : untyped\l<constant:Bar>$11 = alias <constant:Bar> : untyped\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_0" -> "bb::TestRescue#multiple_rescue_classes_3" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_0" -> "bb::TestRescue#multiple_rescue_classes_4" [style="tapered"];
 
-    "bb::TestRescue#multiple_rescue_classes_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_classes_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_1" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_3" [label = "block[id=3](<rescueTemp$4, <constant:Foo>$8, <constant:Bar>$11)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:Foo>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#multiple_rescue_classes_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:Foo>$8, <constant:Bar>$11)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:Foo>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_3" -> "bb::TestRescue#multiple_rescue_classes_8" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_3" -> "bb::TestRescue#multiple_rescue_classes_9" [style="tapered"];
 
-    "bb::TestRescue#multiple_rescue_classes_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_classes_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_4" -> "bb::TestRescue#multiple_rescue_classes_7" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_classes_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_7" -> "bb::TestRescue#multiple_rescue_classes_1" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_8" [label = "block[id=8](<rescueTemp$4)
-baz = <rescueTemp$4 : untyped
-<returnMethodTemp>$2 = baz : untyped
-<unconditional>"];
+    "bb::TestRescue#multiple_rescue_classes_8" [
+        label = "block[id=8](<rescueTemp$4)\lbaz = <rescueTemp$4 : untyped\l<returnMethodTemp>$2 = baz : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_8" -> "bb::TestRescue#multiple_rescue_classes_7" [style="bold"];
-    "bb::TestRescue#multiple_rescue_classes_9" [label = "block[id=9](<rescueTemp$4, <constant:Bar>$11)
-<rescueTemp$12 = <rescueTemp$4.is_a?(<constant:Bar>$11) : untyped
-<rescueTemp$12"];
+    "bb::TestRescue#multiple_rescue_classes_9" [
+        label = "block[id=9](<rescueTemp$4, <constant:Bar>$11)\l<rescueTemp$12 = <rescueTemp$4.is_a?(<constant:Bar>$11) : untyped\l<rescueTemp$12\l"
+    ];
 
     "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_8" [style="bold"];
     "bb::TestRescue#multiple_rescue_classes_9" -> "bb::TestRescue#multiple_rescue_classes_1" [style="tapered"];
@@ -225,42 +216,38 @@ subgraph "cluster_::TestRescue#parse_rescue_ensure" {
     "bb::TestRescue#parse_rescue_ensure_0" [shape = invhouse];
     "bb::TestRescue#parse_rescue_ensure_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_rescue_ensure_0" [label = "block[id=0]()
-<constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_rescue_ensure_0" [
+        label = "block[id=0]()\l<constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_0" -> "bb::TestRescue#parse_rescue_ensure_3" [style="bold"];
     "bb::TestRescue#parse_rescue_ensure_0" -> "bb::TestRescue#parse_rescue_ensure_4" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_ensure_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_ensure_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_1" -> "bb::TestRescue#parse_rescue_ensure_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_ensure_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$9)
-<rescueTemp$10 = <rescueTemp$4.is_a?(<constant:StandardError>$9) : untyped
-<rescueTemp$10"];
+    "bb::TestRescue#parse_rescue_ensure_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$9)\l<rescueTemp$10 = <rescueTemp$4.is_a?(<constant:StandardError>$9) : untyped\l<rescueTemp$10\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_3" -> "bb::TestRescue#parse_rescue_ensure_8" [style="bold"];
     "bb::TestRescue#parse_rescue_ensure_3" -> "bb::TestRescue#parse_rescue_ensure_1" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_ensure_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_ensure_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_4" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
-    "bb::TestRescue#parse_rescue_ensure_6" [label = "block[id=6](<returnMethodTemp>$2)
-<statTemp>$7 = self : TestRescue
-<rescueTemp$6 = <statTemp>$7.bar() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_ensure_6" [
+        label = "block[id=6](<returnMethodTemp>$2)\l<statTemp>$7 = self : TestRescue\l<rescueTemp$6 = <statTemp>$7.bar() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_6" -> "bb::TestRescue#parse_rescue_ensure_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_ensure_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$11 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$11.baz() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_ensure_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$11 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$11.baz() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_ensure_8" -> "bb::TestRescue#parse_rescue_ensure_6" [style="bold"];
 }
@@ -271,28 +258,28 @@ subgraph "cluster_::TestRescue#parse_bug_rescue_empty_else" {
     "bb::TestRescue#parse_bug_rescue_empty_else_0" [shape = invhouse];
     "bb::TestRescue#parse_bug_rescue_empty_else_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_bug_rescue_empty_else_0" [label = "block[id=0]()
-<constant:LoadError>$7 = alias <constant:LoadError> : <Class:LoadError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_bug_rescue_empty_else_0" [
+        label = "block[id=0]()\l<constant:LoadError>$7 = alias <constant:LoadError> : <Class:LoadError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_0" -> "bb::TestRescue#parse_bug_rescue_empty_else_3" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_0" -> "bb::TestRescue#parse_bug_rescue_empty_else_7" [style="tapered"];
 
-    "bb::TestRescue#parse_bug_rescue_empty_else_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_bug_rescue_empty_else_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_1" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="bold"];
-    "bb::TestRescue#parse_bug_rescue_empty_else_3" [label = "block[id=3](<rescueTemp$4, <constant:LoadError>$7)
-<rescueTemp$8 = <rescueTemp$4.is_a?(<constant:LoadError>$7) : untyped
-<rescueTemp$8"];
+    "bb::TestRescue#parse_bug_rescue_empty_else_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:LoadError>$7)\l<rescueTemp$8 = <rescueTemp$4.is_a?(<constant:LoadError>$7) : untyped\l<rescueTemp$8\l"
+    ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_3" -> "bb::TestRescue#parse_bug_rescue_empty_else_7" [style="bold"];
     "bb::TestRescue#parse_bug_rescue_empty_else_3" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="tapered"];
 
-    "bb::TestRescue#parse_bug_rescue_empty_else_7" [label = "block[id=7]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_bug_rescue_empty_else_7" [
+        label = "block[id=7]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_bug_rescue_empty_else_7" -> "bb::TestRescue#parse_bug_rescue_empty_else_1" [style="bold"];
 }
@@ -303,41 +290,38 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12686" {
     "bb::TestRescue#parse_ruby_bug_12686_0" [shape = invhouse];
     "bb::TestRescue#parse_ruby_bug_12686_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_ruby_bug_12686_0" [label = "block[id=0]()
-<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
-<statTemp>$4 = self : TestRescue
-<rescueTemp$6 = <unanalyzable> : untyped
-<rescueTemp$6"];
+    "bb::TestRescue#parse_ruby_bug_12686_0" [
+        label = "block[id=0]()\l<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$4 = self : TestRescue\l<rescueTemp$6 = <unanalyzable> : untyped\l<rescueTemp$6\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_0" -> "bb::TestRescue#parse_ruby_bug_12686_3" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_0" -> "bb::TestRescue#parse_ruby_bug_12686_4" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12686_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12686_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_1" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_3" [label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$10)
-<rescueTemp$11 = <rescueTemp$6.is_a?(<constant:StandardError>$10) : untyped
-<rescueTemp$11"];
+    "bb::TestRescue#parse_ruby_bug_12686_3" [
+        label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$10)\l<rescueTemp$11 = <rescueTemp$6.is_a?(<constant:StandardError>$10) : untyped\l<rescueTemp$11\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_3" -> "bb::TestRescue#parse_ruby_bug_12686_8" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12686_3" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12686_4" [label = "block[id=4](<statTemp>$4)
-<statTemp>$7 = self : TestRescue
-<statTemp>$5 = <statTemp>$7.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12686_4" [
+        label = "block[id=4](<statTemp>$4)\l<statTemp>$7 = self : TestRescue\l<statTemp>$5 = <statTemp>$7.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_4" -> "bb::TestRescue#parse_ruby_bug_12686_7" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_7" [label = "block[id=7](<statTemp>$4, <statTemp>$5)
-<returnMethodTemp>$2 = <statTemp>$4.take_arg(<statTemp>$5) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12686_7" [
+        label = "block[id=7](<statTemp>$4, <statTemp>$5)\l<returnMethodTemp>$2 = <statTemp>$4.take_arg(<statTemp>$5) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_7" -> "bb::TestRescue#parse_ruby_bug_12686_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12686_8" [label = "block[id=8](<statTemp>$4, <rescueTemp$6)
-<statTemp>$5 = nil : NilClass
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12686_8" [
+        label = "block[id=8](<statTemp>$4, <rescueTemp$6)\l<statTemp>$5 = nil : NilClass\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12686_8" -> "bb::TestRescue#parse_ruby_bug_12686_7" [style="bold"];
 }
@@ -348,40 +332,38 @@ subgraph "cluster_::TestRescue#parse_rescue_mod" {
     "bb::TestRescue#parse_rescue_mod_0" [shape = invhouse];
     "bb::TestRescue#parse_rescue_mod_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_rescue_mod_0" [label = "block[id=0]()
-<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_rescue_mod_0" [
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_0" -> "bb::TestRescue#parse_rescue_mod_3" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_0" -> "bb::TestRescue#parse_rescue_mod_4" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_mod_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_1" -> "bb::TestRescue#parse_rescue_mod_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#parse_rescue_mod_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_3" -> "bb::TestRescue#parse_rescue_mod_8" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_3" -> "bb::TestRescue#parse_rescue_mod_1" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_mod_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_4" -> "bb::TestRescue#parse_rescue_mod_7" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_7" -> "bb::TestRescue#parse_rescue_mod_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$10 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$10 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_8" -> "bb::TestRescue#parse_rescue_mod_7" [style="bold"];
 }
@@ -392,41 +374,38 @@ subgraph "cluster_::TestRescue#parse_resbody_list_var" {
     "bb::TestRescue#parse_resbody_list_var_0" [shape = invhouse];
     "bb::TestRescue#parse_resbody_list_var_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_resbody_list_var_0" [label = "block[id=0]()
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_resbody_list_var_0" [
+        label = "block[id=0]()\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_0" -> "bb::TestRescue#parse_resbody_list_var_3" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_0" -> "bb::TestRescue#parse_resbody_list_var_4" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_list_var_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_list_var_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_1" -> "bb::TestRescue#parse_resbody_list_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_3" [label = "block[id=3](<rescueTemp$4)
-<statTemp>$8 = self : TestRescue
-<rescueTemp$7 = <statTemp>$8.foo() : untyped
-<rescueTemp$9 = <rescueTemp$4.is_a?(<rescueTemp$7) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#parse_resbody_list_var_3" [
+        label = "block[id=3](<rescueTemp$4)\l<statTemp>$8 = self : TestRescue\l<rescueTemp$7 = <statTemp>$8.foo() : untyped\l<rescueTemp$9 = <rescueTemp$4.is_a?(<rescueTemp$7) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_3" -> "bb::TestRescue#parse_resbody_list_var_8" [style="bold"];
     "bb::TestRescue#parse_resbody_list_var_3" -> "bb::TestRescue#parse_resbody_list_var_1" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_list_var_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_list_var_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_4" -> "bb::TestRescue#parse_resbody_list_var_7" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_list_var_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_7" -> "bb::TestRescue#parse_resbody_list_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_list_var_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$10 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_list_var_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$10 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_list_var_8" -> "bb::TestRescue#parse_resbody_list_var_7" [style="bold"];
 }
@@ -437,44 +416,38 @@ subgraph "cluster_::TestRescue#parse_rescue_else_ensure" {
     "bb::TestRescue#parse_rescue_else_ensure_0" [shape = invhouse];
     "bb::TestRescue#parse_rescue_else_ensure_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_rescue_else_ensure_0" [label = "block[id=0]()
-<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_rescue_else_ensure_0" [
+        label = "block[id=0]()\l<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_0" -> "bb::TestRescue#parse_rescue_else_ensure_3" [style="bold"];
     "bb::TestRescue#parse_rescue_else_ensure_0" -> "bb::TestRescue#parse_rescue_else_ensure_4" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_else_ensure_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_else_ensure_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_1" -> "bb::TestRescue#parse_rescue_else_ensure_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_else_ensure_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$10)
-<rescueTemp$11 = <rescueTemp$4.is_a?(<constant:StandardError>$10) : untyped
-<rescueTemp$11"];
+    "bb::TestRescue#parse_rescue_else_ensure_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$10)\l<rescueTemp$11 = <rescueTemp$4.is_a?(<constant:StandardError>$10) : untyped\l<rescueTemp$11\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_3" -> "bb::TestRescue#parse_rescue_else_ensure_8" [style="bold"];
     "bb::TestRescue#parse_rescue_else_ensure_3" -> "bb::TestRescue#parse_rescue_else_ensure_1" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_else_ensure_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<statTemp>$6 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$6.foo() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_else_ensure_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<statTemp>$6 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$6.foo() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_4" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
-    "bb::TestRescue#parse_rescue_else_ensure_6" [label = "block[id=6](<returnMethodTemp>$2)
-<statTemp>$8 = self : TestRescue
-<rescueTemp$7 = <statTemp>$8.bar() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_else_ensure_6" [
+        label = "block[id=6](<returnMethodTemp>$2)\l<statTemp>$8 = self : TestRescue\l<rescueTemp$7 = <statTemp>$8.bar() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_6" -> "bb::TestRescue#parse_rescue_else_ensure_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_else_ensure_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$12 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$12.baz() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_else_ensure_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$12 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$12.baz() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_else_ensure_8" -> "bb::TestRescue#parse_rescue_else_ensure_6" [style="bold"];
 }
@@ -485,40 +458,38 @@ subgraph "cluster_::TestRescue#parse_rescue" {
     "bb::TestRescue#parse_rescue_0" [shape = invhouse];
     "bb::TestRescue#parse_rescue_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_rescue_0" [label = "block[id=0]()
-<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_rescue_0" [
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_rescue_0" -> "bb::TestRescue#parse_rescue_3" [style="bold"];
     "bb::TestRescue#parse_rescue_0" -> "bb::TestRescue#parse_rescue_4" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_1" -> "bb::TestRescue#parse_rescue_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#parse_rescue_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#parse_rescue_3" -> "bb::TestRescue#parse_rescue_8" [style="bold"];
     "bb::TestRescue#parse_rescue_3" -> "bb::TestRescue#parse_rescue_1" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_4" -> "bb::TestRescue#parse_rescue_7" [style="bold"];
-    "bb::TestRescue#parse_rescue_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_7" -> "bb::TestRescue#parse_rescue_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$10 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$10.foo() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$10 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$10.foo() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_8" -> "bb::TestRescue#parse_rescue_7" [style="bold"];
 }
@@ -529,40 +500,38 @@ subgraph "cluster_::TestRescue#parse_resbody_var" {
     "bb::TestRescue#parse_resbody_var_0" [shape = invhouse];
     "bb::TestRescue#parse_resbody_var_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_resbody_var_0" [label = "block[id=0]()
-<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_resbody_var_0" [
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_0" -> "bb::TestRescue#parse_resbody_var_3" [style="bold"];
     "bb::TestRescue#parse_resbody_var_0" -> "bb::TestRescue#parse_resbody_var_4" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_var_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1" -> "bb::TestRescue#parse_resbody_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#parse_resbody_var_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_3" -> "bb::TestRescue#parse_resbody_var_8" [style="bold"];
     "bb::TestRescue#parse_resbody_var_3" -> "bb::TestRescue#parse_resbody_var_1" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_var_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_4" -> "bb::TestRescue#parse_resbody_var_7" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_7" -> "bb::TestRescue#parse_resbody_var_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_8" [label = "block[id=8](<rescueTemp$4)
-<statTemp>$10 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_8" [
+        label = "block[id=8](<rescueTemp$4)\l<statTemp>$10 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$10.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_8" -> "bb::TestRescue#parse_resbody_var_7" [style="bold"];
 }
@@ -573,42 +542,38 @@ subgraph "cluster_::TestRescue#parse_resbody_var_1" {
     "bb::TestRescue#parse_resbody_var_1_0" [shape = invhouse];
     "bb::TestRescue#parse_resbody_var_1_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_resbody_var_1_0" [label = "block[id=0]()
-<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>
-@ex$11 = alias @ex : StandardError | NilClass
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_resbody_var_1_0" [
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l@ex$11 = alias @ex : StandardError | NilClass\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_0" -> "bb::TestRescue#parse_resbody_var_1_3" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_0" -> "bb::TestRescue#parse_resbody_var_1_4" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_var_1_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_1_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_1" -> "bb::TestRescue#parse_resbody_var_1_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8, @ex$11)
-<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped
-<rescueTemp$9"];
+    "bb::TestRescue#parse_resbody_var_1_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8, @ex$11)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_3" -> "bb::TestRescue#parse_resbody_var_1_8" [style="bold"];
     "bb::TestRescue#parse_resbody_var_1_3" -> "bb::TestRescue#parse_resbody_var_1_1" [style="tapered"];
 
-    "bb::TestRescue#parse_resbody_var_1_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_1_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$5.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_4" -> "bb::TestRescue#parse_resbody_var_1_7" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_1_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_7" -> "bb::TestRescue#parse_resbody_var_1_1" [style="bold"];
-    "bb::TestRescue#parse_resbody_var_1_8" [label = "block[id=8](<rescueTemp$4, @ex$11)
-@ex$11 = <rescueTemp$4 : StandardError
-<statTemp>$12 = self : TestRescue
-<returnMethodTemp>$2 = <statTemp>$12.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_resbody_var_1_8" [
+        label = "block[id=8](<rescueTemp$4, @ex$11)\l@ex$11 = <rescueTemp$4 : StandardError\l<statTemp>$12 = self : TestRescue\l<returnMethodTemp>$2 = <statTemp>$12.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_resbody_var_1_8" -> "bb::TestRescue#parse_resbody_var_1_7" [style="bold"];
 }
@@ -619,42 +584,38 @@ subgraph "cluster_::TestRescue#parse_rescue_mod_op_assign" {
     "bb::TestRescue#parse_rescue_mod_op_assign_0" [shape = invhouse];
     "bb::TestRescue#parse_rescue_mod_op_assign_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_rescue_mod_op_assign_0" [label = "block[id=0]()
-<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
-<statTemp>$4 = foo : NilClass
-<rescueTemp$6 = <unanalyzable> : untyped
-<rescueTemp$6"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_0" [
+        label = "block[id=0]()\l<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$4 = foo : NilClass\l<rescueTemp$6 = <unanalyzable> : untyped\l<rescueTemp$6\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_0" -> "bb::TestRescue#parse_rescue_mod_op_assign_3" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_0" -> "bb::TestRescue#parse_rescue_mod_op_assign_4" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_mod_op_assign_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_1" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_3" [label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$10)
-<rescueTemp$11 = <rescueTemp$6.is_a?(<constant:StandardError>$10) : untyped
-<rescueTemp$11"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_3" [
+        label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$10)\l<rescueTemp$11 = <rescueTemp$6.is_a?(<constant:StandardError>$10) : untyped\l<rescueTemp$11\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_3" -> "bb::TestRescue#parse_rescue_mod_op_assign_8" [style="bold"];
     "bb::TestRescue#parse_rescue_mod_op_assign_3" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="tapered"];
 
-    "bb::TestRescue#parse_rescue_mod_op_assign_4" [label = "block[id=4](<statTemp>$4)
-<statTemp>$7 = self : TestRescue
-<statTemp>$5 = <statTemp>$7.meth() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_4" [
+        label = "block[id=4](<statTemp>$4)\l<statTemp>$7 = self : TestRescue\l<statTemp>$5 = <statTemp>$7.meth() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_4" -> "bb::TestRescue#parse_rescue_mod_op_assign_7" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_7" [label = "block[id=7](<statTemp>$4, <statTemp>$5)
-foo = <statTemp>$4.+(<statTemp>$5) : untyped
-<finalReturn> = return foo : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_7" [
+        label = "block[id=7](<statTemp>$4, <statTemp>$5)\lfoo = <statTemp>$4.+(<statTemp>$5) : untyped\l<finalReturn> = return foo : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_7" -> "bb::TestRescue#parse_rescue_mod_op_assign_1" [style="bold"];
-    "bb::TestRescue#parse_rescue_mod_op_assign_8" [label = "block[id=8](<statTemp>$4, <rescueTemp$6)
-<statTemp>$12 = self : TestRescue
-<statTemp>$5 = <statTemp>$12.bar() : untyped
-<unconditional>"];
+    "bb::TestRescue#parse_rescue_mod_op_assign_8" [
+        label = "block[id=8](<statTemp>$4, <rescueTemp$6)\l<statTemp>$12 = self : TestRescue\l<statTemp>$5 = <statTemp>$12.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_rescue_mod_op_assign_8" -> "bb::TestRescue#parse_rescue_mod_op_assign_7" [style="bold"];
 }
@@ -665,41 +626,38 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402" {
     "bb::TestRescue#parse_ruby_bug_12402_0" [shape = invhouse];
     "bb::TestRescue#parse_ruby_bug_12402_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_ruby_bug_12402_0" [label = "block[id=0]()
-<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::TestRescue#parse_ruby_bug_12402_0" [
+        label = "block[id=0]()\l<constant:StandardError>$10 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_0" -> "bb::TestRescue#parse_ruby_bug_12402_3" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_0" -> "bb::TestRescue#parse_ruby_bug_12402_4" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_3" [label = "block[id=3](<rescueTemp$4, <constant:StandardError>$10)
-<rescueTemp$11 = <rescueTemp$4.is_a?(<constant:StandardError>$10) : untyped
-<rescueTemp$11"];
+    "bb::TestRescue#parse_ruby_bug_12402_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$10)\l<rescueTemp$11 = <rescueTemp$4.is_a?(<constant:StandardError>$10) : untyped\l<rescueTemp$11\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_3" -> "bb::TestRescue#parse_ruby_bug_12402_8" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_3" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_4" [label = "block[id=4]()
-<statTemp>$5 = self : TestRescue
-<statTemp>$7 = self : TestRescue
-<statTemp>$6 = <statTemp>$7.bar() : untyped
-foo = <statTemp>$5.raise(<statTemp>$6) : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : TestRescue\l<statTemp>$7 = self : TestRescue\l<statTemp>$6 = <statTemp>$7.bar() : untyped\lfoo = <statTemp>$5.raise(<statTemp>$6) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_4" -> "bb::TestRescue#parse_ruby_bug_12402_7" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_7" [label = "block[id=7](foo)
-<finalReturn> = return foo : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_7" [
+        label = "block[id=7](foo)\l<finalReturn> = return foo : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_7" -> "bb::TestRescue#parse_ruby_bug_12402_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_8" [label = "block[id=8](<rescueTemp$4)
-foo = nil : NilClass
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_8" [
+        label = "block[id=8](<rescueTemp$4)\lfoo = nil : NilClass\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_8" -> "bb::TestRescue#parse_ruby_bug_12402_7" [style="bold"];
 }
@@ -710,43 +668,38 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_1" {
     "bb::TestRescue#parse_ruby_bug_12402_1_0" [shape = invhouse];
     "bb::TestRescue#parse_ruby_bug_12402_1_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1_0" [label = "block[id=0]()
-<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>
-<statTemp>$4 = foo : NilClass
-<rescueTemp$6 = <unanalyzable> : untyped
-<rescueTemp$6"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_0" [
+        label = "block[id=0]()\l<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$4 = foo : NilClass\l<rescueTemp$6 = <unanalyzable> : untyped\l<rescueTemp$6\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_0" -> "bb::TestRescue#parse_ruby_bug_12402_1_3" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_0" -> "bb::TestRescue#parse_ruby_bug_12402_1_4" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_1" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_3" [label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$12)
-<rescueTemp$13 = <rescueTemp$6.is_a?(<constant:StandardError>$12) : untyped
-<rescueTemp$13"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_3" [
+        label = "block[id=3](<statTemp>$4, <rescueTemp$6, <constant:StandardError>$12)\l<rescueTemp$13 = <rescueTemp$6.is_a?(<constant:StandardError>$12) : untyped\l<rescueTemp$13\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_3" -> "bb::TestRescue#parse_ruby_bug_12402_1_8" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_1_3" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_1_4" [label = "block[id=4](<statTemp>$4)
-<statTemp>$7 = self : TestRescue
-<statTemp>$9 = self : TestRescue
-<statTemp>$8 = <statTemp>$9.bar() : untyped
-<statTemp>$5 = <statTemp>$7.raise(<statTemp>$8) : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_4" [
+        label = "block[id=4](<statTemp>$4)\l<statTemp>$7 = self : TestRescue\l<statTemp>$9 = self : TestRescue\l<statTemp>$8 = <statTemp>$9.bar() : untyped\l<statTemp>$5 = <statTemp>$7.raise(<statTemp>$8) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_4" -> "bb::TestRescue#parse_ruby_bug_12402_1_7" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_7" [label = "block[id=7](<statTemp>$4, <statTemp>$5)
-foo = <statTemp>$4.+(<statTemp>$5) : untyped
-<finalReturn> = return foo : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_7" [
+        label = "block[id=7](<statTemp>$4, <statTemp>$5)\lfoo = <statTemp>$4.+(<statTemp>$5) : untyped\l<finalReturn> = return foo : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_7" -> "bb::TestRescue#parse_ruby_bug_12402_1_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_1_8" [label = "block[id=8](<statTemp>$4, <rescueTemp$6)
-<statTemp>$5 = nil : NilClass
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_1_8" [
+        label = "block[id=8](<statTemp>$4, <rescueTemp$6)\l<statTemp>$5 = nil : NilClass\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_1_8" -> "bb::TestRescue#parse_ruby_bug_12402_1_7" [style="bold"];
 }
@@ -757,47 +710,38 @@ subgraph "cluster_::TestRescue#parse_ruby_bug_12402_2" {
     "bb::TestRescue#parse_ruby_bug_12402_2_0" [shape = invhouse];
     "bb::TestRescue#parse_ruby_bug_12402_2_1" [shape = parallelogram];
 
-    "bb::TestRescue#parse_ruby_bug_12402_2_0" [label = "block[id=0]()
-<constant:StandardError>$20 = alias <constant:StandardError> : <Class:StandardError>
-<statTemp>$5 = self : TestRescue
-[]$3 = <statTemp>$5.foo() : untyped
-[]$4 = 0 : Integer(0)
-<statTemp>$10 = []$3.[]([]$4) : untyped
-<rescueTemp$14 = <unanalyzable> : untyped
-<rescueTemp$14"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_0" [
+        label = "block[id=0]()\l<constant:StandardError>$20 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$5 = self : TestRescue\l[]$3 = <statTemp>$5.foo() : untyped\l[]$4 = 0 : Integer(0)\l<statTemp>$10 = []$3.[]([]$4) : untyped\l<rescueTemp$14 = <unanalyzable> : untyped\l<rescueTemp$14\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_0" -> "bb::TestRescue#parse_ruby_bug_12402_2_3" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_0" -> "bb::TestRescue#parse_ruby_bug_12402_2_4" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_2_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_1" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_3" [label = "block[id=3](<statTemp>$10, <rescueTemp$14, <constant:StandardError>$20, []$3, []$4)
-<rescueTemp$21 = <rescueTemp$14.is_a?(<constant:StandardError>$20) : untyped
-<rescueTemp$21"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_3" [
+        label = "block[id=3](<statTemp>$10, <rescueTemp$14, <constant:StandardError>$20, []$3, []$4)\l<rescueTemp$21 = <rescueTemp$14.is_a?(<constant:StandardError>$20) : untyped\l<rescueTemp$21\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_3" -> "bb::TestRescue#parse_ruby_bug_12402_2_8" [style="bold"];
     "bb::TestRescue#parse_ruby_bug_12402_2_3" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="tapered"];
 
-    "bb::TestRescue#parse_ruby_bug_12402_2_4" [label = "block[id=4](<statTemp>$10, []$3, []$4)
-<statTemp>$15 = self : TestRescue
-<statTemp>$17 = self : TestRescue
-<statTemp>$16 = <statTemp>$17.bar() : untyped
-<statTemp>$13 = <statTemp>$15.raise(<statTemp>$16) : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_4" [
+        label = "block[id=4](<statTemp>$10, []$3, []$4)\l<statTemp>$15 = self : TestRescue\l<statTemp>$17 = self : TestRescue\l<statTemp>$16 = <statTemp>$17.bar() : untyped\l<statTemp>$13 = <statTemp>$15.raise(<statTemp>$16) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_4" -> "bb::TestRescue#parse_ruby_bug_12402_2_7" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_7" [label = "block[id=7](<statTemp>$10, <statTemp>$13, []$3, []$4)
-<statTemp>$9 = <statTemp>$10.+(<statTemp>$13) : untyped
-<returnMethodTemp>$2 = []$3.[]=([]$4, <statTemp>$9) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_7" [
+        label = "block[id=7](<statTemp>$10, <statTemp>$13, []$3, []$4)\l<statTemp>$9 = <statTemp>$10.+(<statTemp>$13) : untyped\l<returnMethodTemp>$2 = []$3.[]=([]$4, <statTemp>$9) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_7" -> "bb::TestRescue#parse_ruby_bug_12402_2_1" [style="bold"];
-    "bb::TestRescue#parse_ruby_bug_12402_2_8" [label = "block[id=8](<statTemp>$10, <rescueTemp$14, []$3, []$4)
-<statTemp>$13 = nil : NilClass
-<unconditional>"];
+    "bb::TestRescue#parse_ruby_bug_12402_2_8" [
+        label = "block[id=8](<statTemp>$10, <rescueTemp$14, []$3, []$4)\l<statTemp>$13 = nil : NilClass\l<unconditional>\l"
+    ];
 
     "bb::TestRescue#parse_ruby_bug_12402_2_8" -> "bb::TestRescue#parse_ruby_bug_12402_2_7" [style="bold"];
 }

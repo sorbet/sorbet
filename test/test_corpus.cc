@@ -334,7 +334,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\"{" << '\n';
+            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -354,7 +354,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\"{" << '\n';
+            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }

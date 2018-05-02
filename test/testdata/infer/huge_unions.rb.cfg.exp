@@ -1,17 +1,18 @@
-digraph "huge_unions.rb"{
+digraph "huge_unions.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -22,304 +23,259 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_0" [shape = invhouse];
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
-    "bb::<Class:A>#send_beta_invitation_0" [label = "block[id=0]()
-<constant:C1>$9 = alias <constant:C1> : <Class:C1>
-<constant:C2>$13 = alias <constant:C2> : <Class:C2>
-<constant:C3>$17 = alias <constant:C3> : <Class:C3>
-<constant:C4>$21 = alias <constant:C4> : <Class:C4>
-<constant:C5>$25 = alias <constant:C5> : <Class:C5>
-<constant:C6>$29 = alias <constant:C6> : <Class:C6>
-<constant:C7>$33 = alias <constant:C7> : <Class:C7>
-<constant:C8>$37 = alias <constant:C8> : <Class:C8>
-<constant:C9>$41 = alias <constant:C9> : <Class:C9>
-<constant:C10>$45 = alias <constant:C10> : <Class:C10>
-<constant:C11>$49 = alias <constant:C11> : <Class:C11>
-<constant:C12>$53 = alias <constant:C12> : <Class:C12>
-<constant:C13>$57 = alias <constant:C13> : <Class:C13>
-<constant:C14>$61 = alias <constant:C14> : <Class:C14>
-<constant:C15>$65 = alias <constant:C15> : <Class:C15>
-<constant:C16>$69 = alias <constant:C16> : <Class:C16>
-<constant:C17>$73 = alias <constant:C17> : <Class:C17>
-<constant:C18>$77 = alias <constant:C18> : <Class:C18>
-<constant:C19>$81 = alias <constant:C19> : <Class:C19>
-<constant:C20>$85 = alias <constant:C20> : <Class:C20>
-<selfMethodTemp>$3 = self : <Class:A>
-invite = load_arg(<selfMethodTemp>$3#send_beta_invitation, 0) : untyped
-<statTemp>$7 = 1 : Integer(1)
-<ifTemp>$6 = <statTemp>$7.===(invite) : TrueClass | FalseClass
-<ifTemp>$6"];
+    "bb::<Class:A>#send_beta_invitation_0" [
+        label = "block[id=0]()\l<constant:C1>$9 = alias <constant:C1> : <Class:C1>\l<constant:C2>$13 = alias <constant:C2> : <Class:C2>\l<constant:C3>$17 = alias <constant:C3> : <Class:C3>\l<constant:C4>$21 = alias <constant:C4> : <Class:C4>\l<constant:C5>$25 = alias <constant:C5> : <Class:C5>\l<constant:C6>$29 = alias <constant:C6> : <Class:C6>\l<constant:C7>$33 = alias <constant:C7> : <Class:C7>\l<constant:C8>$37 = alias <constant:C8> : <Class:C8>\l<constant:C9>$41 = alias <constant:C9> : <Class:C9>\l<constant:C10>$45 = alias <constant:C10> : <Class:C10>\l<constant:C11>$49 = alias <constant:C11> : <Class:C11>\l<constant:C12>$53 = alias <constant:C12> : <Class:C12>\l<constant:C13>$57 = alias <constant:C13> : <Class:C13>\l<constant:C14>$61 = alias <constant:C14> : <Class:C14>\l<constant:C15>$65 = alias <constant:C15> : <Class:C15>\l<constant:C16>$69 = alias <constant:C16> : <Class:C16>\l<constant:C17>$73 = alias <constant:C17> : <Class:C17>\l<constant:C18>$77 = alias <constant:C18> : <Class:C18>\l<constant:C19>$81 = alias <constant:C19> : <Class:C19>\l<constant:C20>$85 = alias <constant:C20> : <Class:C20>\l<selfMethodTemp>$3 = self : <Class:A>\linvite = load_arg(<selfMethodTemp>$3#send_beta_invitation, 0) : untyped\l<statTemp>$7 = 1 : Integer(1)\l<ifTemp>$6 = <statTemp>$7.===(invite) : TrueClass | FalseClass\l<ifTemp>$6\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_3" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_1" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_2" [label = "block[id=2](<constant:C1>$9)
-r = <constant:C1>$9 : <Class:C1>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_2" [
+        label = "block[id=2](<constant:C1>$9)\lr = <constant:C1>$9 : <Class:C1>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_3" [label = "block[id=3](<constant:C2>$13, <constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$11 = 2 : Integer(2)
-<ifTemp>$10 = <statTemp>$11.===(invite) : TrueClass | FalseClass
-<ifTemp>$10"];
+    "bb::<Class:A>#send_beta_invitation_3" [
+        label = "block[id=3](<constant:C2>$13, <constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$11 = 2 : Integer(2)\l<ifTemp>$10 = <statTemp>$11.===(invite) : TrueClass | FalseClass\l<ifTemp>$10\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_4" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_5" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_4" [label = "block[id=4](<constant:C2>$13)
-r = <constant:C2>$13 : <Class:C2>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_4" [
+        label = "block[id=4](<constant:C2>$13)\lr = <constant:C2>$13 : <Class:C2>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_5" [label = "block[id=5](<constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$15 = 3 : Integer(3)
-<ifTemp>$14 = <statTemp>$15.===(invite) : TrueClass | FalseClass
-<ifTemp>$14"];
+    "bb::<Class:A>#send_beta_invitation_5" [
+        label = "block[id=5](<constant:C3>$17, <constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$15 = 3 : Integer(3)\l<ifTemp>$14 = <statTemp>$15.===(invite) : TrueClass | FalseClass\l<ifTemp>$14\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_6" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_7" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_6" [label = "block[id=6](<constant:C3>$17)
-r = <constant:C3>$17 : <Class:C3>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_6" [
+        label = "block[id=6](<constant:C3>$17)\lr = <constant:C3>$17 : <Class:C3>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_7" [label = "block[id=7](<constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$19 = 4 : Integer(4)
-<ifTemp>$18 = <statTemp>$19.===(invite) : TrueClass | FalseClass
-<ifTemp>$18"];
+    "bb::<Class:A>#send_beta_invitation_7" [
+        label = "block[id=7](<constant:C4>$21, <constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$19 = 4 : Integer(4)\l<ifTemp>$18 = <statTemp>$19.===(invite) : TrueClass | FalseClass\l<ifTemp>$18\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_8" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_9" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_8" [label = "block[id=8](<constant:C4>$21)
-r = <constant:C4>$21 : <Class:C4>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_8" [
+        label = "block[id=8](<constant:C4>$21)\lr = <constant:C4>$21 : <Class:C4>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_9" [label = "block[id=9](<constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$23 = 5 : Integer(5)
-<ifTemp>$22 = <statTemp>$23.===(invite) : TrueClass | FalseClass
-<ifTemp>$22"];
+    "bb::<Class:A>#send_beta_invitation_9" [
+        label = "block[id=9](<constant:C5>$25, <constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$23 = 5 : Integer(5)\l<ifTemp>$22 = <statTemp>$23.===(invite) : TrueClass | FalseClass\l<ifTemp>$22\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_10" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_11" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_10" [label = "block[id=10](<constant:C5>$25)
-r = <constant:C5>$25 : <Class:C5>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_10" [
+        label = "block[id=10](<constant:C5>$25)\lr = <constant:C5>$25 : <Class:C5>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_11" [label = "block[id=11](<constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$27 = 6 : Integer(6)
-<ifTemp>$26 = <statTemp>$27.===(invite) : TrueClass | FalseClass
-<ifTemp>$26"];
+    "bb::<Class:A>#send_beta_invitation_11" [
+        label = "block[id=11](<constant:C6>$29, <constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$27 = 6 : Integer(6)\l<ifTemp>$26 = <statTemp>$27.===(invite) : TrueClass | FalseClass\l<ifTemp>$26\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_12" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_13" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_12" [label = "block[id=12](<constant:C6>$29)
-r = <constant:C6>$29 : <Class:C6>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_12" [
+        label = "block[id=12](<constant:C6>$29)\lr = <constant:C6>$29 : <Class:C6>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_13" [label = "block[id=13](<constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$31 = 7 : Integer(7)
-<ifTemp>$30 = <statTemp>$31.===(invite) : TrueClass | FalseClass
-<ifTemp>$30"];
+    "bb::<Class:A>#send_beta_invitation_13" [
+        label = "block[id=13](<constant:C7>$33, <constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$31 = 7 : Integer(7)\l<ifTemp>$30 = <statTemp>$31.===(invite) : TrueClass | FalseClass\l<ifTemp>$30\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_14" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_15" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_14" [label = "block[id=14](<constant:C7>$33)
-r = <constant:C7>$33 : <Class:C7>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_14" [
+        label = "block[id=14](<constant:C7>$33)\lr = <constant:C7>$33 : <Class:C7>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_15" [label = "block[id=15](<constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$35 = 8 : Integer(8)
-<ifTemp>$34 = <statTemp>$35.===(invite) : TrueClass | FalseClass
-<ifTemp>$34"];
+    "bb::<Class:A>#send_beta_invitation_15" [
+        label = "block[id=15](<constant:C8>$37, <constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$35 = 8 : Integer(8)\l<ifTemp>$34 = <statTemp>$35.===(invite) : TrueClass | FalseClass\l<ifTemp>$34\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_16" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_17" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_16" [label = "block[id=16](<constant:C8>$37)
-r = <constant:C8>$37 : <Class:C8>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_16" [
+        label = "block[id=16](<constant:C8>$37)\lr = <constant:C8>$37 : <Class:C8>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_17" [label = "block[id=17](<constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$39 = 9 : Integer(9)
-<ifTemp>$38 = <statTemp>$39.===(invite) : TrueClass | FalseClass
-<ifTemp>$38"];
+    "bb::<Class:A>#send_beta_invitation_17" [
+        label = "block[id=17](<constant:C9>$41, <constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$39 = 9 : Integer(9)\l<ifTemp>$38 = <statTemp>$39.===(invite) : TrueClass | FalseClass\l<ifTemp>$38\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_18" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_19" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_18" [label = "block[id=18](<constant:C9>$41)
-r = <constant:C9>$41 : <Class:C9>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_18" [
+        label = "block[id=18](<constant:C9>$41)\lr = <constant:C9>$41 : <Class:C9>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_19" [label = "block[id=19](<constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$43 = 10 : Integer(10)
-<ifTemp>$42 = <statTemp>$43.===(invite) : TrueClass | FalseClass
-<ifTemp>$42"];
+    "bb::<Class:A>#send_beta_invitation_19" [
+        label = "block[id=19](<constant:C10>$45, <constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$43 = 10 : Integer(10)\l<ifTemp>$42 = <statTemp>$43.===(invite) : TrueClass | FalseClass\l<ifTemp>$42\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_20" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_21" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_20" [label = "block[id=20](<constant:C10>$45)
-r = <constant:C10>$45 : <Class:C10>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_20" [
+        label = "block[id=20](<constant:C10>$45)\lr = <constant:C10>$45 : <Class:C10>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_21" [label = "block[id=21](<constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$47 = 11 : Integer(11)
-<ifTemp>$46 = <statTemp>$47.===(invite) : TrueClass | FalseClass
-<ifTemp>$46"];
+    "bb::<Class:A>#send_beta_invitation_21" [
+        label = "block[id=21](<constant:C11>$49, <constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$47 = 11 : Integer(11)\l<ifTemp>$46 = <statTemp>$47.===(invite) : TrueClass | FalseClass\l<ifTemp>$46\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_22" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_23" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_22" [label = "block[id=22](<constant:C11>$49)
-r = <constant:C11>$49 : <Class:C11>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_22" [
+        label = "block[id=22](<constant:C11>$49)\lr = <constant:C11>$49 : <Class:C11>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_23" [label = "block[id=23](<constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$51 = 12 : Integer(12)
-<ifTemp>$50 = <statTemp>$51.===(invite) : TrueClass | FalseClass
-<ifTemp>$50"];
+    "bb::<Class:A>#send_beta_invitation_23" [
+        label = "block[id=23](<constant:C12>$53, <constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$51 = 12 : Integer(12)\l<ifTemp>$50 = <statTemp>$51.===(invite) : TrueClass | FalseClass\l<ifTemp>$50\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_24" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_25" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_24" [label = "block[id=24](<constant:C12>$53)
-r = <constant:C12>$53 : <Class:C12>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_24" [
+        label = "block[id=24](<constant:C12>$53)\lr = <constant:C12>$53 : <Class:C12>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_25" [label = "block[id=25](<constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$55 = 13 : Integer(13)
-<ifTemp>$54 = <statTemp>$55.===(invite) : TrueClass | FalseClass
-<ifTemp>$54"];
+    "bb::<Class:A>#send_beta_invitation_25" [
+        label = "block[id=25](<constant:C13>$57, <constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$55 = 13 : Integer(13)\l<ifTemp>$54 = <statTemp>$55.===(invite) : TrueClass | FalseClass\l<ifTemp>$54\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_26" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_27" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_26" [label = "block[id=26](<constant:C13>$57)
-r = <constant:C13>$57 : <Class:C13>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_26" [
+        label = "block[id=26](<constant:C13>$57)\lr = <constant:C13>$57 : <Class:C13>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_27" [label = "block[id=27](<constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$59 = 14 : Integer(14)
-<ifTemp>$58 = <statTemp>$59.===(invite) : TrueClass | FalseClass
-<ifTemp>$58"];
+    "bb::<Class:A>#send_beta_invitation_27" [
+        label = "block[id=27](<constant:C14>$61, <constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$59 = 14 : Integer(14)\l<ifTemp>$58 = <statTemp>$59.===(invite) : TrueClass | FalseClass\l<ifTemp>$58\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_28" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_29" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_28" [label = "block[id=28](<constant:C14>$61)
-r = <constant:C14>$61 : <Class:C14>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_28" [
+        label = "block[id=28](<constant:C14>$61)\lr = <constant:C14>$61 : <Class:C14>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_29" [label = "block[id=29](<constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$63 = 15 : Integer(15)
-<ifTemp>$62 = <statTemp>$63.===(invite) : TrueClass | FalseClass
-<ifTemp>$62"];
+    "bb::<Class:A>#send_beta_invitation_29" [
+        label = "block[id=29](<constant:C15>$65, <constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$63 = 15 : Integer(15)\l<ifTemp>$62 = <statTemp>$63.===(invite) : TrueClass | FalseClass\l<ifTemp>$62\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_30" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_31" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_30" [label = "block[id=30](<constant:C15>$65)
-r = <constant:C15>$65 : <Class:C15>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_30" [
+        label = "block[id=30](<constant:C15>$65)\lr = <constant:C15>$65 : <Class:C15>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_31" [label = "block[id=31](<constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$67 = 16 : Integer(16)
-<ifTemp>$66 = <statTemp>$67.===(invite) : TrueClass | FalseClass
-<ifTemp>$66"];
+    "bb::<Class:A>#send_beta_invitation_31" [
+        label = "block[id=31](<constant:C16>$69, <constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$67 = 16 : Integer(16)\l<ifTemp>$66 = <statTemp>$67.===(invite) : TrueClass | FalseClass\l<ifTemp>$66\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_32" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_33" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_32" [label = "block[id=32](<constant:C16>$69)
-r = <constant:C16>$69 : <Class:C16>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_32" [
+        label = "block[id=32](<constant:C16>$69)\lr = <constant:C16>$69 : <Class:C16>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_33" [label = "block[id=33](<constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$71 = 17 : Integer(17)
-<ifTemp>$70 = <statTemp>$71.===(invite) : TrueClass | FalseClass
-<ifTemp>$70"];
+    "bb::<Class:A>#send_beta_invitation_33" [
+        label = "block[id=33](<constant:C17>$73, <constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$71 = 17 : Integer(17)\l<ifTemp>$70 = <statTemp>$71.===(invite) : TrueClass | FalseClass\l<ifTemp>$70\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_34" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_35" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_34" [label = "block[id=34](<constant:C17>$73)
-r = <constant:C17>$73 : <Class:C17>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_34" [
+        label = "block[id=34](<constant:C17>$73)\lr = <constant:C17>$73 : <Class:C17>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_35" [label = "block[id=35](<constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$75 = 18 : Integer(18)
-<ifTemp>$74 = <statTemp>$75.===(invite) : TrueClass | FalseClass
-<ifTemp>$74"];
+    "bb::<Class:A>#send_beta_invitation_35" [
+        label = "block[id=35](<constant:C18>$77, <constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$75 = 18 : Integer(18)\l<ifTemp>$74 = <statTemp>$75.===(invite) : TrueClass | FalseClass\l<ifTemp>$74\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_36" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_37" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_36" [label = "block[id=36](<constant:C18>$77)
-r = <constant:C18>$77 : <Class:C18>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_36" [
+        label = "block[id=36](<constant:C18>$77)\lr = <constant:C18>$77 : <Class:C18>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_37" [label = "block[id=37](<constant:C19>$81, <constant:C20>$85, invite)
-<statTemp>$79 = 19 : Integer(19)
-<ifTemp>$78 = <statTemp>$79.===(invite) : TrueClass | FalseClass
-<ifTemp>$78"];
+    "bb::<Class:A>#send_beta_invitation_37" [
+        label = "block[id=37](<constant:C19>$81, <constant:C20>$85, invite)\l<statTemp>$79 = 19 : Integer(19)\l<ifTemp>$78 = <statTemp>$79.===(invite) : TrueClass | FalseClass\l<ifTemp>$78\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_38" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_39" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_38" [label = "block[id=38](<constant:C19>$81)
-r = <constant:C19>$81 : <Class:C19>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_38" [
+        label = "block[id=38](<constant:C19>$81)\lr = <constant:C19>$81 : <Class:C19>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_39" [label = "block[id=39](<constant:C20>$85, invite)
-<statTemp>$83 = 20 : Integer(20)
-<ifTemp>$82 = <statTemp>$83.===(invite) : TrueClass | FalseClass
-<ifTemp>$82"];
+    "bb::<Class:A>#send_beta_invitation_39" [
+        label = "block[id=39](<constant:C20>$85, invite)\l<statTemp>$83 = 20 : Integer(20)\l<ifTemp>$82 = <statTemp>$83.===(invite) : TrueClass | FalseClass\l<ifTemp>$82\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_40" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_41" [style="tapered"];
 
-    "bb::<Class:A>#send_beta_invitation_40" [label = "block[id=40](<constant:C20>$85)
-r = <constant:C20>$85 : <Class:C20>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_40" [
+        label = "block[id=40](<constant:C20>$85)\lr = <constant:C20>$85 : <Class:C20>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_41" [label = "block[id=41]()
-<statTemp>$86 = self : <Class:A>
-<statTemp>$87 = \"Bla bla bla\" : String(\"Bla bla bla\")
-<statTemp>$4 = <statTemp>$86.raise(<statTemp>$87) : <impossible>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_41" [
+        label = "block[id=41]()\l<statTemp>$86 = self : <Class:A>\l<statTemp>$87 = \"Bla bla bla\" : String(\"Bla bla bla\")\l<statTemp>$4 = <statTemp>$86.raise(<statTemp>$87) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
-    "bb::<Class:A>#send_beta_invitation_61" [label = "block[id=61](r)
-s = r : <Class:C1> | <Class:C2> | <Class:C3> | <Class:C4> | <Class:C5> | <Class:C6> | <Class:C7> | <Class:C8> | <Class:C9> | <Class:C10> | <Class:C11> | <Class:C12> | <Class:C13> | <Class:C14> | <Class:C15> | <Class:C16> | <Class:C17> | <Class:C18> | <Class:C19> | <Class:C20>
-<returnMethodTemp>$2 = return s : <impossible>
-<unconditional>"];
+    "bb::<Class:A>#send_beta_invitation_61" [
+        label = "block[id=61](r)\ls = r : <Class:C1> | <Class:C2> | <Class:C3> | <Class:C4> | <Class:C5> | <Class:C6> | <Class:C7> | <Class:C8> | <Class:C9> | <Class:C10> | <Class:C11> | <Class:C12> | <Class:C13> | <Class:C14> | <Class:C15> | <Class:C16> | <Class:C17> | <Class:C18> | <Class:C19> | <Class:C20>\l<returnMethodTemp>$2 = return s : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
 }

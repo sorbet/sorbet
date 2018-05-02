@@ -1,17 +1,18 @@
-digraph "transitive.rb"{
+digraph "transitive.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -22,13 +23,14 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_0" [shape = invhouse];
     "bb::A#foo_1" [shape = parallelogram];
 
-    "bb::A#foo_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::A#foo_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
-    "bb::A#foo_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::A#foo_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
@@ -39,16 +41,14 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_0" [shape = invhouse];
     "bb::Bar#baz_1" [shape = parallelogram];
 
-    "bb::Bar#baz_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Bar
-<statTemp>$4 = self : Bar
-<returnMethodTemp>$2 = <statTemp>$4.foo() : Integer
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Bar#baz_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Bar\l<statTemp>$4 = self : Bar\l<returnMethodTemp>$2 = <statTemp>$4.foo() : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
-    "bb::Bar#baz_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Bar#baz_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
 }

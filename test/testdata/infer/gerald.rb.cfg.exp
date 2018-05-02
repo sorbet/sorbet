@@ -1,23 +1,18 @@
-digraph "gerald.rb"{
+digraph "gerald.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<constant:AutogenLoader>$9 = alias <constant:AutogenLoader> : untyped
-<statTemp>$5 = self : <Class:<root>>
-<statTemp>$6 = \"../../../extn\" : String(\"../../../extn\")
-<statTemp>$4 = <statTemp>$5.require_relative(<statTemp>$6) : TrueClass | FalseClass
-<statTemp>$10 = \"__FILE__\" : String(\"__FILE__\")
-<statTemp>$7 = <constant:AutogenLoader>$9.init(<statTemp>$10) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<constant:AutogenLoader>$9 = alias <constant:AutogenLoader> : untyped\l<statTemp>$5 = self : <Class:<root>>\l<statTemp>$6 = \"../../../extn\" : String(\"../../../extn\")\l<statTemp>$4 = <statTemp>$5.require_relative(<statTemp>$6) : TrueClass | FalseClass\l<statTemp>$10 = \"__FILE__\" : String(\"__FILE__\")\l<statTemp>$7 = <constant:AutogenLoader>$9.init(<statTemp>$10) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -28,14 +23,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#rule_token" {
     "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_0" [label = "block[id=0]()
-@rule_token$4 = alias @rule_token : untyped
-<finalReturn> = return @rule_token$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_0" [
+        label = "block[id=0]()\l@rule_token$4 = alias @rule_token : untyped\l<finalReturn> = return @rule_token$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_0" -> "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" -> "bb::Opus::CIBot::Gerald::MatchTimeout#rule_token_1" [style="bold"];
 }
@@ -46,20 +41,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeout#initialize" {
     "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_0" [label = "block[id=0]()
-@rule_token$7 = alias @rule_token : untyped
-<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeout
-message = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
-rule_token = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped
-<statTemp>$5 = self : Opus::CIBot::Gerald::MatchTimeout
-<statTemp>$4 = <statTemp>$5.super(message) : untyped
-@rule_token$7 = rule_token : untyped
-<finalReturn> = return @rule_token$7 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_0" [
+        label = "block[id=0]()\l@rule_token$7 = alias @rule_token : untyped\l<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeout\lmessage = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped\lrule_token = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped\l<statTemp>$5 = self : Opus::CIBot::Gerald::MatchTimeout\l<statTemp>$4 = <statTemp>$5.super(message) : untyped\l@rule_token$7 = rule_token : untyped\l<finalReturn> = return @rule_token$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_0" -> "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" -> "bb::Opus::CIBot::Gerald::MatchTimeout#initialize_1" [style="bold"];
 }
@@ -70,86 +59,60 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#initialize" {
     "bb::Opus::CIBot::Gerald::Matcher#initialize_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_0" [label = "block[id=0]()
-<constant:<Magic>>$14 = alias <constant:<Magic>> : <Magic>
-@rules$20 = alias @rules : untyped
-<constant:GeraldRule>$11 = alias <constant:GeraldRule> : untyped
-<statTemp>$12 = :\"deleted_at_is_nil\" : Symbol(:\"deleted_at_is_nil\")
-<statTemp>$9 = <constant:GeraldRule>$11.query_by(<statTemp>$12) : untyped
-<statTemp>$13 = <constant:<Magic>>$14.<build-hash>() : ShapeType {
-}
-<statTemp>$8 = <statTemp>$9.load_all(<statTemp>$13) : untyped
-<block-pre-call-temp>$15 = <statTemp>$8.partition() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$14 = alias <constant:<Magic>> : <Magic>\l@rules$20 = alias @rules : untyped\l<constant:GeraldRule>$11 = alias <constant:GeraldRule> : untyped\l<statTemp>$12 = :\"deleted_at_is_nil\" : Symbol(:\"deleted_at_is_nil\")\l<statTemp>$9 = <constant:GeraldRule>$11.query_by(<statTemp>$12) : untyped\l<statTemp>$13 = <constant:<Magic>>$14.<build-hash>() : ShapeType {\l}\l<statTemp>$8 = <statTemp>$9.load_all(<statTemp>$13) : untyped\l<block-pre-call-temp>$15 = <statTemp>$8.partition() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_0" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_1" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_2" [label = "block[id=2](@rules$20)
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_2" [
+        label = "block[id=2](@rules$20)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_2" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#initialize_2" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_3" [label = "block[id=3](@rules$20)
-<assignTemp$3 = Solve<::Opus::CIBot::Gerald::Matcher#initialize#<block>> : untyped
-<statTemp>$22 = 0 : Integer(0)
-@rules$20 = <assignTemp$3.[](<statTemp>$22) : untyped
-<statTemp>$25 = 1 : Integer(1)
-invalid_rules = <assignTemp$3.[](<statTemp>$25) : untyped
-<statTemp>$27 = invalid_rules.empty?() : untyped
-<ifTemp>$26 = <statTemp>$27.!() : untyped
-<ifTemp>$26"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_3" [
+        label = "block[id=3](@rules$20)\l<assignTemp$3 = Solve<::Opus::CIBot::Gerald::Matcher#initialize#<block>> : untyped\l<statTemp>$22 = 0 : Integer(0)\l@rules$20 = <assignTemp$3.[](<statTemp>$22) : untyped\l<statTemp>$25 = 1 : Integer(1)\linvalid_rules = <assignTemp$3.[](<statTemp>$25) : untyped\l<statTemp>$27 = invalid_rules.empty?() : untyped\l<ifTemp>$26 = <statTemp>$27.!() : untyped\l<ifTemp>$26\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_3" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_5" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#initialize_3" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_10" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_4" [label = "block[id=4](@rules$20)
-outerLoops: 1
-<block-pass>$2$2 = load_yield_param(::Opus::CIBot::Gerald::Matcher#initialize#<block>, 0) : untyped
-<blockReturnTemp>$16 = <block-pass>$2$2.valid?() : untyped
-<blockReturnTemp>$18 = blockreturn<::Opus::CIBot::Gerald::Matcher#initialize#<block>> <blockReturnTemp>$16 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_4" [
+        label = "block[id=4](@rules$20)\louterLoops: 1\l<block-pass>$2$2 = load_yield_param(::Opus::CIBot::Gerald::Matcher#initialize#<block>, 0) : untyped\l<blockReturnTemp>$16 = <block-pass>$2$2.valid?() : untyped\l<blockReturnTemp>$18 = blockreturn<::Opus::CIBot::Gerald::Matcher#initialize#<block>> <blockReturnTemp>$16 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_4" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_5" [label = "block[id=5](invalid_rules)
-<block-pre-call-temp>$32 = invalid_rules.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_5" [
+        label = "block[id=5](invalid_rules)\l<block-pre-call-temp>$32 = invalid_rules.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_5" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_7" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_7" [label = "block[id=7]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_7" [
+        label = "block[id=7]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_7" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_9" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#initialize_7" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_8" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_8" [label = "block[id=8]()
-<statTemp>$30 = Solve<::Opus::CIBot::Gerald::Matcher#initialize#<block>> : untyped
-<statTemp>$36 = \",\" : String(\",\")
-invalid_rule_ids = <statTemp>$30.join(<statTemp>$36) : untyped
-<statTemp>$38 = self : Opus::CIBot::Gerald::Matcher
-<statTemp>$37 = <statTemp>$38.log() : untyped
-<statTemp>$40 = \"Gerald skipping invalid rules: \" : String(\"Gerald skipping invalid rules: \")
-<statTemp>$39 = <statTemp>$40.+(invalid_rule_ids) : String
-<returnMethodTemp>$4 = <statTemp>$37.warn(<statTemp>$39) : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_8" [
+        label = "block[id=8]()\l<statTemp>$30 = Solve<::Opus::CIBot::Gerald::Matcher#initialize#<block>> : untyped\l<statTemp>$36 = \",\" : String(\",\")\linvalid_rule_ids = <statTemp>$30.join(<statTemp>$36) : untyped\l<statTemp>$38 = self : Opus::CIBot::Gerald::Matcher\l<statTemp>$37 = <statTemp>$38.log() : untyped\l<statTemp>$40 = \"Gerald skipping invalid rules: \" : String(\"Gerald skipping invalid rules: \")\l<statTemp>$39 = <statTemp>$40.+(invalid_rule_ids) : String\l<returnMethodTemp>$4 = <statTemp>$37.warn(<statTemp>$39) : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_8" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_10" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_9" [label = "block[id=9]()
-outerLoops: 1
-<block-pass>$4$3 = load_yield_param(::Opus::CIBot::Gerald::Matcher#initialize#<block>, 0) : untyped
-<blockReturnTemp>$33 = <block-pass>$4$3.token() : untyped
-<blockReturnTemp>$35 = blockreturn<::Opus::CIBot::Gerald::Matcher#initialize#<block>> <blockReturnTemp>$33 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_9" [
+        label = "block[id=9]()\louterLoops: 1\l<block-pass>$4$3 = load_yield_param(::Opus::CIBot::Gerald::Matcher#initialize#<block>, 0) : untyped\l<blockReturnTemp>$33 = <block-pass>$4$3.token() : untyped\l<blockReturnTemp>$35 = blockreturn<::Opus::CIBot::Gerald::Matcher#initialize#<block>> <blockReturnTemp>$33 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_9" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_7" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#initialize_10" [label = "block[id=10](<returnMethodTemp>$4)
-<finalReturn> = return <returnMethodTemp>$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#initialize_10" [
+        label = "block[id=10](<returnMethodTemp>$4)\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#initialize_10" -> "bb::Opus::CIBot::Gerald::Matcher#initialize_1" [style="bold"];
 }
@@ -160,91 +123,60 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
     "bb::Opus::CIBot::Gerald::Matcher#match_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Matcher#match_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Matcher#match_0" [label = "block[id=0]()
-<constant:<Magic>>$28 = alias <constant:<Magic>> : <Magic>
-<constant:MAX_AFFECTED_FILES>$12 = alias <constant:MAX_AFFECTED_FILES> : Integer(100)
-@rules$33 = alias @rules : untyped
-<constant:MatchTimeBudget>$31 = alias <constant:MatchTimeBudget> : <Class:Opus::CIBot::Gerald::MatchTimeBudget>
-<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Matcher
-match_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped
-<statTemp>$9 = match_context.diff() : untyped
-<statTemp>$8 = <statTemp>$9.affected_files() : untyped
-<statTemp>$7 = <statTemp>$8.count() : untyped
-<ifTemp>$6 = <statTemp>$7.>(<constant:MAX_AFFECTED_FILES>$12) : untyped
-<ifTemp>$6"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$28 = alias <constant:<Magic>> : <Magic>\l<constant:MAX_AFFECTED_FILES>$12 = alias <constant:MAX_AFFECTED_FILES> : Integer(100)\l@rules$33 = alias @rules : untyped\l<constant:MatchTimeBudget>$31 = alias <constant:MatchTimeBudget> : <Class:Opus::CIBot::Gerald::MatchTimeBudget>\l<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Matcher\lmatch_context = load_arg(<selfMethodTemp>$4#match, 0) : untyped\l<statTemp>$9 = match_context.diff() : untyped\l<statTemp>$8 = <statTemp>$9.affected_files() : untyped\l<statTemp>$7 = <statTemp>$8.count() : untyped\l<ifTemp>$6 = <statTemp>$7.>(<constant:MAX_AFFECTED_FILES>$12) : untyped\l<ifTemp>$6\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_0" -> "bb::Opus::CIBot::Gerald::Matcher#match_2" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#match_0" -> "bb::Opus::CIBot::Gerald::Matcher#match_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#match_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_1" -> "bb::Opus::CIBot::Gerald::Matcher#match_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_2" [label = "block[id=2](<constant:<Magic>>$28, match_context)
-<statTemp>$15 = self : Opus::CIBot::Gerald::Matcher
-<statTemp>$14 = <statTemp>$15.log() : untyped
-<statTemp>$19 = \"Gerald skipping large PR with \" : String(\"Gerald skipping large PR with \")
-<statTemp>$23 = match_context.diff() : untyped
-<statTemp>$22 = <statTemp>$23.affected_files() : untyped
-<statTemp>$21 = <statTemp>$22.count() : untyped
-<statTemp>$20 = <statTemp>$21.to_s() : untyped
-<statTemp>$18 = <statTemp>$19.concat(<statTemp>$20) : String
-<statTemp>$26 = \" affected files\" : String(\" affected files\")
-<statTemp>$25 = <statTemp>$26.to_s() : String
-<statTemp>$17 = <statTemp>$18.concat(<statTemp>$25) : String
-<statTemp>$16 = <statTemp>$17.to_s() : String
-<statTemp>$13 = <statTemp>$14.warn(<statTemp>$16) : untyped
-<returnTemp>$27 = <constant:<Magic>>$28.<build-array>() : TupleType {
-}
-<statTemp>$5 = return <returnTemp>$27 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_2" [
+        label = "block[id=2](<constant:<Magic>>$28, match_context)\l<statTemp>$15 = self : Opus::CIBot::Gerald::Matcher\l<statTemp>$14 = <statTemp>$15.log() : untyped\l<statTemp>$19 = \"Gerald skipping large PR with \" : String(\"Gerald skipping large PR with \")\l<statTemp>$23 = match_context.diff() : untyped\l<statTemp>$22 = <statTemp>$23.affected_files() : untyped\l<statTemp>$21 = <statTemp>$22.count() : untyped\l<statTemp>$20 = <statTemp>$21.to_s() : untyped\l<statTemp>$18 = <statTemp>$19.concat(<statTemp>$20) : String\l<statTemp>$26 = \" affected files\" : String(\" affected files\")\l<statTemp>$25 = <statTemp>$26.to_s() : String\l<statTemp>$17 = <statTemp>$18.concat(<statTemp>$25) : String\l<statTemp>$16 = <statTemp>$17.to_s() : String\l<statTemp>$13 = <statTemp>$14.warn(<statTemp>$16) : untyped\l<returnTemp>$27 = <constant:<Magic>>$28.<build-array>() : TupleType {\l}\l<statTemp>$5 = return <returnTemp>$27 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_2" -> "bb::Opus::CIBot::Gerald::Matcher#match_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_3" [label = "block[id=3](@rules$33, match_context, <constant:MatchTimeBudget>$31)
-budget = <constant:MatchTimeBudget>$31.new() : Opus::CIBot::Gerald::MatchTimeBudget
-<block-pre-call-temp>$34 = @rules$33.select() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_3" [
+        label = "block[id=3](@rules$33, match_context, <constant:MatchTimeBudget>$31)\lbudget = <constant:MatchTimeBudget>$31.new() : Opus::CIBot::Gerald::MatchTimeBudget\l<block-pre-call-temp>$34 = @rules$33.select() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_3" -> "bb::Opus::CIBot::Gerald::Matcher#match_4" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_4" [label = "block[id=4](match_context, budget)
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_4" [
+        label = "block[id=4](match_context, budget)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_4" -> "bb::Opus::CIBot::Gerald::Matcher#match_6" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#match_4" -> "bb::Opus::CIBot::Gerald::Matcher#match_5" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#match_5" [label = "block[id=5]()
-<returnMethodTemp>$3 = Solve<::Opus::CIBot::Gerald::Matcher#match#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_5" [
+        label = "block[id=5]()\l<returnMethodTemp>$3 = Solve<::Opus::CIBot::Gerald::Matcher#match#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_5" -> "bb::Opus::CIBot::Gerald::Matcher#match_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_6" [label = "block[id=6](match_context, budget)
-outerLoops: 1
-r$5 = load_yield_param(::Opus::CIBot::Gerald::Matcher#match#<block>, 0) : untyped
-<block-pre-call-temp>$38 = budget.time_rule(r$5) : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_6" [
+        label = "block[id=6](match_context, budget)\louterLoops: 1\lr$5 = load_yield_param(::Opus::CIBot::Gerald::Matcher#match#<block>, 0) : untyped\l<block-pre-call-temp>$38 = budget.time_rule(r$5) : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_6" -> "bb::Opus::CIBot::Gerald::Matcher#match_7" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_7" [label = "block[id=7](match_context, budget, r$5)
-outerLoops: 2
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_7" [
+        label = "block[id=7](match_context, budget, r$5)\louterLoops: 2\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_7" -> "bb::Opus::CIBot::Gerald::Matcher#match_9" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#match_7" -> "bb::Opus::CIBot::Gerald::Matcher#match_8" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Matcher#match_8" [label = "block[id=8](match_context, budget)
-outerLoops: 1
-<blockReturnTemp>$35 = Solve<::Opus::CIBot::Gerald::Matcher#match#<block>#<block>> : untyped
-<blockReturnTemp>$43 = blockreturn<::Opus::CIBot::Gerald::Matcher#match#<block>> <blockReturnTemp>$35 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_8" [
+        label = "block[id=8](match_context, budget)\louterLoops: 1\l<blockReturnTemp>$35 = Solve<::Opus::CIBot::Gerald::Matcher#match#<block>#<block>> : untyped\l<blockReturnTemp>$43 = blockreturn<::Opus::CIBot::Gerald::Matcher#match#<block>> <blockReturnTemp>$35 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_8" -> "bb::Opus::CIBot::Gerald::Matcher#match_4" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Matcher#match_9" [label = "block[id=9](match_context, budget, r$5)
-outerLoops: 2
-<blockReturnTemp>$39 = r$5.matches?(match_context) : untyped
-<blockReturnTemp>$42 = blockreturn<::Opus::CIBot::Gerald::Matcher#match#<block>#<block>> <blockReturnTemp>$39 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Matcher#match_9" [
+        label = "block[id=9](match_context, budget, r$5)\louterLoops: 2\l<blockReturnTemp>$39 = r$5.matches?(match_context) : untyped\l<blockReturnTemp>$42 = blockreturn<::Opus::CIBot::Gerald::Matcher#match#<block>#<block>> <blockReturnTemp>$39 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_9" -> "bb::Opus::CIBot::Gerald::Matcher#match_7" [style="bold"];
 }
@@ -255,14 +187,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#repo" {
     "bb::Opus::CIBot::Gerald::MatchContext#repo_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#repo_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#repo_0" [label = "block[id=0]()
-@repo$4 = alias @repo : untyped
-<finalReturn> = return @repo$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#repo_0" [
+        label = "block[id=0]()\l@repo$4 = alias @repo : untyped\l<finalReturn> = return @repo$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#repo_0" -> "bb::Opus::CIBot::Gerald::MatchContext#repo_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#repo_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#repo_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#repo_1" -> "bb::Opus::CIBot::Gerald::MatchContext#repo_1" [style="bold"];
 }
@@ -273,14 +205,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#assignee" {
     "bb::Opus::CIBot::Gerald::MatchContext#assignee_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#assignee_0" [label = "block[id=0]()
-@assignee$4 = alias @assignee : untyped
-<finalReturn> = return @assignee$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#assignee_0" [
+        label = "block[id=0]()\l@assignee$4 = alias @assignee : untyped\l<finalReturn> = return @assignee$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#assignee_0" -> "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" -> "bb::Opus::CIBot::Gerald::MatchContext#assignee_1" [style="bold"];
 }
@@ -291,14 +223,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#gh_user" {
     "bb::Opus::CIBot::Gerald::MatchContext#gh_user_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#gh_user_0" [label = "block[id=0]()
-@gh_user$4 = alias @gh_user : untyped
-<finalReturn> = return @gh_user$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#gh_user_0" [
+        label = "block[id=0]()\l@gh_user$4 = alias @gh_user : untyped\l<finalReturn> = return @gh_user$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#gh_user_0" -> "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" -> "bb::Opus::CIBot::Gerald::MatchContext#gh_user_1" [style="bold"];
 }
@@ -309,14 +241,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#merge_branch" {
     "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_0" [label = "block[id=0]()
-@merge_branch$4 = alias @merge_branch : untyped
-<finalReturn> = return @merge_branch$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_0" [
+        label = "block[id=0]()\l@merge_branch$4 = alias @merge_branch : untyped\l<finalReturn> = return @merge_branch$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_0" -> "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" -> "bb::Opus::CIBot::Gerald::MatchContext#merge_branch_1" [style="bold"];
 }
@@ -327,14 +259,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#body" {
     "bb::Opus::CIBot::Gerald::MatchContext#body_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#body_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#body_0" [label = "block[id=0]()
-@body$4 = alias @body : untyped
-<finalReturn> = return @body$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#body_0" [
+        label = "block[id=0]()\l@body$4 = alias @body : untyped\l<finalReturn> = return @body$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#body_0" -> "bb::Opus::CIBot::Gerald::MatchContext#body_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#body_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#body_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#body_1" -> "bb::Opus::CIBot::Gerald::MatchContext#body_1" [style="bold"];
 }
@@ -345,14 +277,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#title" {
     "bb::Opus::CIBot::Gerald::MatchContext#title_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#title_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#title_0" [label = "block[id=0]()
-@title$4 = alias @title : untyped
-<finalReturn> = return @title$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#title_0" [
+        label = "block[id=0]()\l@title$4 = alias @title : untyped\l<finalReturn> = return @title$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#title_0" -> "bb::Opus::CIBot::Gerald::MatchContext#title_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#title_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#title_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#title_1" -> "bb::Opus::CIBot::Gerald::MatchContext#title_1" [style="bold"];
 }
@@ -363,14 +295,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#diff" {
     "bb::Opus::CIBot::Gerald::MatchContext#diff_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#diff_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#diff_0" [label = "block[id=0]()
-@diff$4 = alias @diff : untyped
-<finalReturn> = return @diff$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#diff_0" [
+        label = "block[id=0]()\l@diff$4 = alias @diff : untyped\l<finalReturn> = return @diff$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#diff_0" -> "bb::Opus::CIBot::Gerald::MatchContext#diff_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#diff_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#diff_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#diff_1" -> "bb::Opus::CIBot::Gerald::MatchContext#diff_1" [style="bold"];
 }
@@ -381,14 +313,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#openapi_diff" {
     "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_0" [label = "block[id=0]()
-@openapi_diff$4 = alias @openapi_diff : untyped
-<finalReturn> = return @openapi_diff$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_0" [
+        label = "block[id=0]()\l@openapi_diff$4 = alias @openapi_diff : untyped\l<finalReturn> = return @openapi_diff$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_0" -> "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" -> "bb::Opus::CIBot::Gerald::MatchContext#openapi_diff_1" [style="bold"];
 }
@@ -399,38 +331,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#initialize" {
     "bb::Opus::CIBot::Gerald::MatchContext#initialize_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#initialize_0" [label = "block[id=0]()
-@repo$5 = alias @repo : untyped
-@assignee$7 = alias @assignee : untyped
-@gh_user$9 = alias @gh_user : untyped
-@merge_branch$11 = alias @merge_branch : untyped
-@body$13 = alias @body : untyped
-@title$15 = alias @title : untyped
-@diff$17 = alias @diff : untyped
-@openapi_diff$18 = alias @openapi_diff : untyped
-<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchContext
-repo = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
-assignee = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped
-gh_user = load_arg(<selfMethodTemp>$3#initialize, 2) : untyped
-merge_branch = load_arg(<selfMethodTemp>$3#initialize, 3) : untyped
-body = load_arg(<selfMethodTemp>$3#initialize, 4) : untyped
-title = load_arg(<selfMethodTemp>$3#initialize, 5) : untyped
-diff = load_arg(<selfMethodTemp>$3#initialize, 6) : untyped
-openapi_diff = load_arg(<selfMethodTemp>$3#initialize, 7) : untyped
-@repo$5 = repo : untyped
-@assignee$7 = assignee : untyped
-@gh_user$9 = gh_user : untyped
-@merge_branch$11 = merge_branch : untyped
-@body$13 = body : untyped
-@title$15 = title : untyped
-@diff$17 = diff : untyped
-@openapi_diff$18 = openapi_diff : untyped
-<finalReturn> = return @openapi_diff$18 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#initialize_0" [
+        label = "block[id=0]()\l@repo$5 = alias @repo : untyped\l@assignee$7 = alias @assignee : untyped\l@gh_user$9 = alias @gh_user : untyped\l@merge_branch$11 = alias @merge_branch : untyped\l@body$13 = alias @body : untyped\l@title$15 = alias @title : untyped\l@diff$17 = alias @diff : untyped\l@openapi_diff$18 = alias @openapi_diff : untyped\l<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchContext\lrepo = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped\lassignee = load_arg(<selfMethodTemp>$3#initialize, 1) : untyped\lgh_user = load_arg(<selfMethodTemp>$3#initialize, 2) : untyped\lmerge_branch = load_arg(<selfMethodTemp>$3#initialize, 3) : untyped\lbody = load_arg(<selfMethodTemp>$3#initialize, 4) : untyped\ltitle = load_arg(<selfMethodTemp>$3#initialize, 5) : untyped\ldiff = load_arg(<selfMethodTemp>$3#initialize, 6) : untyped\lopenapi_diff = load_arg(<selfMethodTemp>$3#initialize, 7) : untyped\l@repo$5 = repo : untyped\l@assignee$7 = assignee : untyped\l@gh_user$9 = gh_user : untyped\l@merge_branch$11 = merge_branch : untyped\l@body$13 = body : untyped\l@title$15 = title : untyped\l@diff$17 = diff : untyped\l@openapi_diff$18 = openapi_diff : untyped\l<finalReturn> = return @openapi_diff$18 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#initialize_0" -> "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" -> "bb::Opus::CIBot::Gerald::MatchContext#initialize_1" [style="bold"];
 }
@@ -441,17 +349,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?" {
     "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_0" [label = "block[id=0]()
-@repo$6 = alias @repo : untyped
-<statTemp>$7 = \"stripe-internal/\" : String(\"stripe-internal/\")
-<statTemp>$4 = @repo$6.start_with?(<statTemp>$7) : untyped
-<returnMethodTemp>$2 = <statTemp>$4.!() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_0" [
+        label = "block[id=0]()\l@repo$6 = alias @repo : untyped\l<statTemp>$7 = \"stripe-internal/\" : String(\"stripe-internal/\")\l<statTemp>$4 = @repo$6.start_with?(<statTemp>$7) : untyped\l<returnMethodTemp>$2 = <statTemp>$4.!() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_0" -> "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" -> "bb::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix?_1" [style="bold"];
 }
@@ -462,16 +367,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#initialize" {
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_0" [label = "block[id=0]()
-<constant:Time>$6 = alias <constant:Time> : <Class:Time>
-@start$4 = alias @start : untyped
-@start$4 = <constant:Time>$6.now() : Time
-<finalReturn> = return @start$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_0" [
+        label = "block[id=0]()\l<constant:Time>$6 = alias <constant:Time> : <Class:Time>\l@start$4 = alias @start : untyped\l@start$4 = <constant:Time>$6.now() : Time\l<finalReturn> = return @start$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_0" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#initialize_1" [style="bold"];
 }
@@ -482,42 +385,26 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#check!" {
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_0" [label = "block[id=0]()
-<constant:Time>$8 = alias <constant:Time> : <Class:Time>
-<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>
-<constant:TOTAL_TIME_MS>$15 = alias <constant:TOTAL_TIME_MS> : Integer(10000)
-@start$10 = alias @start : untyped
-<statTemp>$6 = <constant:Time>$8.now() : Time
-<statTemp>$5 = <statTemp>$6.-(@start$10) : Float
-<statTemp>$11 = 1000 : Integer(1000)
-dur_ms = <statTemp>$5.*(<statTemp>$11) : Float
-<ifTemp>$12 = dur_ms.>(<constant:TOTAL_TIME_MS>$15) : TrueClass | FalseClass
-<ifTemp>$12"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_0" [
+        label = "block[id=0]()\l<constant:Time>$8 = alias <constant:Time> : <Class:Time>\l<constant:MatchTimeout>$19 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>\l<constant:TOTAL_TIME_MS>$15 = alias <constant:TOTAL_TIME_MS> : Integer(10000)\l@start$10 = alias @start : untyped\l<statTemp>$6 = <constant:Time>$8.now() : Time\l<statTemp>$5 = <statTemp>$6.-(@start$10) : Float\l<statTemp>$11 = 1000 : Integer(1000)\ldur_ms = <statTemp>$5.*(<statTemp>$11) : Float\l<ifTemp>$12 = dur_ms.>(<constant:TOTAL_TIME_MS>$15) : TrueClass | FalseClass\l<ifTemp>$12\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_0" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_2" [style="bold"];
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_0" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_4" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_2" [label = "block[id=2](<constant:MatchTimeout>$19, <constant:TOTAL_TIME_MS>$15)
-<statTemp>$16 = self : Opus::CIBot::Gerald::MatchTimeBudget
-<statTemp>$23 = \"Gerald match time budged exceeded \" : String(\"Gerald match time budged exceeded \")
-<statTemp>$24 = <constant:TOTAL_TIME_MS>$15.to_s() : String
-<statTemp>$22 = <statTemp>$23.concat(<statTemp>$24) : String
-<statTemp>$27 = \"ms\" : String(\"ms\")
-<statTemp>$26 = <statTemp>$27.to_s() : String
-<statTemp>$21 = <statTemp>$22.concat(<statTemp>$26) : String
-<statTemp>$20 = <statTemp>$21.to_s() : String
-<statTemp>$17 = <constant:MatchTimeout>$19.new(<statTemp>$20) : Opus::CIBot::Gerald::MatchTimeout
-<returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_2" [
+        label = "block[id=2](<constant:MatchTimeout>$19, <constant:TOTAL_TIME_MS>$15)\l<statTemp>$16 = self : Opus::CIBot::Gerald::MatchTimeBudget\l<statTemp>$23 = \"Gerald match time budged exceeded \" : String(\"Gerald match time budged exceeded \")\l<statTemp>$24 = <constant:TOTAL_TIME_MS>$15.to_s() : String\l<statTemp>$22 = <statTemp>$23.concat(<statTemp>$24) : String\l<statTemp>$27 = \"ms\" : String(\"ms\")\l<statTemp>$26 = <statTemp>$27.to_s() : String\l<statTemp>$21 = <statTemp>$22.concat(<statTemp>$26) : String\l<statTemp>$20 = <statTemp>$21.to_s() : String\l<statTemp>$17 = <constant:MatchTimeout>$19.new(<statTemp>$20) : Opus::CIBot::Gerald::MatchTimeout\l<returnMethodTemp>$2 = <statTemp>$16.raise(<statTemp>$17) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_2" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_4" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_4" [label = "block[id=4](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_4" [
+        label = "block[id=4](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_4" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#check!_1" [style="bold"];
 }
@@ -528,66 +415,26 @@ subgraph "cluster_::Opus::CIBot::Gerald::MatchTimeBudget#time_rule" {
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_0" [label = "block[id=0]()
-<constant:<Magic>>$51 = alias <constant:<Magic>> : <Magic>
-<constant:Time>$6 = alias <constant:Time> : <Class:Time>
-<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>
-<constant:PER_RULE_MS>$20 = alias <constant:PER_RULE_MS> : Integer(2000)
-<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeBudget
-rule = load_arg(<selfMethodTemp>$3#time_rule, 0) : untyped
-<blk> = load_arg(<selfMethodTemp>$3#time_rule, 1) : untyped
-rule_start = <constant:Time>$6.now() : Time
-res = <blk>.call(<statTemp>$9) : untyped
-<statTemp>$12 = <constant:Time>$6.now() : Time
-<statTemp>$11 = <statTemp>$12.-(rule_start) : Float
-<statTemp>$15 = 1000 : Integer(1000)
-dur_ms = <statTemp>$11.*(<statTemp>$15) : Float
-<ifTemp>$17 = dur_ms.>(<constant:PER_RULE_MS>$20) : TrueClass | FalseClass
-<ifTemp>$17"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$51 = alias <constant:<Magic>> : <Magic>\l<constant:Time>$6 = alias <constant:Time> : <Class:Time>\l<constant:MatchTimeout>$24 = alias <constant:MatchTimeout> : <Class:Opus::CIBot::Gerald::MatchTimeout>\l<constant:PER_RULE_MS>$20 = alias <constant:PER_RULE_MS> : Integer(2000)\l<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::MatchTimeBudget\lrule = load_arg(<selfMethodTemp>$3#time_rule, 0) : untyped\l<blk> = load_arg(<selfMethodTemp>$3#time_rule, 1) : untyped\lrule_start = <constant:Time>$6.now() : Time\lres = <blk>.call(<statTemp>$9) : untyped\l<statTemp>$12 = <constant:Time>$6.now() : Time\l<statTemp>$11 = <statTemp>$12.-(rule_start) : Float\l<statTemp>$15 = 1000 : Integer(1000)\ldur_ms = <statTemp>$11.*(<statTemp>$15) : Float\l<ifTemp>$17 = dur_ms.>(<constant:PER_RULE_MS>$20) : TrueClass | FalseClass\l<ifTemp>$17\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_0" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_2" [style="bold"];
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_0" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_4" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_2" [label = "block[id=2](<constant:<Magic>>$51, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20, dur_ms, rule, res)
-<statTemp>$21 = self : Opus::CIBot::Gerald::MatchTimeBudget
-<statTemp>$32 = \"Gerald rule \'\" : String(\"Gerald rule \'\")
-<statTemp>$34 = rule.token() : untyped
-<statTemp>$33 = <statTemp>$34.to_s() : untyped
-<statTemp>$31 = <statTemp>$32.concat(<statTemp>$33) : String
-<statTemp>$37 = \"\' exceeded per-rule time budget actual=\" : String(\"\' exceeded per-rule time budget actual=\")
-<statTemp>$36 = <statTemp>$37.to_s() : String
-<statTemp>$30 = <statTemp>$31.concat(<statTemp>$36) : String
-<statTemp>$39 = dur_ms.to_i() : Integer
-<statTemp>$38 = <statTemp>$39.to_s() : String
-<statTemp>$29 = <statTemp>$30.concat(<statTemp>$38) : String
-<statTemp>$42 = \"ms budget=\" : String(\"ms budget=\")
-<statTemp>$41 = <statTemp>$42.to_s() : String
-<statTemp>$28 = <statTemp>$29.concat(<statTemp>$41) : String
-<statTemp>$43 = <constant:PER_RULE_MS>$20.to_s() : String
-<statTemp>$27 = <statTemp>$28.concat(<statTemp>$43) : String
-<statTemp>$46 = \"ms\" : String(\"ms\")
-<statTemp>$45 = <statTemp>$46.to_s() : String
-<statTemp>$26 = <statTemp>$27.concat(<statTemp>$45) : String
-<statTemp>$25 = <statTemp>$26.to_s() : String
-<hashTemp>$48 = :\"rule_token\" : Symbol(:\"rule_token\")
-<hashTemp>$49 = rule.token() : untyped
-<statTemp>$47 = <constant:<Magic>>$51.<build-hash>(<hashTemp>$48, <hashTemp>$49) : ShapeType {
-  Symbol(:\"rule_token\") => untyped
-}
-<statTemp>$22 = <constant:MatchTimeout>$24.new(<statTemp>$25, <statTemp>$47) : Opus::CIBot::Gerald::MatchTimeout
-<statTemp>$16 = <statTemp>$21.raise(<statTemp>$22) : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_2" [
+        label = "block[id=2](<constant:<Magic>>$51, <constant:MatchTimeout>$24, <constant:PER_RULE_MS>$20, dur_ms, rule, res)\l<statTemp>$21 = self : Opus::CIBot::Gerald::MatchTimeBudget\l<statTemp>$32 = \"Gerald rule \'\" : String(\"Gerald rule \'\")\l<statTemp>$34 = rule.token() : untyped\l<statTemp>$33 = <statTemp>$34.to_s() : untyped\l<statTemp>$31 = <statTemp>$32.concat(<statTemp>$33) : String\l<statTemp>$37 = \"\' exceeded per-rule time budget actual=\" : String(\"\' exceeded per-rule time budget actual=\")\l<statTemp>$36 = <statTemp>$37.to_s() : String\l<statTemp>$30 = <statTemp>$31.concat(<statTemp>$36) : String\l<statTemp>$39 = dur_ms.to_i() : Integer\l<statTemp>$38 = <statTemp>$39.to_s() : String\l<statTemp>$29 = <statTemp>$30.concat(<statTemp>$38) : String\l<statTemp>$42 = \"ms budget=\" : String(\"ms budget=\")\l<statTemp>$41 = <statTemp>$42.to_s() : String\l<statTemp>$28 = <statTemp>$29.concat(<statTemp>$41) : String\l<statTemp>$43 = <constant:PER_RULE_MS>$20.to_s() : String\l<statTemp>$27 = <statTemp>$28.concat(<statTemp>$43) : String\l<statTemp>$46 = \"ms\" : String(\"ms\")\l<statTemp>$45 = <statTemp>$46.to_s() : String\l<statTemp>$26 = <statTemp>$27.concat(<statTemp>$45) : String\l<statTemp>$25 = <statTemp>$26.to_s() : String\l<hashTemp>$48 = :\"rule_token\" : Symbol(:\"rule_token\")\l<hashTemp>$49 = rule.token() : untyped\l<statTemp>$47 = <constant:<Magic>>$51.<build-hash>(<hashTemp>$48, <hashTemp>$49) : ShapeType {\l  Symbol(:\"rule_token\") => untyped\l}\l<statTemp>$22 = <constant:MatchTimeout>$24.new(<statTemp>$25, <statTemp>$47) : Opus::CIBot::Gerald::MatchTimeout\l<statTemp>$16 = <statTemp>$21.raise(<statTemp>$22) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_2" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_4" [style="bold"];
-    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_4" [label = "block[id=4](res)
-<statTemp>$53 = self : Opus::CIBot::Gerald::MatchTimeBudget
-<statTemp>$52 = <statTemp>$53.check!() : untyped
-<finalReturn> = return res : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_4" [
+        label = "block[id=4](res)\l<statTemp>$53 = self : Opus::CIBot::Gerald::MatchTimeBudget\l<statTemp>$52 = <statTemp>$53.check!() : untyped\l<finalReturn> = return res : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_4" -> "bb::Opus::CIBot::Gerald::MatchTimeBudget#time_rule_1" [style="bold"];
 }
@@ -598,20 +445,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#initialize" {
     "bb::Opus::CIBot::Gerald::Diff#initialize_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#initialize_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#initialize_0" [label = "block[id=0]()
-@raw$5 = alias @raw : untyped
-@parsed$6 = alias @parsed : untyped
-<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::Diff
-raw_diff = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped
-@raw$5 = raw_diff : untyped
-<statTemp>$7 = self : Opus::CIBot::Gerald::Diff
-@parsed$6 = <statTemp>$7.parse(raw_diff) : untyped
-<finalReturn> = return @parsed$6 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#initialize_0" [
+        label = "block[id=0]()\l@raw$5 = alias @raw : untyped\l@parsed$6 = alias @parsed : untyped\l<selfMethodTemp>$3 = self : Opus::CIBot::Gerald::Diff\lraw_diff = load_arg(<selfMethodTemp>$3#initialize, 0) : untyped\l@raw$5 = raw_diff : untyped\l<statTemp>$7 = self : Opus::CIBot::Gerald::Diff\l@parsed$6 = <statTemp>$7.parse(raw_diff) : untyped\l<finalReturn> = return @parsed$6 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#initialize_0" -> "bb::Opus::CIBot::Gerald::Diff#initialize_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#initialize_1" -> "bb::Opus::CIBot::Gerald::Diff#initialize_1" [style="bold"];
 }
@@ -622,21 +463,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#affected_files" {
     "bb::Opus::CIBot::Gerald::Diff#affected_files_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#affected_files_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#affected_files_0" [label = "block[id=0]()
-<statTemp>$6 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$5 = <statTemp>$6.added_files() : untyped
-<statTemp>$8 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$7 = <statTemp>$8.deleted_files() : untyped
-<statTemp>$4 = <statTemp>$5.+(<statTemp>$7) : untyped
-<statTemp>$10 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$9 = <statTemp>$10.changed_files() : untyped
-<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$9) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#affected_files_0" [
+        label = "block[id=0]()\l<statTemp>$6 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$5 = <statTemp>$6.added_files() : untyped\l<statTemp>$8 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$7 = <statTemp>$8.deleted_files() : untyped\l<statTemp>$4 = <statTemp>$5.+(<statTemp>$7) : untyped\l<statTemp>$10 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$9 = <statTemp>$10.changed_files() : untyped\l<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$9) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#affected_files_0" -> "bb::Opus::CIBot::Gerald::Diff#affected_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#affected_files_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#affected_files_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#affected_files_1" -> "bb::Opus::CIBot::Gerald::Diff#affected_files_1" [style="bold"];
 }
@@ -647,60 +481,48 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_files" {
     "bb::Opus::CIBot::Gerald::Diff#added_files_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#added_files_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#added_files_0" [label = "block[id=0]()
-@parsed$8 = alias @parsed : untyped
-<block-pre-call-temp>$9 = @parsed$8.select() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_0" [
+        label = "block[id=0]()\l@parsed$8 = alias @parsed : untyped\l<block-pre-call-temp>$9 = @parsed$8.select() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_0" -> "bb::Opus::CIBot::Gerald::Diff#added_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_files_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_1" -> "bb::Opus::CIBot::Gerald::Diff#added_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_files_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_2" -> "bb::Opus::CIBot::Gerald::Diff#added_files_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#added_files_2" -> "bb::Opus::CIBot::Gerald::Diff#added_files_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#added_files_3" [label = "block[id=3]()
-<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#added_files#<block>> : untyped
-<block-pre-call-temp>$16 = <statTemp>$6.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_3" [
+        label = "block[id=3]()\l<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#added_files#<block>> : untyped\l<block-pre-call-temp>$16 = <statTemp>$6.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_3" -> "bb::Opus::CIBot::Gerald::Diff#added_files_5" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_files_4" [label = "block[id=4]()
-outerLoops: 1
-part$4 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_files#<block>, 0) : untyped
-<statTemp>$13 = :\"a_name\" : Symbol(:\"a_name\")
-<statTemp>$11 = part$4.[](<statTemp>$13) : untyped
-<statTemp>$14 = \"/dev/null\" : String(\"/dev/null\")
-<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped
-<blockReturnTemp>$15 = blockreturn<::Opus::CIBot::Gerald::Diff#added_files#<block>> <blockReturnTemp>$10 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_4" [
+        label = "block[id=4]()\louterLoops: 1\lpart$4 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_files#<block>, 0) : untyped\l<statTemp>$13 = :\"a_name\" : Symbol(:\"a_name\")\l<statTemp>$11 = part$4.[](<statTemp>$13) : untyped\l<statTemp>$14 = \"/dev/null\" : String(\"/dev/null\")\l<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped\l<blockReturnTemp>$15 = blockreturn<::Opus::CIBot::Gerald::Diff#added_files#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_4" -> "bb::Opus::CIBot::Gerald::Diff#added_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_files_5" [label = "block[id=5]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_5" [
+        label = "block[id=5]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_5" -> "bb::Opus::CIBot::Gerald::Diff#added_files_7" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#added_files_5" -> "bb::Opus::CIBot::Gerald::Diff#added_files_6" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#added_files_6" [label = "block[id=6]()
-<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#added_files#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_6" [
+        label = "block[id=6]()\l<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#added_files#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_6" -> "bb::Opus::CIBot::Gerald::Diff#added_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_files_7" [label = "block[id=7]()
-outerLoops: 1
-part$5 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_files#<block>, 0) : untyped
-<statTemp>$19 = :\"b_name\" : Symbol(:\"b_name\")
-<blockReturnTemp>$17 = part$5.[](<statTemp>$19) : untyped
-<blockReturnTemp>$20 = blockreturn<::Opus::CIBot::Gerald::Diff#added_files#<block>> <blockReturnTemp>$17 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_files_7" [
+        label = "block[id=7]()\louterLoops: 1\lpart$5 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_files#<block>, 0) : untyped\l<statTemp>$19 = :\"b_name\" : Symbol(:\"b_name\")\l<blockReturnTemp>$17 = part$5.[](<statTemp>$19) : untyped\l<blockReturnTemp>$20 = blockreturn<::Opus::CIBot::Gerald::Diff#added_files#<block>> <blockReturnTemp>$17 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_files_7" -> "bb::Opus::CIBot::Gerald::Diff#added_files_5" [style="bold"];
 }
@@ -711,60 +533,48 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#deleted_files" {
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_0" [label = "block[id=0]()
-@parsed$8 = alias @parsed : untyped
-<block-pre-call-temp>$9 = @parsed$8.select() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_0" [
+        label = "block[id=0]()\l@parsed$8 = alias @parsed : untyped\l<block-pre-call-temp>$9 = @parsed$8.select() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_0" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_3" [label = "block[id=3]()
-<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> : untyped
-<block-pre-call-temp>$16 = <statTemp>$6.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_3" [
+        label = "block[id=3]()\l<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> : untyped\l<block-pre-call-temp>$16 = <statTemp>$6.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_3" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_4" [label = "block[id=4]()
-outerLoops: 1
-part$7 = load_yield_param(::Opus::CIBot::Gerald::Diff#deleted_files#<block>, 0) : untyped
-<statTemp>$13 = :\"b_name\" : Symbol(:\"b_name\")
-<statTemp>$11 = part$7.[](<statTemp>$13) : untyped
-<statTemp>$14 = \"/dev/null\" : String(\"/dev/null\")
-<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped
-<blockReturnTemp>$15 = blockreturn<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> <blockReturnTemp>$10 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_4" [
+        label = "block[id=4]()\louterLoops: 1\lpart$7 = load_yield_param(::Opus::CIBot::Gerald::Diff#deleted_files#<block>, 0) : untyped\l<statTemp>$13 = :\"b_name\" : Symbol(:\"b_name\")\l<statTemp>$11 = part$7.[](<statTemp>$13) : untyped\l<statTemp>$14 = \"/dev/null\" : String(\"/dev/null\")\l<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped\l<blockReturnTemp>$15 = blockreturn<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_4" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" [label = "block[id=5]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" [
+        label = "block[id=5]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_7" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_6" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_6" [label = "block[id=6]()
-<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_6" [
+        label = "block[id=6]()\l<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_6" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#deleted_files_7" [label = "block[id=7]()
-outerLoops: 1
-part$8 = load_yield_param(::Opus::CIBot::Gerald::Diff#deleted_files#<block>, 0) : untyped
-<statTemp>$19 = :\"a_name\" : Symbol(:\"a_name\")
-<blockReturnTemp>$17 = part$8.[](<statTemp>$19) : untyped
-<blockReturnTemp>$20 = blockreturn<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> <blockReturnTemp>$17 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#deleted_files_7" [
+        label = "block[id=7]()\louterLoops: 1\lpart$8 = load_yield_param(::Opus::CIBot::Gerald::Diff#deleted_files#<block>, 0) : untyped\l<statTemp>$19 = :\"a_name\" : Symbol(:\"a_name\")\l<blockReturnTemp>$17 = part$8.[](<statTemp>$19) : untyped\l<blockReturnTemp>$20 = blockreturn<::Opus::CIBot::Gerald::Diff#deleted_files#<block>> <blockReturnTemp>$17 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#deleted_files_7" -> "bb::Opus::CIBot::Gerald::Diff#deleted_files_5" [style="bold"];
 }
@@ -775,61 +585,48 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_files" {
     "bb::Opus::CIBot::Gerald::Diff#changed_files_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#changed_files_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_0" [label = "block[id=0]()
-@parsed$8 = alias @parsed : untyped
-<block-pre-call-temp>$9 = @parsed$8.select() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_0" [
+        label = "block[id=0]()\l@parsed$8 = alias @parsed : untyped\l<block-pre-call-temp>$9 = @parsed$8.select() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_0" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_1" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_2" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#changed_files_2" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_3" [label = "block[id=3]()
-<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#changed_files#<block>> : untyped
-<block-pre-call-temp>$18 = <statTemp>$6.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_3" [
+        label = "block[id=3]()\l<statTemp>$6 = Solve<::Opus::CIBot::Gerald::Diff#changed_files#<block>> : untyped\l<block-pre-call-temp>$18 = <statTemp>$6.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_3" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_5" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_4" [label = "block[id=4]()
-outerLoops: 1
-part$10 = load_yield_param(::Opus::CIBot::Gerald::Diff#changed_files#<block>, 0) : untyped
-<statTemp>$13 = :\"a_name\" : Symbol(:\"a_name\")
-<statTemp>$11 = part$10.[](<statTemp>$13) : untyped
-<statTemp>$16 = :\"b_name\" : Symbol(:\"b_name\")
-<statTemp>$14 = part$10.[](<statTemp>$16) : untyped
-<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped
-<blockReturnTemp>$17 = blockreturn<::Opus::CIBot::Gerald::Diff#changed_files#<block>> <blockReturnTemp>$10 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_4" [
+        label = "block[id=4]()\louterLoops: 1\lpart$10 = load_yield_param(::Opus::CIBot::Gerald::Diff#changed_files#<block>, 0) : untyped\l<statTemp>$13 = :\"a_name\" : Symbol(:\"a_name\")\l<statTemp>$11 = part$10.[](<statTemp>$13) : untyped\l<statTemp>$16 = :\"b_name\" : Symbol(:\"b_name\")\l<statTemp>$14 = part$10.[](<statTemp>$16) : untyped\l<blockReturnTemp>$10 = <statTemp>$11.==(<statTemp>$14) : untyped\l<blockReturnTemp>$17 = blockreturn<::Opus::CIBot::Gerald::Diff#changed_files#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_4" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_5" [label = "block[id=5]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_5" [
+        label = "block[id=5]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_5" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_7" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#changed_files_5" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_6" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_6" [label = "block[id=6]()
-<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#changed_files#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$4 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_6" [
+        label = "block[id=6]()\l<returnMethodTemp>$4 = Solve<::Opus::CIBot::Gerald::Diff#changed_files#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_6" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_files_7" [label = "block[id=7]()
-outerLoops: 1
-part$11 = load_yield_param(::Opus::CIBot::Gerald::Diff#changed_files#<block>, 0) : untyped
-<statTemp>$21 = :\"b_name\" : Symbol(:\"b_name\")
-<blockReturnTemp>$19 = part$11.[](<statTemp>$21) : untyped
-<blockReturnTemp>$22 = blockreturn<::Opus::CIBot::Gerald::Diff#changed_files#<block>> <blockReturnTemp>$19 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_files_7" [
+        label = "block[id=7]()\louterLoops: 1\lpart$11 = load_yield_param(::Opus::CIBot::Gerald::Diff#changed_files#<block>, 0) : untyped\l<statTemp>$21 = :\"b_name\" : Symbol(:\"b_name\")\l<blockReturnTemp>$19 = part$11.[](<statTemp>$21) : untyped\l<blockReturnTemp>$22 = blockreturn<::Opus::CIBot::Gerald::Diff#changed_files#<block>> <blockReturnTemp>$19 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_files_7" -> "bb::Opus::CIBot::Gerald::Diff#changed_files_5" [style="bold"];
 }
@@ -840,37 +637,31 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#added_lines" {
     "bb::Opus::CIBot::Gerald::Diff#added_lines_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#added_lines_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#added_lines_0" [label = "block[id=0]()
-@parsed$7 = alias @parsed : untyped
-<block-pre-call-temp>$8 = @parsed$7.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_lines_0" [
+        label = "block[id=0]()\l@parsed$7 = alias @parsed : untyped\l<block-pre-call-temp>$8 = @parsed$7.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_lines_0" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_lines_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_lines_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_lines_1" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_lines_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_lines_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_lines_2" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#added_lines_2" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#added_lines_3" [label = "block[id=3]()
-<statTemp>$5 = Solve<::Opus::CIBot::Gerald::Diff#added_lines#<block>> : untyped
-<returnMethodTemp>$3 = <statTemp>$5.flatten() : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_lines_3" [
+        label = "block[id=3]()\l<statTemp>$5 = Solve<::Opus::CIBot::Gerald::Diff#added_lines#<block>> : untyped\l<returnMethodTemp>$3 = <statTemp>$5.flatten() : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_lines_3" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#added_lines_4" [label = "block[id=4]()
-outerLoops: 1
-part$13 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_lines#<block>, 0) : untyped
-<statTemp>$11 = :\"added_lines\" : Symbol(:\"added_lines\")
-<blockReturnTemp>$9 = part$13.[](<statTemp>$11) : untyped
-<blockReturnTemp>$12 = blockreturn<::Opus::CIBot::Gerald::Diff#added_lines#<block>> <blockReturnTemp>$9 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#added_lines_4" [
+        label = "block[id=4]()\louterLoops: 1\lpart$13 = load_yield_param(::Opus::CIBot::Gerald::Diff#added_lines#<block>, 0) : untyped\l<statTemp>$11 = :\"added_lines\" : Symbol(:\"added_lines\")\l<blockReturnTemp>$9 = part$13.[](<statTemp>$11) : untyped\l<blockReturnTemp>$12 = blockreturn<::Opus::CIBot::Gerald::Diff#added_lines#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#added_lines_4" -> "bb::Opus::CIBot::Gerald::Diff#added_lines_2" [style="bold"];
 }
@@ -881,37 +672,31 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#removed_lines" {
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#removed_lines_0" [label = "block[id=0]()
-@parsed$7 = alias @parsed : untyped
-<block-pre-call-temp>$8 = @parsed$7.map() : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#removed_lines_0" [
+        label = "block[id=0]()\l@parsed$7 = alias @parsed : untyped\l<block-pre-call-temp>$8 = @parsed$7.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_0" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#removed_lines_3" [label = "block[id=3]()
-<statTemp>$5 = Solve<::Opus::CIBot::Gerald::Diff#removed_lines#<block>> : untyped
-<returnMethodTemp>$3 = <statTemp>$5.flatten() : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#removed_lines_3" [
+        label = "block[id=3]()\l<statTemp>$5 = Solve<::Opus::CIBot::Gerald::Diff#removed_lines#<block>> : untyped\l<returnMethodTemp>$3 = <statTemp>$5.flatten() : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_3" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#removed_lines_4" [label = "block[id=4]()
-outerLoops: 1
-part$15 = load_yield_param(::Opus::CIBot::Gerald::Diff#removed_lines#<block>, 0) : untyped
-<statTemp>$11 = :\"removed_lines\" : Symbol(:\"removed_lines\")
-<blockReturnTemp>$9 = part$15.[](<statTemp>$11) : untyped
-<blockReturnTemp>$12 = blockreturn<::Opus::CIBot::Gerald::Diff#removed_lines#<block>> <blockReturnTemp>$9 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#removed_lines_4" [
+        label = "block[id=4]()\louterLoops: 1\lpart$15 = load_yield_param(::Opus::CIBot::Gerald::Diff#removed_lines#<block>, 0) : untyped\l<statTemp>$11 = :\"removed_lines\" : Symbol(:\"removed_lines\")\l<blockReturnTemp>$9 = part$15.[](<statTemp>$11) : untyped\l<blockReturnTemp>$12 = blockreturn<::Opus::CIBot::Gerald::Diff#removed_lines#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#removed_lines_4" -> "bb::Opus::CIBot::Gerald::Diff#removed_lines_2" [style="bold"];
 }
@@ -922,18 +707,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_lines" {
     "bb::Opus::CIBot::Gerald::Diff#changed_lines_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#changed_lines_0" [label = "block[id=0]()
-<statTemp>$5 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$4 = <statTemp>$5.added_lines() : untyped
-<statTemp>$7 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$6 = <statTemp>$7.removed_lines() : untyped
-<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$6) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_lines_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$4 = <statTemp>$5.added_lines() : untyped\l<statTemp>$7 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$6 = <statTemp>$7.removed_lines() : untyped\l<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$6) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_lines_0" -> "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" -> "bb::Opus::CIBot::Gerald::Diff#changed_lines_1" [style="bold"];
 }
@@ -944,17 +725,14 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#changed_openapi?" {
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_0" [label = "block[id=0]()
-<constant:SPEC_PATH>$7 = alias <constant:SPEC_PATH> : untyped
-<statTemp>$5 = self : Opus::CIBot::Gerald::Diff
-<statTemp>$4 = <statTemp>$5.changed_files() : untyped
-<returnMethodTemp>$2 = <statTemp>$4.include?(<constant:SPEC_PATH>$7) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_0" [
+        label = "block[id=0]()\l<constant:SPEC_PATH>$7 = alias <constant:SPEC_PATH> : untyped\l<statTemp>$5 = self : Opus::CIBot::Gerald::Diff\l<statTemp>$4 = <statTemp>$5.changed_files() : untyped\l<returnMethodTemp>$2 = <statTemp>$4.include?(<constant:SPEC_PATH>$7) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_0" -> "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" -> "bb::Opus::CIBot::Gerald::Diff#changed_openapi?_1" [style="bold"];
 }
@@ -965,371 +743,174 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#parse" {
     "bb::Opus::CIBot::Gerald::Diff#parse_0" [shape = invhouse];
     "bb::Opus::CIBot::Gerald::Diff#parse_1" [shape = parallelogram];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_0" [label = "block[id=0]()
-<constant:Range>$17 = alias <constant:Range> : <Class:Range>
-<constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>
-<constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>
-<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff
-diff = load_arg(<selfMethodTemp>$4#parse, 0) : untyped
-<statTemp>$11 = \"^diff [^\\n]*\\n\" : String(\"^diff [^\\n]*\\n\")
-<statTemp>$13 = 0 : Integer(0)
-<statTemp>$14 = 4 : Integer(4)
-<statTemp>$12 = <statTemp>$13.|(<statTemp>$14) : Integer
-<statTemp>$8 = <constant:Regexp>$10.new(<statTemp>$11, <statTemp>$12) : Regexp
-<statTemp>$6 = diff.split(<statTemp>$8) : untyped
-<statTemp>$18 = 1 : Integer(1)
-<statTemp>$19 = -1 : Integer(-1)
-<statTemp>$15 = <constant:Range>$17.new(<statTemp>$18, <statTemp>$19) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-parts = <statTemp>$6.[](<statTemp>$15) : untyped
-parts"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_0" [
+        label = "block[id=0]()\l<constant:Range>$17 = alias <constant:Range> : <Class:Range>\l<constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>\l<constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff\ldiff = load_arg(<selfMethodTemp>$4#parse, 0) : untyped\l<statTemp>$11 = \"^diff [^\\n]*\\n\" : String(\"^diff [^\\n]*\\n\")\l<statTemp>$13 = 0 : Integer(0)\l<statTemp>$14 = 4 : Integer(4)\l<statTemp>$12 = <statTemp>$13.|(<statTemp>$14) : Integer\l<statTemp>$8 = <constant:Regexp>$10.new(<statTemp>$11, <statTemp>$12) : Regexp\l<statTemp>$6 = diff.split(<statTemp>$8) : untyped\l<statTemp>$18 = 1 : Integer(1)\l<statTemp>$19 = -1 : Integer(-1)\l<statTemp>$15 = <constant:Range>$17.new(<statTemp>$18, <statTemp>$19) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\lparts = <statTemp>$6.[](<statTemp>$15) : untyped\lparts\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_0" -> "bb::Opus::CIBot::Gerald::Diff#parse_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_0" -> "bb::Opus::CIBot::Gerald::Diff#parse_3" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_1" -> "bb::Opus::CIBot::Gerald::Diff#parse_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_3" [label = "block[id=3](<constant:Range>$17, <constant:<Magic>>$22)
-parts = <constant:<Magic>>$22.<build-array>() : TupleType {
-}
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_3" [
+        label = "block[id=3](<constant:Range>$17, <constant:<Magic>>$22)\lparts = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_3" -> "bb::Opus::CIBot::Gerald::Diff#parse_4" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_4" [label = "block[id=4](<constant:Range>$17, <constant:<Magic>>$22, parts)
-<castTemp$24 = parts : untyped
-parts = cast(<castTemp$24, AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = String
-  ]
-}); : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = String
-  ]
-}
-<block-pre-call-temp>$27 = parts.map() : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = TypeVar(U$1)
-  ]
-}
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_4" [
+        label = "block[id=4](<constant:Range>$17, <constant:<Magic>>$22, parts)\l<castTemp$24 = parts : untyped\lparts = cast(<castTemp$24, AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}); : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<block-pre-call-temp>$27 = parts.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_4" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_5" [label = "block[id=5](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)
-outerLoops: 1
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_5" [
+        label = "block[id=5](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_5" -> "bb::Opus::CIBot::Gerald::Diff#parse_7" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_5" -> "bb::Opus::CIBot::Gerald::Diff#parse_6" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_6" [label = "block[id=6]()
-<statTemp>$25 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>> : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = NilClass | ShapeType {
-            Symbol(:\"a_name\") => String
-            Symbol(:\"b_name\") => String | NilClass
-            Symbol(:\"added_lines\") => TupleType {
-              }
-            Symbol(:\"removed_lines\") => TupleType {
-              }
-          }
-  ]
-}
-<returnMethodTemp>$3 = <statTemp>$25.compact() : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = NilClass | ShapeType {
-            Symbol(:\"a_name\") => String
-            Symbol(:\"b_name\") => String | NilClass
-            Symbol(:\"added_lines\") => TupleType {
-              }
-            Symbol(:\"removed_lines\") => TupleType {
-              }
-          }
-  ]
-}
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_6" [
+        label = "block[id=6]()\l<statTemp>$25 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => TupleType {\l              }\l            Symbol(:\"removed_lines\") => TupleType {\l              }\l          }\l  ]\l}\l<returnMethodTemp>$3 = <statTemp>$25.compact() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => TupleType {\l              }\l            Symbol(:\"removed_lines\") => TupleType {\l              }\l          }\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_6" -> "bb::Opus::CIBot::Gerald::Diff#parse_1" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_7" [label = "block[id=7](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)
-outerLoops: 1
-part$19 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>, 0) : String
-<statTemp>$31 = \"
-\" : String(\"
-\")
-lines$19 = part$19.split(<statTemp>$31) : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = String
-  ]
-}
-<castTemp$33 = nil : NilClass
-b_name$19 = cast(<castTemp$33, String | NilClass); : String | NilClass
-a_name$19 = b_name$19 : String | NilClass
-added_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {
-}
-removed_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {
-}
-<block-pre-call-temp>$38 = lines$19.each() : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = String
-  ]
-}
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_7" [
+        label = "block[id=7](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\lpart$19 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>, 0) : String\l<statTemp>$31 = \"\l\" : String(\"\l\")\llines$19 = part$19.split(<statTemp>$31) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<castTemp$33 = nil : NilClass\lb_name$19 = cast(<castTemp$33, String | NilClass); : String | NilClass\la_name$19 = b_name$19 : String | NilClass\ladded_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\lremoved_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\l<block-pre-call-temp>$38 = lines$19.each() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_7" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_8" [label = "block[id=8](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<block-call>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_8" [
+        label = "block[id=8](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<block-call>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_8" -> "bb::Opus::CIBot::Gerald::Diff#parse_10" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_8" -> "bb::Opus::CIBot::Gerald::Diff#parse_9" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_9" [label = "block[id=9](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 1
-<statTemp>$36 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = String
-  ]
-}
-<ifTemp>$105 = a_name$19.nil?() : TrueClass | FalseClass
-<ifTemp>$105"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_9" [
+        label = "block[id=9](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<statTemp>$36 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<ifTemp>$105 = a_name$19.nil?() : TrueClass | FalseClass\l<ifTemp>$105\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_9" -> "bb::Opus::CIBot::Gerald::Diff#parse_37" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_9" -> "bb::Opus::CIBot::Gerald::Diff#parse_38" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_10" [label = "block[id=10](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-line$20 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>#<block>, 0) : String
-<statTemp>$42 = \"index \" : String(\"index \")
-<statTemp>$43 = \"@@\" : String(\"@@\")
-<statTemp>$44 = \"new file mode\" : String(\"new file mode\")
-<ifTemp>$40 = line$20.start_with?(<statTemp>$42, <statTemp>$43, <statTemp>$44) : TrueClass | FalseClass
-<ifTemp>$40"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_10" [
+        label = "block[id=10](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\lline$20 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>#<block>, 0) : String\l<statTemp>$42 = \"index \" : String(\"index \")\l<statTemp>$43 = \"@@\" : String(\"@@\")\l<statTemp>$44 = \"new file mode\" : String(\"new file mode\")\l<ifTemp>$40 = line$20.start_with?(<statTemp>$42, <statTemp>$43, <statTemp>$44) : TrueClass | FalseClass\l<ifTemp>$40\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_10" -> "bb::Opus::CIBot::Gerald::Diff#parse_11" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_10" -> "bb::Opus::CIBot::Gerald::Diff#parse_12" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_11" [label = "block[id=11](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<blockReturnTemp>$46 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$45 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_11" [
+        label = "block[id=11](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$46 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$45 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_11" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_12" [label = "block[id=12](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$49 = \"---\" : String(\"---\")
-<ifTemp>$47 = line$20.start_with?(<statTemp>$49) : TrueClass | FalseClass
-<ifTemp>$47"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_12" [
+        label = "block[id=12](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$49 = \"---\" : String(\"---\")\l<ifTemp>$47 = line$20.start_with?(<statTemp>$49) : TrueClass | FalseClass\l<ifTemp>$47\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_12" -> "bb::Opus::CIBot::Gerald::Diff#parse_13" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_12" -> "bb::Opus::CIBot::Gerald::Diff#parse_14" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_13" [label = "block[id=13](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$54 = 4 : Integer(4)
-<statTemp>$55 = -1 : Integer(-1)
-<statTemp>$52 = <constant:Range>$17.new(<statTemp>$54, <statTemp>$55) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-a_name$19 = line$20.[](<statTemp>$52) : String | NilClass
-a_name$19"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_13" [
+        label = "block[id=13](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$54 = 4 : Integer(4)\l<statTemp>$55 = -1 : Integer(-1)\l<statTemp>$52 = <constant:Range>$17.new(<statTemp>$54, <statTemp>$55) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\la_name$19 = line$20.[](<statTemp>$52) : String | NilClass\la_name$19\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_13" -> "bb::Opus::CIBot::Gerald::Diff#parse_15" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_13" -> "bb::Opus::CIBot::Gerald::Diff#parse_16" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_14" [label = "block[id=14](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$67 = \"+++\" : String(\"+++\")
-<ifTemp>$65 = line$20.start_with?(<statTemp>$67) : TrueClass | FalseClass
-<ifTemp>$65"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_14" [
+        label = "block[id=14](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$67 = \"+++\" : String(\"+++\")\l<ifTemp>$65 = line$20.start_with?(<statTemp>$67) : TrueClass | FalseClass\l<ifTemp>$65\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_14" -> "bb::Opus::CIBot::Gerald::Diff#parse_21" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_14" -> "bb::Opus::CIBot::Gerald::Diff#parse_22" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_15" [label = "block[id=15](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<statTemp>$59 = \"a/\" : String(\"a/\")
-<ifTemp>$56 = a_name$19.start_with?(<statTemp>$59) : TrueClass | FalseClass
-<ifTemp>$56"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_15" [
+        label = "block[id=15](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$59 = \"a/\" : String(\"a/\")\l<ifTemp>$56 = a_name$19.start_with?(<statTemp>$59) : TrueClass | FalseClass\l<ifTemp>$56\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_15" -> "bb::Opus::CIBot::Gerald::Diff#parse_18" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_15" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_16" [label = "block[id=16](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<ifTemp>$56 = a_name$19 : NilClass
-<ifTemp>$56"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_16" [
+        label = "block[id=16](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$56 = a_name$19 : NilClass\l<ifTemp>$56\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_16" -> "bb::Opus::CIBot::Gerald::Diff#parse_18" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_16" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_18" [label = "block[id=18](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<statTemp>$60 = a_name$19 : String
-<statTemp>$63 = 2 : Integer(2)
-<statTemp>$64 = -1 : Integer(-1)
-<statTemp>$61 = <constant:Range>$17.new(<statTemp>$63, <statTemp>$64) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-a_name$19 = <statTemp>$60.[](<statTemp>$61) : untyped
-<blockReturnTemp>$39 = a_name$19 : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_18" [
+        label = "block[id=18](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$60 = a_name$19 : String\l<statTemp>$63 = 2 : Integer(2)\l<statTemp>$64 = -1 : Integer(-1)\l<statTemp>$61 = <constant:Range>$17.new(<statTemp>$63, <statTemp>$64) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\la_name$19 = <statTemp>$60.[](<statTemp>$61) : untyped\l<blockReturnTemp>$39 = a_name$19 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_18" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_21" [label = "block[id=21](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$72 = 4 : Integer(4)
-<statTemp>$73 = -1 : Integer(-1)
-<statTemp>$70 = <constant:Range>$17.new(<statTemp>$72, <statTemp>$73) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-b_name$19 = line$20.[](<statTemp>$70) : String | NilClass
-b_name$19"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_21" [
+        label = "block[id=21](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$72 = 4 : Integer(4)\l<statTemp>$73 = -1 : Integer(-1)\l<statTemp>$70 = <constant:Range>$17.new(<statTemp>$72, <statTemp>$73) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\lb_name$19 = line$20.[](<statTemp>$70) : String | NilClass\lb_name$19\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_21" -> "bb::Opus::CIBot::Gerald::Diff#parse_23" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_21" -> "bb::Opus::CIBot::Gerald::Diff#parse_24" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_22" [label = "block[id=22](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$85 = \"+\" : String(\"+\")
-<ifTemp>$83 = line$20.start_with?(<statTemp>$85) : TrueClass | FalseClass
-<ifTemp>$83"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_22" [
+        label = "block[id=22](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$85 = \"+\" : String(\"+\")\l<ifTemp>$83 = line$20.start_with?(<statTemp>$85) : TrueClass | FalseClass\l<ifTemp>$83\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_22" -> "bb::Opus::CIBot::Gerald::Diff#parse_29" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_22" -> "bb::Opus::CIBot::Gerald::Diff#parse_30" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_23" [label = "block[id=23](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<statTemp>$77 = \"b/\" : String(\"b/\")
-<ifTemp>$74 = b_name$19.start_with?(<statTemp>$77) : TrueClass | FalseClass
-<ifTemp>$74"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_23" [
+        label = "block[id=23](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$77 = \"b/\" : String(\"b/\")\l<ifTemp>$74 = b_name$19.start_with?(<statTemp>$77) : TrueClass | FalseClass\l<ifTemp>$74\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_23" -> "bb::Opus::CIBot::Gerald::Diff#parse_26" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_23" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_24" [label = "block[id=24](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<ifTemp>$74 = b_name$19 : NilClass
-<ifTemp>$74"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_24" [
+        label = "block[id=24](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$74 = b_name$19 : NilClass\l<ifTemp>$74\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_24" -> "bb::Opus::CIBot::Gerald::Diff#parse_26" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_24" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_26" [label = "block[id=26](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<statTemp>$78 = b_name$19 : String
-<statTemp>$81 = 2 : Integer(2)
-<statTemp>$82 = -1 : Integer(-1)
-<statTemp>$79 = <constant:Range>$17.new(<statTemp>$81, <statTemp>$82) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-b_name$19 = <statTemp>$78.[](<statTemp>$79) : untyped
-<blockReturnTemp>$39 = b_name$19 : untyped
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_26" [
+        label = "block[id=26](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$78 = b_name$19 : String\l<statTemp>$81 = 2 : Integer(2)\l<statTemp>$82 = -1 : Integer(-1)\l<statTemp>$79 = <constant:Range>$17.new(<statTemp>$81, <statTemp>$82) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\lb_name$19 = <statTemp>$78.[](<statTemp>$79) : untyped\l<blockReturnTemp>$39 = b_name$19 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_26" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_29" [label = "block[id=29](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$91 = 1 : Integer(1)
-<statTemp>$92 = -1 : Integer(-1)
-<statTemp>$89 = <constant:Range>$17.new(<statTemp>$91, <statTemp>$92) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<statTemp>$87 = line$20.[](<statTemp>$89) : String | NilClass
-<blockReturnTemp>$39 = added_lines$19.<<(<statTemp>$87) : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_29" [
+        label = "block[id=29](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$91 = 1 : Integer(1)\l<statTemp>$92 = -1 : Integer(-1)\l<statTemp>$89 = <constant:Range>$17.new(<statTemp>$91, <statTemp>$92) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\l<statTemp>$87 = line$20.[](<statTemp>$89) : String | NilClass\l<blockReturnTemp>$39 = added_lines$19.<<(<statTemp>$87) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_29" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_30" [label = "block[id=30](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$95 = \"-\" : String(\"-\")
-<ifTemp>$93 = line$20.start_with?(<statTemp>$95) : TrueClass | FalseClass
-<ifTemp>$93"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_30" [
+        label = "block[id=30](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$95 = \"-\" : String(\"-\")\l<ifTemp>$93 = line$20.start_with?(<statTemp>$95) : TrueClass | FalseClass\l<ifTemp>$93\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_30" -> "bb::Opus::CIBot::Gerald::Diff#parse_31" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_30" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
-    "bb::Opus::CIBot::Gerald::Diff#parse_31" [label = "block[id=31](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)
-outerLoops: 2
-<statTemp>$101 = 1 : Integer(1)
-<statTemp>$102 = -1 : Integer(-1)
-<statTemp>$99 = <constant:Range>$17.new(<statTemp>$101, <statTemp>$102) : AppliedType {
-  klass = ::Range
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<statTemp>$97 = line$20.[](<statTemp>$99) : String | NilClass
-<blockReturnTemp>$39 = removed_lines$19.<<(<statTemp>$97) : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_31" [
+        label = "block[id=31](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$101 = 1 : Integer(1)\l<statTemp>$102 = -1 : Integer(-1)\l<statTemp>$99 = <constant:Range>$17.new(<statTemp>$101, <statTemp>$102) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\l<statTemp>$97 = line$20.[](<statTemp>$99) : String | NilClass\l<blockReturnTemp>$39 = removed_lines$19.<<(<statTemp>$97) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_31" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_36" [label = "block[id=36](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 2
-<blockReturnTemp>$103 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$39 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_36" [
+        label = "block[id=36](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$103 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$39 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_36" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_37" [label = "block[id=37](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)
-outerLoops: 1
-<blockReturnTemp>$108 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$107 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_37" [
+        label = "block[id=37](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<blockReturnTemp>$108 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$107 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_37" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];
-    "bb::Opus::CIBot::Gerald::Diff#parse_38" [label = "block[id=38](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)
-outerLoops: 1
-<hashTemp>$109 = :\"a_name\" : Symbol(:\"a_name\")
-<hashTemp>$111 = :\"b_name\" : Symbol(:\"b_name\")
-<hashTemp>$113 = :\"added_lines\" : Symbol(:\"added_lines\")
-<hashTemp>$115 = :\"removed_lines\" : Symbol(:\"removed_lines\")
-<blockReturnTemp>$28 = <constant:<Magic>>$22.<build-hash>(<hashTemp>$109, a_name$19, <hashTemp>$111, b_name$19, <hashTemp>$113, added_lines$19, <hashTemp>$115, removed_lines$19) : ShapeType {
-  Symbol(:\"a_name\") => String
-  Symbol(:\"b_name\") => String | NilClass
-  Symbol(:\"added_lines\") => TupleType {
-    }
-  Symbol(:\"removed_lines\") => TupleType {
-    }
-}
-<blockReturnTemp>$117 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$28 : <impossible>
-<unconditional>"];
+    "bb::Opus::CIBot::Gerald::Diff#parse_38" [
+        label = "block[id=38](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<hashTemp>$109 = :\"a_name\" : Symbol(:\"a_name\")\l<hashTemp>$111 = :\"b_name\" : Symbol(:\"b_name\")\l<hashTemp>$113 = :\"added_lines\" : Symbol(:\"added_lines\")\l<hashTemp>$115 = :\"removed_lines\" : Symbol(:\"removed_lines\")\l<blockReturnTemp>$28 = <constant:<Magic>>$22.<build-hash>(<hashTemp>$109, a_name$19, <hashTemp>$111, b_name$19, <hashTemp>$113, added_lines$19, <hashTemp>$115, removed_lines$19) : ShapeType {\l  Symbol(:\"a_name\") => String\l  Symbol(:\"b_name\") => String | NilClass\l  Symbol(:\"added_lines\") => TupleType {\l    }\l  Symbol(:\"removed_lines\") => TupleType {\l    }\l}\l<blockReturnTemp>$117 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$28 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_38" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];
 }

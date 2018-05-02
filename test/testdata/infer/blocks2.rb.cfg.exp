@@ -1,21 +1,18 @@
-digraph "blocks2.rb"{
+digraph "blocks2.rb" {
 subgraph "cluster_::Foo#bar" {
     label = "::Foo#bar";
     color = blue;
     "bb::Foo#bar_0" [shape = invhouse];
     "bb::Foo#bar_1" [shape = parallelogram];
 
-    "bb::Foo#bar_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Foo
-<blk> = load_arg(<selfMethodTemp>$3#bar, 0) : untyped
-<statTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = <blk>.call(<statTemp>$5) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Foo#bar_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Foo\l<blk> = load_arg(<selfMethodTemp>$3#bar, 0) : untyped\l<statTemp>$5 = 1 : Integer(1)\l<returnMethodTemp>$2 = <blk>.call(<statTemp>$5) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_1" [style="bold"];
-    "bb::Foo#bar_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Foo#bar_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Foo#bar_1" -> "bb::Foo#bar_1" [style="bold"];
 }
@@ -26,36 +23,31 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_0" [shape = invhouse];
     "bb::Foo#baz_1" [shape = parallelogram];
 
-    "bb::Foo#baz_0" [label = "block[id=0]()
-<statTemp>$5 = self : Foo
-<block-pre-call-temp>$6 = <statTemp>$5.bar() : untyped
-<unconditional>"];
+    "bb::Foo#baz_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : Foo\l<block-pre-call-temp>$6 = <statTemp>$5.bar() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];
-    "bb::Foo#baz_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Foo#baz_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Foo#baz_1" -> "bb::Foo#baz_1" [style="bold"];
-    "bb::Foo#baz_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Foo#baz_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Foo#baz_2" -> "bb::Foo#baz_4" [style="bold"];
     "bb::Foo#baz_2" -> "bb::Foo#baz_3" [style="tapered"];
 
-    "bb::Foo#baz_3" [label = "block[id=3]()
-<returnMethodTemp>$3 = Solve<::Foo#baz#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Foo#baz_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Foo#baz#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Foo#baz_3" -> "bb::Foo#baz_1" [style="bold"];
-    "bb::Foo#baz_4" [label = "block[id=4]()
-outerLoops: 1
-r$3 = load_yield_param(::Foo#baz#<block>, 0) : untyped
-<statTemp>$8 = self : Foo
-<blockReturnTemp>$7 = <statTemp>$8.puts(r$3) : NilClass
-<blockReturnTemp>$10 = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$7 : <impossible>
-<unconditional>"];
+    "bb::Foo#baz_4" [
+        label = "block[id=4]()\louterLoops: 1\lr$3 = load_yield_param(::Foo#baz#<block>, 0) : untyped\l<statTemp>$8 = self : Foo\l<blockReturnTemp>$7 = <statTemp>$8.puts(r$3) : NilClass\l<blockReturnTemp>$10 = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Foo#baz_4" -> "bb::Foo#baz_2" [style="bold"];
 }

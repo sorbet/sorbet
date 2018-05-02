@@ -1,18 +1,18 @@
-digraph "array.rb"{
+digraph "array.rb" {
 subgraph "cluster_::TestArray#an_int" {
     label = "::TestArray#an_int";
     color = blue;
     "bb::TestArray#an_int_0" [shape = invhouse];
     "bb::TestArray#an_int_1" [shape = parallelogram];
 
-    "bb::TestArray#an_int_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = 0 : Integer(0)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestArray#an_int_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 0 : Integer(0)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
-    "bb::TestArray#an_int_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestArray#an_int_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestArray#an_int_1" -> "bb::TestArray#an_int_1" [style="bold"];
 }
@@ -23,14 +23,14 @@ subgraph "cluster_::TestArray#a_string" {
     "bb::TestArray#a_string_0" [shape = invhouse];
     "bb::TestArray#a_string_1" [shape = parallelogram];
 
-    "bb::TestArray#a_string_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = \"str\" : String(\"str\")
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestArray#a_string_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = \"str\" : String(\"str\")\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
-    "bb::TestArray#a_string_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestArray#a_string_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestArray#a_string_1" -> "bb::TestArray#a_string_1" [style="bold"];
 }
@@ -41,34 +41,14 @@ subgraph "cluster_::TestArray#test_arrays" {
     "bb::TestArray#test_arrays_0" [shape = invhouse];
     "bb::TestArray#test_arrays_1" [shape = parallelogram];
 
-    "bb::TestArray#test_arrays_0" [label = "block[id=0]()
-<constant:<Magic>>$5 = alias <constant:<Magic>> : <Magic>
-<statTemp>$4 = <constant:<Magic>>$5.<build-array>() : TupleType {
-}
-<arrayTemp>$7 = 1 : Integer(1)
-<arrayTemp>$8 = 2 : Integer(2)
-<statTemp>$6 = <constant:<Magic>>$5.<build-array>(<arrayTemp>$7, <arrayTemp>$8) : TupleType {
-  0 = Integer(1)
-  1 = Integer(2)
-}
-<statTemp>$10 = self : TestArray
-<arrayTemp>$9 = <statTemp>$10.an_int() : Integer
-<statTemp>$12 = self : TestArray
-<arrayTemp>$11 = <statTemp>$12.a_string() : String
-<arrayTemp>$13 = <constant:<Magic>>$5.<build-array>() : TupleType {
-}
-<returnMethodTemp>$2 = <constant:<Magic>>$5.<build-array>(<arrayTemp>$9, <arrayTemp>$11, <arrayTemp>$13) : TupleType {
-  0 = Integer
-  1 = String
-  2 = TupleType {
-      }
-}
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::TestArray#test_arrays_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$5 = alias <constant:<Magic>> : <Magic>\l<statTemp>$4 = <constant:<Magic>>$5.<build-array>() : TupleType {\l}\l<arrayTemp>$7 = 1 : Integer(1)\l<arrayTemp>$8 = 2 : Integer(2)\l<statTemp>$6 = <constant:<Magic>>$5.<build-array>(<arrayTemp>$7, <arrayTemp>$8) : TupleType {\l  0 = Integer(1)\l  1 = Integer(2)\l}\l<statTemp>$10 = self : TestArray\l<arrayTemp>$9 = <statTemp>$10.an_int() : Integer\l<statTemp>$12 = self : TestArray\l<arrayTemp>$11 = <statTemp>$12.a_string() : String\l<arrayTemp>$13 = <constant:<Magic>>$5.<build-array>() : TupleType {\l}\l<returnMethodTemp>$2 = <constant:<Magic>>$5.<build-array>(<arrayTemp>$9, <arrayTemp>$11, <arrayTemp>$13) : TupleType {\l  0 = Integer\l  1 = String\l  2 = TupleType {\l      }\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
-    "bb::TestArray#test_arrays_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestArray#test_arrays_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestArray#test_arrays_1" -> "bb::TestArray#test_arrays_1" [style="bold"];
 }

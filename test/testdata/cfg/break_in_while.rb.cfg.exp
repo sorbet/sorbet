@@ -1,21 +1,18 @@
-digraph "break_in_while.rb"{
+digraph "break_in_while.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<statTemp>$5 = self : <Class:<root>>
-<statTemp>$7 = self : <Class:<root>>
-<statTemp>$6 = <statTemp>$7.foo() : untyped
-<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : <Class:<root>>\l<statTemp>$7 = self : <Class:<root>>\l<statTemp>$6 = <statTemp>$7.foo() : untyped\l<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -26,26 +23,24 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_0" [shape = invhouse];
     "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::Object#foo_0" [label = "block[id=0]()
-<unconditional>"];
+    "bb::Object#foo_0" [
+        label = "block[id=0]()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
-    "bb::Object#foo_1" [label = "block[id=1]()
-<statTemp>$9 = self
-<statTemp>$5 = <statTemp>$9.dead()
-<unconditional>"];
+    "bb::Object#foo_1" [
+        label = "block[id=1]()\l<statTemp>$9 = self\l<statTemp>$5 = <statTemp>$9.dead()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2]()
-outerLoops: 1
-<whileTemp>$4 = true : TrueClass
-<unconditional>"];
+    "bb::Object#foo_2" [
+        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$4 = true : TrueClass\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="bold"];
-    "bb::Object#foo_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
 }
