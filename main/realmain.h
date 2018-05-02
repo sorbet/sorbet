@@ -55,6 +55,10 @@ struct Options {
     Phase stopAfterPhase = Phase::INFERENCER;
     bool noStdlib = false;
 
+    // Should we monitor STDOUT for HUP and exit if it hangs up. This is a
+    // workaround for https://bugzilla.mindrot.org/show_bug.cgi?id=2863
+    bool stdoutHUPHack = false;
+
     core::StrictLevel forceMinStrict = core::StrictLevel::Stripe;
     core::StrictLevel forceMaxStrict = core::StrictLevel::Strong;
 

@@ -25,6 +25,9 @@
 #include "version/version.h"
 #include <algorithm> // find
 #include <iostream>
+
+#include <poll.h>
+
 namespace spd = spdlog;
 using namespace std;
 
@@ -567,6 +570,34 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
     }
 }
 
+/*
+ * Workaround https://bugzilla.mindrot.org/show_bug.cgi?id=2863 ; We are
+ * commonly run under ssh with a controlmaster, and we write exclusively to
+ * STDERR in normal usage. If the client goes away, we can hang forever writing
+ * to a full pipe buffer on stderr.
+ *
+ * Workaround by monitoring for STDOUT to go away and self-HUPing.
+ */
+void startHUPMonitor() {
+    std::thread monitor([]() {
+        struct pollfd pfd;
+        pfd.fd = 1; // STDOUT
+        pfd.events = 0;
+        pfd.revents = 0;
+        while (true) {
+            int rv = poll(&pfd, 1, -1);
+            if (rv <= 0) {
+                continue;
+            }
+            if ((pfd.revents & (POLLHUP | POLLERR)) != 0) {
+                // STDOUT has gone away; Exit via SIGHUP.
+                kill(getpid(), SIGHUP);
+            }
+        }
+    });
+    monitor.detach();
+}
+
 int realmain(int argc, const char *argv[]) {
     returnCode = 0;
     logger = spd::details::registry::instance().create("console", stderr_color_sink);
@@ -578,6 +609,9 @@ int realmain(int argc, const char *argv[]) {
 
     Options opts;
     readOptions(opts, argc, argv);
+    if (opts.stdoutHUPHack) {
+        startHUPMonitor();
+    }
     if (!opts.debugLogFile.empty()) {
         auto fileSink = std::make_shared<spd::sinks::simple_file_sink_mt>(opts.debugLogFile);
         fileSink->set_level(spd::level::debug);
