@@ -1967,8 +1967,29 @@
                                       "name" : "added_lines"
                                     },
                                     "rhs" : {
-                                      "type" : "Array",
-                                      "elts" : [
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "Send",
+                                        "receiver" : {
+                                          "type" : "Const",
+                                          "scope" : {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "T"
+                                          },
+                                          "name" : "Array"
+                                        },
+                                        "method" : "[]",
+                                        "args" : [
+                                          {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "String"
+                                          }
+                                        ]
+                                      },
+                                      "method" : "new",
+                                      "args" : [
                                       ]
                                     }
                                   },
@@ -1979,8 +2000,29 @@
                                       "name" : "removed_lines"
                                     },
                                     "rhs" : {
-                                      "type" : "Array",
-                                      "elts" : [
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "Send",
+                                        "receiver" : {
+                                          "type" : "Const",
+                                          "scope" : {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "T"
+                                          },
+                                          "name" : "Array"
+                                        },
+                                        "method" : "[]",
+                                        "args" : [
+                                          {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "String"
+                                          }
+                                        ]
+                                      },
+                                      "method" : "new",
+                                      "args" : [
                                       ]
                                     }
                                   },
@@ -2305,21 +2347,32 @@
                                                 {
                                                   "type" : "Send",
                                                   "receiver" : {
-                                                    "type" : "LVar",
-                                                    "name" : "line"
+                                                    "type" : "Const",
+                                                    "scope" : null,
+                                                    "name" : "T"
                                                   },
-                                                  "method" : "[]",
+                                                  "method" : "must",
                                                   "args" : [
                                                     {
-                                                      "type" : "IRange",
-                                                      "from" : {
-                                                        "type" : "Integer",
-                                                        "val" : "1"
+                                                      "type" : "Send",
+                                                      "receiver" : {
+                                                        "type" : "LVar",
+                                                        "name" : "line"
                                                       },
-                                                      "to" : {
-                                                        "type" : "Integer",
-                                                        "val" : "-1"
-                                                      }
+                                                      "method" : "[]",
+                                                      "args" : [
+                                                        {
+                                                          "type" : "IRange",
+                                                          "from" : {
+                                                            "type" : "Integer",
+                                                            "val" : "1"
+                                                          },
+                                                          "to" : {
+                                                            "type" : "Integer",
+                                                            "val" : "-1"
+                                                          }
+                                                        }
+                                                      ]
                                                     }
                                                   ]
                                                 }
@@ -2357,21 +2410,32 @@
                                                   {
                                                     "type" : "Send",
                                                     "receiver" : {
-                                                      "type" : "LVar",
-                                                      "name" : "line"
+                                                      "type" : "Const",
+                                                      "scope" : null,
+                                                      "name" : "T"
                                                     },
-                                                    "method" : "[]",
+                                                    "method" : "must",
                                                     "args" : [
                                                       {
-                                                        "type" : "IRange",
-                                                        "from" : {
-                                                          "type" : "Integer",
-                                                          "val" : "1"
+                                                        "type" : "Send",
+                                                        "receiver" : {
+                                                          "type" : "LVar",
+                                                          "name" : "line"
                                                         },
-                                                        "to" : {
-                                                          "type" : "Integer",
-                                                          "val" : "-1"
-                                                        }
+                                                        "method" : "[]",
+                                                        "args" : [
+                                                          {
+                                                            "type" : "IRange",
+                                                            "from" : {
+                                                              "type" : "Integer",
+                                                              "val" : "1"
+                                                            },
+                                                            "to" : {
+                                                              "type" : "Integer",
+                                                              "val" : "-1"
+                                                            }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }
