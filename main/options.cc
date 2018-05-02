@@ -83,6 +83,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(""), "file");
+    options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
 
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
@@ -202,6 +203,8 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         }
         opts.stopAfterPhase = extractStopAfter(raw);
         opts.noStdlib = raw["no-stdlib"].as<bool>();
+
+        opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
 
         opts.threads = min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
         if (opts.threads == 0) {
