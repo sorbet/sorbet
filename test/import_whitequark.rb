@@ -24,4 +24,7 @@ def main
     cur_file = nil
   end
 end
-main
+
+if $0 == __FILE__
+  main
+end

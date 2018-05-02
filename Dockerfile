@@ -16,6 +16,8 @@ RUN apt-get update && apt-get install -y ragel bison ruby autoconf
 # Dependencies for pay-server gems
 RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev
 
+RUN rbenv exec gem install bundler --no-rdoc --no-ri
+
 RUN /usr/stripe/bin/docker/stripe-install-go 1.9 d70eadefce8e160638a9a6db97f7192d8463069ab33138893ad3bf31b0650a79
 ENV GOPATH /gopath
 ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin

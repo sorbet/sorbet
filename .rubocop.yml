@@ -1,0 +1,13 @@
+inherit_gem:
+  stripe-rubocop: .rubocop.yml
+
+AllCops:
+  Exclude:
+    # Someday we should enable some formatting cops for these
+    - test/testdata/**/*
+    - test/cli/**/*
+
+    # Things we didn't write
+    - bazel-*/**/*
+    - third_party/**/*
+    - parser/tools/generate_diagnostics.rb

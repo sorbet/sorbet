@@ -6,6 +6,8 @@ set -eux
 ./tools/scripts/lint_sh.sh -t
 ./tools/scripts/generate_compdb_targets.sh -t
 ./tools/scripts/build_compilation_db.sh
+rbenv exec bundle install
+rbenv exec bundle exec rubocop
 
 err=0
 
