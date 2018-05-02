@@ -61,6 +61,7 @@ const char *store_str = "Store";
 const char *root_store_str = "RootStore";
 const char *sinatra_str = "Sinatra";
 const char *base_str = "Base";
+const char *void_str = "Void";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -167,6 +168,7 @@ void GlobalState::initEmpty() {
     SymbolRef sinatra_base_id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), enterNameConstant(base_str));
     sinatra_base_id.data(*this).setIsModule(false);
     sinatra_base_id.data(*this).superClass = core::Symbols::Object();
+    SymbolRef void_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(void_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -219,6 +221,7 @@ void GlobalState::initEmpty() {
     ENFORCE(T_Set_id = Symbols::T_Set());
     ENFORCE(sinatra_id = Symbols::Sinatra());
     ENFORCE(sinatra_base_id = Symbols::SinatraBase());
+    ENFORCE(void_id = Symbols::void_());
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();

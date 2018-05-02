@@ -31,6 +31,7 @@ struct ParsedSig {
         bool overridable = false;
         bool implementation = false;
         bool returns = false;
+        bool void_ = false;
         bool checked = false;
     } seen;
 

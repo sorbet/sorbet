@@ -100,6 +100,7 @@ NameDef names[] = {
     {"overridable", Resolver},
 
     {"returns", Resolver | DSL},
+    {"void_", "void", Resolver},
     {"checked", Resolver},
     {"soft", Resolver},
     {"all", Resolver | Infer | Core},

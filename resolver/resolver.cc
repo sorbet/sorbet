@@ -443,12 +443,17 @@ private:
 
         auto sig = TypeSyntax::parseSig(ctx, send, nullptr);
 
-        if (!sig.seen.returns) {
+        if (!sig.seen.returns && !sig.seen.void_) {
             if (sig.seen.args || !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation ||
                                    sig.seen.overridable || sig.seen.abstract)) {
                 if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `sig`: No return type specified. Specify one with .returns()");
                 }
+            }
+        }
+        if (sig.seen.returns && sig.seen.void_) {
+            if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `sig`: Don't use both .returns() and .void");
             }
         }
 
@@ -486,7 +491,7 @@ private:
                 ++it;
             } else {
                 arg.data(ctx).resultType = core::Types::dynamic();
-                if (sig.seen.args || sig.seen.returns) {
+                if (sig.seen.args || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
                                                       core::errors::Resolver::InvalidMethodSignature)) {

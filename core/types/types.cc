@@ -35,6 +35,12 @@ shared_ptr<Type> Types::dynamic() {
     static auto res = make_shared<ClassType>(core::Symbols::untyped());
     return res;
 }
+
+shared_ptr<Type> Types::void_() {
+    static auto res = make_shared<ClassType>(core::Symbols::void_());
+    return res;
+}
+
 std::shared_ptr<Type> Types::trueClass() {
     static auto res = make_shared<ClassType>(core::Symbols::TrueClass());
     return res;

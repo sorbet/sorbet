@@ -184,6 +184,10 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
 
                 break;
             }
+            case core::Names::void_()._id:
+                sig.seen.void_ = true;
+                sig.returns = core::Types::void_();
+                break;
             case core::Names::checked()._id:
                 sig.seen.checked = true;
                 break;

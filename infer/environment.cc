@@ -805,6 +805,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx)),
                         constr);
                 }
+
+                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
+                    expectedType = core::Types::dynamic();
+                }
+
                 tp.type = core::Types::bottom();
                 tp.origins.push_back(bind.loc);
 

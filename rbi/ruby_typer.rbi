@@ -88,3 +88,7 @@ class RubyTyper::ENVClass
   def update(key, &blk); end
 end
 ::ENV = T.let(nil, RubyTyper::ENVClass)
+
+# The magic type that sig.void returns
+module RubyTyper::Void
+end

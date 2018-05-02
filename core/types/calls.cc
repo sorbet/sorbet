@@ -486,7 +486,13 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     core::categoryCounterInc("dispatch_call", "classtype");
     if (isDynamic()) {
         return Types::dynamic();
+    } else if (this->symbol == core::Symbols::void_()) {
+        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
+            e.setHeader("Can not call method `{}` on void type", fun.data(ctx).toString(ctx));
+        }
+        return Types::dynamic();
     }
+
     core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
 
     if (!mayBeOverloaded.exists()) {
