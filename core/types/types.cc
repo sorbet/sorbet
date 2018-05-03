@@ -226,7 +226,7 @@ core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
 core::LiteralType::LiteralType(bool val)
     : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
-core::TupleType::TupleType(vector<shared_ptr<Type>> &elements)
+core::TupleType::TupleType(vector<shared_ptr<Type>> elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
 
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
@@ -239,7 +239,7 @@ void TupleType::_sanityCheck(core::Context ctx) {
 
 core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
 
-core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> &keys, vector<shared_ptr<Type>> &values)
+core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> keys, vector<shared_ptr<Type>> values)
     : ProxyType(core::Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
 
 void ShapeType::_sanityCheck(core::Context ctx) {

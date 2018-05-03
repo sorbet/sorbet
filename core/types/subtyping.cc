@@ -298,7 +298,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                                 ENFORCE(u2 != nullptr);
                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
-                                    return candidate->value == el2->value && u1 == u2; // from lambda
+                                    return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                 });
                                 if (fnd != h1->keys.end()) {
                                     keys.emplace_back(el2);
@@ -608,7 +608,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
                                  ENFORCE(u2 != nullptr);
                                  auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                      ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
-                                     return candidate->value == el2->value && u1 == u2; // from lambda
+                                     return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                  });
                                  if (fnd != h1->keys.end()) {
                                      keys.emplace_back(el2);
@@ -964,7 +964,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
                              ENFORCE(u2 != nullptr);
                              auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                  ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
-                                 return candidate->value == el2->value && u1 == u2; // from lambda
+                                 return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                              });
                              result = fnd != h1->keys.end() &&
                                       Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],

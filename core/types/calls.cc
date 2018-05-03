@@ -297,10 +297,10 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
 }
 
 shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
-    if (auto *tc = cast_type<MetaType>(tp.get())) {
-        return tc->wrapped;
+    if (auto *metaType = cast_type<MetaType>(tp.get())) {
+        return metaType->wrapped;
     }
-    if (ClassType *classType = cast_type<ClassType>(tp.get())) {
+    if (auto *classType = cast_type<ClassType>(tp.get())) {
         SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
@@ -310,6 +310,25 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
         }
 
         return attachedClass.data(ctx).externalType(ctx);
+    }
+
+    if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
+        vector<shared_ptr<Type>> unwrappedValues;
+        for (auto value : shapeType->values) {
+            unwrappedValues.emplace_back(unwrapType(ctx, loc, value));
+        }
+        return make_shared<ShapeType>(shapeType->keys, unwrappedValues);
+    } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
+        vector<shared_ptr<Type>> unwrappedElems;
+        for (auto elem : tupleType->elems) {
+            unwrappedElems.emplace_back(unwrapType(ctx, loc, elem));
+        }
+        return make_shared<TupleType>(unwrappedElems);
+    } else if (auto *litType = cast_type<LiteralType>(tp.get())) {
+        if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
+            e.setHeader("Unsupported usage of literal type");
+        }
+        return Types::dynamic();
     }
     return tp;
 }

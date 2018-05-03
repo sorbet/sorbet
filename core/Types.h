@@ -60,6 +60,7 @@ public:
     static std::shared_ptr<Type> procClass();
     static std::shared_ptr<Type> classClass();
     static std::shared_ptr<Type> falsyTypes();
+
     static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass);
     static std::shared_ptr<Type> approximateSubtract(core::Context ctx, std::shared_ptr<Type> from,
                                                      std::shared_ptr<Type> what);
@@ -337,7 +338,7 @@ public:
     std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
     ShapeType();
-    ShapeType(std::vector<std::shared_ptr<LiteralType>> &keys, std::vector<std::shared_ptr<Type>> &values);
+    ShapeType(std::vector<std::shared_ptr<LiteralType>> keys, std::vector<std::shared_ptr<Type>> values);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
     virtual std::string show(const GlobalState &gs) final;
@@ -360,7 +361,7 @@ public:
 class TupleType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    TupleType(std::vector<std::shared_ptr<Type>> &elems);
+    TupleType(std::vector<std::shared_ptr<Type>> elems);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) final;
     virtual std::string show(const GlobalState &gs) final;
