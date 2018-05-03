@@ -8,7 +8,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/sig_good.rb:2
       argument b<> -> T1 @ test/testdata/namer/sig_good.rb:10
       argument c<> -> T1 | NilClass @ test/testdata/namer/sig_good.rb:11
       argument d<> -> T1 | T2 @ test/testdata/namer/sig_good.rb:12
-      argument e<> -> untyped @ test/testdata/namer/sig_good.rb:13
+      argument e<> -> T.untyped @ test/testdata/namer/sig_good.rb:13
       argument f<> -> AppliedType {
         klass = ::Array
         targs = [

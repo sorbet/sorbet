@@ -1,21 +1,21 @@
 class <constant:<root>> < ::Object () @ test/testdata/namer/sig_bad.rb:2
   class <constant:A> < ::Object () @ test/testdata/namer/sig_bad.rb:5
     method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig_bad.rb:22
-      argument a<> -> untyped @ test/testdata/namer/sig_bad.rb:7
-      argument b<> -> untyped @ test/testdata/namer/sig_bad.rb:8
+      argument a<> -> T.untyped @ test/testdata/namer/sig_bad.rb:7
+      argument b<> -> T.untyped @ test/testdata/namer/sig_bad.rb:8
       argument c<> -> Object @ test/testdata/namer/sig_bad.rb:9
-      argument d<> -> untyped @ test/testdata/namer/sig_bad.rb:10
-      argument e<> -> untyped @ test/testdata/namer/sig_bad.rb:11
-      argument f<> -> untyped @ test/testdata/namer/sig_bad.rb:12
+      argument d<> -> T.untyped @ test/testdata/namer/sig_bad.rb:10
+      argument e<> -> T.untyped @ test/testdata/namer/sig_bad.rb:11
+      argument f<> -> T.untyped @ test/testdata/namer/sig_bad.rb:12
       argument g<> -> <impossible> @ test/testdata/namer/sig_bad.rb:13
-      argument h<> -> untyped @ test/testdata/namer/sig_bad.rb:14
-      argument i<> -> untyped @ test/testdata/namer/sig_bad.rb:15
-      argument j<> -> untyped @ test/testdata/namer/sig_bad.rb:16
-      argument k<> -> untyped @ test/testdata/namer/sig_bad.rb:17
+      argument h<> -> T.untyped @ test/testdata/namer/sig_bad.rb:14
+      argument i<> -> T.untyped @ test/testdata/namer/sig_bad.rb:15
+      argument j<> -> T.untyped @ test/testdata/namer/sig_bad.rb:16
+      argument k<> -> T.untyped @ test/testdata/namer/sig_bad.rb:17
       argument l<> -> ShapeType {
       } @ test/testdata/namer/sig_bad.rb:18
       argument m<> -> ShapeType {
-        Symbol(:"foo") => untyped
+        Symbol(:"foo") => T.untyped
       } @ test/testdata/namer/sig_bad.rb:19
   class <constant:T1> < ::Object () @ test/testdata/namer/sig_bad.rb:2
   class <constant:T2> < ::Object () @ test/testdata/namer/sig_bad.rb:3

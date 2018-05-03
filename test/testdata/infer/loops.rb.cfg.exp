@@ -63,7 +63,7 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
 
     "bb::HasLoops#incorrect_assignment_3" -> "bb::HasLoops#incorrect_assignment_1" [style="bold"];
     "bb::HasLoops#incorrect_assignment_4" [
-        label = "block[id=4](a)\louterLoops: 1\la = 1 : untyped\l<unconditional>\l"
+        label = "block[id=4](a)\louterLoops: 1\la = 1 : T.untyped\l<unconditional>\l"
     ];
 
     "bb::HasLoops#incorrect_assignment_4" -> "bb::HasLoops#incorrect_assignment_2" [style="bold"];

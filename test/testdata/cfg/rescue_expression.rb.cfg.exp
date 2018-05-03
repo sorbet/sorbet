@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$8 = self : <Class:<root>>\l<statTemp>$7 = <statTemp>$8.foo() : untyped\l<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$8 = self : <Class:<root>>\l<statTemp>$7 = <statTemp>$8.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<constant:MyException>$8 = alias <constant:MyException> : <Class:MyException>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+        label = "block[id=0]()\l<constant:MyException>$8 = alias <constant:MyException> : <Class:MyException>\l<rescueTemp$4 = <unanalyzable> : T.untyped\l<rescueTemp$4\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<rescueTemp$4, <constant:MyException>$8)\l<statTemp>$11 = <constant:MyException>$8.new() : MyException\l<rescueTemp$10 = <statTemp>$11.class() : <Class:MyException>\l<rescueTemp$13 = <rescueTemp$4.is_a?(<rescueTemp$10) : untyped\l<rescueTemp$13\l"
+        label = "block[id=3](<rescueTemp$4, <constant:MyException>$8)\l<statTemp>$11 = <constant:MyException>$8.new() : MyException\l<rescueTemp$10 = <statTemp>$11.class() : <Class:MyException>\l<rescueTemp$13 = <rescueTemp$4.is_a?(<rescueTemp$10) : T.untyped\l<rescueTemp$13\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];

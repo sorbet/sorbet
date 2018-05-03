@@ -18,7 +18,7 @@ namespace core {
 namespace {
 const char *top_str = "<any>";
 const char *bottom_str = "<impossible>";
-const char *untyped_str = "untyped";
+const char *untyped_str = "T.untyped";
 const char *root_str = "<root>";
 const char *object_str = "Object";
 const char *junk_str = "<<JUNK>>";

@@ -6,7 +6,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : untyped\l<rescueTemp$5 = <unanalyzable> : untyped\l<rescueTemp$5\l"
+        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : T.untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : T.untyped\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3](<rescueTemp$5, <constant:StandardError>$8, final_attempt, foo)\l<rescueTemp$9 = <rescueTemp$5.is_a?(<constant:StandardError>$8) : untyped\l<rescueTemp$9\l"
+        label = "block[id=3](<rescueTemp$5, <constant:StandardError>$8, final_attempt, foo)\l<rescueTemp$9 = <rescueTemp$5.is_a?(<constant:StandardError>$8) : T.untyped\l<rescueTemp$9\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_8" [style="bold"];
@@ -44,14 +44,14 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_10" -> "bb::ModuleMethods#instrumented_request_14" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_11" [
-        label = "block[id=11](final_attempt, foo, err, is_successful)\l||$2 = final_attempt : untyped\l||$2\l"
+        label = "block[id=11](final_attempt, foo, err, is_successful)\l||$2 = final_attempt : T.untyped\l||$2\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_11" -> "bb::ModuleMethods#instrumented_request_13" [style="bold"];
     "bb::ModuleMethods#instrumented_request_11" -> "bb::ModuleMethods#instrumented_request_14" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_13" [
-        label = "block[id=13](is_successful, ||$2)\l<ifTemp>$12 = ||$2 : untyped\l<ifTemp>$12\l"
+        label = "block[id=13](is_successful, ||$2)\l<ifTemp>$12 = ||$2 : T.untyped\l<ifTemp>$12\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_13" -> "bb::ModuleMethods#instrumented_request_19" [style="bold"];
@@ -65,7 +65,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_14" -> "bb::ModuleMethods#instrumented_request_16" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_15" [
-        label = "block[id=15](foo, is_successful)\l<ifTemp>$12 = foo : untyped\l<ifTemp>$12\l"
+        label = "block[id=15](foo, is_successful)\l<ifTemp>$12 = foo : T.untyped\l<ifTemp>$12\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_15" -> "bb::ModuleMethods#instrumented_request_19" [style="bold"];

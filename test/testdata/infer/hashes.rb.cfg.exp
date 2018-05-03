@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$6 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$3 = self : Foo\lcond = load_arg(<selfMethodTemp>$3#bar, 0) : untyped\lcond\l"
+        label = "block[id=0]()\l<constant:<Magic>>$6 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$3 = self : Foo\lcond = load_arg(<selfMethodTemp>$3#bar, 0) : T.untyped\lcond\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_2" [style="bold"];

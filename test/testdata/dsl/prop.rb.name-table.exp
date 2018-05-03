@@ -3,19 +3,19 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     method array () -> AppliedType {
       klass = ::Array
       targs = [
-        <constant:Elem> = untyped
+        <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:37
     method array= (arg0) -> AppliedType {
       klass = ::Array
       targs = [
-        <constant:Elem> = untyped
+        <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:37
       argument arg0<> -> AppliedType {
         klass = ::Array
         targs = [
-          <constant:Elem> = untyped
+          <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:37
     method array_of () -> AppliedType {
@@ -39,19 +39,19 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     method array_of_explicit () -> AppliedType {
       klass = ::Array
       targs = [
-        <constant:Elem> = untyped
+        <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:39
     method array_of_explicit= (arg0) -> AppliedType {
       klass = ::Array
       targs = [
-        <constant:Elem> = untyped
+        <constant:Elem> = T.untyped
       ]
     } @ test/testdata/dsl/prop.rb:39
       argument arg0<> -> AppliedType {
         klass = ::Array
         targs = [
-          <constant:Elem> = untyped
+          <constant:Elem> = T.untyped
         ]
       } @ test/testdata/dsl/prop.rb:39
     method const () -> String @ test/testdata/dsl/prop.rb:50
@@ -62,7 +62,7 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     method default_without_migrate () -> String | NilClass @ test/testdata/dsl/prop.rb:29
     method default_without_migrate= (arg0) -> String @ test/testdata/dsl/prop.rb:29
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:29
-    method enum_prop () -> untyped @ test/testdata/dsl/prop.rb:54
+    method enum_prop () -> T.untyped @ test/testdata/dsl/prop.rb:54
     method factory () -> String @ test/testdata/dsl/prop.rb:33
     method factory= (arg0) -> String @ test/testdata/dsl/prop.rb:33
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:33
@@ -73,22 +73,22 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     method foreign= (arg0) -> String @ test/testdata/dsl/prop.rb:56
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:56
     method foreign_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:56
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:56
+      argument opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:56
     method foreign_invalid () -> String | NilClass @ test/testdata/dsl/prop.rb:59
     method foreign_invalid= (arg0) -> String @ test/testdata/dsl/prop.rb:59
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:59
-    method foreign_invalid_ (opts) -> untyped @ test/testdata/dsl/prop.rb:59
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:59
+    method foreign_invalid_ (opts) -> T.untyped @ test/testdata/dsl/prop.rb:59
+      argument opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:59
     method foreign_lazy () -> String | NilClass @ test/testdata/dsl/prop.rb:57
     method foreign_lazy= (arg0) -> String @ test/testdata/dsl/prop.rb:57
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:57
     method foreign_lazy_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:57
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:57
+      argument opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:57
     method foreign_proc () -> String | NilClass @ test/testdata/dsl/prop.rb:58
     method foreign_proc= (arg0) -> String @ test/testdata/dsl/prop.rb:58
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:58
     method foreign_proc_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:58
-      argument opts<keyword, repeated> -> untyped @ test/testdata/dsl/prop.rb:58
+      argument opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:58
     method hash_of () -> AppliedType {
       klass = ::Hash
       targs = [
@@ -125,7 +125,7 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     method no_class_arg () -> AppliedType {
           klass = ::Array
           targs = [
-            <constant:Elem> = untyped
+            <constant:Elem> = T.untyped
           ]
         } | NilClass @ test/testdata/dsl/prop.rb:52
     method nodefault () -> String | NilClass @ test/testdata/dsl/prop.rb:31
@@ -172,16 +172,16 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
       argument arg0<> -> String @ test/testdata/dsl/prop.rb:35
   class <constant:ForeignClass> < ::Object () @ test/testdata/dsl/prop.rb:25
   class <constant:NotAODM> < ::Object () @ test/testdata/dsl/prop.rb:2
-    class <constant:Default> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:12
-    class <constant:IntegerParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:10
-    class <constant:StringParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:11
+    class <constant:Default> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
+    class <constant:IntegerParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:10
+    class <constant:StringParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:11
     method <static-init> () @ test/testdata/dsl/prop.rb:2
   class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8224
     method main () @ test/testdata/dsl/prop.rb:76
   class <constant:Opus> () @ ???
-    class <constant:Param> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:12
-      class <constant:CaseParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:12
-      class <constant:ParamSpecsParam> < ::RubyTyper::StubClass () -> untyped @ test/testdata/dsl/prop.rb:12
+    class <constant:Param> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
+      class <constant:CaseParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
+      class <constant:ParamSpecsParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
   class <constant:PropHelpers2> < ::Object () @ test/testdata/dsl/prop.rb:67
     method created () -> Float @ test/testdata/dsl/prop.rb:69
     method token () -> String @ test/testdata/dsl/prop.rb:68

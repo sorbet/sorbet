@@ -6,7 +6,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_1" [shape = parallelogram];
 
     "bb::A#initialize_0" [
-        label = "block[id=0]()\l<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$6 = self : A\l<statTemp>$5 = <statTemp>$6.spec_list() : untyped\l<block-pre-call-temp>$7 = <statTemp>$5.map() : untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$6 = self : A\l<statTemp>$5 = <statTemp>$6.spec_list() : T.untyped\l<block-pre-call-temp>$7 = <statTemp>$5.map() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::A#initialize_0" -> "bb::A#initialize_2" [style="bold"];
@@ -23,19 +23,19 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
 
     "bb::A#initialize_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::A#initialize#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::A#initialize#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_5" [
-        label = "block[id=5](<constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$9 = <unanalyzable> : untyped\l<rescueTemp$9\l"
+        label = "block[id=5](<constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$9 = <unanalyzable> : T.untyped\l<rescueTemp$9\l"
     ];
 
     "bb::A#initialize_5" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
     "bb::A#initialize_6" [
-        label = "block[id=6](<rescueTemp$9, <constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$13 = <rescueTemp$9.is_a?(<constant:StandardError>$12) : untyped\l<rescueTemp$13\l"
+        label = "block[id=6](<rescueTemp$9, <constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$13 = <rescueTemp$9.is_a?(<constant:StandardError>$12) : T.untyped\l<rescueTemp$13\l"
     ];
 
     "bb::A#initialize_6" -> "bb::A#initialize_11" [style="bold"];

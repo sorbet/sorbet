@@ -4,14 +4,14 @@ class <constant:<root>> < ::Object () @ -e:1
       argument w<> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = untyped
-          <constant:Arg0> = untyped
+          <constant:Return> = T.untyped
+          <constant:Arg0> = T.untyped
         ]
       } @ test/testdata/resolver/proc.rb:20
       argument x<> -> AppliedType {
         klass = ::Proc0
         targs = [
-          <constant:Return> = untyped
+          <constant:Return> = T.untyped
         ]
       } @ test/testdata/resolver/proc.rb:17
       argument y<> -> AppliedType {
@@ -23,7 +23,7 @@ class <constant:<root>> < ::Object () @ -e:1
       argument z<> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = untyped
+          <constant:Return> = T.untyped
           <constant:Arg0> = Integer
         ]
       } @ test/testdata/resolver/proc.rb:19

@@ -28,7 +28,7 @@ begin
         self(<constant:Object>).puts(::E.e())
         self(<constant:Object>).puts(::F.f=(91))
         self(<constant:Object>).puts(::G.new().wrapper())
-        self(<constant:Object>).puts(::untyped.h())
+        self(<constant:Object>).puts(::T.untyped.h())
       end
     end
   end

@@ -1,14 +1,14 @@
 class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
   class <constant:Opus> () @ ???
-    class <constant:AutogenLoader> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:3
+    class <constant:AutogenLoader> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:3
     class <constant:CIBot> () @ test/testdata/infer/gerald.rb:5
-      class <constant:Actions> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:147
-        class <constant:OpenAPI> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:147
-          class <constant:SPEC_PATH> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:147
+      class <constant:Actions> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+        class <constant:OpenAPI> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+          class <constant:SPEC_PATH> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
       class <constant:Gerald> (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
         class <constant:Diff> < ::Object () @ test/testdata/infer/gerald.rb:111
-          field @parsed -> untyped @ test/testdata/infer/gerald.rb:115
-          field @raw -> untyped @ test/testdata/infer/gerald.rb:114
+          field @parsed -> T.untyped @ test/testdata/infer/gerald.rb:115
+          field @raw -> T.untyped @ test/testdata/infer/gerald.rb:114
           method added_files () @ test/testdata/infer/gerald.rb:122
             method <block>$2 (part) @ test/testdata/infer/gerald.rb:123
               argument part<> @ test/testdata/infer/gerald.rb:123
@@ -42,14 +42,14 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
             method <block>$2 (part) @ test/testdata/infer/gerald.rb:139
               argument part<> @ test/testdata/infer/gerald.rb:139
         class <constant:MatchContext> < ::Object () @ test/testdata/infer/gerald.rb:51
-          field @assignee -> untyped @ test/testdata/infer/gerald.rb:53
-          field @body -> untyped @ test/testdata/infer/gerald.rb:56
-          field @diff -> untyped @ test/testdata/infer/gerald.rb:58
-          field @gh_user -> untyped @ test/testdata/infer/gerald.rb:54
-          field @merge_branch -> untyped @ test/testdata/infer/gerald.rb:55
-          field @openapi_diff -> untyped @ test/testdata/infer/gerald.rb:59
-          field @repo -> untyped @ test/testdata/infer/gerald.rb:52
-          field @title -> untyped @ test/testdata/infer/gerald.rb:57
+          field @assignee -> T.untyped @ test/testdata/infer/gerald.rb:53
+          field @body -> T.untyped @ test/testdata/infer/gerald.rb:56
+          field @diff -> T.untyped @ test/testdata/infer/gerald.rb:58
+          field @gh_user -> T.untyped @ test/testdata/infer/gerald.rb:54
+          field @merge_branch -> T.untyped @ test/testdata/infer/gerald.rb:55
+          field @openapi_diff -> T.untyped @ test/testdata/infer/gerald.rb:59
+          field @repo -> T.untyped @ test/testdata/infer/gerald.rb:52
+          field @title -> T.untyped @ test/testdata/infer/gerald.rb:57
           method assignee () @ test/testdata/infer/gerald.rb:53
           method body () @ test/testdata/infer/gerald.rb:56
           method diff () @ test/testdata/infer/gerald.rb:58
@@ -69,24 +69,24 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
           method title () @ test/testdata/infer/gerald.rb:57
           method user_stripe_suffix? () @ test/testdata/infer/gerald.rb:73
         class <constant:MatchTimeBudget> < ::Object () @ test/testdata/infer/gerald.rb:79
-          field @start -> untyped @ test/testdata/infer/gerald.rb:85
+          field @start -> T.untyped @ test/testdata/infer/gerald.rb:85
           method check! () @ test/testdata/infer/gerald.rb:89
           method initialize () @ test/testdata/infer/gerald.rb:84
           method time_rule (rule, <blk>) @ test/testdata/infer/gerald.rb:96
-            argument <blk><block> -> untyped @ test/testdata/infer/gerald.rb:98
+            argument <blk><block> -> T.untyped @ test/testdata/infer/gerald.rb:98
             argument rule<> @ test/testdata/infer/gerald.rb:96
           static-field <constant:PER_RULE_MS> -> Integer(2000) @ test/testdata/infer/gerald.rb:82
           static-field <constant:TOTAL_TIME_MS> -> Integer(10000) @ test/testdata/infer/gerald.rb:81
         class <constant:MatchTimeout> < ::StandardError () @ test/testdata/infer/gerald.rb:7
-          field @rule_token -> untyped @ test/testdata/infer/gerald.rb:9
+          field @rule_token -> T.untyped @ test/testdata/infer/gerald.rb:9
           method initialize (message, rule_token) @ test/testdata/infer/gerald.rb:11
             argument message<> @ test/testdata/infer/gerald.rb:11
             argument rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
           method rule_token () @ test/testdata/infer/gerald.rb:9
         class <constant:Matcher> < ::Object (<constant:Log>) @ test/testdata/infer/gerald.rb:17
-          class <constant:Chalk> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:18
-            class <constant:Log> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:18
-          field @rules -> untyped @ test/testdata/infer/gerald.rb:23
+          class <constant:Chalk> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
+            class <constant:Log> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
+          field @rules -> T.untyped @ test/testdata/infer/gerald.rb:23
           method initialize () @ test/testdata/infer/gerald.rb:22
             method <block>$2 (<block-pass>$2) @ test/testdata/infer/gerald.rb:25
               argument <block-pass>$2<> @ test/testdata/infer/gerald.rb:25
@@ -103,8 +103,8 @@ class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
         class <singleton class:<constant:MatchTimeBudget>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:79
         class <singleton class:<constant:MatchTimeout>> < ::<Class:StandardError> () @ test/testdata/infer/gerald.rb:7
         class <singleton class:<constant:Matcher>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:17
-      class <constant:Model> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:24
-        class <constant:GeraldRule> < ::RubyTyper::StubClass () -> untyped @ test/testdata/infer/gerald.rb:24
+      class <constant:Model> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
+        class <constant:GeraldRule> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
       class <singleton class:<constant:Gerald>> < ::Module () @ test/testdata/infer/gerald.rb:5
     class <singleton class:<constant:CIBot>> < ::Module () @ test/testdata/infer/gerald.rb:5
   method <static-init>$11 () @ test/testdata/infer/gerald.rb:2

@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : <Class:<root>>\l<statTemp>$7 = self : <Class:<root>>\l<statTemp>$6 = <statTemp>$7.foo() : untyped\l<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5 = self : <Class:<root>>\l<statTemp>$7 = self : <Class:<root>>\l<statTemp>$6 = <statTemp>$7.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\lx$2 = load_yield_param(::Object#foo#<block>, 0) : untyped\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\lx$2 = load_yield_param(::Object#foo#<block>, 0) : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];

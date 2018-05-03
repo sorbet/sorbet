@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$7 = self : <Class:<root>>\l<returnMethodTemp>$2 = <statTemp>$7.main() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$7 = self : <Class:<root>>\l<returnMethodTemp>$2 = <statTemp>$7.main() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -34,14 +34,14 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2](<constant:A>$19, <constant:B>$29, try)\l<rescueTemp$5 = <unanalyzable> : untyped\l<rescueTemp$5\l"
+        label = "block[id=2](<constant:A>$19, <constant:B>$29, try)\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](<rescueTemp$5, <constant:A>$19, <constant:B>$29, try)\l<rescueTemp$39 = <rescueTemp$5.is_a?(<constant:B>$29) : untyped\l<rescueTemp$39\l"
+        label = "block[id=3](<rescueTemp$5, <constant:A>$19, <constant:B>$29, try)\l<rescueTemp$39 = <rescueTemp$5.is_a?(<constant:B>$29) : T.untyped\l<rescueTemp$39\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_22" [style="bold"];
@@ -53,14 +53,14 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_5" [
-        label = "block[id=5](<constant:A>$19, <constant:B>$29, try)\l<rescueTemp$9 = <unanalyzable> : untyped\l<rescueTemp$9\l"
+        label = "block[id=5](<constant:A>$19, <constant:B>$29, try)\l<rescueTemp$9 = <unanalyzable> : T.untyped\l<rescueTemp$9\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_5" -> "bb::Object#main_7" [style="tapered"];
 
     "bb::Object#main_6" [
-        label = "block[id=6](<rescueTemp$9, <constant:A>$19, <constant:B>$29, try)\l<rescueTemp$32 = <rescueTemp$9.is_a?(<constant:A>$19) : untyped\l<rescueTemp$32\l"
+        label = "block[id=6](<rescueTemp$9, <constant:A>$19, <constant:B>$29, try)\l<rescueTemp$32 = <rescueTemp$9.is_a?(<constant:A>$19) : T.untyped\l<rescueTemp$32\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_17" [style="bold"];

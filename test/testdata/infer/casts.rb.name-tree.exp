@@ -18,7 +18,7 @@ class <emptyTree>::<constant:TestCasts><<constant:TestCasts>> < (::<todo sym>)
       s = T.cast(6, String)
       s.+("hi")
       s.+(3)
-      s = T.cast(6, untyped)
+      s = T.cast(6, T.untyped)
       s.+("hi")
       s.+(3)
     end

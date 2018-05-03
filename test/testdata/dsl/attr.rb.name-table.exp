@@ -2,9 +2,9 @@ class <constant:<root>> < ::Object () @ -e:1
   class <constant:TestAttr> < ::Object () @ test/testdata/dsl/attr.rb:2
     field @v1 -> Integer @ test/testdata/dsl/attr.rb:4
     field @v2 -> String @ test/testdata/dsl/attr.rb:5
-    field @v3 -> untyped @ test/testdata/dsl/attr.rb:17
-    field @v4 -> untyped @ test/testdata/dsl/attr.rb:19
-    field @v5 -> untyped @ test/testdata/dsl/attr.rb:19
+    field @v3 -> T.untyped @ test/testdata/dsl/attr.rb:17
+    field @v4 -> T.untyped @ test/testdata/dsl/attr.rb:19
+    field @v5 -> T.untyped @ test/testdata/dsl/attr.rb:19
     method initialize () @ test/testdata/dsl/attr.rb:3
     method v1 () -> Integer @ test/testdata/dsl/attr.rb:9
     method v1= (v1) -> Integer @ test/testdata/dsl/attr.rb:11

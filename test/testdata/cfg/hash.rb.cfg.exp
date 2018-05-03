@@ -24,7 +24,7 @@ subgraph "cluster_::TestHash#test" {
     "bb::TestHash#test_1" [shape = parallelogram];
 
     "bb::TestHash#test_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$11 = alias <constant:<Magic>> : <Magic>\l<statTemp>$6 = self : TestHash\l<hashTemp>$4 = <statTemp>$6.something() : untyped\l<hashTemp>$5 = :\"bar\" : Symbol(:\"bar\")\l<statTemp>$9 = 1 : Integer(1)\l<statTemp>$10 = 2 : Integer(2)\l<hashTemp>$7 = <statTemp>$9.+(<statTemp>$10) : Integer\l<hashTemp>$8 = 2 : Integer(2)\l<returnMethodTemp>$2 = <constant:<Magic>>$11.<build-hash>(<hashTemp>$4, <hashTemp>$5, <hashTemp>$7, <hashTemp>$8) : AppliedType {\l  klass = ::Hash\l  targs = [\l    <constant:K> = untyped\l    <constant:V> = untyped\l    <constant:Elem> = untyped\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:<Magic>>$11 = alias <constant:<Magic>> : <Magic>\l<statTemp>$6 = self : TestHash\l<hashTemp>$4 = <statTemp>$6.something() : T.untyped\l<hashTemp>$5 = :\"bar\" : Symbol(:\"bar\")\l<statTemp>$9 = 1 : Integer(1)\l<statTemp>$10 = 2 : Integer(2)\l<hashTemp>$7 = <statTemp>$9.+(<statTemp>$10) : Integer\l<hashTemp>$8 = 2 : Integer(2)\l<returnMethodTemp>$2 = <constant:<Magic>>$11.<build-hash>(<hashTemp>$4, <hashTemp>$5, <hashTemp>$7, <hashTemp>$8) : AppliedType {\l  klass = ::Hash\l  targs = [\l    <constant:K> = T.untyped\l    <constant:V> = T.untyped\l    <constant:Elem> = T.untyped\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_0" -> "bb::TestHash#test_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::TestHash#test_shaped" {
     "bb::TestHash#test_shaped_1" [shape = parallelogram];
 
     "bb::TestHash#test_shaped_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$13 = alias <constant:<Magic>> : <Magic>\l<hashTemp>$4 = 1 : Integer(1)\l<hashTemp>$5 = 2 : Integer(2)\l<hashTemp>$6 = 2 : Integer(2)\l<hashTemp>$7 = 3 : Integer(3)\l<hashTemp>$8 = :\"foo\" : Symbol(:\"foo\")\l<hashTemp>$9 = :\"bar\" : Symbol(:\"bar\")\l<hashTemp>$10 = :\"baz\" : Symbol(:\"baz\")\l<statTemp>$12 = self : TestHash\l<hashTemp>$11 = <statTemp>$12.something() : untyped\l<returnMethodTemp>$2 = <constant:<Magic>>$13.<build-hash>(<hashTemp>$4, <hashTemp>$5, <hashTemp>$6, <hashTemp>$7, <hashTemp>$8, <hashTemp>$9, <hashTemp>$10, <hashTemp>$11) : ShapeType {\l  Integer(1) => Integer(2)\l  Integer(2) => Integer(3)\l  Symbol(:\"foo\") => Symbol(:\"bar\")\l  Symbol(:\"baz\") => untyped\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:<Magic>>$13 = alias <constant:<Magic>> : <Magic>\l<hashTemp>$4 = 1 : Integer(1)\l<hashTemp>$5 = 2 : Integer(2)\l<hashTemp>$6 = 2 : Integer(2)\l<hashTemp>$7 = 3 : Integer(3)\l<hashTemp>$8 = :\"foo\" : Symbol(:\"foo\")\l<hashTemp>$9 = :\"bar\" : Symbol(:\"bar\")\l<hashTemp>$10 = :\"baz\" : Symbol(:\"baz\")\l<statTemp>$12 = self : TestHash\l<hashTemp>$11 = <statTemp>$12.something() : T.untyped\l<returnMethodTemp>$2 = <constant:<Magic>>$13.<build-hash>(<hashTemp>$4, <hashTemp>$5, <hashTemp>$6, <hashTemp>$7, <hashTemp>$8, <hashTemp>$9, <hashTemp>$10, <hashTemp>$11) : ShapeType {\l  Integer(1) => Integer(2)\l  Integer(2) => Integer(3)\l  Symbol(:\"foo\") => Symbol(:\"bar\")\l  Symbol(:\"baz\") => T.untyped\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::TestHash#test_shaped_0" -> "bb::TestHash#test_shaped_1" [style="bold"];

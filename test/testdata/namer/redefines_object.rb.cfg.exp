@@ -24,7 +24,7 @@ subgraph "cluster_::Trigger#trigger" {
     "bb::Trigger#trigger_1" [shape = parallelogram];
 
     "bb::Trigger#trigger_0" [
-        label = "block[id=0]()\l@__fake_logger$4 = alias @__fake_logger : untyped\l<finalReturn> = return @__fake_logger$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@__fake_logger$4 = alias @__fake_logger : T.untyped\l<finalReturn> = return @__fake_logger$4 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Trigger#trigger_0" -> "bb::Trigger#trigger_1" [style="bold"];

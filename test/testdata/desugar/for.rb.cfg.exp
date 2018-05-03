@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<constant:Main>$8 = alias <constant:Main> : <Class:Main>\l<returnMethodTemp>$2 = <constant:Main>$8.main() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:Main>$8 = alias <constant:Main> : <Class:Main>\l<returnMethodTemp>$2 = <constant:Main>$8.main() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#each" {
     "bb::<Class:A>#each_1" [shape = parallelogram];
 
     "bb::<Class:A>#each_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$12 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$3 = self : <Class:A>\l<blk> = load_arg(<selfMethodTemp>$3#each, 0) : untyped\l<arrayTemp>$7 = 1 : Integer(1)\l<arrayTemp>$8 = 2 : Integer(2)\l<arrayTemp>$9 = 3 : Integer(3)\l<arrayTemp>$10 = 4 : Integer(4)\l<arrayTemp>$11 = 5 : Integer(5)\l<statTemp>$6 = <constant:<Magic>>$12.<build-array>(<arrayTemp>$7, <arrayTemp>$8, <arrayTemp>$9, <arrayTemp>$10, <arrayTemp>$11) : TupleType {\l  0 = Integer(1)\l  1 = Integer(2)\l  2 = Integer(3)\l  3 = Integer(4)\l  4 = Integer(5)\l}\l<statTemp>$4 = <blk>.call(<statTemp>$6) : untyped\l<arrayTemp>$15 = 6 : Integer(6)\l<arrayTemp>$16 = 7 : Integer(7)\l<arrayTemp>$17 = 8 : Integer(8)\l<arrayTemp>$18 = 9 : Integer(9)\l<arrayTemp>$19 = 0 : Integer(0)\l<statTemp>$14 = <constant:<Magic>>$12.<build-array>(<arrayTemp>$15, <arrayTemp>$16, <arrayTemp>$17, <arrayTemp>$18, <arrayTemp>$19) : TupleType {\l  0 = Integer(6)\l  1 = Integer(7)\l  2 = Integer(8)\l  3 = Integer(9)\l  4 = Integer(0)\l}\l<returnMethodTemp>$2 = <blk>.call(<statTemp>$14) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:<Magic>>$12 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$3 = self : <Class:A>\l<blk> = load_arg(<selfMethodTemp>$3#each, 0) : T.untyped\l<arrayTemp>$7 = 1 : Integer(1)\l<arrayTemp>$8 = 2 : Integer(2)\l<arrayTemp>$9 = 3 : Integer(3)\l<arrayTemp>$10 = 4 : Integer(4)\l<arrayTemp>$11 = 5 : Integer(5)\l<statTemp>$6 = <constant:<Magic>>$12.<build-array>(<arrayTemp>$7, <arrayTemp>$8, <arrayTemp>$9, <arrayTemp>$10, <arrayTemp>$11) : TupleType {\l  0 = Integer(1)\l  1 = Integer(2)\l  2 = Integer(3)\l  3 = Integer(4)\l  4 = Integer(5)\l}\l<statTemp>$4 = <blk>.call(<statTemp>$6) : T.untyped\l<arrayTemp>$15 = 6 : Integer(6)\l<arrayTemp>$16 = 7 : Integer(7)\l<arrayTemp>$17 = 8 : Integer(8)\l<arrayTemp>$18 = 9 : Integer(9)\l<arrayTemp>$19 = 0 : Integer(0)\l<statTemp>$14 = <constant:<Magic>>$12.<build-array>(<arrayTemp>$15, <arrayTemp>$16, <arrayTemp>$17, <arrayTemp>$18, <arrayTemp>$19) : TupleType {\l  0 = Integer(6)\l  1 = Integer(7)\l  2 = Integer(8)\l  3 = Integer(9)\l  4 = Integer(0)\l}\l<returnMethodTemp>$2 = <blk>.call(<statTemp>$14) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#each_0" -> "bb::<Class:A>#each_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::<Class:E>#e=" {
     "bb::<Class:E>#e=_1" [shape = parallelogram];
 
     "bb::<Class:E>#e=_0" [
-        label = "block[id=0]()\l@e$4 = alias @e : untyped\l<selfMethodTemp>$3 = self : <Class:E>\le = load_arg(<selfMethodTemp>$3#e=, 0) : untyped\l@e$4 = e : untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<selfMethodTemp>$3 = self : <Class:E>\le = load_arg(<selfMethodTemp>$3#e=, 0) : T.untyped\l@e$4 = e : T.untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:E>#e=_0" -> "bb::<Class:E>#e=_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:E>#e" {
     "bb::<Class:E>#e_1" [shape = parallelogram];
 
     "bb::<Class:E>#e_0" [
-        label = "block[id=0]()\l@e$4 = alias @e : untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:E>#e_0" -> "bb::<Class:E>#e_1" [style="bold"];
@@ -78,7 +78,7 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_1" [shape = parallelogram];
 
     "bb::<Class:Main>#main_0" [
-        label = "block[id=0]()\l<constant:E>$105 = alias <constant:E> : <Class:E>\l<constant:A>$12 = alias <constant:A> : <Class:A>\l@a$89 = alias @a : untyped\l@@b$93 = alias @@b : untyped\l$c$97 = alias $c : untyped\l<block-pre-call-temp>$13 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:E>$105 = alias <constant:E> : <Class:E>\l<constant:A>$12 = alias <constant:A> : <Class:A>\l@a$89 = alias @a : T.untyped\l@@b$93 = alias @@b : T.untyped\l$c$97 = alias $c : T.untyped\l<block-pre-call-temp>$13 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_0" -> "bb::<Class:Main>#main_2" [style="bold"];
@@ -95,12 +95,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_2" -> "bb::<Class:Main>#main_3" [style="tapered"];
 
     "bb::<Class:Main>#main_3" [
-        label = "block[id=3](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$10 = Solve<::<Class:Main>#main#<block>> : untyped\l<block-pre-call-temp>$26 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=3](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$10 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<block-pre-call-temp>$26 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_3" -> "bb::<Class:Main>#main_5" [style="bold"];
     "bb::<Class:Main>#main_4" [
-        label = "block[id=4](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$2$2 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<statTemp>$19 = 0 : Integer(0)\la$2 = forTemp$2$2.[](<statTemp>$19) : untyped\l<statTemp>$20 = self : <Class:Main>\l<statTemp>$21 = a$2.inspect() : untyped\l<blockReturnTemp>$14 = <statTemp>$20.puts(<statTemp>$21) : NilClass\l<blockReturnTemp>$23 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$14 : <impossible>\l<unconditional>\l"
+        label = "block[id=4](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$2$2 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<statTemp>$19 = 0 : Integer(0)\la$2 = forTemp$2$2.[](<statTemp>$19) : T.untyped\l<statTemp>$20 = self : <Class:Main>\l<statTemp>$21 = a$2.inspect() : T.untyped\l<blockReturnTemp>$14 = <statTemp>$20.puts(<statTemp>$21) : NilClass\l<blockReturnTemp>$23 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$14 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_4" -> "bb::<Class:Main>#main_2" [style="bold"];
@@ -112,12 +112,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_5" -> "bb::<Class:Main>#main_6" [style="tapered"];
 
     "bb::<Class:Main>#main_6" [
-        label = "block[id=6](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$24 = Solve<::<Class:Main>#main#<block>> : untyped\l<block-pre-call-temp>$40 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=6](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$24 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<block-pre-call-temp>$40 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_6" -> "bb::<Class:Main>#main_8" [style="bold"];
     "bb::<Class:Main>#main_7" [
-        label = "block[id=7](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$3 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<assignTemp$4$3 = forTemp$3.to_a() : untyped\l<statTemp>$33 = 0 : Integer(0)\la$3 = <assignTemp$4$3.[](<statTemp>$33) : untyped\l<statTemp>$34 = self : <Class:Main>\l<statTemp>$35 = a$3.inspect() : untyped\l<blockReturnTemp>$27 = <statTemp>$34.puts(<statTemp>$35) : NilClass\l<blockReturnTemp>$37 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$27 : <impossible>\l<unconditional>\l"
+        label = "block[id=7](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$3 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<assignTemp$4$3 = forTemp$3.to_a() : T.untyped\l<statTemp>$33 = 0 : Integer(0)\la$3 = <assignTemp$4$3.[](<statTemp>$33) : T.untyped\l<statTemp>$34 = self : <Class:Main>\l<statTemp>$35 = a$3.inspect() : T.untyped\l<blockReturnTemp>$27 = <statTemp>$34.puts(<statTemp>$35) : NilClass\l<blockReturnTemp>$37 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$27 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_7" -> "bb::<Class:Main>#main_5" [style="bold"];
@@ -129,12 +129,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_8" -> "bb::<Class:Main>#main_9" [style="tapered"];
 
     "bb::<Class:Main>#main_9" [
-        label = "block[id=9](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$38 = Solve<::<Class:Main>#main#<block>> : untyped\l<block-pre-call-temp>$60 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=9](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$38 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<block-pre-call-temp>$60 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_9" -> "bb::<Class:Main>#main_11" [style="bold"];
     "bb::<Class:Main>#main_10" [
-        label = "block[id=10](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$5$4 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<statTemp>$46 = 0 : Integer(0)\la$4 = forTemp$5$4.[](<statTemp>$46) : untyped\l<statTemp>$49 = 1 : Integer(1)\lb$4 = forTemp$5$4.[](<statTemp>$49) : untyped\l<statTemp>$51 = self : <Class:Main>\l<statTemp>$52 = a$4.inspect() : untyped\l<statTemp>$50 = <statTemp>$51.puts(<statTemp>$52) : NilClass\l<statTemp>$54 = self : <Class:Main>\l<statTemp>$55 = b$4.inspect() : untyped\l<blockReturnTemp>$41 = <statTemp>$54.puts(<statTemp>$55) : NilClass\l<blockReturnTemp>$57 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$41 : <impossible>\l<unconditional>\l"
+        label = "block[id=10](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$5$4 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<statTemp>$46 = 0 : Integer(0)\la$4 = forTemp$5$4.[](<statTemp>$46) : T.untyped\l<statTemp>$49 = 1 : Integer(1)\lb$4 = forTemp$5$4.[](<statTemp>$49) : T.untyped\l<statTemp>$51 = self : <Class:Main>\l<statTemp>$52 = a$4.inspect() : T.untyped\l<statTemp>$50 = <statTemp>$51.puts(<statTemp>$52) : NilClass\l<statTemp>$54 = self : <Class:Main>\l<statTemp>$55 = b$4.inspect() : T.untyped\l<blockReturnTemp>$41 = <statTemp>$54.puts(<statTemp>$55) : NilClass\l<blockReturnTemp>$57 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$41 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_10" -> "bb::<Class:Main>#main_8" [style="bold"];
@@ -146,12 +146,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_11" -> "bb::<Class:Main>#main_12" [style="tapered"];
 
     "bb::<Class:Main>#main_12" [
-        label = "block[id=12](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$58 = Solve<::<Class:Main>#main#<block>> : untyped\l<statTemp>$80 = self : <Class:Main>\l<statTemp>$81 = \"main\" : String(\"main\")\l<statTemp>$79 = <statTemp>$80.puts(<statTemp>$81) : NilClass\l<block-pre-call-temp>$84 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=12](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$58 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<statTemp>$80 = self : <Class:Main>\l<statTemp>$81 = \"main\" : String(\"main\")\l<statTemp>$79 = <statTemp>$80.puts(<statTemp>$81) : NilClass\l<block-pre-call-temp>$84 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_12" -> "bb::<Class:Main>#main_14" [style="bold"];
     "bb::<Class:Main>#main_13" [
-        label = "block[id=13](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$5 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<assignTemp$7$5 = forTemp$5.to_a() : untyped\l<statTemp>$67 = 0 : Integer(0)\la$5 = <assignTemp$7$5.[](<statTemp>$67) : untyped\l<statTemp>$70 = 1 : Integer(1)\lb$5 = <assignTemp$7$5.[](<statTemp>$70) : untyped\l<statTemp>$72 = self : <Class:Main>\l<statTemp>$73 = a$5.inspect() : untyped\l<statTemp>$71 = <statTemp>$72.puts(<statTemp>$73) : NilClass\l<statTemp>$75 = self : <Class:Main>\l<statTemp>$76 = b$5.inspect() : untyped\l<blockReturnTemp>$61 = <statTemp>$75.puts(<statTemp>$76) : NilClass\l<blockReturnTemp>$78 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$61 : <impossible>\l<unconditional>\l"
+        label = "block[id=13](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$5 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<assignTemp$7$5 = forTemp$5.to_a() : T.untyped\l<statTemp>$67 = 0 : Integer(0)\la$5 = <assignTemp$7$5.[](<statTemp>$67) : T.untyped\l<statTemp>$70 = 1 : Integer(1)\lb$5 = <assignTemp$7$5.[](<statTemp>$70) : T.untyped\l<statTemp>$72 = self : <Class:Main>\l<statTemp>$73 = a$5.inspect() : T.untyped\l<statTemp>$71 = <statTemp>$72.puts(<statTemp>$73) : NilClass\l<statTemp>$75 = self : <Class:Main>\l<statTemp>$76 = b$5.inspect() : T.untyped\l<blockReturnTemp>$61 = <statTemp>$75.puts(<statTemp>$76) : NilClass\l<blockReturnTemp>$78 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$61 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_13" -> "bb::<Class:Main>#main_11" [style="bold"];
@@ -163,12 +163,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_14" -> "bb::<Class:Main>#main_15" [style="tapered"];
 
     "bb::<Class:Main>#main_15" [
-        label = "block[id=15](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$82 = Solve<::<Class:Main>#main#<block>> : untyped\l<block-pre-call-temp>$131 = <constant:A>$12.each() : untyped\l<unconditional>\l"
+        label = "block[id=15](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\l<statTemp>$82 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<block-pre-call-temp>$131 = <constant:A>$12.each() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_15" -> "bb::<Class:Main>#main_17" [style="bold"];
     "bb::<Class:Main>#main_16" [
-        label = "block[id=16](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$8$6 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<statTemp>$91 = 0 : Integer(0)\l@a$89 = forTemp$8$6.[](<statTemp>$91) : untyped\l<statTemp>$95 = 1 : Integer(1)\l@@b$93 = forTemp$8$6.[](<statTemp>$95) : untyped\l<statTemp>$99 = 2 : Integer(2)\l$c$97 = forTemp$8$6.[](<statTemp>$99) : untyped\l<statTemp>$102 = 3 : Integer(3)\ld$6 = forTemp$8$6.[](<statTemp>$102) : untyped\l<statTemp>$108 = 4 : Integer(4)\l<statTemp>$106 = forTemp$8$6.[](<statTemp>$108) : untyped\l<statTemp>$103 = <constant:E>$105.e=(<statTemp>$106) : untyped\l<statTemp>$110 = self : <Class:Main>\l<statTemp>$111 = @a$89.inspect() : untyped\l<statTemp>$109 = <statTemp>$110.puts(<statTemp>$111) : NilClass\l<statTemp>$114 = self : <Class:Main>\l<statTemp>$115 = @@b$93.inspect() : untyped\l<statTemp>$113 = <statTemp>$114.puts(<statTemp>$115) : NilClass\l<statTemp>$118 = self : <Class:Main>\l<statTemp>$119 = $c$97.inspect() : untyped\l<statTemp>$117 = <statTemp>$118.puts(<statTemp>$119) : NilClass\l<statTemp>$122 = self : <Class:Main>\l<statTemp>$123 = d$6.inspect() : untyped\l<statTemp>$121 = <statTemp>$122.puts(<statTemp>$123) : NilClass\l<statTemp>$125 = self : <Class:Main>\l<statTemp>$127 = <constant:E>$105.e() : untyped\l<statTemp>$126 = <statTemp>$127.inspect() : untyped\l<blockReturnTemp>$85 = <statTemp>$125.puts(<statTemp>$126) : NilClass\l<blockReturnTemp>$129 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$85 : <impossible>\l<unconditional>\l"
+        label = "block[id=16](<constant:E>$105, <constant:A>$12, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$8$6 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<statTemp>$91 = 0 : Integer(0)\l@a$89 = forTemp$8$6.[](<statTemp>$91) : T.untyped\l<statTemp>$95 = 1 : Integer(1)\l@@b$93 = forTemp$8$6.[](<statTemp>$95) : T.untyped\l<statTemp>$99 = 2 : Integer(2)\l$c$97 = forTemp$8$6.[](<statTemp>$99) : T.untyped\l<statTemp>$102 = 3 : Integer(3)\ld$6 = forTemp$8$6.[](<statTemp>$102) : T.untyped\l<statTemp>$108 = 4 : Integer(4)\l<statTemp>$106 = forTemp$8$6.[](<statTemp>$108) : T.untyped\l<statTemp>$103 = <constant:E>$105.e=(<statTemp>$106) : T.untyped\l<statTemp>$110 = self : <Class:Main>\l<statTemp>$111 = @a$89.inspect() : T.untyped\l<statTemp>$109 = <statTemp>$110.puts(<statTemp>$111) : NilClass\l<statTemp>$114 = self : <Class:Main>\l<statTemp>$115 = @@b$93.inspect() : T.untyped\l<statTemp>$113 = <statTemp>$114.puts(<statTemp>$115) : NilClass\l<statTemp>$118 = self : <Class:Main>\l<statTemp>$119 = $c$97.inspect() : T.untyped\l<statTemp>$117 = <statTemp>$118.puts(<statTemp>$119) : NilClass\l<statTemp>$122 = self : <Class:Main>\l<statTemp>$123 = d$6.inspect() : T.untyped\l<statTemp>$121 = <statTemp>$122.puts(<statTemp>$123) : NilClass\l<statTemp>$125 = self : <Class:Main>\l<statTemp>$127 = <constant:E>$105.e() : T.untyped\l<statTemp>$126 = <statTemp>$127.inspect() : T.untyped\l<blockReturnTemp>$85 = <statTemp>$125.puts(<statTemp>$126) : NilClass\l<blockReturnTemp>$129 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$85 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_16" -> "bb::<Class:Main>#main_14" [style="bold"];
@@ -180,12 +180,12 @@ subgraph "cluster_::<Class:Main>#main" {
     "bb::<Class:Main>#main_17" -> "bb::<Class:Main>#main_18" [style="tapered"];
 
     "bb::<Class:Main>#main_18" [
-        label = "block[id=18]()\l<returnMethodTemp>$8 = Solve<::<Class:Main>#main#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$8 : <impossible>\l<unconditional>\l"
+        label = "block[id=18]()\l<returnMethodTemp>$8 = Solve<::<Class:Main>#main#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$8 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_18" -> "bb::<Class:Main>#main_1" [style="bold"];
     "bb::<Class:Main>#main_19" [
-        label = "block[id=19](<constant:E>$105, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$7 = load_yield_param(::<Class:Main>#main#<block>, 0) : untyped\l<assignTemp$10$7 = forTemp$7.to_a() : untyped\l<statTemp>$138 = 0 : Integer(0)\l@a$89 = <assignTemp$10$7.[](<statTemp>$138) : untyped\l<statTemp>$141 = 1 : Integer(1)\l@@b$93 = <assignTemp$10$7.[](<statTemp>$141) : untyped\l<statTemp>$144 = 2 : Integer(2)\l$c$97 = <assignTemp$10$7.[](<statTemp>$144) : untyped\l<statTemp>$147 = 3 : Integer(3)\ld$7 = <assignTemp$10$7.[](<statTemp>$147) : untyped\l<statTemp>$152 = 4 : Integer(4)\l<statTemp>$150 = <assignTemp$10$7.[](<statTemp>$152) : untyped\l<statTemp>$148 = <constant:E>$105.e=(<statTemp>$150) : untyped\l<statTemp>$154 = self : <Class:Main>\l<statTemp>$155 = @a$89.inspect() : untyped\l<statTemp>$153 = <statTemp>$154.puts(<statTemp>$155) : NilClass\l<statTemp>$158 = self : <Class:Main>\l<statTemp>$159 = @@b$93.inspect() : untyped\l<statTemp>$157 = <statTemp>$158.puts(<statTemp>$159) : NilClass\l<statTemp>$162 = self : <Class:Main>\l<statTemp>$163 = $c$97.inspect() : untyped\l<statTemp>$161 = <statTemp>$162.puts(<statTemp>$163) : NilClass\l<statTemp>$166 = self : <Class:Main>\l<statTemp>$167 = d$7.inspect() : untyped\l<statTemp>$165 = <statTemp>$166.puts(<statTemp>$167) : NilClass\l<statTemp>$169 = self : <Class:Main>\l<statTemp>$171 = <constant:E>$105.e() : untyped\l<statTemp>$170 = <statTemp>$171.inspect() : untyped\l<blockReturnTemp>$132 = <statTemp>$169.puts(<statTemp>$170) : NilClass\l<blockReturnTemp>$173 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$132 : <impossible>\l<unconditional>\l"
+        label = "block[id=19](<constant:E>$105, @a$89, @@b$93, $c$97)\louterLoops: 1\lforTemp$7 = load_yield_param(::<Class:Main>#main#<block>, 0) : T.untyped\l<assignTemp$10$7 = forTemp$7.to_a() : T.untyped\l<statTemp>$138 = 0 : Integer(0)\l@a$89 = <assignTemp$10$7.[](<statTemp>$138) : T.untyped\l<statTemp>$141 = 1 : Integer(1)\l@@b$93 = <assignTemp$10$7.[](<statTemp>$141) : T.untyped\l<statTemp>$144 = 2 : Integer(2)\l$c$97 = <assignTemp$10$7.[](<statTemp>$144) : T.untyped\l<statTemp>$147 = 3 : Integer(3)\ld$7 = <assignTemp$10$7.[](<statTemp>$147) : T.untyped\l<statTemp>$152 = 4 : Integer(4)\l<statTemp>$150 = <assignTemp$10$7.[](<statTemp>$152) : T.untyped\l<statTemp>$148 = <constant:E>$105.e=(<statTemp>$150) : T.untyped\l<statTemp>$154 = self : <Class:Main>\l<statTemp>$155 = @a$89.inspect() : T.untyped\l<statTemp>$153 = <statTemp>$154.puts(<statTemp>$155) : NilClass\l<statTemp>$158 = self : <Class:Main>\l<statTemp>$159 = @@b$93.inspect() : T.untyped\l<statTemp>$157 = <statTemp>$158.puts(<statTemp>$159) : NilClass\l<statTemp>$162 = self : <Class:Main>\l<statTemp>$163 = $c$97.inspect() : T.untyped\l<statTemp>$161 = <statTemp>$162.puts(<statTemp>$163) : NilClass\l<statTemp>$166 = self : <Class:Main>\l<statTemp>$167 = d$7.inspect() : T.untyped\l<statTemp>$165 = <statTemp>$166.puts(<statTemp>$167) : NilClass\l<statTemp>$169 = self : <Class:Main>\l<statTemp>$171 = <constant:E>$105.e() : T.untyped\l<statTemp>$170 = <statTemp>$171.inspect() : T.untyped\l<blockReturnTemp>$132 = <statTemp>$169.puts(<statTemp>$170) : NilClass\l<blockReturnTemp>$173 = blockreturn<::<Class:Main>#main#<block>> <blockReturnTemp>$132 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:Main>#main_19" -> "bb::<Class:Main>#main_17" [style="bold"];

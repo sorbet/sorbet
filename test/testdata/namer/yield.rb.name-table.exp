@@ -4,7 +4,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/yield.rb:2
       argument blk<block> @ test/testdata/namer/yield.rb:7
     method blockyield () @ test/testdata/namer/yield.rb:15
       method <block>$2 (i, <blk>) @ test/testdata/namer/yield.rb:16
-        argument <blk><block> -> untyped @ test/testdata/namer/yield.rb:16
+        argument <blk><block> -> T.untyped @ test/testdata/namer/yield.rb:16
         argument i<> @ test/testdata/namer/yield.rb:16
     method main () @ test/testdata/namer/yield.rb:19
       method <block>$2 (x) @ test/testdata/namer/yield.rb:20
@@ -20,7 +20,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/yield.rb:2
     method mixed (blk) @ test/testdata/namer/yield.rb:11
       argument blk<block> @ test/testdata/namer/yield.rb:11
     method yielder (<blk>) @ test/testdata/namer/yield.rb:3
-      argument <blk><block> -> untyped @ test/testdata/namer/yield.rb:4
+      argument <blk><block> -> T.untyped @ test/testdata/namer/yield.rb:4
   class <singleton class:<constant:Main>> < ::<Class:Object> () @ test/testdata/namer/yield.rb:2
   method <static-init>$11 () @ test/testdata/namer/yield.rb:2
 

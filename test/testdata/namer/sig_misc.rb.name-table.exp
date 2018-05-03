@@ -1,7 +1,7 @@
 class <constant:<root>> < ::Object () @ test/testdata/namer/sig_misc.rb:2
   class <constant:A> < ::Object () @ test/testdata/namer/sig_misc.rb:5
     method f1 (x) -> T1 @ test/testdata/namer/sig_misc.rb:20
-      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:20
+      argument x<> -> T.untyped @ test/testdata/namer/sig_misc.rb:20
     method f2 (x) -> T2 @ test/testdata/namer/sig_misc.rb:24
       argument x<> -> T1 @ test/testdata/namer/sig_misc.rb:23
     method f3 () -> T1 @ test/testdata/namer/sig_misc.rb:28
@@ -18,8 +18,8 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/sig_misc.rb:2
     method test_abstract () -> T1 @ test/testdata/namer/sig_misc.rb:64
     method test_abstract_untyped () @ test/testdata/namer/sig_misc.rb:78
     method test_implementation (x, y) @ test/testdata/namer/sig_misc.rb:67
-      argument x<> -> untyped @ test/testdata/namer/sig_misc.rb:67
-      argument y<> -> untyped @ test/testdata/namer/sig_misc.rb:67
+      argument x<> -> T.untyped @ test/testdata/namer/sig_misc.rb:67
+      argument y<> -> T.untyped @ test/testdata/namer/sig_misc.rb:67
     method test_kwargs (returns) -> T2 @ test/testdata/namer/sig_misc.rb:16
       argument returns<> -> T1 @ test/testdata/namer/sig_misc.rb:14
     method test_overridable () -> T1 @ test/testdata/namer/sig_misc.rb:73
@@ -27,7 +27,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/sig_misc.rb:2
     method test_override () -> T1 @ test/testdata/namer/sig_misc.rb:70
     method test_standard_untyped () @ test/testdata/namer/sig_misc.rb:79
     method test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/namer/sig_misc.rb:57
-      argument <blk><block> -> untyped @ test/testdata/namer/sig_misc.rb:58
+      argument <blk><block> -> T.untyped @ test/testdata/namer/sig_misc.rb:58
       argument x<> -> Integer @ test/testdata/namer/sig_misc.rb:56
   class <constant:T1> < ::Object () @ test/testdata/namer/sig_misc.rb:2
   class <constant:T2> < ::Object () @ test/testdata/namer/sig_misc.rb:3

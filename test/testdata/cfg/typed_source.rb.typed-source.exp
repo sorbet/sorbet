@@ -84,12 +84,12 @@ class Examples
       if (true)
           # <selfMethodTemp>$3: Examples
           #
-          # cond: untyped
+          # cond: T.untyped
           #
           # <ifTemp>$5: TrueClass
-            # cond: untyped
+            # cond: T.untyped
         a = 1
-            # cond: untyped
+            # cond: T.untyped
             #
             # a: Integer(1)
       else
@@ -98,25 +98,25 @@ class Examples
 
             # b: NilClass
             #
-            # cond: untyped
+            # cond: T.untyped
             #   Being truthy entails:
-            #     cond to be untyped
+            #     cond to be T.untyped
             #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #   Being falsy entails:
-            #     cond to be untyped
+            #     cond to be T.untyped
             #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
       while true
             # b: NilClass
             #
-            # cond: untyped
+            # cond: T.untyped
             #   Being truthy entails:
-            #     cond to be untyped
+            #     cond to be T.untyped
             #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #   Being falsy entails:
-            #     cond to be untyped
+            #     cond to be T.untyped
             #     <debugEnvironmentTemp>$11 to be NilClass
             #     a to be Integer(1)
             #
@@ -124,51 +124,51 @@ class Examples
         if (cond)
               # b: NilClass
               #
-              # cond: untyped (and truthy)
+              # cond: T.untyped (and truthy)
               #
               #   Being truthy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
           b = 1 # error: Changing type of a variable in a loop
-              # b: untyped
+              # b: T.untyped
               #
-              # cond: untyped (and truthy)
+              # cond: T.untyped (and truthy)
               #
               #   Being truthy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
         else
               # b: NilClass
               #
-              # cond: untyped
+              # cond: T.untyped
               #   Being truthy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
           b = 2 # error: Changing type of a variable in a loop
-              # b: untyped
+              # b: T.untyped
               #
-              # cond: untyped
+              # cond: T.untyped
               #   Being truthy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
               #   Being falsy entails:
-              #     cond to be untyped
+              #     cond to be T.untyped
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
         end
@@ -181,82 +181,82 @@ class Examples
     def variables_loop_if(cond)
                           # <selfMethodTemp>$3: Examples
                           #
-                          # cond: untyped
+                          # cond: T.untyped
             # b: NilClass
             #
-            # cond: untyped
+            # cond: T.untyped
             #   Being truthy entails:
             #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
-            #     cond to be untyped
+            #     cond to be T.untyped
             #   Being falsy entails:
             #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
-            #     cond to be untyped
+            #     cond to be T.untyped
       while true
             # b: NilClass
             #
-            # cond: untyped
+            # cond: T.untyped
             #   Being truthy entails:
             #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
-            #     cond to be untyped
+            #     cond to be T.untyped
             #   Being falsy entails:
             #     <debugEnvironmentTemp>$8 to be NilClass
             #     <selfMethodTemp>$3 to be Examples
-            #     cond to be untyped
+            #     cond to be T.untyped
             #
             # <whileTemp>$5: TrueClass
         if (cond)
               # b: NilClass
               #
-              # cond: untyped (and truthy)
+              # cond: T.untyped (and truthy)
               #
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
           b = 1 # error: Changing type of a variable in a loop
-              # b: untyped
+              # b: T.untyped
               #
-              # cond: untyped (and truthy)
+              # cond: T.untyped (and truthy)
               #
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
         else
               # b: NilClass
               #
-              # cond: untyped
+              # cond: T.untyped
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
           b = 2 # error: Changing type of a variable in a loop
-              # b: untyped
+              # b: T.untyped
               #
-              # cond: untyped
+              # cond: T.untyped
               #   Being truthy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-              #     cond to be untyped
+              #     cond to be T.untyped
         end
       end
 
@@ -264,23 +264,23 @@ class Examples
     end
 
     def take_arguments(i)
-      # <returnMethodTemp>$2: untyped
+      # <returnMethodTemp>$2: T.untyped
       if(false)
          # <selfMethodTemp>$3: Examples
          #
-         # i: untyped
+         # i: T.untyped
          #
          # <ifTemp>$4: FalseClass
        2 # error: This code is unreachable
       else
-       # i: untyped
+       # i: T.untyped
        i
-       # i: untyped
+       # i: T.untyped
        #
-       # <returnMethodTemp>$2: untyped
+       # <returnMethodTemp>$2: T.untyped
       end
       # dead=1
-      # <returnMethodTemp>$2: untyped
+      # <returnMethodTemp>$2: T.untyped
       #
       # <finalReturn>: <impossible>
     end

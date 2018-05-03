@@ -1,6 +1,6 @@
 class <constant:<root>> < ::Object () @ test/testdata/resolver/resolution_order.rb:8
   class <constant:A> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:20
-    class <constant:DOES_NOT_EXIST> < ::RubyTyper::StubClass () -> untyped @ test/testdata/resolver/resolution_order.rb:11
+    class <constant:DOES_NOT_EXIST> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
     static-field <constant:AB> -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:21
     static-field <constant:AV> -> Integer @ test/testdata/resolver/resolution_order.rb:23
   class <constant:B> < ::Object () @ test/testdata/resolver/resolution_order.rb:26
