@@ -37,8 +37,8 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         return false;
     }
     auto myVariance = data.variance();
-    if (!inSym.derivesFrom(gs, core::Symbols::Class()) && (myVariance != parentVariance)) {
-        // this requirement can be loosened. You can go from variant to invariant.
+    if (!inSym.derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
+        myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch)) {
             e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs).show(gs));
         }

@@ -733,7 +733,7 @@ class ZeroDivisionError < StandardError
 end
 class CSV
   extend T::Generic
-  Elem = type_member(fixed: T::Array[String])
+  Elem = type_member(:out, fixed: T::Array[String])
 
   type_parameters(:U).sig(
       path: T.any(String, File),
@@ -767,7 +767,7 @@ end
 
 class Dir
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member(:out, fixed: String)
 
   sig(
       arg0: T.any(String, Pathname),
@@ -965,7 +965,7 @@ end
 
 class File
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member(:out, fixed: String)
 
   sig(
       file: String,
@@ -1482,7 +1482,7 @@ end
 
 class IO
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member(:out, fixed: String)
 
   sig(
       arg0: BasicObject,
@@ -1998,7 +1998,7 @@ end
 
 class StringIO
   extend T::Generic
-  Elem = type_member(fixed: String)
+  Elem = type_member(:out, fixed: String)
 
   sig.returns(StringIO)
   def clone(); end
@@ -2024,7 +2024,7 @@ end
 
 class Struct
   extend T::Generic
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member(:out, fixed: T.untyped)
 
   sig.returns(Struct)
   def clone(); end
@@ -2081,7 +2081,7 @@ end
 
 class Array
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   type_parameters(:U).sig(
       arg0: T.type_parameter(:U),
@@ -4005,7 +4005,7 @@ end
 
 module Enumerable
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   sig.returns(T.any(TrueClass, FalseClass))
   sig(
@@ -4387,7 +4387,7 @@ end
 
 class Enumerator
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   sig.returns(Enumerator[Elem])
   def clone(); end
@@ -5374,9 +5374,9 @@ end
 
 class Hash
   extend T::Generic
-  K = type_member
-  V = type_member
-  Elem = type_member
+  K = type_member(:out)
+  V = type_member(:out)
+  Elem = type_member(:out)
 
   type_parameters(:U).sig(
       arg0: T.type_parameter(:U),
@@ -9492,7 +9492,7 @@ end
 
 class Range
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   sig(
       obj: BasicObject,
@@ -10388,7 +10388,7 @@ end
 
 class Set
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   type_parameters(:U).sig(
       ary: T.type_parameter(:U),
@@ -10709,7 +10709,7 @@ end
 
 class SortedSet
   extend T::Generic
-  Elem = type_member
+  Elem = type_member(:out)
 
   sig(
       o: Elem,

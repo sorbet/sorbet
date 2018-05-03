@@ -10,7 +10,7 @@ class Struct
 end
 
 class RubyTyper::DynamicStruct < Struct
-  Elem = type_member(fixed: T.untyped)
+  Elem = type_member(:out, fixed: T.untyped)
 
   sig(
       args: BasicObject,
@@ -25,7 +25,7 @@ end
 class RubyTyper::ENVClass
   extend T::Generic
   include Enumerable
-  Elem = type_member(fixed: [String, T.nilable(String)])
+  Elem = type_member(:out, fixed: [String, T.nilable(String)])
 
   sig(
       key: String,
