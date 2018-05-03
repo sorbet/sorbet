@@ -1,26 +1,18 @@
-digraph "hard_assert.rb"{
+digraph "hard_assert.rb" {
 subgraph "cluster_::Main#basic" {
     label = "::Main#basic";
     color = blue;
     "bb::Main#basic_0" [shape = invhouse];
     "bb::Main#basic_1" [shape = parallelogram];
 
-    "bb::Main#basic_0" [label = "block[id=0]()
-<constant:String>$9 = alias <constant:String> : <Class:String>
-<selfMethodTemp>$3 = self : Main
-a = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String
-<statTemp>$5 = self : Main
-<statTemp>$6 = a.is_a?(<constant:String>$9) : TrueClass | FalseClass
-<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass
-<castTemp$11 = a : String
-<statTemp>$10 = cast(<castTemp$11, String); : String
-<returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#basic_0" [
+        label = "block[id=0]()\l<constant:String>$9 = alias <constant:String> : <Class:String>\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String\l<statTemp>$5 = self : Main\l<statTemp>$6 = a.is_a?(<constant:String>$9) : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$11 = a : String\l<statTemp>$10 = cast(<castTemp$11, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#basic_0" -> "bb::Main#basic_1" [style="bold"];
-    "bb::Main#basic_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#basic_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#basic_1" -> "bb::Main#basic_1" [style="bold"];
 }
@@ -31,22 +23,14 @@ subgraph "cluster_::Main#not" {
     "bb::Main#not_0" [shape = invhouse];
     "bb::Main#not_1" [shape = parallelogram];
 
-    "bb::Main#not_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Main
-a = load_arg(<selfMethodTemp>$3#not, 0) : String | NilClass
-<statTemp>$5 = self : Main
-<statTemp>$7 = a.nil?() : TrueClass | FalseClass
-<statTemp>$6 = <statTemp>$7.!() : TrueClass | FalseClass
-<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass
-<castTemp$10 = a : String
-<statTemp>$9 = cast(<castTemp$10, String); : String
-<returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#not_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#not, 0) : String | NilClass\l<statTemp>$5 = self : Main\l<statTemp>$7 = a.nil?() : TrueClass | FalseClass\l<statTemp>$6 = <statTemp>$7.!() : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$10 = a : String\l<statTemp>$9 = cast(<castTemp$10, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#not_0" -> "bb::Main#not_1" [style="bold"];
-    "bb::Main#not_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#not_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#not_1" -> "bb::Main#not_1" [style="bold"];
 }
@@ -57,39 +41,31 @@ subgraph "cluster_::Main#with_and" {
     "bb::Main#with_and_0" [shape = invhouse];
     "bb::Main#with_and_1" [shape = parallelogram];
 
-    "bb::Main#with_and_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Main
-a = load_arg(<selfMethodTemp>$3#with_and, 0) : String | NilClass
-<statTemp>$5 = self : Main
-&&$2 = a.nil?() : TrueClass | FalseClass
-&&$2"];
+    "bb::Main#with_and_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#with_and, 0) : String | NilClass\l<statTemp>$5 = self : Main\l&&$2 = a.nil?() : TrueClass | FalseClass\l&&$2\l"
+    ];
 
     "bb::Main#with_and_0" -> "bb::Main#with_and_2" [style="bold"];
     "bb::Main#with_and_0" -> "bb::Main#with_and_3" [style="tapered"];
 
-    "bb::Main#with_and_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#with_and_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#with_and_1" -> "bb::Main#with_and_1" [style="bold"];
-    "bb::Main#with_and_2" [label = "block[id=2](<statTemp>$5, a)
-<statTemp>$10 = 1 : Integer(1)
-<statTemp>$11 = 1 : Integer(1)
-<statTemp>$6 = <statTemp>$10.==(<statTemp>$11) : TrueClass | FalseClass
-<unconditional>"];
+    "bb::Main#with_and_2" [
+        label = "block[id=2](<statTemp>$5, a)\l<statTemp>$10 = 1 : Integer(1)\l<statTemp>$11 = 1 : Integer(1)\l<statTemp>$6 = <statTemp>$10.==(<statTemp>$11) : TrueClass | FalseClass\l<unconditional>\l"
+    ];
 
     "bb::Main#with_and_2" -> "bb::Main#with_and_4" [style="bold"];
-    "bb::Main#with_and_3" [label = "block[id=3](<statTemp>$5, a, &&$2)
-<statTemp>$6 = &&$2 : FalseClass
-<unconditional>"];
+    "bb::Main#with_and_3" [
+        label = "block[id=3](<statTemp>$5, a, &&$2)\l<statTemp>$6 = &&$2 : FalseClass\l<unconditional>\l"
+    ];
 
     "bb::Main#with_and_3" -> "bb::Main#with_and_4" [style="bold"];
-    "bb::Main#with_and_4" [label = "block[id=4](<statTemp>$5, <statTemp>$6, a)
-<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass
-<castTemp$13 = a : NilClass
-<statTemp>$12 = cast(<castTemp$13, NilClass); : NilClass
-<returnMethodTemp>$2 = nil : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#with_and_4" [
+        label = "block[id=4](<statTemp>$5, <statTemp>$6, a)\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$13 = a : NilClass\l<statTemp>$12 = cast(<castTemp$13, NilClass); : NilClass\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#with_and_4" -> "bb::Main#with_and_1" [style="bold"];
 }
@@ -100,22 +76,14 @@ subgraph "cluster_::Main#with_storytime" {
     "bb::Main#with_storytime_0" [shape = invhouse];
     "bb::Main#with_storytime_1" [shape = parallelogram];
 
-    "bb::Main#with_storytime_0" [label = "block[id=0]()
-<constant:<Magic>>$9 = alias <constant:<Magic>> : <Magic>
-<statTemp>$4 = self : Main
-<statTemp>$5 = false : FalseClass
-<hashTemp>$7 = :\"storytime\" : Symbol(:\"storytime\")
-<hashTemp>$8 = 42 : Integer(42)
-<statTemp>$6 = <constant:<Magic>>$9.<build-hash>(<hashTemp>$7, <hashTemp>$8) : ShapeType {
-  Symbol(:\"storytime\") => Integer(42)
-}
-<returnMethodTemp>$2 = <statTemp>$4.hard_assert(<statTemp>$5, <statTemp>$6) : NilClass
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::Main#with_storytime_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$9 = alias <constant:<Magic>> : <Magic>\l<statTemp>$4 = self : Main\l<statTemp>$5 = false : FalseClass\l<hashTemp>$7 = :\"storytime\" : Symbol(:\"storytime\")\l<hashTemp>$8 = 42 : Integer(42)\l<statTemp>$6 = <constant:<Magic>>$9.<build-hash>(<hashTemp>$7, <hashTemp>$8) : ShapeType {\l  Symbol(:\"storytime\") => Integer(42)\l}\l<returnMethodTemp>$2 = <statTemp>$4.hard_assert(<statTemp>$5, <statTemp>$6) : NilClass\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::Main#with_storytime_0" -> "bb::Main#with_storytime_1" [style="bold"];
-    "bb::Main#with_storytime_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#with_storytime_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#with_storytime_1" -> "bb::Main#with_storytime_1" [style="bold"];
 }

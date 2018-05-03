@@ -133,8 +133,17 @@ string CFG::toString(core::Context ctx) {
             first = false;
             escaped << absl::CEscape(line);
         }
-        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [label = \"" << escaped.str() << "\"];" << '\n'
-            << '\n';
+        string label = escaped.str();
+        size_t start_pos = 0;
+        while ((start_pos = label.find("\n", start_pos)) != std::string::npos) {
+            label.replace(start_pos, 1, "\\l");
+            start_pos += 2;
+        }
+        label += "\\l";
+
+        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [" << '\n';
+        buf << "        label = \"" << label << "\"" << '\n';
+        buf << "    ];" << '\n' << '\n';
         buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
             << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << '\n';
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {

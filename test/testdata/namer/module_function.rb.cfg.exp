@@ -1,17 +1,18 @@
-digraph "module_function.rb"{
+digraph "module_function.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -22,15 +23,14 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_0" [shape = invhouse];
     "bb::Funcs#f_1" [shape = parallelogram];
 
-    "bb::Funcs#f_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Funcs
-x = load_arg(<selfMethodTemp>$3#f, 0) : Integer
-<finalReturn> = return x : <impossible>
-<unconditional>"];
+    "bb::Funcs#f_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\lx = load_arg(<selfMethodTemp>$3#f, 0) : Integer\l<finalReturn> = return x : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
-    "bb::Funcs#f_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Funcs#f_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Funcs#f_1" -> "bb::Funcs#f_1" [style="bold"];
 }
@@ -41,15 +41,14 @@ subgraph "cluster_::Funcs#g" {
     "bb::Funcs#g_0" [shape = invhouse];
     "bb::Funcs#g_1" [shape = parallelogram];
 
-    "bb::Funcs#g_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Funcs
-s = load_arg(<selfMethodTemp>$3#g, 0) : Symbol
-<finalReturn> = return s : <impossible>
-<unconditional>"];
+    "bb::Funcs#g_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#g, 0) : Symbol\l<finalReturn> = return s : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
-    "bb::Funcs#g_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Funcs#g_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Funcs#g_1" -> "bb::Funcs#g_1" [style="bold"];
 }
@@ -60,15 +59,14 @@ subgraph "cluster_::Funcs#h" {
     "bb::Funcs#h_0" [shape = invhouse];
     "bb::Funcs#h_1" [shape = parallelogram];
 
-    "bb::Funcs#h_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Funcs
-s = load_arg(<selfMethodTemp>$3#h, 0) : String
-<finalReturn> = return s : <impossible>
-<unconditional>"];
+    "bb::Funcs#h_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#h, 0) : String\l<finalReturn> = return s : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];
-    "bb::Funcs#h_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Funcs#h_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Funcs#h_1" -> "bb::Funcs#h_1" [style="bold"];
 }
@@ -79,18 +77,14 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_0" [shape = invhouse];
     "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
-    "bb::Funcs#<static-init>_0" [label = "block[id=0]()
-<statTemp>$5 = self : <Class:Funcs>
-<statTemp>$6 = :\"f\" : Symbol(:\"f\")
-<statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module
-<statTemp>$8 = self : <Class:Funcs>
-<statTemp>$7 = <statTemp>$8.module_function() : Module
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Funcs#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : <Class:Funcs>\l<statTemp>$6 = :\"f\" : Symbol(:\"f\")\l<statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module\l<statTemp>$8 = self : <Class:Funcs>\l<statTemp>$7 = <statTemp>$8.module_function() : Module\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_1" [style="bold"];
-    "bb::Funcs#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Funcs#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Funcs#<static-init>_1" -> "bb::Funcs#<static-init>_1" [style="bold"];
 }
@@ -101,31 +95,14 @@ subgraph "cluster_::C#test_calls" {
     "bb::C#test_calls_0" [shape = invhouse];
     "bb::C#test_calls_1" [shape = parallelogram];
 
-    "bb::C#test_calls_0" [label = "block[id=0]()
-<constant:Funcs>$9 = alias <constant:Funcs> : <Class:Funcs>
-<constant:C>$24 = alias <constant:C> : <Class:C>
-<statTemp>$5 = self : C
-<statTemp>$6 = 0 : Integer(0)
-<statTemp>$4 = <statTemp>$5.f(<statTemp>$6) : Integer
-<statTemp>$10 = 0 : Integer(0)
-<statTemp>$7 = <constant:Funcs>$9.f(<statTemp>$10) : Integer
-<statTemp>$12 = self : C
-<statTemp>$13 = :\"f\" : Symbol(:\"f\")
-<statTemp>$11 = <statTemp>$12.g(<statTemp>$13) : Symbol
-<statTemp>$16 = :\"f\" : Symbol(:\"f\")
-<statTemp>$14 = <constant:Funcs>$9.g(<statTemp>$16) : Symbol
-<statTemp>$18 = self : C
-<statTemp>$19 = \"hello\" : String(\"hello\")
-<statTemp>$17 = <statTemp>$18.h(<statTemp>$19) : String
-<statTemp>$22 = \"world\" : String(\"world\")
-<statTemp>$20 = <constant:Funcs>$9.h(<statTemp>$22) : String
-<returnMethodTemp>$2 = <constant:C>$24.f() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::C#test_calls_0" [
+        label = "block[id=0]()\l<constant:Funcs>$9 = alias <constant:Funcs> : <Class:Funcs>\l<constant:C>$24 = alias <constant:C> : <Class:C>\l<statTemp>$5 = self : C\l<statTemp>$6 = 0 : Integer(0)\l<statTemp>$4 = <statTemp>$5.f(<statTemp>$6) : Integer\l<statTemp>$10 = 0 : Integer(0)\l<statTemp>$7 = <constant:Funcs>$9.f(<statTemp>$10) : Integer\l<statTemp>$12 = self : C\l<statTemp>$13 = :\"f\" : Symbol(:\"f\")\l<statTemp>$11 = <statTemp>$12.g(<statTemp>$13) : Symbol\l<statTemp>$16 = :\"f\" : Symbol(:\"f\")\l<statTemp>$14 = <constant:Funcs>$9.g(<statTemp>$16) : Symbol\l<statTemp>$18 = self : C\l<statTemp>$19 = \"hello\" : String(\"hello\")\l<statTemp>$17 = <statTemp>$18.h(<statTemp>$19) : String\l<statTemp>$22 = \"world\" : String(\"world\")\l<statTemp>$20 = <constant:Funcs>$9.h(<statTemp>$22) : String\l<returnMethodTemp>$2 = <constant:C>$24.f() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
-    "bb::C#test_calls_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::C#test_calls_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::C#test_calls_1" -> "bb::C#test_calls_1" [style="bold"];
 }

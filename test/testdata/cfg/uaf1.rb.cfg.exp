@@ -1,67 +1,59 @@
-digraph "uaf1.rb"{
+digraph "uaf1.rb" {
 subgraph "cluster_::A#initialize" {
     label = "::A#initialize";
     color = blue;
     "bb::A#initialize_0" [shape = invhouse];
     "bb::A#initialize_1" [shape = parallelogram];
 
-    "bb::A#initialize_0" [label = "block[id=0]()
-<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>
-<statTemp>$6 = self : A
-<statTemp>$5 = <statTemp>$6.spec_list() : untyped
-<block-pre-call-temp>$7 = <statTemp>$5.map() : untyped
-<unconditional>"];
+    "bb::A#initialize_0" [
+        label = "block[id=0]()\l<constant:StandardError>$12 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$6 = self : A\l<statTemp>$5 = <statTemp>$6.spec_list() : untyped\l<block-pre-call-temp>$7 = <statTemp>$5.map() : untyped\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_0" -> "bb::A#initialize_2" [style="bold"];
-    "bb::A#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::A#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_1" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_2" [label = "block[id=2](<constant:StandardError>$12)
-outerLoops: 1
-<block-call>"];
+    "bb::A#initialize_2" [
+        label = "block[id=2](<constant:StandardError>$12)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::A#initialize_2" -> "bb::A#initialize_5" [style="bold"];
     "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
 
-    "bb::A#initialize_3" [label = "block[id=3]()
-<returnMethodTemp>$3 = Solve<::A#initialize#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::A#initialize_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::A#initialize#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
-    "bb::A#initialize_5" [label = "block[id=5](<constant:StandardError>$12)
-outerLoops: 1
-<rescueTemp$9 = <unanalyzable> : untyped
-<rescueTemp$9"];
+    "bb::A#initialize_5" [
+        label = "block[id=5](<constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$9 = <unanalyzable> : untyped\l<rescueTemp$9\l"
+    ];
 
     "bb::A#initialize_5" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
-    "bb::A#initialize_6" [label = "block[id=6](<rescueTemp$9, <constant:StandardError>$12)
-outerLoops: 1
-<rescueTemp$13 = <rescueTemp$9.is_a?(<constant:StandardError>$12) : untyped
-<rescueTemp$13"];
+    "bb::A#initialize_6" [
+        label = "block[id=6](<rescueTemp$9, <constant:StandardError>$12)\louterLoops: 1\l<rescueTemp$13 = <rescueTemp$9.is_a?(<constant:StandardError>$12) : untyped\l<rescueTemp$13\l"
+    ];
 
     "bb::A#initialize_6" -> "bb::A#initialize_11" [style="bold"];
     "bb::A#initialize_6" -> "bb::A#initialize_1" [style="tapered"];
 
-    "bb::A#initialize_7" [label = "block[id=7](<constant:StandardError>$12)
-outerLoops: 1
-<blockReturnTemp>$8 = 1 : Integer(1)
-<unconditional>"];
+    "bb::A#initialize_7" [
+        label = "block[id=7](<constant:StandardError>$12)\louterLoops: 1\l<blockReturnTemp>$8 = 1 : Integer(1)\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_7" -> "bb::A#initialize_10" [style="bold"];
-    "bb::A#initialize_10" [label = "block[id=10](<blockReturnTemp>$8, <constant:StandardError>$12)
-outerLoops: 1
-<blockReturnTemp>$14 = blockreturn<::A#initialize#<block>> <blockReturnTemp>$8 : <impossible>
-<unconditional>"];
+    "bb::A#initialize_10" [
+        label = "block[id=10](<blockReturnTemp>$8, <constant:StandardError>$12)\louterLoops: 1\l<blockReturnTemp>$14 = blockreturn<::A#initialize#<block>> <blockReturnTemp>$8 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_10" -> "bb::A#initialize_2" [style="bold"];
-    "bb::A#initialize_11" [label = "block[id=11](<rescueTemp$9, <constant:StandardError>$12)
-outerLoops: 1
-<blockReturnTemp>$8 = 2 : Integer(2)
-<unconditional>"];
+    "bb::A#initialize_11" [
+        label = "block[id=11](<rescueTemp$9, <constant:StandardError>$12)\louterLoops: 1\l<blockReturnTemp>$8 = 2 : Integer(2)\l<unconditional>\l"
+    ];
 
     "bb::A#initialize_11" -> "bb::A#initialize_10" [style="bold"];
 }

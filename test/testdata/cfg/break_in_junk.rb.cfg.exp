@@ -1,17 +1,18 @@
-digraph "break_in_junk.rb"{
+digraph "break_in_junk.rb" {
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
     "bb::Object#foo_0" [shape = invhouse];
     "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::Object#foo_0" [label = "block[id=0]()
-<unconditional>"];
+    "bb::Object#foo_0" [
+        label = "block[id=0]()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_1" [label = "block[id=1]()
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::Object#foo_1" [
+        label = "block[id=1]()\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
 }

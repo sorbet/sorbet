@@ -1,36 +1,35 @@
-digraph "loops.rb"{
+digraph "loops.rb" {
 subgraph "cluster_::HasLoops#variable_only_inside_loop" {
     label = "::HasLoops#variable_only_inside_loop";
     color = blue;
     "bb::HasLoops#variable_only_inside_loop_0" [shape = invhouse];
     "bb::HasLoops#variable_only_inside_loop_1" [shape = parallelogram];
 
-    "bb::HasLoops#variable_only_inside_loop_0" [label = "block[id=0]()
-<unconditional>"];
+    "bb::HasLoops#variable_only_inside_loop_0" [
+        label = "block[id=0]()\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#variable_only_inside_loop_0" -> "bb::HasLoops#variable_only_inside_loop_2" [style="bold"];
-    "bb::HasLoops#variable_only_inside_loop_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::HasLoops#variable_only_inside_loop_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#variable_only_inside_loop_1" -> "bb::HasLoops#variable_only_inside_loop_1" [style="bold"];
-    "bb::HasLoops#variable_only_inside_loop_2" [label = "block[id=2]()
-outerLoops: 1
-<whileTemp>$4 = true : TrueClass
-<whileTemp>$4"];
+    "bb::HasLoops#variable_only_inside_loop_2" [
+        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$4 = true : TrueClass\l<whileTemp>$4\l"
+    ];
 
     "bb::HasLoops#variable_only_inside_loop_2" -> "bb::HasLoops#variable_only_inside_loop_4" [style="bold"];
     "bb::HasLoops#variable_only_inside_loop_2" -> "bb::HasLoops#variable_only_inside_loop_3" [style="tapered"];
 
-    "bb::HasLoops#variable_only_inside_loop_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = nil
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::HasLoops#variable_only_inside_loop_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#variable_only_inside_loop_3" -> "bb::HasLoops#variable_only_inside_loop_1" [style="bold"];
-    "bb::HasLoops#variable_only_inside_loop_4" [label = "block[id=4]()
-outerLoops: 1
-a = 1 : Integer(1)
-<unconditional>"];
+    "bb::HasLoops#variable_only_inside_loop_4" [
+        label = "block[id=4]()\louterLoops: 1\la = 1 : Integer(1)\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#variable_only_inside_loop_4" -> "bb::HasLoops#variable_only_inside_loop_2" [style="bold"];
 }
@@ -41,33 +40,31 @@ subgraph "cluster_::HasLoops#incorrect_assignment" {
     "bb::HasLoops#incorrect_assignment_0" [shape = invhouse];
     "bb::HasLoops#incorrect_assignment_1" [shape = parallelogram];
 
-    "bb::HasLoops#incorrect_assignment_0" [label = "block[id=0]()
-a = \"s\" : String(\"s\")
-<unconditional>"];
+    "bb::HasLoops#incorrect_assignment_0" [
+        label = "block[id=0]()\la = \"s\" : String(\"s\")\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#incorrect_assignment_0" -> "bb::HasLoops#incorrect_assignment_2" [style="bold"];
-    "bb::HasLoops#incorrect_assignment_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::HasLoops#incorrect_assignment_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#incorrect_assignment_1" -> "bb::HasLoops#incorrect_assignment_1" [style="bold"];
-    "bb::HasLoops#incorrect_assignment_2" [label = "block[id=2](a)
-outerLoops: 1
-<whileTemp>$5 = true : TrueClass
-<whileTemp>$5"];
+    "bb::HasLoops#incorrect_assignment_2" [
+        label = "block[id=2](a)\louterLoops: 1\l<whileTemp>$5 = true : TrueClass\l<whileTemp>$5\l"
+    ];
 
     "bb::HasLoops#incorrect_assignment_2" -> "bb::HasLoops#incorrect_assignment_4" [style="bold"];
     "bb::HasLoops#incorrect_assignment_2" -> "bb::HasLoops#incorrect_assignment_3" [style="tapered"];
 
-    "bb::HasLoops#incorrect_assignment_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = nil
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::HasLoops#incorrect_assignment_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#incorrect_assignment_3" -> "bb::HasLoops#incorrect_assignment_1" [style="bold"];
-    "bb::HasLoops#incorrect_assignment_4" [label = "block[id=4](a)
-outerLoops: 1
-a = 1 : untyped
-<unconditional>"];
+    "bb::HasLoops#incorrect_assignment_4" [
+        label = "block[id=4](a)\louterLoops: 1\la = 1 : untyped\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#incorrect_assignment_4" -> "bb::HasLoops#incorrect_assignment_2" [style="bold"];
 }
@@ -78,33 +75,31 @@ subgraph "cluster_::HasLoops#correct_assignment" {
     "bb::HasLoops#correct_assignment_0" [shape = invhouse];
     "bb::HasLoops#correct_assignment_1" [shape = parallelogram];
 
-    "bb::HasLoops#correct_assignment_0" [label = "block[id=0]()
-a = \"s\" : String(\"s\")
-<unconditional>"];
+    "bb::HasLoops#correct_assignment_0" [
+        label = "block[id=0]()\la = \"s\" : String(\"s\")\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#correct_assignment_0" -> "bb::HasLoops#correct_assignment_2" [style="bold"];
-    "bb::HasLoops#correct_assignment_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::HasLoops#correct_assignment_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#correct_assignment_1" -> "bb::HasLoops#correct_assignment_1" [style="bold"];
-    "bb::HasLoops#correct_assignment_2" [label = "block[id=2](a)
-outerLoops: 1
-<whileTemp>$5 = true : TrueClass
-<whileTemp>$5"];
+    "bb::HasLoops#correct_assignment_2" [
+        label = "block[id=2](a)\louterLoops: 1\l<whileTemp>$5 = true : TrueClass\l<whileTemp>$5\l"
+    ];
 
     "bb::HasLoops#correct_assignment_2" -> "bb::HasLoops#correct_assignment_4" [style="bold"];
     "bb::HasLoops#correct_assignment_2" -> "bb::HasLoops#correct_assignment_3" [style="tapered"];
 
-    "bb::HasLoops#correct_assignment_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = nil
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::HasLoops#correct_assignment_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = nil\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#correct_assignment_3" -> "bb::HasLoops#correct_assignment_1" [style="bold"];
-    "bb::HasLoops#correct_assignment_4" [label = "block[id=4](a)
-outerLoops: 1
-a = \"a\" : String(\"a\")
-<unconditional>"];
+    "bb::HasLoops#correct_assignment_4" [
+        label = "block[id=4](a)\louterLoops: 1\la = \"a\" : String(\"a\")\l<unconditional>\l"
+    ];
 
     "bb::HasLoops#correct_assignment_4" -> "bb::HasLoops#correct_assignment_2" [style="bold"];
 }

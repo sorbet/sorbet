@@ -1,21 +1,18 @@
-digraph "rescue_var_expression.rb"{
+digraph "rescue_var_expression.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<statTemp>$6 = self : <Class:<root>>
-<statTemp>$8 = self : <Class:<root>>
-<statTemp>$7 = <statTemp>$8.foo() : untyped
-<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$8 = self : <Class:<root>>\l<statTemp>$7 = <statTemp>$8.foo() : untyped\l<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -26,43 +23,38 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_0" [shape = invhouse];
     "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::Object#foo_0" [label = "block[id=0]()
-<constant:Exception>$9 = alias <constant:Exception> : <Class:Exception>
-<constant:MyClass>$14 = alias <constant:MyClass> : <Class:MyClass>
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::Object#foo_0" [
+        label = "block[id=0]()\l<constant:Exception>$9 = alias <constant:Exception> : <Class:Exception>\l<constant:MyClass>$14 = alias <constant:MyClass> : <Class:MyClass>\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
     "bb::Object#foo_0" -> "bb::Object#foo_4" [style="tapered"];
 
-    "bb::Object#foo_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#foo_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_3" [label = "block[id=3](<rescueTemp$4, <constant:Exception>$9, <constant:MyClass>$14)
-<rescueTemp$10 = <rescueTemp$4.is_a?(<constant:Exception>$9) : untyped
-<rescueTemp$10"];
+    "bb::Object#foo_3" [
+        label = "block[id=3](<rescueTemp$4, <constant:Exception>$9, <constant:MyClass>$14)\l<rescueTemp$10 = <rescueTemp$4.is_a?(<constant:Exception>$9) : untyped\l<rescueTemp$10\l"
+    ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="tapered"];
 
-    "bb::Object#foo_4" [label = "block[id=4]()
-<statTemp>$5 = self : Object
-<statTemp>$6 = \"boop\" : String(\"boop\")
-<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : <impossible>
-<unconditional>"];
+    "bb::Object#foo_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : Object\l<statTemp>$6 = \"boop\" : String(\"boop\")\l<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_7" [style="bold"];
-    "bb::Object#foo_7" [label = "block[id=7](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_7" [
+        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_8" [label = "block[id=8](<rescueTemp$4, <constant:MyClass>$14)
-<statTemp>$12 = <constant:MyClass>$14.new() : MyClass
-<statTemp>$11 = <statTemp>$12.foo=(<rescueTemp$4) : untyped
-<returnMethodTemp>$2 = 3 : Integer(3)
-<unconditional>"];
+    "bb::Object#foo_8" [
+        label = "block[id=8](<rescueTemp$4, <constant:MyClass>$14)\l<statTemp>$12 = <constant:MyClass>$14.new() : MyClass\l<statTemp>$11 = <statTemp>$12.foo=(<rescueTemp$4) : untyped\l<returnMethodTemp>$2 = 3 : Integer(3)\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_7" [style="bold"];
 }
@@ -73,14 +65,14 @@ subgraph "cluster_::MyClass#foo=" {
     "bb::MyClass#foo=_0" [shape = invhouse];
     "bb::MyClass#foo=_1" [shape = parallelogram];
 
-    "bb::MyClass#foo=_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : MyClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::MyClass#foo=_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : MyClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::MyClass#foo=_0" -> "bb::MyClass#foo=_1" [style="bold"];
-    "bb::MyClass#foo=_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::MyClass#foo=_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::MyClass#foo=_1" -> "bb::MyClass#foo=_1" [style="bold"];
 }

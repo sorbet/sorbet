@@ -1,20 +1,18 @@
-digraph "yield.rb"{
+digraph "yield.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<constant:Main>$7 = alias <constant:Main> : <Class:Main>
-<statTemp>$5 = <constant:Main>$7.new() : Main
-<returnMethodTemp>$2 = <statTemp>$5.main() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<constant:Main>$7 = alias <constant:Main> : <Class:Main>\l<statTemp>$5 = <constant:Main>$7.new() : Main\l<returnMethodTemp>$2 = <statTemp>$5.main() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -25,18 +23,14 @@ subgraph "cluster_::Main#yielder" {
     "bb::Main#yielder_0" [shape = invhouse];
     "bb::Main#yielder_1" [shape = parallelogram];
 
-    "bb::Main#yielder_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Main
-<blk> = load_arg(<selfMethodTemp>$3#yielder, 0) : untyped
-<statTemp>$6 = 1 : Integer(1)
-a = <blk>.call(<statTemp>$6) : untyped
-<returnMethodTemp>$2 = <blk>.call(a) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#yielder_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\l<blk> = load_arg(<selfMethodTemp>$3#yielder, 0) : untyped\l<statTemp>$6 = 1 : Integer(1)\la = <blk>.call(<statTemp>$6) : untyped\l<returnMethodTemp>$2 = <blk>.call(a) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#yielder_0" -> "bb::Main#yielder_1" [style="bold"];
-    "bb::Main#yielder_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#yielder_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#yielder_1" -> "bb::Main#yielder_1" [style="bold"];
 }
@@ -47,18 +41,14 @@ subgraph "cluster_::Main#blockpass" {
     "bb::Main#blockpass_0" [shape = invhouse];
     "bb::Main#blockpass_1" [shape = parallelogram];
 
-    "bb::Main#blockpass_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Main
-blk = load_arg(<selfMethodTemp>$3#blockpass, 0) : untyped
-<statTemp>$6 = 1 : Integer(1)
-a = blk.call(<statTemp>$6) : untyped
-<returnMethodTemp>$2 = blk.call(a) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#blockpass_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\lblk = load_arg(<selfMethodTemp>$3#blockpass, 0) : untyped\l<statTemp>$6 = 1 : Integer(1)\la = blk.call(<statTemp>$6) : untyped\l<returnMethodTemp>$2 = blk.call(a) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#blockpass_0" -> "bb::Main#blockpass_1" [style="bold"];
-    "bb::Main#blockpass_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#blockpass_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#blockpass_1" -> "bb::Main#blockpass_1" [style="bold"];
 }
@@ -69,18 +59,14 @@ subgraph "cluster_::Main#mixed" {
     "bb::Main#mixed_0" [shape = invhouse];
     "bb::Main#mixed_1" [shape = parallelogram];
 
-    "bb::Main#mixed_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Main
-blk = load_arg(<selfMethodTemp>$3#mixed, 0) : untyped
-<statTemp>$6 = 1 : Integer(1)
-a = blk.call(<statTemp>$6) : untyped
-<returnMethodTemp>$2 = blk.call(a) : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Main#mixed_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\lblk = load_arg(<selfMethodTemp>$3#mixed, 0) : untyped\l<statTemp>$6 = 1 : Integer(1)\la = blk.call(<statTemp>$6) : untyped\l<returnMethodTemp>$2 = blk.call(a) : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#mixed_0" -> "bb::Main#mixed_1" [style="bold"];
-    "bb::Main#mixed_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#mixed_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#mixed_1" -> "bb::Main#mixed_1" [style="bold"];
 }
@@ -91,36 +77,31 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_0" [shape = invhouse];
     "bb::Main#blockyield_1" [shape = parallelogram];
 
-    "bb::Main#blockyield_0" [label = "block[id=0]()
-<statTemp>$5 = self : Main
-<block-pre-call-temp>$6 = <statTemp>$5.yielder() : untyped
-<unconditional>"];
+    "bb::Main#blockyield_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : Main\l<block-pre-call-temp>$6 = <statTemp>$5.yielder() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
-    "bb::Main#blockyield_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#blockyield_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#blockyield_1" -> "bb::Main#blockyield_1" [style="bold"];
-    "bb::Main#blockyield_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Main#blockyield_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_4" [style="bold"];
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_3" [style="tapered"];
 
-    "bb::Main#blockyield_3" [label = "block[id=3]()
-<returnMethodTemp>$3 = Solve<::Main#blockyield#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Main#blockyield_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Main#blockyield#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
-    "bb::Main#blockyield_4" [label = "block[id=4]()
-outerLoops: 1
-i$5 = load_yield_param(::Main#blockyield#<block>, 0) : untyped
-<blk>$5 = load_yield_param(::Main#blockyield#<block>, 1) : untyped
-<blockReturnTemp>$7 = <blk>$5.call(i$5) : untyped
-<blockReturnTemp>$10 = blockreturn<::Main#blockyield#<block>> <blockReturnTemp>$7 : <impossible>
-<unconditional>"];
+    "bb::Main#blockyield_4" [
+        label = "block[id=4]()\louterLoops: 1\li$5 = load_yield_param(::Main#blockyield#<block>, 0) : untyped\l<blk>$5 = load_yield_param(::Main#blockyield#<block>, 1) : untyped\l<blockReturnTemp>$7 = <blk>$5.call(i$5) : untyped\l<blockReturnTemp>$10 = blockreturn<::Main#blockyield#<block>> <blockReturnTemp>$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#blockyield_4" -> "bb::Main#blockyield_2" [style="bold"];
 }
@@ -131,138 +112,99 @@ subgraph "cluster_::Main#main" {
     "bb::Main#main_0" [shape = invhouse];
     "bb::Main#main_1" [shape = parallelogram];
 
-    "bb::Main#main_0" [label = "block[id=0]()
-<constant:<Magic>>$25 = alias <constant:<Magic>> : <Magic>
-<statTemp>$10 = self : Main
-<block-pre-call-temp>$11 = <statTemp>$10.lambda() : Proc
-<unconditional>"];
+    "bb::Main#main_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$25 = alias <constant:<Magic>> : <Magic>\l<statTemp>$10 = self : Main\l<block-pre-call-temp>$11 = <statTemp>$10.lambda() : Proc\l<unconditional>\l"
+    ];
 
     "bb::Main#main_0" -> "bb::Main#main_2" [style="bold"];
-    "bb::Main#main_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Main#main_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Main#main_1" -> "bb::Main#main_1" [style="bold"];
-    "bb::Main#main_2" [label = "block[id=2](<constant:<Magic>>$25)
-outerLoops: 1
-<block-call>"];
+    "bb::Main#main_2" [
+        label = "block[id=2](<constant:<Magic>>$25)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#main_2" -> "bb::Main#main_4" [style="bold"];
     "bb::Main#main_2" -> "bb::Main#main_3" [style="tapered"];
 
-    "bb::Main#main_3" [label = "block[id=3](<constant:<Magic>>$25)
-l = Solve<::Main#main#<block>> : Proc
-<statTemp>$18 = self : Main
-<block-pre-call-temp>$19 = <statTemp>$18.yielder() : untyped
-<unconditional>"];
+    "bb::Main#main_3" [
+        label = "block[id=3](<constant:<Magic>>$25)\ll = Solve<::Main#main#<block>> : Proc\l<statTemp>$18 = self : Main\l<block-pre-call-temp>$19 = <statTemp>$18.yielder() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Main#main_3" -> "bb::Main#main_5" [style="bold"];
-    "bb::Main#main_4" [label = "block[id=4](<constant:<Magic>>$25)
-outerLoops: 1
-x$7 = load_yield_param(::Main#main#<block>, 0) : untyped
-<statTemp>$14 = self : Main
-<statTemp>$13 = <statTemp>$14.puts(x$7) : NilClass
-<blockReturnTemp>$12 = 3 : Integer(3)
-<blockReturnTemp>$16 = blockreturn<::Main#main#<block>> <blockReturnTemp>$12 : <impossible>
-<unconditional>"];
+    "bb::Main#main_4" [
+        label = "block[id=4](<constant:<Magic>>$25)\louterLoops: 1\lx$7 = load_yield_param(::Main#main#<block>, 0) : untyped\l<statTemp>$14 = self : Main\l<statTemp>$13 = <statTemp>$14.puts(x$7) : NilClass\l<blockReturnTemp>$12 = 3 : Integer(3)\l<blockReturnTemp>$16 = blockreturn<::Main#main#<block>> <blockReturnTemp>$12 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_4" -> "bb::Main#main_2" [style="bold"];
-    "bb::Main#main_5" [label = "block[id=5](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-call>"];
+    "bb::Main#main_5" [
+        label = "block[id=5](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#main_5" -> "bb::Main#main_7" [style="bold"];
     "bb::Main#main_5" -> "bb::Main#main_6" [style="tapered"];
 
-    "bb::Main#main_6" [label = "block[id=6](<constant:<Magic>>$25, l)
-<statTemp>$17 = Solve<::Main#main#<block>> : untyped
-<statTemp>$30 = self : Main
-<block-pre-call-temp>$31 = <statTemp>$30.blockpass() : untyped
-<unconditional>"];
+    "bb::Main#main_6" [
+        label = "block[id=6](<constant:<Magic>>$25, l)\l<statTemp>$17 = Solve<::Main#main#<block>> : untyped\l<statTemp>$30 = self : Main\l<block-pre-call-temp>$31 = <statTemp>$30.blockpass() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Main#main_6" -> "bb::Main#main_8" [style="bold"];
-    "bb::Main#main_7" [label = "block[id=7](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-pass>$2$8 = load_yield_param(::Main#main#<block>, 0) : untyped
-<statTemp>$21 = l.to_proc() : Proc
-<statTemp>$26 = <block-pass>$2$8.to_a() : untyped
-<statTemp>$23 = <constant:<Magic>>$25.<splat>(<statTemp>$26) : untyped
-<blockReturnTemp>$20 = <statTemp>$21.call(<statTemp>$23) : untyped
-<blockReturnTemp>$28 = blockreturn<::Main#main#<block>> <blockReturnTemp>$20 : <impossible>
-<unconditional>"];
+    "bb::Main#main_7" [
+        label = "block[id=7](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-pass>$2$8 = load_yield_param(::Main#main#<block>, 0) : untyped\l<statTemp>$21 = l.to_proc() : Proc\l<statTemp>$26 = <block-pass>$2$8.to_a() : untyped\l<statTemp>$23 = <constant:<Magic>>$25.<splat>(<statTemp>$26) : untyped\l<blockReturnTemp>$20 = <statTemp>$21.call(<statTemp>$23) : untyped\l<blockReturnTemp>$28 = blockreturn<::Main#main#<block>> <blockReturnTemp>$20 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_7" -> "bb::Main#main_5" [style="bold"];
-    "bb::Main#main_8" [label = "block[id=8](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-call>"];
+    "bb::Main#main_8" [
+        label = "block[id=8](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#main_8" -> "bb::Main#main_10" [style="bold"];
     "bb::Main#main_8" -> "bb::Main#main_9" [style="tapered"];
 
-    "bb::Main#main_9" [label = "block[id=9](<constant:<Magic>>$25, l)
-<statTemp>$29 = Solve<::Main#main#<block>> : untyped
-<statTemp>$41 = self : Main
-<block-pre-call-temp>$42 = <statTemp>$41.mixed() : untyped
-<unconditional>"];
+    "bb::Main#main_9" [
+        label = "block[id=9](<constant:<Magic>>$25, l)\l<statTemp>$29 = Solve<::Main#main#<block>> : untyped\l<statTemp>$41 = self : Main\l<block-pre-call-temp>$42 = <statTemp>$41.mixed() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Main#main_9" -> "bb::Main#main_11" [style="bold"];
-    "bb::Main#main_10" [label = "block[id=10](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-pass>$3$9 = load_yield_param(::Main#main#<block>, 0) : untyped
-<statTemp>$33 = l.to_proc() : Proc
-<statTemp>$37 = <block-pass>$3$9.to_a() : untyped
-<statTemp>$35 = <constant:<Magic>>$25.<splat>(<statTemp>$37) : untyped
-<blockReturnTemp>$32 = <statTemp>$33.call(<statTemp>$35) : untyped
-<blockReturnTemp>$39 = blockreturn<::Main#main#<block>> <blockReturnTemp>$32 : <impossible>
-<unconditional>"];
+    "bb::Main#main_10" [
+        label = "block[id=10](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-pass>$3$9 = load_yield_param(::Main#main#<block>, 0) : untyped\l<statTemp>$33 = l.to_proc() : Proc\l<statTemp>$37 = <block-pass>$3$9.to_a() : untyped\l<statTemp>$35 = <constant:<Magic>>$25.<splat>(<statTemp>$37) : untyped\l<blockReturnTemp>$32 = <statTemp>$33.call(<statTemp>$35) : untyped\l<blockReturnTemp>$39 = blockreturn<::Main#main#<block>> <blockReturnTemp>$32 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_10" -> "bb::Main#main_8" [style="bold"];
-    "bb::Main#main_11" [label = "block[id=11](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-call>"];
+    "bb::Main#main_11" [
+        label = "block[id=11](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#main_11" -> "bb::Main#main_13" [style="bold"];
     "bb::Main#main_11" -> "bb::Main#main_12" [style="tapered"];
 
-    "bb::Main#main_12" [label = "block[id=12](<constant:<Magic>>$25, l)
-<statTemp>$40 = Solve<::Main#main#<block>> : untyped
-<statTemp>$51 = self : Main
-<block-pre-call-temp>$52 = <statTemp>$51.blockyield() : untyped
-<unconditional>"];
+    "bb::Main#main_12" [
+        label = "block[id=12](<constant:<Magic>>$25, l)\l<statTemp>$40 = Solve<::Main#main#<block>> : untyped\l<statTemp>$51 = self : Main\l<block-pre-call-temp>$52 = <statTemp>$51.blockyield() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Main#main_12" -> "bb::Main#main_14" [style="bold"];
-    "bb::Main#main_13" [label = "block[id=13](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-pass>$4$10 = load_yield_param(::Main#main#<block>, 0) : untyped
-<statTemp>$44 = l.to_proc() : Proc
-<statTemp>$48 = <block-pass>$4$10.to_a() : untyped
-<statTemp>$46 = <constant:<Magic>>$25.<splat>(<statTemp>$48) : untyped
-<blockReturnTemp>$43 = <statTemp>$44.call(<statTemp>$46) : untyped
-<blockReturnTemp>$50 = blockreturn<::Main#main#<block>> <blockReturnTemp>$43 : <impossible>
-<unconditional>"];
+    "bb::Main#main_13" [
+        label = "block[id=13](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-pass>$4$10 = load_yield_param(::Main#main#<block>, 0) : untyped\l<statTemp>$44 = l.to_proc() : Proc\l<statTemp>$48 = <block-pass>$4$10.to_a() : untyped\l<statTemp>$46 = <constant:<Magic>>$25.<splat>(<statTemp>$48) : untyped\l<blockReturnTemp>$43 = <statTemp>$44.call(<statTemp>$46) : untyped\l<blockReturnTemp>$50 = blockreturn<::Main#main#<block>> <blockReturnTemp>$43 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_13" -> "bb::Main#main_11" [style="bold"];
-    "bb::Main#main_14" [label = "block[id=14](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-call>"];
+    "bb::Main#main_14" [
+        label = "block[id=14](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Main#main_14" -> "bb::Main#main_16" [style="bold"];
     "bb::Main#main_14" -> "bb::Main#main_15" [style="tapered"];
 
-    "bb::Main#main_15" [label = "block[id=15]()
-<returnMethodTemp>$7 = Solve<::Main#main#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$7 : <impossible>
-<unconditional>"];
+    "bb::Main#main_15" [
+        label = "block[id=15]()\l<returnMethodTemp>$7 = Solve<::Main#main#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_15" -> "bb::Main#main_1" [style="bold"];
-    "bb::Main#main_16" [label = "block[id=16](<constant:<Magic>>$25, l)
-outerLoops: 1
-<block-pass>$5$11 = load_yield_param(::Main#main#<block>, 0) : untyped
-<statTemp>$54 = l.to_proc() : Proc
-<statTemp>$58 = <block-pass>$5$11.to_a() : untyped
-<statTemp>$56 = <constant:<Magic>>$25.<splat>(<statTemp>$58) : untyped
-<blockReturnTemp>$53 = <statTemp>$54.call(<statTemp>$56) : untyped
-<blockReturnTemp>$60 = blockreturn<::Main#main#<block>> <blockReturnTemp>$53 : <impossible>
-<unconditional>"];
+    "bb::Main#main_16" [
+        label = "block[id=16](<constant:<Magic>>$25, l)\louterLoops: 1\l<block-pass>$5$11 = load_yield_param(::Main#main#<block>, 0) : untyped\l<statTemp>$54 = l.to_proc() : Proc\l<statTemp>$58 = <block-pass>$5$11.to_a() : untyped\l<statTemp>$56 = <constant:<Magic>>$25.<splat>(<statTemp>$58) : untyped\l<blockReturnTemp>$53 = <statTemp>$54.call(<statTemp>$56) : untyped\l<blockReturnTemp>$60 = blockreturn<::Main#main#<block>> <blockReturnTemp>$53 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Main#main_16" -> "bb::Main#main_14" [style="bold"];
 }

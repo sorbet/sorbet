@@ -1,32 +1,30 @@
-digraph "simple.rb"{
+digraph "simple.rb" {
 subgraph "cluster_::ControlFlow#orZero0" {
     label = "::ControlFlow#orZero0";
     color = blue;
     "bb::ControlFlow#orZero0_0" [shape = invhouse];
     "bb::ControlFlow#orZero0_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero0_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero0, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero0_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_2" [style="bold"];
     "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero0_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero0_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0_1" -> "bb::ControlFlow#orZero0_1" [style="bold"];
-    "bb::ControlFlow#orZero0_2" [label = "block[id=2](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero0_2" [
+        label = "block[id=2](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0_2" -> "bb::ControlFlow#orZero0_1" [style="bold"];
-    "bb::ControlFlow#orZero0_3" [label = "block[id=3]()
-<returnTemp>$6 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$6 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero0_3" [
+        label = "block[id=3]()\l<returnTemp>$6 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$6 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0_3" -> "bb::ControlFlow#orZero0_1" [style="bold"];
 }
@@ -37,28 +35,26 @@ subgraph "cluster_::ControlFlow#orZero0a" {
     "bb::ControlFlow#orZero0a_0" [shape = invhouse];
     "bb::ControlFlow#orZero0a_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero0a_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero0a, 0) : Integer
-a"];
+    "bb::ControlFlow#orZero0a_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0a, 0) : Integer\la\l"
+    ];
 
     "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_2" [style="bold"];
     "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero0a_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero0a_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0a_1" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
-    "bb::ControlFlow#orZero0a_2" [label = "block[id=2](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero0a_2" [
+        label = "block[id=2](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0a_2" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
-    "bb::ControlFlow#orZero0a_3" [label = "block[id=3]()
-<returnTemp>$6 = 0
-<returnMethodTemp>$2 = return <returnTemp>$6
-<unconditional>"];
+    "bb::ControlFlow#orZero0a_3" [
+        label = "block[id=3]()\l<returnTemp>$6 = 0\l<returnMethodTemp>$2 = return <returnTemp>$6\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0a_3" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
 }
@@ -69,29 +65,26 @@ subgraph "cluster_::ControlFlow#orZero0n" {
     "bb::ControlFlow#orZero0n_0" [shape = invhouse];
     "bb::ControlFlow#orZero0n_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero0n_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero0n, 0) : Integer | NilClass
-b = a.!() : TrueClass | FalseClass
-b"];
+    "bb::ControlFlow#orZero0n_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0n, 0) : Integer | NilClass\lb = a.!() : TrueClass | FalseClass\lb\l"
+    ];
 
     "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_2" [style="bold"];
     "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero0n_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero0n_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0n_1" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
-    "bb::ControlFlow#orZero0n_2" [label = "block[id=2]()
-<returnTemp>$7 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero0n_2" [
+        label = "block[id=2]()\l<returnTemp>$7 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0n_2" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
-    "bb::ControlFlow#orZero0n_3" [label = "block[id=3](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero0n_3" [
+        label = "block[id=3](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero0n_3" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
 }
@@ -102,31 +95,26 @@ subgraph "cluster_::ControlFlow#orZero1n" {
     "bb::ControlFlow#orZero1n_0" [shape = invhouse];
     "bb::ControlFlow#orZero1n_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero1n_0" [label = "block[id=0]()
-<constant:Integer>$8 = alias <constant:Integer> : <Class:Integer>
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero1n, 0) : Integer | NilClass
-<statTemp>$5 = a.is_a?(<constant:Integer>$8) : TrueClass | FalseClass
-b = <statTemp>$5.!() : TrueClass | FalseClass
-b"];
+    "bb::ControlFlow#orZero1n_0" [
+        label = "block[id=0]()\l<constant:Integer>$8 = alias <constant:Integer> : <Class:Integer>\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero1n, 0) : Integer | NilClass\l<statTemp>$5 = a.is_a?(<constant:Integer>$8) : TrueClass | FalseClass\lb = <statTemp>$5.!() : TrueClass | FalseClass\lb\l"
+    ];
 
     "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_2" [style="bold"];
     "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero1n_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero1n_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero1n_1" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
-    "bb::ControlFlow#orZero1n_2" [label = "block[id=2]()
-<returnTemp>$10 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$10 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero1n_2" [
+        label = "block[id=2]()\l<returnTemp>$10 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$10 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero1n_2" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
-    "bb::ControlFlow#orZero1n_3" [label = "block[id=3](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero1n_3" [
+        label = "block[id=3](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero1n_3" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
 }
@@ -137,26 +125,26 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_0" [shape = invhouse];
     "bb::ControlFlow#orZero2_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero2_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero2, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero2_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero2, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_4" [style="bold"];
     "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero2_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::ControlFlow#orZero2_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero2_1" -> "bb::ControlFlow#orZero2_1" [style="bold"];
-    "bb::ControlFlow#orZero2_3" [label = "block[id=3]()
-a = 0 : Integer(0)
-<unconditional>"];
+    "bb::ControlFlow#orZero2_3" [
+        label = "block[id=3]()\la = 0 : Integer(0)\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero2_3" -> "bb::ControlFlow#orZero2_4" [style="bold"];
-    "bb::ControlFlow#orZero2_4" [label = "block[id=4](a)
-<finalReturn> = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero2_4" [
+        label = "block[id=4](a)\l<finalReturn> = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero2_4" -> "bb::ControlFlow#orZero2_1" [style="bold"];
 }
@@ -167,45 +155,40 @@ subgraph "cluster_::ControlFlow#orZero3" {
     "bb::ControlFlow#orZero3_0" [shape = invhouse];
     "bb::ControlFlow#orZero3_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero3_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero3, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero3_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero3, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_2" [style="bold"];
     "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero3_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero3_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3_1" -> "bb::ControlFlow#orZero3_1" [style="bold"];
-    "bb::ControlFlow#orZero3_2" [label = "block[id=2]()
-<statTemp>$6 = 1 : Integer(1)
-<statTemp>$7 = 2 : Integer(2)
-<ifTemp>$4 = <statTemp>$6.==(<statTemp>$7) : TrueClass | FalseClass
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero3_2" [
+        label = "block[id=2]()\l<statTemp>$6 = 1 : Integer(1)\l<statTemp>$7 = 2 : Integer(2)\l<ifTemp>$4 = <statTemp>$6.==(<statTemp>$7) : TrueClass | FalseClass\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_5" [style="bold"];
     "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero3_3" [label = "block[id=3](a)
-<ifTemp>$4 = a : NilClass
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero3_3" [
+        label = "block[id=3](a)\l<ifTemp>$4 = a : NilClass\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_5" [style="bold"];
     "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero3_5" [label = "block[id=5]()
-<returnTemp>$8 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$8 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero3_5" [
+        label = "block[id=5]()\l<returnTemp>$8 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$8 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3_5" -> "bb::ControlFlow#orZero3_1" [style="bold"];
-    "bb::ControlFlow#orZero3_6" [label = "block[id=6]()
-<returnTemp>$9 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$9 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero3_6" [
+        label = "block[id=6]()\l<returnTemp>$9 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3_6" -> "bb::ControlFlow#orZero3_1" [style="bold"];
 }
@@ -216,48 +199,43 @@ subgraph "cluster_::ControlFlow#orZero3n" {
     "bb::ControlFlow#orZero3n_0" [shape = invhouse];
     "bb::ControlFlow#orZero3n_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero3n_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero3n, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero3n_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero3n, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_2" [style="bold"];
     "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero3n_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero3n_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3n_1" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
-    "bb::ControlFlow#orZero3n_2" [label = "block[id=2]()
-<statTemp>$7 = 1 : Integer(1)
-<statTemp>$8 = 2 : Integer(2)
-<statTemp>$5 = <statTemp>$7.==(<statTemp>$8) : TrueClass | FalseClass
-<unconditional>"];
+    "bb::ControlFlow#orZero3n_2" [
+        label = "block[id=2]()\l<statTemp>$7 = 1 : Integer(1)\l<statTemp>$8 = 2 : Integer(2)\l<statTemp>$5 = <statTemp>$7.==(<statTemp>$8) : TrueClass | FalseClass\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3n_2" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
-    "bb::ControlFlow#orZero3n_3" [label = "block[id=3](a)
-<statTemp>$5 = a : NilClass
-<unconditional>"];
+    "bb::ControlFlow#orZero3n_3" [
+        label = "block[id=3](a)\l<statTemp>$5 = a : NilClass\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3n_3" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
-    "bb::ControlFlow#orZero3n_4" [label = "block[id=4](<statTemp>$5)
-b = <statTemp>$5.!() : TrueClass | FalseClass
-b"];
+    "bb::ControlFlow#orZero3n_4" [
+        label = "block[id=4](<statTemp>$5)\lb = <statTemp>$5.!() : TrueClass | FalseClass\lb\l"
+    ];
 
     "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_5" [style="bold"];
     "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero3n_5" [label = "block[id=5]()
-<returnTemp>$10 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$10 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero3n_5" [
+        label = "block[id=5]()\l<returnTemp>$10 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$10 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3n_5" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
-    "bb::ControlFlow#orZero3n_6" [label = "block[id=6]()
-<returnTemp>$11 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$11 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero3n_6" [
+        label = "block[id=6]()\l<returnTemp>$11 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$11 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero3n_6" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
 }
@@ -268,42 +246,40 @@ subgraph "cluster_::ControlFlow#orZero4" {
     "bb::ControlFlow#orZero4_0" [shape = invhouse];
     "bb::ControlFlow#orZero4_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero4_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero4, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero4_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero4, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_2" [style="bold"];
     "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero4_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero4_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero4_1" -> "bb::ControlFlow#orZero4_1" [style="bold"];
-    "bb::ControlFlow#orZero4_2" [label = "block[id=2](a)
-<ifTemp>$4 = a : Integer
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero4_2" [
+        label = "block[id=2](a)\l<ifTemp>$4 = a : Integer\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_5" [style="bold"];
     "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero4_3" [label = "block[id=3](a)
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero4_3" [
+        label = "block[id=3](a)\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_5" [style="bold"];
     "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero4_5" [label = "block[id=5](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero4_5" [
+        label = "block[id=5](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero4_5" -> "bb::ControlFlow#orZero4_1" [style="bold"];
-    "bb::ControlFlow#orZero4_6" [label = "block[id=6]()
-<returnTemp>$7 = 0
-<returnMethodTemp>$2 = return <returnTemp>$7
-<unconditional>"];
+    "bb::ControlFlow#orZero4_6" [
+        label = "block[id=6]()\l<returnTemp>$7 = 0\l<returnMethodTemp>$2 = return <returnTemp>$7\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero4_6" -> "bb::ControlFlow#orZero4_1" [style="bold"];
 }
@@ -314,42 +290,40 @@ subgraph "cluster_::ControlFlow#orZero5" {
     "bb::ControlFlow#orZero5_0" [shape = invhouse];
     "bb::ControlFlow#orZero5_1" [shape = parallelogram];
 
-    "bb::ControlFlow#orZero5_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : ControlFlow
-a = load_arg(<selfMethodTemp>$3#orZero5, 0) : Integer | NilClass
-a"];
+    "bb::ControlFlow#orZero5_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero5, 0) : Integer | NilClass\la\l"
+    ];
 
     "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_2" [style="bold"];
     "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_3" [style="tapered"];
 
-    "bb::ControlFlow#orZero5_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::ControlFlow#orZero5_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero5_1" -> "bb::ControlFlow#orZero5_1" [style="bold"];
-    "bb::ControlFlow#orZero5_2" [label = "block[id=2](a)
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero5_2" [
+        label = "block[id=2](a)\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_5" [style="bold"];
     "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero5_3" [label = "block[id=3](a)
-<ifTemp>$4 = a : NilClass
-<ifTemp>$4"];
+    "bb::ControlFlow#orZero5_3" [
+        label = "block[id=3](a)\l<ifTemp>$4 = a : NilClass\l<ifTemp>$4\l"
+    ];
 
     "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_5" [style="bold"];
     "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
 
-    "bb::ControlFlow#orZero5_5" [label = "block[id=5](a)
-<returnMethodTemp>$2 = return a : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero5_5" [
+        label = "block[id=5](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero5_5" -> "bb::ControlFlow#orZero5_1" [style="bold"];
-    "bb::ControlFlow#orZero5_6" [label = "block[id=6]()
-<returnTemp>$7 = 0 : Integer(0)
-<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>
-<unconditional>"];
+    "bb::ControlFlow#orZero5_6" [
+        label = "block[id=6]()\l<returnTemp>$7 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::ControlFlow#orZero5_6" -> "bb::ControlFlow#orZero5_1" [style="bold"];
 }

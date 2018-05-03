@@ -1,34 +1,30 @@
-digraph "extra_bb_args.rb"{
+digraph "extra_bb_args.rb" {
 subgraph "cluster_::Object#main" {
     label = "::Object#main";
     color = blue;
     "bb::Object#main_0" [shape = invhouse];
     "bb::Object#main_1" [shape = parallelogram];
 
-    "bb::Object#main_0" [label = "block[id=0]()
-<castTemp$5 = nil : NilClass
-name = cast(<castTemp$5, String | NilClass); : String | NilClass
-<ifTemp>$7 = name.nil?() : TrueClass | FalseClass
-<ifTemp>$7"];
+    "bb::Object#main_0" [
+        label = "block[id=0]()\l<castTemp$5 = nil : NilClass\lname = cast(<castTemp$5, String | NilClass); : String | NilClass\l<ifTemp>$7 = name.nil?() : TrueClass | FalseClass\l<ifTemp>$7\l"
+    ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_0" -> "bb::Object#main_3" [style="tapered"];
 
-    "bb::Object#main_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#main_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
-    "bb::Object#main_2" [label = "block[id=2]()
-<returnTemp>$9 = \"missing name\" : String(\"missing name\")
-<statTemp>$6 = return <returnTemp>$9 : <impossible>
-<unconditional>"];
+    "bb::Object#main_2" [
+        label = "block[id=2]()\l<returnTemp>$9 = \"missing name\" : String(\"missing name\")\l<statTemp>$6 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#main_2" -> "bb::Object#main_1" [style="bold"];
-    "bb::Object#main_3" [label = "block[id=3](name)
-<statTemp>$11 = \"foo\" : String(\"foo\")
-<returnMethodTemp>$2 = name.include?(<statTemp>$11) : TrueClass | FalseClass
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#main_3" [
+        label = "block[id=3](name)\l<statTemp>$11 = \"foo\" : String(\"foo\")\l<returnMethodTemp>$2 = name.include?(<statTemp>$11) : TrueClass | FalseClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#main_3" -> "bb::Object#main_1" [style="bold"];
 }

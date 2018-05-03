@@ -1,42 +1,37 @@
-digraph "dealias_with_return.rb"{
+digraph "dealias_with_return.rb" {
 subgraph "cluster_::Object#a" {
     label = "::Object#a";
     color = blue;
     "bb::Object#a_0" [shape = invhouse];
     "bb::Object#a_1" [shape = parallelogram];
 
-    "bb::Object#a_0" [label = "block[id=0]()
-<constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>
-<selfMethodTemp>$3 = self : Object
-<rescueTemp$5 = <unanalyzable> : untyped
-<rescueTemp$5"];
+    "bb::Object#a_0" [
+        label = "block[id=0]()\l<constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : Object\l<rescueTemp$5 = <unanalyzable> : untyped\l<rescueTemp$5\l"
+    ];
 
     "bb::Object#a_0" -> "bb::Object#a_3" [style="bold"];
     "bb::Object#a_0" -> "bb::Object#a_4" [style="tapered"];
 
-    "bb::Object#a_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#a_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_3" [label = "block[id=3](<rescueTemp$5, <constant:StandardError>$9)
-<rescueTemp$10 = <rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped
-<rescueTemp$10"];
+    "bb::Object#a_3" [
+        label = "block[id=3](<rescueTemp$5, <constant:StandardError>$9)\l<rescueTemp$10 = <rescueTemp$5.is_a?(<constant:StandardError>$9) : untyped\l<rescueTemp$10\l"
+    ];
 
     "bb::Object#a_3" -> "bb::Object#a_8" [style="bold"];
     "bb::Object#a_3" -> "bb::Object#a_1" [style="tapered"];
 
-    "bb::Object#a_4" [label = "block[id=4]()
-<returnTemp>$6 = 1 : Integer(1)
-<statTemp>$4 = return <returnTemp>$6 : <impossible>
-<unconditional>"];
+    "bb::Object#a_4" [
+        label = "block[id=4]()\l<returnTemp>$6 = 1 : Integer(1)\l<statTemp>$4 = return <returnTemp>$6 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_8" [label = "block[id=8](<rescueTemp$5)
-a = 2 : Integer(2)
-<statTemp>$12 = 3 : Integer(3)
-<returnMethodTemp>$2 = a.+(<statTemp>$12) : Integer
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#a_8" [
+        label = "block[id=8](<rescueTemp$5)\la = 2 : Integer(2)\l<statTemp>$12 = 3 : Integer(3)\l<returnMethodTemp>$2 = a.+(<statTemp>$12) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
 }

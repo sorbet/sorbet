@@ -1,19 +1,18 @@
-digraph "ensure_without_rescue.rb"{
+digraph "ensure_without_rescue.rb" {
 subgraph "cluster_#<static-init>" {
     label = "#<static-init>";
     color = blue;
     "bb#<static-init>_0" [shape = invhouse];
     "bb#<static-init>_1" [shape = parallelogram];
 
-    "bb#<static-init>_0" [label = "block[id=0]()
-<statTemp>$7 = self : <Class:<root>>
-<returnMethodTemp>$2 = <statTemp>$7.main() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$7 = self : <Class:<root>>\l<returnMethodTemp>$2 = <statTemp>$7.main() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
@@ -24,24 +23,21 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_0" [shape = invhouse];
     "bb::Object#main_1" [shape = parallelogram];
 
-    "bb::Object#main_0" [label = "block[id=0]()
-<rescueTemp$4 = <unanalyzable> : untyped
-<rescueTemp$4"];
+    "bb::Object#main_0" [
+        label = "block[id=0]()\l<rescueTemp$4 = <unanalyzable> : untyped\l<rescueTemp$4\l"
+    ];
 
     "bb::Object#main_0" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_0" -> "bb::Object#main_4" [style="tapered"];
 
-    "bb::Object#main_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#main_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
-    "bb::Object#main_4" [label = "block[id=4]()
-<statTemp>$5 = self : Object
-<returnMethodTemp>$2 = <statTemp>$5.a() : untyped
-<statTemp>$7 = self : Object
-<rescueTemp$6 = <statTemp>$7.b() : untyped
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#main_4" [
+        label = "block[id=4]()\l<statTemp>$5 = self : Object\l<returnMethodTemp>$2 = <statTemp>$5.a() : untyped\l<statTemp>$7 = self : Object\l<rescueTemp$6 = <statTemp>$7.b() : untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#main_4" -> "bb::Object#main_1" [style="bold"];
 }
@@ -52,13 +48,14 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_0" [shape = invhouse];
     "bb::Object#a_1" [shape = parallelogram];
 
-    "bb::Object#a_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#a_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#a_0" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#a_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
 }
@@ -69,13 +66,14 @@ subgraph "cluster_::Object#b" {
     "bb::Object#b_0" [shape = invhouse];
     "bb::Object#b_1" [shape = parallelogram];
 
-    "bb::Object#b_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Object#b_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#b_0" -> "bb::Object#b_1" [style="bold"];
-    "bb::Object#b_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Object#b_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Object#b_1" -> "bb::Object#b_1" [style="bold"];
 }

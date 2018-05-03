@@ -1,32 +1,30 @@
-digraph "examples.rb"{
+digraph "examples.rb" {
 subgraph "cluster_::Examples#i_like_ifs" {
     label = "::Examples#i_like_ifs";
     color = blue;
     "bb::Examples#i_like_ifs_0" [shape = invhouse];
     "bb::Examples#i_like_ifs_1" [shape = parallelogram];
 
-    "bb::Examples#i_like_ifs_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::Examples#i_like_ifs_0" [
+        label = "block[id=0]()\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::Examples#i_like_ifs_0" -> "bb::Examples#i_like_ifs_2" [style="bold"];
     "bb::Examples#i_like_ifs_0" -> "bb::Examples#i_like_ifs_3" [style="tapered"];
 
-    "bb::Examples#i_like_ifs_1" [label = "block[id=1](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::Examples#i_like_ifs_1" [
+        label = "block[id=1](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_ifs_1" -> "bb::Examples#i_like_ifs_1" [style="bold"];
-    "bb::Examples#i_like_ifs_2" [label = "block[id=2]()
-<returnTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>
-<unconditional>"];
+    "bb::Examples#i_like_ifs_2" [
+        label = "block[id=2]()\l<returnTemp>$5 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_ifs_2" -> "bb::Examples#i_like_ifs_1" [style="bold"];
-    "bb::Examples#i_like_ifs_3" [label = "block[id=3]()
-<returnTemp>$6 = 2
-<returnMethodTemp>$2 = return <returnTemp>$6
-<unconditional>"];
+    "bb::Examples#i_like_ifs_3" [
+        label = "block[id=3]()\l<returnTemp>$6 = 2\l<returnMethodTemp>$2 = return <returnTemp>$6\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_ifs_3" -> "bb::Examples#i_like_ifs_1" [style="bold"];
 }
@@ -37,30 +35,31 @@ subgraph "cluster_::Examples#i_like_exps" {
     "bb::Examples#i_like_exps_0" [shape = invhouse];
     "bb::Examples#i_like_exps_1" [shape = parallelogram];
 
-    "bb::Examples#i_like_exps_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::Examples#i_like_exps_0" [
+        label = "block[id=0]()\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::Examples#i_like_exps_0" -> "bb::Examples#i_like_exps_2" [style="bold"];
     "bb::Examples#i_like_exps_0" -> "bb::Examples#i_like_exps_3" [style="tapered"];
 
-    "bb::Examples#i_like_exps_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#i_like_exps_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_exps_1" -> "bb::Examples#i_like_exps_1" [style="bold"];
-    "bb::Examples#i_like_exps_2" [label = "block[id=2]()
-<returnMethodTemp>$2 = 1 : Integer(1)
-<unconditional>"];
+    "bb::Examples#i_like_exps_2" [
+        label = "block[id=2]()\l<returnMethodTemp>$2 = 1 : Integer(1)\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_exps_2" -> "bb::Examples#i_like_exps_4" [style="bold"];
-    "bb::Examples#i_like_exps_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = 2
-<unconditional>"];
+    "bb::Examples#i_like_exps_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_exps_3" -> "bb::Examples#i_like_exps_4" [style="bold"];
-    "bb::Examples#i_like_exps_4" [label = "block[id=4](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Examples#i_like_exps_4" [
+        label = "block[id=4](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#i_like_exps_4" -> "bb::Examples#i_like_exps_1" [style="bold"];
 }
@@ -71,27 +70,26 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
     "bb::Examples#return_in_one_branch1_0" [shape = invhouse];
     "bb::Examples#return_in_one_branch1_1" [shape = parallelogram];
 
-    "bb::Examples#return_in_one_branch1_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::Examples#return_in_one_branch1_0" [
+        label = "block[id=0]()\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::Examples#return_in_one_branch1_0" -> "bb::Examples#return_in_one_branch1_2" [style="bold"];
     "bb::Examples#return_in_one_branch1_0" -> "bb::Examples#return_in_one_branch1_3" [style="tapered"];
 
-    "bb::Examples#return_in_one_branch1_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#return_in_one_branch1_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch1_1" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
-    "bb::Examples#return_in_one_branch1_2" [label = "block[id=2]()
-<returnTemp>$5 = 1 : Integer(1)
-<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>
-<unconditional>"];
+    "bb::Examples#return_in_one_branch1_2" [
+        label = "block[id=2]()\l<returnTemp>$5 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$5 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch1_2" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
-    "bb::Examples#return_in_one_branch1_3" [label = "block[id=3]()
-<returnMethodTemp>$2 = 2
-<finalReturn> = return <returnMethodTemp>$2
-<unconditional>"];
+    "bb::Examples#return_in_one_branch1_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2 = 2\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch1_3" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
 }
@@ -102,27 +100,26 @@ subgraph "cluster_::Examples#return_in_one_branch2" {
     "bb::Examples#return_in_one_branch2_0" [shape = invhouse];
     "bb::Examples#return_in_one_branch2_1" [shape = parallelogram];
 
-    "bb::Examples#return_in_one_branch2_0" [label = "block[id=0]()
-<ifTemp>$4 = true : TrueClass
-<ifTemp>$4"];
+    "bb::Examples#return_in_one_branch2_0" [
+        label = "block[id=0]()\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+    ];
 
     "bb::Examples#return_in_one_branch2_0" -> "bb::Examples#return_in_one_branch2_2" [style="bold"];
     "bb::Examples#return_in_one_branch2_0" -> "bb::Examples#return_in_one_branch2_3" [style="tapered"];
 
-    "bb::Examples#return_in_one_branch2_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#return_in_one_branch2_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch2_1" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
-    "bb::Examples#return_in_one_branch2_2" [label = "block[id=2]()
-<returnMethodTemp>$2 = 1 : Integer(1)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Examples#return_in_one_branch2_2" [
+        label = "block[id=2]()\l<returnMethodTemp>$2 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch2_2" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
-    "bb::Examples#return_in_one_branch2_3" [label = "block[id=3]()
-<returnTemp>$5 = 2
-<returnMethodTemp>$2 = return <returnTemp>$5
-<unconditional>"];
+    "bb::Examples#return_in_one_branch2_3" [
+        label = "block[id=3]()\l<returnTemp>$5 = 2\l<returnMethodTemp>$2 = return <returnTemp>$5\l<unconditional>\l"
+    ];
 
     "bb::Examples#return_in_one_branch2_3" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
 }
@@ -133,48 +130,48 @@ subgraph "cluster_::Examples#variables" {
     "bb::Examples#variables_0" [shape = invhouse];
     "bb::Examples#variables_1" [shape = parallelogram];
 
-    "bb::Examples#variables_0" [label = "block[id=0]()
-<ifTemp>$5 = true : TrueClass
-<ifTemp>$5"];
+    "bb::Examples#variables_0" [
+        label = "block[id=0]()\l<ifTemp>$5 = true : TrueClass\l<ifTemp>$5\l"
+    ];
 
     "bb::Examples#variables_0" -> "bb::Examples#variables_2" [style="bold"];
     "bb::Examples#variables_0" -> "bb::Examples#variables_3" [style="tapered"];
 
-    "bb::Examples#variables_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#variables_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_1" -> "bb::Examples#variables_1" [style="bold"];
-    "bb::Examples#variables_2" [label = "block[id=2]()
-a = 1 : Integer(1)
-<unconditional>"];
+    "bb::Examples#variables_2" [
+        label = "block[id=2]()\la = 1 : Integer(1)\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_2" -> "bb::Examples#variables_4" [style="bold"];
-    "bb::Examples#variables_3" [label = "block[id=3]()
-a = 2
-<unconditional>"];
+    "bb::Examples#variables_3" [
+        label = "block[id=3]()\la = 2\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_3" -> "bb::Examples#variables_4" [style="bold"];
-    "bb::Examples#variables_4" [label = "block[id=4](a)
-<ifTemp>$7 = false : FalseClass
-<ifTemp>$7"];
+    "bb::Examples#variables_4" [
+        label = "block[id=4](a)\l<ifTemp>$7 = false : FalseClass\l<ifTemp>$7\l"
+    ];
 
     "bb::Examples#variables_4" -> "bb::Examples#variables_5" [style="bold"];
     "bb::Examples#variables_4" -> "bb::Examples#variables_6" [style="tapered"];
 
-    "bb::Examples#variables_5" [label = "block[id=5](a)
-b = 1
-<unconditional>"];
+    "bb::Examples#variables_5" [
+        label = "block[id=5](a)\lb = 1\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_5" -> "bb::Examples#variables_7" [style="bold"];
-    "bb::Examples#variables_6" [label = "block[id=6](a)
-b = 2 : Integer(2)
-<unconditional>"];
+    "bb::Examples#variables_6" [
+        label = "block[id=6](a)\lb = 2 : Integer(2)\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_6" -> "bb::Examples#variables_7" [style="bold"];
-    "bb::Examples#variables_7" [label = "block[id=7](b, a)
-<returnMethodTemp>$2 = a.+(b) : Integer
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Examples#variables_7" [
+        label = "block[id=7](b, a)\l<returnMethodTemp>$2 = a.+(b) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];
 }
@@ -185,59 +182,55 @@ subgraph "cluster_::Examples#variables_and_loop" {
     "bb::Examples#variables_and_loop_0" [shape = invhouse];
     "bb::Examples#variables_and_loop_1" [shape = parallelogram];
 
-    "bb::Examples#variables_and_loop_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Examples
-cond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped
-<ifTemp>$5 = true : TrueClass
-<ifTemp>$5"];
+    "bb::Examples#variables_and_loop_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Examples\lcond = load_arg(<selfMethodTemp>$3#variables_and_loop, 0) : untyped\l<ifTemp>$5 = true : TrueClass\l<ifTemp>$5\l"
+    ];
 
     "bb::Examples#variables_and_loop_0" -> "bb::Examples#variables_and_loop_2" [style="bold"];
     "bb::Examples#variables_and_loop_0" -> "bb::Examples#variables_and_loop_3" [style="tapered"];
 
-    "bb::Examples#variables_and_loop_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#variables_and_loop_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_1" -> "bb::Examples#variables_and_loop_1" [style="bold"];
-    "bb::Examples#variables_and_loop_2" [label = "block[id=2](cond)
-a = 1 : Integer(1)
-<unconditional>"];
+    "bb::Examples#variables_and_loop_2" [
+        label = "block[id=2](cond)\la = 1 : Integer(1)\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_2" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_3" [label = "block[id=3](cond)
-a = 2
-<unconditional>"];
+    "bb::Examples#variables_and_loop_3" [
+        label = "block[id=3](cond)\la = 2\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_3" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_5" [label = "block[id=5](b, cond)
-outerLoops: 1
-<whileTemp>$7 = true : TrueClass
-<whileTemp>$7"];
+    "bb::Examples#variables_and_loop_5" [
+        label = "block[id=5](b, cond)\louterLoops: 1\l<whileTemp>$7 = true : TrueClass\l<whileTemp>$7\l"
+    ];
 
     "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_7" [style="bold"];
     "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_6" [style="tapered"];
 
-    "bb::Examples#variables_and_loop_6" [label = "block[id=6](b)
-<finalReturn> = return b
-<unconditional>"];
+    "bb::Examples#variables_and_loop_6" [
+        label = "block[id=6](b)\l<finalReturn> = return b\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_6" -> "bb::Examples#variables_and_loop_1" [style="bold"];
-    "bb::Examples#variables_and_loop_7" [label = "block[id=7](b, cond)
-outerLoops: 1
-cond"];
+    "bb::Examples#variables_and_loop_7" [
+        label = "block[id=7](b, cond)\louterLoops: 1\lcond\l"
+    ];
 
     "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_8" [style="bold"];
     "bb::Examples#variables_and_loop_7" -> "bb::Examples#variables_and_loop_9" [style="tapered"];
 
-    "bb::Examples#variables_and_loop_8" [label = "block[id=8](b, cond)
-outerLoops: 1
-b = 1 : untyped
-<unconditional>"];
+    "bb::Examples#variables_and_loop_8" [
+        label = "block[id=8](b, cond)\louterLoops: 1\lb = 1 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_8" -> "bb::Examples#variables_and_loop_5" [style="bold"];
-    "bb::Examples#variables_and_loop_9" [label = "block[id=9](b, cond)
-outerLoops: 1
-b = 2 : untyped
-<unconditional>"];
+    "bb::Examples#variables_and_loop_9" [
+        label = "block[id=9](b, cond)\louterLoops: 1\lb = 2 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_and_loop_9" -> "bb::Examples#variables_and_loop_5" [style="bold"];
 }
@@ -248,46 +241,43 @@ subgraph "cluster_::Examples#variables_loop_if" {
     "bb::Examples#variables_loop_if_0" [shape = invhouse];
     "bb::Examples#variables_loop_if_1" [shape = parallelogram];
 
-    "bb::Examples#variables_loop_if_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Examples
-cond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped
-<unconditional>"];
+    "bb::Examples#variables_loop_if_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Examples\lcond = load_arg(<selfMethodTemp>$3#variables_loop_if, 0) : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_loop_if_0" -> "bb::Examples#variables_loop_if_2" [style="bold"];
-    "bb::Examples#variables_loop_if_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#variables_loop_if_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_loop_if_1" -> "bb::Examples#variables_loop_if_1" [style="bold"];
-    "bb::Examples#variables_loop_if_2" [label = "block[id=2](b, cond)
-outerLoops: 1
-<whileTemp>$5 = true : TrueClass
-<whileTemp>$5"];
+    "bb::Examples#variables_loop_if_2" [
+        label = "block[id=2](b, cond)\louterLoops: 1\l<whileTemp>$5 = true : TrueClass\l<whileTemp>$5\l"
+    ];
 
     "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_4" [style="bold"];
     "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_3" [style="tapered"];
 
-    "bb::Examples#variables_loop_if_3" [label = "block[id=3](b)
-<finalReturn> = return b
-<unconditional>"];
+    "bb::Examples#variables_loop_if_3" [
+        label = "block[id=3](b)\l<finalReturn> = return b\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_loop_if_3" -> "bb::Examples#variables_loop_if_1" [style="bold"];
-    "bb::Examples#variables_loop_if_4" [label = "block[id=4](b, cond)
-outerLoops: 1
-cond"];
+    "bb::Examples#variables_loop_if_4" [
+        label = "block[id=4](b, cond)\louterLoops: 1\lcond\l"
+    ];
 
     "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_5" [style="bold"];
     "bb::Examples#variables_loop_if_4" -> "bb::Examples#variables_loop_if_6" [style="tapered"];
 
-    "bb::Examples#variables_loop_if_5" [label = "block[id=5](b, cond)
-outerLoops: 1
-b = 1 : untyped
-<unconditional>"];
+    "bb::Examples#variables_loop_if_5" [
+        label = "block[id=5](b, cond)\louterLoops: 1\lb = 1 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_loop_if_5" -> "bb::Examples#variables_loop_if_2" [style="bold"];
-    "bb::Examples#variables_loop_if_6" [label = "block[id=6](b, cond)
-outerLoops: 1
-b = 2 : untyped
-<unconditional>"];
+    "bb::Examples#variables_loop_if_6" [
+        label = "block[id=6](b, cond)\louterLoops: 1\lb = 2 : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#variables_loop_if_6" -> "bb::Examples#variables_loop_if_2" [style="bold"];
 }
@@ -298,32 +288,31 @@ subgraph "cluster_::Examples#take_arguments" {
     "bb::Examples#take_arguments_0" [shape = invhouse];
     "bb::Examples#take_arguments_1" [shape = parallelogram];
 
-    "bb::Examples#take_arguments_0" [label = "block[id=0]()
-<selfMethodTemp>$3 = self : Examples
-i = load_arg(<selfMethodTemp>$3#take_arguments, 0) : untyped
-<ifTemp>$4 = false : FalseClass
-<ifTemp>$4"];
+    "bb::Examples#take_arguments_0" [
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Examples\li = load_arg(<selfMethodTemp>$3#take_arguments, 0) : untyped\l<ifTemp>$4 = false : FalseClass\l<ifTemp>$4\l"
+    ];
 
     "bb::Examples#take_arguments_0" -> "bb::Examples#take_arguments_2" [style="bold"];
     "bb::Examples#take_arguments_0" -> "bb::Examples#take_arguments_3" [style="tapered"];
 
-    "bb::Examples#take_arguments_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::Examples#take_arguments_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::Examples#take_arguments_1" -> "bb::Examples#take_arguments_1" [style="bold"];
-    "bb::Examples#take_arguments_2" [label = "block[id=2]()
-<returnMethodTemp>$2 = 2
-<unconditional>"];
+    "bb::Examples#take_arguments_2" [
+        label = "block[id=2]()\l<returnMethodTemp>$2 = 2\l<unconditional>\l"
+    ];
 
     "bb::Examples#take_arguments_2" -> "bb::Examples#take_arguments_4" [style="bold"];
-    "bb::Examples#take_arguments_3" [label = "block[id=3](i)
-<returnMethodTemp>$2 = i : untyped
-<unconditional>"];
+    "bb::Examples#take_arguments_3" [
+        label = "block[id=3](i)\l<returnMethodTemp>$2 = i : untyped\l<unconditional>\l"
+    ];
 
     "bb::Examples#take_arguments_3" -> "bb::Examples#take_arguments_4" [style="bold"];
-    "bb::Examples#take_arguments_4" [label = "block[id=4](<returnMethodTemp>$2)
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::Examples#take_arguments_4" [
+        label = "block[id=4](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];
 }

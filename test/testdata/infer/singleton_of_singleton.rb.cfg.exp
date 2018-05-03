@@ -1,17 +1,18 @@
-digraph "singleton_of_singleton.rb"{
+digraph "singleton_of_singleton.rb" {
 subgraph "cluster_::<Class:A>#foo" {
     label = "::<Class:A>#foo";
     color = blue;
     "bb::<Class:A>#foo_0" [shape = invhouse];
     "bb::<Class:A>#foo_1" [shape = parallelogram];
 
-    "bb::<Class:A>#foo_0" [label = "block[id=0]()
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::<Class:A>#foo_0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#foo_0" -> "bb::<Class:A>#foo_1" [style="bold"];
-    "bb::<Class:A>#foo_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::<Class:A>#foo_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::<Class:A>#foo_1" -> "bb::<Class:A>#foo_1" [style="bold"];
 }
@@ -22,14 +23,14 @@ subgraph "cluster_::<Class:<Class:A>>#bar" {
     "bb::<Class:<Class:A>>#bar_0" [shape = invhouse];
     "bb::<Class:<Class:A>>#bar_1" [shape = parallelogram];
 
-    "bb::<Class:<Class:A>>#bar_0" [label = "block[id=0]()
-<returnMethodTemp>$2 = self : <Class:<Class:A>>
-<finalReturn> = return <returnMethodTemp>$2 : <impossible>
-<unconditional>"];
+    "bb::<Class:<Class:A>>#bar_0" [
+        label = "block[id=0]()\l<returnMethodTemp>$2 = self : <Class:<Class:A>>\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::<Class:<Class:A>>#bar_0" -> "bb::<Class:<Class:A>>#bar_1" [style="bold"];
-    "bb::<Class:<Class:A>>#bar_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::<Class:<Class:A>>#bar_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::<Class:<Class:A>>#bar_1" -> "bb::<Class:<Class:A>>#bar_1" [style="bold"];
 }

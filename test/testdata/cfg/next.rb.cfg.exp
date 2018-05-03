@@ -1,57 +1,35 @@
-digraph "next.rb"{
+digraph "next.rb" {
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
     "bb::Object#foo_0" [shape = invhouse];
     "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::Object#foo_0" [label = "block[id=0]()
-<constant:<Magic>>$7 = alias <constant:<Magic>> : <Magic>
-<arrayTemp>$6 = 1 : Integer(1)
-<statTemp>$5 = <constant:<Magic>>$7.<build-array>(<arrayTemp>$6) : TupleType {
-  0 = Integer(1)
-}
-<block-pre-call-temp>$8 = <statTemp>$5.map() : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = TypeVar(U$1)
-  ]
-}
-<unconditional>"];
+    "bb::Object#foo_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$7 = alias <constant:<Magic>> : <Magic>\l<arrayTemp>$6 = 1 : Integer(1)\l<statTemp>$5 = <constant:<Magic>>$7.<build-array>(<arrayTemp>$6) : TupleType {\l  0 = Integer(1)\l}\l<block-pre-call-temp>$8 = <statTemp>$5.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
-    "bb::Object#foo_1" [label = "block[id=1]()
-<statTemp>$15 = self
-<blockReturnTemp>$9 = <statTemp>$15.bad()
-<unconditional>"];
+    "bb::Object#foo_1" [
+        label = "block[id=1]()\l<statTemp>$15 = self\l<blockReturnTemp>$9 = <statTemp>$15.bad()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Object#foo_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::Object#foo_3" [label = "block[id=3]()
-<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : AppliedType {
-  klass = ::Array
-  targs = [
-    <constant:Elem> = untyped
-  ]
-}
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = untyped\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_4" [label = "block[id=4]()
-outerLoops: 1
-x$2 = load_yield_param(::Object#foo#<block>, 0) : untyped
-<statTemp>$11 = self : Object
-<statTemp>$10 = <statTemp>$11.good() : untyped
-<blockReturnTemp>$13 = x$2 : untyped
-<blockReturnTemp>$14 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$13 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_4" [
+        label = "block[id=4]()\louterLoops: 1\lx$2 = load_yield_param(::Object#foo#<block>, 0) : untyped\l<statTemp>$11 = self : Object\l<statTemp>$10 = <statTemp>$11.good() : untyped\l<blockReturnTemp>$13 = x$2 : untyped\l<blockReturnTemp>$14 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$13 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];
 }

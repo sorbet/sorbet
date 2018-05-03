@@ -1,39 +1,35 @@
-digraph "block_in_deadcode.rb"{
+digraph "block_in_deadcode.rb" {
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
     "bb::Object#foo_0" [shape = invhouse];
     "bb::Object#foo_1" [shape = parallelogram];
 
-    "bb::Object#foo_0" [label = "block[id=0]()
-<statTemp>$5 = self : Object
-<block-pre-call-temp>$6 = <statTemp>$5.outer() : untyped
-<unconditional>"];
+    "bb::Object#foo_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : Object\l<block-pre-call-temp>$6 = <statTemp>$5.outer() : untyped\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
-    "bb::Object#foo_1" [label = "block[id=1]()
-<statTemp>$10 = self
-<block-pre-call-temp>$11 = <statTemp>$10.inner()
-<unconditional>"];
+    "bb::Object#foo_1" [
+        label = "block[id=1]()\l<statTemp>$10 = self\l<block-pre-call-temp>$11 = <statTemp>$10.inner()\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_2" [label = "block[id=2]()
-outerLoops: 1
-<block-call>"];
+    "bb::Object#foo_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+    ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
-    "bb::Object#foo_3" [label = "block[id=3]()
-<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : untyped
-<finalReturn> = return <returnMethodTemp>$3 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_4" [label = "block[id=4]()
-outerLoops: 1
-<statTemp>$8 = return <returnTemp>$9 : <impossible>
-<unconditional>"];
+    "bb::Object#foo_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
 }

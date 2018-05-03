@@ -1,20 +1,18 @@
-digraph "ivar_assign.rb"{
+digraph "ivar_assign.rb" {
 subgraph "cluster_::TestIVar#initialize" {
     label = "::TestIVar#initialize";
     color = blue;
     "bb::TestIVar#initialize_0" [shape = invhouse];
     "bb::TestIVar#initialize_1" [shape = parallelogram];
 
-    "bb::TestIVar#initialize_0" [label = "block[id=0]()
-@foo$4 = alias @foo : Integer
-<castTemp$5 = 0 : Integer(0)
-@foo$4 = cast(<castTemp$5, Integer); : Integer
-<finalReturn> = return @foo$4 : <impossible>
-<unconditional>"];
+    "bb::TestIVar#initialize_0" [
+        label = "block[id=0]()\l@foo$4 = alias @foo : Integer\l<castTemp$5 = 0 : Integer(0)\l@foo$4 = cast(<castTemp$5, Integer); : Integer\l<finalReturn> = return @foo$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
-    "bb::TestIVar#initialize_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestIVar#initialize_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestIVar#initialize_1" -> "bb::TestIVar#initialize_1" [style="bold"];
 }
@@ -25,15 +23,14 @@ subgraph "cluster_::TestIVar#test" {
     "bb::TestIVar#test_0" [shape = invhouse];
     "bb::TestIVar#test_1" [shape = parallelogram];
 
-    "bb::TestIVar#test_0" [label = "block[id=0]()
-@foo$4 = alias @foo : Integer
-@foo$4 = nil : Integer
-<finalReturn> = return @foo$4 : <impossible>
-<unconditional>"];
+    "bb::TestIVar#test_0" [
+        label = "block[id=0]()\l@foo$4 = alias @foo : Integer\l@foo$4 = nil : Integer\l<finalReturn> = return @foo$4 : <impossible>\l<unconditional>\l"
+    ];
 
     "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];
-    "bb::TestIVar#test_1" [label = "block[id=1]()
-<unconditional>"];
+    "bb::TestIVar#test_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
 
     "bb::TestIVar#test_1" -> "bb::TestIVar#test_1" [style="bold"];
 }
