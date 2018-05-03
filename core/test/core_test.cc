@@ -84,11 +84,9 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
         {"# typed: false\n", StrictLevel::Stripe},
         {"# typed: lax\n", StrictLevel::Stripe},
 
-        // Test the old sigil
-        {"# @typed", StrictLevel::Strict},
-        {"\n# @typed\n", StrictLevel::Strict},
-        {"not an @typed sigil\n# @typed\n", StrictLevel::Strict},
-        {"@typed\n# @typed some noise\n", StrictLevel::Stripe},
+        // We no longer support the old sigil
+        {"# @typed", StrictLevel::Stripe},
+        {"\n# @typed\n", StrictLevel::Stripe},
     };
     for (auto &tc : cases) {
         EXPECT_EQ(tc.strict, fileSigil(tc.src));

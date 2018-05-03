@@ -1,4 +1,4 @@
-# @typed
+# typed: strict
 module MyRoutes
   def self.registered(app)
     app.helpers Helpers

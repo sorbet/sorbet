@@ -28,17 +28,14 @@ StrictLevel fileSigil(absl::string_view source) {
      * StrictLevel::Strict: # typed: strict
      * StrictLevel::String: # typed: strong
      */
-    static regex old_sigil("^\\s*#\\s*@typed\\s*$");
     static regex sigil("^\\s*#\\s*typed:\\s*(\\w+)?\\s*$");
     size_t off = 0;
-    // std::regex appears to be ludicrously slow, to the point where running
-    // this regex is as slow as running the entirety of the remainder of our
-    // pipeline.
+    // std::regex is shockingly slow.
     //
-    // Help it out by manually scanning for the word `typed`, and then running
+    // Help it out by manually scanning for the word `typed:`, and then running
     // the regex only over the single line.
     while (true) {
-        off = source.find("typed", off);
+        off = source.find("typed:", off);
         if (off == absl::string_view::npos) {
             return StrictLevel::Stripe;
         }
@@ -50,12 +47,6 @@ StrictLevel fileSigil(absl::string_view source) {
         size_t line_end = source.find('\n', off);
         if (line_end == absl::string_view::npos) {
             line_end = source.size();
-        }
-
-        // Support the old @typed sigil for compatibility until we remove it
-        // from source.
-        if (regex_search(source.data() + line_start, source.data() + line_end, old_sigil)) {
-            return StrictLevel::Strict;
         }
 
         match_results<const char *> match;
