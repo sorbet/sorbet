@@ -403,7 +403,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expect = ruby_typer::FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
-            TEST_COUT << gotPhase.first << " ok" << '\n';
+            TEST_COUT << gotPhase.first << " OK" << '\n';
         }
     }
 
