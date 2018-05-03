@@ -8,7 +8,7 @@ class <constant:<root>> < ::Object () @ test/testdata/desugar/sclass.rb:2
   class <constant:G> < ::Object () @ test/testdata/desugar/sclass.rb:58
     method wrapper () @ test/testdata/desugar/sclass.rb:59
   class <constant:H> < ::Object () @ test/testdata/desugar/sclass.rb:72
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8223
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8224
     method main () @ test/testdata/desugar/sclass.rb:82
   class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:2
   class <singleton class:<constant:B>> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:12

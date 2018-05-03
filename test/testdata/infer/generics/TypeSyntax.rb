@@ -1,9 +1,9 @@
 # typed: strict
 
 class Generics
- sig(arr: T::Array[String]).returns(String)
+ sig(arr: T::Array[String]).returns(T.nilable(String))
  def read(arr)
-   T.assert_type!(arr[0], String)
+   T.assert_type!(arr[0], T.nilable(String))
  end
 
  sig().returns(T::Array[String])

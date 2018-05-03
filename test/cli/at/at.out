@@ -2,7 +2,7 @@ test/cli/at/at.rb:2: Expression passed as an argument `arg0` to method `+` does 
      2 |1 + "s"
         ^^^^^^^
     https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Method `+` has specified type of argument `arg0` as `Integer`
-    5765 |      arg0: Integer,
+    5766 |      arg0: Integer,
                 ^^^^^
   Got String("s") originating from:
     test/cli/at/at.rb:2:

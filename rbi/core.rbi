@@ -2130,16 +2130,16 @@ class Array
   sig(
       arg0: Range[Integer],
   )
-  .returns(T::Array[Elem])
+  .returns(T.nilable(T::Array[Elem]))
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T::Array[Elem])
+  .returns(T.nilable(T::Array[Elem]))
   def [](arg0, arg1=_); end
 
   sig(
@@ -2233,17 +2233,18 @@ class Array
   sig(
       arg0: Elem,
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
+      arg0: Elem,
       blk: T.proc().returns(Elem),
   )
   .returns(Elem)
-  def delete(arg0=_, &blk); end
+  def delete(arg0, &blk); end
 
   sig(
       arg0: Integer,
   )
-  .returns(T::Array[Elem])
+  .returns(T.nilable(Elem))
   def delete_at(arg0); end
 
   sig(
@@ -2334,7 +2335,7 @@ class Array
   .returns(T::Array[Elem])
   def fill(arg0=_, arg1=_, arg2=_, &blk); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -2398,7 +2399,7 @@ class Array
   .returns(T::Array[Elem])
   def keep_if(&blk); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -2443,7 +2444,7 @@ class Array
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   def pop(arg0=_); end
 
   type_parameters(:U).sig(
@@ -2461,7 +2462,7 @@ class Array
   type_parameters(:U).sig(
       arg0: T.type_parameter(:U),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   def rassoc(arg0); end
 
   sig(
@@ -2516,11 +2517,11 @@ class Array
   sig(
       arg0: Elem,
   )
-  .returns(Elem)
+  .returns(T.nilable(Integer))
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(Integer)
+  .returns(T.nilable(Integer))
   sig.returns(Enumerator[Elem])
   def rindex(arg0=_, &blk); end
 
@@ -2536,7 +2537,7 @@ class Array
   .returns(T::Array[Elem])
   def rotate!(arg0=_); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -2557,7 +2558,7 @@ class Array
   sig.returns(Enumerator[Elem])
   def select!(&blk); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -2582,7 +2583,7 @@ class Array
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   def slice!(arg0, arg1=_); end
 
   sig.returns(T::Array[Elem])
@@ -2676,16 +2677,16 @@ class Array
   sig(
       arg0: Range[Integer],
   )
-  .returns(T::Array[Elem])
+  .returns(T.nilable(T::Array[Elem]))
   sig(
       arg0: T.any(Integer, Float),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
       arg1: Integer,
   )
-  .returns(T::Array[Elem])
+  .returns(T.nilable(T::Array[Elem]))
   def slice(arg0, arg1=_); end
 
   sig.returns(String)
@@ -4166,14 +4167,14 @@ module Enumerable
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   def inject(initial=_, arg0=_, &blk); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -4189,7 +4190,7 @@ module Enumerable
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -4201,11 +4202,11 @@ module Enumerable
   .returns(T::Array[Elem])
   def max_by(arg0=_, &blk); end
 
-  sig.returns(Elem)
+  sig.returns(T.nilable(Elem))
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -4221,7 +4222,7 @@ module Enumerable
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   sig(
       arg0: Integer,
   )
@@ -4233,14 +4234,14 @@ module Enumerable
   .returns(T::Array[Elem])
   def min_by(arg0=_, &blk); end
 
-  sig.returns([Elem, Elem])
+  sig.returns([T.nilable(Elem), T.nilable(Elem)])
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
-  .returns([Elem, Elem])
+  .returns([T.nilable(Elem), T.nilable(Elem)])
   def minmax(&blk); end
 
-  sig.returns([Elem, Elem])
+  sig.returns([T.nilable(Elem), T.nilable(Elem)])
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
@@ -4370,7 +4371,7 @@ module Enumerable
   sig(
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
-  .returns(Elem)
+  .returns(T.nilable(Elem))
   def reduce(initial=_, arg0=_, &blk); end
 
   sig(
@@ -5417,12 +5418,12 @@ class Hash
   sig(
       arg0: K,
   )
-  .returns(V)
+  .returns(T.nilable(V))
   sig(
       arg0: K,
       blk: T.proc(arg0: K).returns(V),
   )
-  .returns(V)
+  .returns(T.nilable(V))
   def default(arg0=_, &blk); end
 
   sig(
@@ -5530,7 +5531,7 @@ class Hash
   type_parameters(:T).sig(
       arg0: T.type_parameter(:T),
   )
-  .returns(K)
+  .returns(T.nilable(K))
   def key(arg0); end
 
   type_parameters(:T).sig(

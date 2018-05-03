@@ -1,7 +1,7 @@
 # typed: strict
 
 class Main
-    sig(val: T::Array[String]).returns(String)
+    sig(val: T::Array[String]).returns(T.nilable(String))
     def array(val)
         val[0]
     end

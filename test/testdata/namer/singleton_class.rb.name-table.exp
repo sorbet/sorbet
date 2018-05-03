@@ -4,7 +4,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/singleton_class.rb:1
       class <constant:C> < ::Object () @ test/testdata/namer/singleton_class.rb:1
       class <singleton class:<constant:C>> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:1
     class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/singleton_class.rb:1
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8223
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8224
     method main () @ test/testdata/namer/singleton_class.rb:4
   class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/singleton_class.rb:1
   method <static-init>$11 () @ test/testdata/namer/singleton_class.rb:1

@@ -105,6 +105,6 @@ def main
   T.assert_type!(a, Integer)
 
   a = ChildEnumerable[Integer, String].new.min
-  T.assert_type!(a, String)
+  T.assert_type!(a, T.nilable(String))
 end
 main
