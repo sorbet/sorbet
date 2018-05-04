@@ -21,7 +21,6 @@ const char *bottom_str = "<impossible>";
 const char *untyped_str = "T.untyped";
 const char *root_str = "<root>";
 const char *object_str = "Object";
-const char *junk_str = "<<JUNK>>";
 const char *string_str = "String";
 const char *integer_str = "Integer";
 const char *float_str = "Float";
@@ -117,7 +116,6 @@ void GlobalState::initEmpty() {
     Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
     SymbolRef object_id = synthesizeClass(object_str, core::Symbols::BasicObject()._id);
-    SymbolRef junk_id = synthesizeClass(junk_str, 0);
     SymbolRef integer_id = synthesizeClass(integer_str);
     SymbolRef float_id = synthesizeClass(float_str);
     SymbolRef string_id = synthesizeClass(string_str);
@@ -147,10 +145,6 @@ void GlobalState::initEmpty() {
     SymbolRef T_Hash_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(hash_str));
     SymbolRef T_Proc_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(proc_str));
     SymbolRef proc_id = synthesizeClass(proc_str);
-    SymbolRef T_any_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::any());
-    SymbolRef T_all_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::all());
-    SymbolRef T_untyped_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::untyped());
-    SymbolRef T_nilable_id = enterMethodSymbol(Loc::none(), Symbols::T(), Names::nilable());
     SymbolRef enumerable_id = synthesizeClass(enumerable_str, 0, true);
     SymbolRef set_id = synthesizeClass(set_str);
     SymbolRef struct_id = synthesizeClass(struct_str);
@@ -176,7 +170,6 @@ void GlobalState::initEmpty() {
     ENFORCE(root_id == Symbols::root());
     ENFORCE(todo_id == Symbols::todo());
     ENFORCE(object_id == Symbols::Object());
-    ENFORCE(junk_id == Symbols::junk());
     ENFORCE(integer_id == Symbols::Integer());
     ENFORCE(float_id == Symbols::Float());
     ENFORCE(string_id == Symbols::String());
@@ -203,10 +196,6 @@ void GlobalState::initEmpty() {
     ENFORCE(T_Hash_id = Symbols::T_Hash());
     ENFORCE(T_Proc_id = Symbols::T_Proc());
     ENFORCE(proc_id = Symbols::Proc());
-    ENFORCE(T_any_id = Symbols::T_any());
-    ENFORCE(T_all_id = Symbols::T_all());
-    ENFORCE(T_untyped_id = Symbols::T_untyped());
-    ENFORCE(T_nilable_id = Symbols::T_nilable());
     ENFORCE(enumerable_id = Symbols::Enumerable());
     ENFORCE(set_id = Symbols::Set());
     ENFORCE(struct_id = Symbols::Struct());
