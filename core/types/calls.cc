@@ -73,6 +73,22 @@ shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, c
         case Names::freeze()._id: {
             return selfRef;
         }
+        case Names::squareBrackets()._id: {
+            if (args.size() != 1) {
+                break;
+            }
+            auto *lit = cast_type<LiteralType>(args.front().type.get());
+            if (!lit) {
+                break;
+            }
+            shared_ptr<LiteralType> shared(args.front().type, lit);
+            auto idx = find_if(keys.begin(), keys.end(),
+                               [ctx, shared](auto el) -> bool { return el->equalsLiteral(ctx, shared); });
+            if (idx == keys.end()) {
+                return Types::nilClass();
+            }
+            return this->values[idx - keys.begin()];
+        }
         default:
             break;
     }
