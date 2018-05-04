@@ -87,6 +87,20 @@ std::shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef f
         case Names::freeze()._id: {
             return selfRef;
         }
+        case Names::squareBrackets()._id: {
+            if (args.size() != 1) {
+                break;
+            }
+            auto *lit = cast_type<LiteralType>(args.front().type.get());
+            if (!lit || !lit->underlying->derivesFrom(ctx, core::Symbols::Integer())) {
+                break;
+            }
+            auto idx = lit->value;
+            if (idx >= this->elems.size()) {
+                return Types::nilClass();
+            }
+            return this->elems[idx];
+        }
         default:
             break;
     }
