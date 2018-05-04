@@ -49,7 +49,13 @@ git checkout "$PAY_SERVER_SHA"
 
 eval "$(rbenv init -)"
 stripe-deps-ruby  --without monster ci_ignore test_ui
-rbenv exec bundle exec rake build:FileListStep
+
+# Clobber our .bazelrc so pay-server's bazel doesn't see it.
+rm ../.bazelrc
+
+# Unset JENKINS_URL so pay-server acts like it's running in dev, not
+# CI, and runs its own `bazel` invocations
+env -u JENKINS_URL rbenv exec bundle exec rake build:FileListStep
 
 # Make sure these specific files are typed
 while IFS= read -r f; do
@@ -96,6 +102,7 @@ fi
 
 (
     cd -
+    cp bazelrc-jenkins .bazelrc
     bazel build main:ruby-typer -c opt --config=ci --config=sanitize
 )
 
