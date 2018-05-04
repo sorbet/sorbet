@@ -133,6 +133,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                 if (bind.tpe && !bind.tpe->isDynamic() && cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     typedSendCount++;
                 }
+                ENFORCE(bind.tpe);
                 bind.tpe->sanityCheck(ctx);
                 if (bind.tpe->isBottom()) {
                     current.isDead = true;
