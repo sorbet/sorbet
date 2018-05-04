@@ -25,5 +25,5 @@ class <constant:<root>> < ::Object () @ test/testdata/resolver/self.rb:3
     type-member(=) <constant:Elem> @ test/testdata/resolver/self.rb:21
   class <singleton class:<constant:TestSelf>> < ::<Class:Object> () @ test/testdata/resolver/self.rb:3
   class <singleton class:<constant:TestSelfGeneric>> < ::<Class:Object> (<constant:Generic>) @ test/testdata/resolver/self.rb:18
-  method <static-init>$11 () @ test/testdata/resolver/self.rb:3
+  method <static-init>$12 () @ test/testdata/resolver/self.rb:3
 

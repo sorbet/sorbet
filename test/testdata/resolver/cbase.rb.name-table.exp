@@ -3,5 +3,5 @@ class <constant:<root>> < ::Object () @ test/testdata/resolver/cbase.rb:2
   class <constant:B> (<constant:BasicObject>) @ test/testdata/resolver/cbase.rb:3
   class <singleton class:<constant:A>> < ::Module () @ test/testdata/resolver/cbase.rb:2
   class <singleton class:<constant:B>> < ::Module () @ test/testdata/resolver/cbase.rb:3
-  method <static-init>$11 () @ test/testdata/resolver/cbase.rb:2
+  method <static-init>$12 () @ test/testdata/resolver/cbase.rb:2
 

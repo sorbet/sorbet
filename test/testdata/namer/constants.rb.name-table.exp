@@ -6,5 +6,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/constants.rb:2
       static-field <constant:D> -> Integer(1) @ test/testdata/namer/constants.rb:8
     class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/constants.rb:3
   class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/constants.rb:2
-  method <static-init>$11 () @ test/testdata/namer/constants.rb:2
+  method <static-init>$12 () @ test/testdata/namer/constants.rb:2
 

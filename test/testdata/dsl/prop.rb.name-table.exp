@@ -212,5 +212,5 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
   class <singleton class:<constant:PropHelpers>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:62
   class <singleton class:<constant:ShardingProp>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:72
   class <singleton class:<constant:SomeODM>> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:16
-  method <static-init>$11 () @ test/testdata/dsl/prop.rb:2
+  method <static-init>$12 () @ test/testdata/dsl/prop.rb:2
 

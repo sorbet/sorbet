@@ -6,5 +6,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/defs_in_blocks.rb:2
       argument a<> @ test/testdata/namer/defs_in_blocks.rb:8
   class <singleton class:<constant:Object>> < ::<Class:BasicObject> () @ ???
     method a_static_method () @ test/testdata/namer/defs_in_blocks.rb:11
-  method <static-init>$11 () @ test/testdata/namer/defs_in_blocks.rb:2
+  method <static-init>$12 () @ test/testdata/namer/defs_in_blocks.rb:2
 

@@ -22,5 +22,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/yield.rb:2
     method yielder (<blk>) @ test/testdata/namer/yield.rb:3
       argument <blk><block> -> T.untyped @ test/testdata/namer/yield.rb:4
   class <singleton class:<constant:Main>> < ::<Class:Object> () @ test/testdata/namer/yield.rb:2
-  method <static-init>$11 () @ test/testdata/namer/yield.rb:2
+  method <static-init>$12 () @ test/testdata/namer/yield.rb:2
 

@@ -24,5 +24,5 @@ class <constant:<root>> < ::Object () @ test/testdata/resolver/resolution_order.
   class <singleton class:<constant:HasError>> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:10
   class <singleton class:<constant:TestInheritace1>> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:14
   class <singleton class:<constant:TestInheritace2>> < ::<Class:A> () @ test/testdata/resolver/resolution_order.rb:17
-  method <static-init>$11 () @ test/testdata/resolver/resolution_order.rb:8
+  method <static-init>$12 () @ test/testdata/resolver/resolution_order.rb:8
 

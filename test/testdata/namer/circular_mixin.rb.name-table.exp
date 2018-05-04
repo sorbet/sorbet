@@ -3,5 +3,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/circular_mixin.rb:2
   class <constant:B> (<constant:BasicObject>, <constant:StubClass>) @ test/testdata/namer/circular_mixin.rb:7
   class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/circular_mixin.rb:2
   class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/circular_mixin.rb:3
-  method <static-init>$11 () @ test/testdata/namer/circular_mixin.rb:2
+  method <static-init>$12 () @ test/testdata/namer/circular_mixin.rb:2
 

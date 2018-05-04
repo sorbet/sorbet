@@ -46,9 +46,6 @@ const char *complex_str = "Complex";
 const char *rational_str = "Rational";
 // A magic non user-creatable class with methods to keep state between passes
 const char *magic_str = "<Magic>";
-const char *DB_str = "DB";
-const char *model_str = "Model";
-const char *m_str = "M";
 const char *enumerable_str = "Enumerable";
 const char *set_str = "Set";
 const char *struct_str = "Struct";
@@ -247,21 +244,6 @@ void GlobalState::initEmpty() {
     arg.data(*this).resultType = core::Types::Object();
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = core::Types::Boolean();
-
-    // TODO(pay-server) Synthesize ::M = ::Opus::DB::Model
-    //
-    // This is a hack to handle that specific alias in pay-server; More-general
-    // handling will require substantial additional sophistication in the
-    // namer+resolver.
-
-    SymbolRef db = enterClassSymbol(Loc::none(), Symbols::Opus(), enterNameConstant(DB_str));
-    db.data(*this).setIsModule(true);
-
-    SymbolRef model = enterClassSymbol(Loc::none(), db, enterNameConstant(model_str));
-    model.data(*this).setIsModule(true);
-
-    SymbolRef m = enterStaticFieldSymbol(Loc::none(), Symbols::root(), enterNameConstant(m_str));
-    m.data(*this).resultType = make_unique<AliasType>(model);
 
     int reservedCount = 0;
 

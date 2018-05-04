@@ -1,5 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$11>()
+  def self.<static-init><<static-init>$12>()
     begin
       ::Foo::Bar.baz(1)
       ::Foo::Bar.baz(2)

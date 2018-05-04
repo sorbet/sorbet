@@ -50,6 +50,6 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/sig_good.rb:2
   class <singleton class:<constant:M1>> < ::Module () @ test/testdata/namer/sig_good.rb:4
   class <singleton class:<constant:T1>> < ::<Class:Object> () @ test/testdata/namer/sig_good.rb:2
   class <singleton class:<constant:T2>> < ::<Class:Object> () @ test/testdata/namer/sig_good.rb:3
-  method <static-init>$11 () @ test/testdata/namer/sig_good.rb:2
+  method <static-init>$12 () @ test/testdata/namer/sig_good.rb:2
   static-field <constant:A1> -> AliasType { symbol = ::T1 } @ test/testdata/namer/sig_good.rb:5
 

@@ -7,5 +7,5 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/ancestors.rb:2
   class <singleton class:<constant:Mixin1>> < ::Module () @ test/testdata/namer/ancestors.rb:2
   class <singleton class:<constant:Mixin2>> < ::Module () @ test/testdata/namer/ancestors.rb:3
   class <singleton class:<constant:Parent>> < ::<Class:Object> () @ test/testdata/namer/ancestors.rb:5
-  method <static-init>$11 () @ test/testdata/namer/ancestors.rb:2
+  method <static-init>$12 () @ test/testdata/namer/ancestors.rb:2
 
