@@ -381,6 +381,9 @@ public:
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
     static std::shared_ptr<TupleType> makeRaw();
+
+    // Return the type of the underlying array that this tuple decays into
+    std::shared_ptr<Type> elementType();
 };
 
 // MagicType is the type of the built-in core::Symbols::Magic()

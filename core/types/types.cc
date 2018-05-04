@@ -642,3 +642,11 @@ bool ShapeType::hasUntyped() {
     return false;
 };
 SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
+
+shared_ptr<Type> TupleType::elementType() {
+    auto *ap = cast_type<AppliedType>(this->underlying.get());
+    ENFORCE(ap);
+    ENFORCE(ap->klass == core::Symbols::Array());
+    ENFORCE(ap->targs.size() == 1);
+    return ap->targs.front();
+}

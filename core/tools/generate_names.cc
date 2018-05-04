@@ -232,6 +232,10 @@ NameDef names[] = {
 
     // methods that are known by tuple and\or shape types
     {"freeze", Core},
+    {"last", Core},
+    {"first", Core},
+    {"min", Core},
+    {"max", Core},
 
     {"staticInit", "<static-init>", Resolver},
 };

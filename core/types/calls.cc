@@ -101,6 +101,42 @@ std::shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef f
             }
             return this->elems[idx];
         }
+        case Names::last()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elems.back();
+        }
+        case Names::first()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elems.front();
+        }
+        case Names::min()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elementType();
+        }
+        case Names::max()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elementType();
+        }
         default:
             break;
     }
