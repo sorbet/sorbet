@@ -11,8 +11,8 @@ using namespace std;
 
 shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
 
-shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    auto ret = _lub(ctx, t1, t2);
+shared_ptr<core::Type> core::Types::any(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+    auto ret = lub(ctx, t1, t2);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
                                                 " was lubbing with " + t2->toString(ctx));
     ENFORCE(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a super type of " + t2->toString(ctx) +
@@ -46,12 +46,12 @@ shared_ptr<core::Type> underlying(shared_ptr<Type> t1) {
 shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     OrType *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    shared_ptr<core::Type> n1 = Types::lub(ctx, o1->left, t2);
+    shared_ptr<core::Type> n1 = Types::any(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
         core::categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<core::Type> n2 = Types::lub(ctx, o1->right, t2);
+    shared_ptr<core::Type> n2 = Types::any(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
         core::categoryCounterInc("lubDistributeOr.outcome", "n2'");
         return n2;
@@ -78,12 +78,12 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
 shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     AndType *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
-    shared_ptr<core::Type> n1 = Types::glb(ctx, a1->left, t2);
+    shared_ptr<core::Type> n1 = Types::all(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
         core::categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<core::Type> n2 = Types::glb(ctx, a1->right, t2);
+    shared_ptr<core::Type> n2 = Types::all(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
         core::categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
@@ -119,7 +119,7 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
             return Types::bottom();
         }
         if (a1a != a1->left || a1b != a1->right) {
-            return Types::buildAnd(ctx, a1a, a1b);
+            return Types::all(ctx, a1a, a1b);
         }
     } else if (OrType *o1 = cast_type<OrType>(t1.get())) {
         auto subl = Types::isSubType(ctx, o1->left, t2);
@@ -135,14 +135,14 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
     return t1;
 }
 
-shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         core::categoryCounterInc("lub", "ref-eq");
         return t1;
     }
 
     if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
-        return _lub(ctx, t2, t1);
+        return lub(ctx, t2, t1);
     }
 
     if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
@@ -224,7 +224,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
             }
             ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
             if (idx.data(ctx).isCovariant()) {
-                newTargs.push_back(Types::lub(ctx, a1->targs[i], a2->targs[j]));
+                newTargs.push_back(Types::any(ctx, a1->targs[i], a2->targs[j]));
             } else if (idx.data(ctx).isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1, t2);
@@ -236,7 +236,7 @@ shared_ptr<core::Type> core::Types::_lub(core::Context ctx, shared_ptr<Type> t1,
                 }
 
             } else if (idx.data(ctx).isContravariant()) {
-                newTargs.push_back(Types::glb(ctx, a1->targs[i], a2->targs[j]));
+                newTargs.push_back(Types::all(ctx, a1->targs[i], a2->targs[j]));
             }
             changed = changed || newTargs.back() != a2->targs[j];
             j++;
@@ -494,8 +494,8 @@ shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    auto ret = _glb(ctx, t1, t2);
+shared_ptr<core::Type> core::Types::all(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+    auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
     ENFORCE(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a subtype of " + t1->toString(ctx) +
@@ -519,7 +519,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
     return ret;
 }
 
-shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
     if (t1.get() == t2.get()) {
         core::categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -556,7 +556,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
     }
 
     if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
-        return _glb(ctx, t2, t1);
+        return glb(ctx, t2, t1);
     }
     if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
         core::categoryCounterInc("glb", "<and");
@@ -678,12 +678,12 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         }
 
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
-            auto lft = Types::glb(ctx, t1, o2->left);
+            auto lft = Types::all(ctx, t1, o2->left);
             if (Types::isSubType(ctx, lft, o2->right)) {
                 core::categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
-            auto rght = Types::glb(ctx, t1, o2->right);
+            auto rght = Types::all(ctx, t1, o2->right);
             if (Types::isSubType(ctx, rght, o2->left)) {
                 core::categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
@@ -697,10 +697,10 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
         }
 
         if (auto *o1 = cast_type<OrType>(t1.get())) { // 6
-            auto t11 = Types::glb(ctx, o1->left, o2->left);
-            auto t12 = Types::glb(ctx, o1->left, o2->right);
-            auto t21 = Types::glb(ctx, o1->right, o2->left);
-            auto t22 = Types::glb(ctx, o1->right, o2->right);
+            auto t11 = Types::all(ctx, o1->left, o2->left);
+            auto t12 = Types::all(ctx, o1->left, o2->right);
+            auto t21 = Types::all(ctx, o1->right, o2->left);
+            auto t22 = Types::all(ctx, o1->right, o2->right);
 
             // This is a heuristic to try and eagerly make a smaller type. For
             // now we are choosing that if any type collapses then we should use
@@ -723,7 +723,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
             }
 
             if (score > 0) {
-                return Types::lub(ctx, Types::lub(ctx, t11, t12), Types::lub(ctx, t21, t22));
+                return Types::any(ctx, Types::any(ctx, t11, t12), Types::any(ctx, t21, t22));
             }
         }
         core::categoryCounterInc("glb.orcollapsed", "no");
@@ -774,7 +774,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
                 newTargs.push_back(a1->targs[j]);
             } else {
                 if (idx.data(ctx).isCovariant()) {
-                    newTargs.push_back(Types::glb(ctx, a1->targs[j], a2->targs[i]));
+                    newTargs.push_back(Types::all(ctx, a1->targs[j], a2->targs[i]));
                 } else if (idx.data(ctx).isInvariant()) {
                     if (!Types::equiv(ctx, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
@@ -785,7 +785,7 @@ shared_ptr<core::Type> core::Types::_glb(core::Context ctx, shared_ptr<Type> t1,
                         newTargs.push_back(a1->targs[j]);
                     }
                 } else if (idx.data(ctx).isContravariant()) {
-                    newTargs.push_back(Types::lub(ctx, a1->targs[j], a2->targs[i]));
+                    newTargs.push_back(Types::any(ctx, a1->targs[j], a2->targs[i]));
                 }
             }
             j++;

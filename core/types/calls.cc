@@ -28,7 +28,7 @@ shared_ptr<Type> OrType::dispatchCall(core::Context ctx, core::NameRef name, cor
     core::categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(ctx, name, callLoc, args, left, fullType, block);
     auto rightRet = right->dispatchCall(ctx, name, callLoc, args, right, fullType, block);
-    return Types::lub(ctx, leftRet, rightRet);
+    return Types::any(ctx, leftRet, rightRet);
 }
 
 shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
@@ -62,7 +62,7 @@ shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, co
 }
 
 shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    return Types::lub(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
+    return Types::any(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
 }
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
@@ -465,9 +465,9 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 for (auto &arg : args) {
                     auto ty = unwrapType(ctx, arg.origins[0], arg.type);
                     if (name == core::Names::any()) {
-                        res = Types::buildOr(ctx, res, ty);
+                        res = Types::any(ctx, res, ty);
                     } else {
-                        res = Types::buildAnd(ctx, res, ty);
+                        res = Types::all(ctx, res, ty);
                     }
                 }
 

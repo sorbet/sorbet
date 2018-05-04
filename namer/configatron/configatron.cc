@@ -126,7 +126,7 @@ struct Path {
 
     void setType(core::GlobalState &gs, shared_ptr<core::Type> tp) {
         if (myType) {
-            myType = core::Types::buildOr(core::MutableContext(gs, core::Symbols::root()), myType, tp);
+            myType = core::Types::any(core::MutableContext(gs, core::Symbols::root()), myType, tp);
         } else {
             myType = tp;
         }
@@ -171,7 +171,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
                 auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::dynamic();
                 if (elemType) {
                     elemType =
-                        core::Types::buildOr(core::MutableContext(gs, core::Symbols::root()), elemType, thisElemType);
+                        core::Types::any(core::MutableContext(gs, core::Symbols::root()), elemType, thisElemType);
                 } else {
                     elemType = thisElemType;
                 }

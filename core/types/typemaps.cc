@@ -246,7 +246,7 @@ std::shared_ptr<Type> OrType::_instantiate(core::Context ctx, std::vector<Symbol
         if (!right) {
             right = this->right;
         }
-        return Types::buildOr(ctx, left, right);
+        return Types::any(ctx, left, right);
     }
     return nullptr;
 }
@@ -261,7 +261,7 @@ std::shared_ptr<Type> OrType::_instantiate(core::Context ctx, const TypeConstrai
         if (!right) {
             right = this->right;
         }
-        return Types::buildOr(ctx, left, right);
+        return Types::any(ctx, left, right);
     }
     return nullptr;
 }
@@ -276,7 +276,7 @@ std::shared_ptr<Type> OrType::_approximate(core::Context ctx, const TypeConstrai
         if (!right) {
             right = this->right;
         }
-        return Types::buildOr(ctx, left, right);
+        return Types::any(ctx, left, right);
     }
     return nullptr;
 }
@@ -292,7 +292,7 @@ std::shared_ptr<Type> AndType::_instantiate(core::Context ctx, std::vector<Symbo
         if (!right) {
             right = this->right;
         }
-        return Types::buildAnd(ctx, left, right);
+        return Types::all(ctx, left, right);
     }
     return nullptr;
 }
@@ -307,7 +307,7 @@ std::shared_ptr<Type> AndType::_instantiate(core::Context ctx, const TypeConstra
         if (!right) {
             right = this->right;
         }
-        return Types::buildAnd(ctx, left, right);
+        return Types::all(ctx, left, right);
     }
     return nullptr;
 }
@@ -322,7 +322,7 @@ std::shared_ptr<Type> AndType::_approximate(core::Context ctx, const TypeConstra
         if (!right) {
             right = this->right;
         }
-        return Types::buildAnd(ctx, left, right);
+        return Types::all(ctx, left, right);
     }
     return nullptr;
 }

@@ -132,7 +132,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
             auto &second = fnd->second;
             auto &typeAndOrigin = env.types[i];
             auto combinedType =
-                core::Types::glb(ctx, dropConstructor(ctx, typeAndOrigin.origins[0], typeAndOrigin.type), second);
+                core::Types::all(ctx, dropConstructor(ctx, typeAndOrigin.origins[0], typeAndOrigin.type), second);
             if (combinedType->isBottom()) {
                 copy.mutate().isDead = true;
                 break;
@@ -151,7 +151,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
         if (fnd == other.yesTypeTests.end()) {
             it = yesTypeTests.erase(it);
         } else {
-            entry.second = core::Types::lub(ctx, fnd->second, entry.second);
+            entry.second = core::Types::any(ctx, fnd->second, entry.second);
             it++;
         }
     }
@@ -163,7 +163,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
         if (fnd == other.noTypeTests.end()) {
             it = noTypeTests.erase(it);
         } else {
-            entry.second = core::Types::glb(ctx, fnd->second, entry.second);
+            entry.second = core::Types::all(ctx, fnd->second, entry.second);
             it++;
         }
     }
@@ -496,7 +496,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         if (tp.type->isDynamic()) {
             tp.type = core::Types::falsyTypes();
         } else {
-            tp.type = core::Types::glb(ctx, tp.type, core::Types::falsyTypes());
+            tp.type = core::Types::all(ctx, tp.type, core::Types::falsyTypes());
             if (tp.type->isBottom()) {
                 isDead = true;
                 return;
@@ -533,7 +533,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
             // makes it easier to migrate code
             tp.type = typeTested.second;
         } else {
-            tp.type = core::Types::glb(ctx, tp.type, typeTested.second);
+            tp.type = core::Types::all(ctx, tp.type, typeTested.second);
             if (tp.type->isBottom()) {
                 isDead = true;
                 setTypeAndOrigin(typeTested.first, tp);
@@ -576,7 +576,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
         auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
         auto &thisTO = types[i];
         if (thisTO.type.get() != nullptr) {
-            thisTO.type = core::Types::lub(ctx, thisTO.type, otherTO.type);
+            thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type->sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
@@ -644,7 +644,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
             auto otherPin = other.pinnedTypes.find(var);
             if (otherPin != other.pinnedTypes.end()) {
                 if (tp.type != nullptr) {
-                    tp.type = core::Types::lub(ctx, tp.type, otherPin->second.type);
+                    tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
                     for (auto origin : otherPin->second.origins) {
                         if (find(tp.origins.begin(), tp.origins.end(), origin) == tp.origins.end()) {
                             tp.origins.push_back(origin);

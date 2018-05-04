@@ -93,7 +93,7 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, std::shared_ptr<Type> t1, st
         if (!entry) {
             entry = t2;
         } else if (t2->isFullyDefined()) {
-            entry = Types::glb(ctx, entry, t2);
+            entry = Types::all(ctx, entry, t2);
         } else {
             entry = AndType::make_shared(entry, t2);
         }
@@ -104,7 +104,7 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, std::shared_ptr<Type> t1, st
         if (!entry) {
             entry = t1;
         } else if (t1->isFullyDefined()) {
-            entry = Types::lub(ctx, entry, t1);
+            entry = Types::any(ctx, entry, t1);
         } else {
             entry = AndType::make_shared(entry, t1);
         }

@@ -208,13 +208,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
 shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            return core::Types::buildOr(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig),
-                                        core::Types::nilClass());
+            return core::Types::any(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig), core::Types::nilClass());
         case core::Names::all()._id: {
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::buildAnd(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
+                result = core::Types::all(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
                 i++;
             }
             return result;
@@ -223,7 +222,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::buildOr(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
+                result = core::Types::any(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
                 i++;
             }
             return result;
@@ -276,7 +275,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
             auto result = getResultLiteral(ctx, arr->elems[0]);
             int i = 1;
             while (i < arr->elems.size()) {
-                result = core::Types::buildOr(ctx, result, getResultLiteral(ctx, arr->elems[i]));
+                result = core::Types::any(ctx, result, getResultLiteral(ctx, arr->elems[i]));
                 i++;
             }
             return result;

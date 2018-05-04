@@ -111,12 +111,12 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
     auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
 
-    auto barNfoo1 = core::Types::lub(ctx, barType, foo1Type);
-    auto foo1Nbar = core::Types::lub(ctx, foo1Type, barType);
-    auto barNfoo2 = core::Types::lub(ctx, barType, foo2Type);
-    auto foo2Nbar = core::Types::lub(ctx, foo2Type, barType);
-    auto foo1Nfoo2 = core::Types::lub(ctx, foo1Type, foo2Type);
-    auto foo2Nfoo1 = core::Types::lub(ctx, foo2Type, foo1Type);
+    auto barNfoo1 = core::Types::any(ctx, barType, foo1Type);
+    auto foo1Nbar = core::Types::any(ctx, foo1Type, barType);
+    auto barNfoo2 = core::Types::any(ctx, barType, foo2Type);
+    auto foo2Nbar = core::Types::any(ctx, foo2Type, barType);
+    auto foo1Nfoo2 = core::Types::any(ctx, foo1Type, foo2Type);
+    auto foo2Nfoo1 = core::Types::any(ctx, foo2Type, foo1Type);
 
     ASSERT_EQ("ClassType", barNfoo1->typeName());
     ASSERT_TRUE(core::Types::isSubType(ctx, barType, barNfoo1));
@@ -136,12 +136,12 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
 
     auto intType = make_shared<core::ClassType>(core::Symbols::Integer());
-    auto intNfoo1 = core::Types::lub(ctx, foo1Type, intType);
-    auto intNbar = core::Types::lub(ctx, barType, intType);
-    auto intNfoo1Nbar = core::Types::lub(ctx, intNfoo1, barType);
+    auto intNfoo1 = core::Types::any(ctx, foo1Type, intType);
+    auto intNbar = core::Types::any(ctx, barType, intType);
+    auto intNfoo1Nbar = core::Types::any(ctx, intNfoo1, barType);
     ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nbar, intNbar));
-    auto intNfoo1Nfoo2 = core::Types::lub(ctx, intNfoo1, foo2Type);
-    auto intNfoo1Nfoo2Nbar = core::Types::lub(ctx, intNfoo1Nfoo2, barType);
+    auto intNfoo1Nfoo2 = core::Types::any(ctx, intNfoo1, foo2Type);
+    auto intNfoo1Nfoo2Nbar = core::Types::any(ctx, intNfoo1Nfoo2, barType);
     ASSERT_TRUE(core::Types::equiv(ctx, intNfoo1Nfoo2Nbar, intNbar));
 }
 
@@ -161,12 +161,12 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
     auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
 
-    auto barOrfoo1 = core::Types::glb(ctx, barType, foo1Type);
-    auto foo1Orbar = core::Types::glb(ctx, foo1Type, barType);
-    auto barOrfoo2 = core::Types::glb(ctx, barType, foo2Type);
-    auto foo2Orbar = core::Types::glb(ctx, foo2Type, barType);
-    auto foo1Orfoo2 = core::Types::glb(ctx, foo1Type, foo2Type);
-    auto foo2Orfoo1 = core::Types::glb(ctx, foo2Type, foo1Type);
+    auto barOrfoo1 = core::Types::all(ctx, barType, foo1Type);
+    auto foo1Orbar = core::Types::all(ctx, foo1Type, barType);
+    auto barOrfoo2 = core::Types::all(ctx, barType, foo2Type);
+    auto foo2Orbar = core::Types::all(ctx, foo2Type, barType);
+    auto foo1Orfoo2 = core::Types::all(ctx, foo1Type, foo2Type);
+    auto foo2Orfoo1 = core::Types::all(ctx, foo2Type, foo1Type);
 
     ASSERT_EQ("ClassType", barOrfoo1->typeName());
     ASSERT_TRUE(core::Types::isSubType(ctx, barOrfoo1, barType));
