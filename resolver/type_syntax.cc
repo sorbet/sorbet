@@ -362,7 +362,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 if (sym.data(ctx).typeArity(ctx) > 0 && !silenceGenericError) {
                     if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
-                                    i->toString(ctx));
+                                    i->symbol.show(ctx));
                     }
                 }
                 result = sym.data(ctx).externalType(ctx);
@@ -370,7 +370,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = make_shared<core::LambdaParam>(sym);
             } else {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Malformed type declaration. Not a class type `{}`", i->toString(ctx));
+                    e.setHeader("Malformed type declaration. Not a class type `{}`", i->symbol.show(ctx));
                 }
                 result = core::Types::dynamic();
             }
@@ -411,7 +411,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
             if (recvi == nullptr) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Malformed type declaration. Unknown type syntax `{}`", expr->toString(ctx));
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
                 result = core::Types::dynamic();
                 return;
@@ -438,7 +438,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
             if (s->fun != core::Names::squareBrackets()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Malformed type declaration. Unknown type syntax `{}`", expr->toString(ctx));
+                    e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
                 }
             }
 
@@ -462,7 +462,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Illegal type expression. Unknown type `{}`", out->toString(ctx));
+                e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
             }
             result = core::Types::dynamic();
         },
