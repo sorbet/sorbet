@@ -148,6 +148,9 @@ public:
         static constexpr int TYPE_INVARIANT = 0x0080;
         static constexpr int TYPE_CONTRAVARIANT = 0x0040;
         static constexpr int TYPE_FIXED = 0x0020;
+
+        // Static Field flags
+        static constexpr int STATIC_FIELD_TYPE_ALIAS = 0x0100;
     };
 
     SymbolRef owner;
@@ -487,6 +490,15 @@ public:
         flags |= Symbol::Flags::CLASS_INTERFACE;
     }
 
+    inline void setStaticTypeAlias() {
+        ENFORCE(isStaticField());
+        flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
+    }
+    inline bool isStaticTypeAlias() {
+        ENFORCE(isStaticField());
+        return (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
+    }
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
@@ -751,6 +763,11 @@ public:
 
     static SymbolRef void_() {
         return SymbolRef(nullptr, 46);
+    }
+
+    // Synthetic symbol used by resolver to mark type alias assignments.
+    static SymbolRef typeAliasTemp() {
+        return SymbolRef(nullptr, 51);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

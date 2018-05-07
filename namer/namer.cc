@@ -616,7 +616,17 @@ public:
         }
         auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
         if (shouldBeSelf == nullptr) {
-            return fillAssign(ctx, lhs, move(asgn));
+            auto ret = fillAssign(ctx, lhs, move(asgn));
+            if (send->fun == core::Names::typeAlias()) {
+                core::SymbolRef sym;
+                if (auto id = ast::cast_tree<ast::Ident>(ret->lhs.get())) {
+                    sym = id->symbol;
+                }
+                if (sym.exists() && sym.data(ctx).isStaticField()) {
+                    sym.data(ctx).setStaticTypeAlias();
+                }
+            }
+            return ret;
         }
 
         auto *typeName = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());

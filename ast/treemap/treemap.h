@@ -293,6 +293,10 @@ private:
         if (what == nullptr) {
             return what;
         }
+        if (TreeRef *ref = cast_tree<TreeRef>(what.get())) {
+            ENFORCE(ref->tree);
+            return mapIt(move(ref->tree), ctx);
+        }
         auto loc = what->loc;
 
         try {

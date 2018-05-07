@@ -1,0 +1,19 @@
+class <constant:<root>> < ::Object () @ -e:1
+  class <constant:Foo> < ::Object () @ test/testdata/resolver/alias.rb:1
+    method address () -> NilClass | ShapeType {
+          Symbol(:"line1") => String | NilClass
+          Symbol(:"line2") => String | NilClass
+          Symbol(:"city") => String | NilClass
+          Symbol(:"state") => String | NilClass
+          Symbol(:"postal_code") => String | NilClass
+          Symbol(:"country") => String | NilClass
+        } @ test/testdata/resolver/alias.rb:25
+    method any () @ test/testdata/resolver/alias.rb:29
+    method bar (a) -> Integer @ test/testdata/resolver/alias.rb:4
+      argument a<> -> Integer @ test/testdata/resolver/alias.rb:3
+    method react () -> String @ test/testdata/resolver/alias.rb:11
+    static-field <constant:A> -> T.untyped @ test/testdata/resolver/alias.rb:2
+    static-field <constant:ADDRESS_TYPE> -> T.untyped @ test/testdata/resolver/alias.rb:15
+    static-field <constant:Reactions> -> T.untyped @ test/testdata/resolver/alias.rb:8
+  class <singleton class:<constant:Foo>> < ::<Class:Object> () @ test/testdata/resolver/alias.rb:1
+

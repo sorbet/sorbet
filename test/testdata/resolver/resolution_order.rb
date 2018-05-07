@@ -8,7 +8,19 @@
 A::AB::BC
 
 class HasError
- include D::DA::DOES_NOT_EXIST # error: Unable to resolve constant
+  include D::DA::DOES_NOT_EXIST # error: Unable to resolve constant
+end
+
+class IsGood
+  sig(a: E::EC).returns(Integer)
+  def foo1(a)
+    1
+  end
+
+  sig(a: E::EA).returns(Integer)
+  def foo2(a)
+    1
+  end
 end
 
 class TestInheritace1 < A::AB
@@ -42,6 +54,7 @@ end
 module E
   include D
   EA = DA
+  EC = B::BC
 end
 
 module D

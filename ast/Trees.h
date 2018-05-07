@@ -18,10 +18,14 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0) = 0;
     virtual std::string nodeName() = 0;
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
-
+    std::unique_ptr<Expression> deepCopy() const;
     virtual void _sanityCheck() = 0;
-
     core::Loc loc;
+
+    class DeepCopyError {};
+
+    // This function should be private but it makes it hard to access from template methods in TreeCopy.cc
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const = 0;
 };
 
 template <class To> To *cast_tree(Expression *what) {
@@ -75,6 +79,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -96,6 +101,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -109,6 +115,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -125,6 +132,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -139,6 +147,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -152,6 +161,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -163,6 +173,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -176,6 +187,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -189,6 +201,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -202,6 +215,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -224,6 +238,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -244,6 +259,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -257,6 +273,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -270,6 +287,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -290,6 +308,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -303,6 +322,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -316,6 +336,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -330,6 +351,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -343,6 +365,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -356,6 +379,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -370,6 +394,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -397,6 +422,22 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+
+private:
+    virtual void _sanityCheck();
+};
+
+// Used inside resolver to insert trees that were copied with DeepCopy
+// Should only exist inside resolver.
+class TreeRef final : public Expression {
+public:
+    std::unique_ptr<Expression> tree;
+    TreeRef(core::Loc loc, std::unique_ptr<Expression> tree);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -414,6 +455,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -432,6 +474,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -449,6 +492,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -469,6 +513,7 @@ public:
     core::NameRef asSymbol(const core::GlobalState &gs) const;
     bool isTrue(const core::GlobalState &gs);
     bool isFalse(const core::GlobalState &gs);
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -483,6 +528,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -496,6 +542,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -509,6 +556,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -521,6 +569,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -534,6 +583,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -549,6 +599,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -566,6 +617,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();
@@ -577,6 +629,7 @@ public:
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
 
 private:
     virtual void _sanityCheck();

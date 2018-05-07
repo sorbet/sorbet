@@ -38,6 +38,7 @@ template class std::unique_ptr<ruby_typer::ast::Self>;
 template class std::unique_ptr<ruby_typer::ast::Block>;
 template class std::unique_ptr<ruby_typer::ast::InsSeq>;
 template class std::unique_ptr<ruby_typer::ast::EmptyTree>;
+template class std::unique_ptr<ruby_typer::ast::TreeRef>;
 
 using namespace std;
 
@@ -1184,5 +1185,21 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
+string TreeRef::nodeName() {
+    return "TreeRef";
+}
+
+std::string TreeRef::toString(const core::GlobalState &gs, int tabs) {
+    return tree ? this->tree->toString(gs, tabs) : "TreeRef(nullptr)";
+}
+
+std::string TreeRef::showRaw(const core::GlobalState &gs, int tabs) {
+    return nodeName() + "{ underlying = " + (tree ? tree->showRaw(gs, tabs) : "nullptr") + " }";
+}
+
+TreeRef::TreeRef(core::Loc loc, std::unique_ptr<Expression> tree) : Expression(loc), tree(move(tree)) {}
+void TreeRef::_sanityCheck() {
+    tree->_sanityCheck();
+}
 } // namespace ast
 } // namespace ruby_typer

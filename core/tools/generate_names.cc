@@ -136,6 +136,7 @@ NameDef names[] = {
     {"privateClassMethod", "private_class_method", Namer | Resolver},
     {"moduleFunction", "module_function", Namer | Resolver},
     {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
+    {"typeAlias", "type_alias", Namer | Resolver},
     {"typeMember", "type_member", DSL | Namer | Resolver},
     {"typeTemplate", "type_template", DSL | Namer | Resolver},
     {"T", DSL | Namer},
