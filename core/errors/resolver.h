@@ -7,7 +7,7 @@ namespace core {
 namespace errors {
 namespace Resolver {
 constexpr ErrorClass DynamicConstant{5001, StrictLevel::Typed};
-constexpr ErrorClass StubConstant{5002, StrictLevel::Typed};
+constexpr ErrorClass StubConstant{5002, StrictLevel::Stripe};
 constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::Stripe};
 constexpr ErrorClass InvalidTypeDeclaration{5004, StrictLevel::Stripe};
 constexpr ErrorClass InvalidDeclareVariables{5005, StrictLevel::Typed};
