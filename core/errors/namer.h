@@ -4,9 +4,9 @@ namespace ruby_typer {
 namespace core {
 namespace errors {
 namespace Namer {
-constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::Typed};
-constexpr ErrorClass IncludeNotConstant{4002, StrictLevel::Typed};
-constexpr ErrorClass IncludePassedBlock{4003, StrictLevel::Typed};
+constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::Stripe};
+constexpr ErrorClass IncludeNotConstant{4002, StrictLevel::Stripe};
+constexpr ErrorClass IncludePassedBlock{4003, StrictLevel::Stripe};
 constexpr ErrorClass DynamicConstantDefinition{4004, StrictLevel::Typed};
 constexpr ErrorClass DynamicMethodDefinition{4005, StrictLevel::Typed};
 constexpr ErrorClass SelfOutsideClass{4006, StrictLevel::Typed};
