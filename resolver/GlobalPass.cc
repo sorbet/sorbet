@@ -31,7 +31,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     }
     auto &data = my.data(gs);
     if (!data.isTypeMember() && !data.isTypeArgument()) {
-        if (auto e = gs.beginError(inSym.definitionLoc, core::errors::Resolver::NotATypeVariable)) {
+        if (auto e = gs.beginError(data.definitionLoc, core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.toString(gs));
         }
         return false;

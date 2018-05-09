@@ -510,7 +510,9 @@ public:
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
                                unique_ptr<Node> superclass, unique_ptr<Node> body, const token *end_) {
-        return make_unique<Class>(tok_loc(class_, end_), move(name), move(superclass), move(body));
+        Loc loc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
+
+        return make_unique<Class>(loc, move(name), move(superclass), move(body));
     }
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
@@ -521,12 +523,13 @@ public:
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
-        return make_unique<Module>(tok_loc(module, end_), move(name), move(body));
+        Loc loc = tok_loc(module).join(maybe_loc(name));
+        return make_unique<Module>(loc, move(name), move(body));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
                                 const token *end_) {
-        return make_unique<SClass>(tok_loc(class_).join(tok_loc(end_)), move(expr), move(body));
+        return make_unique<SClass>(tok_loc(class_), move(expr), move(body));
     }
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,

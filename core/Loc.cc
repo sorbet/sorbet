@@ -71,22 +71,42 @@ string leftPad(string s, int l) {
     return s;
 }
 
+constexpr unsigned int WINDOW_SIZE = 10; // how many lines of source to print
+constexpr unsigned int WINDOW_HALF_SIZE = WINDOW_SIZE / 2;
+static_assert((WINDOW_SIZE & 1) == 0, "WINDOW_SIZE should be divisable by 2");
+
+void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int posWidth) {
+    printTabs(buf, tabs);
+    buf << rang::fgB::black << leftPad(to_string(line + 1), posWidth) << " |" << rang::style::reset;
+    auto endPos = filed.line_breaks()[line + 1];
+    if (filed.source()[endPos] == '\n') {
+        endPos -= 1;
+    }
+    buf.write(filed.source().data() + filed.line_breaks()[line] + 1, endPos - filed.line_breaks()[line]);
+    buf << endl;
+}
+
 string Loc::toString(const core::GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &filed = this->file.data(gs);
     auto pos = this->position(gs);
     int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
-    auto lineIt = pos.first.line - 1;
-    while (lineIt != pos.second.line) {
+    const auto firstLine = pos.first.line - 1;
+    auto lineIt = firstLine;
+    while (lineIt != pos.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
+        addLocLine(buf, lineIt, filed, tabs, posWidth);
+        lineIt++;
+    }
+    if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
         printTabs(buf, tabs);
-        buf << rang::fgB::black << leftPad(to_string(lineIt + 1), posWidth) << " |" << rang::style::reset;
-        auto endPos = filed.line_breaks()[lineIt + 1];
-        if (filed.source()[endPos] == '\n') {
-            endPos -= 1;
-        }
-        buf.write(filed.source().data() + filed.line_breaks()[lineIt] + 1, endPos - filed.line_breaks()[lineIt]);
-        buf << endl;
+        string space(posWidth, ' ');
+        buf << space << " |"
+            << "...\n";
+        lineIt = pos.second.line - WINDOW_HALF_SIZE;
+    }
+    while (lineIt != pos.second.line) {
+        addLocLine(buf, lineIt, filed, tabs, posWidth);
         lineIt++;
     }
 
