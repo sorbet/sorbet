@@ -42,7 +42,6 @@ begin
   class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin)
     def self.<static-init><<static-init>>()
       begin
-        self(<singleton class:<constant:Child>>).include(::Mixin, ::Mixin)
         self(<singleton class:<constant:Child>>).include(3)
         self(<singleton class:<constant:Child>>).include(::Mixin) do ||
           <emptyTree>

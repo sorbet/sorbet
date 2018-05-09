@@ -25,7 +25,6 @@ module OtherMixin
 end
 class Child < Parent
   include Mixin
-  include Mixin, Mixin # error: `include` should only be passed a single constant. You passed `2` parameters
   include 3 # error: `include` must be passed a constant literal
   include Mixin do # error: `include` can not be passed a block
   end

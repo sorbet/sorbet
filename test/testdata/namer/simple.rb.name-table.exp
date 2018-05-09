@@ -17,7 +17,7 @@ class <constant:<root>> < ::Object () @ test/testdata/namer/simple.rb:2
   class <constant:Parent> < ::Object () @ test/testdata/namer/simple.rb:20
   class <singleton class:<constant:ANamespace>> < ::Module () @ test/testdata/namer/simple.rb:13
   class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/namer/simple.rb:26
-    method <block>$2 () @ test/testdata/namer/simple.rb:30
+    method <block>$2 () @ test/testdata/namer/simple.rb:29
   class <singleton class:<constant:Mixin>> < ::Module () @ test/testdata/namer/simple.rb:22
   class <singleton class:<constant:NormalClass>> < ::<Class:Object> () @ test/testdata/namer/simple.rb:2
     method normal_static_method () @ test/testdata/namer/simple.rb:5

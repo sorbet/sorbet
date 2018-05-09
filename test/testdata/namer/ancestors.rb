@@ -9,3 +9,7 @@ end
 class Child < Parent
   include Mixin2
 end
+
+class MultipleInclude
+  include Mixin1, Mixin2
+end

@@ -110,20 +110,6 @@ Begin {
             receiver = NULL
             method = include
             args = [
-              Const {
-                scope = NULL
-                name = <constant:Mixin>
-              }
-              Const {
-                scope = NULL
-                name = <constant:Mixin>
-              }
-            ]
-          }
-          Send {
-            receiver = NULL
-            method = include
-            args = [
               Integer {
                 val = "3"
               }
