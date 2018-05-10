@@ -1,4 +1,5 @@
 # These are extensions to the Ruby language that we added to make the type systems easier
+# typed: strict
 
 class Struct
   sig(
@@ -87,7 +88,7 @@ class RubyTyper::ENVClass
   .returns(T::Hash[String, T.nilable(String)])
   def update(key, &blk); end
 end
-::ENV = T.let(nil, RubyTyper::ENVClass)
+::ENV = T.let(T.unsafe(nil), RubyTyper::ENVClass)
 
 # The magic type that sig.void returns
 module RubyTyper::Void

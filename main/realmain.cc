@@ -388,12 +388,8 @@ struct typecheck_thread_result {
     core::CounterState counters;
 };
 
-// If ever given a result type, it should be something along the lines of
-// vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
-void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
-               WorkerPool &workers) {
-    vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
-
+vector<unique_ptr<ast::Expression>> resolve(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what,
+                                            const Options &opts, WorkerPool &workers) {
     try {
         {
             core::UnfreezeNameTable nameTableAccess(*gs);     // creates names from config
@@ -457,6 +453,16 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
             cout << resolved->showRaw(*gs) << '\n';
         }
     }
+    return what;
+}
+
+// If ever given a result type, it should be something along the lines of
+// vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
+void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
+               WorkerPool &workers) {
+    vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
+    what = resolve(gs, move(what), opts, workers);
+
     {
         Timer timeit(logger, "Infer+CFG");
 
@@ -562,8 +568,8 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, logger);
         vector<std::string> empty;
-        typecheck(gs, index(gs, empty, payloadFiles, emptyOpts, workers, kvstore), emptyOpts,
-                  workers); // result is thrown away
+        resolve(gs, index(gs, empty, payloadFiles, emptyOpts, workers, kvstore), emptyOpts,
+                workers); // result is thrown away
     } else {
         Timer timeit(logger, "Read serialized payload");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);

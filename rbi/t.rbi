@@ -1,3 +1,4 @@
+# typed: strict
 module T
   sig(x: T.untyped).returns(T.untyped)
   def self.unsafe(x); end

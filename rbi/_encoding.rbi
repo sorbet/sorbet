@@ -1,3 +1,4 @@
+# typed: strict
 # Augmenting core.rbi for the Encoding class
 class Encoding
   ANSI_X3_4_1968 = _

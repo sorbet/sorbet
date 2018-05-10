@@ -1,3 +1,4 @@
+# typed: strict
 module Kernel
   sig(
     predicate: BasicObject,

@@ -1,3 +1,4 @@
+# typed: strict
 class Date::Infinity
   sig.returns(Date::Infinity)
   def +@(); end

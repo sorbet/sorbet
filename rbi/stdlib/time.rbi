@@ -1,3 +1,4 @@
+# typed: strict
 class Time
   sig(
       date: String,

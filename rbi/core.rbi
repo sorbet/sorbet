@@ -1,3 +1,4 @@
+# typed: strict
 module Abbrev
 end
 class BasicObject
@@ -5332,7 +5333,7 @@ module Gem
   sig.returns(String)
   def self.config_file(); end
 
-  sig.returns(Gem::ConfigFile)
+  sig.returns(T.untyped)
   def self.configuration(); end
 
   sig(
