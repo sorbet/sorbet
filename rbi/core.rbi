@@ -6649,11 +6649,170 @@ module Kernel
   .returns(NilClass)
   def self.warn(*msg); end
 
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def !~(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.nilable(Integer))
+  def <=>(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def ===(other); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(NilClass)
+  def =~(other); end
+
   sig.returns(Kernel)
   def clone(); end
 
+  sig(
+      port: IO,
+  )
+  .returns(NilClass)
+  def display(port); end
+
+  sig.returns(Kernel)
+  def dup(); end
+
+  sig(
+      method: Symbol,
+      args: BasicObject,
+  )
+  .returns(Enumerator[T.untyped])
+  sig(
+      method: Symbol,
+      args: BasicObject,
+      blk: BasicObject,
+  )
+  .returns(Enumerator[T.untyped])
+  def enum_for(method=_, *args, &blk); end
+
+  sig(
+      other: BasicObject,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def eql?(other); end
+
+  sig(
+      mod: Module,
+  )
+  .returns(NilClass)
+  def extend(mod); end
+
+  sig.returns(Kernel)
+  def freeze(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def frozen?(); end
+
+  sig.returns(Integer)
+  def hash(); end
+
+  sig.returns(String)
+  def inspect(); end
+
+  sig(
+      arg0: Class,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def instance_of?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def instance_variable_defined?(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+  )
+  .returns(T.untyped)
+  def instance_variable_get(arg0); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+      arg1: BasicObject,
+  )
+  .returns(T.untyped)
+  def instance_variable_set(arg0, arg1); end
+
+  sig.returns(T::Array[Symbol])
+  def instance_variables(); end
+
+  sig(
+      arg0: T.any(Class, Module),
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def is_a?(arg0); end
+
+  sig(
+      arg0: Class,
+  )
+  .returns(T.any(TrueClass, FalseClass))
+  def kind_of?(arg0); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Method)
+  def method(arg0); end
+
+  sig(
+      regular: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def methods(regular=_); end
+
   sig.returns(T.any(TrueClass, FalseClass))
   def nil?(); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def private_methods(all=_); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def protected_methods(all=_); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Method)
+  def public_method(arg0); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def public_methods(all=_); end
+
+  sig(
+      arg0: T.any(Symbol, String),
+      args: BasicObject,
+  )
+  .returns(T.untyped)
+  def public_send(arg0, *args); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(T.untyped)
+  def remove_instance_variable(arg0); end
 
   sig(
       arg0: T.any(String, Symbol),
@@ -6668,8 +6827,54 @@ module Kernel
   .returns(T.untyped)
   def send(arg0, *arg1, &blk); end
 
+  sig.returns(Class)
+  def singleton_class(); end
+
+  sig(
+      arg0: Symbol,
+  )
+  .returns(Method)
+  def singleton_method(arg0); end
+
+  sig(
+      all: T.any(TrueClass, FalseClass),
+  )
+  .returns(T::Array[Symbol])
+  def singleton_methods(all=_); end
+
+  sig.returns(Kernel)
+  def taint(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def tainted?(); end
+
+  sig(
+      method: Symbol,
+      args: BasicObject,
+  )
+  .returns(Enumerator[T.untyped])
+  sig(
+      method: Symbol,
+      args: BasicObject,
+      blk: BasicObject,
+  )
+  .returns(Enumerator[T.untyped])
+  def to_enum(method=_, *args, &blk); end
+
   sig.returns(String)
   def to_s(); end
+
+  sig.returns(Kernel)
+  def trust(); end
+
+  sig.returns(Kernel)
+  def untaint(); end
+
+  sig.returns(Kernel)
+  def untrust(); end
+
+  sig.returns(T.any(TrueClass, FalseClass))
+  def untrusted?(); end
 
   type_parameters(:T).sig(
       x: Object,
@@ -8247,208 +8452,17 @@ class Numeric
 end
 
 class Object
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def !~(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.nilable(Integer))
-  def <=>(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def ===(other); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(NilClass)
-  def =~(other); end
-
   sig.returns(Object)
   def clone(); end
-
-  sig(
-      port: IO,
-  )
-  .returns(NilClass)
-  def display(port); end
 
   sig.returns(Object)
   def dup(); end
 
-  sig(
-      method: Symbol,
-      args: BasicObject,
-  )
-  .returns(Enumerator[T.untyped])
-  sig(
-      method: Symbol,
-      args: BasicObject,
-      blk: BasicObject,
-  )
-  .returns(Enumerator[T.untyped])
-  def enum_for(method=_, *args, &blk); end
-
-  sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def eql?(other); end
-
-  sig(
-      mod: Module,
-  )
-  .returns(NilClass)
-  def extend(mod); end
-
   sig.returns(Object)
   def freeze(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
-  def frozen?(); end
-
-  sig.returns(Integer)
-  def hash(); end
-
-  sig.returns(String)
-  def inspect(); end
-
-  sig(
-      arg0: Class,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def instance_of?(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def instance_variable_defined?(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-  )
-  .returns(T.untyped)
-  def instance_variable_get(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      arg1: BasicObject,
-  )
-  .returns(T.untyped)
-  def instance_variable_set(arg0, arg1); end
-
-  sig.returns(T::Array[Symbol])
-  def instance_variables(); end
-
-  sig(
-      arg0: T.any(Class, Module),
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def is_a?(arg0); end
-
-  sig(
-      arg0: Class,
-  )
-  .returns(T.any(TrueClass, FalseClass))
-  def kind_of?(arg0); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def method(arg0); end
-
-  sig(
-      regular: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def methods(regular=_); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def private_methods(all=_); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def protected_methods(all=_); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def public_method(arg0); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def public_methods(all=_); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def public_send(arg0, *args); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(T.untyped)
-  def remove_instance_variable(arg0); end
-
-  sig(
-      arg0: T.any(Symbol, String),
-      args: BasicObject,
-  )
-  .returns(T.untyped)
-  def send(arg0, *args); end
-
-  sig.returns(Class)
-  def singleton_class(); end
-
-  sig(
-      arg0: Symbol,
-  )
-  .returns(Method)
-  def singleton_method(arg0); end
-
-  sig(
-      all: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
-  def singleton_methods(all=_); end
-
   sig.returns(Object)
   def taint(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def tainted?(); end
-
-  sig(
-      method: Symbol,
-      args: BasicObject,
-  )
-  .returns(Enumerator[T.untyped])
-  sig(
-      method: Symbol,
-      args: BasicObject,
-      blk: BasicObject,
-  )
-  .returns(Enumerator[T.untyped])
-  def to_enum(method=_, *args, &blk); end
 
   sig.returns(Object)
   def trust(); end
@@ -8458,9 +8472,6 @@ class Object
 
   sig.returns(Object)
   def untrust(); end
-
-  sig.returns(T.any(TrueClass, FalseClass))
-  def untrusted?(); end
 end
 
 class Pathname

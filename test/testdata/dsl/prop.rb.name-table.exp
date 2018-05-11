@@ -176,7 +176,7 @@ class <constant:<root>> < ::Object () @ test/testdata/dsl/prop.rb:2
     class <constant:IntegerParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:10
     class <constant:StringParam> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:11
     method <static-init> () @ test/testdata/dsl/prop.rb:2
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8249
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
     method main () @ test/testdata/dsl/prop.rb:76
   class <constant:Opus> () @ ???
     class <constant:Param> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
