@@ -229,18 +229,6 @@ core::LiteralType::LiteralType(bool val)
 core::TupleType::TupleType(vector<shared_ptr<Type>> elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
 
-bool LiteralType::equalsLiteral(const GlobalState &gs, std::shared_ptr<LiteralType> rhs) {
-    if (this->value != rhs->value) {
-        return false;
-    }
-    auto *lklass = cast_type<ClassType>(this->underlying.get());
-    auto *rklass = cast_type<ClassType>(rhs->underlying.get());
-    if (!lklass || !rklass) {
-        return false;
-    }
-    return lklass->symbol == rklass->symbol;
-}
-
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
 
 OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
