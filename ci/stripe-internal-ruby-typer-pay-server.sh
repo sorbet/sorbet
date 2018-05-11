@@ -30,8 +30,10 @@ export LSAN_OPTIONS
 mkdir -p /build/bin
 cp bazel-bin/main/ruby-typer /build/bin
 
-PATH=$PATH:"$(pwd)/bazel-bin/main/"
-export PATH
+RUBY_TYPER_CACHE_DIR=$(mktemp -d)
+mkdir -p "${RUBY_TYPER_CACHE_DIR}/bin"
+export RUBY_TYPER_CACHE_DIR
+
 GIT_SHA=$(git rev-parse HEAD)
 
 if [ ! -d $DIR ]; then
@@ -46,7 +48,12 @@ if [ ! -f "../ci/stripe-internal-ruby-typer-pay-server-sha" ]; then
 fi
 PAY_SERVER_SHA="$(cat ../ci/stripe-internal-ruby-typer-pay-server-sha)"
 git checkout "$PAY_SERVER_SHA"
-
+RUBY_TYPER_MASQUERADE_SHA="$(cat lib/ruby-types/ruby-typer.sha)"
+(
+    cd -
+    mkdir -p "${RUBY_TYPER_CACHE_DIR}/${RUBY_TYPER_MASQUERADE_SHA}/bin"
+    ln -s "$(pwd)/bazel-bin/main/ruby-typer" "${RUBY_TYPER_CACHE_DIR}/${RUBY_TYPER_MASQUERADE_SHA}/bin"
+)
 eval "$(rbenv init -)"
 stripe-deps-ruby  --without monster ci_ignore test_ui
 
