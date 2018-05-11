@@ -209,20 +209,31 @@ private:
             if (!lastRun) {
                 return false;
             }
+
             ast::ConstantLit *inner = job.cnst.get();
             while (auto *scope = ast::cast_tree<ast::ConstantLit>(inner->scope.get())) {
                 inner = scope;
             }
-            if (auto e = ctx.state.beginError(inner->loc, core::errors::Resolver::StubConstant)) {
-                e.setHeader("Unable to resolve constant `{}`", inner->cnst.show(ctx));
-            }
-
             core::SymbolRef scope;
             if (auto *id = ast::cast_tree<ast::Ident>(inner->scope.get())) {
                 scope = id->symbol.data(ctx).dealias(ctx);
             } else {
                 scope = job.scope->scope;
             }
+            if (auto e = ctx.state.beginError(inner->loc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", inner->cnst.show(ctx));
+                auto suggested = scope.data(ctx).findMemberFuzzyMatch(ctx, inner->cnst);
+                if (suggested.size() > 0) {
+                    vector<core::ErrorLine> lines;
+                    for (auto suggestion : suggested) {
+                        lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).definitionLoc,
+                                                                 "Did you mean: `{}`?",
+                                                                 suggestion.symbol.data(ctx).fullName(ctx)));
+                    }
+                    e.addErrorSection(core::ErrorSection(lines));
+                }
+            }
+
             core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, inner->cnst);
             stub.data(ctx).superClass = core::Symbols::StubClass();
             stub.data(ctx).resultType = core::Types::dynamic();
@@ -262,10 +273,8 @@ private:
         if (id) {
             resolved = id->symbol.data(ctx).dealias(ctx);
         } else {
-            if (!id) {
-                if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
-                    e.setHeader("Superclasses and mixins must be statically resolved to classes");
-                }
+            if (auto e = ctx.state.beginError(job.resolve.cnst->loc, core::errors::Resolver::DynamicSuperclass)) {
+                e.setHeader("Superclasses and mixins must be statically resolved to classes");
             }
             resolved = core::Symbols::StubClass();
         }

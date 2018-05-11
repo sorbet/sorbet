@@ -10,6 +10,7 @@
 template class std::vector<ruby_typer::core::TypeAndOrigins>;
 template class std::vector<ruby_typer::core::LocalVariable>;
 template class std::vector<std::pair<ruby_typer::core::NameRef, ruby_typer::core::SymbolRef>>;
+template class std::vector<const ruby_typer::core::Symbol *>;
 
 namespace ruby_typer {
 namespace core {
@@ -186,14 +187,124 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
     return Symbols::noSymbol();
 }
 
-Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan) const {
+vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState &gs, NameRef name,
+                                                               int betterThan) const {
+    vector<Symbol::FuzzySearchResult> res;
+    if (name.data(gs).kind == NameKind::UTF8) {
+        auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
+        if (sym.symbol.exists()) {
+            res.emplace_back(sym);
+        }
+    } else if (name.data(gs).kind == NameKind::CONSTANT) {
+        res = findMemberFuzzyMatchConstant(gs, name, betterThan);
+    }
+    return res;
+}
+
+vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
+                                                                       int betterThan) const {
+    // Performance of this method is bad, to say the least.
+    // It's written under assumption that it's called rarely
+    // and that it's worth spending a lot of time finding a good candidate in ALL scopes.
+    // It may return multiple candidates:
+    //   - best candidate per every outer scope if it's better than all the candidates in inner scope
+    //   - globally best candidate in ALL scopes.
+    vector<Symbol::FuzzySearchResult> result;
+    FuzzySearchResult best;
+    best.symbol = Symbols::noSymbol();
+    best.name = NameRef::noName();
+    best.distance = betterThan;
+    ENFORCE(name.data(gs).kind == NameKind::CONSTANT);
+    ENFORCE(name.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
+    auto currentName = name.data(gs).cnst.original.data(gs).raw.utf8;
+    if (best.distance < 0) {
+        best.distance = 1 + (currentName.size() / 2);
+    }
+
+    // Find the closest by following outer scopes
+    {
+        core::SymbolRef base = ref(gs);
+        do {
+            // follow outer scopes
+
+            // find scopes that would be considered for search
+            vector<core::SymbolRef> candidateScopes;
+            candidateScopes.emplace_back(base);
+            int i = 0;
+            // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
+            while (i < candidateScopes.size()) {
+                const auto &sym = candidateScopes[i].data(gs);
+                if (sym.superClass.exists()) {
+                    if (find(candidateScopes.begin(), candidateScopes.end(), sym.superClass) == candidateScopes.end()) {
+                        candidateScopes.emplace_back(sym.superClass);
+                    }
+                }
+                for (auto ancestor : sym.argumentsOrMixins) {
+                    if (find(candidateScopes.begin(), candidateScopes.end(), ancestor) == candidateScopes.end()) {
+                        candidateScopes.emplace_back(ancestor);
+                    }
+                }
+                i++;
+            }
+            for (const auto scope : candidateScopes) {
+                for (auto member : scope.data(gs).members) {
+                    if (member.first.data(gs).kind == NameKind::CONSTANT) {
+                        ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
+                        auto thisDistance = Levenstein::distance(
+                            currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
+                        if (thisDistance < best.distance) {
+                            best.distance = thisDistance;
+                            best.symbol = member.second;
+                            best.name = member.first;
+                            result.push_back(best);
+                        }
+                    }
+                }
+            }
+
+            base = base.data(gs).owner;
+        } while (best.distance > 0 && base.data(gs).owner.exists() && base != core::Symbols::root());
+    }
+
+    if (best.distance > 0) {
+        // find the closest by global dfs.
+        auto globalBest = best;
+        vector<core::SymbolRef> yetToGoDeeper;
+        yetToGoDeeper.emplace_back(Symbols::root());
+        while (globalBest.distance > 0 && !yetToGoDeeper.empty()) {
+            const core::SymbolRef thisIter = yetToGoDeeper.back();
+            yetToGoDeeper.pop_back();
+            ENFORCE(thisIter.data(gs).isClass());
+            for (auto member : thisIter.data(gs).members) {
+                if (member.second.exists() && member.first.exists() &&
+                    member.first.data(gs).kind == NameKind::CONSTANT) {
+                    ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
+                    auto thisDistance = Levenstein::distance(
+                        currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
+                    if (thisDistance < globalBest.distance) {
+                        globalBest.distance = thisDistance;
+                        globalBest.symbol = member.second;
+                        globalBest.name = member.first;
+                    }
+                    if (member.second.data(gs).isClass()) {
+                        yetToGoDeeper.emplace_back(member.second);
+                    }
+                }
+            }
+        }
+        if (best.symbol != globalBest.symbol) {
+            result.emplace_back(globalBest);
+        }
+    }
+    return result;
+}
+
+Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan) const {
     FuzzySearchResult result;
     result.symbol = Symbols::noSymbol();
     result.name = NameRef::noName();
     result.distance = betterThan;
-    if (name.data(gs).kind != NameKind::UTF8) {
-        return result;
-    }
+    ENFORCE(name.data(gs).kind == NameKind::UTF8);
 
     auto currentName = name.data(gs).raw.utf8;
     if (result.distance < 0) {
@@ -217,7 +328,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatch(const GlobalState &gs, Na
     for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
         ENFORCE(it->exists());
 
-        auto subResult = it->data(gs).findMemberFuzzyMatch(gs, name, result.distance);
+        auto subResult = it->data(gs).findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.data(gs).kind == NameKind::UTF8);
@@ -225,7 +336,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatch(const GlobalState &gs, Na
         }
     }
     if (this->superClass.exists()) {
-        auto subResult = this->superClass.data(gs).findMemberFuzzyMatch(gs, name, result.distance);
+        auto subResult = this->superClass.data(gs).findMemberFuzzyMatchUTF8(gs, name, result.distance);
         if (subResult.symbol.exists()) {
             ENFORCE(subResult.name.exists());
             ENFORCE(subResult.name.data(gs).kind == NameKind::UTF8);

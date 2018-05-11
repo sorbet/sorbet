@@ -4,6 +4,9 @@
 using namespace std;
 
 int ruby_typer::Levenstein::distance(absl::string_view s1, absl::string_view s2, int bound) noexcept {
+    if (s1.data() == s2.data() && s1.size() == s2.size()) {
+        return 0;
+    }
     // A mildly tweaked version from
     // https://en.wikibooks.org/wiki/Algorithm_Implementation/Strings/Levenshtein_distance#C++
     int s1len = s1.size();

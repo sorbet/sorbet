@@ -511,7 +511,7 @@ public:
         int distance;
     };
 
-    FuzzySearchResult findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMemberFuzzyMatch(const GlobalState &gs, NameRef name, int betterThan = -1) const;
 
     std::string fullName(const GlobalState &gs) const;
 
@@ -549,6 +549,9 @@ public:
 
 private:
     friend class serialize::Serializer;
+    FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
+    std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
+                                                                int betterThan = -1) const;
 
     /*
      * mixins and superclasses: `superClass` is *not* included in the

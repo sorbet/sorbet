@@ -1,0 +1,21 @@
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr` http://go/e/5002
+     3 |Yieldr.foo(Intege, Int)
+        ^^^^^^
+    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Did you mean: `::Enumerator::Yielder`?
+     141 |class Enumerator::Yielder < Object
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
+     3 |Yieldr.foo(Intege, Int)
+                   ^^^^^^
+    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L__LINE__: Did you mean: `::Integer`?
+    5697 |class Integer
+          ^^^^^^^^^^^^^
+test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
+     3 |Yieldr.foo(Intege, Int)
+                           ^^^
+test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` http://go/e/5002
+     7 |module A::B; Constant; end
+                     ^^^^^^^^
+    test/cli/constant-fuzzy/constant-fuzzy.rb:5: Did you mean: `::A#Constant`?
+     5 |module A; Constant = 1; end;
+                  ^^^^^^^^
