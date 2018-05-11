@@ -555,13 +555,15 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                             this->show(ctx), fullType->show(ctx));
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
-                core::Symbol::FuzzySearchResult alternative;
-                alternative = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
-                if (alternative.symbol.exists()) {
-                    e.addErrorSection(core::ErrorSection({
-                        core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc, "Did you mean: `{}`?",
-                                              alternative.name.toString(ctx)),
-                    }));
+                auto alternatives = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
+                if (!alternatives.empty()) {
+                    vector<core::ErrorLine> lines;
+                    for (auto alternative : alternatives) {
+                        lines.emplace_back(core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
+                                                                 "Did you mean: `{}`?",
+                                                                 alternative.name.toString(ctx)));
+                    }
+                    e.addErrorSection(core::ErrorSection(lines));
                 }
             }
         }
