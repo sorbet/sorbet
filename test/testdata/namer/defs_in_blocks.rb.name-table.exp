@@ -1,5 +1,5 @@
 class <constant:<root>> < ::Object () @ test/testdata/namer/defs_in_blocks.rb:2
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8225
+  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8249
     method <block>$2 () @ test/testdata/namer/defs_in_blocks.rb:2
     method a_method () @ test/testdata/namer/defs_in_blocks.rb:5
     method a_method_with_param (a) @ test/testdata/namer/defs_in_blocks.rb:8

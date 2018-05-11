@@ -6566,11 +6566,20 @@ module Kernel
   .returns(T.noreturn)
   def self.raise(arg0=_, arg1=_, arg2=_); end
 
+  sig.returns(Float)
   sig(
-      max: T.any(Integer, Range[Integer]),
+      arg0: Integer,
   )
-  .returns(Numeric)
-  def self.rand(max); end
+  .returns(Integer)
+  sig(
+      arg0: Range[Integer],
+  )
+  .returns(Integer)
+  sig(
+      arg0: Range[Float],
+  )
+  .returns(Float)
+  def self.rand(arg0=_); end
 
   sig(
       arg0: String,
@@ -6861,6 +6870,21 @@ module Kernel
   )
   .returns(NilClass)
   def puts(*arg0); end
+
+  sig.returns(Float)
+  sig(
+      arg0: Integer,
+  )
+  .returns(Integer)
+  sig(
+      arg0: Range[Integer],
+  )
+  .returns(Integer)
+  sig(
+      arg0: Range[Float],
+  )
+  .returns(Float)
+  def rand(arg0=_); end
 
   sig(
       arg0: String,
