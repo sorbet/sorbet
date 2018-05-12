@@ -42,7 +42,7 @@ def externals():
     new_git_repository(
         name="lmdb",
         remote="https://github.com/LMDB/lmdb.git",
-        commit="0a2622317f189c7062d03d050be6766586a548b2",
+        commit="86a90cad721cbdc0bb0a9c3bf15396f5c946ae95",
         build_file="//:lmdb.BUILD",
     )
 
@@ -57,7 +57,7 @@ def externals():
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
-        commit="0fadf4a2e3e629b9fa43888f9754aea5327d038f",
+        commit="e8a63b87c36ac814272d73b503658431d2000055",
         build_file="//:jemalloc.BUILD",
     )
 
@@ -71,14 +71,14 @@ def externals():
     new_git_repository(
         name="concurrentqueue",
         remote="https://github.com/cameron314/concurrentqueue.git",
-        commit="3e0eac9b7a611bb8142db82789f307f2f0ad1c33",
+        commit="8f7e861dd9411a0bf77a6b9de83a47b3424fafba",
         build_file="//:concurrentqueue.BUILD",
     )
 
     new_git_repository(
         name="statsd",
-        remote="https://github.com/romanbsd/statsd-c-client",
-        commit="0bfa3d59e29ad7eff332c9e2506a23d311ff8db4",
+        remote="https://github.com/romanbsd/statsd-c-client.git",
+        commit="0caa5ef05d6a786bb4695394534a7182a3c94427",
         build_file="//:statsd.BUILD",
     )
 
@@ -101,12 +101,12 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="a7e522daf1ec9cda69b356472f662142dd0c1215"
+        commit="dd9911a004edcc34152850a6216bb3b53ad6bb82"
     )
 
     new_git_repository(
         name = "compdb",
-        commit = "03c5a0a234a3c9e5973d1d506069a15612ef446e",
+        commit = "1cf753e9f3486372da026ca629ec8f6760dc31ff",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
         build_file_content = (
         """
