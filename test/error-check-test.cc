@@ -19,7 +19,7 @@ namespace ruby_typer {
 TEST(ErrorTest, RawCheck) { // NOLINT
     try {
         ENFORCE(false, "intentional failure");
-    } catch (...) {
+    } catch (SRubyException &) {
     }
 }
 
@@ -34,7 +34,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
 
     try {
         auto desugared = ruby_typer::ast::desugar::node2Tree(ctx, move(ast));
-    } catch (...) {
+    } catch (SRubyException &) {
     }
 
     EXPECT_EQ(0, errorQueue->drainErrors().size());

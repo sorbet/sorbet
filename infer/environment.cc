@@ -985,7 +985,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
         setTypeAndOrigin(bind.bind, tp);
 
         return tp.type;
-    } catch (...) {
+    } catch (SRubyException &) {
         if (auto e = ctx.state.beginError(bind.loc, core::errors::Internal::InternalError)) {
             e.setHeader("Failed to type (backtrace is above)");
         }

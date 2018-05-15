@@ -734,7 +734,7 @@ private:
                 auto *ref = what.get();
                 Error::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
             }
-        } catch (...) {
+        } catch (SRubyException &) {
             if (!locReported) {
                 locReported = true;
                 if (auto e = ctx.state.beginError(loc, core::errors::Internal::InternalError)) {

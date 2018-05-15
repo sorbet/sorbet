@@ -434,7 +434,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         // Symbol, Array,
         ENFORCE(ret != nullptr, "CFB builder ret unset");
         return ret;
-    } catch (...) {
+    } catch (SRubyException &) {
         if (auto e = cctx.ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
             e.setHeader("Failed to convert tree to CFG (backtrace is above )");
         }

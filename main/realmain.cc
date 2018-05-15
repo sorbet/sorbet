@@ -167,7 +167,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, unique_ptr<core::Globa
         }
 
         return dslsInlined;
-    } catch (...) {
+    } catch (SRubyException &) {
         if (auto e = lgs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(*lgs).path());
         }
@@ -374,7 +374,7 @@ unique_ptr<ast::Expression> typecheckFile(core::Context ctx, unique_ptr<ast::Exp
             logger->error("Suggest adding # typed: true to: {}", f.data(ctx).path());
         }
 
-    } catch (...) {
+    } catch (SRubyException &) {
         if (auto e = ctx.state.beginError(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
@@ -417,7 +417,7 @@ vector<unique_ptr<ast::Expression>> resolve(shared_ptr<core::GlobalState> &gs, v
                     gs->flushErrors();
                     namingProgress.reportProgress(i);
                     i++;
-                } catch (...) {
+                } catch (SRubyException &) {
                     returnCode = 13;
                     if (auto e =
                             gs->beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
@@ -437,7 +437,7 @@ vector<unique_ptr<ast::Expression>> resolve(shared_ptr<core::GlobalState> &gs, v
             core::UnfreezeSymbolTable symbolTableAccess(*gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
         }
-    } catch (...) {
+    } catch (SRubyException &) {
         if (auto e = gs->beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
@@ -496,7 +496,7 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
                             core::ErrorRegion errs(ctx, file);
                             try {
                                 threadResult.trees.emplace_back(typecheckFile(ctx, move(job), opts));
-                            } catch (...) {
+                            } catch (SRubyException &) {
                                 logger->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                             }
                         }

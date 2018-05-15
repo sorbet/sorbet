@@ -1282,7 +1282,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::Node *node) { Error::raise("Unimplemented Parser Node: ", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;
-    } catch (...) {
+    } catch (SRubyException &) {
         if (!locReported) {
             locReported = true;
             if (auto e = ctx.state.beginError(what->loc, core::errors::Internal::InternalError)) {
@@ -1314,7 +1314,7 @@ unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::No
         result = liftTopLevel(ctx, move(result));
         auto verifiedResult = Verifier::run(ctx, move(result));
         return verifiedResult;
-    } catch (...) {
+    } catch (SRubyException &) {
         locReported = false;
         throw;
     }
