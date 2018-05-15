@@ -127,7 +127,7 @@ public:
     std::unordered_map<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
     std::unordered_map<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
-    std::string toString(core::Context ctx);
+    std::string toString(core::Context ctx) const;
 
     bool hasType(core::Context ctx, core::LocalVariable symbol) const;
 

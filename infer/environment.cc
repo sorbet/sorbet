@@ -125,7 +125,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
             // would be otherwise; Many of the performance optimizations in this
             // file effectively exist to support this feature.
             //
-            if (isNeeded) {
+            if (isNeeded && !env.types[i].type->isDynamic()) {
                 copy.mutate().yesTypeTests.emplace_back(local, env.types[i].type);
             }
         } else {
@@ -175,9 +175,11 @@ void KnowledgeFact::sanityCheck() const {
     }
     for (auto &a : yesTypeTests) {
         ENFORCE(a.second.get() != nullptr);
+        ENFORCE(!a.second->isDynamic());
     }
     for (auto &a : noTypeTests) {
         ENFORCE(a.second.get() != nullptr);
+        ENFORCE(!a.second->isDynamic());
     }
 }
 
@@ -234,7 +236,7 @@ void TestedKnowledge::sanityCheck() const {
     ENFORCE(TestedKnowledge::empty.truthy->yesTypeTests.empty());
 }
 
-string Environment::toString(core::Context ctx) {
+string Environment::toString(core::Context ctx) const {
     stringstream buf;
     if (isDead) {
         buf << "dead=" << isDead << '\n';
@@ -392,8 +394,10 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
             if (attachedClass.exists()) {
                 auto ty = attachedClass.data(ctx).externalType(ctx);
-                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, ty);
-                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, ty);
+                if (!ty->isDynamic()) {
+                    whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, ty);
+                    whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, ty);
+                }
             }
             whoKnows.sanityCheck();
         }
@@ -404,14 +408,15 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         auto &whoKnows = getKnowledge(local);
         core::TypeAndOrigins tp1 = getTypeAndOrigin(ctx, send->args[0]);
         core::TypeAndOrigins tp2 = getTypeAndOrigin(ctx, send->recv);
-        if (tp1.type->isDynamic() && tp2.type->isDynamic()) {
-            return;
-        }
 
         ENFORCE(tp1.type.get() != nullptr);
         ENFORCE(tp2.type.get() != nullptr);
-        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, tp1.type);
-        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], tp2.type);
+        if (!tp1.type->isDynamic()) {
+            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, tp1.type);
+        }
+        if (!tp2.type->isDynamic()) {
+            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], tp2.type);
+        }
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::tripleEq()) {
         if (!knowledgeFilter.isNeeded(local)) {
@@ -431,8 +436,10 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
         if (attachedClass.exists()) {
             auto ty = attachedClass.data(ctx).externalType(ctx);
-            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], ty);
-            whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0], ty);
+            if (!ty->isDynamic()) {
+                whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], ty);
+                whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0], ty);
+            }
         }
         whoKnows.sanityCheck();
 
@@ -549,6 +556,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
         tp.origins.emplace_back(loc);
+
         if (!tp.type->isDynamic()) {
             tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
             setTypeAndOrigin(typeTested.first, tp);
