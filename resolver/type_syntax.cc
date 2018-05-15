@@ -448,7 +448,31 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg, sigBeingParsed));
                 targs.emplace_back(ty);
             }
-            auto ctype = make_shared<core::ClassType>(recvi->symbol.data(ctx).singletonClass(ctx));
+
+            core::SymbolRef corrected;
+            if (recvi->symbol == core::Symbols::Array()) {
+                corrected = core::Symbols::T_Array();
+            } else if (recvi->symbol == core::Symbols::Hash()) {
+                corrected = core::Symbols::T_Hash();
+            } else if (recvi->symbol == core::Symbols::Enumerable()) {
+                corrected = core::Symbols::T_Enumerable();
+            } else if (recvi->symbol == core::Symbols::Range()) {
+                corrected = core::Symbols::T_Range();
+            } else if (recvi->symbol == core::Symbols::Set()) {
+                corrected = core::Symbols::T_Set();
+            }
+            if (corrected.exists()) {
+                if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
+                    e.setHeader("Use {}[...], not {}[...] to declare a typed {}", corrected.data(ctx).show(ctx),
+                                recvi->symbol.data(ctx).show(ctx), recvi->symbol.data(ctx).show(ctx));
+                    e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
+                        "{}[...] will not work in the runtime type system.", recvi->symbol.data(ctx).show(ctx))));
+                }
+            } else {
+                corrected = recvi->symbol;
+            }
+
+            auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));
             auto out = ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, targs, ctype, ctype, nullptr);
 
             if (out->isDynamic()) {

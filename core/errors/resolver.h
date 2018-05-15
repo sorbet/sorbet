@@ -31,6 +31,7 @@ constexpr ErrorClass ConcreteMethodInInterface{5022, StrictLevel::Stripe};
 constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::Typed}; // there are violations.
 constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::Stripe};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::Stripe};
+constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::Stripe};
 } // namespace Resolver
 } // namespace errors
 } // namespace core
