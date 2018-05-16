@@ -602,6 +602,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                             // and account for keyword arguments
                             data.arguments().size(),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
+                e.addErrorLine(method.data(ctx).definitionLoc, "`{}` defined here", fun.toString(ctx));
             }
         }
     }
@@ -707,6 +708,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments
                         data.arguments().size(), aend - args.begin());
+            e.addErrorLine(method.data(ctx).definitionLoc, "`{}` defined here", fun.toString(ctx));
         }
     }
 
