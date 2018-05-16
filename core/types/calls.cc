@@ -424,26 +424,37 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
 
         case core::Names::untyped()._id:
         case core::Names::any()._id:
-        case core::Names::all()._id:
+        case core::Names::all()._id: {
             if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
                 return nullptr;
             }
             if (name == core::Names::untyped()) {
                 return Types::dynamic();
-            } else {
-                shared_ptr<Type> res = (name == core::Names::all()) ? core::Types::top() : core::Types::bottom();
-                for (auto &arg : args) {
-                    auto ty = unwrapType(ctx, arg.origins[0], arg.type);
-                    if (name == core::Names::any()) {
-                        res = Types::any(ctx, res, ty);
-                    } else {
-                        res = Types::all(ctx, res, ty);
-                    }
-                }
-
-                return make_shared<core::MetaType>(res);
             }
 
+            if (args.empty()) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("T.{}() needs one or more type arguments", name.show(ctx));
+                    if (name == core::Names::any()) {
+                        e.addErrorSection(
+                            core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
+                    }
+                }
+                return core::Types::dynamic();
+            }
+
+            shared_ptr<Type> res = (name == core::Names::all()) ? core::Types::top() : core::Types::bottom();
+            for (auto &arg : args) {
+                auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+                if (name == core::Names::any()) {
+                    res = Types::any(ctx, res, ty);
+                } else {
+                    res = Types::all(ctx, res, ty);
+                }
+            }
+
+            return make_shared<core::MetaType>(res);
+        }
         case core::Names::class_()._id:
         case core::Names::singletonClass()._id: {
             /*

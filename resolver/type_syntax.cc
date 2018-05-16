@@ -210,6 +210,12 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         case core::Names::nilable()._id:
             return core::Types::any(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig), core::Types::nilClass());
         case core::Names::all()._id: {
+            if (send->args.empty()) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("T.all() needs one or more type arguments");
+                }
+                return core::Types::dynamic();
+            }
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
@@ -219,6 +225,14 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
             return result;
         }
         case core::Names::any()._id: {
+            if (send->args.empty()) {
+                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("T.all() needs one or more type arguments");
+                    e.addErrorSection(
+                        core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
+                }
+                return core::Types::dynamic();
+            }
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
             int i = 1;
             while (i < send->args.size()) {
