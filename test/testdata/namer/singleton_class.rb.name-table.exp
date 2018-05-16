@@ -1,11 +1,11 @@
-class <constant:<root>> < ::Object () @ test/testdata/namer/singleton_class.rb:1
-  class <constant:A> () @ test/testdata/namer/singleton_class.rb:1
-    class <constant:B> () @ test/testdata/namer/singleton_class.rb:1
-      class <constant:C> < ::Object () @ test/testdata/namer/singleton_class.rb:1
-      class <singleton class:<constant:C>> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:1
-    class <singleton class:<constant:B>> < ::Module () @ test/testdata/namer/singleton_class.rb:1
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
-    method main () @ test/testdata/namer/singleton_class.rb:4
-  class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/singleton_class.rb:1
-  method <static-init>$12 () @ test/testdata/namer/singleton_class.rb:1
+class ::<root> < ::Object () @ test/testdata/namer/singleton_class.rb:1
+  class ::<Class:A> < ::Module () @ test/testdata/namer/singleton_class.rb:1
+  class ::A () @ test/testdata/namer/singleton_class.rb:1
+    class ::A::<Class:B> < ::Module () @ test/testdata/namer/singleton_class.rb:1
+    class ::A::B () @ test/testdata/namer/singleton_class.rb:1
+      class ::A::B::<Class:C> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:1
+      class ::A::B::C < ::Object () @ test/testdata/namer/singleton_class.rb:1
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
+    method ::Object#main () @ test/testdata/namer/singleton_class.rb:4
+  method #<static-init> () @ test/testdata/namer/singleton_class.rb:1
 

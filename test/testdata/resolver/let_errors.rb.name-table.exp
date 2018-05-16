@@ -1,12 +1,12 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:LetErrors> < ::Object () @ test/testdata/resolver/let_errors.rb:2
-    field @a -> Integer @ test/testdata/resolver/let_errors.rb:9
-    field @ivar -> Integer @ test/testdata/resolver/let_errors.rb:5
-    method <static-init> () @ test/testdata/resolver/let_errors.rb:2
-    method initialize () @ test/testdata/resolver/let_errors.rb:3
-    method not_initialize () @ test/testdata/resolver/let_errors.rb:8
-    static-field @@cv -> Symbol @ test/testdata/resolver/let_errors.rb:15
-    static-field @@cvar -> Integer @ test/testdata/resolver/let_errors.rb:4
-  class <singleton class:<constant:LetErrors>> < ::<Class:Object> () @ test/testdata/resolver/let_errors.rb:2
-    field @b -> String @ test/testdata/resolver/let_errors.rb:12
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:LetErrors> < ::<Class:Object> () @ test/testdata/resolver/let_errors.rb:2
+    field ::<Class:LetErrors>#@b -> String @ test/testdata/resolver/let_errors.rb:12
+  class ::LetErrors < ::Object () @ test/testdata/resolver/let_errors.rb:2
+    field ::LetErrors#@a -> Integer @ test/testdata/resolver/let_errors.rb:9
+    field ::LetErrors#@ivar -> Integer @ test/testdata/resolver/let_errors.rb:5
+    method ::LetErrors#<static-init> () @ test/testdata/resolver/let_errors.rb:2
+    method ::LetErrors#initialize () @ test/testdata/resolver/let_errors.rb:3
+    method ::LetErrors#not_initialize () @ test/testdata/resolver/let_errors.rb:8
+    static-field ::LetErrors#@@cv -> Symbol @ test/testdata/resolver/let_errors.rb:15
+    static-field ::LetErrors#@@cvar -> Integer @ test/testdata/resolver/let_errors.rb:4
 

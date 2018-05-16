@@ -1,9 +1,9 @@
-class <constant:<root>> < ::Object () @ test/testdata/namer/class_and_alias.rb:2
-  class <constant:A> < ::Object () @ test/testdata/namer/class_and_alias.rb:3
-  class <constant:B>$1 < ::Object () @ test/testdata/namer/class_and_alias.rb:6
-  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/class_and_alias.rb:3
-  class <singleton class:<constant:B>> < ::<Class:Object> () @ test/testdata/namer/class_and_alias.rb:6
-  method <static-init>$12 () @ test/testdata/namer/class_and_alias.rb:2
-  static-field <constant:A>$1 -> Integer(91) @ test/testdata/namer/class_and_alias.rb:2
-  static-field <constant:B> -> Integer(91) @ test/testdata/namer/class_and_alias.rb:8
+class ::<root> < ::Object () @ test/testdata/namer/class_and_alias.rb:2
+  class ::<Class:A> < ::<Class:Object> () @ test/testdata/namer/class_and_alias.rb:3
+  class ::<Class:B> < ::<Class:Object> () @ test/testdata/namer/class_and_alias.rb:6
+  class ::<constant:B> < ::Object () @ test/testdata/namer/class_and_alias.rb:6
+  class ::A < ::Object () @ test/testdata/namer/class_and_alias.rb:3
+  method #<static-init> () @ test/testdata/namer/class_and_alias.rb:2
+  static-field #<constant:A> -> Integer(91) @ test/testdata/namer/class_and_alias.rb:2
+  static-field #B -> Integer(91) @ test/testdata/namer/class_and_alias.rb:8
 

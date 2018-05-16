@@ -1,19 +1,19 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:Opus> () @ ???
-    class <constant:CIBot> () @ test/testdata/infer/lub_tuples.rb:2
-      class <constant:Tasks> () @ test/testdata/infer/lub_tuples.rb:2
-        class <constant:NotifySlackBuildComplete> < ::Object () @ test/testdata/infer/lub_tuples.rb:2
-          field @determined_build_group_status_and_which -> NilClass | TupleType {
+class ::<root> < ::Object () @ -e:1
+  class ::Opus () @ ???
+    class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
+    class ::Opus::CIBot () @ test/testdata/infer/lub_tuples.rb:2
+      class ::Opus::CIBot::<Class:Tasks> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
+      class ::Opus::CIBot::Tasks () @ test/testdata/infer/lub_tuples.rb:2
+        class ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/infer/lub_tuples.rb:2
+        class ::Opus::CIBot::Tasks::NotifySlackBuildComplete < ::Object () @ test/testdata/infer/lub_tuples.rb:2
+          field ::Opus::CIBot::Tasks::NotifySlackBuildComplete#@determined_build_group_status_and_which -> NilClass | TupleType {
                 0 = TrueClass | FalseClass
                 1 = String | NilClass
               } @ test/testdata/infer/lub_tuples.rb:6
-          method cond () @ test/testdata/infer/lub_tuples.rb:10
-          method determined_build_group_status_and_which : private () -> TupleType {
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#cond () @ test/testdata/infer/lub_tuples.rb:10
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#determined_build_group_status_and_which : private () -> TupleType {
             0 = TrueClass | FalseClass
             1 = String | NilClass
           } @ test/testdata/infer/lub_tuples.rb:13
-          method initialize () @ test/testdata/infer/lub_tuples.rb:5
-        class <singleton class:<constant:NotifySlackBuildComplete>> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/infer/lub_tuples.rb:2
-      class <singleton class:<constant:Tasks>> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
-    class <singleton class:<constant:CIBot>> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize () @ test/testdata/infer/lub_tuples.rb:5
 

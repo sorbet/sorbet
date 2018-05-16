@@ -1,10 +1,10 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:CCCCCCCCC> < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-  class <singleton class:<constant:CCCCCCCCC>> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+  class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:CCCCCCCCC> < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
-  class <singleton class:<constant:CCCCCCCCC>> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
+  class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 
 --print=ast is incompatible with --cacheDir. Ignoring cache
 class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)

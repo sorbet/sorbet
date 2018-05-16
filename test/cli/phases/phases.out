@@ -38,8 +38,8 @@ ClassDef{
 }
 --- dsl-tree-raw end ---
 --- name-table start ---
-class <constant:<root>> < ::Object () @ -e:1
-  method <static-init>$12 () @ -e:1
+class ::<root> < ::Object () @ -e:1
+  method #<static-init> () @ -e:1
 
 --- name-table end ---
 --- name-tree start ---

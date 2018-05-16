@@ -1,35 +1,35 @@
-class <constant:<root>> < ::Object () @ test/testdata/resolver/resolution_order.rb:8
-  class <constant:A> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:32
-    class <constant:DOES_NOT_EXIST> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
-    static-field <constant:AB> -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:33
-    static-field <constant:AV> -> Integer @ test/testdata/resolver/resolution_order.rb:35
-  class <constant:B> < ::Object () @ test/testdata/resolver/resolution_order.rb:38
-    static-field <constant:BC> -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:39
-  class <constant:C> < ::B () @ test/testdata/resolver/resolution_order.rb:42
-  class <constant:D> (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:60
-    static-field <constant:DA> -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:61
-  class <constant:E> (<constant:BasicObject>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:54
-    static-field <constant:EA> -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:56
-    static-field <constant:EC> -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:57
-  class <constant:F> (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_order.rb:45
-    method <static-init> () @ test/testdata/resolver/resolution_order.rb:51
-  class <constant:HasError> < ::Object (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
-  class <constant:IsGood> < ::Object () @ test/testdata/resolver/resolution_order.rb:14
-    method foo1 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:16
-      argument a<> -> C @ test/testdata/resolver/resolution_order.rb:15
-    method foo2 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:21
-      argument a<> -> A @ test/testdata/resolver/resolution_order.rb:20
-  class <constant:TestInheritace1> < ::B () @ test/testdata/resolver/resolution_order.rb:26
-  class <constant:TestInheritace2> < ::A () @ test/testdata/resolver/resolution_order.rb:29
-  class <singleton class:<constant:A>> < ::Module () @ test/testdata/resolver/resolution_order.rb:32
-  class <singleton class:<constant:B>> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:38
-  class <singleton class:<constant:C>> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:42
-  class <singleton class:<constant:D>> < ::Module () @ test/testdata/resolver/resolution_order.rb:60
-  class <singleton class:<constant:E>> < ::Module () @ test/testdata/resolver/resolution_order.rb:54
-  class <singleton class:<constant:F>> < ::Module () @ test/testdata/resolver/resolution_order.rb:45
-  class <singleton class:<constant:HasError>> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:10
-  class <singleton class:<constant:IsGood>> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:14
-  class <singleton class:<constant:TestInheritace1>> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:26
-  class <singleton class:<constant:TestInheritace2>> < ::<Class:A> () @ test/testdata/resolver/resolution_order.rb:29
-  method <static-init>$12 () @ test/testdata/resolver/resolution_order.rb:8
+class ::<root> < ::Object () @ test/testdata/resolver/resolution_order.rb:8
+  class ::<Class:A> < ::Module () @ test/testdata/resolver/resolution_order.rb:32
+  class ::<Class:B> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:38
+  class ::<Class:C> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:42
+  class ::<Class:D> < ::Module () @ test/testdata/resolver/resolution_order.rb:60
+  class ::<Class:E> < ::Module () @ test/testdata/resolver/resolution_order.rb:54
+  class ::<Class:F> < ::Module () @ test/testdata/resolver/resolution_order.rb:45
+  class ::<Class:HasError> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:10
+  class ::<Class:IsGood> < ::<Class:Object> () @ test/testdata/resolver/resolution_order.rb:14
+  class ::<Class:TestInheritace1> < ::<Class:B> () @ test/testdata/resolver/resolution_order.rb:26
+  class ::<Class:TestInheritace2> < ::<Class:A> () @ test/testdata/resolver/resolution_order.rb:29
+  class ::A (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:32
+    class ::A::DOES_NOT_EXIST < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
+    static-field ::A#AB -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:33
+    static-field ::A#AV -> Integer @ test/testdata/resolver/resolution_order.rb:35
+  class ::B < ::Object () @ test/testdata/resolver/resolution_order.rb:38
+    static-field ::B#BC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:39
+  class ::C < ::B () @ test/testdata/resolver/resolution_order.rb:42
+  class ::D (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:60
+    static-field ::D#DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:61
+  class ::E (<constant:BasicObject>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:54
+    static-field ::E#EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:56
+    static-field ::E#EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:57
+  class ::F (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_order.rb:45
+    method ::F#<static-init> () @ test/testdata/resolver/resolution_order.rb:51
+  class ::HasError < ::Object (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
+  class ::IsGood < ::Object () @ test/testdata/resolver/resolution_order.rb:14
+    method ::IsGood#foo1 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:16
+      argument ::IsGood#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:15
+    method ::IsGood#foo2 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:21
+      argument ::IsGood#foo2#a<> -> A @ test/testdata/resolver/resolution_order.rb:20
+  class ::TestInheritace1 < ::B () @ test/testdata/resolver/resolution_order.rb:26
+  class ::TestInheritace2 < ::A () @ test/testdata/resolver/resolution_order.rb:29
+  method #<static-init> () @ test/testdata/resolver/resolution_order.rb:8
 

@@ -1,29 +1,29 @@
-class <constant:<root>> < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:2
-  class <constant:Bad1> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class <constant:Bad2> < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:29
-    class <constant:ClassMethods> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:31
-    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
-  class <constant:Bad3> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
-    class <constant:ClassMethods> < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:38
-    class <singleton class:<constant:ClassMethods>> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
-  class <constant:Bad4> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
-    class <constant:ClassMethods> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:45
-    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
-  class <constant:Bad5> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class <constant:Bad6> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class <constant:Mixin> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-    class <constant:ClassMethods> (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:5
-      method mixin_class_method () @ test/testdata/resolver/mixes_in_class_methods.rb:6
-    class <singleton class:<constant:ClassMethods>> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
-    method mixin_method () @ test/testdata/resolver/mixes_in_class_methods.rb:12
-  class <constant:Test> < ::Object (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
-  class <singleton class:<constant:Bad1>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class <singleton class:<constant:Bad2>> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
-  class <singleton class:<constant:Bad3>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
-  class <singleton class:<constant:Bad4>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
-  class <singleton class:<constant:Bad5>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class <singleton class:<constant:Bad6>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class <singleton class:<constant:Mixin>> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-  class <singleton class:<constant:Test>> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
-  method <static-init>$12 () @ test/testdata/resolver/mixes_in_class_methods.rb:2
+class ::<root> < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:2
+  class ::<Class:Bad1> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class ::<Class:Bad2> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
+  class ::<Class:Bad3> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
+  class ::<Class:Bad4> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
+  class ::<Class:Bad5> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class ::<Class:Bad6> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class ::<Class:Mixin> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
+  class ::<Class:Test> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  class ::Bad1 (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class ::Bad2 < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:29
+    class ::Bad2::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+    class ::Bad2::ClassMethods (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:31
+  class ::Bad3 (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
+    class ::Bad3::<Class:ClassMethods> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class ::Bad3::ClassMethods < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+  class ::Bad4 (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
+    class ::Bad4::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+    class ::Bad4::ClassMethods (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:45
+  class ::Bad5 (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class ::Bad6 (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class ::Mixin (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
+    class ::Mixin::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+    class ::Mixin::ClassMethods (<constant:BasicObject>) @ test/testdata/resolver/mixes_in_class_methods.rb:5
+      method ::Mixin::ClassMethods#mixin_class_method () @ test/testdata/resolver/mixes_in_class_methods.rb:6
+    method ::Mixin#mixin_method () @ test/testdata/resolver/mixes_in_class_methods.rb:12
+  class ::Test < ::Object (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  method #<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:2
 

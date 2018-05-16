@@ -1,9 +1,9 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:A> (<constant:BasicObject>) @ test/testdata/namer/type_alias.rb:2
-    class <constant:C1> < ::Object () @ test/testdata/namer/type_alias.rb:3
-    class <singleton class:<constant:C1>> < ::<Class:Object> () @ test/testdata/namer/type_alias.rb:3
-    method f (x) -> NilClass @ test/testdata/namer/type_alias.rb:7
-      argument x<> -> A::C1 @ test/testdata/namer/type_alias.rb:6
-    static-field <constant:C2> -> AliasType { symbol = ::A::C1 } @ test/testdata/namer/type_alias.rb:4
-  class <singleton class:<constant:A>> < ::Module () @ test/testdata/namer/type_alias.rb:2
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:A> < ::Module () @ test/testdata/namer/type_alias.rb:2
+  class ::A (<constant:BasicObject>) @ test/testdata/namer/type_alias.rb:2
+    class ::A::<Class:C1> < ::<Class:Object> () @ test/testdata/namer/type_alias.rb:3
+    class ::A::C1 < ::Object () @ test/testdata/namer/type_alias.rb:3
+    method ::A#f (x) -> NilClass @ test/testdata/namer/type_alias.rb:7
+      argument ::A#f#x<> -> A::C1 @ test/testdata/namer/type_alias.rb:6
+    static-field ::A#C2 -> AliasType { symbol = ::A::C1 } @ test/testdata/namer/type_alias.rb:4
 

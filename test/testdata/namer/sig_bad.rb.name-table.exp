@@ -1,26 +1,26 @@
-class <constant:<root>> < ::Object () @ test/testdata/namer/sig_bad.rb:2
-  class <constant:A> < ::Object () @ test/testdata/namer/sig_bad.rb:5
-    method bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig_bad.rb:22
-      argument a<> -> T.untyped @ test/testdata/namer/sig_bad.rb:7
-      argument b<> -> T.untyped @ test/testdata/namer/sig_bad.rb:8
-      argument c<> -> Object @ test/testdata/namer/sig_bad.rb:9
-      argument d<> -> T.untyped @ test/testdata/namer/sig_bad.rb:10
-      argument e<> -> T.untyped @ test/testdata/namer/sig_bad.rb:11
-      argument f<> -> T.untyped @ test/testdata/namer/sig_bad.rb:12
-      argument g<> -> <impossible> @ test/testdata/namer/sig_bad.rb:13
-      argument h<> -> T.untyped @ test/testdata/namer/sig_bad.rb:14
-      argument i<> -> T.untyped @ test/testdata/namer/sig_bad.rb:15
-      argument j<> -> T.untyped @ test/testdata/namer/sig_bad.rb:16
-      argument k<> -> T.untyped @ test/testdata/namer/sig_bad.rb:17
-      argument l<> -> ShapeType {
+class ::<root> < ::Object () @ test/testdata/namer/sig_bad.rb:2
+  class ::<Class:A> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:5
+  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:2
+  class ::<Class:T2> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:3
+  class ::A < ::Object () @ test/testdata/namer/sig_bad.rb:5
+    method ::A#bad (a, b, c, d, e, f, g, h, i, j, k, l, m) -> T2 @ test/testdata/namer/sig_bad.rb:22
+      argument ::A#bad#a<> -> T.untyped @ test/testdata/namer/sig_bad.rb:7
+      argument ::A#bad#b<> -> T.untyped @ test/testdata/namer/sig_bad.rb:8
+      argument ::A#bad#c<> -> Object @ test/testdata/namer/sig_bad.rb:9
+      argument ::A#bad#d<> -> T.untyped @ test/testdata/namer/sig_bad.rb:10
+      argument ::A#bad#e<> -> T.untyped @ test/testdata/namer/sig_bad.rb:11
+      argument ::A#bad#f<> -> T.untyped @ test/testdata/namer/sig_bad.rb:12
+      argument ::A#bad#g<> -> <impossible> @ test/testdata/namer/sig_bad.rb:13
+      argument ::A#bad#h<> -> T.untyped @ test/testdata/namer/sig_bad.rb:14
+      argument ::A#bad#i<> -> T.untyped @ test/testdata/namer/sig_bad.rb:15
+      argument ::A#bad#j<> -> T.untyped @ test/testdata/namer/sig_bad.rb:16
+      argument ::A#bad#k<> -> T.untyped @ test/testdata/namer/sig_bad.rb:17
+      argument ::A#bad#l<> -> ShapeType {
       } @ test/testdata/namer/sig_bad.rb:18
-      argument m<> -> ShapeType {
+      argument ::A#bad#m<> -> ShapeType {
         Symbol(:"foo") => T.untyped
       } @ test/testdata/namer/sig_bad.rb:19
-  class <constant:T1> < ::Object () @ test/testdata/namer/sig_bad.rb:2
-  class <constant:T2> < ::Object () @ test/testdata/namer/sig_bad.rb:3
-  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:5
-  class <singleton class:<constant:T1>> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:2
-  class <singleton class:<constant:T2>> < ::<Class:Object> () @ test/testdata/namer/sig_bad.rb:3
-  method <static-init>$12 () @ test/testdata/namer/sig_bad.rb:2
+  class ::T1 < ::Object () @ test/testdata/namer/sig_bad.rb:2
+  class ::T2 < ::Object () @ test/testdata/namer/sig_bad.rb:3
+  method #<static-init> () @ test/testdata/namer/sig_bad.rb:2
 

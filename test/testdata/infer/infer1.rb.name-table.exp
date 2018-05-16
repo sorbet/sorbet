@@ -1,15 +1,15 @@
-class <constant:<root>> < ::Object () @ test/testdata/infer/infer1.rb:2
-  class <constant:Object> < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
-    method baz1 () @ test/testdata/infer/infer1.rb:2
-    method baz2 () @ test/testdata/infer/infer1.rb:7
-    method baz3 () @ test/testdata/infer/infer1.rb:12
-    method baz4 () @ test/testdata/infer/infer1.rb:16
-    method baz5 (cond) @ test/testdata/infer/infer1.rb:20
-      argument cond<> @ test/testdata/infer/infer1.rb:20
-    method baz6 (cond) @ test/testdata/infer/infer1.rb:29
-      argument cond<> @ test/testdata/infer/infer1.rb:29
-    method baz7 (cond) @ test/testdata/infer/infer1.rb:38
-      argument cond<> @ test/testdata/infer/infer1.rb:38
-    method baz8 () @ test/testdata/infer/infer1.rb:46
-  method <static-init>$12 () @ test/testdata/infer/infer1.rb:2
+class ::<root> < ::Object () @ test/testdata/infer/infer1.rb:2
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
+    method ::Object#baz1 () @ test/testdata/infer/infer1.rb:2
+    method ::Object#baz2 () @ test/testdata/infer/infer1.rb:7
+    method ::Object#baz3 () @ test/testdata/infer/infer1.rb:12
+    method ::Object#baz4 () @ test/testdata/infer/infer1.rb:16
+    method ::Object#baz5 (cond) @ test/testdata/infer/infer1.rb:20
+      argument ::Object#baz5#cond<> @ test/testdata/infer/infer1.rb:20
+    method ::Object#baz6 (cond) @ test/testdata/infer/infer1.rb:29
+      argument ::Object#baz6#cond<> @ test/testdata/infer/infer1.rb:29
+    method ::Object#baz7 (cond) @ test/testdata/infer/infer1.rb:38
+      argument ::Object#baz7#cond<> @ test/testdata/infer/infer1.rb:38
+    method ::Object#baz8 () @ test/testdata/infer/infer1.rb:46
+  method #<static-init> () @ test/testdata/infer/infer1.rb:2
 

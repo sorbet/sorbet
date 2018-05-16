@@ -368,7 +368,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
 
 string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {
     ostringstream os;
-    string name = this->name.toString(gs);
+    string name = this->fullName(gs);
     auto &members = this->members;
 
     vector<string> children;

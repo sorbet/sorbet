@@ -1,18 +1,18 @@
-class <constant:<root>> < ::Object () @ test/testdata/namer/module_function.rb:2
-  class <constant:C> < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:17
-    method test_calls () @ test/testdata/namer/module_function.rb:20
-  class <constant:Funcs> (<constant:BasicObject>) @ test/testdata/namer/module_function.rb:2
-    method <static-init> () @ test/testdata/namer/module_function.rb:2
-    method f (x) -> Integer @ test/testdata/namer/module_function.rb:4
-      argument x<> -> Integer @ test/testdata/namer/module_function.rb:3
-    method g (s) -> Symbol @ test/testdata/namer/module_function.rb:9
-      argument s<> -> Symbol @ test/testdata/namer/module_function.rb:8
-    method h (s) -> String @ test/testdata/namer/module_function.rb:14
-      argument s<> -> String @ test/testdata/namer/module_function.rb:13
-  class <singleton class:<constant:C>> < ::<Class:Object> () @ test/testdata/namer/module_function.rb:17
-  class <singleton class:<constant:Funcs>> < ::Module () @ test/testdata/namer/module_function.rb:2
-    method f () -> AliasType { symbol = ::Funcs#f } @ test/testdata/namer/module_function.rb:4
-    method g () -> AliasType { symbol = ::Funcs#g } @ test/testdata/namer/module_function.rb:9
-    method h () -> AliasType { symbol = ::Funcs#h } @ test/testdata/namer/module_function.rb:14
-  method <static-init>$12 () @ test/testdata/namer/module_function.rb:2
+class ::<root> < ::Object () @ test/testdata/namer/module_function.rb:2
+  class ::<Class:C> < ::<Class:Object> () @ test/testdata/namer/module_function.rb:17
+  class ::<Class:Funcs> < ::Module () @ test/testdata/namer/module_function.rb:2
+    method ::<Class:Funcs>#f () -> AliasType { symbol = ::Funcs#f } @ test/testdata/namer/module_function.rb:4
+    method ::<Class:Funcs>#g () -> AliasType { symbol = ::Funcs#g } @ test/testdata/namer/module_function.rb:9
+    method ::<Class:Funcs>#h () -> AliasType { symbol = ::Funcs#h } @ test/testdata/namer/module_function.rb:14
+  class ::C < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:17
+    method ::C#test_calls () @ test/testdata/namer/module_function.rb:20
+  class ::Funcs (<constant:BasicObject>) @ test/testdata/namer/module_function.rb:2
+    method ::Funcs#<static-init> () @ test/testdata/namer/module_function.rb:2
+    method ::Funcs#f (x) -> Integer @ test/testdata/namer/module_function.rb:4
+      argument ::Funcs#f#x<> -> Integer @ test/testdata/namer/module_function.rb:3
+    method ::Funcs#g (s) -> Symbol @ test/testdata/namer/module_function.rb:9
+      argument ::Funcs#g#s<> -> Symbol @ test/testdata/namer/module_function.rb:8
+    method ::Funcs#h (s) -> String @ test/testdata/namer/module_function.rb:14
+      argument ::Funcs#h#s<> -> String @ test/testdata/namer/module_function.rb:13
+  method #<static-init> () @ test/testdata/namer/module_function.rb:2
 
