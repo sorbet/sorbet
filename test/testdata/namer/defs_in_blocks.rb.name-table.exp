@@ -1,7 +1,7 @@
 class ::<root> < ::Object () @ test/testdata/namer/defs_in_blocks.rb:2
   class ::<Class:Object> < ::<Class:BasicObject> () @ ???
     method ::<Class:Object>#a_static_method () @ test/testdata/namer/defs_in_blocks.rb:11
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core.rbi#L8454
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/object.rbi#L2
     method ::Object#<block> () @ test/testdata/namer/defs_in_blocks.rb:2
     method ::Object#a_method () @ test/testdata/namer/defs_in_blocks.rb:5
     method ::Object#a_method_with_param (a) @ test/testdata/namer/defs_in_blocks.rb:8
