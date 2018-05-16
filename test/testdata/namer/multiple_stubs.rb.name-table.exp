@@ -1,5 +1,5 @@
-class <constant:<root>> < ::Object () @ test/testdata/namer/multiple_stubs.rb:2
-  class <constant:Foo> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
-    class <constant:Bar> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
-  method <static-init>$12 () @ test/testdata/namer/multiple_stubs.rb:2
+class ::<root> < ::Object () @ test/testdata/namer/multiple_stubs.rb:2
+  class ::Foo < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
+    class ::Foo::Bar < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
+  method #<static-init> () @ test/testdata/namer/multiple_stubs.rb:2
 

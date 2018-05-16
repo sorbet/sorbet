@@ -1,111 +1,111 @@
-class <constant:<root>> < ::Object () @ test/testdata/infer/gerald.rb:2
-  class <constant:Opus> () @ ???
-    class <constant:AutogenLoader> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:3
-    class <constant:CIBot> () @ test/testdata/infer/gerald.rb:5
-      class <constant:Actions> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
-        class <constant:OpenAPI> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
-          class <constant:SPEC_PATH> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
-      class <constant:Gerald> (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
-        class <constant:Diff> < ::Object () @ test/testdata/infer/gerald.rb:111
-          field @parsed -> T.untyped @ test/testdata/infer/gerald.rb:115
-          field @raw -> T.untyped @ test/testdata/infer/gerald.rb:114
-          method added_files () @ test/testdata/infer/gerald.rb:122
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:123
-              argument part<> @ test/testdata/infer/gerald.rb:123
-            method <block>$3 (part) @ test/testdata/infer/gerald.rb:123
-              argument part<> @ test/testdata/infer/gerald.rb:123
-          method added_lines () @ test/testdata/infer/gerald.rb:134
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:135
-              argument part<> @ test/testdata/infer/gerald.rb:135
-          method affected_files () @ test/testdata/infer/gerald.rb:118
-          method changed_files () @ test/testdata/infer/gerald.rb:130
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:131
-              argument part<> @ test/testdata/infer/gerald.rb:131
-            method <block>$3 (part) @ test/testdata/infer/gerald.rb:131
-              argument part<> @ test/testdata/infer/gerald.rb:131
-          method changed_lines () @ test/testdata/infer/gerald.rb:142
-          method changed_openapi? () @ test/testdata/infer/gerald.rb:146
-          method deleted_files () @ test/testdata/infer/gerald.rb:126
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:127
-              argument part<> @ test/testdata/infer/gerald.rb:127
-            method <block>$3 (part) @ test/testdata/infer/gerald.rb:127
-              argument part<> @ test/testdata/infer/gerald.rb:127
-          method initialize (raw_diff) @ test/testdata/infer/gerald.rb:113
-            argument raw_diff<> @ test/testdata/infer/gerald.rb:113
-          method parse : private (diff) @ test/testdata/infer/gerald.rb:150
-            argument diff<> @ test/testdata/infer/gerald.rb:150
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:155
-              argument part<> @ test/testdata/infer/gerald.rb:155
-              method <block>$2 (line) @ test/testdata/infer/gerald.rb:161
-                argument line<> @ test/testdata/infer/gerald.rb:161
-          method removed_lines () @ test/testdata/infer/gerald.rb:138
-            method <block>$2 (part) @ test/testdata/infer/gerald.rb:139
-              argument part<> @ test/testdata/infer/gerald.rb:139
-        class <constant:MatchContext> < ::Object () @ test/testdata/infer/gerald.rb:51
-          field @assignee -> T.untyped @ test/testdata/infer/gerald.rb:53
-          field @body -> T.untyped @ test/testdata/infer/gerald.rb:56
-          field @diff -> T.untyped @ test/testdata/infer/gerald.rb:58
-          field @gh_user -> T.untyped @ test/testdata/infer/gerald.rb:54
-          field @merge_branch -> T.untyped @ test/testdata/infer/gerald.rb:55
-          field @openapi_diff -> T.untyped @ test/testdata/infer/gerald.rb:59
-          field @repo -> T.untyped @ test/testdata/infer/gerald.rb:52
-          field @title -> T.untyped @ test/testdata/infer/gerald.rb:57
-          method assignee () @ test/testdata/infer/gerald.rb:53
-          method body () @ test/testdata/infer/gerald.rb:56
-          method diff () @ test/testdata/infer/gerald.rb:58
-          method gh_user () @ test/testdata/infer/gerald.rb:54
-          method initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff) @ test/testdata/infer/gerald.rb:61
-            argument assignee<> @ test/testdata/infer/gerald.rb:61
-            argument body<> @ test/testdata/infer/gerald.rb:61
-            argument diff<> @ test/testdata/infer/gerald.rb:61
-            argument gh_user<> @ test/testdata/infer/gerald.rb:61
-            argument merge_branch<> @ test/testdata/infer/gerald.rb:61
-            argument openapi_diff<> @ test/testdata/infer/gerald.rb:61
-            argument repo<> @ test/testdata/infer/gerald.rb:61
-            argument title<> @ test/testdata/infer/gerald.rb:61
-          method merge_branch () @ test/testdata/infer/gerald.rb:55
-          method openapi_diff () @ test/testdata/infer/gerald.rb:59
-          method repo () @ test/testdata/infer/gerald.rb:52
-          method title () @ test/testdata/infer/gerald.rb:57
-          method user_stripe_suffix? () @ test/testdata/infer/gerald.rb:73
-        class <constant:MatchTimeBudget> < ::Object () @ test/testdata/infer/gerald.rb:79
-          field @start -> T.untyped @ test/testdata/infer/gerald.rb:85
-          method check! () @ test/testdata/infer/gerald.rb:89
-          method initialize () @ test/testdata/infer/gerald.rb:84
-          method time_rule (rule, <blk>) @ test/testdata/infer/gerald.rb:96
-            argument <blk><block> -> T.untyped @ test/testdata/infer/gerald.rb:98
-            argument rule<> @ test/testdata/infer/gerald.rb:96
-          static-field <constant:PER_RULE_MS> -> Integer(2000) @ test/testdata/infer/gerald.rb:82
-          static-field <constant:TOTAL_TIME_MS> -> Integer(10000) @ test/testdata/infer/gerald.rb:81
-        class <constant:MatchTimeout> < ::StandardError () @ test/testdata/infer/gerald.rb:7
-          field @rule_token -> T.untyped @ test/testdata/infer/gerald.rb:9
-          method initialize (message, rule_token) @ test/testdata/infer/gerald.rb:11
-            argument message<> @ test/testdata/infer/gerald.rb:11
-            argument rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
-          method rule_token () @ test/testdata/infer/gerald.rb:9
-        class <constant:Matcher> < ::Object (<constant:Log>) @ test/testdata/infer/gerald.rb:17
-          class <constant:Chalk> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
-            class <constant:Log> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
-          field @rules -> T.untyped @ test/testdata/infer/gerald.rb:23
-          method initialize () @ test/testdata/infer/gerald.rb:22
-            method <block>$2 (<block-pass>$2) @ test/testdata/infer/gerald.rb:25
-              argument <block-pass>$2<> @ test/testdata/infer/gerald.rb:25
-            method <block>$3 (<block-pass>$4) @ test/testdata/infer/gerald.rb:27
-              argument <block-pass>$4<> @ test/testdata/infer/gerald.rb:27
-          method match (match_context) @ test/testdata/infer/gerald.rb:33
-            argument match_context<> @ test/testdata/infer/gerald.rb:33
-            method <block>$2 (r) @ test/testdata/infer/gerald.rb:43
-              argument r<> @ test/testdata/infer/gerald.rb:43
-              method <block>$2 () @ test/testdata/infer/gerald.rb:44
-          static-field <constant:MAX_AFFECTED_FILES> -> Integer(100) @ test/testdata/infer/gerald.rb:20
-        class <singleton class:<constant:Diff>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:111
-        class <singleton class:<constant:MatchContext>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:51
-        class <singleton class:<constant:MatchTimeBudget>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:79
-        class <singleton class:<constant:MatchTimeout>> < ::<Class:StandardError> () @ test/testdata/infer/gerald.rb:7
-        class <singleton class:<constant:Matcher>> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:17
-      class <constant:Model> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
-        class <constant:GeraldRule> < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
-      class <singleton class:<constant:Gerald>> < ::Module () @ test/testdata/infer/gerald.rb:5
-    class <singleton class:<constant:CIBot>> < ::Module () @ test/testdata/infer/gerald.rb:5
-  method <static-init>$12 () @ test/testdata/infer/gerald.rb:2
+class ::<root> < ::Object () @ test/testdata/infer/gerald.rb:2
+  class ::Opus () @ ???
+    class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/gerald.rb:5
+    class ::Opus::AutogenLoader < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:3
+    class ::Opus::CIBot () @ test/testdata/infer/gerald.rb:5
+      class ::Opus::CIBot::<Class:Gerald> < ::Module () @ test/testdata/infer/gerald.rb:5
+      class ::Opus::CIBot::Actions < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+        class ::Opus::CIBot::Actions::OpenAPI < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+          class ::Opus::CIBot::Actions::OpenAPI::SPEC_PATH < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+      class ::Opus::CIBot::Gerald (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
+        class ::Opus::CIBot::Gerald::<Class:Diff> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:111
+        class ::Opus::CIBot::Gerald::<Class:MatchContext> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:51
+        class ::Opus::CIBot::Gerald::<Class:MatchTimeBudget> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:79
+        class ::Opus::CIBot::Gerald::<Class:MatchTimeout> < ::<Class:StandardError> () @ test/testdata/infer/gerald.rb:7
+        class ::Opus::CIBot::Gerald::<Class:Matcher> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:17
+        class ::Opus::CIBot::Gerald::Diff < ::Object () @ test/testdata/infer/gerald.rb:111
+          field ::Opus::CIBot::Gerald::Diff#@parsed -> T.untyped @ test/testdata/infer/gerald.rb:115
+          field ::Opus::CIBot::Gerald::Diff#@raw -> T.untyped @ test/testdata/infer/gerald.rb:114
+          method ::Opus::CIBot::Gerald::Diff#added_files () @ test/testdata/infer/gerald.rb:122
+            method ::Opus::CIBot::Gerald::Diff#added_files#<block> (part) @ test/testdata/infer/gerald.rb:123
+              argument ::Opus::CIBot::Gerald::Diff#added_files#<block>#part<> @ test/testdata/infer/gerald.rb:123
+            method ::Opus::CIBot::Gerald::Diff#added_files#<block> (part) @ test/testdata/infer/gerald.rb:123
+              argument ::Opus::CIBot::Gerald::Diff#added_files#<block>#part<> @ test/testdata/infer/gerald.rb:123
+          method ::Opus::CIBot::Gerald::Diff#added_lines () @ test/testdata/infer/gerald.rb:134
+            method ::Opus::CIBot::Gerald::Diff#added_lines#<block> (part) @ test/testdata/infer/gerald.rb:135
+              argument ::Opus::CIBot::Gerald::Diff#added_lines#<block>#part<> @ test/testdata/infer/gerald.rb:135
+          method ::Opus::CIBot::Gerald::Diff#affected_files () @ test/testdata/infer/gerald.rb:118
+          method ::Opus::CIBot::Gerald::Diff#changed_files () @ test/testdata/infer/gerald.rb:130
+            method ::Opus::CIBot::Gerald::Diff#changed_files#<block> (part) @ test/testdata/infer/gerald.rb:131
+              argument ::Opus::CIBot::Gerald::Diff#changed_files#<block>#part<> @ test/testdata/infer/gerald.rb:131
+            method ::Opus::CIBot::Gerald::Diff#changed_files#<block> (part) @ test/testdata/infer/gerald.rb:131
+              argument ::Opus::CIBot::Gerald::Diff#changed_files#<block>#part<> @ test/testdata/infer/gerald.rb:131
+          method ::Opus::CIBot::Gerald::Diff#changed_lines () @ test/testdata/infer/gerald.rb:142
+          method ::Opus::CIBot::Gerald::Diff#changed_openapi? () @ test/testdata/infer/gerald.rb:146
+          method ::Opus::CIBot::Gerald::Diff#deleted_files () @ test/testdata/infer/gerald.rb:126
+            method ::Opus::CIBot::Gerald::Diff#deleted_files#<block> (part) @ test/testdata/infer/gerald.rb:127
+              argument ::Opus::CIBot::Gerald::Diff#deleted_files#<block>#part<> @ test/testdata/infer/gerald.rb:127
+            method ::Opus::CIBot::Gerald::Diff#deleted_files#<block> (part) @ test/testdata/infer/gerald.rb:127
+              argument ::Opus::CIBot::Gerald::Diff#deleted_files#<block>#part<> @ test/testdata/infer/gerald.rb:127
+          method ::Opus::CIBot::Gerald::Diff#initialize (raw_diff) @ test/testdata/infer/gerald.rb:113
+            argument ::Opus::CIBot::Gerald::Diff#initialize#raw_diff<> @ test/testdata/infer/gerald.rb:113
+          method ::Opus::CIBot::Gerald::Diff#parse : private (diff) @ test/testdata/infer/gerald.rb:150
+            argument ::Opus::CIBot::Gerald::Diff#parse#diff<> @ test/testdata/infer/gerald.rb:150
+            method ::Opus::CIBot::Gerald::Diff#parse#<block> (part) @ test/testdata/infer/gerald.rb:155
+              argument ::Opus::CIBot::Gerald::Diff#parse#<block>#part<> @ test/testdata/infer/gerald.rb:155
+              method ::Opus::CIBot::Gerald::Diff#parse#<block>#<block> (line) @ test/testdata/infer/gerald.rb:161
+                argument ::Opus::CIBot::Gerald::Diff#parse#<block>#<block>#line<> @ test/testdata/infer/gerald.rb:161
+          method ::Opus::CIBot::Gerald::Diff#removed_lines () @ test/testdata/infer/gerald.rb:138
+            method ::Opus::CIBot::Gerald::Diff#removed_lines#<block> (part) @ test/testdata/infer/gerald.rb:139
+              argument ::Opus::CIBot::Gerald::Diff#removed_lines#<block>#part<> @ test/testdata/infer/gerald.rb:139
+        class ::Opus::CIBot::Gerald::MatchContext < ::Object () @ test/testdata/infer/gerald.rb:51
+          field ::Opus::CIBot::Gerald::MatchContext#@assignee -> T.untyped @ test/testdata/infer/gerald.rb:53
+          field ::Opus::CIBot::Gerald::MatchContext#@body -> T.untyped @ test/testdata/infer/gerald.rb:56
+          field ::Opus::CIBot::Gerald::MatchContext#@diff -> T.untyped @ test/testdata/infer/gerald.rb:58
+          field ::Opus::CIBot::Gerald::MatchContext#@gh_user -> T.untyped @ test/testdata/infer/gerald.rb:54
+          field ::Opus::CIBot::Gerald::MatchContext#@merge_branch -> T.untyped @ test/testdata/infer/gerald.rb:55
+          field ::Opus::CIBot::Gerald::MatchContext#@openapi_diff -> T.untyped @ test/testdata/infer/gerald.rb:59
+          field ::Opus::CIBot::Gerald::MatchContext#@repo -> T.untyped @ test/testdata/infer/gerald.rb:52
+          field ::Opus::CIBot::Gerald::MatchContext#@title -> T.untyped @ test/testdata/infer/gerald.rb:57
+          method ::Opus::CIBot::Gerald::MatchContext#assignee () @ test/testdata/infer/gerald.rb:53
+          method ::Opus::CIBot::Gerald::MatchContext#body () @ test/testdata/infer/gerald.rb:56
+          method ::Opus::CIBot::Gerald::MatchContext#diff () @ test/testdata/infer/gerald.rb:58
+          method ::Opus::CIBot::Gerald::MatchContext#gh_user () @ test/testdata/infer/gerald.rb:54
+          method ::Opus::CIBot::Gerald::MatchContext#initialize (repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff) @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#assignee<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#body<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#diff<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#gh_user<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#merge_branch<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#openapi_diff<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#repo<> @ test/testdata/infer/gerald.rb:61
+            argument ::Opus::CIBot::Gerald::MatchContext#initialize#title<> @ test/testdata/infer/gerald.rb:61
+          method ::Opus::CIBot::Gerald::MatchContext#merge_branch () @ test/testdata/infer/gerald.rb:55
+          method ::Opus::CIBot::Gerald::MatchContext#openapi_diff () @ test/testdata/infer/gerald.rb:59
+          method ::Opus::CIBot::Gerald::MatchContext#repo () @ test/testdata/infer/gerald.rb:52
+          method ::Opus::CIBot::Gerald::MatchContext#title () @ test/testdata/infer/gerald.rb:57
+          method ::Opus::CIBot::Gerald::MatchContext#user_stripe_suffix? () @ test/testdata/infer/gerald.rb:73
+        class ::Opus::CIBot::Gerald::MatchTimeBudget < ::Object () @ test/testdata/infer/gerald.rb:79
+          field ::Opus::CIBot::Gerald::MatchTimeBudget#@start -> T.untyped @ test/testdata/infer/gerald.rb:85
+          method ::Opus::CIBot::Gerald::MatchTimeBudget#check! () @ test/testdata/infer/gerald.rb:89
+          method ::Opus::CIBot::Gerald::MatchTimeBudget#initialize () @ test/testdata/infer/gerald.rb:84
+          method ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule (rule, <blk>) @ test/testdata/infer/gerald.rb:96
+            argument ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#<blk><block> -> T.untyped @ test/testdata/infer/gerald.rb:98
+            argument ::Opus::CIBot::Gerald::MatchTimeBudget#time_rule#rule<> @ test/testdata/infer/gerald.rb:96
+          static-field ::Opus::CIBot::Gerald::MatchTimeBudget#PER_RULE_MS -> Integer(2000) @ test/testdata/infer/gerald.rb:82
+          static-field ::Opus::CIBot::Gerald::MatchTimeBudget#TOTAL_TIME_MS -> Integer(10000) @ test/testdata/infer/gerald.rb:81
+        class ::Opus::CIBot::Gerald::MatchTimeout < ::StandardError () @ test/testdata/infer/gerald.rb:7
+          field ::Opus::CIBot::Gerald::MatchTimeout#@rule_token -> T.untyped @ test/testdata/infer/gerald.rb:9
+          method ::Opus::CIBot::Gerald::MatchTimeout#initialize (message, rule_token) @ test/testdata/infer/gerald.rb:11
+            argument ::Opus::CIBot::Gerald::MatchTimeout#initialize#message<> @ test/testdata/infer/gerald.rb:11
+            argument ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
+          method ::Opus::CIBot::Gerald::MatchTimeout#rule_token () @ test/testdata/infer/gerald.rb:9
+        class ::Opus::CIBot::Gerald::Matcher < ::Object (<constant:Log>) @ test/testdata/infer/gerald.rb:17
+          class ::Opus::CIBot::Gerald::Matcher::Chalk < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
+            class ::Opus::CIBot::Gerald::Matcher::Chalk::Log < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
+          field ::Opus::CIBot::Gerald::Matcher#@rules -> T.untyped @ test/testdata/infer/gerald.rb:23
+          method ::Opus::CIBot::Gerald::Matcher#initialize () @ test/testdata/infer/gerald.rb:22
+            method ::Opus::CIBot::Gerald::Matcher#initialize#<block> (<block-pass>$2) @ test/testdata/infer/gerald.rb:25
+              argument ::Opus::CIBot::Gerald::Matcher#initialize#<block>#<block-pass><> @ test/testdata/infer/gerald.rb:25
+            method ::Opus::CIBot::Gerald::Matcher#initialize#<block> (<block-pass>$4) @ test/testdata/infer/gerald.rb:27
+              argument ::Opus::CIBot::Gerald::Matcher#initialize#<block>#<block-pass><> @ test/testdata/infer/gerald.rb:27
+          method ::Opus::CIBot::Gerald::Matcher#match (match_context) @ test/testdata/infer/gerald.rb:33
+            argument ::Opus::CIBot::Gerald::Matcher#match#match_context<> @ test/testdata/infer/gerald.rb:33
+            method ::Opus::CIBot::Gerald::Matcher#match#<block> (r) @ test/testdata/infer/gerald.rb:43
+              argument ::Opus::CIBot::Gerald::Matcher#match#<block>#r<> @ test/testdata/infer/gerald.rb:43
+              method ::Opus::CIBot::Gerald::Matcher#match#<block>#<block> () @ test/testdata/infer/gerald.rb:44
+          static-field ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES -> Integer(100) @ test/testdata/infer/gerald.rb:20
+      class ::Opus::CIBot::Model < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
+        class ::Opus::CIBot::Model::GeraldRule < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
+  method #<static-init> () @ test/testdata/infer/gerald.rb:2
 

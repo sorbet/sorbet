@@ -1,7 +1,7 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:C> < ::Object () @ test/testdata/todo/block_in_class.rb:1
-    static-field <constant:L> -> T.untyped @ test/testdata/todo/block_in_class.rb:2
-  class <singleton class:<constant:C>> < ::<Class:Object> () @ test/testdata/todo/block_in_class.rb:1
-    method <block>$2 (x) @ test/testdata/todo/block_in_class.rb:2
-      argument x<> @ test/testdata/todo/block_in_class.rb:2
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:C> < ::<Class:Object> () @ test/testdata/todo/block_in_class.rb:1
+    method ::<Class:C>#<block> (x) @ test/testdata/todo/block_in_class.rb:2
+      argument ::<Class:C>#<block>#x<> @ test/testdata/todo/block_in_class.rb:2
+  class ::C < ::Object () @ test/testdata/todo/block_in_class.rb:1
+    static-field ::C#L -> T.untyped @ test/testdata/todo/block_in_class.rb:2
 

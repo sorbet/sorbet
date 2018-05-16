@@ -1,20 +1,20 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:A> < ::Object () @ test/testdata/namer/arguments.rb:2
-    method take_arguments (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:3
-      argument a<> @ test/testdata/namer/arguments.rb:3
-      argument b<optional> @ test/testdata/namer/arguments.rb:3
-      argument c<repeated> @ test/testdata/namer/arguments.rb:3
-      argument d<keyword> @ test/testdata/namer/arguments.rb:3
-      argument e<optional, keyword> @ test/testdata/namer/arguments.rb:3
-      argument f<keyword, repeated> @ test/testdata/namer/arguments.rb:3
-      argument g<block> @ test/testdata/namer/arguments.rb:3
-      method <block>$2 (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:6
-        argument a<> @ test/testdata/namer/arguments.rb:6
-        argument b<optional> @ test/testdata/namer/arguments.rb:6
-        argument c<repeated> @ test/testdata/namer/arguments.rb:6
-        argument d<keyword> @ test/testdata/namer/arguments.rb:6
-        argument e<optional, keyword> @ test/testdata/namer/arguments.rb:6
-        argument f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
-        argument g<block> @ test/testdata/namer/arguments.rb:6
-  class <singleton class:<constant:A>> < ::<Class:Object> () @ test/testdata/namer/arguments.rb:2
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:A> < ::<Class:Object> () @ test/testdata/namer/arguments.rb:2
+  class ::A < ::Object () @ test/testdata/namer/arguments.rb:2
+    method ::A#take_arguments (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#a<> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#b<optional> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#c<repeated> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#d<keyword> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#e<optional, keyword> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#f<keyword, repeated> @ test/testdata/namer/arguments.rb:3
+      argument ::A#take_arguments#g<block> @ test/testdata/namer/arguments.rb:3
+      method ::A#take_arguments#<block> (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#a<> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#b<optional> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#c<repeated> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#d<keyword> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#e<optional, keyword> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
+        argument ::A#take_arguments#<block>#g<block> @ test/testdata/namer/arguments.rb:6
 

@@ -1,10 +1,10 @@
-class <constant:<root>> < ::Object () @ -e:1
-  class <constant:F> < ::Object () @ test/testdata/namer/dynamic_method_with_class.rb:2
-    method bar (baz) @ test/testdata/namer/dynamic_method_with_class.rb:8
-      argument baz<> @ test/testdata/namer/dynamic_method_with_class.rb:8
-    method bla () @ test/testdata/namer/dynamic_method_with_class.rb:6
-      method <block>$2 () @ test/testdata/namer/dynamic_method_with_class.rb:7
-    method foo (<blk>) @ test/testdata/namer/dynamic_method_with_class.rb:3
-      argument <blk><block> -> T.untyped @ test/testdata/namer/dynamic_method_with_class.rb:4
-  class <singleton class:<constant:F>> < ::<Class:Object> () @ test/testdata/namer/dynamic_method_with_class.rb:2
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:F> < ::<Class:Object> () @ test/testdata/namer/dynamic_method_with_class.rb:2
+  class ::F < ::Object () @ test/testdata/namer/dynamic_method_with_class.rb:2
+    method ::F#bar (baz) @ test/testdata/namer/dynamic_method_with_class.rb:8
+      argument ::F#bar#baz<> @ test/testdata/namer/dynamic_method_with_class.rb:8
+    method ::F#bla () @ test/testdata/namer/dynamic_method_with_class.rb:6
+      method ::F#bla#<block> () @ test/testdata/namer/dynamic_method_with_class.rb:7
+    method ::F#foo (<blk>) @ test/testdata/namer/dynamic_method_with_class.rb:3
+      argument ::F#foo#<blk><block> -> T.untyped @ test/testdata/namer/dynamic_method_with_class.rb:4
 

@@ -1,25 +1,25 @@
-class <constant:<root>> < ::Object () @ test/testdata/resolver/let_var.rb:2
-  class <constant:Child1> < ::Parent () @ test/testdata/resolver/let_var.rb:39
-    method <static-init> () @ test/testdata/resolver/let_var.rb:40
-  class <constant:Child> < ::Parent (<constant:Mixin>) @ test/testdata/resolver/let_var.rb:23
-    field @undefinedivar -> T.untyped @ test/testdata/resolver/let_var.rb:34
-    method <static-init> () @ test/testdata/resolver/let_var.rb:23
-    method child_method () @ test/testdata/resolver/let_var.rb:30
-    static-field @@undefined_cvar -> T.untyped @ test/testdata/resolver/let_var.rb:28
-  class <constant:Mixin> (<constant:BasicObject>) @ test/testdata/resolver/let_var.rb:18
-    method <static-init> () @ test/testdata/resolver/let_var.rb:18
-    static-field @@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
-  class <constant:Parent> < ::Object () @ test/testdata/resolver/let_var.rb:2
-    field @ivar -> Integer @ test/testdata/resolver/let_var.rb:4
-    field @ivar2 -> Integer @ test/testdata/resolver/let_var.rb:5
-    method <static-init> () @ test/testdata/resolver/let_var.rb:2
-    method hi () @ test/testdata/resolver/let_var.rb:12
-    method initialize () @ test/testdata/resolver/let_var.rb:3
-    static-field @@class_var -> String @ test/testdata/resolver/let_var.rb:8
-  class <singleton class:<constant:Child1>> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:39
-  class <singleton class:<constant:Child>> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:23
-  class <singleton class:<constant:Mixin>> < ::Module () @ test/testdata/resolver/let_var.rb:18
-  class <singleton class:<constant:Parent>> < ::<Class:Object> () @ test/testdata/resolver/let_var.rb:2
-  method <static-init>$12 () @ test/testdata/resolver/let_var.rb:2
-  static-field <constant:Alias> -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
+class ::<root> < ::Object () @ test/testdata/resolver/let_var.rb:2
+  class ::<Class:Child1> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:39
+  class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/resolver/let_var.rb:23
+  class ::<Class:Mixin> < ::Module () @ test/testdata/resolver/let_var.rb:18
+  class ::<Class:Parent> < ::<Class:Object> () @ test/testdata/resolver/let_var.rb:2
+  class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/resolver/let_var.rb:23
+    field ::Child#@undefinedivar -> T.untyped @ test/testdata/resolver/let_var.rb:34
+    method ::Child#<static-init> () @ test/testdata/resolver/let_var.rb:23
+    method ::Child#child_method () @ test/testdata/resolver/let_var.rb:30
+    static-field ::Child#@@undefined_cvar -> T.untyped @ test/testdata/resolver/let_var.rb:28
+  class ::Child1 < ::Parent () @ test/testdata/resolver/let_var.rb:39
+    method ::Child1#<static-init> () @ test/testdata/resolver/let_var.rb:40
+  class ::Mixin (<constant:BasicObject>) @ test/testdata/resolver/let_var.rb:18
+    method ::Mixin#<static-init> () @ test/testdata/resolver/let_var.rb:18
+    static-field ::Mixin#@@mixin_cvar -> Integer @ test/testdata/resolver/let_var.rb:19
+  class ::Parent < ::Object () @ test/testdata/resolver/let_var.rb:2
+    field ::Parent#@ivar -> Integer @ test/testdata/resolver/let_var.rb:4
+    field ::Parent#@ivar2 -> Integer @ test/testdata/resolver/let_var.rb:5
+    method ::Parent#<static-init> () @ test/testdata/resolver/let_var.rb:2
+    method ::Parent#hi () @ test/testdata/resolver/let_var.rb:12
+    method ::Parent#initialize () @ test/testdata/resolver/let_var.rb:3
+    static-field ::Parent#@@class_var -> String @ test/testdata/resolver/let_var.rb:8
+  method #<static-init> () @ test/testdata/resolver/let_var.rb:2
+  static-field #Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/let_var.rb:38
 
