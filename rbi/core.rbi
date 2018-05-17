@@ -4311,7 +4311,7 @@ module Enumerable
   sig.returns(Enumerator[Elem])
   def take_while(&blk); end
 
-  sig.returns(T::Hash[Elem, Elem])
+  sig.returns(T::Hash[T.untyped, T.untyped])
   def to_h(); end
 
   sig(
