@@ -49,7 +49,7 @@ public:
     struct WellKnown {};
 
 #ifdef DEBUG_MODE
-    constexpr NameRef(WellKnown, unsigned int id) : _id(id), globalStateId(-1) {}
+    constexpr NameRef(WellKnown, unsigned int id) : _id(id), globalStateId(-1), parentGlobalStateId(-1) {}
 #else
     constexpr NameRef(WellKnown, unsigned int id) : _id(id) {}
 #endif
@@ -94,11 +94,14 @@ public:
 
     bool isWellKnownName() const;
 
+    void enforceCorrectGlobalState(const GlobalState &gs) const;
+
 public:
     int _id;
 
 #ifdef DEBUG_MODE
     int globalStateId;
+    int parentGlobalStateId;
 #endif
 };
 

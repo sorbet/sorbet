@@ -12,6 +12,7 @@ namespace core {
 NameRef::NameRef(const GlobalState &gs, unsigned int id) : _id(id) {
 #ifdef DEBUG_MODE
     globalStateId = gs.globalStateId;
+    parentGlobalStateId = gs.parentGlobalStateId;
 #endif
 }
 
@@ -144,21 +145,33 @@ bool Name::isClassName(const GlobalState &gs) const {
     }
 }
 
+void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
+#ifdef DEBUG_MODE
+    if (isWellKnownName()) {
+        return;
+    }
+    if (globalStateId == gs.globalStateId) {
+        return;
+    }
+    auto inParent = parentGlobalStateId == gs.globalStateId || parentGlobalStateId == gs.parentGlobalStateId;
+    if (inParent && id() < gs.lastNameKnownByParentGlobalState) {
+        return;
+    }
+    ENFORCE(false, "NameRef not owned by correct GlobalState");
+#endif
+}
+
 Name &NameRef::data(GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
-#ifdef DEBUG_MODE
-    ENFORCE(isWellKnownName() || globalStateId == gs.globalStateId);
-#endif
+    enforceCorrectGlobalState(gs);
     return gs.names[_id];
 }
 
 const Name &NameRef::data(const GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
-#ifdef DEBUG_MODE
-    ENFORCE(isWellKnownName() || globalStateId == gs.globalStateId);
-#endif
+    enforceCorrectGlobalState(gs);
     return gs.names[_id];
 }
 string NameRef::toString(const GlobalState &gs) const {

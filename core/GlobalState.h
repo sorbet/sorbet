@@ -103,6 +103,8 @@ public:
     bool wasModified() const;
 
     int globalStateId;
+    int parentGlobalStateId;
+    int lastNameKnownByParentGlobalState;
     bool silenceErrors = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;

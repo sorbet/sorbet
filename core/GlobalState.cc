@@ -844,6 +844,8 @@ std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     if (keepId) {
         result->globalStateId = this->globalStateId;
     }
+    result->parentGlobalStateId = this->globalStateId;
+    result->lastNameKnownByParentGlobalState = namesUsed();
 
     result->strings = this->strings;
     result->strings_last_page_used = STRINGS_PAGE_SIZE;
