@@ -44,7 +44,7 @@ class ::<root> < ::Object () @ -e:1
 --- name-table end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$89>()
+  def self.<static-init><<static-init>$88>()
     1
   end
 end
@@ -56,7 +56,7 @@ ClassDef{
   rhs = [
     MethodDef{
       self = 1
-      name = <static-init><<static-init>$89>
+      name = <static-init><<static-init>$88>
       args = []
       rhs = Literal{ value = 1 }
     }
