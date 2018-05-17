@@ -241,9 +241,6 @@ class Encoding < Object
   def to_s(); end
 end
 
-class Encoding::CompatibilityError < EncodingError
-end
-
 class Encoding::Converter < Data
   AFTER_OUTPUT = T.let(T.unsafe(nil), Integer)
   CRLF_NEWLINE_DECORATOR = T.let(T.unsafe(nil), Integer)
@@ -258,13 +255,4 @@ class Encoding::Converter < Data
   XML_ATTR_CONTENT_DECORATOR = T.let(T.unsafe(nil), Integer)
   XML_ATTR_QUOTE_DECORATOR = T.let(T.unsafe(nil), Integer)
   XML_TEXT_DECORATOR = T.let(T.unsafe(nil), Integer)
-end
-
-class Encoding::ConverterNotFoundError < EncodingError
-end
-
-class Encoding::InvalidByteSequenceError < EncodingError
-end
-
-class Encoding::UndefinedConversionError < EncodingError
 end

@@ -19,6 +19,3 @@ class StringScanner < Object
   .returns(String)
   def scan(arg0); end
 end
-
-class StringScanner::Error < StandardError
-end

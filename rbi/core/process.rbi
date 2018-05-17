@@ -442,9 +442,6 @@ module Process::Sys
   def self.setuid(user); end
 end
 
-class Process::Tms < Struct
-end
-
 module Process::UID
   sig(
       user: Integer,

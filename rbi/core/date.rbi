@@ -11,6 +11,3 @@ class Date < Object
   JULIAN = T.let(T.unsafe(nil), Float)
   MONTHNAMES = T.let(T.unsafe(nil), Array)
 end
-
-class Date::Infinity < Numeric
-end

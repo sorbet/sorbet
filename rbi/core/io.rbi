@@ -532,19 +532,3 @@ class IO < Object
   sig.returns(Integer)
   def to_i(); end
 end
-
-class IO::EAGAINWaitReadable < Errno::EAGAIN
-  include IO::WaitReadable
-end
-
-class IO::EAGAINWaitWritable < Errno::EAGAIN
-  include IO::WaitWritable
-end
-
-class IO::EINPROGRESSWaitReadable < Errno::EINPROGRESS
-  include IO::WaitReadable
-end
-
-class IO::EINPROGRESSWaitWritable < Errno::EINPROGRESS
-  include IO::WaitWritable
-end

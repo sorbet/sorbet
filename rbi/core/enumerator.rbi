@@ -87,18 +87,3 @@ class Enumerator < Object
   .returns(Enumerator[[Elem, T.type_parameter(:U)]])
   def with_object(arg0, &blk); end
 end
-
-class Enumerator::Generator < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class Enumerator::Lazy < Enumerator
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class Enumerator::Yielder < Object
-end

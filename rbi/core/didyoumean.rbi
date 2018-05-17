@@ -5,14 +5,8 @@ module DidYouMean
   VERSION = T.let(T.unsafe(nil), String)
 end
 
-class DidYouMean::ClassNameChecker < Object
-end
-
 class DidYouMean::ClassNameChecker::ClassName < SimpleDelegator
   RUBYGEMS_ACTIVATION_MONITOR = T.let(T.unsafe(nil), Monitor)
-end
-
-class DidYouMean::Formatter < Object
 end
 
 module DidYouMean::JaroWinkler
@@ -22,12 +16,6 @@ end
 
 class DidYouMean::MethodNameChecker < Object
   NAMES_TO_EXCLUDE = T.let(T.unsafe(nil), Hash)
-end
-
-class DidYouMean::NullChecker < Object
-end
-
-class DidYouMean::SpellChecker < Object
 end
 
 class DidYouMean::VariableNameChecker < Object

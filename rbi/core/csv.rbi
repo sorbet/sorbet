@@ -16,23 +16,3 @@ class CSV < Object
   .returns(NilClass)
   def self.foreach(path, options=_, &blk); end
 end
-
-class CSV::FieldInfo < Struct
-end
-
-class CSV::MalformedCSVError < RuntimeError
-end
-
-class CSV::Row < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
-class CSV::Table < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end

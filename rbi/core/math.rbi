@@ -163,6 +163,3 @@ module Math
   .returns(Float)
   def self.tanh(x); end
 end
-
-class Math::DomainError < StandardError
-end

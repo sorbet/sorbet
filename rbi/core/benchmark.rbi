@@ -41,12 +41,6 @@ module Benchmark
   def self.realtime(&blk); end
 end
 
-class Benchmark::Job < Object
-end
-
-class Benchmark::Report < Object
-end
-
 class Benchmark::Tms < Object
   CAPTION = T.let(T.unsafe(nil), String)
   FORMAT = T.let(T.unsafe(nil), String)
