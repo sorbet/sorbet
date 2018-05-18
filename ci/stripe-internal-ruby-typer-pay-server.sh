@@ -14,7 +14,9 @@ maxrss: %M
 '
 
 # This is what we'll ship to our users
-bazel build main:ruby-typer --config=release
+/usr/local/bin/junit-script-output \
+    release-build \
+    bazel build main:ruby-typer --config=release
 
 ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer"
 export ASAN_SYMBOLIZER_PATH
@@ -78,19 +80,25 @@ fi
 OUT=$(mktemp)
 TIMEFILE1=$(mktemp)
 
-/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+/usr/local/bin/junit-script-output \
+    typecheck-uncached \
+    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
 cat "$TIMEFILE1"
 
-/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+/usr/local/bin/junit-script-output \
+    typecheck-cached \
+    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
 cat "$TIMEFILE1"
 
-/usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
+/usr/local/bin/junit-script-output \
+    typecheck-final \
+    /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
 if [ -s "$OUT" ]; then
     exit 1
 fi
@@ -110,17 +118,21 @@ fi
 (
     cd -
     cp bazelrc-jenkins .bazelrc
-    bazel build main:ruby-typer -c opt --config=ci --config=sanitize
+    /usr/local/bin/junit-script-output \
+        sanitized-build \
+        bazel build main:ruby-typer -c opt --config=ci --config=sanitize
 )
 
 TIMEFILE2=$(mktemp)
 
 # Disable leak sanatizer. Does not work in docker
 # https://github.com/google/sanitizers/issues/764
-/usr/bin/time -o "$TIMEFILE2" \
+/usr/local/bin/junit-script-output \
+    typecheck-sanitized \
+    /usr/bin/time -o "$TIMEFILE2" \
     ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=strict --suggest-typed \
-      --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
-      --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/ruby-typer --metrics-sha="$GIT_SHA"
+    --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
+    --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/ruby-typer --metrics-sha="$GIT_SHA"
 
 cat "$TIMEFILE2"
 
