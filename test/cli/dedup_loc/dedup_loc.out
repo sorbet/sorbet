@@ -1,0 +1,10 @@
+test/cli/dedup_loc/dedup_loc.rb:5: Argument does not have asserted type `NilClass` http://go/e/7007
+     5 |    T.assert_type!(e, NilClass)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Got Exception originating from:
+    test/cli/dedup_loc/dedup_loc.rb:4:
+     4 |rescue Exception => e
+     5 |    T.assert_type!(e, NilClass)
+    test/cli/dedup_loc/dedup_loc.rb:4:
+     4 |rescue Exception => e
+               ^^^^^^^^^

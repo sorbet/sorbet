@@ -28,12 +28,12 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     31 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:24:
-    24 |          nil
-                  ^^^
     test/cli/errors/errors.rb:21:
     21 |  def main(foo)
           ^^^^^^^^^^^^^
+    test/cli/errors/errors.rb:24:
+    24 |          nil
+                  ^^^
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
@@ -67,12 +67,12 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     31 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:24:
-    24 |          nil
-                  ^^^
     test/cli/errors/errors.rb:21:
     21 |  def main(foo)
           ^^^^^^^^^^^^^
+    test/cli/errors/errors.rb:24:
+    24 |          nil
+                  ^^^
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
@@ -106,12 +106,12 @@ test/cli/errors/errors.rb:28: Expression passed as an argument `a` to method `ba
     31 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:24:
-    24 |          nil
-                  ^^^
     test/cli/errors/errors.rb:21:
     21 |  def main(foo)
           ^^^^^^^^^^^^^
+    test/cli/errors/errors.rb:24:
+    24 |          nil
+                  ^^^
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
