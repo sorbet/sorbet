@@ -1,0 +1,7 @@
+class ::<root> < ::Object () @ -e:1
+  class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/sig_compat.rb:3
+  class ::A < ::Object () @ test/testdata/resolver/sig_compat.rb:3
+    method ::A#f (a, b) -> T.untyped @ test/testdata/resolver/sig_compat.rb:8
+      argument ::A#f#a<> -> Integer @ test/testdata/resolver/sig_compat.rb:5
+      argument ::A#f#b<> -> T.untyped @ test/testdata/resolver/sig_compat.rb:6
+

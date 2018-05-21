@@ -10,7 +10,7 @@ class ::<root> < ::Object () @ test/testdata/resolver/sig_bad.rb:2
       argument ::A#bad#d<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:10
       argument ::A#bad#e<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:11
       argument ::A#bad#f<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:12
-      argument ::A#bad#g<> -> <impossible> @ test/testdata/resolver/sig_bad.rb:13
+      argument ::A#bad#g<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:13
       argument ::A#bad#h<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:14
       argument ::A#bad#i<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:15
       argument ::A#bad#j<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:16

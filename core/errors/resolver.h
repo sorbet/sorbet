@@ -32,6 +32,9 @@ constexpr ErrorClass BadAbstractMethod{5023, StrictLevel::Typed}; // there are v
 constexpr ErrorClass RecursiveTypeAlias{5024, StrictLevel::Stripe};
 constexpr ErrorClass TypeAliasInGenericClass{5025, StrictLevel::Stripe};
 constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::Stripe};
+
+// This is for type signatures that we permit at Stripe but ban in Typed code
+constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::Typed};
 } // namespace Resolver
 } // namespace errors
 } // namespace core
