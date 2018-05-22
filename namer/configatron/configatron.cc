@@ -4,6 +4,7 @@
 #include <dirent.h>
 #include <iostream>
 #include <sys/types.h>
+#include <utility>
 
 using namespace std;
 using namespace ruby_typer;
@@ -92,7 +93,7 @@ struct Path {
     Path *parent;
     string selector;
     shared_ptr<core::Type> myType;
-    Path(Path *parent, string selector) : parent(parent), selector(selector){};
+    Path(Path *parent, string selector) : parent(parent), selector(std::move(selector)){};
     string toString() {
         if (parent) {
             return parent->toString() + "." + selector;

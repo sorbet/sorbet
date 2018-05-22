@@ -252,7 +252,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
     }
     out << '\n';
     out << "{";
-    out << "    core::categoryCounterInc(\"nodes\", \"" << node.name << "\");" << '\n';
+    out << R"(    core::categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
     out << "}" << '\n';
     out << '\n';
 
@@ -296,10 +296,10 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
                 out << "      printNode(buf, a, gs, tabs + 2);" << '\n';
                 out << "    }" << '\n';
                 out << "    printTabs(buf, tabs + 1);" << '\n';
-                out << "    buf << \"]\" << '\\n';" << '\n';
+                out << R"(    buf << "]" << '\n';)" << '\n';
                 break;
             case String:
-                out << "    buf << \"" << arg.name << " = \\\"\" << " << arg.name << " << \"\\\"\" << '\\n';" << '\n';
+                out << "    buf << \"" << arg.name << R"( = \"" << )" << arg.name << R"( << "\"" << '\n';)" << '\n';
                 break;
             case Uint:
                 out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << '\\n';" << '\n';
@@ -314,13 +314,13 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
 
     out << "  std::string " << node.name << "::toJSON(const core::GlobalState &gs, int tabs) {" << '\n'
         << "    std::stringstream buf;" << '\n';
-    out << "    buf << \"{\" << '\\n';" << '\n';
+    out << R"(    buf << "{" << '\n';)" << '\n';
     out << "    printTabs(buf, tabs + 1);" << '\n';
     auto maybeComma = "";
     if (!node.fields.empty()) {
         maybeComma = ",";
     }
-    out << "    buf << \"\\\"type\\\" : \\\"" << node.name << "\\\"" << maybeComma << "\" << '\\n';" << '\n';
+    out << R"(    buf << "\"type\" : \")" << node.name << "\\\"" << maybeComma << "\" << '\\n';" << '\n';
     int i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
@@ -331,16 +331,16 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case Name:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << core::JSON::escape(" << arg.name
-                    << ".data(gs).show(gs)) << \"\\\"" << maybeComma << "\" << '\\n';" << '\n';
+                out << R"(    buf << "\")" << arg.name << R"(\" : \"" << core::JSON::escape()" << arg.name
+                    << R"(.data(gs).show(gs)) << "\")" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case Node:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : \";" << '\n';
+                out << R"(    buf << "\")" << arg.name << R"(\" : ";)" << '\n';
                 out << "    printNodeJSON(buf, " << arg.name << ", gs, tabs + 1);" << '\n';
                 out << "    buf << \"" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case NodeVec:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : [\" << '\\n';" << '\n';
+                out << R"(    buf << "\")" << arg.name << R"(\" : [" << '\n';)" << '\n';
                 out << "    int i = -1;" << '\n';
                 out << "    for (auto &&a: " << arg.name << ") {" << '\n';
                 out << "      i++;" << '\n';
@@ -355,11 +355,11 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
                 out << "    buf << \"]" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case String:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
+                out << R"(    buf << "\")" << arg.name << R"(\" : \"" << )" << arg.name << R"( << "\")" << maybeComma
                     << "\" << '\\n';" << '\n';
                 break;
             case Uint:
-                out << "    buf << \"\\\"" << arg.name << "\\\" : \\\"\" << " << arg.name << " << \"\\\"" << maybeComma
+                out << R"(    buf << "\")" << arg.name << R"(\" : \"" << )" << arg.name << R"( << "\")" << maybeComma
                     << "\" << '\\n';" << '\n';
                 break;
         }

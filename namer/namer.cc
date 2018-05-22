@@ -52,7 +52,7 @@ class NameInserter {
         bool optional = false, keyword = false, block = false, repeated = false;
 
         while (true) {
-            if (ast::UnresolvedIdent *nm = ast::cast_tree<ast::UnresolvedIdent>(arg)) {
+            if (auto *nm = ast::cast_tree<ast::UnresolvedIdent>(arg)) {
                 core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
                 core::Symbol &data = sym.data(ctx);
                 if (optional) {
@@ -118,7 +118,7 @@ class NameInserter {
             return false;
         }
 
-        if (send->args.size() < 1) {
+        if (send->args.empty()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
                 e.setHeader("`{}` requires at least one argument");
             }
@@ -259,7 +259,7 @@ public:
         for (auto &arg : args) {
             core::NameRef name;
 
-            if (ast::ShadowArg *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
+            if (auto *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
                 auto id = ast::cast_tree<ast::UnresolvedIdent>(sarg->expr.get());
                 ENFORCE(id != nullptr);
                 name = id->name;
@@ -609,7 +609,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        ast::ConstantLit *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        auto *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
             return asgn;
         }

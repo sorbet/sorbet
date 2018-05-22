@@ -21,10 +21,10 @@
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
-#include "signal.h"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
 #include <algorithm> // find
+#include <csignal>
 #include <iostream>
 #include <poll.h>
 
@@ -723,7 +723,7 @@ int realmain(int argc, const char *argv[]) {
         FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
     }
 
-    if (opts.someCounters.size() != 0) {
+    if (!opts.someCounters.empty()) {
         if (opts.enableCounters) {
             logger->error("Don't pass both --counters and --counter");
             return 1;

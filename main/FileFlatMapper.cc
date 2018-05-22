@@ -21,7 +21,7 @@ FileFlatMapper::FileFlatMapper(int &argc, const char **&argv) : origArgc(argc), 
             try {
                 string argsP = FileOps::read(argv[i] + 1);
                 for (string arg : split(argsP, '\n')) {
-                    char *c_arg = (char *)malloc(arg.size() + 1);
+                    auto *c_arg = (char *)malloc(arg.size() + 1);
                     memcpy(c_arg, arg.c_str(), arg.size() + 1);
                     args.push_back(c_arg);
                 }
@@ -32,7 +32,7 @@ FileFlatMapper::FileFlatMapper(int &argc, const char **&argv) : origArgc(argc), 
             }
         } else {
             int length = strlen(argv[i]);
-            char *c_arg = (char *)malloc(length + 1);
+            auto *c_arg = (char *)malloc(length + 1);
             memcpy(c_arg, argv[i], length);
             c_arg[length] = '\0';
             args.push_back(c_arg);

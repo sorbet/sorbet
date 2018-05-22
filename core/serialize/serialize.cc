@@ -132,28 +132,33 @@ u4 Serializer::UnPickler::getU4() {
     } else {
         u4 res = r & 127;
         u4 vle = r;
-        if ((vle & 128) == 0)
+        if ((vle & 128) == 0) {
             goto done;
+        }
 
         vle = data[pos++];
         res |= (vle & 127) << 7;
-        if ((vle & 128) == 0)
+        if ((vle & 128) == 0) {
             goto done;
+        }
 
         vle = data[pos++];
         res |= (vle & 127) << 14;
-        if ((vle & 128) == 0)
+        if ((vle & 128) == 0) {
             goto done;
+        }
 
         vle = data[pos++];
         res |= (vle & 127) << 21;
-        if ((vle & 128) == 0)
+        if ((vle & 128) == 0) {
             goto done;
+        }
 
         vle = data[pos++];
         res |= (vle & 127) << 28;
-        if ((vle & 128) == 0)
+        if ((vle & 128) == 0) {
             goto done;
+        }
 
     done:
         return res;
@@ -161,7 +166,7 @@ u4 Serializer::UnPickler::getU4() {
 }
 
 void Serializer::Pickler::putS8(const int64_t i) {
-    u8 u = absl::bit_cast<u8>(i);
+    auto u = absl::bit_cast<u8>(i);
     while (u > 127) {
         putU1((u & 127) | 128);
         u = u >> 7;
@@ -188,7 +193,7 @@ void Serializer::pickle(Pickler &p, const File &what) {
 }
 
 std::shared_ptr<File> Serializer::unpickleFile(UnPickler &p) {
-    File::Type t = (File::Type)p.getU1();
+    auto t = (File::Type)p.getU1();
     auto path = (std::string)p.getStr();
     auto source = (std::string)p.getStr();
     return std::make_shared<File>(move(path), move(source), t);
@@ -416,7 +421,7 @@ Symbol Serializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef(*gs, p.getU4());
         auto sym = SymbolRef(gs, p.getU4());
-        result.members.push_back(std::make_pair(name, sym));
+        result.members.emplace_back(name, sym);
     }
     result.resultType = unpickleType(p, gs);
 
@@ -1015,7 +1020,7 @@ std::unique_ptr<ast::Expression> Serializer::unpickleExpr(serialize::Serializer:
             return std::make_unique<ast::ConstDef>(loc, symbol, move(rhs));
         }
         case 35: {
-            ast::UnresolvedIdent::VarKind kind = (ast::UnresolvedIdent::VarKind)p.getU1();
+            auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return std::make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }

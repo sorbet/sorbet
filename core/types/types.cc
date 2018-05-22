@@ -4,6 +4,8 @@
 #include "core/Context.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
+#include <utility>
+
 #include "core/Types.h"
 
 using namespace ruby_typer;
@@ -229,9 +231,9 @@ core::LiteralType::LiteralType(bool val)
 core::TupleType::TupleType(vector<shared_ptr<Type>> elements)
     : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
 
-AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
+AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(std::move(left)), right(std::move(right)) {}
 
-OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(left), right(right) {}
+OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(std::move(left)), right(std::move(right)) {}
 
 void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);

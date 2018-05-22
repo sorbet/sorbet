@@ -84,7 +84,7 @@ class WorkerPool {
     std::vector<std::unique_ptr<Joinable>> threads;
     std::shared_ptr<spd::logger> logger;
 
-    void multiplexJob_(Task_ _t);
+    void multiplexJob_(Task_ t);
 
 public:
     WorkerPool(int size, std::shared_ptr<spd::logger> logger);

@@ -28,7 +28,7 @@ StrictLevel fileSigil(absl::string_view source) {
      * StrictLevel::Strict: # typed: strict
      * StrictLevel::String: # typed: strong
      */
-    static regex sigil("^\\s*#\\s*typed:\\s*(\\w+)?\\s*$");
+    static regex sigil(R"(^\s*#\s*typed:\s*(\w+)?\s*$)");
     size_t off = 0;
     // std::regex is shockingly slow.
     //

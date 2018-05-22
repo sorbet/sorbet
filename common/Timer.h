@@ -5,7 +5,7 @@
 
 class Timer {
 public:
-    Timer(std::shared_ptr<spdlog::logger> log, const std::string &msg);
+    Timer(std::shared_ptr<spdlog::logger> log, std::string msg);
     ~Timer();
 
 private:

@@ -38,7 +38,7 @@ namespace dsl {
  */
 class Sinatra final {
 public:
-    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::MethodDef *send);
+    static std::vector<std::unique_ptr<ast::Expression>> replaceDSL(core::MutableContext ctx, ast::MethodDef *mdef);
 
     Sinatra() = delete;
 };

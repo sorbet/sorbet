@@ -68,7 +68,7 @@ public:
 
     bool isPayload() const;
 
-    File(std::string &&path_, std::string &&source_, Type sourcetype);
+    File(std::string &&path_, std::string &&source_, Type source_type);
     File(File &&other) = default;
     File(const File &other) = delete;
     File() = delete;

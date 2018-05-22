@@ -118,7 +118,7 @@ string exec(string cmd) {
 
 namespace {
 #define MAX_STACK_FRAMES 128
-static void *stack_traces[MAX_STACK_FRAMES];
+void *stack_traces[MAX_STACK_FRAMES];
 
 void filter_unnecessary(string &out) {
     string::size_type i = 0;
@@ -150,7 +150,7 @@ void filter_unnecessary(string &out) {
 
 void ruby_typer::Error::print_backtrace() noexcept {
     int trace_size = 0;
-    char **messages = (char **)nullptr;
+    auto **messages = (char **)nullptr;
     string program_name = getProgramName();
 
     trace_size = backtrace(stack_traces, MAX_STACK_FRAMES);

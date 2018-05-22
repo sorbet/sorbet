@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
-#include <stdbool.h>
+
 #include <string>
 #include <sys/sysctl.h>
 #include <sys/types.h>

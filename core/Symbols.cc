@@ -636,11 +636,11 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Symbol &singletonInfo = singleton.data(gs);
 
     core::counterInc("singleton_classes");
-    singletonInfo.members.push_back(make_pair(Names::attached(), selfRef));
+    singletonInfo.members.emplace_back(Names::attached(), selfRef);
     singletonInfo.superClass = core::Symbols::todo();
     singletonInfo.setIsModule(false);
 
-    selfRef.data(gs).members.push_back(make_pair(Names::singleton(), singleton));
+    selfRef.data(gs).members.emplace_back(Names::singleton(), singleton);
     return singleton;
 }
 
@@ -768,7 +768,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 }
 
 LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
-LocalVariable::LocalVariable() : _name() {}
+LocalVariable::LocalVariable() {}
 bool LocalVariable::exists() const {
     return _name._id > 0;
 }

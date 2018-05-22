@@ -1,10 +1,12 @@
 #include "Timer.h"
+
+#include <utility>
 using namespace std;
 long timespec_delta(struct timespec *start, struct timespec *stop) {
     return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
 }
 
-Timer::Timer(shared_ptr<spdlog::logger> log, const string &msg) : log(log), msg(msg) {
+Timer::Timer(shared_ptr<spdlog::logger> log, string msg) : log(std::move(log)), msg(std::move(msg)) {
     clock_gettime(CLOCK_REALTIME, &begin);
 }
 

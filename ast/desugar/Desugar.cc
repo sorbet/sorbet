@@ -29,7 +29,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
     if (auto *oargs = parser::cast_node<parser::Args>(argnode.get())) {
         args.reserve(oargs->args.size());
         for (auto &arg : oargs->args) {
-            if (parser::Mlhs *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
+            if (auto *lhs = parser::cast_node<parser::Mlhs>(arg.get())) {
                 core::NameRef temporary = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
                                                                     core::Names::destructureArg(), ++uniqueCounter);
                 args.emplace_back(MK::Local(arg->loc, temporary));
@@ -172,11 +172,11 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
                     right = 1;
                     exclusive = MK::False(lh->loc);
                 }
-                auto index =
-                    MK::Send3(lh->loc, make_unique<Ident>(lh->loc, core::Symbols::Range()), core::Names::new_(),
-                              MK::Int(lh->loc, left), MK::Int(lh->loc, -right), move(exclusive));
+                auto lhloc = lh->loc;
+                auto index = MK::Send3(lhloc, make_unique<Ident>(lhloc, core::Symbols::Range()), core::Names::new_(),
+                                       MK::Int(lhloc, left), MK::Int(lhloc, -right), move(exclusive));
                 stats.emplace_back(MK::Assign(
-                    lh->loc, move(lh), MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), move(index))));
+                    lhloc, move(lh), MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), move(index))));
             }
             i = -right;
         } else {
@@ -186,7 +186,8 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
                 stats.emplace_back(desugarMlhs(ctx, mlhs->loc, mlhs, move(val), uniqueCounter));
             } else {
                 unique_ptr<Expression> lh = node2TreeImpl(ctx, move(c), uniqueCounter);
-                stats.emplace_back(MK::Assign(lh->loc, move(lh), move(val)));
+                auto lhloc = lh->loc;
+                stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
             }
 
             i++;
@@ -601,7 +602,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::DefS *method) {
-                parser::Self *self = parser::cast_node<parser::Self>(method->singleton.get());
+                auto *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
@@ -620,7 +621,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::SClass *sclass) {
                 // This will be a nested ClassDef which we leave in the tree
                 // which will get the symbol of `class.singleton_class`
-                parser::Self *self = parser::cast_node<parser::Self>(sclass->expr.get());
+                auto *self = parser::cast_node<parser::Self>(sclass->expr.get());
                 if (self == nullptr) {
                     if (auto e = ctx.state.beginError(sclass->loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
@@ -648,9 +649,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     // This must have been a csend; That will have been desugared
                     // into an insseq with an If in the expression.
                     res.swap(recv);
-                    InsSeq *is = cast_tree<InsSeq>(res.get());
+                    auto *is = cast_tree<InsSeq>(res.get());
                     ENFORCE(is != nullptr, "DesugarBlock: failed to find InsSeq");
-                    If *iff = cast_tree<If>(is->expr.get());
+                    auto *iff = cast_tree<If>(is->expr.get());
                     ENFORCE(iff != nullptr, "DesugarBlock: failed to find If");
                     send = cast_tree<Send>(iff->elsep.get());
                     ENFORCE(send != nullptr, "DesugarBlock: failed to find Send");
@@ -856,7 +857,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                             }
                         } else {
                             unique_ptr<Expression> current = make_unique<Array>(loc, move(elems));
-                            elems.clear();
+                            /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
+                            elems = Array::ENTRY_store();
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, move(lastMerge), core::Names::concat(), move(current));
                             } else {
@@ -893,14 +895,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 unique_ptr<Expression> lastMerge;
 
                 for (auto &pairAsExpression : hash->pairs) {
-                    parser::Pair *pair = parser::cast_node<parser::Pair>(pairAsExpression.get());
+                    auto *pair = parser::cast_node<parser::Pair>(pairAsExpression.get());
                     if (pair != nullptr) {
                         auto key = node2TreeImpl(ctx, move(pair->key), uniqueCounter);
                         auto value = node2TreeImpl(ctx, move(pair->value), uniqueCounter);
                         keys.emplace_back(move(key));
                         values.emplace_back(move(value));
                     } else {
-                        parser::Kwsplat *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
+                        auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
                         ENFORCE(splat != nullptr, "kwsplat cast failed");
 
                         // Desguar
@@ -918,8 +920,10 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                             }
                         } else {
                             unique_ptr<Expression> current = make_unique<Hash>(loc, move(keys), move(values));
-                            keys.clear();
-                            values.clear();
+                            /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
+                            keys = Hash::ENTRY_store();
+                            values = Hash::ENTRY_store();
+
                             if (lastMerge != nullptr) {
                                 lastMerge = MK::Send1(loc, move(lastMerge), core::Names::merge(), move(current));
                             } else {
@@ -1163,7 +1167,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(iff);
             },
             [&](parser::Masgn *masgn) {
-                parser::Mlhs *lhs = parser::cast_node<parser::Mlhs>(masgn->lhs.get());
+                auto *lhs = parser::cast_node<parser::Mlhs>(masgn->lhs.get());
                 ENFORCE(lhs != nullptr, "Failed to get lhs of Masgn");
 
                 auto res =
@@ -1200,7 +1204,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         unique_ptr<Expression> test;
                         if (temp.exists()) {
                             auto local = MK::Local(cloc, temp);
-                            test = MK::Send1(ctree->loc, move(ctree), core::Names::tripleEq(), move(local));
+                            auto patternloc = ctree->loc;
+                            test = MK::Send1(patternloc, move(ctree), core::Names::tripleEq(), move(local));
                         } else {
                             test.swap(ctree);
                         }

@@ -150,24 +150,27 @@ TypeConstraint TypeConstraint::EmptyFrozenConstraint(makeEmptyFrozenConstraint()
 
 bool TypeConstraint::hasUpperBound(core::SymbolRef forWhat) const {
     for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return true;
+        }
     }
     return false;
 }
 
 bool TypeConstraint::hasLowerBound(core::SymbolRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return true;
+        }
     }
     return false;
 }
 
 std::shared_ptr<Type> &TypeConstraint::findUpperBound(core::SymbolRef forWhat) {
     for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     this->upperBounds.emplace_back();
     this->upperBounds.back().first = forWhat;
@@ -176,8 +179,9 @@ std::shared_ptr<Type> &TypeConstraint::findUpperBound(core::SymbolRef forWhat) {
 
 std::shared_ptr<Type> &TypeConstraint::findLowerBound(core::SymbolRef forWhat) {
     for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     this->lowerBounds.emplace_back();
     this->lowerBounds.back().first = forWhat;
@@ -186,8 +190,9 @@ std::shared_ptr<Type> &TypeConstraint::findLowerBound(core::SymbolRef forWhat) {
 
 std::shared_ptr<Type> &TypeConstraint::findSolution(core::SymbolRef forWhat) {
     for (auto &entry : this->solution) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     this->solution.emplace_back();
     this->solution.back().first = forWhat;
@@ -196,24 +201,27 @@ std::shared_ptr<Type> &TypeConstraint::findSolution(core::SymbolRef forWhat) {
 
 std::shared_ptr<Type> TypeConstraint::findUpperBound(core::SymbolRef forWhat) const {
     for (auto &entry : this->upperBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     Error::raise("should never happen");
 }
 
 std::shared_ptr<Type> TypeConstraint::findLowerBound(core::SymbolRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     Error::raise("should never happen");
 }
 
 std::shared_ptr<Type> TypeConstraint::findSolution(core::SymbolRef forWhat) const {
     for (auto &entry : this->solution) {
-        if (entry.first == forWhat)
+        if (entry.first == forWhat) {
             return entry.second;
+        }
     }
     Error::raise("should never happen");
 }

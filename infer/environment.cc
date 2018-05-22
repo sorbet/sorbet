@@ -33,7 +33,7 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
             used_vars.insert(bb->bexit.cond);
         }
         for (auto &bind : bb->exprs) {
-            if (cfg::Send *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                 if (send->fun == core::Names::hardAssert()) {
                     if (!send->args.empty()) {
                         used_vars.insert(send->args[0]);
@@ -47,12 +47,12 @@ KnowledgeFilter::KnowledgeFilter(core::Context ctx, unique_ptr<cfg::CFG> &cfg) {
         changed = false;
         for (auto &bb : cfg->forwardsTopoSort) {
             for (auto &bind : bb->exprs) {
-                if (cfg::Ident *id = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+                if (auto *id = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
                     if (isNeeded(bind.bind) && !isNeeded(id->what)) {
                         used_vars.insert(id->what);
                         changed = true;
                     }
-                } else if (cfg::Send *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                } else if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
                     if (send->fun == core::Names::bang()) {
                         if (send->args.empty()) {
                             if (isNeeded(bind.bind) && !isNeeded(send->recv)) {
@@ -470,7 +470,6 @@ void Environment::setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrig
         return;
     }
     types[fnd - vars.begin()] = typeAndOrigins;
-    return;
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,

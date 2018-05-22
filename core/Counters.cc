@@ -32,7 +32,7 @@ struct CounterImpl {
     CounterImpl(CounterImpl const &) = delete;
     CounterImpl(CounterImpl &&) = default;
     CounterImpl &operator=(CounterImpl &&) = delete;
-    typedef unsigned long CounterType;
+    using CounterType = unsigned long;
 
     CounterImpl canonicalize();
 

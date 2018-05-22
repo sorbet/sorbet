@@ -110,8 +110,6 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
         std::sort(bb->backEdges.begin(), bb->backEdges.end(),
                   [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
     }
-
-    return;
 }
 
 CFGContext CFGContext::withTarget(core::LocalVariable target) {

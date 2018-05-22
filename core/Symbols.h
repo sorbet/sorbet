@@ -571,7 +571,7 @@ private:
     std::vector<SymbolRef> typeParams;
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
-                                           int MaxDepth = 100) const;
+                                           int maxDepth = 100) const;
 };
 
 // CheckSize(Symbol, 152, 8); // This is under too much churn to be worth checking

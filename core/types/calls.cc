@@ -474,7 +474,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
             if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
                 return nullptr;
             }
-            if (args.size() < 1 || args.size() > 2) {
+            if (args.empty() || args.size() > 2) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                                 name.toString(ctx), "1-2", args.size());
@@ -633,7 +633,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         if (hashArg.type->isDynamic()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
-        } else if (ShapeType *hash = cast_type<ShapeType>(hashArg.type.get())) {
+        } else if (auto *hash = cast_type<ShapeType>(hashArg.type.get())) {
             --aend;
 
             while (kwit != data.arguments().end()) {

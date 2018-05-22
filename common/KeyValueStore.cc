@@ -1,27 +1,35 @@
 #include "KeyValueStore.h"
+
+#include <utility>
 using namespace std;
 namespace ruby_typer {
 const string OLD_VERSION_KEY = "VERSION";
 const string VERSION_KEY = "DB_FORMAT_VERSION";
 const size_t MAX_DB_SIZE_BYTES =
     4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
-KeyValueStore::KeyValueStore(std::string version, string path) : path(path), writerId(this_thread::get_id()) {
+KeyValueStore::KeyValueStore(std::string version, string path)
+    : path(std::move(path)), writerId(this_thread::get_id()) {
     int rc;
     rc = mdb_env_create(&env);
-    if (rc != 0)
+    if (rc != 0) {
         goto fail;
+    }
     rc = mdb_env_set_mapsize(env, MAX_DB_SIZE_BYTES);
-    if (rc != 0)
+    if (rc != 0) {
         goto fail;
+    }
     rc = mdb_env_open(env, this->path.c_str(), 0, 0664);
-    if (rc != 0)
+    if (rc != 0) {
         goto fail;
-    rc = mdb_txn_begin(env, NULL, 0, &txn);
-    if (rc != 0)
+    }
+    rc = mdb_txn_begin(env, nullptr, 0, &txn);
+    if (rc != 0) {
         goto fail;
-    rc = mdb_open(txn, NULL, MDB_CREATE, &dbi);
-    if (rc != 0)
+    }
+    rc = mdb_open(txn, nullptr, MDB_CREATE, &dbi);
+    if (rc != 0) {
         goto fail;
+    }
     readers[writerId] = txn;
     {
         if (read(OLD_VERSION_KEY)) { // remove databases that use old(non-string) versioning scheme.
@@ -40,8 +48,9 @@ fail:
 KeyValueStore::~KeyValueStore() noexcept(false) {
     int rc;
     rc = mdb_txn_commit(txn);
-    if (rc != 0)
+    if (rc != 0) {
         goto fail;
+    }
     mdb_close(env, dbi);
     mdb_env_close(env);
     return;
@@ -75,7 +84,7 @@ u1 *KeyValueStore::read(const absl::string_view key) {
         unique_lock<mutex> lk(readersLock);
         auto &txn_store = readers[this_thread::get_id()];
         if (!txn_store) {
-            rc = mdb_txn_begin(env, NULL, MDB_RDONLY, &txn_store);
+            rc = mdb_txn_begin(env, nullptr, MDB_RDONLY, &txn_store);
         }
         txn = txn_store;
     }

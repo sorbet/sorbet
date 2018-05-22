@@ -1,8 +1,10 @@
 #include "GlobalState.h"
+
 #include "ErrorQueue.h"
 #include "Types.h"
 #include "core/Names/core.h"
 #include "core/errors/errors.h"
+#include <utility>
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
@@ -79,7 +81,7 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
     data.setIsModule(isModule);
 
     if (symRef._id > Symbols::root()._id) {
-        Symbols::root().data(*this, true).members.push_back(make_pair(nameId, symRef));
+        Symbols::root().data(*this, true).members.emplace_back(nameId, symRef);
     }
     return symRef;
 }
@@ -88,7 +90,7 @@ int globalStateIdCounter = 1;
 const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(std::shared_ptr<ErrorQueue> errorQueue)
-    : globalStateId(globalStateIdCounter++), errorQueue(errorQueue) {
+    : globalStateId(globalStateIdCounter++), errorQueue(std::move(errorQueue)) {
     unsigned int max_name_count = 262144;   // 6MB
     unsigned int max_symbol_count = 524288; // 32MB
 
@@ -109,9 +111,9 @@ void GlobalState::initEmpty() {
     SymbolRef top_id = synthesizeClass(top_str, 0);
     SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
     SymbolRef root_id = synthesizeClass(root_str, 0);
-    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(no_symbol_str), no_symbol_id));
-    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(top_str), top_id));
-    Symbols::root().data(*this, true).members.push_back(make_pair(enterNameConstant(bottom_str), bottom_id));
+    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(no_symbol_str), no_symbol_id);
+    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(top_str), top_id);
+    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(bottom_str), bottom_id);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
     SymbolRef object_id = synthesizeClass(object_str, core::Symbols::BasicObject()._id);
     SymbolRef integer_id = synthesizeClass(integer_str);
@@ -335,9 +337,9 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     }
 
     if (!reallocate) {
-        ownerScope.members.push_back(make_pair(name, ret));
+        ownerScope.members.emplace_back(name, ret);
     } else {
-        owner.data(*this, true).members.push_back(make_pair(name, ret));
+        owner.data(*this, true).members.emplace_back(name, ret);
     }
     wasModified_ = true;
     return ret;

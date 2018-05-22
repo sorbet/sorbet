@@ -1,5 +1,6 @@
 #include "Trees.h"
 #include <sstream>
+#include <utility>
 
 // makes lldb work. Don't remove please
 template class std::unique_ptr<ruby_typer::ast::Expression>;
@@ -196,7 +197,7 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
 }
 
 Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast)
-    : Expression(loc), type(ty), arg(move(arg)), cast(cast) {
+    : Expression(loc), type(std::move(ty)), arg(move(arg)), cast(cast) {
     core::categoryCounterInc("trees", "cast");
     _sanityCheck();
 }
@@ -232,7 +233,7 @@ BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), 
     _sanityCheck();
 }
 
-Literal::Literal(core::Loc loc, std::shared_ptr<core::Type> value) : Expression(loc), value(value) {
+Literal::Literal(core::Loc loc, std::shared_ptr<core::Type> value) : Expression(loc), value(std::move(value)) {
     core::categoryCounterInc("trees", "literal");
     _sanityCheck();
 }

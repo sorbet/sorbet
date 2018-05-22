@@ -318,7 +318,7 @@ class RestArg final : public Reference {
 public:
     std::unique_ptr<Reference> expr;
 
-    RestArg(core::Loc loc, std::unique_ptr<Reference> expr);
+    RestArg(core::Loc loc, std::unique_ptr<Reference> arg);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -451,7 +451,7 @@ public:
     // The name of the cast operator.
     core::NameRef cast;
 
-    Cast(core::Loc loc, std::shared_ptr<core::Type> type, std::unique_ptr<Expression> arg, core::NameRef kind);
+    Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

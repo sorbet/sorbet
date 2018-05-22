@@ -3,6 +3,7 @@
 #include "core/Types.h"
 #include <algorithm> // find_if
 #include <unordered_map>
+#include <utility>
 
 namespace ruby_typer {
 namespace core {
@@ -44,7 +45,7 @@ shared_ptr<core::Type> underlying(shared_ptr<Type> t1) {
 }
 
 shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    OrType *o1 = cast_type<OrType>(t1.get());
+    auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
     shared_ptr<core::Type> n1 = Types::any(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
@@ -76,7 +77,7 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
 }
 
 shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    AndType *a1 = cast_type<AndType>(t1.get());
+    auto *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
     shared_ptr<core::Type> n1 = Types::all(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
@@ -110,7 +111,7 @@ shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, 
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
 shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
-    if (AndType *a1 = cast_type<AndType>(t1.get())) {
+    if (auto *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
         auto subl = Types::isSubType(ctx, a1a, t2);
@@ -121,7 +122,7 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
         if (a1a != a1->left || a1b != a1->right) {
             return Types::all(ctx, a1a, a1b);
         }
-    } else if (OrType *o1 = cast_type<OrType>(t1.get())) {
+    } else if (auto *o1 = cast_type<OrType>(t1.get())) {
         auto subl = Types::isSubType(ctx, o1->left, t2);
         auto subr = Types::isSubType(ctx, o1->right, t2);
         if (subl && subr) {
@@ -145,7 +146,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         return lub(ctx, t2, t1);
     }
 
-    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
+    if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             core::categoryCounterInc("lub", "<untyped");
             return t1;
@@ -160,7 +161,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+    if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             core::categoryCounterInc("lub", "untyped>");
             return t2;
@@ -191,8 +192,8 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         return lubDistributeOr(ctx, t1, t2);
     }
 
-    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
-        AppliedType *a2 = cast_type<AppliedType>(t2.get());
+    if (auto *a1 = cast_type<AppliedType>(t1.get())) {
+        auto *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             if (isSubType(ctx, t2, t1)) {
                 return t1;
@@ -248,16 +249,16 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
+    if (auto *p1 = cast_type<ProxyType>(t1.get())) {
         core::categoryCounterInc("lub", "<proxy");
-        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+        if (auto *p2 = cast_type<ProxyType>(t2.get())) {
             core::categoryCounterInc("lub", "proxy>");
             // both are proxy
             shared_ptr<core::Type> result;
             typecase(
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                    if (TupleType *a2 = cast_type<TupleType>(p2)) {
+                    if (auto *a2 = cast_type<TupleType>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                             vector<shared_ptr<core::Type>> elemLubs;
                             int i = -1;
@@ -284,7 +285,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                     }
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                    if (ShapeType *h2 = cast_type<ShapeType>(p2)) {
+                    if (auto *h2 = cast_type<ShapeType>(p2)) {
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = -1;
@@ -294,7 +295,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
                                 ++i;
-                                ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
+                                auto *u2 = cast_type<ClassType>(el2->underlying.get());
                                 ENFORCE(u2 != nullptr);
                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
@@ -325,9 +326,9 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                     }
                 },
                 [&](LiteralType *l1) {
-                    if (LiteralType *l2 = cast_type<LiteralType>(p2)) {
-                        ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
-                        ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
+                    if (auto *l2 = cast_type<LiteralType>(p2)) {
+                        auto *u1 = cast_type<ClassType>(l1->underlying.get());
+                        auto *u2 = cast_type<ClassType>(l2->underlying.get());
                         ENFORCE(u1 != nullptr && u2 != nullptr);
                         if (u1->symbol == u2->symbol) {
                             if (l1->value == l2->value) {
@@ -356,7 +357,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                 return lub(ctx, t2, und);
             }
         }
-    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+    } else if (auto *p2 = cast_type<ProxyType>(t2.get())) {
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(p2) || isa_type<ShapeType>(p2);
         // only 1st is proxy
@@ -370,21 +371,21 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    LambdaParam *p1 = cast_type<LambdaParam>(t1.get());
-    LambdaParam *p2 = cast_type<LambdaParam>(t2.get());
+    auto *p1 = cast_type<LambdaParam>(t1.get());
+    auto *p2 = cast_type<LambdaParam>(t2.get());
 
     if (p1 != nullptr || p2 != nullptr) {
         return OrType::make_shared(t1, t2);
     }
 
-    TypeVar *tv1 = cast_type<TypeVar>(t1.get());
-    TypeVar *tv2 = cast_type<TypeVar>(t2.get());
+    auto *tv1 = cast_type<TypeVar>(t1.get());
+    auto *tv2 = cast_type<TypeVar>(t2.get());
     if (tv1 != nullptr || tv2 != nullptr) {
         return OrType::make_shared(t1, t2);
     }
 
-    SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
-    SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
+    auto *s1 = cast_type<SelfTypeParam>(t1.get());
+    auto *s2 = cast_type<SelfTypeParam>(t2.get());
 
     if (s1 != nullptr || s2 != nullptr) {
         if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
@@ -426,8 +427,8 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
     shared_ptr<core::Type> result;
 
     // 1 :-)
-    ClassType *c1 = cast_type<ClassType>(t1.get());
-    ClassType *c2 = cast_type<ClassType>(t2.get());
+    auto *c1 = cast_type<ClassType>(t1.get());
+    auto *c2 = cast_type<ClassType>(t2.get());
     core::categoryCounterInc("lub", "<class>");
     ENFORCE(c1 != nullptr && c2 != nullptr);
 
@@ -472,8 +473,8 @@ shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_
 
     shared_ptr<core::Type> result;
     // 1 :-)
-    ClassType *c1 = cast_type<ClassType>(t1.get());
-    ClassType *c2 = cast_type<ClassType>(t2.get());
+    auto *c1 = cast_type<ClassType>(t1.get());
+    auto *c2 = cast_type<ClassType>(t2.get());
     ENFORCE(c1 != nullptr && c2 != nullptr);
     core::categoryCounterInc("glb", "<class>");
 
@@ -525,7 +526,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         return t1;
     }
 
-    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
+    if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             core::categoryCounterInc("glb", "<untyped");
             return t1;
@@ -540,7 +541,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+    if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             core::categoryCounterInc("glb", "untyped>");
             return t2;
@@ -566,15 +567,15 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         return glbDistributeAnd(ctx, t2, t1);
     }
 
-    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
-        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+    if (auto *p1 = cast_type<ProxyType>(t1.get())) {
+        if (auto *p2 = cast_type<ProxyType>(t2.get())) {
             if (typeid(*p1) != typeid(*p2)) {
                 return Types::bottom();
             }
             shared_ptr<core::Type> result;
             typecase(p1,
                      [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                         TupleType *a2 = cast_type<TupleType>(p2);
+                         auto *a2 = cast_type<TupleType>(p2);
                          ENFORCE(a2 != nullptr);
                          if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                              vector<shared_ptr<core::Type>> elemGlbs;
@@ -595,7 +596,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
 
                      },
                      [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                         ShapeType *h2 = cast_type<ShapeType>(p2);
+                         auto *h2 = cast_type<ShapeType>(p2);
                          ENFORCE(h2 != nullptr);
                          if (h2->keys.size() == h1->keys.size()) {
                              // have enough keys.
@@ -604,7 +605,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
                              vector<shared_ptr<core::Type>> valueLubs;
                              for (auto &el2 : h2->keys) {
                                  ++i;
-                                 ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
+                                 auto *u2 = cast_type<ClassType>(el2->underlying.get());
                                  ENFORCE(u2 != nullptr);
                                  auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                      ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
@@ -630,10 +631,10 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
 
                      },
                      [&](LiteralType *l1) {
-                         LiteralType *l2 = cast_type<LiteralType>(p2);
+                         auto *l2 = cast_type<LiteralType>(p2);
                          ENFORCE(l2 != nullptr);
-                         ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
-                         ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
+                         auto *u1 = cast_type<ClassType>(l1->underlying.get());
+                         auto *u2 = cast_type<ClassType>(l2->underlying.get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
                          if (u1->symbol == u2->symbol) {
                              if (l1->value == l2->value) {
@@ -655,7 +656,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
                 return Types::bottom();
             }
         }
-    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+    } else if (auto *p2 = cast_type<ProxyType>(t2.get())) {
         // only 1st is proxy
         if (Types::isSubType(ctx, t2, t1)) {
             return t2;
@@ -730,8 +731,8 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         return AndType::make_shared(t1, t2);
     }
 
-    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
-        AppliedType *a2 = cast_type<AppliedType>(t2.get());
+    if (auto *a1 = cast_type<AppliedType>(t1.get())) {
+        auto *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             auto *c2 = cast_type<ClassType>(t2.get());
             if (a1->klass.data(ctx).isClassModule() || c2 == nullptr) {
@@ -793,14 +794,14 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         return make_shared<AppliedType>(a1->klass, newTargs);
     }
 
-    TypeVar *tv1 = cast_type<TypeVar>(t1.get());
-    TypeVar *tv2 = cast_type<TypeVar>(t2.get());
+    auto *tv1 = cast_type<TypeVar>(t1.get());
+    auto *tv2 = cast_type<TypeVar>(t2.get());
     if (tv1 != nullptr || tv2 != nullptr) {
         return AndType::make_shared(t1, t2);
     }
 
-    SelfTypeParam *s1 = cast_type<SelfTypeParam>(t1.get());
-    SelfTypeParam *s2 = cast_type<SelfTypeParam>(t2.get());
+    auto *s1 = cast_type<SelfTypeParam>(t1.get());
+    auto *s2 = cast_type<SelfTypeParam>(t2.get());
 
     if (s1 != nullptr || s2 != nullptr) {
         if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
@@ -835,7 +836,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
         }
     }
 
-    if (ClassType *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
+    if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
             return true;
         }
@@ -843,7 +844,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
             return true;
         }
         if (mayBeSpecial1->symbol == core::Symbols::top()) {
-            if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+            if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
                 return mayBeSpecial2->symbol == core::Symbols::top() ||
                        mayBeSpecial2->symbol == core::Symbols::untyped();
             } else {
@@ -852,7 +853,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
         }
     }
 
-    if (ClassType *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
+    if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
             return true;
         }
@@ -885,11 +886,11 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
         return self1->definition == self2->definition;
     }
 
-    if (AppliedType *a1 = cast_type<AppliedType>(t1.get())) {
-        AppliedType *a2 = cast_type<AppliedType>(t2.get());
+    if (auto *a1 = cast_type<AppliedType>(t1.get())) {
+        auto *a2 = cast_type<AppliedType>(t2.get());
         bool result;
         if (a2 == nullptr) {
-            if (ClassType *c2 = cast_type<ClassType>(t2.get())) {
+            if (auto *c2 = cast_type<ClassType>(t2.get())) {
                 return classSymbolIsAsGoodAs(ctx, a1->klass, c2->symbol);
             }
             return false;
@@ -924,20 +925,20 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
         }
         return result;
     }
-    if (AppliedType *a2 = cast_type<AppliedType>(t2.get())) {
-        if (ProxyType *pt = cast_type<ProxyType>(t1.get())) {
+    if (auto *a2 = cast_type<AppliedType>(t2.get())) {
+        if (auto *pt = cast_type<ProxyType>(t1.get())) {
             return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying, t2);
         }
         return false;
     }
 
-    if (ProxyType *p1 = cast_type<ProxyType>(t1.get())) {
-        if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+    if (auto *p1 = cast_type<ProxyType>(t1.get())) {
+        if (auto *p2 = cast_type<ProxyType>(t2.get())) {
             bool result;
             // TODO: simply compare as memory regions
             typecase(p1,
                      [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                         TupleType *a2 = cast_type<TupleType>(p2);
+                         auto *a2 = cast_type<TupleType>(p2);
                          result = a2 != nullptr && a1->elems.size() >= a2->elems.size();
                          if (result) {
                              int i = -1;
@@ -951,7 +952,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
                          }
                      },
                      [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                         ShapeType *h2 = cast_type<ShapeType>(p2);
+                         auto *h2 = cast_type<ShapeType>(p2);
                          result = h2 != nullptr && h2->keys.size() <= h1->keys.size();
                          if (!result) {
                              return;
@@ -960,7 +961,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
                          int i = -1;
                          for (auto &el2 : h2->keys) {
                              ++i;
-                             ClassType *u2 = cast_type<ClassType>(el2->underlying.get());
+                             auto *u2 = cast_type<ClassType>(el2->underlying.get());
                              ENFORCE(u2 != nullptr);
                              auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
                                  ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
@@ -975,14 +976,14 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
                          }
                      },
                      [&](LiteralType *l1) {
-                         LiteralType *l2 = cast_type<LiteralType>(p2);
+                         auto *l2 = cast_type<LiteralType>(p2);
                          if (l2 == nullptr) {
                              // is a literal a subtype of a different kind of proxy
                              result = false;
                              return;
                          }
-                         ClassType *u1 = cast_type<ClassType>(l1->underlying.get());
-                         ClassType *u2 = cast_type<ClassType>(l2->underlying.get());
+                         auto *u1 = cast_type<ClassType>(l1->underlying.get());
+                         auto *u2 = cast_type<ClassType>(l2->underlying.get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
                          result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
                      });
@@ -993,7 +994,7 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
             shared_ptr<Type> und = p1->underlying;
             return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
         }
-    } else if (ProxyType *p2 = cast_type<ProxyType>(t2.get())) {
+    } else if (auto *p2 = cast_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
         return false;
     } else if (isa_type<MetaType>(t1.get()) || isa_type<MetaType>(t2.get())) {
@@ -1151,7 +1152,7 @@ std::shared_ptr<Type> MetaType::_instantiate(core::Context ctx, std::vector<Symb
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(wrapped) {}
+MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(std::move(wrapped)) {}
 
 std::shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver

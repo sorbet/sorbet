@@ -332,6 +332,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            resolvedTree.reset();
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
@@ -352,6 +353,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
             auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            resolvedTree.reset();
 
             stringstream dot;
             dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
@@ -372,6 +374,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
             ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            resolvedTree.reset();
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
@@ -386,6 +389,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkPragma("infer");
             CFG_Collector_and_Typer collector;
             ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            resolvedTree.reset();
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
 

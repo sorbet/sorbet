@@ -14,6 +14,7 @@
 
 #include <algorithm> // find_if
 #include <list>
+#include <utility>
 #include <vector>
 
 using namespace std;
@@ -62,7 +63,7 @@ private:
         shared_ptr<Nesting> parent;
         core::SymbolRef scope;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(parent), scope(scope) {}
+        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
     shared_ptr<Nesting> nesting_;
 
@@ -166,7 +167,7 @@ private:
             }
             return nullptr;
         }
-        if (ast::ConstantLit *scope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
+        if (auto *scope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
             auto resolved = resolveConstant(ctx, nesting, scope, typeAliases, lastRun);
             if (!resolved) {
                 return resolved;
@@ -174,7 +175,7 @@ private:
             c->scope = move(resolved);
         }
 
-        if (ast::Ident *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
+        if (auto *id = ast::cast_tree<ast::Ident>(c->scope.get())) {
             core::SymbolRef resolved = id->symbol.data(ctx).dealias(ctx);
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
             if (result.exists()) {
@@ -223,7 +224,7 @@ private:
             if (auto e = ctx.state.beginError(inner->loc, core::errors::Resolver::StubConstant)) {
                 e.setHeader("Unable to resolve constant `{}`", inner->cnst.show(ctx));
                 auto suggested = scope.data(ctx).findMemberFuzzyMatch(ctx, inner->cnst);
-                if (suggested.size() > 0) {
+                if (!suggested.empty()) {
                     vector<core::ErrorLine> lines;
                     for (auto suggestion : suggested) {
                         lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).definitionLoc,
@@ -328,12 +329,12 @@ private:
         auto ref = make_unique<ast::TreeRef>(ancestor->loc, nullptr);
         job.resolve.out = ref.get();
 
-        if (ast::ConstantLit *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
+        if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
             job.resolve.cnst.reset(cnst);
             ancestor.release();
-        } else if (ast::Self *self = ast::cast_tree<ast::Self>(ancestor.get())) {
+        } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             job.resolve.out->tree = make_unique<ast::Ident>(self->loc, ctx.contextClass());
-        } else if (ast::Ident *id = ast::cast_tree<ast::Ident>(ancestor.get())) {
+        } else if (auto *id = ast::cast_tree<ast::Ident>(ancestor.get())) {
             job.resolve.out->tree = move(ancestor);
         } else {
             if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
@@ -770,7 +771,7 @@ private:
                 },
 
                 [&](ast::Assign *assgn) {
-                    if (ast::Ident *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
+                    if (auto *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
                         if (id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
                             stat.reset(nullptr);
                         }

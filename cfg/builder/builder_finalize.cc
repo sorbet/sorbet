@@ -392,8 +392,6 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         sort(it->args.begin(), it->args.end());
         core::histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
-
-    return;
 }
 
 int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlock *currentBB) {

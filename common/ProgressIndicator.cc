@@ -1,5 +1,7 @@
 #include "ProgressIndicator.h"
 
+#include <utility>
+
 void ProgressIndicator::reportProgress(int current) {
     ENFORCE(std::this_thread::get_id() == outputThreadId);
     auto currentTime = getCurrentTimeMillis();
@@ -16,7 +18,7 @@ ProgressIndicator::~ProgressIndicator() {
 }
 
 ProgressIndicator::ProgressIndicator(bool enabled, std::string name, int progressExpected)
-    : progressExpected(progressExpected), name(name), enabled(enabled) {
+    : progressExpected(progressExpected), name(std::move(name)), enabled(enabled) {
     outputThreadId = std::this_thread::get_id();
     if (enabled) {
         progress.reset(progressbar_new(this->name.c_str(), this->progressExpected));

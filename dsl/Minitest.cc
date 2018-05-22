@@ -54,7 +54,7 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         return nullptr;
     }
 
-    if (send->args.size() == 0 && send->fun == core::Names::before()) {
+    if (send->args.empty() && send->fun == core::Names::before()) {
         return ast::MK::Method0(send->loc, core::Names::initialize(), prepareBody(ctx, move(send->block->body)));
     }
 

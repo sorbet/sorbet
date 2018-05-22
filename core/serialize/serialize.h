@@ -17,7 +17,7 @@ public:
     static std::vector<u1> store(GlobalState &gs);
     static std::vector<u1> store(GlobalState &gs, std::unique_ptr<ast::Expression> &e);
     static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p);
-    static void loadGlobalState(GlobalState &gs, const u1 *const p);
+    static void loadGlobalState(GlobalState &gs, const u1 *const data);
 
     class Pickler {
         std::vector<u1> data;
@@ -25,7 +25,7 @@ public:
 
     public:
         void putU4(u4 u);
-        void putU1(const u1 v1);
+        void putU1(const u1 u);
         void putS8(const int64_t i);
         void putStr(const absl::string_view s);
         std::vector<u1> result(int compressionDegree);
@@ -41,7 +41,7 @@ public:
         u1 getU1();
         int64_t getS8();
         absl::string_view getStr();
-        explicit UnPickler(const u1 *const data);
+        explicit UnPickler(const u1 *const compressed);
     };
     static Pickler pickle(const GlobalState &gs);
     static void pickle(Pickler &p, const File &what);
@@ -55,7 +55,7 @@ private:
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static std::shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
-    static void unpickleGS(UnPickler &p, GlobalState &gs);
+    static void unpickleGS(UnPickler &p, GlobalState &result);
     static std::unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, GlobalState &, FileRef file);
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
 };

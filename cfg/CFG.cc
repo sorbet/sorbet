@@ -145,10 +145,10 @@ string CFG::toString(core::Context ctx) {
         buf << "        label = \"" << label << "\"" << '\n';
         buf << "    ];" << '\n' << '\n';
         buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-            << basicBlock->bexit.thenb->id << "\" [style=\"bold\"];" << '\n';
+            << basicBlock->bexit.thenb->id << R"(" [style="bold"];)" << '\n';
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
             buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-                << basicBlock->bexit.elseb->id << "\" [style=\"tapered\"];" << '\n'
+                << basicBlock->bexit.elseb->id << R"(" [style="tapered"];)" << '\n'
                 << '\n';
         }
     }

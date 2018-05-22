@@ -111,7 +111,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                             ENFORCE(false, "NameKind missing");
                     }
                 } else {
-                    nameSubstitution.push_back(NameRef(to, 0));
+                    nameSubstitution.emplace_back(to, 0);
                     seenEmpty = true;
                 }
                 ENFORCE(!fastPath || nameSubstitution.back()._id == i);

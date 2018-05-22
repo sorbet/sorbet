@@ -1,3 +1,4 @@
+# -*- mode: yaml -*-
 # NOTE(nelhage): See https://reviews.llvm.org/D30567 for some context
 # on why this list is formatted so oddly. This seems to be the best
 # way to format the check list in a readable way.
@@ -8,8 +9,6 @@
 
 Checks: '
   ,-*,
-  ,hicpp-use-equals-default,
-  ,hicpp-use-override,
   ,misc-move-const-arg,
   ,modernize-deprecated-headers,
   ,modernize-loop-convert,
@@ -17,11 +16,62 @@ Checks: '
   ,readability-braces-around-statements,
   ,readability-container-size-empty,
   ,readability-implicit-bool-cast,
+  ,bugprone-assert-side-effect,
+  ,bugprone-dangling-handle,
+  ,bugprone-forward-declaration-namespace,
+  ,bugprone-inaccurate-erase,
+  ,bugprone-move-forwarding-reference,
+  ,bugprone-string-constructor,
+  ,bugprone-suspicious-memset-usage,
+  ,bugprone-use-after-move,
+  ,bugprone-virtual-near-miss,
+  ,modernize-use-auto,
+  ,modernize-avoid-bind,
+  ,modernize-make-shared,
+  ,modernize-make-unique,
+  ,modernize-pass-by-value,
+  ,modernize-raw-string-literal,
+  ,modernize-redundant-void-arg,
+  ,modernize-replace-auto-ptr,
+  ,modernize-replace-random-shuffle,
+  ,modernize-shrink-to-fit,
+  ,modernize-unary-static-assert,
+  ,modernize-use-bool-literals,
+  ,modernize-use-default-member-init,
+  ,modernize-use-emplace,
+  ,modernize-use-equals-default,
+  ,modernize-use-equals-delete,
+  ,modernize-use-nullptr,
+  ,modernize-use-override,
+  ,modernize-use-transparent-functors,
+  ,modernize-use-using,
+  ,readability-avoid-const-params-in-decls,
+  ,readability-delete-null-pointer,
+  ,readability-deleted-default,
+  ,readability-function-size,
+  ,readability-identifier-naming,
+  ,readability-inconsistent-declaration-parameter-name,
+  ,readability-misleading-indentation,
+  ,readability-misplaced-array-index,
+  ,readability-named-parameter,
+  ,readability-non-const-parameter,
+  ,readability-redundant-control-flow,
+  ,readability-redundant-declaration,
+  ,readability-redundant-function-ptr-dereference,
+  ,readability-redundant-member-init,
+  ,readability-redundant-string-cstr,
+  ,readability-redundant-string-init,
+  ,readability-static-accessed-through-instance,
+  ,readability-static-definition-in-anonymous-namespace,
+  ,readability-uniqueptr-delete-release,
 '
 # not enabling google-readability-redundant-smartptr-get because it also changes it in conditions `foo.get() == nullptr` vs `foo == nullptr`
 # not enabling readability-else-after-return because it is iterative and it break  } else if (..) { into 2 lines.
-# not enabling modernize-use-auto because Nelson didn't like it.
 WarningsAsErrors: '*'
 AnalyzeTemporaryDtors: false
 FormatStyle:     file
-CheckOptions: []
+CheckOptions:
+  - key: 'bugprone-assert-side-effect.AssertMacros'
+    value: 'ENFORCE'
+  - key: 'bugprone-dangling-handle.HandleClasses'
+    value: 'absl::string_view'
