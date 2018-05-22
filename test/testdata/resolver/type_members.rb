@@ -6,7 +6,7 @@ end
 
 class Invalids
   Exp = type_member(1+1) # error: Invalid param, must be a :symbol
-  Baz = type_member(:baz) # error: Invalid variance kind, only :out and :in are supported
+  Baz = type_member(:baz) # error: Invalid variance kind, only `:out` and `:in` are supported
   Mama = type_member("mama") # error: Invalid param, must be a :symbol
   One = type_member(1) # error: Invalid param, must be a :symbol
   ArrOne = type_member([1]) # error: Invalid param, must be a :symbol

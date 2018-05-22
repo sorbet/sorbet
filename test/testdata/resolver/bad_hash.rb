@@ -1,2 +1,2 @@
 # typed: true
-T.let({}, Hash[Integer, String]) # error: Use T::Hash[...], not Hash[...]
+T.let({}, Hash[Integer, String]) # error: Use `T::Hash[...]`, not `Hash[...]`

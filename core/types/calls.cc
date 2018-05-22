@@ -434,7 +434,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
 
             if (args.empty()) {
                 if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("T.{}() needs one or more type arguments", name.show(ctx));
+                    e.setHeader("`{}` needs one or more type arguments", "T." + name.show(ctx));
                     if (name == core::Names::any()) {
                         e.addErrorSection(
                             core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
