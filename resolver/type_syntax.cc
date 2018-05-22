@@ -71,7 +71,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                             if (typeArgSpec.type) {
                                 if (auto e = ctx.state.beginError(arg->loc,
                                                                   core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Malformed signature; Type Argument {} was specified twice",
+                                    e.setHeader("Malformed signature; Type argument `{}` was specified twice",
                                                 name.toString(ctx));
                                 }
                             }
@@ -120,7 +120,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
 
                 if (send->args.size() > 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, , got: {}", send->fun.toString(ctx),
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", send->fun.toString(ctx),
                                     "0-1", send->args.size());
                     }
                 }
@@ -326,7 +326,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
 
         default:
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                e.setHeader("Unsupported method T.{}", send->fun.toString(ctx));
+                e.setHeader("Unsupported method `{}`", "T." + send->fun.toString(ctx));
             }
             return core::Types::dynamic();
     }
@@ -410,7 +410,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 auto arity = targs.size() - 1;
                 if (arity > core::Symbols::MAX_PROC_ARITY) {
                     if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                        e.setHeader("Malformed T.proc: Too many arguments (max {})", core::Symbols::MAX_PROC_ARITY);
+                        e.setHeader("Malformed T.proc: Too many arguments (max `{}`)", core::Symbols::MAX_PROC_ARITY);
                     }
                     result = core::Types::dynamic();
                     return;
@@ -480,10 +480,11 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
             if (corrected.exists()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
-                    e.setHeader("Use {}[...], not {}[...] to declare a typed {}", corrected.data(ctx).show(ctx),
-                                recvi->symbol.data(ctx).show(ctx), recvi->symbol.data(ctx).show(ctx));
-                    e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
-                        "{}[...] will not work in the runtime type system.", recvi->symbol.data(ctx).show(ctx))));
+                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx).show(ctx) + "[...]",
+                                recvi->symbol.data(ctx).show(ctx) + "[...]", recvi->symbol.data(ctx).show(ctx));
+                    e.addErrorSection(
+                        core::ErrorSection(core::ErrorColors::format("`{}` will not work in the runtime type system.",
+                                                                     recvi->symbol.data(ctx).show(ctx) + "[...]")));
                 }
             } else {
                 corrected = recvi->symbol;

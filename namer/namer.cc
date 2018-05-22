@@ -550,8 +550,9 @@ public:
                     variance = core::Variance::Invariant;
                 } else {
                     if (auto e = ctx.state.beginError(lit->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                        e.setHeader("Invalid variance kind, only :{} and :{} are supported",
-                                    core::Names::covariant().toString(ctx), core::Names::contravariant().toString(ctx));
+                        e.setHeader("Invalid variance kind, only `{}` and `{}` are supported",
+                                    ":" + core::Names::covariant().toString(ctx),
+                                    ":" + core::Names::contravariant().toString(ctx));
                     }
                 }
             } else {
