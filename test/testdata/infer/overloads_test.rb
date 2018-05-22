@@ -27,13 +27,13 @@ class HasOverloads
   end
 
   sig(
-    a: Class,  # error: Malformed sig
-    b: String, # error: Malformed sig
+    a: Class,  # error: Malformed `sig`
+    b: String, # error: Malformed `sig`
   )
   .returns(Integer)
   sig(
-    b: Class,  # error: Malformed sig
-    a: String, # error: Malformed sig
+    b: Class,  # error: Malformed `sig`
+    a: String, # error: Malformed `sig`
   )
   .returns(Symbol)
   def invalid_overloaded(a:, b:);

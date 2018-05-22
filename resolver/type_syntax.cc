@@ -164,7 +164,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `sig.returns`. Expected: `{}`, got: `{}`", 1,
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", 1, "sig.returns",
                                     send->args.size());
                     }
                     break;

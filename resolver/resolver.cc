@@ -562,13 +562,13 @@ private:
             if (sig.seen.args ||
                 !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation || sig.seen.overridable)) {
                 if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed `sig`: No return type specified. Specify one with .returns()");
+                    e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
                 }
             }
         }
         if (sig.seen.returns && sig.seen.void_) {
             if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed `sig`: Don't use both .returns() and .void");
+                e.setHeader("Malformed `{}`: Don't use both .returns() and .void", "sig");
             }
         }
 
@@ -610,7 +610,7 @@ private:
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
                                                       core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed sig. Type not specified for argument `{}`",
+                        e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     arg.data(ctx).name.toString(ctx));
                     }
                 }
@@ -620,7 +620,7 @@ private:
             if (isOverloaded && arg.data(ctx).isKeyword()) {
                 if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
                                                   core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed sig. Overloaded functions cannot have keyword arguments:  `{}`",
+                    e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
                                 arg.data(ctx).name.toString(ctx));
                 }
             }
@@ -784,7 +784,7 @@ private:
 
         if (!lastSig.empty()) {
             if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                e.setHeader("Malformed sig. No method def following it");
+                e.setHeader("Malformed `{}`. No method def following it", "sig");
             }
         }
 
