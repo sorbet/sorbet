@@ -1,47 +1,47 @@
 <!doctype html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+        <title>reveal.js</title>
 
-    <link rel="stylesheet" href="css/reveal.css">
-    <link rel="stylesheet" href="css/theme/league.css">
+        <link rel="stylesheet" href="css/reveal.css">
+        <link rel="stylesheet" href="css/theme/league.css">
 
-    <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+        <!-- Theme used for syntax highlighting of code -->
+        <link rel="stylesheet" href="lib/css/zenburn.css">
 
-    <!-- Printing and PDF exports -->
-    <script>
-			var link = document.createElement( 'link' );
-			link.rel = 'stylesheet';
-			link.type = 'text/css';
-			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
-			document.getElementsByTagName( 'head' )[0].appendChild( link );
-	</script>
-    <!-- Dmitry's tunning to the theme -->
-    <style>
-    body {
-        background: url( 'img/background.png' );
-        background-repeat: no-repeat;
-    	background-size: 100% 100%;
-    }
+        <!-- Printing and PDF exports -->
+        <script>
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        </script>
+        <!-- Dmitry's tunning to the theme -->
+        <style>
+body {
+    background: url( 'img/background.png' );
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
 
     .reveal ol ol {
-    	list-style-type: lower-alpha;
-	}
+        list-style-type: lower-alpha;
+    }
 
-	.reveal .footer {
-    	position: absolute;
-    	bottom: 1em;
-    	left: 1em;
-    	font-size: 0.9em;
-	}
+    .reveal .footer {
+        position: absolute;
+        bottom: 1em;
+        left: 1em;
+        font-size: 0.9em;
+    }
 
-	.new-list-elem {
-  		text-decoration: underline;
-	}
+    .new-list-elem {
+        text-decoration: underline;
+    }
 
     .reveal h1,
     .reveal h2,
@@ -52,74 +52,75 @@
         text-transform: none;
         text-shadow: none;
     }
-</style>
-</head>
-<body>
-<div class="reveal">
-    <div class="slides">
-        <section>
-            <h1>Sorbet:<br>a typesystem for Ruby@Stripe</h1>
+        </style>
+    </head>
+    <body>
+        <div class="reveal">
+            <div class="slides">
+                <section>
+                    <h1>Sorbet:<br>A Typechecker for Ruby</h1>
 
-            <p><small>by Dmitry @darkdimius Petrashko,
-                <br>Nelson @nelhage Elhage,
-                <br> Paul @ptarjan Tarjan
-            </small></p>
-        </section>
-        <section data-markdown="index.md"
-                 data-separator="^---\n"
-                 data-separator-vertical="^\^\^\^\n"
-                 data-separator-notes="^Note:"
-                 data-charset="utf8">
-            <!--
-                Note that Windows uses `\r\n` instead of `\n` as its linefeed character.
-                For a regex that supports all operating systems, use `\r?\n` instead of `\n`.
-            -->
-        </section>
-        <section>END</section>
-    </div>
-</div>
+                    <p><small>by Dmitry @darkdimius Petrashko,
+                        <br>Nelson @nelhage Elhage,
+                        <br> Paul @ptarjan Tarjan
+                    </small></p>
+                </section>
+                <section data-markdown="index.md"
+                         data-separator="^---\n"
+                         data-separator-vertical="^\^\^\^\n"
+                         data-separator-notes="^Note:"
+                         data-charset="utf8">
+                    <!--
+                        Note that Windows uses `\r\n` instead of `\n` as its linefeed character.
+                        For a regex that supports all operating systems, use `\r?\n` instead of `\n`.
+                    -->
+                </section>
+                <section>END</section>
+            </div>
+        </div>
 
-<script src="lib/js/head.min.js"></script>
-<script src="js/reveal.js"></script>
+        <script src="lib/js/head.min.js"></script>
+        <script src="js/reveal.js"></script>
 
-<script>
-			// More info about config & dependencies:
-			// - https://github.com/hakimel/reveal.js#configuration
-			// - https://github.com/hakimel/reveal.js#dependencies
-			Reveal.initialize({
+        <script>
+            // More info about config & dependencies:
+            // - https://github.com/hakimel/reveal.js#configuration
+            // - https://github.com/hakimel/reveal.js#dependencies
+            Reveal.initialize({
                 slideNumber: 'c/t',
-				width: 1024,
-				height: 768,
-				controlsBackArrows: 'hidden',
-				controls: false,
-				progress: true,
-				loop: false,
-				help: true,
-				mouseWheel: false,
-				previewLinks: false,
+                width: 1024,
+                height: 768,
+                controlsBackArrows: 'hidden',
+                controls: false,
+                progress: true,
+                loop: false,
+                help: true,
+                mouseWheel: false,
+                previewLinks: false,
+                history: true,
 
                 hideAddressBar: true, // Hides the address bar on mobile devices
 
-				dependencies: [
-                        // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
-                	{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+                dependencies: [
+                    // Cross-browser shim that fully implements classList - https://github.com/eligrey/classList.js/
+                    { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
 
-                		// Interpret Markdown in <section> elements
-            		{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
-            		{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    // Interpret Markdown in <section> elements
+                    { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+                    { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
 
-            		// Syntax highlight for <code> elements
-            		{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+                    // Syntax highlight for <code> elements
+                    { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
 
-            		// Zoom in and out with Alt+click
-            		{ src: 'plugin/zoom-js/zoom.js', async: true },
+                    // Zoom in and out with Alt+click
+                    { src: 'plugin/zoom-js/zoom.js', async: true },
 
-            		// Speaker notes
-            		{ src: 'plugin/notes/notes.js', async: true },
+                    // Speaker notes
+                    { src: 'plugin/notes/notes.js', async: true },
 
-            		// MathJax
-            		{ src: 'plugin/math/math.js', async: true }				]
-			});
-		</script>
-</body>
+                    // MathJax
+                    { src: 'plugin/math/math.js', async: true }       ]
+            });
+        </script>
+    </body>
 </html>
