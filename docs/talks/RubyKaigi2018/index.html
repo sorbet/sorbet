@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-        <title>reveal.js</title>
+        <title>Sorbet: A Typechecker for Ruby</title>
 
         <link rel="stylesheet" href="css/reveal.css">
         <link rel="stylesheet" href="css/theme/league.css">
@@ -28,30 +28,34 @@ body {
     background-size: 100% 100%;
 }
 
-    .reveal ol ol {
-        list-style-type: lower-alpha;
-    }
+.reveal ol ol {
+    list-style-type: lower-alpha;
+}
 
-    .reveal .footer {
-        position: absolute;
-        bottom: 1em;
-        left: 1em;
-        font-size: 0.9em;
-    }
+.reveal .footer {
+    position: absolute;
+    bottom: 1em;
+    left: 1em;
+    font-size: 0.9em;
+}
 
-    .new-list-elem {
-        text-decoration: underline;
-    }
+.new-list-elem {
+    text-decoration: underline;
+}
 
-    .reveal h1,
-    .reveal h2,
-    .reveal h3,
-    .reveal h4,
-    .reveal h5,
-    .reveal h6 {
-        text-transform: none;
-        text-shadow: none;
-    }
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.reveal h4,
+.reveal h5,
+.reveal h6 {
+    text-transform: none;
+    text-shadow: none;
+}
+
+.reveal i.twitter {
+    color: #cccccc;
+}
         </style>
     </head>
     <body>
@@ -60,9 +64,9 @@ body {
                 <section>
                     <h1>Sorbet:<br>A Typechecker for Ruby</h1>
 
-                    <p><small>by Dmitry @darkdimius Petrashko,
-                        <br>Nelson @nelhage Elhage,
-                        <br> Paul @ptarjan Tarjan
+                    <p><small>Dmitry <i class="twitter">@darkdimius </i>Petrashko
+                        <br>Nelson <i class="twitter">@nelhage</i> Elhage
+                        <br>Paul <i class="twitter">@ptarjan</i> Tarjan
                     </small></p>
                 </section>
                 <section data-markdown="index.md"
@@ -119,7 +123,8 @@ body {
                     { src: 'plugin/notes/notes.js', async: true },
 
                     // MathJax
-                    { src: 'plugin/math/math.js', async: true }       ]
+                    { src: 'plugin/math/math.js', async: true },
+                ]
             });
         </script>
     </body>
