@@ -20,16 +20,21 @@
 
 ## Ruby at Stripe: Stats
 
-Language                             files             code
----------------------------------------------------------------------------------------
-Ruby                                 20958          2136070
-JavaScript                            6804          1107315
-JSON                                  2719           906087
+|Language                        | files | lines |
+|--------------------------------|------:|------:|
+|Ruby                            | 25k   | 2,300k|
+|Javascript                      |  8k   | 1,100k|
+|YAML                            |  3k   |   700k|
+|Scala                           |  5k   |   500k|
+|HTML                            |  1k   |   400k|
+|Go                              |  3k   |   400k|
 
 engineers: ~400
+
 commits per day: ~1800
 
-Note: engineers taken from https://docs.google.com/spreadsheets/d/1m4EeSEQHBVsSjRuSj4SH7vvXbOMWKsCHUpmuIWQupFI/edit#gid=173620479 ,
+Note: lines&files taken from https://hackpad.corp.stripe.com/Code-Metrics-R6KrBcukuSG
+engineers taken from https://docs.google.com/spreadsheets/d/1m4EeSEQHBVsSjRuSj4SH7vvXbOMWKsCHUpmuIWQupFI/edit#gid=173620479 ,
 commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/ab68760e/table
 
 ----
@@ -126,7 +131,6 @@ this seems like the only mention of runtime type system
 
 - When we are confident it works well internally
 - Will post on stripe.com/blog
-
 
 ---
 # Could you collaborate before it's open source?
