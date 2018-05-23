@@ -1,7 +1,7 @@
-#ifndef SRUBY_TYPER_H
-#define SRUBY_TYPER_H
+#ifndef RUBY_TYPER_INFER_H
+#define RUBY_TYPER_INFER_H
 
 #include "core/core.h"
 #include "inference.h"
 
-#endif // SRUBY_TYPER_H
+#endif // RUBY_TYPER_INFER_H
