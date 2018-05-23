@@ -26,30 +26,27 @@ class ForeignClass
 end
 
 class AdvancedODM
-    prop :default_without_migrate, String, default: ""
-    prop :default, String, default: "", optional: :migrate
-    prop :nodefault, String
-    prop :factory_without_migrate, String, factory: -> {""}
-    prop :factory, String, factory: -> {""}, optional: :migrate
-
-    prop :type, type: String, default: "", optional: :migrate
-    prop :object
-    prop :array, Array, default: [], optional: :migrate
-    prop :array_of, array: String, default: "", optional: :migrate
-    prop :array_of_explicit, Array, array: String, default: [""], optional: :migrate
-    prop :t_array, T::Array[String], default: [""], optional: :migrate
-    prop :hash_of, T::Hash[Symbol, String], default: {a: ""}, optional: :migrate
-
-    prop :optional_explicit, String, optional: true, default: "", optional: :migrate
-    prop :optional_existing, String, optional: :existing, default: "", optional: :migrate
+    prop :default_without_optional_false, String, default: ""
     prop :optional_false, String, optional: false
-    optional :optional, String, default: "", optional: :migrate
-    optional :optional_nilable, T.nilable(String), optional: :migrate
+    prop :nodefault, String
 
-    prop :const_explicit, String, immutable: true, default: "", optional: :migrate
-    const :const, String, default: "", optional: :migrate
+    prop :type, type: String, optional: false
+    prop :object
+    prop :array, Array, optional: false
+    prop :array_of, array: String, optional: false
+    prop :array_of_explicit, Array, array: String, optional: false
+    prop :t_array, T::Array[String], optional: false
+    prop :hash_of, T::Hash[Symbol, String], optional: false
 
-    prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, default: "", optional: :migrate
+    prop :optional_explicit, String, optional: true, optional: false
+    prop :optional_existing, String, optional: :existing, optional: false
+    optional :optional, String, optional: false
+    optional :optional_nilable, T.nilable(String), optional: false
+
+    prop :const_explicit, String, immutable: true, optional: false
+    const :const, String, optional: false
+
+    prop :no_class_arg, type: Array, immutable: true, optional: true, array: String, optional: false
 
     prop :enum_prop, enum: ["hello", "goodbye"]
 
@@ -81,12 +78,10 @@ def main
     T.assert_type!(SomeODM.new.foo2, String) # error: Argument does not have asserted type
     T.assert_type!(SomeODM.new.foo2 = 'b', String)
 
-    T.assert_type!(AdvancedODM.new.default_without_migrate, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.default, String)
+    T.assert_type!(AdvancedODM.new.default_without_optional_false, T.nilable(String))
+    T.assert_type!(AdvancedODM.new.optional_false, String)
     T.assert_type!(AdvancedODM.new.nodefault, T.nilable(String))
     T.assert_type!(AdvancedODM.new.nodefault, String) # error: Argument does not have asserted type
-    T.assert_type!(AdvancedODM.new.factory_without_migrate, T.nilable(String))
-    T.assert_type!(AdvancedODM.new.factory, String)
 
     T.assert_type!(AdvancedODM.new.type, String)
     T.assert_type!(AdvancedODM.new.object, T.nilable(Object))

@@ -156,7 +156,6 @@ NameDef names[] = {
     {"immutable", DSL},
     {"migrate", DSL},
     {"default_", "default", DSL},
-    {"factory", DSL},
     {"const_", "const", DSL},
     {"token", DSL},
     {"created", DSL},
