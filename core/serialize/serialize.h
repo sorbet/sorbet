@@ -1,6 +1,6 @@
 
-#ifndef SRUBY_SERIALIZE_H
-#define SRUBY_SERIALIZE_H
+#ifndef SORBET_SERIALIZE_H
+#define SORBET_SERIALIZE_H
 #include "ast/ast.h"
 #include "core/core.h"
 

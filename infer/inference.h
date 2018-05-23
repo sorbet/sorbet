@@ -1,5 +1,5 @@
-#ifndef SRUBY_INFERENCE_H
-#define SRUBY_INFERENCE_H
+#ifndef SORBET_INFERENCE_H
+#define SORBET_INFERENCE_H
 
 #include "cfg/CFG.h"
 #include <memory>
@@ -14,4 +14,4 @@ public:
 } // namespace infer
 } // namespace ruby_typer
 
-#endif // SRUBY_INFERENCE_H
+#endif // SORBET_INFERENCE_H

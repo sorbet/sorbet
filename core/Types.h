@@ -1,5 +1,5 @@
-#ifndef SRUBY_TYPES_H
-#define SRUBY_TYPES_H
+#ifndef SORBET_TYPES_H
+#define SORBET_TYPES_H
 
 #include "Context.h"
 #include "Counters.h"
@@ -552,4 +552,4 @@ public:
 
 } // namespace core
 } // namespace ruby_typer
-#endif // SRUBY_TYPES_H
+#endif // SORBET_TYPES_H

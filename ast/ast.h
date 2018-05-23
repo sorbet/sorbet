@@ -1,5 +1,5 @@
-#ifndef SRUBY_AST_H
-#define SRUBY_AST_H
+#ifndef SORBET_AST_H
+#define SORBET_AST_H
 #include "Trees.h"
 
-#endif // SRUBY_AST_H
+#endif // SORBET_AST_H

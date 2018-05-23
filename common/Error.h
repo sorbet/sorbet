@@ -1,5 +1,5 @@
-#ifndef SRUBY_ERRO_H
-#define SRUBY_ERRO_H
+#ifndef SORBET_ERRO_H
+#define SORBET_ERRO_H
 
 #include "os/os.h"
 #include "spdlog/spdlog.h"
@@ -87,4 +87,4 @@ template <typename... TArgs>
     throw SRubyException(message.str());
 }
 } // namespace ruby_typer
-#endif // SRUBY_ERRO_H
+#endif // SORBET_ERRO_H

@@ -1,4 +1,4 @@
-#ifndef RUBY_TYPER_REAL_MAIN_H
+#ifndef SORBET_REAL_MAIN_H
 #include "common/Timer.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
@@ -14,7 +14,7 @@ namespace ruby_typer {
 namespace realmain {
 int realmain(int argc, const char *argv[]);
 
-// Terminate execution of ruby-typer with specific return code
+// Terminate execution of sorbet with specific return code
 class EarlyReturnWithCode : public SRubyException {
 public:
     EarlyReturnWithCode(int returnCode);
@@ -100,4 +100,4 @@ struct Options {
 void readOptions(Options &, int argc, const char *argv[]) throw(EarlyReturnWithCode);
 } // namespace realmain
 } // namespace ruby_typer
-#endif // RUBY_TYPER_REAL_MAIN_H
+#endif // SORBET_REAL_MAIN_H

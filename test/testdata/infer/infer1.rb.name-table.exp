@@ -1,5 +1,5 @@
 class ::<root> < ::Object () @ test/testdata/infer/infer1.rb:2
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/_self.rbi#L5823
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L5823
     method ::Object#baz1 () @ test/testdata/infer/infer1.rb:2
     method ::Object#baz2 () @ test/testdata/infer/infer1.rb:7
     method ::Object#baz3 () @ test/testdata/infer/infer1.rb:12

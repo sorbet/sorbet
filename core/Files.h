@@ -1,5 +1,5 @@
-#ifndef SRUBY_AST_FILES_H
-#define SRUBY_AST_FILES_H
+#ifndef SORBET_AST_FILES_H
+#define SORBET_AST_FILES_H
 
 #include "Names.h"
 #include "StrictLevel.h"
@@ -97,4 +97,4 @@ template <> struct hash<ruby_typer::core::FileRef> {
     }
 };
 } // namespace std
-#endif // SRUBY_AST_FILES_H
+#endif // SORBET_AST_FILES_H

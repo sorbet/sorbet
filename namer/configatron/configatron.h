@@ -1,5 +1,5 @@
-#ifndef SRUBY_CONFIGATRON_H
-#define SRUBY_CONFIGATRON_H
+#ifndef SORBET_CONFIGATRON_H
+#define SORBET_CONFIGATRON_H
 
 #include "core/core.h"
 namespace ruby_typer {
@@ -13,4 +13,4 @@ public:
 } // namespace namer
 } // namespace ruby_typer
 
-#endif // SRUBY_CONFIGATRON_H
+#endif // SORBET_CONFIGATRON_H

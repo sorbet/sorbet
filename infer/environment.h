@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_ENVIRONMENT_H
-#define RUBY_TYPER_ENVIRONMENT_H
+#ifndef SORBET_ENVIRONMENT_H
+#define SORBET_ENVIRONMENT_H
 
 #include "cfg/CFG.h"
 #include "core/Context.h"
@@ -202,4 +202,4 @@ private:
 } // namespace infer
 } // namespace ruby_typer
 
-#endif // RUBY_TYPER_ENVIRONMENT_H
+#endif // SORBET_ENVIRONMENT_H

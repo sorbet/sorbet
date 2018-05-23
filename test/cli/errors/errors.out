@@ -4,7 +4,7 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
      852 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
@@ -43,7 +43,7 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
      852 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
@@ -82,7 +82,7 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: Expression passed as an argument `arg0` to method `raise` does not match expected type http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L__LINE__: Method `<overload N.1 : raise>` has specified type of argument `arg0` as `String`
      852 |      arg0: String,
                 ^^^^^
   Got Integer originating from:

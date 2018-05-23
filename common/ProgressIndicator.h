@@ -1,5 +1,5 @@
-#ifndef SRUBY_PROGRESSINDICATOR_H
-#define SRUBY_PROGRESSINDICATOR_H
+#ifndef SORBET_PROGRESSINDICATOR_H
+#define SORBET_PROGRESSINDICATOR_H
 
 #include "common.h"
 #include "progressbar/progressbar.h"
@@ -32,4 +32,4 @@ public:
     void reportProgress(int current);
 };
 
-#endif // SRUBY_PROGRESSINDICATOR_H
+#endif // SORBET_PROGRESSINDICATOR_H

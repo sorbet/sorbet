@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_CHALK_ODM_PROP_H
-#define SRUBY_DSL_CHALK_ODM_PROP_H
+#ifndef SORBET_DSL_CHALK_ODM_PROP_H
+#define SORBET_DSL_CHALK_ODM_PROP_H
 #include "ast/ast.h"
 
 namespace ruby_typer {

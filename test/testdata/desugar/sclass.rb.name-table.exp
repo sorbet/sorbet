@@ -35,7 +35,7 @@ class ::<root> < ::Object () @ test/testdata/desugar/sclass.rb:2
   class ::G < ::Object () @ test/testdata/desugar/sclass.rb:58
     method ::G#wrapper () @ test/testdata/desugar/sclass.rb:59
   class ::H < ::Object () @ test/testdata/desugar/sclass.rb:72
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/_self.rbi#L5823
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L5823
     method ::Object#main () @ test/testdata/desugar/sclass.rb:82
   field #$c @ test/testdata/desugar/sclass.rb:19
   method #<static-init> () @ test/testdata/desugar/sclass.rb:2

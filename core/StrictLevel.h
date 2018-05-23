@@ -1,5 +1,5 @@
-#ifndef SRUBY_CORE_STRICT_LEVEL_H
-#define SRUBY_CORE_STRICT_LEVEL_H
+#ifndef SORBET_CORE_STRICT_LEVEL_H
+#define SORBET_CORE_STRICT_LEVEL_H
 
 namespace ruby_typer {
 namespace core {

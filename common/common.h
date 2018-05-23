@@ -1,5 +1,5 @@
-#ifndef SRUBY_COMMON_HPP
-#define SRUBY_COMMON_HPP
+#ifndef SORBET_COMMON_HPP
+#define SORBET_COMMON_HPP
 
 #if __cplusplus < 201402L
 #define STRINGIZE(x) "C++ = " #x

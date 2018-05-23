@@ -1,5 +1,5 @@
-#ifndef SRUBY_NAMES_H
-#define SRUBY_NAMES_H
+#ifndef SORBET_NAMES_H
+#define SORBET_NAMES_H
 
 #include "common/common.h"
 #include "proto/Name.pb.h"
@@ -186,4 +186,4 @@ template <> struct std::equal_to<ruby_typer::core::NameRef> {
     }
 };
 
-#endif // SRUBY_NAMES_H
+#endif // SORBET_NAMES_H

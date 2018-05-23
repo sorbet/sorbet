@@ -1,5 +1,5 @@
-#ifndef SRUBY_WORKERPOOL_H
-#define SRUBY_WORKERPOOL_H
+#ifndef SORBET_WORKERPOOL_H
+#define SORBET_WORKERPOOL_H
 
 #include "blockingconcurrentqueue.h"
 #include "common.h"
@@ -93,4 +93,4 @@ public:
     void multiplexJob(Task t);
 };
 
-#endif // SRUBY_WORKERPOOL_H
+#endif // SORBET_WORKERPOOL_H

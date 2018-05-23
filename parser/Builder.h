@@ -1,5 +1,5 @@
-#ifndef SRUBY_PARSER_BUILDER_H
-#define SRUBY_PARSER_BUILDER_H
+#ifndef SORBET_PARSER_BUILDER_H
+#define SORBET_PARSER_BUILDER_H
 
 #include "ruby_parser/builder.hh"
 #include "ruby_parser/driver.hh"

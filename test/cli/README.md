@@ -1,6 +1,6 @@
 # Driver tests
 
-This directory contains tests for the `ruby-typer` driver. Tests of
+This directory contains tests for the `sorbet` driver. Tests of
 the actual typechecking passes should prefer the `test/testdata/`
 machinery, but this directory allows for testing the driver binary
 end-to-end and command-line flags.
@@ -27,7 +27,7 @@ The Bazel rules in this directory will produce two targets:
 Scripts are all run inside Bazel, and so will be executed from the top
 of the workspace, and can access both source files and built targets
 using their path from the root. In particular, the compiled
-`ruby-typer` binary is available under `main/ruby-typer`.
+`sorbet` binary is available under `main/sorbet`.
 
 `tools/scripts/update_exp_files.sh` will use `bazel query` to discover
 all `run_*` targets, and then execute them and update the `.out`

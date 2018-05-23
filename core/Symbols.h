@@ -1,5 +1,5 @@
-#ifndef SRUBY_SYMBOLS_H
-#define SRUBY_SYMBOLS_H
+#ifndef SORBET_SYMBOLS_H
+#define SORBET_SYMBOLS_H
 
 #include "Loc.h"
 #include "Names.h"
@@ -814,4 +814,4 @@ template <> struct hash<ruby_typer::core::LocalVariable> {
     }
 };
 } // namespace std
-#endif // SRUBY_SYMBOLS_H
+#endif // SORBET_SYMBOLS_H

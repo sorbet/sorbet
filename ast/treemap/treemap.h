@@ -1,5 +1,5 @@
-#ifndef SRUBY_TREEMAP_H
-#define SRUBY_TREEMAP_H
+#ifndef SORBET_TREEMAP_H
+#define SORBET_TREEMAP_H
 
 #include "ast/Trees.h"
 #include "core/Context.h"
@@ -758,4 +758,4 @@ public:
 } // namespace ast
 } // namespace ruby_typer
 
-#endif // SRUBY_TREEMAP_H
+#endif // SORBET_TREEMAP_H

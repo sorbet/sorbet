@@ -1,5 +1,5 @@
-#ifndef SRUBY_CONCURRENTQUEUE_H
-#define SRUBY_CONCURRENTQUEUE_H
+#ifndef SORBET_CONCURRENTQUEUE_H
+#define SORBET_CONCURRENTQUEUE_H
 #include "blockingconcurrentqueue.h"
 #include <atomic>
 #include <chrono>
@@ -79,4 +79,4 @@ public:
 template <class Elem>
 using BlockingBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>;
 
-#endif // SRUBY_CONCURRENTQUEUE_H
+#endif // SORBET_CONCURRENTQUEUE_H

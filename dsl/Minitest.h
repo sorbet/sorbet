@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_MINITEST_H
-#define SRUBY_DSL_MINITEST_H
+#ifndef SORBET_DSL_MINITEST_H
+#define SORBET_DSL_MINITEST_H
 #include "ast/ast.h"
 
 namespace ruby_typer {

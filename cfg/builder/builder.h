@@ -1,5 +1,5 @@
-#ifndef SRUBY_BUILDER_H
-#define SRUBY_BUILDER_H
+#ifndef SORBET_BUILDER_H
+#define SORBET_BUILDER_H
 
 #include "ast/ast.h"
 #include "cfg/CFG.h"
@@ -52,4 +52,4 @@ private:
 };
 } // namespace cfg
 } // namespace ruby_typer
-#endif // SRUBY_BUILDER_H
+#endif // SORBET_BUILDER_H

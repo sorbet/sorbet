@@ -4,7 +4,7 @@
 # definition. However, it would work with our autoloader, and also
 # writing definitions out-of-order simulates the definitions being
 # located in multiple files that are processed out of order by
-# ruby-typer.
+# sorbet.
 A::AB::BC
 
 class HasError

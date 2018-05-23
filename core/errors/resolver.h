@@ -1,5 +1,5 @@
-#ifndef SRUBY_CORE_ERRORS_RESOLVER_H
-#define SRUBY_CORE_ERRORS_RESOLVER_H
+#ifndef SORBET_CORE_ERRORS_RESOLVER_H
+#define SORBET_CORE_ERRORS_RESOLVER_H
 #include "core/Errors.h"
 
 namespace ruby_typer {

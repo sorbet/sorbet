@@ -1,5 +1,5 @@
-#ifndef SRUBY_JSON_H
-#define SRUBY_JSON_H
+#ifndef SORBET_JSON_H
+#define SORBET_JSON_H
 
 #include <google/protobuf/util/json_util.h>
 #include <string>
@@ -14,4 +14,4 @@ struct JSON {
 
 } // namespace core
 } // namespace ruby_typer
-#endif // SRUBY_JSON
+#endif // SORBET_JSON

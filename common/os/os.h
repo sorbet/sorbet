@@ -1,5 +1,5 @@
-#ifndef SRUBY_OS_H
-#define SRUBY_OS_H
+#ifndef SORBET_OS_H
+#define SORBET_OS_H
 #include <functional>
 #include <memory>
 #include <pthread.h>
@@ -38,4 +38,4 @@ std::unique_ptr<Joinable> runInAThread(std::function<void()> function);
  * */
 bool stopInDebugger();
 
-#endif // SRUBY_OS_H
+#endif // SORBET_OS_H

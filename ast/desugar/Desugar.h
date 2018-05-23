@@ -1,5 +1,5 @@
-#ifndef SRUBY_DESUGAR_H
-#define SRUBY_DESUGAR_H
+#ifndef SORBET_DESUGAR_H
+#define SORBET_DESUGAR_H
 
 #include "ast/ast.h"
 #include "parser/parser.h"
@@ -14,4 +14,4 @@ std::unique_ptr<Expression> node2Tree(core::MutableContext ctx, std::unique_ptr<
 } // namespace ast
 } // namespace ruby_typer
 
-#endif // SRUBY_DESUGAR_H
+#endif // SORBET_DESUGAR_H

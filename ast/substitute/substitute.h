@@ -1,5 +1,5 @@
-#ifndef SRUBY_SUBSTITUTE_H
-#define SRUBY_SUBSTITUTE_H
+#ifndef SORBET_SUBSTITUTE_H
+#define SORBET_SUBSTITUTE_H
 
 #include "ast/ast.h"
 #include "core/Context.h"
@@ -13,4 +13,4 @@ public:
 };
 } // namespace ast
 } // namespace ruby_typer
-#endif // SRUBY_SUBSTITUTE_H
+#endif // SORBET_SUBSTITUTE_H

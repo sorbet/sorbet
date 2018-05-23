@@ -1,5 +1,5 @@
-#ifndef SRUBY_HASHING_H
-#define SRUBY_HASHING_H
+#ifndef SORBET_HASHING_H
+#define SORBET_HASHING_H
 
 #include "Names.h"
 
@@ -35,4 +35,4 @@ inline unsigned int _hash(absl::string_view utf8) {
 }
 } // namespace core
 } // namespace ruby_typer
-#endif // SRUBY_HASHING_H
+#endif // SORBET_HASHING_H

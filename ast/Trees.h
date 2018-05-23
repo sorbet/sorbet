@@ -1,5 +1,5 @@
-#ifndef SRUBY_TREES_H
-#define SRUBY_TREES_H
+#ifndef SORBET_TREES_H
+#define SORBET_TREES_H
 
 #include "common/common.h"
 #include "core/Context.h"
@@ -664,4 +664,4 @@ private:
 } // namespace ast
 } // namespace ruby_typer
 
-#endif // SRUBY_TREES_H
+#endif // SORBET_TREES_H

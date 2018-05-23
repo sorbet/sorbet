@@ -1,5 +1,5 @@
-#ifndef SRUBY_AST_LOC_H
-#define SRUBY_AST_LOC_H
+#ifndef SORBET_AST_LOC_H
+#define SORBET_AST_LOC_H
 
 #include "Files.h"
 #include "proto/Loc.pb.h"
@@ -48,4 +48,4 @@ public:
 } // namespace core
 } // namespace ruby_typer
 
-#endif // SRUBY_AST_LOC_H
+#endif // SORBET_AST_LOC_H

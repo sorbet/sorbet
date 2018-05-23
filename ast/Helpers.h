@@ -1,5 +1,5 @@
-#ifndef SRUBY_AST_HELPERSS_H
-#define SRUBY_AST_HELPERSS_H
+#ifndef SORBET_AST_HELPERSS_H
+#define SORBET_AST_HELPERSS_H
 
 #include "ast/ast.h"
 #include "core/Names/desugar.h"
@@ -270,4 +270,4 @@ public:
 } // namespace ast
 } // namespace ruby_typer
 
-#endif // SRUBY_TREES_H
+#endif // SORBET_TREES_H

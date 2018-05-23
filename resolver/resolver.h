@@ -1,5 +1,5 @@
-#ifndef SRUBY_RESOLVER_RESOLVER_H
-#define SRUBY_RESOLVER_RESOLVER_H
+#ifndef SORBET_RESOLVER_RESOLVER_H
+#define SORBET_RESOLVER_RESOLVER_H
 
 #include "ast/ast.h"
 #include <memory>

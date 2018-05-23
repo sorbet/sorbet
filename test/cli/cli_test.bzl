@@ -12,7 +12,7 @@ def cli_test(path):
             "{}/*.rb".format(name),
             "{}/*.yaml".format(name),
             "{}/*.input".format(name),
-        ]) + ["//main:ruby-typer"]
+        ]) + ["//main:sorbet"]
     )
 
     output = path.replace('.sh', '.out')

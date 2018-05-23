@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_INTERFACE_WRAPPER_H
-#define SRUBY_DSL_INTERFACE_WRAPPER_H
+#ifndef SORBET_DSL_INTERFACE_WRAPPER_H
+#define SORBET_DSL_INTERFACE_WRAPPER_H
 #include "ast/ast.h"
 
 namespace ruby_typer {

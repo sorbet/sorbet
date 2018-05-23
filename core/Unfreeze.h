@@ -1,5 +1,5 @@
-#ifndef SRUBY_UNFREEZING_H
-#define SRUBY_UNFREEZING_H
+#ifndef SORBET_UNFREEZING_H
+#define SORBET_UNFREEZING_H
 
 #include "core.h"
 
@@ -34,4 +34,4 @@ public:
 
 } // namespace core
 } // namespace ruby_typer
-#endif // SRUBY_UNFREEZING_H
+#endif // SORBET_UNFREEZING_H

@@ -1,5 +1,5 @@
 #!/bin/bash
-main/ruby-typer -e '
+main/sorbet -e '
  foo(1 +
   2 +
   3 +

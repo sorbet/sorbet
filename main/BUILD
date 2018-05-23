@@ -7,7 +7,7 @@ config_setting(
 )
 
 cc_binary(
-    name = "ruby-typer",
+    name = "sorbet",
     srcs = [
         "main.cc",
     ],
@@ -33,7 +33,7 @@ cc_binary(
 )
 
 cc_binary(
-    name = "ruby-typer-orig",
+    name = "sorbet-orig",
     srcs = [
         "main.cc",
     ],
@@ -79,5 +79,32 @@ cc_library(
         "//resolver",
         "//version",
         "@cxxopts",
+    ],
+)
+
+# The old name
+cc_binary(
+    name = "ruby-typer",
+    srcs = [
+        "main.cc",
+    ],
+    copts = ["--std=c++14"],
+    linkopts = select({
+        "//tools/config:more-static": ["-static"],
+        "//conditions:default": [],
+    }),
+    linkstatic = select({
+        "//tools/config:fastbuild": 0,
+        "//conditions:default": 1,
+    }),
+    malloc = select({
+        ":can-use-jemalloc": "@jemalloc//:jemalloc",
+        "//conditions:default": "@bazel_tools//tools/cpp:malloc",
+    }),
+    visibility = ["//visibility:public"],
+    deps = [
+        "realmain",
+        "//payload/binary:some",
+        "//payload/text:empty",
     ],
 )

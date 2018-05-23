@@ -1,5 +1,5 @@
-#ifndef SRUBY_GLOBAL_STATE_H
-#define SRUBY_GLOBAL_STATE_H
+#ifndef SORBET_GLOBAL_STATE_H
+#define SORBET_GLOBAL_STATE_H
 #include "Errors.h"
 #include "Files.h"
 #include "Hashing.h"
@@ -152,4 +152,4 @@ private:
 } // namespace core
 } // namespace ruby_typer
 
-#endif // SRUBY_GLOBAL_STATE_H
+#endif // SORBET_GLOBAL_STATE_H

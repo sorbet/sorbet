@@ -1,5 +1,5 @@
-#ifndef SRUBY_CONTEXT_H
-#define SRUBY_CONTEXT_H
+#ifndef SORBET_CONTEXT_H
+#define SORBET_CONTEXT_H
 
 #include "GlobalState.h"
 #include "common/common.h"
@@ -104,4 +104,4 @@ private:
 } // namespace core
 } // namespace ruby_typer
 
-#endif // SRUBY_CONTEXT_H
+#endif // SORBET_CONTEXT_H

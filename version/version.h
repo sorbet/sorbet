@@ -1,5 +1,5 @@
-#ifndef SRUBY_VERSION_H
-#define SRUBY_VERSION_H
+#ifndef SORBET_VERSION_H
+#define SORBET_VERSION_H
 
 #include <chrono>
 #include <string>
@@ -17,4 +17,4 @@ public:
 };
 } // namespace ruby_typer
 
-#endif // SRUBY_VERSION_H
+#endif // SORBET_VERSION_H

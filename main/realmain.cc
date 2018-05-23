@@ -666,7 +666,7 @@ int realmain(int argc, const char *argv[]) {
             std::string argString(argv[i]);
             argsConcat = argsConcat + " " + argString;
         }
-        logger->debug("Running ruby-typer version {} with arguments: {}", Version::build_scm_revision, argsConcat);
+        logger->debug("Running sorbet version {} with arguments: {}", Version::build_scm_revision, argsConcat);
     }
     WorkerPool workers(opts.threads, logger);
 
@@ -716,7 +716,7 @@ int realmain(int argc, const char *argv[]) {
     }
 
     { typecheck(gs, move(indexed), opts, workers); }
-    logger->trace("ruby-typer done");
+    logger->trace("sorbet done");
 
     if (!opts.storeState.empty()) {
         gs->markAsPayload();

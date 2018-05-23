@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_DSLBUILDER_H
-#define SRUBY_DSL_DSLBUILDER_H
+#ifndef SORBET_DSL_DSLBUILDER_H
+#define SORBET_DSL_DSLBUILDER_H
 #include "ast/ast.h"
 
 namespace ruby_typer {

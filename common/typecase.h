@@ -1,5 +1,5 @@
-#ifndef SRUBY_TYPECASE_H
-#define SRUBY_TYPECASE_H
+#ifndef SORBET_TYPECASE_H
+#define SORBET_TYPECASE_H
 
 #include "Error.h"
 #include "common.h"
@@ -52,4 +52,4 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
 } // namespace ruby_typer
 
 // End typecase code
-#endif // SRUBY_TYPECASE_H
+#endif // SORBET_TYPECASE_H

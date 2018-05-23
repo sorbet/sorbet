@@ -1,5 +1,5 @@
-#ifndef SRUBY_REPORTER_H
-#define SRUBY_REPORTER_H
+#ifndef SORBET_REPORTER_H
+#define SORBET_REPORTER_H
 
 #include "Loc.h"
 #include "StrictLevel.h"

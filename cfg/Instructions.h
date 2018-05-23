@@ -1,5 +1,5 @@
-#ifndef SRUBY_INSTRUCTIONS_H
-#define SRUBY_INSTRUCTIONS_H
+#ifndef SORBET_INSTRUCTIONS_H
+#define SORBET_INSTRUCTIONS_H
 
 #include "core/core.h"
 #include <climits>
@@ -190,4 +190,4 @@ public:
 } // namespace cfg
 } // namespace ruby_typer
 
-#endif // SRUBY_CFG_H
+#endif // SORBET_CFG_H

@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_TYPECONSTRAINT_H
-#define RUBY_TYPER_TYPECONSTRAINT_H
+#ifndef SORBET_TYPECONSTRAINT_H
+#define SORBET_TYPECONSTRAINT_H
 
 #include "Types.h"
 #include <unordered_map>
@@ -48,4 +48,4 @@ public:
 } // namespace core
 } // namespace ruby_typer
 
-#endif // RUBY_TYPER_TYPECONSTRAINT_H
+#endif // SORBET_TYPECONSTRAINT_H

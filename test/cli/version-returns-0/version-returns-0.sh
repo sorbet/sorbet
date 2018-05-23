@@ -1,1 +1,1 @@
-main/ruby-typer --version || echo "failed"
+main/sorbet --version || echo "failed"

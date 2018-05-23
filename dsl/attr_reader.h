@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_ATTR_READER_H
-#define SRUBY_DSL_ATTR_READER_H
+#ifndef SORBET_DSL_ATTR_READER_H
+#define SORBET_DSL_ATTR_READER_H
 #include "ast/ast.h"
 
 namespace ruby_typer {

@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_LEVENSTEIN_H
-#define RUBY_TYPER_LEVENSTEIN_H
+#ifndef SORBET_LEVENSTEIN_H
+#define SORBET_LEVENSTEIN_H
 #include "absl/strings/string_view.h"
 
 namespace ruby_typer {
@@ -10,4 +10,4 @@ public:
 };
 
 } // namespace ruby_typer
-#endif // RUBY_TYPER_LEVENSTEIN_H
+#endif // SORBET_LEVENSTEIN_H

@@ -1,5 +1,5 @@
-#ifndef SRUBY_NAMER_NAMER_H
-#define SRUBY_NAMER_NAMER_H
+#ifndef SORBET_NAMER_NAMER_H
+#define SORBET_NAMER_NAMER_H
 #include "ast/ast.h"
 #include <memory>
 

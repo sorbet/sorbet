@@ -1,5 +1,5 @@
-#ifndef SRUBY_PARSER_PARSER_H
-#define SRUBY_PARSER_PARSER_H
+#ifndef SORBET_PARSER_PARSER_H
+#define SORBET_PARSER_PARSER_H
 
 #include "Node.h"
 
@@ -16,4 +16,4 @@ public:
 } // namespace parser
 } // namespace ruby_typer
 
-#endif // SRUBY_PARSER_PARSER_H
+#endif // SORBET_PARSER_PARSER_H

@@ -1,5 +1,5 @@
-#ifndef SRUBY_DSL_UTIL_H
-#define SRUBY_DSL_UTIL_H
+#ifndef SORBET_DSL_UTIL_H
+#define SORBET_DSL_UTIL_H
 
 #include "ast/ast.h"
 #include "core/Names.h"

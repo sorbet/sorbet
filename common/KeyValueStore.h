@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_KEYVALUESTORE_H
-#define RUBY_TYPER_KEYVALUESTORE_H
+#ifndef SORBET_KEYVALUESTORE_H
+#define SORBET_KEYVALUESTORE_H
 #include "common.h"
 #include "lmdb.h"
 #include <mutex>
@@ -35,4 +35,4 @@ public:
 };
 } // namespace ruby_typer
 
-#endif // RUBY_TYPER_KEYVALUESTORE_H
+#endif // SORBET_KEYVALUESTORE_H

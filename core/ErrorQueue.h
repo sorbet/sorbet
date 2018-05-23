@@ -1,5 +1,5 @@
-#ifndef SRUBY_ERRORQUEUE_H
-#define SRUBY_ERRORQUEUE_H
+#ifndef SORBET_ERRORQUEUE_H
+#define SORBET_ERRORQUEUE_H
 #include "Errors.h"
 #include "common/ConcurrentQueue.h"
 #include "spdlog/spdlog.h"
@@ -37,4 +37,4 @@ public:
 } // namespace core
 } // namespace ruby_typer
 
-#endif // SRUBY_ERRORQUEUE_H
+#endif // SORBET_ERRORQUEUE_H

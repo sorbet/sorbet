@@ -1,5 +1,5 @@
 LOG_FILE=$(mktemp)
-main/ruby-typer -e '1' -q --debug-log-file="$LOG_FILE"
+main/sorbet -e '1' -q --debug-log-file="$LOG_FILE"
 echo LOG BEGINS
 # only keep message parts, drop timings and the entire counter section
 sed -n '/^/,/^Counters and Histograms:/p;/^Counters and Histograms:/q' < "$LOG_FILE" |  # remove counters

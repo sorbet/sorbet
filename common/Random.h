@@ -1,5 +1,5 @@
-#ifndef RUBY_TYPER_RANDOM_H
-#define RUBY_TYPER_RANDOM_H
+#ifndef SORBET_RANDOM_H
+#define SORBET_RANDOM_H
 
 #include "common.h"
 #include <random>
@@ -18,4 +18,4 @@ public:
 };
 } // namespace ruby_typer
 
-#endif // RUBY_TYPER_RANDOM_H
+#endif // SORBET_RANDOM_H
