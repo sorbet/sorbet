@@ -71,36 +71,31 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 ## Usage: Calls into stdlib
 
 ```ruby
-[1, 2, 3, 4].max + [1, 2, 3, 4].min
+# Integer
+([1, 2].count + 3).next 
 ```
 
----
-
-## Usage: union types
+<hr/>
 
 ```ruby
-# foo is a T.any(Integer, String)
-hash = foo.freeze # Shared methods work
-
-case foo 
-when Integer
-  ...
-when String
-  ...
-end
+"str" + :sym
 ```
 
----
-
-## Usage: interescrtion types
-
-```ruby
-# Returns a T.all(Integer, STring)
-if something
-    return 5
-else
-    return "overloading!"
-end
+```console
+$ sorbet -e '"str" + :sym'
+-e:1: Expression passed as an argument `arg0` to method `+` 
+      does not match expected type 
+      github.com/stripe/sorbet/wiki/7002
+     1 |"str" + :sym
+        ^^^^^^^^^^^^
+    github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L18: 
+    Method `+` has specified type of argument `arg0` as `String`
+    18 |      arg0: String,
+              ^^^^^
+  Got Symbol(:"sym") originating from:
+    -e:1:
+     1 |"str" + :sym
+                ^^^^
 ```
 
 ---
@@ -108,9 +103,25 @@ end
 ## Usage: truthiness
 
 ```ruby
-# foo is a T.nilable(String) == T.any(String, NilClass)
-return nil if foo.nil?
-# foo is now a String
+foo = array_of_strings[0]
+# foo is a T.nilable(String) now
+return true if foo.nil?
+# foo is a String now
+return foo.empty?
+```
+
+<hr/>
+
+```ruby
+foo = array_of_strings[0]
+return foo.empty?
+```
+
+```console
+Method `empty?` does not exist on `NilClass` 
+component of `T.nilable(String)`
+     5 |return foo.empty?
+               ^^^^^^^^^^
 ```
 
 ---
@@ -118,14 +129,51 @@ return nil if foo.nil?
 ## Usage: dead code
 
 ```ruby
-if something
-    a = 1
+if Random.rand > 0.5
+    foo = 1
 else
-    a = 2
+    foo = 2
 end
-...
-return a if a.is_a?(Integer)
-# Anything here is dead code
+# foo is an Integer
+```
+
+<hr/>
+
+```ruby
+if Random.rand
+    foo = 1
+else
+    foo = 2
+end
+```
+
+```console
+/tmp/a.rb:6: This code is unreachable
+     6 |    foo = 2
+                  ^
+```
+
+---
+
+## Usage: union types
+
+```ruby
+foo = ["1", 2]
+hash = foo.map(&:succ) # Shared methods work
+```
+
+<hr/>
+
+```ruby
+foo = ["1", 2, [3]]
+hash = foo.map(&:succ)
+```
+
+```console
+Method `succ` does not exist on `Array` component of 
+`T.any(String, Integer, T::Array[Integer])`
+     4 |hash = foo.map(&:succ)
+                        ^^^^^
 ```
 
 ---
@@ -177,7 +225,7 @@ Note: We built this first and it works independently of the static typechecker
 sig.returns(String) # Optional but not inferred
 def foo
     a = 5 # Integer
-    a = T.let(untypable, String) # String
+    a = T.let("str", String) # String
 end
 ```
 
@@ -203,16 +251,18 @@ sig(a: A, b: T::Array[B]).returns(T.any(C, D))
 T::Array[String].new[0] # This is T.nilable(String)
 ```
 
+<hr/>
+
 ```ruby
-sig(id: Integer).returns(T.nilable(ORM))
+sig(id: Integer).returns(T.nilable(MyORM))
 def load(id); ... ; end
 
-# Method name does not exist on NilClass component of T.nilable(ORM)
 load(123).name
+```
 
-obj = load(123)
-return nil if !obj
-obj.name
+```console
+Method `name` does not exist on `NilClass` 
+component of `T.nilable(MyORM)`
 ```
 
 ---
