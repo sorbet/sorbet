@@ -174,6 +174,9 @@ NameDef names[] = {
     {"registered", DSL},
     {"instanceRegistered", "<instance_registered>", DSL},
     {"helpers", DSL},
+
+    {"Opus", DSL},
+    {"Command", DSL},
     // end DSL methods
 
     // Our own special methods which have special meaning

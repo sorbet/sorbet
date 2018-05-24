@@ -1,6 +1,7 @@
 #include "dsl/dsl.h"
 #include "ast/treemap/treemap.h"
 #include "dsl/ChalkODMProp.h"
+#include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
 #include "dsl/Minitest.h"
@@ -18,6 +19,8 @@ class DSLReplacer {
 
 public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
+        Command::patchDSL(ctx, classDef.get());
+
         unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
