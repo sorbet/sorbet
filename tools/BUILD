@@ -25,7 +25,6 @@ compilation_database(
         "//payload/text:some",
         "//payload/binary:empty",
         "//main:sorbet",
-        "//main:ruby-typer",
         "//payload/text:empty",
         "//payload/binary:some",
         "//main:realmain",

@@ -52,16 +52,11 @@ if [ ! -f "../ci/stripe-internal-sorbet-pay-server-sha" ]; then
 fi
 PAY_SERVER_SHA="$(cat ../ci/stripe-internal-sorbet-pay-server-sha)"
 git checkout "$PAY_SERVER_SHA"
-if [ -f "lib/ruby-types/sorbet.sha" ]; then
-  SORBET_MASQUERADE_SHA="$(cat lib/ruby-types/sorbet.sha)"
-elif [ -f "lib/ruby-types/ruby-typer.sha" ]; then
-  SORBET_MASQUERADE_SHA="$(cat lib/ruby-types/ruby-typer.sha)"
-fi
+SORBET_MASQUERADE_SHA="$(cat lib/ruby-types/sorbet.sha)"
 (
     cd -
     mkdir -p "${SORBET_CACHE_DIR}/${SORBET_MASQUERADE_SHA}/bin"
     ln -s "$(pwd)/bazel-bin/main/sorbet" "${SORBET_CACHE_DIR}/${SORBET_MASQUERADE_SHA}/bin"
-    ln -s "$(pwd)/bazel-bin/main/sorbet" "${SORBET_CACHE_DIR}/${SORBET_MASQUERADE_SHA}/bin/ruby-typer"
 )
 eval "$(rbenv init -)"
 stripe-deps-ruby  --without monster ci_ignore test_ui
