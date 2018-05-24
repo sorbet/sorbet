@@ -1,9 +1,10 @@
-# Who are we?
+# Introductions
 
 ---
+
 # Outline
  1. Ruby at Stripe
- 1. What did we want from a type system
+ 1. Our Type System Design Principles
  1. Examples
  1. Production experience
 
@@ -11,10 +12,10 @@
 
 # Ruby at Stripe
 
-- Ruby is the primary programming language at Stripe
-- Stripe has a monorepo
-- Mostly ~10 macroservices with a few microservices
-- Monolith is growing faster than services
+- Ruby is the primary programming language
+- Most product code is in a monorepo (intentionally!)
+- ~10 macroservices with a few microservices
+- New code mostly goes into an existing service
 
 ---
 
@@ -39,7 +40,7 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ----
 
-# Other Ruby typing
+# Other Ruby Typing
 
 - github.com/plum-umd/rdl
 - Typed Ruby from github
@@ -47,19 +48,19 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ---
 
-# Is this open source?
+# Open Source?
 
 - Yes! Eventually
 - Prove it out internally first
-Have questions? reach us at sorbet@stripe.com
+- Have questions? Reach us at **sorbet@stripe.com**
 
 ---
 
-## What did we want from a type system?
-- explicitness
-- compatible with ruby
-- feels useful, instead of burdensome
-- scales: in speed, team size, codebase size and time (not postponing hard decisions)
+# Type System Design Principles
+- Explicit
+- Compatible with Ruby
+- Feels useful, instead of burdensome
+- Scales: in speed, team size, codebase size and time (not postponing hard decisions)
 
 ---
 
@@ -71,7 +72,6 @@ Have questions? reach us at sorbet@stripe.com
 ```ruby
 [1, 2, 3, 4].max + [1, 2, 3, 4].min
 ```
-
 
 ---
 
@@ -112,9 +112,11 @@ this seems like the only mention of runtime type system
 # Practical experience
 
 ---
+
 ## Organic penetration
 
 ---
+
 ## Percent of type-able files and sites
 
 ---
@@ -127,23 +129,32 @@ this seems like the only mention of runtime type system
 
 ---
 
-## When is this open source?
+# Collaboration
 
-- When we are confident it works well internally
+---
+
+## Collaboration: Open Source
+
+- Will open source when it is ready
+- Perfect it internally before pushing out
 - Will post on stripe.com/blog
 
 ---
-# Could you collaborate before it's open source?
 
-Yes. Reach out to us via sorbet@stripe.com
+## Collaboration: Using it
 
----
-# Let's collaborate on typing Ruby!
-
-- there are multiple parties working to add types to ruby
-- we'd love to chat and share, please email us sorbet@stripe.com
+- Please reach out, even before we open source
+- Would love beta testers
+- sorbet@stripe.com
 
 ---
 
-<img src="http://thecatapi.com/api/images/get?format=src&type=gif" width = 600>
+## Collaboration: Building it
 
+- There are multiple parties working to add types to Ruby
+- We'd love to chat and share
+- sorbet@stripe.com
+
+---
+
+# Thank you!
