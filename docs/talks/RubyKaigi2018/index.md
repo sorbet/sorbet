@@ -4,7 +4,7 @@
 
 # Outline
  1. Ruby at Stripe
- 1. Our Type System Design Principles
+ 1. Our type system design principles
  1. Examples
  1. Production experience
 
@@ -38,7 +38,7 @@ Note: lines&files taken from https://hackpad.corp.stripe.com/Code-Metrics-R6KrBc
 engineers taken from https://docs.google.com/spreadsheets/d/1m4EeSEQHBVsSjRuSj4SH7vvXbOMWKsCHUpmuIWQupFI/edit#gid=173620479 ,
 commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/ab68760e/table
 
-----
+---
 
 # Other Ruby Typing
 
@@ -59,8 +59,42 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 # Type System Design Principles
 - Explicit
 - Compatible with Ruby
-- Feels useful, instead of burdensome
-- Scales: in speed, team size, codebase size and time (not postponing hard decisions)
+- As simple as possible, but powerful enough
+- Scales
+
+Note:
+
+- Explicit
+
+  We're willing to write annotations, and in fact see them as
+  beneficial; They make code more readable and predictable. We're here
+  to help readers as much as writers.
+
+- Compatible with Ruby
+
+  In particular, we don't want new syntax. Existing Ruby syntax means
+  we can leverage most of our existing tooling (editors, etc). Also,
+  the whole point here is to improve an existing Ruby codebase, so we
+  should be able to adopt it incrementally.
+
+- As simple as possible, but powerful enough
+
+  I [nelson] don't quite know how to link "Feels useful, instead of
+  burdensome" up with our decisions. It seems like an obvious goal to
+  the point of having not much value. I think I like this one better.
+
+  Overall, we are not strong believers in super-complex type
+  systems. They have their place, and we need a fair emount of
+  expressive power to model (enough) real Ruby code, but all else
+  being equal we want to be simpler. We believe that such a system
+  scales better, and -- most importantly -- is easiest for users to
+  learn+understand.
+
+- Scales
+
+  On all axes: in speed, team size, codebase size and time (not
+  postponing hard decisions). We're already a large codebase, and will
+  only get larger.
 
 ---
 
@@ -72,7 +106,7 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ```ruby
 # Integer
-([1, 2].count + 3).next 
+([1, 2].count + 3).next
 ```
 
 <hr/>
@@ -82,13 +116,12 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 ```
 
 ```console
-$ sorbet -e '"str" + :sym'
--e:1: Expression passed as an argument `arg0` to method `+` 
-      does not match expected type 
+Expression passed as an argument `arg0` to method `+`
+      does not match expected type
       github.com/stripe/sorbet/wiki/7002
      1 |"str" + :sym
         ^^^^^^^^^^^^
-    github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L18: 
+    github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L18:
     Method `+` has specified type of argument `arg0` as `String`
     18 |      arg0: String,
               ^^^^^
@@ -118,7 +151,7 @@ return foo.empty?
 ```
 
 ```console
-Method `empty?` does not exist on `NilClass` 
+Method `empty?` does not exist on `NilClass`
 component of `T.nilable(String)`
      5 |return foo.empty?
                ^^^^^^^^^^
@@ -148,7 +181,7 @@ end
 ```
 
 ```console
-/tmp/a.rb:6: This code is unreachable
+This code is unreachable
      6 |    foo = 2
                   ^
 ```
@@ -170,7 +203,7 @@ hash = foo.map(&:succ)
 ```
 
 ```console
-Method `succ` does not exist on `Array` component of 
+Method `succ` does not exist on `Array` component of
 `T.any(String, Integer, T::Array[Integer])`
      4 |hash = foo.map(&:succ)
                         ^^^^^
@@ -187,7 +220,7 @@ Method `succ` does not exist on `Array` component of
 ```ruby
 extend T::Helpers
 ...
- 
+
 sig(
     # Both positional and named parameters are referred to by name.
     # You must declare all parameters (and the return value below).
@@ -261,7 +294,7 @@ load(123).name
 ```
 
 ```console
-Method `name` does not exist on `NilClass` 
+Method `name` does not exist on `NilClass`
 component of `T.nilable(MyORM)`
 ```
 
@@ -293,7 +326,7 @@ component of `T.nilable(MyORM)`
 ## Collaboration: Open Source
 
 - Will open source when it is ready
-- Perfect it internally before pushing out
+- Make sure it succeeds internally first
 - Will post on stripe.com/blog
 
 ---
