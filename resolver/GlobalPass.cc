@@ -108,30 +108,49 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
 }
 
-void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                      core::SymbolRef sym) {
+const vector<core::SymbolRef> &
+getAbstractMethods(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+                   core::SymbolRef klass) {
     vector<core::SymbolRef> abstract;
-
-    auto superclass = sym.data(gs).superClass;
-    auto fnd = abstractCache.find(superclass);
-    if (fnd != abstractCache.end()) {
-        abstract.insert(abstract.end(), fnd->second.begin(), fnd->second.end());
-    }
-    for (auto ancst : sym.data(gs).mixins()) {
-        auto fnd = abstractCache.find(ancst);
-        if (fnd != abstractCache.end()) {
-            abstract.insert(abstract.end(), fnd->second.begin(), fnd->second.end());
-        }
+    auto ent = abstractCache.find(klass);
+    if (ent != abstractCache.end()) {
+        return ent->second;
     }
 
-    auto isAbstract = sym.data(gs).isClassAbstract();
+    auto superclass = klass.data(gs).superClass;
+    if (superclass.exists()) {
+        auto &superclassMethods = getAbstractMethods(gs, abstractCache, superclass);
+        // TODO(nelhage): This code coud go quadratic or even exponential given
+        // pathological arrangments of interfaces and abstract methods. Switch
+        // to a better data structure if that is ever a problem.
+        abstract.insert(abstract.end(), superclassMethods.begin(), superclassMethods.end());
+    }
+
+    for (auto ancst : klass.data(gs).mixins()) {
+        auto fromMixin = getAbstractMethods(gs, abstractCache, ancst);
+        abstract.insert(abstract.end(), fromMixin.begin(), fromMixin.end());
+    }
+
+    auto isAbstract = klass.data(gs).isClassAbstract();
     if (isAbstract) {
-        for (auto mem : sym.data(gs).members) {
+        for (auto mem : klass.data(gs).members) {
             if (mem.second.data(gs).isMethod() && mem.second.data(gs).isAbstract()) {
                 abstract.push_back(mem.second);
             }
         }
     }
+
+    auto &entry = abstractCache[klass];
+    entry = move(abstract);
+    return entry;
+}
+
+void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+                      core::SymbolRef sym) {
+    if (sym.data(gs).isClassAbstract()) {
+        return;
+    }
+    auto &abstract = getAbstractMethods(gs, abstractCache, sym);
 
     if (abstract.empty()) {
         return;
@@ -143,15 +162,13 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
         }
 
         auto mem = sym.data(gs).findConcreteMethodTransitive(gs, proto.data(gs).name);
-        if (!isAbstract && !mem.exists()) {
+        if (!mem.exists()) {
             if (auto e = gs.beginError(sym.data(gs).definitionLoc, core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Missing definition for abstract method `{}`", proto.data(gs).show(gs));
                 e.addErrorLine(proto.data(gs).definitionLoc, "defined here");
             }
         }
     }
-
-    abstractCache[sym] = move(abstract);
 }
 }; // namespace
 
