@@ -1,16 +1,16 @@
 # Introductions
 
----
+Note:
 
-# Outline
- 1. Ruby at Stripe
- 1. Our type system design principles
- 1. Examples
- 1. Production experience
+pt starts talking here
 
 ---
 
-# Ruby at Stripe
+# Background
+
+---
+
+## Ruby at Stripe
 
 - Ruby is the primary programming language
 - Most product code is in a monorepo (intentionally!)
@@ -40,23 +40,29 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ---
 
-# Other Ruby Typing
+## Other Ruby Typing
 
+- Diamondback Ruby
 - github.com/plum-umd/rdl
-- Typed Ruby from github
+- Unreleased GitHub experiment
 - Presentation tomorrow by @soutaro
 
 ---
 
-# Open Source?
+## Open Source?
 
 - Yes! Eventually
 - Prove it out internally first
 - Have questions? Reach us at **sorbet@stripe.com**
 
+Note:
+
+hand off to nelhage after this slide
+
 ---
 
-# Type System Design Principles
+## Type System Design Principles
+
 - Explicit
 - Compatible with Ruby
 - As simple as possible, but powerful enough
@@ -78,10 +84,6 @@ Note:
   should be able to adopt it incrementally.
 
 - As simple as possible, but powerful enough
-
-  I [nelson] don't quite know how to link "Feels useful, instead of
-  burdensome" up with our decisions. It seems like an obvious goal to
-  the point of having not much value. I think I like this one better.
 
   Overall, we are not strong believers in super-complex type
   systems. They have their place, and we need a fair emount of
@@ -211,11 +213,11 @@ Method `succ` does not exist on `Array` component of
 
 ---
 
-# Demo (declarations)
+# Declaration Syntax
 
 ---
 
-## Declaration: compatible syntax
+## Declaration: Compatible syntax
 
 ```ruby
 extend T::Helpers
@@ -235,7 +237,7 @@ end
 
 ---
 
-## Declaration: runtime typesystem
+## Declaration: Runtime Typesystem
 
 ```ruby
 sig.returns(String)
@@ -252,7 +254,7 @@ Note: We built this first and it works independently of the static typechecker
 
 ---
 
-## Declaration: kinda manifest
+## Declaration: Local Inference
 
 ```ruby
 sig.returns(String) # Optional but not inferred
@@ -264,16 +266,24 @@ end
 
 ---
 
-## Declaration: nominal
+## Declaration: Interfaces
+
 
 ```ruby
-class A; end
-class B; end
-class C; end
-class D; end
+module Fooable
+  sig.abstract; def foo; end
+end
 
-sig(a: A, b: T::Array[B]).returns(T.any(C, D))
+class MyFooable
+  include Fooable
+
+  def foo; ...; end
+end
 ```
+
+Note:
+
+tbd? explain not structural?
 
 ---
 
@@ -298,6 +308,46 @@ Method `name` does not exist on `NilClass`
 component of `T.nilable(MyORM)`
 ```
 
+Note:
+
+dmitry takes over after this slide
+
+---
+## Declaration: Generic classes
+
+
+```ruby
+class Box
+  extend T::Generic
+
+  Elem = type_member
+
+  sig.returns(Elem)
+  attr_reader :x
+
+  sig(x: Elem).returns(Elem)
+  attr_writer :x
+end
+
+int_box = Box[Integer].new
+```
+
+---
+## Declaration: Generic methods
+
+```ruby
+class Array
+  Elem = type_member
+
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
+  )
+  .returns(T::Array[T.type_parameter(:U)])
+  sig.returns(T::Array[Elem])
+  def map(&blk); end
+end
+```
+
 ---
 # Practical experience
 
@@ -305,41 +355,82 @@ component of `T.nilable(MyORM)`
 
 ## Organic penetration
 
+TODO: stats
+
+- number of human-authored `sig`s
+- number of generated signatures
+- ???
+
 ---
 
 ## Percent of type-able files and sites
 
 ---
 
+## Bugs found in production code
+
+- `nil` checks
+- errors in dead code
+- error-handling
+- incorrect declarations
+- ???
+
+---
+## User response
+
+[quotes from users here]
+
+
+---
+
 ## Speed of our typer
 
----
-
-## illustrations of bugs found by it(3 min)
+stat: lines/second/core
 
 ---
 
-# Collaboration
+## Implementation
+
+- C++
+- Don't depend on a Ruby VM
+- C++ port of `whitequark/parser` by GitHub
+- Extensive test suite
+- CI runs against Stripe codebase
+
+---
+## Metaprogramming support
+
+- Minimal native support
+- Reflection-based signature generation
+
+Note:
+
+Hand off to pt after this slide
 
 ---
 
-## Collaboration: Open Source
+# Can I use it?
 
-- Will open source when it is ready
-- Make sure it succeeds internally first
+---
+
+## Open Source
+
+- Will open source, timeline TBD
+- Focusing on internal deployment for now
 - Will post on stripe.com/blog
 
 ---
 
-## Collaboration: Using it
+## Using it
 
 - Please reach out, even before we open source
-- Would love beta testers
+- Interested in your use cases
+- Will let you know when it's ready for beta
 - sorbet@stripe.com
 
 ---
 
-## Collaboration: Building it
+## Building it
 
 - There are multiple parties working to add types to Ruby
 - We'd love to chat and share
