@@ -21,18 +21,17 @@ pt starts talking here
 
 ## Ruby at Stripe: Stats
 
-|Language                        | files | lines |
-|--------------------------------|------:|------:|
-|Ruby                            | 25k   | 2,300k|
-|Javascript                      |  8k   | 1,100k|
-|YAML                            |  3k   |   700k|
-|Scala                           |  5k   |   500k|
-|HTML                            |  1k   |   400k|
-|Go                              |  3k   |   400k|
+|Language                        | lines |||Language                        | lines |
+|--------------------------------|------:|||--------------------------------|------:|
+|Ruby                            |   34% |||Scala                           |    7% |
+|Javascript                      |   16% |||HTML                            |    6% |
+|YAML                            |   10% |||Go                              |    6% |
 
-engineers: ~400
+Millions of lines of code
 
-commits per day: ~1800
+Hundreds of engineers
+
+Thousands of commits per day
 
 Note: lines&files taken from https://hackpad.corp.stripe.com/Code-Metrics-R6KrBcukuSG
 engineers taken from https://docs.google.com/spreadsheets/d/1m4EeSEQHBVsSjRuSj4SH7vvXbOMWKsCHUpmuIWQupFI/edit#gid=173620479 ,
@@ -357,9 +356,8 @@ end
 
 TODO: stats
 
-- number of human-authored `sig`s
-- number of generated signatures
-- ???
+- number of human-authored signatures: 3k
+- number of generated signatures: 240k
 
 ---
 
@@ -378,14 +376,31 @@ TODO: stats
 ---
 ## User response
 
-[quotes from users here]
+> “DeveloperHappiness” would be a good name for ruby-typer
+> <!-- .element: class="smallquote"  -->
+
+<span> </span>
+
+> nice!! beautiful errors and damn that was fast!!
+> <!-- .element: class="smallquote"  -->
+
+<span> </span>
+
+> I'm trying to use it locally, it's been super helpful to catch bugs in my own code
+> <!-- .element: class="smallquote"  -->
+
+<span> </span>
+
+> I introduced a typo with sed and ruby-typer caught it in CI within seconds of me pushing the branch.
+> It’s really nice to get this kind of notification quickly rather than having to wait for potentially several minutes before the test job fails.
+> <!-- .element: class="smallquote"  -->
 
 
 ---
 
 ## Speed of our typer
 
-stat: lines/second/core
+175k lines/second/cpu core
 
 ---
 
@@ -423,18 +438,19 @@ Hand off to pt after this slide
 
 ## Using it
 
-- Please reach out, even before we open source
-- Interested in your use cases
-- Will let you know when it's ready for beta
-- sorbet@stripe.com
+
+- Please reach out, even before we open source <!-- .element: class="fragment" data-fragment-index="1" -->
+- Interested in your use cases <!-- .element: class="fragment" data-fragment-index="1" -->
+- Will let you know when it's ready for beta <!-- .element: class="fragment" data-fragment-index="1" -->
+- sorbet@stripe.com <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ---
 
 ## Building it
 
-- There are multiple parties working to add types to Ruby
-- We'd love to chat and share
-- sorbet@stripe.com
+- There are multiple parties working to add types to Ruby <!-- .element: class="fragment" data-fragment-index="1" -->
+- We'd love to chat and share <!-- .element: class="fragment" data-fragment-index="1" -->
+- sorbet@stripe.com <!-- .element: class="fragment" data-fragment-index="1" -->
 
 ---
 
