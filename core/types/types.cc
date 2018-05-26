@@ -218,7 +218,7 @@ bool Type::isBottom() {
 
 core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
 
-core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), value(absl::bit_cast<u8>(val)) {}
+core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), floatval(val) {}
 
 core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
     : ProxyType(klass == core::Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {

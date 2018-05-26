@@ -307,7 +307,10 @@ private:
 
 class LiteralType final : public ProxyType {
 public:
-    int64_t value;
+    union {
+        int64_t value;
+        double floatval;
+    };
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(core::SymbolRef klass, core::NameRef val);

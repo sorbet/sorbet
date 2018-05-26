@@ -157,7 +157,7 @@ public:
     Loc definitionLoc;
     mutable u4 uniqueCounter =
         1; // used as a counter for local variables inside CFG. not shared by design TODO: check that is actually isn't
-    u4 flags;
+    u4 flags = Flags::NONE;
 
     /** Type aliases are introduced by resolver and SHOULD NOT be serialized */
     std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;

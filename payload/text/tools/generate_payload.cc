@@ -24,7 +24,7 @@ void emit_header(vector<string> sourceFiles, ostream &out) {
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "();" << '\n';
     }
-    out << "  std::vector<std::pair<std::string, std::string>> all();" << '\n';
+    out << "  std::vector<std::pair<std::string, std::string> > all();" << '\n';
 
     out << "}};" << '\n';
 }
@@ -36,8 +36,8 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
         out << "  std::string " + sourceName2funcName(file) << "() {" << '\n';
         out << "  return \"" + absl::CEscape(ruby_typer::FileOps::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
     }
-    out << "std::vector<std::pair<std::string, std::string>> all() {" << '\n';
-    out << "  std::vector<std::pair<std::string, std::string>> result;" << '\n';
+    out << "std::vector<std::pair<std::string, std::string> > all() {" << '\n';
+    out << "  std::vector<std::pair<std::string, std::string> > result;" << '\n';
     for (auto &file : sourceFiles) {
         string version;
         if (ruby_typer::Version::isReleaseBuild) {
