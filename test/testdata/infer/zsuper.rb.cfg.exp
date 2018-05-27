@@ -1,22 +1,4 @@
 digraph "zsuper.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
-    color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
-
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::Foo#baz" {
     label = "::Foo#baz";
     color = blue;

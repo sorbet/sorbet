@@ -25,5 +25,4 @@ class ::<root> < ::Object () @ test/testdata/resolver/self.rb:3
       ]
     } @ test/testdata/resolver/self.rb:30
     type-member(=) ::TestSelfGeneric#Elem @ test/testdata/resolver/self.rb:21
-  method #<static-init> () @ test/testdata/resolver/self.rb:3
 

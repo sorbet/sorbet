@@ -3,6 +3,7 @@ class <emptyTree><<constant:<root>>> < ()
     begin
       ::Foo::Bar.baz(1)
       ::Foo::Bar.baz(2)
+      <emptyTree>
     end
   end
 end

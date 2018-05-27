@@ -1,16 +1,23 @@
 class <emptyTree><<constant:<root>>> < ()
+  {}
+
+  {:"a" => "a"}
+
+  self(<constant:<todo sym>>).x().to_hash()
+
+  self(<constant:<todo sym>>).x()
+
+  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
+
+  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
+
+  self(<constant:<todo sym>>).x().to_hash().merge({:"a" => "a"})
+
   begin
-    {}
-    {:"a" => "a"}
     self(<constant:<todo sym>>).x().to_hash()
-    self(<constant:<todo sym>>).x()
-    {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
-    {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash())
-    self(<constant:<todo sym>>).x().to_hash().merge({:"a" => "a"})
-    begin
-      self(<constant:<todo sym>>).x().to_hash()
-    end.merge({:"a" => "a"})
-    {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
-    {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
-  end
+  end.merge({:"a" => "a"})
+
+  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
+
+  {:"a" => "a"}.merge(self(<constant:<todo sym>>).x().to_hash()).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"b" => "b", :"c" => "c"}).merge(self(<constant:<todo sym>>).y().to_hash()).merge({:"d" => "d"})
 end

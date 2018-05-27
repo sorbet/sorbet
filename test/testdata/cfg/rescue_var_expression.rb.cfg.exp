@@ -1,22 +1,4 @@
 digraph "rescue_var_expression.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
-    color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
-
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$8 = self : <Class:<root>>\l<statTemp>$7 = <statTemp>$8.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$6.puts(<statTemp>$7) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
@@ -57,6 +39,24 @@ subgraph "cluster_::Object#foo" {
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_7" [style="bold"];
+}
+
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
+    color = blue;
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
+
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$4 = self : <Class:<root>>\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$5 = <statTemp>$6.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$4.puts(<statTemp>$5) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
 subgraph "cluster_::MyClass#foo=" {

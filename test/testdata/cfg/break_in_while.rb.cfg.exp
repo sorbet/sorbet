@@ -1,22 +1,4 @@
 digraph "break_in_while.rb" {
-subgraph "cluster_#<static-init>" {
-    label = "#<static-init>";
-    color = blue;
-    "bb#<static-init>_0" [shape = invhouse];
-    "bb#<static-init>_1" [shape = parallelogram];
-
-    "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : <Class:<root>>\l<statTemp>$7 = self : <Class:<root>>\l<statTemp>$6 = <statTemp>$7.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$5.puts(<statTemp>$6) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
-    "bb#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
-    ];
-
-    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
-}
-
 subgraph "cluster_::Object#foo" {
     label = "::Object#foo";
     color = blue;
@@ -43,6 +25,24 @@ subgraph "cluster_::Object#foo" {
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
+}
+
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
+    color = blue;
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
+
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<statTemp>$4 = self : <Class:<root>>\l<statTemp>$6 = self : <Class:<root>>\l<statTemp>$5 = <statTemp>$6.foo() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$4.puts(<statTemp>$5) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
 }
 
 }

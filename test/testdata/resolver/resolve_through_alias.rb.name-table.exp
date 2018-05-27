@@ -7,5 +7,4 @@ class ::<root> < ::Object () @ test/testdata/resolver/resolve_through_alias.rb:3
   class ::NS (<constant:BasicObject>) @ test/testdata/resolver/resolve_through_alias.rb:3
     class ::NS::<Class:Inner> < ::Module () @ test/testdata/resolver/resolve_through_alias.rb:4
     class ::NS::Inner (<constant:BasicObject>) @ test/testdata/resolver/resolve_through_alias.rb:4
-  method #<static-init> () @ test/testdata/resolver/resolve_through_alias.rb:3
 

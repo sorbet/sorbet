@@ -2,107 +2,104 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    InsSeq{
-      stats = [
-        MethodDef{
-          self = 0
-          name = main<<constant:<todo sym>>>
-          args = []
-          rhs = InsSeq{
-            stats = [
-              Assign{
-                lhs = UnresolvedIdent{
+    MethodDef{
+      self = 0
+      name = main<<constant:<todo sym>>>
+      args = []
+      rhs = InsSeq{
+        stats = [
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = try
+            }
+            rhs = Literal{ value = 0 }
+          }
+        ],
+        expr = InsSeq{
+          stats = [
+          ],
+          expr = Rescue{
+            body = If{
+              cond = Send{
+                recv = UnresolvedIdent{
                   kind = Local
                   name = try
                 }
-                rhs = Literal{ value = 0 }
+                name = <
+                block = nullptr
+                args = [
+                  Literal{ value = 3 }
+                ]
               }
-            ],
-            expr = InsSeq{
-              stats = [
-              ],
-              expr = Rescue{
-                body = If{
-                  cond = Send{
-                    recv = UnresolvedIdent{
+              thenp = InsSeq{
+                stats = [
+                  Assign{
+                    lhs = UnresolvedIdent{
                       kind = Local
                       name = try
                     }
-                    name = <
-                    block = nullptr
-                    args = [
-                      Literal{ value = 3 }
-                    ]
-                  }
-                  thenp = InsSeq{
-                    stats = [
-                      Assign{
-                        lhs = UnresolvedIdent{
-                          kind = Local
-                          name = try
-                        }
-                        rhs = Send{
-                          recv = UnresolvedIdent{
-                            kind = Local
-                            name = try
-                          }
-                          name = +
-                          block = nullptr
-                          args = [
-                            Literal{ value = 1 }
-                          ]
-                        }
+                    rhs = Send{
+                      recv = UnresolvedIdent{
+                        kind = Local
+                        name = try
                       }
-                    ],
-                    expr = Send{
-                      recv = Self{ claz = ::<todo sym> }
-                      name = raise
+                      name = +
                       block = nullptr
                       args = [
-                        Literal{ value = "e" }
+                        Literal{ value = 1 }
                       ]
                     }
                   }
-                  elsep = EmptyTree
+                ],
+                expr = Send{
+                  recv = Self{ claz = ::<todo sym> }
+                  name = raise
+                  block = nullptr
+                  args = [
+                    Literal{ value = "e" }
+                  ]
                 }
-                rescueCases = [
-                  RescueCase{
-                    exceptions = [
-                    ]
-                    var = UnresolvedIdent{
-                      kind = Local
-                      name = <rescueTemp$2
-                    }
-                    body = InsSeq{
-                      stats = [
-                        Send{
-                          recv = Self{ claz = ::<todo sym> }
-                          name = puts
-                          block = nullptr
-                          args = [
-                            Literal{ value = "rescue" }
-                          ]
-                        }
-                        Retry{}
-                      ],
-                      expr = Literal{ value = 1 }
-                    }
-                  }
-                ]
-                else = EmptyTree
-                ensure = EmptyTree
               }
+              elsep = EmptyTree
             }
+            rescueCases = [
+              RescueCase{
+                exceptions = [
+                ]
+                var = UnresolvedIdent{
+                  kind = Local
+                  name = <rescueTemp$2
+                }
+                body = InsSeq{
+                  stats = [
+                    Send{
+                      recv = Self{ claz = ::<todo sym> }
+                      name = puts
+                      block = nullptr
+                      args = [
+                        Literal{ value = "rescue" }
+                      ]
+                    }
+                    Retry{}
+                  ],
+                  expr = Literal{ value = 1 }
+                }
+              }
+            ]
+            else = EmptyTree
+            ensure = EmptyTree
           }
         }
-      ],
-      expr = Send{
-        recv = Self{ claz = ::<todo sym> }
-        name = main
-        block = nullptr
-        args = [
-        ]
       }
+    }
+
+    Send{
+      recv = Self{ claz = ::<todo sym> }
+      name = main
+      block = nullptr
+      args = [
+      ]
     }
   ]
 }

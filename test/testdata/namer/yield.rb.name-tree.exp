@@ -1,10 +1,11 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$65>()
-      begin
-        <emptyTree>
-        ::Main.new().main()
-      end
+      ::Main.new().main()
     end
   end
   class <emptyTree>::<constant:Main><<constant:Main>> < (::<todo sym>)

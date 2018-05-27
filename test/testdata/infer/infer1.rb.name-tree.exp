@@ -1,18 +1,19 @@
 class <emptyTree><<constant:<root>>> < ()
   <emptyTree>
 
-  def self.<static-init><<static-init>$65>()
-    begin
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-      <emptyTree>
-    end
-  end
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
+
+  <emptyTree>
 
   def baz1<baz1>()
     begin

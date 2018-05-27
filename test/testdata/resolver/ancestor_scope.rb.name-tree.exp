@@ -1,12 +1,17 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>$65>()
       begin
-        <emptyTree>
-        <emptyTree>
         T.assert_type!(::Test.new(), Test::Mixin)
         T.assert_type!(::Test.new(), Test::Other)
         T.assert_type!(::Test.new(), Other)
+        <emptyTree>
       end
     end
   end

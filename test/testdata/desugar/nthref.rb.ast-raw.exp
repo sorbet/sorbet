@@ -2,17 +2,14 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    InsSeq{
-      stats = [
-        UnresolvedIdent{
-          kind = Global
-          name = 1
-        }
-      ],
-      expr = UnresolvedIdent{
-        kind = Global
-        name = 314159
-      }
+    UnresolvedIdent{
+      kind = Global
+      name = 1
+    }
+
+    UnresolvedIdent{
+      kind = Global
+      name = 314159
     }
   ]
 }

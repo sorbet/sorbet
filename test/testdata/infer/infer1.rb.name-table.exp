@@ -11,5 +11,4 @@ class ::<root> < ::Object () @ test/testdata/infer/infer1.rb:2
     method ::Object#baz7 (cond) @ test/testdata/infer/infer1.rb:38
       argument ::Object#baz7#cond<> @ test/testdata/infer/infer1.rb:38
     method ::Object#baz8 () @ test/testdata/infer/infer1.rb:46
-  method #<static-init> () @ test/testdata/infer/infer1.rb:2
 
