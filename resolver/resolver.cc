@@ -689,7 +689,7 @@ private:
                 [&](ast::Send *send) {
                     if (TypeSyntax::isSig(ctx, send)) {
                         if (!lastSig.empty()) {
-                            if (!ctx.withOwner(klass->symbol).permitOverloadDefinitions()) {
+                            if (!ctx.permitOverloadDefinitions()) {
                                 if (auto e = ctx.state.beginError(lastSig[0]->loc,
                                                                   core::errors::Resolver::InvalidMethodSignature)) {
                                     e.setHeader("Unused type annotation. No method def before next annotation");
@@ -719,8 +719,7 @@ private:
                     if (!lastSig.empty()) {
                         core::prodCounterInc("types.sig.count");
 
-                        bool isOverloaded =
-                            lastSig.size() > 1 && ctx.withOwner(klass->symbol).permitOverloadDefinitions();
+                        bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
 
                         if (isOverloaded) {
                             mdef->symbol.data(ctx).setOverloaded();
