@@ -2,96 +2,97 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    InsSeq{
-      stats = [
-        MethodDef{
-          self = 0
-          name = main<<constant:<todo sym>>>
-          args = []
-          rhs = InsSeq{
-            stats = [
-            ],
-            expr = Rescue{
+    MethodDef{
+      self = 0
+      name = main<<constant:<todo sym>>>
+      args = []
+      rhs = InsSeq{
+        stats = [
+        ],
+        expr = Rescue{
+          body = Send{
+            recv = Self{ claz = ::<todo sym> }
+            name = a
+            block = nullptr
+            args = [
+            ]
+          }
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = UnresolvedIdent{
+                kind = Local
+                name = <rescueTemp$2
+              }
               body = Send{
                 recv = Self{ claz = ::<todo sym> }
-                name = a
-                block = nullptr
-                args = [
-                ]
-              }
-              rescueCases = [
-                RescueCase{
-                  exceptions = [
-                  ]
-                  var = UnresolvedIdent{
-                    kind = Local
-                    name = <rescueTemp$2
-                  }
-                  body = Send{
-                    recv = Self{ claz = ::<todo sym> }
-                    name = b
-                    block = nullptr
-                    args = [
-                    ]
-                  }
-                }
-              ]
-              else = Send{
-                recv = Self{ claz = ::<todo sym> }
-                name = c
-                block = nullptr
-                args = [
-                ]
-              }
-              ensure = Send{
-                recv = Self{ claz = ::<todo sym> }
-                name = d
+                name = b
                 block = nullptr
                 args = [
                 ]
               }
             }
-          }
-        }
-        MethodDef{
-          self = 0
-          name = a<<constant:<todo sym>>>
-          args = []
-          rhs = EmptyTree
-        }
-        MethodDef{
-          self = 0
-          name = b<<constant:<todo sym>>>
-          args = []
-          rhs = EmptyTree
-        }
-        MethodDef{
-          self = 0
-          name = c<<constant:<todo sym>>>
-          args = []
-          rhs = EmptyTree
-        }
-        MethodDef{
-          self = 0
-          name = d<<constant:<todo sym>>>
-          args = []
-          rhs = EmptyTree
-        }
-      ],
-      expr = Send{
-        recv = Self{ claz = ::<todo sym> }
-        name = puts
-        block = nullptr
-        args = [
-          Send{
+          ]
+          else = Send{
             recv = Self{ claz = ::<todo sym> }
-            name = foo
+            name = c
             block = nullptr
             args = [
             ]
           }
-        ]
+          ensure = Send{
+            recv = Self{ claz = ::<todo sym> }
+            name = d
+            block = nullptr
+            args = [
+            ]
+          }
+        }
       }
+    }
+
+    MethodDef{
+      self = 0
+      name = a<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      self = 0
+      name = b<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      self = 0
+      name = c<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+
+    MethodDef{
+      self = 0
+      name = d<<constant:<todo sym>>>
+      args = []
+      rhs = EmptyTree
+    }
+
+    Send{
+      recv = Self{ claz = ::<todo sym> }
+      name = puts
+      block = nullptr
+      args = [
+        Send{
+          recv = Self{ claz = ::<todo sym> }
+          name = foo
+          block = nullptr
+          args = [
+          ]
+        }
+      ]
     }
   ]
 }

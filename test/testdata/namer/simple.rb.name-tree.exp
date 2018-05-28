@@ -1,16 +1,18 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$65>()
-      begin
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-      end
-    end
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
   end
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<todo sym>)
     <emptyTree>

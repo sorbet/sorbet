@@ -1,11 +1,8 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$65>()
-      begin
-        <emptyTree>
-        <emptyTree>
-      end
-    end
+    <emptyTree>
+
+    <emptyTree>
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()  end
   module <emptyTree>::<constant:A><<constant:A>> < ()

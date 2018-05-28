@@ -1306,7 +1306,15 @@ unique_ptr<Expression> liftTopLevel(core::MutableContext ctx, unique_ptr<Express
     auto loc = what->loc;
 
     ClassDef::RHS_store rhs;
-    rhs.emplace_back(move(what));
+    auto insSeq = cast_tree<InsSeq>(what.get());
+    if (insSeq) {
+        for (auto &stat : insSeq->stats) {
+            rhs.emplace_back(move(stat));
+        }
+        rhs.emplace_back(move(insSeq->expr));
+    } else {
+        rhs.emplace_back(move(what));
+    }
     return make_unique<ClassDef>(loc, core::Symbols::root(), MK::EmptyTree(core::Loc::none()),
                                  ClassDef::ANCESTORS_store(), move(rhs), Class);
 }

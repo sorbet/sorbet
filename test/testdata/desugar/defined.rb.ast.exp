@@ -1,6 +1,5 @@
 class <emptyTree><<constant:<root>>> < ()
-  begin
-    ::<Magic>.defined?(self(<constant:<todo sym>>).foo())
-    self(<constant:<todo sym>>).defined_(self(<constant:<todo sym>>).foo())
-  end
+  ::<Magic>.defined?(self(<constant:<todo sym>>).foo())
+
+  self(<constant:<todo sym>>).defined_(self(<constant:<todo sym>>).foo())
 end

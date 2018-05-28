@@ -2,22 +2,21 @@ begin
   class <emptyTree><<constant:<root>>> < ()
     <emptyTree>
 
-    def self.<static-init><<static-init>$65>()
-      begin
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        #$c = ::Object.new()
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        <emptyTree>
-        self(<singleton class:<constant:<root>>>).main()
-      end
-    end
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
 
     def main<main>()
       begin
@@ -29,6 +28,14 @@ begin
         self(<constant:Object>).puts(::F.f=(91))
         self(<constant:Object>).puts(::G.new().wrapper())
         self(<constant:Object>).puts(::T.untyped.h())
+      end
+    end
+
+    def self.<static-init><<static-init>$65>()
+      begin
+        #$c = ::Object.new()
+        self(<singleton class:<constant:<root>>>).main()
+        <emptyTree>
       end
     end
   end

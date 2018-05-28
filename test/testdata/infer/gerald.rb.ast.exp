@@ -1,280 +1,280 @@
 class <emptyTree><<constant:<root>>> < ()
-  begin
-    self(<constant:<todo sym>>).require_relative("../../../extn")
-    <emptyTree>::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
-    module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:<todo sym>>> < ()
-      class <emptyTree>::<constant:MatchTimeout><<constant:<todo sym>>> < (<emptyTree>::<constant:StandardError>)
-        self(<constant:<todo sym>>).attr_reader(:"rule_token")
+  self(<constant:<todo sym>>).require_relative("../../../extn")
 
-        def initialize<<constant:<todo sym>>>(message, rule_token: = "")
-          begin
-            self(<constant:<todo sym>>).super(message)
-            @rule_token = rule_token
-          end
+  <emptyTree>::<constant:Opus>::<constant:AutogenLoader>.init("__FILE__")
+
+  module <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Gerald><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:MatchTimeout><<constant:<todo sym>>> < (<emptyTree>::<constant:StandardError>)
+      self(<constant:<todo sym>>).attr_reader(:"rule_token")
+
+      def initialize<<constant:<todo sym>>>(message, rule_token: = "")
+        begin
+          self(<constant:<todo sym>>).super(message)
+          @rule_token = rule_token
         end
       end
+    end
 
-      class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<todo sym>)
-        self(<constant:<todo sym>>).include(<emptyTree>::<constant:Chalk>::<constant:Log>)
+    class <emptyTree>::<constant:Matcher><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).include(<emptyTree>::<constant:Chalk>::<constant:Log>)
 
-        <emptyTree>::<constant:MAX_AFFECTED_FILES> = 100
+      <emptyTree>::<constant:MAX_AFFECTED_FILES> = 100
 
-        def initialize<<constant:<todo sym>>>()
+      def initialize<<constant:<todo sym>>>()
+        begin
           begin
+            <assignTemp$3 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2|
+              <block-pass>$2.valid?()
+            end
+            @rules = <assignTemp$3.[](0)
+            invalid_rules = <assignTemp$3.[](1)
+            <assignTemp$3
+          end
+          if invalid_rules.empty?().!()
             begin
-              <assignTemp$3 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2|
-                <block-pass>$2.valid?()
-              end
-              @rules = <assignTemp$3.[](0)
-              invalid_rules = <assignTemp$3.[](1)
-              <assignTemp$3
+              invalid_rule_ids = invalid_rules.map() do |<block-pass>$4|
+                <block-pass>$4.token()
+              end.join(",")
+              self(<constant:<todo sym>>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
             end
-            if invalid_rules.empty?().!()
-              begin
-                invalid_rule_ids = invalid_rules.map() do |<block-pass>$4|
-                  <block-pass>$4.token()
-                end.join(",")
-                self(<constant:<todo sym>>).log().warn("Gerald skipping invalid rules: ".+(invalid_rule_ids))
-              end
-            else
-              <emptyTree>
-            end
-          end
-        end
-
-        def match<<constant:<todo sym>>>(match_context)
-          begin
-            if match_context.diff().affected_files().count().>(<emptyTree>::<constant:MAX_AFFECTED_FILES>)
-              begin
-                self(<constant:<todo sym>>).log().warn("Gerald skipping large PR with ".concat(begin
-                      match_context.diff().affected_files().count()
-                    end.to_s()).concat(" affected files".to_s()).to_s())
-                return []
-              end
-            else
-              <emptyTree>
-            end
-            budget = <emptyTree>::<constant:MatchTimeBudget>.new()
-            @rules.select() do |r|
-              budget.time_rule(r) do ||
-                r.matches?(match_context)
-              end
-            end
+          else
+            <emptyTree>
           end
         end
       end
 
-      class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<todo sym>)
-        self(<constant:<todo sym>>).attr_reader(:"repo")
-
-        self(<constant:<todo sym>>).attr_reader(:"assignee")
-
-        self(<constant:<todo sym>>).attr_reader(:"gh_user")
-
-        self(<constant:<todo sym>>).attr_reader(:"merge_branch")
-
-        self(<constant:<todo sym>>).attr_reader(:"body")
-
-        self(<constant:<todo sym>>).attr_reader(:"title")
-
-        self(<constant:<todo sym>>).attr_reader(:"diff")
-
-        self(<constant:<todo sym>>).attr_reader(:"openapi_diff")
-
-        def initialize<<constant:<todo sym>>>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
-          begin
-            @repo = repo
-            @assignee = assignee
-            @gh_user = gh_user
-            @merge_branch = merge_branch
-            @body = body
-            @title = title
-            @diff = diff
-            @openapi_diff = openapi_diff
-          end
-        end
-
-        def user_stripe_suffix?<<constant:<todo sym>>>()
-          @repo.start_with?("stripe-internal/").!()
-        end
-      end
-
-      class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<todo sym>)
-        <emptyTree>::<constant:TOTAL_TIME_MS> = 10000
-
-        <emptyTree>::<constant:PER_RULE_MS> = 2000
-
-        def initialize<<constant:<todo sym>>>()
-          @start = <emptyTree>::<constant:Time>.now()
-        end
-
-        def check!<<constant:<todo sym>>>()
-          begin
-            dur_ms = begin
-              <emptyTree>::<constant:Time>.now().-(@start)
-            end.*(1000)
-            if dur_ms.>(<emptyTree>::<constant:TOTAL_TIME_MS>)
-              self(<constant:<todo sym>>).raise(<emptyTree>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
-                      <emptyTree>::<constant:TOTAL_TIME_MS>
-                    end.to_s()).concat("ms".to_s()).to_s()))
-            else
-              <emptyTree>
-            end
-          end
-        end
-
-        def time_rule<<constant:<todo sym>>>(rule)
-          begin
-            rule_start = <emptyTree>::<constant:Time>.now()
-            res = yield(<emptyTree>)
-            dur_ms = begin
-              <emptyTree>::<constant:Time>.now().-(rule_start)
-            end.*(1000)
-            if dur_ms.>(<emptyTree>::<constant:PER_RULE_MS>)
-              self(<constant:<todo sym>>).raise(<emptyTree>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
-                      rule.token()
-                    end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
-                      dur_ms.to_i()
-                    end.to_s()).concat("ms budget=".to_s()).concat(begin
-                      <emptyTree>::<constant:PER_RULE_MS>
-                    end.to_s()).concat("ms".to_s()).to_s(), {:"rule_token" => rule.token()}))
-            else
-              <emptyTree>
-            end
-            self(<constant:<todo sym>>).check!()
-            res
-          end
-        end
-      end
-
-      class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<todo sym>)
-        def initialize<<constant:<todo sym>>>(raw_diff)
-          begin
-            @raw = raw_diff
-            @parsed = self(<constant:<todo sym>>).parse(raw_diff)
-          end
-        end
-
-        def affected_files<<constant:<todo sym>>>()
-          self(<constant:<todo sym>>).added_files().+(self(<constant:<todo sym>>).deleted_files()).+(self(<constant:<todo sym>>).changed_files())
-        end
-
-        def added_files<<constant:<todo sym>>>()
-          @parsed.select() do |part|
-            part.[](:"a_name").==("/dev/null")
-          end.map() do |part|
-            part.[](:"b_name")
-          end
-        end
-
-        def deleted_files<<constant:<todo sym>>>()
-          @parsed.select() do |part|
-            part.[](:"b_name").==("/dev/null")
-          end.map() do |part|
-            part.[](:"a_name")
-          end
-        end
-
-        def changed_files<<constant:<todo sym>>>()
-          @parsed.select() do |part|
-            part.[](:"a_name").==(part.[](:"b_name"))
-          end.map() do |part|
-            part.[](:"b_name")
-          end
-        end
-
-        def added_lines<<constant:<todo sym>>>()
-          @parsed.map() do |part|
-            part.[](:"added_lines")
-          end.flatten()
-        end
-
-        def removed_lines<<constant:<todo sym>>>()
-          @parsed.map() do |part|
-            part.[](:"removed_lines")
-          end.flatten()
-        end
-
-        def changed_lines<<constant:<todo sym>>>()
-          self(<constant:<todo sym>>).added_lines().+(self(<constant:<todo sym>>).removed_lines())
-        end
-
-        def changed_openapi?<<constant:<todo sym>>>()
-          self(<constant:<todo sym>>).changed_files().include?(<emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
-        end
-
-        self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
+      def match<<constant:<todo sym>>>(match_context)
+        begin
+          if match_context.diff().affected_files().count().>(<emptyTree>::<constant:MAX_AFFECTED_FILES>)
             begin
-              parts = diff.split(::Regexp.new("^diff [^\n]*\n", 0.|(4))).[](<emptyTree>::<constant:Range>.new(1, -1))
-              if parts
-                parts
-              else
-                parts = []
-              end
-              parts = <emptyTree>::<constant:T>.cast(parts, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
-              parts.map() do |part|
-                begin
-                  lines = part.split("
+              self(<constant:<todo sym>>).log().warn("Gerald skipping large PR with ".concat(begin
+                    match_context.diff().affected_files().count()
+                  end.to_s()).concat(" affected files".to_s()).to_s())
+              return []
+            end
+          else
+            <emptyTree>
+          end
+          budget = <emptyTree>::<constant:MatchTimeBudget>.new()
+          @rules.select() do |r|
+            budget.time_rule(r) do ||
+              r.matches?(match_context)
+            end
+          end
+        end
+      end
+    end
+
+    class <emptyTree>::<constant:MatchContext><<constant:<todo sym>>> < (::<todo sym>)
+      self(<constant:<todo sym>>).attr_reader(:"repo")
+
+      self(<constant:<todo sym>>).attr_reader(:"assignee")
+
+      self(<constant:<todo sym>>).attr_reader(:"gh_user")
+
+      self(<constant:<todo sym>>).attr_reader(:"merge_branch")
+
+      self(<constant:<todo sym>>).attr_reader(:"body")
+
+      self(<constant:<todo sym>>).attr_reader(:"title")
+
+      self(<constant:<todo sym>>).attr_reader(:"diff")
+
+      self(<constant:<todo sym>>).attr_reader(:"openapi_diff")
+
+      def initialize<<constant:<todo sym>>>(repo, assignee, gh_user, merge_branch, body, title, diff, openapi_diff)
+        begin
+          @repo = repo
+          @assignee = assignee
+          @gh_user = gh_user
+          @merge_branch = merge_branch
+          @body = body
+          @title = title
+          @diff = diff
+          @openapi_diff = openapi_diff
+        end
+      end
+
+      def user_stripe_suffix?<<constant:<todo sym>>>()
+        @repo.start_with?("stripe-internal/").!()
+      end
+    end
+
+    class <emptyTree>::<constant:MatchTimeBudget><<constant:<todo sym>>> < (::<todo sym>)
+      <emptyTree>::<constant:TOTAL_TIME_MS> = 10000
+
+      <emptyTree>::<constant:PER_RULE_MS> = 2000
+
+      def initialize<<constant:<todo sym>>>()
+        @start = <emptyTree>::<constant:Time>.now()
+      end
+
+      def check!<<constant:<todo sym>>>()
+        begin
+          dur_ms = begin
+            <emptyTree>::<constant:Time>.now().-(@start)
+          end.*(1000)
+          if dur_ms.>(<emptyTree>::<constant:TOTAL_TIME_MS>)
+            self(<constant:<todo sym>>).raise(<emptyTree>::<constant:MatchTimeout>.new("Gerald match time budged exceeded ".concat(begin
+                    <emptyTree>::<constant:TOTAL_TIME_MS>
+                  end.to_s()).concat("ms".to_s()).to_s()))
+          else
+            <emptyTree>
+          end
+        end
+      end
+
+      def time_rule<<constant:<todo sym>>>(rule)
+        begin
+          rule_start = <emptyTree>::<constant:Time>.now()
+          res = yield(<emptyTree>)
+          dur_ms = begin
+            <emptyTree>::<constant:Time>.now().-(rule_start)
+          end.*(1000)
+          if dur_ms.>(<emptyTree>::<constant:PER_RULE_MS>)
+            self(<constant:<todo sym>>).raise(<emptyTree>::<constant:MatchTimeout>.new("Gerald rule '".concat(begin
+                    rule.token()
+                  end.to_s()).concat("' exceeded per-rule time budget actual=".to_s()).concat(begin
+                    dur_ms.to_i()
+                  end.to_s()).concat("ms budget=".to_s()).concat(begin
+                    <emptyTree>::<constant:PER_RULE_MS>
+                  end.to_s()).concat("ms".to_s()).to_s(), {:"rule_token" => rule.token()}))
+          else
+            <emptyTree>
+          end
+          self(<constant:<todo sym>>).check!()
+          res
+        end
+      end
+    end
+
+    class <emptyTree>::<constant:Diff><<constant:<todo sym>>> < (::<todo sym>)
+      def initialize<<constant:<todo sym>>>(raw_diff)
+        begin
+          @raw = raw_diff
+          @parsed = self(<constant:<todo sym>>).parse(raw_diff)
+        end
+      end
+
+      def affected_files<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).added_files().+(self(<constant:<todo sym>>).deleted_files()).+(self(<constant:<todo sym>>).changed_files())
+      end
+
+      def added_files<<constant:<todo sym>>>()
+        @parsed.select() do |part|
+          part.[](:"a_name").==("/dev/null")
+        end.map() do |part|
+          part.[](:"b_name")
+        end
+      end
+
+      def deleted_files<<constant:<todo sym>>>()
+        @parsed.select() do |part|
+          part.[](:"b_name").==("/dev/null")
+        end.map() do |part|
+          part.[](:"a_name")
+        end
+      end
+
+      def changed_files<<constant:<todo sym>>>()
+        @parsed.select() do |part|
+          part.[](:"a_name").==(part.[](:"b_name"))
+        end.map() do |part|
+          part.[](:"b_name")
+        end
+      end
+
+      def added_lines<<constant:<todo sym>>>()
+        @parsed.map() do |part|
+          part.[](:"added_lines")
+        end.flatten()
+      end
+
+      def removed_lines<<constant:<todo sym>>>()
+        @parsed.map() do |part|
+          part.[](:"removed_lines")
+        end.flatten()
+      end
+
+      def changed_lines<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).added_lines().+(self(<constant:<todo sym>>).removed_lines())
+      end
+
+      def changed_openapi?<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).changed_files().include?(<emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Actions>::<constant:OpenAPI>::<constant:SPEC_PATH>)
+      end
+
+      self(<constant:<todo sym>>).private(def parse<<constant:<todo sym>>>(diff)
+          begin
+            parts = diff.split(::Regexp.new("^diff [^\n]*\n", 0.|(4))).[](<emptyTree>::<constant:Range>.new(1, -1))
+            if parts
+              parts
+            else
+              parts = []
+            end
+            parts = <emptyTree>::<constant:T>.cast(parts, <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+            parts.map() do |part|
+              begin
+                lines = part.split("
 ")
-                  a_name = b_name = <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-                  added_lines = []
-                  removed_lines = []
-                  lines.each() do |line|
-                    if line.start_with?("index ", "@@", "new file mode")
-                      next(<emptyTree>)
+                a_name = b_name = <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+                added_lines = []
+                removed_lines = []
+                lines.each() do |line|
+                  if line.start_with?("index ", "@@", "new file mode")
+                    next(<emptyTree>)
+                  else
+                    if line.start_with?("---")
+                      begin
+                        a_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
+                        if if a_name
+                            a_name.start_with?("a/")
+                          else
+                            a_name
+                          end
+                          a_name = a_name.[](<emptyTree>::<constant:Range>.new(2, -1))
+                        else
+                          <emptyTree>
+                        end
+                      end
                     else
-                      if line.start_with?("---")
+                      if line.start_with?("+++")
                         begin
-                          a_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
-                          if if a_name
-                              a_name.start_with?("a/")
+                          b_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
+                          if if b_name
+                              b_name.start_with?("b/")
                             else
-                              a_name
+                              b_name
                             end
-                            a_name = a_name.[](<emptyTree>::<constant:Range>.new(2, -1))
+                            b_name = b_name.[](<emptyTree>::<constant:Range>.new(2, -1))
                           else
                             <emptyTree>
                           end
                         end
                       else
-                        if line.start_with?("+++")
-                          begin
-                            b_name = line.[](<emptyTree>::<constant:Range>.new(4, -1))
-                            if if b_name
-                                b_name.start_with?("b/")
-                              else
-                                b_name
-                              end
-                              b_name = b_name.[](<emptyTree>::<constant:Range>.new(2, -1))
-                            else
-                              <emptyTree>
-                            end
-                          end
+                        if line.start_with?("+")
+                          added_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
                         else
-                          if line.start_with?("+")
-                            added_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
+                          if line.start_with?("-")
+                            removed_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
                           else
-                            if line.start_with?("-")
-                              removed_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
-                            else
-                              <emptyTree>
-                            end
+                            <emptyTree>
                           end
                         end
                       end
                     end
                   end
-                  if a_name.nil?()
-                    next(<emptyTree>)
-                  else
-                    <emptyTree>
-                  end
-                  {:"a_name" => a_name, :"b_name" => b_name, :"added_lines" => added_lines, :"removed_lines" => removed_lines}
                 end
-              end.compact()
-            end
-          end)
-      end
+                if a_name.nil?()
+                  next(<emptyTree>)
+                else
+                  <emptyTree>
+                end
+                {:"a_name" => a_name, :"b_name" => b_name, :"added_lines" => added_lines, :"removed_lines" => removed_lines}
+              end
+            end.compact()
+          end
+        end)
     end
   end
 end

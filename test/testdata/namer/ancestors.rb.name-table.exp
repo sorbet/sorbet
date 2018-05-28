@@ -9,5 +9,4 @@ class ::<root> < ::Object () @ test/testdata/namer/ancestors.rb:2
   class ::Mixin2 (<constant:BasicObject>) @ test/testdata/namer/ancestors.rb:3
   class ::MultipleInclude < ::Object (<constant:Mixin1>, <constant:Mixin2>) @ test/testdata/namer/ancestors.rb:13
   class ::Parent < ::Object (<constant:Mixin1>) @ test/testdata/namer/ancestors.rb:5
-  method #<static-init> () @ test/testdata/namer/ancestors.rb:2
 

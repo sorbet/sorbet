@@ -50,6 +50,5 @@ class ::<root> < ::Object () @ test/testdata/resolver/sig_good.rb:2
   class ::M1 (<constant:BasicObject>) @ test/testdata/resolver/sig_good.rb:4
   class ::T1 < ::Object () @ test/testdata/resolver/sig_good.rb:2
   class ::T2 < ::Object () @ test/testdata/resolver/sig_good.rb:3
-  method #<static-init> () @ test/testdata/resolver/sig_good.rb:2
   static-field #A1 -> AliasType { symbol = ::T1 } @ test/testdata/resolver/sig_good.rb:5
 

@@ -1,141 +1,147 @@
 class <emptyTree><<constant:<root>>> < ()
-  begin
-    self(<constant:<todo sym>>).require_relative("../../t")
-    module <emptyTree>::<constant:Foo><<constant:<todo sym>>> < ()
-      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
-        <emptyTree>
-      end
+  self(<constant:<todo sym>>).require_relative("../../t")
+
+  module <emptyTree>::<constant:Foo><<constant:<todo sym>>> < ()
+    class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
+      <emptyTree>
     end
-    class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<todo sym>)
-      <emptyTree>::<constant:B> = <emptyTree>::<constant:Foo>::<constant:Struct>.new()
-
-      var = <emptyTree>::<constant:Struct>.new(:"foo")
-    end
-    class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<todo sym>)
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
-        def foo<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def foo=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        def bar<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def bar=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
-
-        def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-          ::T.cast(nil, <emptyTree>::<constant:A>)
-        end
-      end
-    end
-    class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<todo sym>)
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
-        def foo<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def bar<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def foo=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        def bar=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        self(<constant:<todo sym>>).sig({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
-
-        def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-          <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
-        end
-      end
-    end
-    class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<todo sym>)
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
-        def foo<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def foo=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
-
-        def self.new<<constant:<todo sym>>>(foo = nil)
-          ::T.cast(nil, <emptyTree>::<constant:A>)
-        end
-      end
-
-      class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::Struct)
-        def foo<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def foo=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
-
-        def self.new<<constant:<todo sym>>>(foo = nil)
-          ::T.cast(nil, <emptyTree>::<constant:B>)
-        end
-      end
-    end
-    class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<todo sym>)
-      class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
-        <emptyTree>
-      end
-
-      class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
-        def foo<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def foo=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        def bar<<constant:<todo sym>>>()
-          <emptyTree>
-        end
-
-        def bar=<<constant:<todo sym>>>(arg0)
-          arg0
-        end
-
-        self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
-
-        def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-          ::T.cast(nil, <emptyTree>::<constant:A>)
-        end
-      end
-    end
-    class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
-      def main<<constant:<todo sym>>>()
-        begin
-          a = <emptyTree>::<constant:Struct>.new(:"foo")
-          <emptyTree>::<constant:T>.assert_type!(a, <emptyTree>::<constant:Class>)
-          <emptyTree>::<constant:T>.assert_type!(a.new(), <emptyTree>::<constant:Struct>)
-          <emptyTree>::<constant:T>.assert_type!(a.new(2), <emptyTree>::<constant:Struct>)
-          <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStruct>::<constant:A>)
-          <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2), <emptyTree>::<constant:RealStruct>::<constant:A>)
-          <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStructDesugar>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStructDesugar>::<constant:A>)
-        end
-      end
-    end
-    self(<constant:<todo sym>>).puts(<emptyTree>::<constant:Main>.new().main())
   end
+
+  class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<todo sym>)
+    <emptyTree>::<constant:B> = <emptyTree>::<constant:Foo>::<constant:Struct>.new()
+
+    var = <emptyTree>::<constant:Struct>.new(:"foo")
+  end
+
+  class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+      def foo<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      def bar<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def bar=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+
+      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
+        ::T.cast(nil, <emptyTree>::<constant:A>)
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:RealStructDesugar><<constant:<todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (<emptyTree>::<constant:Struct>)
+      def foo<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def bar<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      def bar=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      self(<constant:<todo sym>>).sig({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+
+      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
+        <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+      def foo<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+
+      def self.new<<constant:<todo sym>>>(foo = nil)
+        ::T.cast(nil, <emptyTree>::<constant:A>)
+      end
+    end
+
+    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::Struct)
+      def foo<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
+
+      def self.new<<constant:<todo sym>>>(foo = nil)
+        ::T.cast(nil, <emptyTree>::<constant:B>)
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:AccidentallyStruct><<constant:<todo sym>>> < (::<todo sym>)
+    class <emptyTree>::<constant:Struct><<constant:<todo sym>>> < (::<todo sym>)
+      <emptyTree>
+    end
+
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+      def foo<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      def bar<<constant:<todo sym>>>()
+        <emptyTree>
+      end
+
+      def bar=<<constant:<todo sym>>>(arg0)
+        arg0
+      end
+
+      self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+
+      def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
+        ::T.cast(nil, <emptyTree>::<constant:A>)
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:Main><<constant:<todo sym>>> < (::<todo sym>)
+    def main<<constant:<todo sym>>>()
+      begin
+        a = <emptyTree>::<constant:Struct>.new(:"foo")
+        <emptyTree>::<constant:T>.assert_type!(a, <emptyTree>::<constant:Class>)
+        <emptyTree>::<constant:T>.assert_type!(a.new(), <emptyTree>::<constant:Struct>)
+        <emptyTree>::<constant:T>.assert_type!(a.new(2), <emptyTree>::<constant:Struct>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStruct>::<constant:A>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStruct>::<constant:A>.new(2), <emptyTree>::<constant:RealStruct>::<constant:A>)
+        <emptyTree>::<constant:T>.assert_type!(<emptyTree>::<constant:RealStructDesugar>::<constant:A>.new(2, 3), <emptyTree>::<constant:RealStructDesugar>::<constant:A>)
+      end
+    end
+  end
+
+  self(<constant:<todo sym>>).puts(<emptyTree>::<constant:Main>.new().main())
 end
