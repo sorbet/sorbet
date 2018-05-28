@@ -1,6 +1,9 @@
 # Introductions
 
 Note:
+- dmitry: PhD Type theory @ , Scala Dotty Compiler
+- nelhage: MIT grad, One of the longest tenured engineers at Stripe
+- pt: Stanford grad, Previously at Facebook on HHVM and Hack
 
 pt starts talking here
 
@@ -13,9 +16,14 @@ pt starts talking here
 ## Ruby at Stripe
 
 - Ruby is the primary programming language
+    - No Rails
+    - Strict subset of Ruby (thanks @bbatsov for Rubocop)
 - Most product code is in a monorepo (intentionally!)
 - ~10 macroservices with a few microservices
 - New code mostly goes into an existing service
+
+Note:
+- Background so you can understand the Ruby we are workig with
 
 ---
 
@@ -46,17 +54,31 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 - Unreleased GitHub experiment
 - Presentation tomorrow by @soutaro
 
+Note:
+- RDL from Jeff Foster and his group at the Maryland goes by many names.
+
 ---
 
 ## Open Source?
 
-- Yes! Eventually
-- Prove it out internally first
-- Have questions? Reach us at **sorbet@stripe.com**
+- Yes! Eventually <!-- .element: class="fragment" data-fragment-index="1" -->
+- Prove it out internally first <!-- .element: class="fragment" data-fragment-index="1" -->
+- Sneak peak: <!-- .element: class="fragment" data-fragment-index="2" --> http://sorbet.run <!-- .element: class="fragment" data-fragment-index="2" -->
+- Have questions? Reach us at <!-- .element: class="fragment" data-fragment-index="2" --> **sorbet@stripe.com** <!-- .element: class="fragment" data-fragment-index="2" -->
 
 Note:
 
-hand off to nelhage after this slide
+- Yes, we very much would like to open source this. We're announcing today to
+gather feedback on the approach and find folks who are interested in
+collaborating. After we deploy it at Stripe and work out the kinks we will open
+source it for everyone else to try.
+
+- But wait, this isn't just a vaporware announcement :) Thanks to the fabulous
+emscripten, we have a browser demo. Try out sorbet.run . (Click link and then
+navigate back).
+
+And with that breif teaser, let me hand off to nelhage to dive into our type
+system.
 
 ---
 
@@ -434,24 +456,52 @@ Hand off to pt after this slide
 - Focusing on internal deployment for now
 - Will post on stripe.com/blog
 
+Note:
+
+Try out the browser demo. The core typechecker is done, most of the work for us
+is around how to roll it out to a big codebase. How do you deal with
+metaprogramming, or unannotated gems, or editor integrations. Please play with
+it and give us feedback.
+
+Keep an eye on the Stripe blog, we'll announce it there.
+
 ---
 
 ## Using it
 
+- Play with http://sorbet.run
+- Interested in your use cases
+- Will let you know when it's ready for beta
+- sorbet@stripe.com
 
-- Please reach out, even before we open source <!-- .element: class="fragment" data-fragment-index="1" -->
-- Interested in your use cases <!-- .element: class="fragment" data-fragment-index="1" -->
-- Will let you know when it's ready for beta <!-- .element: class="fragment" data-fragment-index="1" -->
-- sorbet@stripe.com <!-- .element: class="fragment" data-fragment-index="1" -->
+Note:
+
+
 
 ---
 
 ## Building it
 
-- There are multiple parties working to add types to Ruby <!-- .element: class="fragment" data-fragment-index="1" -->
-- We'd love to chat and share <!-- .element: class="fragment" data-fragment-index="1" -->
-- sorbet@stripe.com <!-- .element: class="fragment" data-fragment-index="1" -->
+- There are multiple parties working to add types to Ruby
+- We'd love to chat and share
+- sorbet@stripe.com
+
+Note:
+
+Let me implore you, if you are working on typechecking Ruby or scaling Ruby we
+would love to chat. Please email us or find us somehow. We've put a lot of
+effort into this space. I've been leading the dev productivity team for 2.5
+years now and we've focussed largely on how to scale our Ruby for the needs of
+Stripe, so we have some tools to share. Check out Andrews great talk about our
+autoloader we built last year. Having said that, we also really want to use your
+tools and systems too! 
 
 ---
 
 # Thank you!
+
+Note: 
+
+With that, thank you so much for listening to us, thank you to the conference
+organizers for letting us speak here today. I hope we can share our typechecker
+with you soon and would love to hear your feedback.
