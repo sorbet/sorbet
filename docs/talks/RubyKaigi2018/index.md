@@ -353,6 +353,16 @@ end
 int_box = Box[Integer].new
 ```
 
+Note:
+
+ Our typesystem also has minimal number of features to model Ruby code.
+ One of such features is generics.
+ In this example, we model a box that can store an element of a specific type.
+ Box declaration does not know what it will store.
+ I will be specified by use site.
+
+ The most common use of this is to model various containers: arrays, sets, hashes
+
 ---
 ## Declaration: Generic methods
 
@@ -369,6 +379,11 @@ class Array
 end
 ```
 
+Note:
+
+  We can also model methods with complex signatures such as Array map
+  that require generic methods.
+
 ---
 # Practical experience
 
@@ -376,26 +391,116 @@ end
 
 ## Organic penetration
 
-TODO: stats
-
-- number of human-authored signatures: 3k
+- number of human-authored signatures: 3k over last 2 months internal alpha mode
 - number of generated signatures: 240k
 
 ---
 
-## Percent of type-able files and sites
+# Bugs found in production code
 
 ---
 
-## Bugs found in production code
+## `nil` checks
 
-- `nil` checks
-- errors in dead code
-- error-handling
-- incorrect declarations
-- ???
+```ruby
+-  endpoint = getEndpoint(user_provided_endpoint_id)
++  maybe_endpoint = getEndpoint(user_provided_endpoint_id)
++
++  if maybe_endpoint.nil?
++    raise UserError.new(:webhook_endpoint_not_found)
++  end
++  endpoint = maybe_endpoint
+```
 
 ---
+
+## Incorrect syntax use(simplified)
+```
+    case var
+        ...
+ -      when Case1 || Case2
+ +      when Case1 , Case2
+        ...
+    end
+```
+
+---
+
+## Incorrect declarations(simplified)
+```
+    class Super
+      # @return [String]
+      def id
+        raise NotImplementedError.new("id wasn't implemented");
+      end
+    end
+
+    class Child
+      def id
+ -      :my_id
+ +      "my_id"
+      end
+    end
+```
+
+---
+
+## Errors in error handling
+
+ ```ruby
+     begin
+       data = JSON.parse(File.read(path))
+ -   rescue JSON::ParseError => e
+ +   rescue JSON::ParserError => e
+       raise "#{PACKAGE_REL_PATH} contains invalid JSON: #{e}"
+     end
+ ```
+
+---
+
+## Errors in error handling
+
+```ruby
+   if look_ahead_days < 1 || look_ahead_days > 30
+-    raise ArgumentError('look_ahead_days must be between 1 and 30, inclusive')
++    raise ArgumentError.new('look_ahead_days must be between 1 and 30, inclusive')
+   end
+```
+
+---
+
+## Errors in dead code(simplified)
+```ruby
+-   soft_assert_failed(
++   soft_assertion_failed(
+      **args
+    )
+```
+
+---
+
+## Typos(simplified)
+
+```
+simplified/pattern.rb:41: Method to_I does not exist on Integer http://go/e/5002
+    31 |        case "1245".to_I
+                            ^^^^
+ruby-typer/stdlib/integer.rbi:1: Did you mean `to_i`?
+    562|        def to_i
+                ^^^^^^^^
+```
+
+```
+simplified/model/data.rb:41: Unable to resolve constant `Foat` http://go/e/5002
+    41 |        orm_entry :data, Foat
+                                 ^^^^
+ruby-typer/stdlib/float.rbi:1: Did you mean: `::Float`?
+     1 |class Float
+        ^^^^^^^^^^^
+```
+
+---
+
 ## User response
 
 > “DeveloperHappiness” would be a good name for ruby-typer
