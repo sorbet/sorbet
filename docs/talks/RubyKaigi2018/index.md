@@ -1,7 +1,7 @@
 # Introductions
 
 Note:
-- dmitry: PhD Type theory @ , Scala Dotty Compiler
+- dmitry: PhD Compiler architecture & a bit of type theory @ next major version of Scala Compiler(3.0)
 - nelhage: MIT grad, One of the longest tenured engineers at Stripe
 - pt: Stanford grad, Previously at Facebook on HHVM and Hack
 
