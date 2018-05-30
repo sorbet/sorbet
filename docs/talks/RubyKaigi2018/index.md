@@ -419,13 +419,19 @@ Note:
 ---
 # Practical experience
 
+Note:
+
+Throwback to the title of our talk -- "a practical typechecker for
+Ruby" -- and I want to link this to our experience at Stripe
+
 ---
 
 ## Internal rollout
 
+- Working on this since last year
 - Runtime types have been deployed for 6 months
 - Static checker in internal beta
- - CI job that does not block merges
+ - engineers can opt in
 - Command-line tool
 
 ---
@@ -438,7 +444,15 @@ Note:
 
 ---
 
-# Bugs found in existing code
+# Some bugs we found
+
+Note:
+
+These are some bugs we found in the process of rolling out the
+typechecker, that slipped through CI and code review. Fortunately our
+test coverage and processes are pretty good so none of these were
+critical, but they are pretty informative of the experience of using
+the tool and the kinds of issues we can catch.
 
 ---
 
@@ -514,7 +528,8 @@ end
 ---
 
 ## Instance variables from `self.`
-```
+```ruby
+# typed: strict
 class ChargeCreator
   def initialize
     @request = …
@@ -540,7 +555,7 @@ variable was set and then attempted to be accessed from the wrong
 scope.
 
 ---
-## Incorrect `case` usage
+## Incorrect pattern matching
 
 ```ruby
   case transaction
@@ -557,22 +572,26 @@ case.rb:12: This code is unreachable
                                ^^^^^^^^^^^^^^
 ```
 
+Note:
+
+Do a careful walk through
+
 ---
 
 
 ## User response
+
+> Nice!! Beautiful errors and damn that was fast!!
+> <!-- .element: class="smallquote"  -->
+
+<span> </span>
 
 > “DeveloperHappiness” would be a good name for ruby-typer
 > <!-- .element: class="smallquote"  -->
 
 <span> </span>
 
-> nice!! beautiful errors and damn that was fast!!
-> <!-- .element: class="smallquote"  -->
-
-<span> </span>
-
-> I'm trying to use it locally, it's been super helpful to catch bugs in my own code
+> I'm trying to use it locally, it's been super helpful to catch bugs in my own code.
 > <!-- .element: class="smallquote"  -->
 
 <span> </span>
@@ -589,12 +608,23 @@ case.rb:12: This code is unreachable
 100k lines/second/cpu core
 
 
-Note:
+| Tool | Speed (lines/s/core) |
+|------|-------:|
+| `sorbet`  | 100,000 |
+| `javac`   | 10,000  |
+| `rubocop` | 1,000   |
+<!-- .element: class="fragment"  -->
 
-This is fast enough to typecheck our entire codebase in less than 10
-seconds on a single machine. By comparison, our test suite takes
-around 10 minutes, parallelized between tens of machines in
-production.
+---
+
+## Versus CI
+
+Speed at Stripe
+
+| Tool | Speed | Parallel Machines |
+|------|-------|-------------------|
+| Sorbet | seconds | 1 |
+| CI | 10 minutes | tens |
 
 ---
 
