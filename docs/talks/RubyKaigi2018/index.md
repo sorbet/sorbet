@@ -77,7 +77,7 @@ source it for everyone else to try.
 emscripten, we have a browser demo. Try out sorbet.run . (Click link and then
 navigate back).
 
-And with that breif teaser, let me hand off to nelhage to dive into our type
+And with that brief teaser, let me hand off to Dmitry to dive into our type
 system.
 
 ---
@@ -243,15 +243,14 @@ Method `succ` does not exist on `Array` component of
 ```ruby
 extend T::Helpers
 ...
-
 sig(
     # Both positional and named parameters are referred to by name.
     # You must declare all parameters (and the return value below).
-    foobar: <Type>,
-    widget: <Type>
+    amount: Integer,
+    currency: String,
 )
-.returns(<Type>)
-def foo(foobar, widget: nil)
+.returns(Stripe::Charge)
+def create_charge(amount, currency)
     ...
 end
 ```
@@ -261,14 +260,18 @@ end
 ## Declaration: Runtime Typesystem
 
 ```ruby
-sig.returns(String)
-def foo
-    :foo
+sig(amount: Integer, currency: String)
+.returns(Stripe::Charge)
+def create_charge(amount, currency)
+    ...
 end
+
+create_charge(10_000, :jpy)
 ```
 
 ```console
-Return value: Expected type String, got type Symbol
+#<TypeError: Parameter currency:
+  Expected type String, got type Symbol>
 ```
 
 Note: We built this first and it works independently of the static typechecker
@@ -305,33 +308,6 @@ end
 Note:
 
 tbd? explain not structural?
-
----
-
-## Declaration: non-nullable types
-
-
-```ruby
-T::Array[String].new[0] # This is T.nilable(String)
-```
-
-<hr/>
-
-```ruby
-sig(id: Integer).returns(T.nilable(MyORM))
-def load(id); ... ; end
-
-load(123).name
-```
-
-```console
-Method `name` does not exist on `NilClass`
-component of `T.nilable(MyORM)`
-```
-
-Note:
-
-dmitry takes over after this slide
 
 ---
 ## Declaration: Generic classes
@@ -527,7 +503,7 @@ ruby-typer/stdlib/float.rbi:1: Did you mean: `::Float`?
 
 ## Speed of our typer
 
-175k lines/second/cpu core
+100k lines/second/cpu core
 
 ---
 
@@ -599,13 +575,13 @@ effort into this space. I've been leading the dev productivity team for 2.5
 years now and we've focussed largely on how to scale our Ruby for the needs of
 Stripe, so we have some tools to share. Check out Andrews great talk about our
 autoloader we built last year. Having said that, we also really want to use your
-tools and systems too! 
+tools and systems too!
 
 ---
 
 # Thank you!
 
-Note: 
+Note:
 
 With that, thank you so much for listening to us, thank you to the conference
 organizers for letting us speak here today. I hope we can share our typechecker
