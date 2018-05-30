@@ -11,6 +11,10 @@ pt starts talking here
 
 # Background
 
+Note:
+
+Don't say anything
+
 ---
 
 ## Stripe
@@ -18,22 +22,32 @@ pt starts talking here
 - Platform that developers use to accept payments
 - 25 countries, 100,000 business worldwide
 - 60% of people in US have used it in the last year
-- If you'd like to take money, look at us
+- If you're running an internet business, check us out
 - Have a Tokyo office
   - Many in the audience
   - Come chat!
   - <a href="http://stripe.com/jobs">stripe.com/jobs</a>
 
+Note:
+
+* currently 25 countries (including Japan)
+
 ---
 
 ## Developer productivity
 
-- Large dedicated team
+Large dedicated team
 - Testing
 - Code
 - Dev Env
 - Abstractions
 - Language Tools
+- Etc.
+
+Note:
+
+- Context
+- Not overhead
 
 ---
 
@@ -41,10 +55,15 @@ pt starts talking here
 
 - Ruby is the primary programming language
     - No Rails
-    - Strict subset of Ruby (thanks @bbatsov for Rubocop)
+    - Enforced subset of Ruby (thanks @bbatsov for Rubocop)
 - Most product code is in a monorepo (intentionally!)
 - ~10 macroservices with a few microservices
 - New code mostly goes into an existing service
+
+Note: 
+
+- Millions of lines of Ruby
+- Bozhidar Batsov
 
 ---
 
@@ -62,19 +81,20 @@ Hundreds of engineers
 
 Thousands of commits per day
 
-Note: lines&files taken from https://hackpad.corp.stripe.com/Code-Metrics-R6KrBcukuSG
-engineers taken from https://docs.google.com/spreadsheets/d/1m4EeSEQHBVsSjRuSj4SH7vvXbOMWKsCHUpmuIWQupFI/edit#gid=173620479 ,
-commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/ab68760e/table
+Note: 
+
+- Top languages
+- Most product engineers use Ruby.
+- Next language is 2% - bash
 
 ---
 
 ## Other ruby typing
 
-- DRuby PRuby RubyDust RTC
-- github.com/plum-umd/rdl
-- Unreleased GitHub experiment
+- DRuby / PRuby / RubyDust / RTC / RDL by Jeff Foster
+- Unreleased GitHub experiment by @charliesom
 - Presentations tomorrow by @soutaro and @mametter
-- Contracts from JetBrains
+- Contracts from JetBrains by @valich
 
 Note:
 - Diamondback Ruby
@@ -95,9 +115,9 @@ Note:
 
 - Yes, we very much would like to open source this. 
 - today gather feedback and find folks who are interested in collaborating. 
-- After we deploy it at Stripe and work out the kinks we will open source.
-- But wait, this isn't just a vaporware announcement :) Thanks to the fabulous
-emscripten, we have a browser demo.
+- I hate throwing code over the wall. Instead we want to release when we can
+dedicate the time to helping the community use it.
+- But wait, this isn't just a vaporware announcement :) We have a browser demo.
 
 Now open: https://sorbet.run/#%221%22%20%2B%202
 
@@ -656,8 +676,9 @@ Hand off to pt after this slide
 
 - Sneak peak: <a href="https://sorbet.run">https://sorbet.run</a>
 - Will open source, timeline TBD
-- Focusing on internal deployment for now
+- When released we will support it
 - Will post on stripe.com/blog
+- sorbet@stripe.com
 
 Note:
 
@@ -671,12 +692,18 @@ Note:
 ## Using it
 
 - Interested in your use cases
+- Large orgs scaling with Ruby
 - Will let you know when it's ready for beta
 - <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
-- So if you are a user of this, please send us your use case
+- Interested in your use cases
+- Two classes particularly interested in
+- Our dev productivity team existed for 2.5 years now and we've focussed largely on how to scale our Ruby for the needs of
+Stripe, so we have some tools to share. 
+- We've put a lot of effort into this space. 
+- Having said that, we also really want to use your tools and systems too!
 
 ---
 
@@ -690,21 +717,29 @@ Note:
 
 - if you are working on typechecking Ruby or scaling Ruby we would love to chat. 
 - Please email us or find us somehow. 
-- We've put a lot of effort into this space. 
-- Our dev productivity team existed for 2.5 years now and we've focussed largely on how to scale our Ruby for the needs of
-Stripe, so we have some tools to share. 
-- Check out Andrews great talk about our autoloader we built last year. 
-- Having said that, we also really want to use your tools and systems too!
+
+---
+
+## Take away
+
+- We have a typechecker
+- Fast, built thoughtfully 
+- Useful, not burdensome
+- Will open source
+- Reach out to us
+- sorbet@stripe.com
 
 ---
 
 # Thank you!
 
+<img class="logo" src="img/logo.png"></img>
+
 <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
-- With that, thank you so much for listening to us, 
 - Thank you to the conference organizers for letting us speak here today. 
-- I hope we can share our typechecker with you soon and would love to hear your feedback.
+- Thanks Ruby for the great language that we all build on.
+- With that, thank you so much for listening to us and taking that.
 - Arigatou gozaimasu
