@@ -22,7 +22,7 @@ pt starts talking here
 - Have a Tokyo office
   - Many in the audience
   - Come chat!
-  - stripe.com/jobs
+  - <a href="http://stripe.com/jobs">stripe.com/jobs</a>
 
 ---
 
@@ -89,7 +89,7 @@ Note:
 
 - Yes! Eventually
 - Prove it out internally first
-- Have questions? Reach us at **sorbet@stripe.com**
+- Have questions? Reach us at <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
@@ -119,8 +119,9 @@ system.
 ## Type System Design Principles
 
 - Explicit
-- Compatible with Ruby
+- Feel useful, not burdensome
 - As simple as possible, but powerful enough
+- Compatible with Ruby
 - Scales
 
 Note:
@@ -131,6 +132,22 @@ Note:
   beneficial; They make code more readable and predictable. We're here
   to help readers as much as writers.
 
+- Feel useful, not burdensome
+
+  While it is explicit, we are putting effort into making it concise.
+  This shows in multiple ways:
+   - error messages should be clear
+   - verbosity should be compensated with more safety
+
+- As simple as possible, but powerful enough
+
+  Overall, we are not strong believers in super-complex type
+  systems. They have their place, and we need a fair amount of
+  expressive power to model (enough) real Ruby code, but all else
+  being equal we want to be simpler. We believe that such a system
+  scales better, and -- most importantly -- is easiest for users to
+  learn+understand.
+
 - Compatible with Ruby
 
   In particular, we don't want new syntax. Existing Ruby syntax means
@@ -138,14 +155,6 @@ Note:
   the whole point here is to improve an existing Ruby codebase, so we
   should be able to adopt it incrementally.
 
-- As simple as possible, but powerful enough
-
-  Overall, we are not strong believers in super-complex type
-  systems. They have their place, and we need a fair emount of
-  expressive power to model (enough) real Ruby code, but all else
-  being equal we want to be simpler. We believe that such a system
-  scales better, and -- most importantly -- is easiest for users to
-  learn+understand.
 
 - Scales
 
@@ -157,6 +166,10 @@ Note:
 
 # Demo (usage)
 
+Note:
+  One of the most areas where those principles can be seen is error messages.
+  The following slides show several examples of them.
+
 ---
 
 ## Usage: Calls into stdlib
@@ -166,7 +179,7 @@ Note:
 ([1, 2].count + 3).next
 ```
 
-<hr/>
+<br/>
 
 ```ruby
 "str" + :sym
@@ -200,7 +213,7 @@ return true if foo.nil?
 return foo.empty?
 ```
 
-<hr/>
+<br/>
 
 ```ruby
 foo = array_of_strings[0]
@@ -227,7 +240,7 @@ end
 # foo is an Integer
 ```
 
-<hr/>
+<br/>
 
 ```ruby
 if Random.rand
@@ -242,28 +255,35 @@ This code is unreachable
      6 |    foo = 2
                   ^
 ```
+<div/>
+
+Note:
+
+  - We see that foo is assinged on both cases in first example
+  - second example has a bug that could have been made by a C person.
+
 
 ---
 
 ## Usage: union types
 
 ```ruby
-foo = ["1", 2]
-hash = foo.map(&:succ) # Shared methods work
+str_or_int = ["1", 2].sample
+hash = str_or_int.succ
 ```
 
-<hr/>
+<br/>
 
 ```ruby
-foo = ["1", 2, [3]]
-hash = foo.map(&:succ)
+str_or_int_or_array = ["1", 2, [3]].sample
+hash = str_or_int_or_array.succ
 ```
 
 ```console
 Method `succ` does not exist on `Array` component of
 `T.any(String, Integer, T::Array[Integer])`
-     4 |hash = foo.map(&:succ)
-                        ^^^^^
+     4 |hash = str_or_int_or_array.succ
+                                  ^^^^^
 ```
 
 ---
@@ -289,6 +309,10 @@ def create_charge(amount, currency)
 end
 ```
 
+Note:
+ here you can see the syntax used to declare types of arguments of the method.
+ This syntax is a ruby dsl. As you can see (~read the slide)
+
 ---
 
 ## Declaration: Runtime Typesystem
@@ -308,7 +332,14 @@ create_charge(10_000, :jpy)
   Expected type String, got type Symbol>
 ```
 
-Note: We built this first and it works independently of the static typechecker
+Note:
+  Even before we've started building a static typechecker,
+  we have built a dynamic one.
+  This dynamic one uses data provided via same dsl
+  to perform runtime type checks in production.
+  If they fail, it raises an error that will include a complete
+  stacktrace as well as data that violated the type constraint.
+
 
 ---
 
@@ -322,26 +353,15 @@ def foo
 end
 ```
 
----
-
-## Declaration: Interfaces
-
-
-```ruby
-module Fooable
-  sig.abstract; def foo; end
-end
-
-class MyFooable
-  include Fooable
-
-  def foo; ...; end
-end
-```
-
 Note:
+ some people think that typesystems can be too verbose.
+ We agree. This is why we want our to be concise.
+ In particular here you don't need to specify type of variable a,
+ we can infer that it is integer.
 
-tbd? explain not structural?
+ If you do want to declare a type of variable, we you can do so with T.let.
+ In this example, you re-assign a to a string and you explicitly daclare
+ that you wanted a to become a string.
 
 ---
 ## Declaration: Generic classes
@@ -384,7 +404,6 @@ class Array
       blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
   .returns(T::Array[T.type_parameter(:U)])
-  sig.returns(T::Array[Elem])
   def map(&blk); end
 end
 ```
@@ -392,7 +411,10 @@ end
 Note:
 
   We can also model methods with complex signatures such as Array map
-  that require generic methods.
+  that require generic methods. They are somewhat verbose,
+  but they are very descriptive and express the usecase well.
+
+  Hand of to Nelson
 
 ---
 # Practical experience
@@ -602,7 +624,7 @@ Hand off to pt after this slide
 
 ## Open source
 
-- Sneak peak: https://sorbet.run
+- Sneak peak: <a href="https://sorbet.run">https://sorbet.run</a>
 - Will open source, timeline TBD
 - Focusing on internal deployment for now
 - Will post on stripe.com/blog
@@ -620,7 +642,7 @@ Note:
 
 - Interested in your use cases
 - Will let you know when it's ready for beta
-- sorbet@stripe.com
+- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
@@ -632,7 +654,7 @@ Note:
 
 - There are multiple parties working to add types to Ruby
 - We'd love to chat and share
-- sorbet@stripe.com
+- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
@@ -648,7 +670,7 @@ Stripe, so we have some tools to share.
 
 # Thank you!
 
-sorbet@stripe.com
+<a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
