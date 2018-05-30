@@ -399,72 +399,45 @@ Note:
 
 ---
 
-## Organic penetration
+## Internal rollout
 
-- number of human-authored signatures: 3k over last 2 months internal alpha mode
-- number of generated signatures: 240k
-
----
-
-# Bugs found in production code
+- Runtime types have been deployed for 6 months
+- Static checker in internal beta
+ - CI job that does not block merges
+- Command-line tool
 
 ---
 
-## `nil` checks
+## Early adoption
+
+- Human-authored signatures: 3k
+- Files annotated by users: 150+
+- Generated signatures: 240k
+
+---
+
+# Bugs found in existing code
+
+---
+
+## Typos in error handling
 
 ```ruby
--  endpoint = getEndpoint(user_provided_endpoint_id)
-+  maybe_endpoint = getEndpoint(user_provided_endpoint_id)
-+
-+  if maybe_endpoint.nil?
-+    raise UserError.new(:webhook_endpoint_not_found)
-+  end
-+  endpoint = maybe_endpoint
-```
-
----
-
-## Incorrect syntax use(simplified)
-```
-    case var
-        ...
- -      when Case1 || Case2
- +      when Case1 , Case2
-        ...
+    begin
+      data = JSON.parse(File.read(path))
+    rescue JSON::ParseError => e
+      raise "#{PACKAGE_REL_PATH} contains invalid JSON: #{e}"
     end
 ```
 
----
-
-## Incorrect declarations(simplified)
+```console
+json.rb:6: Unable to resolve constant ParseError
+    6 |  rescue JSON::ParseError => e
+                ^^^^^^^^^^^^^^^^
+   shims/gems/json.rbi:319: Did you mean: ::JSON::ParserError?
+    319 |class JSON::ParserError < JSON::JSONError
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 ```
-    class Super
-      # @return [String]
-      def id
-        raise NotImplementedError.new("id wasn't implemented");
-      end
-    end
-
-    class Child
-      def id
- -      :my_id
- +      "my_id"
-      end
-    end
-```
-
----
-
-## Errors in error handling
-
- ```ruby
-     begin
-       data = JSON.parse(File.read(path))
- -   rescue JSON::ParseError => e
- +   rescue JSON::ParserError => e
-       raise "#{PACKAGE_REL_PATH} contains invalid JSON: #{e}"
-     end
- ```
 
 ---
 
@@ -472,44 +445,98 @@ Note:
 
 ```ruby
    if look_ahead_days < 1 || look_ahead_days > 30
--    raise ArgumentError('look_ahead_days must be between 1 and 30, inclusive')
-+    raise ArgumentError.new('look_ahead_days must be between 1 and 30, inclusive')
+     raise ArgumentError('look_ahead_days must be between […]')
    end
 ```
 
+```console
+argumenterror.rb:9: Method ArgumentError does not exist on […]
+```
+
 ---
 
-## Errors in dead code(simplified)
+## `nil` checks
+
 ```ruby
--   soft_assert_failed(
-+   soft_assertion_failed(
-      **args
-    )
+app.post '/v1/webhook/:id/update' do
+  endpoint = WebhookEndpoint.load(params[:id])
+  update_webhook(endpoint, params)
+end
+```
+
+```console
+webhook.rb:16: Expression passed as an argument `endpoint`
+    to method `update_webhook` does not match expected type
+  16 |    update_webhook(webhook, params)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+webhook.rb:10: Method update_webhook has specified type
+    of argument endpoint as WebhookEndpoint
+  Got T.nilable(WebhookEndpoint)
 ```
 
 ---
 
-## Typos(simplified)
+## `nil` checks (fixed)
 
-```
-simplified/pattern.rb:41: Method to_I does not exist on Integer http://go/e/5002
-    31 |        case "1245".to_I
-                            ^^^^
-ruby-typer/stdlib/integer.rbi:1: Did you mean `to_i`?
-    562|        def to_i
-                ^^^^^^^^
-```
-
-```
-simplified/model/data.rb:41: Unable to resolve constant `Foat` http://go/e/5002
-    41 |        orm_entry :data, Foat
-                                 ^^^^
-ruby-typer/stdlib/float.rbi:1: Did you mean: `::Float`?
-     1 |class Float
-        ^^^^^^^^^^^
+```ruby
+app.post '/v1/webhook/:id/update' do
+  endpoint = WebhookEndpoint.load(params[:id])
+  if endpoint.nil?
+    raise UserError.new(:webhook_endpoint_not_found)
+  end
+  update_webhook(endpoint, params)
+end
 ```
 
 ---
+
+## Instance variables from `self.`
+```
+class ChargeCreator
+  def initialize
+    @request = …
+  end
+
+  def self.log_results
+    log.info("charge created request_id=#{@request&.trace_id}")
+  end
+end
+```
+
+```console
+charge.rb:9: Use of undeclared variable @request
+     9 |    log.info("charge created request_id=#{@request&.trace_id}")
+                                                  ^^^^^^^^
+```
+
+Note:
+
+Files can opt-in to require declaring instance and class
+variables. Here we found a bug in existing code where an instance
+variable was set and then attempted to be accessed from the wrong
+scope.
+
+---
+## Incorrect `case` usage
+
+```ruby
+  case transaction
+      ...
+      when Stripe::Charge || Stripe::Refund
+      ...
+  end
+```
+
+
+```console
+case.rb:12: This code is unreachable
+    12 |when Stripe::Refund || Stripe::Charge
+                               ^^^^^^^^^^^^^^
+```
+
+---
+
 
 ## User response
 
@@ -538,6 +565,14 @@ ruby-typer/stdlib/float.rbi:1: Did you mean: `::Float`?
 ## Speed of our typer
 
 100k lines/second/cpu core
+
+
+Note:
+
+This is fast enough to typecheck our entire codebase in less than 10
+seconds on a single machine. By comparison, our test suite takes
+around 10 minutes, parallelized between tens of machines in
+production.
 
 ---
 
