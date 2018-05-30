@@ -15,8 +15,8 @@ pt starts talking here
 
 ## Stripe
 
-- Payments processor++
-- 23 countries, 100,000 business worldwide
+- Platform that developers use to accept payments
+- 25 countries, 100,000 business worldwide
 - 60% of people in US have used it in the last year
 - If you'd like to take money, look at us
 - Have a Tokyo office
@@ -70,13 +70,18 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ## Other ruby typing
 
-- Diamondback Ruby
+- DRuby PRuby RubyDust RTC
 - github.com/plum-umd/rdl
 - Unreleased GitHub experiment
-- Presentation tomorrow by @soutaro
+- Presentations tomorrow by @soutaro and @mametter
+- Contracts from JetBrains
 
 Note:
-- RDL from Jeff Foster and his group at the Maryland goes by many names.
+- Diamondback Ruby
+- RDL Jeff Foster Maryland
+- Charlie Somerville at Github
+- Soutaro Matsumoto
+- Valentin Fondaratov
 
 ---
 
@@ -88,26 +93,26 @@ Note:
 
 Note:
 
-- Yes, we very much would like to open source this. We're announcing today to
-gather feedback on the approach and find folks who are interested in
-collaborating. After we deploy it at Stripe and work out the kinks we will open
-source it for everyone else to try.
-
+- Yes, we very much would like to open source this. 
+- today gather feedback and find folks who are interested in collaborating. 
+- After we deploy it at Stripe and work out the kinks we will open source.
 - But wait, this isn't just a vaporware announcement :) Thanks to the fabulous
 emscripten, we have a browser demo.
 
-And with that brief teaser, let me hand off to Dmitry to dive into our type
-system.
-
-https://sorbet.run/#%221%22%20%2B%202
+Now open: https://sorbet.run/#%221%22%20%2B%202
 
 ---
 
 ## Try it &#8681;
 
-http://sorbet.run
+https://sorbet.run
 
-<img src="img/QR_sorbet_run.png"></img>
+<img style="height: 500px" src="img/QR_sorbet_run.png"></img>
+
+Note:
+
+And with that brief teaser, let me hand off to Dmitry to dive into our type
+system.
 
 ---
 
@@ -562,19 +567,17 @@ Hand off to pt after this slide
 
 ## Open source
 
-- Sneak peak: http://sorbet.run
+- Sneak peak: https://sorbet.run
 - Will open source, timeline TBD
 - Focusing on internal deployment for now
 - Will post on stripe.com/blog
 
 Note:
 
-Try out the browser demo. The core typechecker is done, most of the work for us
-is around how to roll it out to a big codebase. How do you deal with
-metaprogramming, or unannotated gems, or editor integrations. Please play with
-it and give us feedback.
-
-Keep an eye on the Stripe blog, we'll announce it there.
+- Try out the browser demo. 
+- core typechecker is done, most of the work for us is around how to roll it out to a big codebase. 
+- How do you deal with metaprogramming, or unannotated gems, or editor integrations. 
+- Please play with it and give us feedback.
 
 ---
 
@@ -586,7 +589,7 @@ Keep an eye on the Stripe blog, we'll announce it there.
 
 Note:
 
-
+- So if you are a user of this, please send us your use case
 
 ---
 
@@ -598,13 +601,13 @@ Note:
 
 Note:
 
-Let me implore you, if you are working on typechecking Ruby or scaling Ruby we
-would love to chat. Please email us or find us somehow. We've put a lot of
-effort into this space. I've been leading the dev productivity team for 2.5
-years now and we've focussed largely on how to scale our Ruby for the needs of
-Stripe, so we have some tools to share. Check out Andrews great talk about our
-autoloader we built last year. Having said that, we also really want to use your
-tools and systems too!
+- if you are working on typechecking Ruby or scaling Ruby we would love to chat. 
+- Please email us or find us somehow. 
+- We've put a lot of effort into this space. 
+- Our dev productivity team existed for 2.5 years now and we've focussed largely on how to scale our Ruby for the needs of
+Stripe, so we have some tools to share. 
+- Check out Andrews great talk about our autoloader we built last year. 
+- Having said that, we also really want to use your tools and systems too!
 
 ---
 
@@ -612,8 +615,9 @@ tools and systems too!
 
 sorbet@stripe.com
 
-Note: 
+Note:
 
-With that, thank you so much for listening to us, thank you to the conference
-organizers for letting us speak here today. I hope we can share our typechecker
-with you soon and would love to hear your feedback.
+- With that, thank you so much for listening to us, 
+- Thank you to the conference organizers for letting us speak here today. 
+- I hope we can share our typechecker with you soon and would love to hear your feedback.
+- Arigatou gozaimasu
