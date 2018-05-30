@@ -57,8 +57,10 @@ body {
     text-shadow: none;
 }
 
-.reveal i.twitter {
+.reveal td.twitter {
     color: #cccccc;
+    vertical-align: middle;
+    font-size: 24px;
 }
 
 .reveal section hr {
@@ -68,6 +70,10 @@ body {
 		width: 90%;
 }
 
+.reveal section img.qr {
+    height: 300px;
+    margin: 0;
+}
         </style>
     </head>
     <body>
@@ -76,10 +82,19 @@ body {
                 <section>
                     <h1>Sorbet:<br>A Typechecker for Ruby</h1>
 
-                    <p><small>Dmitry <i class="twitter">@darkdimius </i>Petrashko
+                    <table>
+                      <td class="twitter">
+                        Dmitry <i class="twitter">@darkdimius </i>Petrashko
                         <br>Nelson <i class="twitter">@nelhage</i> Elhage
                         <br>Paul <i class="twitter">@ptarjan</i> Tarjan
-                    </small></p>
+                      </td>
+                      <td>
+                        <img src="img/QR_sorbet_run.png" class="qr"></img>
+                      </td>
+
+                    </table>
+
+
                 </section>
                 <section data-markdown="index.md"
                          data-separator="^---\n"

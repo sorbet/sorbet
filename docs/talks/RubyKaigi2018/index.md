@@ -13,6 +13,30 @@ pt starts talking here
 
 ---
 
+## Stripe
+
+- Payments processor++
+- 23 countries, 100,000 business worldwide
+- 60% of people in US have used it in the last year
+- If you'd like to take money, look at us
+- Have a Tokyo office
+  - Many in the audience
+  - Come chat!
+  - stripe.com/jobs
+
+---
+
+## Developer productivity
+
+- Large dedicated team
+- Testing
+- Code
+- Dev Env
+- Abstractions
+- Language Tools
+
+---
+
 ## Ruby at Stripe
 
 - Ruby is the primary programming language
@@ -22,12 +46,9 @@ pt starts talking here
 - ~10 macroservices with a few microservices
 - New code mostly goes into an existing service
 
-Note:
-- Background so you can understand the Ruby we are workig with
-
 ---
 
-## Ruby at Stripe: Stats
+## Stats
 
 |Language                        | lines |||Language                        | lines |
 |--------------------------------|------:|||--------------------------------|------:|
@@ -47,7 +68,7 @@ commits per day from https://redshift.northwest.corp.stripe.com/queries/dmitry/a
 
 ---
 
-## Other Ruby Typing
+## Other ruby typing
 
 - Diamondback Ruby
 - github.com/plum-umd/rdl
@@ -59,12 +80,11 @@ Note:
 
 ---
 
-## Open Source?
+## Open source?
 
-- Yes! Eventually <!-- .element: class="fragment" data-fragment-index="1" -->
-- Prove it out internally first <!-- .element: class="fragment" data-fragment-index="1" -->
-- Sneak peak: <!-- .element: class="fragment" data-fragment-index="2" --> http://sorbet.run <!-- .element: class="fragment" data-fragment-index="2" -->
-- Have questions? Reach us at <!-- .element: class="fragment" data-fragment-index="2" --> **sorbet@stripe.com** <!-- .element: class="fragment" data-fragment-index="2" -->
+- Yes! Eventually
+- Prove it out internally first
+- Have questions? Reach us at **sorbet@stripe.com**
 
 Note:
 
@@ -74,11 +94,20 @@ collaborating. After we deploy it at Stripe and work out the kinks we will open
 source it for everyone else to try.
 
 - But wait, this isn't just a vaporware announcement :) Thanks to the fabulous
-emscripten, we have a browser demo. Try out sorbet.run . (Click link and then
-navigate back).
+emscripten, we have a browser demo.
 
 And with that brief teaser, let me hand off to Dmitry to dive into our type
 system.
+
+https://sorbet.run/#%221%22%20%2B%202
+
+---
+
+## Try it &#8681;
+
+http://sorbet.run
+
+<img src="img/QR_sorbet_run.png"></img>
 
 ---
 
@@ -531,8 +560,9 @@ Hand off to pt after this slide
 
 ---
 
-## Open Source
+## Open source
 
+- Sneak peak: http://sorbet.run
 - Will open source, timeline TBD
 - Focusing on internal deployment for now
 - Will post on stripe.com/blog
@@ -550,7 +580,6 @@ Keep an eye on the Stripe blog, we'll announce it there.
 
 ## Using it
 
-- Play with http://sorbet.run
 - Interested in your use cases
 - Will let you know when it's ready for beta
 - sorbet@stripe.com
@@ -581,7 +610,9 @@ tools and systems too!
 
 # Thank you!
 
-Note:
+sorbet@stripe.com
+
+Note: 
 
 With that, thank you so much for listening to us, thank you to the conference
 organizers for letting us speak here today. I hope we can share our typechecker
