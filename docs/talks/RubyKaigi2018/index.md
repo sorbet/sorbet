@@ -143,6 +143,7 @@ system.
 - As simple as possible, but powerful enough
 - Compatible with Ruby
 - Scales
+- Can be adopted gradually
 
 Note:
 
@@ -182,6 +183,12 @@ Note:
   postponing hard decisions). We're already a large codebase, and will
   only get larger.
 
+- Can be adopted gradually
+
+    In order to make adoption possible at scale, we cannot require all
+    the teams to adopt it at once, thus we need to support teams adopting it
+    at different pace.
+
 ---
 
 # Demo (usage)
@@ -201,6 +208,7 @@ Note:
 
 <br/>
 
+<div class="fragment">
 ```ruby
 "str" + :sym
 ```
@@ -221,6 +229,7 @@ Expression passed as an argument `arg0` to method `+`
                 ^^^^
 ```
 
+<div/>
 ---
 
 ## Usage: truthiness
@@ -234,6 +243,7 @@ return foo.empty?
 ```
 
 <br/>
+<div class="fragment">
 
 ```ruby
 foo = array_of_strings[0]
@@ -246,6 +256,8 @@ component of `T.nilable(String)`
      5 |return foo.empty?
                ^^^^^^^^^^
 ```
+
+<div/>
 
 ---
 
@@ -262,6 +274,8 @@ end
 
 <br/>
 
+<div class="fragment">
+
 ```ruby
 if Random.rand
     foo = 1
@@ -275,8 +289,8 @@ This code is unreachable
      6 |    foo = 2
                   ^
 ```
-<div/>
 
+<div/>
 Note:
 
   - We see that foo is assinged on both cases in first example
@@ -294,6 +308,8 @@ hash = str_or_int.succ
 
 <br/>
 
+<div class="fragment">
+
 ```ruby
 str_or_int_or_array = ["1", 2, [3]].sample
 hash = str_or_int_or_array.succ
@@ -305,6 +321,8 @@ Method `succ` does not exist on `Array` component of
      4 |hash = str_or_int_or_array.succ
                                   ^^^^^
 ```
+
+<div/>
 
 ---
 
@@ -383,6 +401,35 @@ Note:
  In this example, you re-assign a to a string and you explicitly daclare
  that you wanted a to become a string.
 
+---
+
+## Declaration: strictness level
+
+```ruby
+#
+# Basic checks such as syntax errors are enabled by default
+```
+
+<div class="fragment">
+```ruby
+# typed: true
+# Enables type checking
+```
+<div/>
+
+<div class="fragment">
+```ruby
+# typed: strict
+# Additionally requires ivars to be declared
+```
+<div/>
+
+<div class="fragment">
+```ruby
+# typed: strong
+# The safest level: disallows calling untyped code
+```
+<div/>
 ---
 ## Declaration: Generic classes
 
