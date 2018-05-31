@@ -61,11 +61,11 @@ class Float < Numeric
   sig(
       arg0: Float,
   )
-  .returns(Numeric)
+  .returns(Float)
   sig(
       arg0: Rational,
   )
-  .returns(Numeric)
+  .returns(Float)
   sig(
       arg0: BigDecimal,
   )
@@ -256,10 +256,10 @@ class Float < Numeric
   sig.returns(Float)
   def abs2(); end
 
-  sig.returns(Numeric)
+  sig.returns(T.any(Integer, Float))
   def angle(); end
 
-  sig.returns(Numeric)
+  sig.returns(T.any(Integer, Float))
   def arg(); end
 
   sig.returns(Integer)
@@ -393,7 +393,7 @@ class Float < Numeric
   sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(Numeric)
+  sig.returns(T.any(Integer, Float))
   def phase(); end
 
   sig.returns(Float)
@@ -438,7 +438,7 @@ class Float < Numeric
   sig(
       arg0: Numeric,
   )
-  .returns(Numeric)
+  .returns(T.any(Integer, Float))
   def round(arg0=_); end
 
   sig.returns(Complex)
