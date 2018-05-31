@@ -30,8 +30,6 @@ Don't say anything
 
 Note:
 
-* currently 25 countries (including Japan)
-
 ---
 
 ## Developer productivity
@@ -101,6 +99,7 @@ Note:
 - RDL Jeff Foster Maryland
 - Charlie Somerville at Github
 - Soutaro Matsumoto
+- Yusuke Endoh
 - Valentin Fondaratov
 
 ---
