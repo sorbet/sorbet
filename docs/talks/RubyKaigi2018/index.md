@@ -780,9 +780,9 @@ Note:
 
 # Thank you!
 
-<img class="logo" src="img/logo.png"></img>
-
 <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
+
+<img class="logo" src="img/logo.png"></img>
 
 Note:
 
