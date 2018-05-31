@@ -725,7 +725,7 @@ Hand off to pt after this slide
 - Will open source, timeline TBD
 - When released we will support it
 - Will post on stripe.com/blog
-- sorbet@stripe.com
+- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 Note:
 
@@ -774,7 +774,7 @@ Note:
 - Useful, not burdensome
 - Will open source
 - Reach out to us
-- sorbet@stripe.com
+- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 ---
 
