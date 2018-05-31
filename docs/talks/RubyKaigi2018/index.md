@@ -521,6 +521,8 @@ test coverage and processes are pretty good so none of these were
 critical, but they are pretty informative of the experience of using
 the tool and the kinds of issues we can catch.
 
+- Examples are simplified but based on real code.
+
 ---
 
 ## Typos in error handling
@@ -556,6 +558,15 @@ json.rb:6: Unable to resolve constant ParseError
 argumenterror.rb:9: Method ArgumentError does not exist on […]
 ```
 
+Note:
+
+Here we see another error inside an error-handling block. Someone
+tried to call the function `ArgumentError`, instead of calling its
+constructor -- perhaps they have been writing too much Python.
+
+Here again we see that sorbert has identified the error and reported
+that that method does not exist.
+
 ---
 
 ## `nil` checks
@@ -578,6 +589,17 @@ webhook.rb:10: Method update_webhook has specified type
   Got T.nilable(WebhookEndpoint)
 ```
 
+Note:
+
+- strict nilability found a bug in an endpoint that handled an API
+  request.
+- This endpoint takes a Webhook ID from a user and updates it in our
+  system
+- the typechecker knows that `load` returns a webhook object or `nil`
+  if that ID doesn't exist, and that `update_webhook` needs a
+  non-`nil` webhook objecrt
+- We detect the missing check
+
 ---
 
 ## `nil` checks (fixed)
@@ -591,6 +613,11 @@ app.post '/v1/webhook/:id/update' do
   update_webhook(endpoint, params)
 end
 ```
+
+Note:
+
+- Easy to fix; If we add the natural check you should have written
+  anyways, we recognize the pattern and quiet the error
 
 ---
 
