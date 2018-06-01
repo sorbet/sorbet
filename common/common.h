@@ -14,6 +14,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <functional>
 #include <ostream>
 #include <sstream>
+#include <stdint.h>
 #include <string>
 #include <type_traits>
 #include <typeinfo>
@@ -72,31 +73,18 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
     }
 
 /**
- * Represents a byte inside the Java Class File.
- * The sizeof(u1) must be equal to 1.
+ * Shorter aliases for unsigned ints of specified byte widths.
  */
-typedef unsigned char u1;
+typedef uint8_t u1;
 CheckSize(u1, 1, 1);
 
-/**
- * Represents two bytes inside the Java Class File.
- * The sizeof(u2) must be equal to 2.
- */
-typedef unsigned short u2;
+typedef uint16_t u2;
 CheckSize(u2, 2, 2);
 
-/**
- * Represents four bytes inside the Java Class File.
- * The sizeof(u4) must be equal to 4.
- */
-typedef unsigned int u4;
+typedef uint32_t u4;
 CheckSize(u4, 4, 4);
 
-/**
- * Represents eight bytes inside the Java Class File.
- * The sizeof(u8) must be equal to 8.
- */
-typedef unsigned long u8;
+typedef uint64_t u8;
 CheckSize(u8, 8, 8);
 
 template <class From, class To> To *fast_cast(From *what) {
