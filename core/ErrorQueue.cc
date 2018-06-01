@@ -25,7 +25,11 @@ ErrorQueue::ErrorQueue(spd::logger &logger, spd::logger &tracer) : logger(logger
 }
 
 void ErrorQueue::renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical) {
-    for (auto &error : collected[whatFile]) {
+    auto it = collected.find(whatFile);
+    if (it == collected.end()) {
+        return;
+    }
+    for (auto &error : it->second) {
         auto &out = error.error->isCritical ? critical : nonCritical;
         out << error.text;
     }
