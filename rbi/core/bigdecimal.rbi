@@ -24,6 +24,13 @@ class BigDecimal < Numeric
   SIGN_POSITIVE_ZERO = T.let(T.unsafe(nil), Integer)
 
   sig(
+    initial: T.any(Integer, Float, Rational, BigDecimal, String),
+    digits: Integer,
+  )
+  .void
+  def initialize(initial, digits=0); end
+
+  sig(
       arg0: Numeric,
   )
   .returns(BigDecimal)
