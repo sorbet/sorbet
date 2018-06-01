@@ -43,8 +43,6 @@ void ErrorQueue::flushErrors(bool all) {
         if (msg.kind == ErrorQueueMessage::Kind::Error) {
             this->errorCount.fetch_add(1);
             collected[msg.whatFile].emplace_back(std::move(msg));
-        } else if (msg.kind == ErrorQueueMessage::Kind::Drop) {
-            collected[msg.whatFile].clear();
         } else if (msg.kind == ErrorQueueMessage::Kind::Flush) {
             renderForFile(msg.whatFile, critical, nonCritical);
             renderForFile(core::FileRef(), critical, nonCritical);

@@ -107,7 +107,7 @@ private:
 };
 
 struct ErrorQueueMessage {
-    enum class Kind { Error, Flush, Drop };
+    enum class Kind { Error, Flush };
     Kind kind;
     FileRef whatFile;
     std::string text;
