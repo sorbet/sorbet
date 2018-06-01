@@ -1123,15 +1123,15 @@ std::shared_ptr<Type> AliasType::_instantiate(core::Context ctx, std::vector<Sym
     Error::raise("should never happen");
 }
 
-std::string MetaType::toString(const GlobalState &gs, int tabs) {
+std::string MetaType::toString(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 
-std::string MetaType::show(const GlobalState &gs) {
+std::string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
 }
 
-std::string MetaType::typeName() {
+std::string MetaType::typeName() const {
     return "MetaType";
 }
 
