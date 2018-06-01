@@ -19,7 +19,7 @@ class DiagnosticToError {
         if (pos == 0) {
             return pos;
         }
-        return min((u4)(pos - 1), max_off);
+        return min((u4)(pos), max_off);
     }
 
 public:
