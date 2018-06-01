@@ -14,7 +14,11 @@ bazel build //tools:clang-format
 
 # shellcheck disable=SC2207
 cxx_src=(
-    $(find . -path ./third_party -prune -false -o -name ".?*" -prune -false -o -name '*.cxx' -o -name '*.h' -o -name '*.cc' )
+    $(find . \
+           -path ./third_party -prune -false -o \
+           -path ./pay-server -prune -false -o \
+           -name ".?*" -prune -false \
+           -o -name '*.cxx' -o -name '*.h' -o -name '*.cc' )
 )
 misformatted=()
 
