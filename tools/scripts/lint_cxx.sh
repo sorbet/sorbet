@@ -19,7 +19,9 @@ if [ "$got_cc" ]; then
 else
     # shellcheck disable=SC2207
     cxx_src=(
-        $(find . -path ./third_party -prune -false -o -name ".?*" -prune -false -o -name '*.cxx' -o -name '*.cc' )
+        $(git ls-files -c -m -o --exclude-standard -- '*.cxx' '*.cc' | \
+              grep -v ^third_party/
+        )
     )
 fi
 

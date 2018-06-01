@@ -1,6 +1,15 @@
 #!/bin/bash
 set -eux
 
+# This is the easiest (only?) way to tell bazel not to recurse into
+# this subdirectory.
+echo '
+local_repository(
+    name = "stripe_pay_server",
+    path = "pay-server",
+)
+' >> WORKSPACE
+
 # ./tools/scripts/format_build_files.sh -t
 ./tools/scripts/format_cxx.sh -t
 ./tools/scripts/lint_sh.sh -t

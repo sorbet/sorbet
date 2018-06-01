@@ -4,8 +4,12 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
+list_sh_src() {
+    git ls-files -z -c -m -o --exclude-standard -- '*.sh'
+}
+
 if [ "$1" == "-t" ]; then
-  OUTPUT=$(find . -name '*.sh' -exec shellcheck -s bash {} \;)
+  OUTPUT=$(list_sh_src | xargs -0 shellcheck -s bash)
   if [ -n "$OUTPUT" ]; then
     echo -ne "\\e[1;31m" >&2
     echo "Some shell files have lint errors!" >&2
@@ -15,5 +19,5 @@ if [ "$1" == "-t" ]; then
     exit 1
   fi
 else
-  exec find . -name '*.sh' -exec shellcheck -s bash {} \;
+    list_sh_src | xargs -0 shellcheck -s bash
 fi

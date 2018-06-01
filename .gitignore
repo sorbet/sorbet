@@ -3,3 +3,6 @@
 /compile_commands.json
 /.gdb_history
 /tags
+
+# CI puts a checkout here for testing.
+/pay-server

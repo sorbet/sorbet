@@ -10,4 +10,5 @@ AllCops:
     # Things we didn't write
     - bazel-*/**/*
     - third_party/**/*
+    - pay-server/**/*
     - parser/tools/generate_diagnostics.rb

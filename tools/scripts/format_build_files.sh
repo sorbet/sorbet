@@ -6,6 +6,11 @@ cd "$(dirname "$0")/../.."
 
 SHA=ad4b2d42459f69158e81dcd1d6fc9666efad9d7b
 
+list_build_files() {
+    git ls-files -z -c -m -o --exclude-standard -- '**/BUILD'
+}
+
+
 if [ ! -x "$(which buildifier)" ]; then
 
   if [[ ! -x "$(which go)" ]]; then
@@ -36,7 +41,7 @@ if [ ! -x "$(which buildifier)" ]; then
   fi
 fi
 if [ "$1" == "-t" ]; then
-  OUTPUT=$(find . -name BUILD -not -path "./bazel-*" -print0 | xargs -0 buildifier -v -mode=diff || :)
+  OUTPUT=$(list_build_files | xargs -0 buildifier -v -mode=diff || :)
   if [ -n "$OUTPUT" ]; then
     echo -ne "\\e[1;31m"
     echo "☢️☢️  Some bazel files need to be reformatted! ☢️☢️"
@@ -46,5 +51,5 @@ if [ "$1" == "-t" ]; then
     exit 1
   fi
 else
-  exec find . -name BUILD -not -path "./bazel-*" -print0 | xargs -0 buildifier -v -mode=fix
+  list_build_files | xargs -0 buildifier -v -mode=fix
 fi
