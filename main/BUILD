@@ -56,6 +56,7 @@ cc_library(
         "FileFlatMapper.cc",
         "FileFlatMapper.h",
         "options.cc",
+        "pipeline.cc",
         "realmain.cc",
         "realmain.h",
     ],

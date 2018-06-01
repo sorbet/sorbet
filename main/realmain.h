@@ -1,8 +1,12 @@
-#ifndef SORBET_REAL_MAIN_H
+#ifndef RUBY_TYPER_REAL_MAIN_H
+#define RUBY_TYPER_REAL_MAIN_H
+#include "ast/ast.h"
+#include "common/KeyValueStore.h"
+#include "common/ProgressIndicator.h"
 #include "common/Timer.h"
+#include "common/WorkerPool.h"
 #include "common/common.h"
 #include "core/StrictLevel.h"
-
 #include "spdlog/spdlog.h"
 #include <cxxopts.hpp>
 #include <memory>
@@ -12,6 +16,7 @@
 
 namespace ruby_typer {
 namespace realmain {
+const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 int realmain(int argc, const char *argv[]);
 
 // Terminate execution of sorbet with specific return code
@@ -98,6 +103,19 @@ struct Options {
 };
 
 void readOptions(Options &, int argc, const char *argv[]) throw(EarlyReturnWithCode);
+std::unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
+                                          std::unique_ptr<KeyValueStore> &kvstore,
+                                          const std::shared_ptr<core::GlobalState> &pgs);
+std::vector<std::unique_ptr<ast::Expression>> index(std::shared_ptr<core::GlobalState> &gs,
+                                                    std::vector<std::string> frs,
+                                                    std::vector<core::FileRef> mainThreadFiles, const Options &opts,
+                                                    WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore);
+std::vector<std::unique_ptr<ast::Expression>>
+resolve(core::GlobalState &gs, std::vector<std::unique_ptr<ast::Expression>> what, const Options &opts);
+void typecheck(std::shared_ptr<core::GlobalState> &gs, std::vector<std::unique_ptr<ast::Expression>> what,
+               const Options &opts, WorkerPool &workers);
+std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
+                                              const Options &opts);
 } // namespace realmain
 } // namespace ruby_typer
-#endif // SORBET_REAL_MAIN_H
+#endif // RUBY_TYPER_REAL_MAIN_H
