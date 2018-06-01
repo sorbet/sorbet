@@ -12,7 +12,9 @@
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
+#include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
+#include "core/statsd/statsd.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "namer/configatron/configatron.h"
@@ -526,7 +528,8 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
             cout << gs->toString() << '\n';
         }
         if (opts.print.NameTableJson) {
-            cout << gs->toJSON() << '\n';
+            auto root = core::Proto::toProto(*gs, core::Symbols::root());
+            cout << core::Proto::toJSON(root) << '\n';
         }
         if (opts.print.NameTableFull) {
             cout << gs->toString(true) << '\n';
@@ -737,11 +740,14 @@ int realmain(int argc, const char *argv[]) {
         logger->debug("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
     }
 
+    auto counters = core::getAndClearThreadCounters();
+
     if (!opts.statsdHost.empty()) {
-        core::submitCountersToStatsd(opts.statsdHost, opts.statsdPort, opts.statsdPrefix + ".counters");
+        core::StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, opts.statsdPrefix + ".counters");
     }
 
     if (!opts.metricsFile.empty()) {
+        auto metrics = core::Proto::toProto(counters, opts.metricsPrefix);
         string status;
         if (gs->hadCriticalError()) {
             status = "Error";
@@ -751,9 +757,15 @@ int realmain(int argc, const char *argv[]) {
             status = "Success";
         }
 
-        core::storeCountersToProtoFile(opts.metricsFile, opts.metricsPrefix, opts.metricsRepo, opts.metricsBranch,
-                                       opts.metricsSha, status);
+        metrics.set_repo(opts.metricsRepo);
+        metrics.set_branch(opts.metricsBranch);
+        metrics.set_sha(opts.metricsSha);
+        metrics.set_status(status);
+
+        auto json = core::Proto::toJSON(metrics);
+        FileOps::write(opts.metricsFile, json);
     }
+
     if (gs->hadCriticalError()) {
         returnCode = 10;
     } else if (returnCode == 0 && gs->totalErrors() > 0 && !opts.supressNonCriticalErrors) {

@@ -83,7 +83,6 @@ public:
     void markAsPayload();
 
     std::string toString(bool showHidden = false) const;
-    std::string toJSON() const;
     std::string showAnnotatedSource(FileRef file) const;
     enum AnnotationPos { BEFORE, AFTER };
     struct Annotation {

@@ -2,7 +2,6 @@
 #define SORBET_NAMES_H
 
 #include "common/common.h"
-#include "proto/Name.pb.h"
 #include <string>
 #include <vector>
 
@@ -160,7 +159,6 @@ public:
 
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
-    com::stripe::rubytyper::Name toProto(const core::GlobalState &gs) const;
     void sanityCheck(const GlobalState &gs) const;
     NameRef ref(const GlobalState &gs) const;
 

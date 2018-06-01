@@ -22,14 +22,12 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//proto/pay-server",
         "@com_google_absl//absl/container:inlined_vector",
         "@com_google_absl//absl/strings",
         "@concurrentqueue",
         "@lmdb",
         "@progressbar",
         "@spdlog",
-        "@statsd",
     ],
 )
 

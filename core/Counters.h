@@ -47,6 +47,11 @@ struct ConstExprStr {
 
 struct CounterImpl;
 
+// forward declarations for classes that need private access to the counter
+// implementation
+class Proto;
+class StatsD;
+
 struct CounterState {
     CounterState();
     ~CounterState();
@@ -58,6 +63,8 @@ struct CounterState {
 private:
     friend CounterState getAndClearThreadCounters();
     friend void counterConsume(CounterState cs);
+    friend class Proto;
+    friend class StatsD;
 
     CounterState(std::unique_ptr<CounterImpl> counters);
     std::unique_ptr<CounterImpl> counters;
@@ -79,9 +86,6 @@ void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned in
 void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
 std::string getCounterStatistics(std::vector<std::string> names);
-bool submitCountersToStatsd(std::string host, int port, std::string prefix);
-bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
-                              const std::string &branch, const std::string &sha, const std::string &status);
 } // namespace core
 } // namespace ruby_typer
 #endif // SORBET_COUNTERS_H

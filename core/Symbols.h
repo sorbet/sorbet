@@ -5,7 +5,6 @@
 #include "Names.h"
 #include "common/common.h"
 #include "core/Names/core.h"
-#include "proto/Symbol.pb.h"
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -544,8 +543,6 @@ public:
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
     SymbolRef enclosingClass(const GlobalState &gs) const;
-
-    com::stripe::rubytyper::Symbol toProto(const core::GlobalState &gs) const;
 
 private:
     friend class serialize::Serializer;

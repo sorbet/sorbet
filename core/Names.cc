@@ -82,20 +82,6 @@ string Name::show(const GlobalState &gs) const {
     }
 }
 
-com::stripe::rubytyper::Name Name::toProto(const core::GlobalState &gs) const {
-    com::stripe::rubytyper::Name name;
-    name.set_name(show(gs));
-    switch (this->kind) {
-        case UTF8:
-            name.set_kind(com::stripe::rubytyper::Name::UTF8);
-        case UNIQUE:
-            name.set_kind(com::stripe::rubytyper::Name::UNIQUE);
-        case CONSTANT:
-            name.set_kind(com::stripe::rubytyper::Name::CONSTANT);
-    }
-    return name;
-}
-
 void Name::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {
         return;

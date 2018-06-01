@@ -1,11 +1,7 @@
 #include "core/Counters.h"
-#include "core/Names.h"
-extern "C" {
-#include "statsd-client.h"
-}
 #include "absl/strings/str_cat.h"
-#include "common/Random.h"
-#include "proto/pay-server/SourceMetrics.pb.h"
+#include "core/Counters_impl.h"
+#include "core/Names.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -27,66 +23,45 @@ CounterState::~CounterState() = default;
 CounterState::CounterState(CounterState &&rhs) = default;
 CounterState &CounterState::operator=(CounterState &&rhs) = default;
 
-struct CounterImpl {
-    CounterImpl() = default;
-    CounterImpl(CounterImpl const &) = delete;
-    CounterImpl(CounterImpl &&) = default;
-    CounterImpl &operator=(CounterImpl &&) = delete;
-    using CounterType = unsigned long;
-
-    CounterImpl canonicalize();
-
-    void clear();
-
-    const char *internKey(const char *str) {
-        auto it1 = this->strings_by_ptr.find(str);
-        if (it1 != this->strings_by_ptr.end()) {
-            return it1->second;
-        }
-
-        absl::string_view view(str);
-        auto it2 = this->strings_by_value.find(view);
-        if (it2 != this->strings_by_value.end()) {
-            this->strings_by_ptr[str] = it2->second;
-            return it2->second;
-        }
-
-        this->strings_by_value[view] = str;
-        this->strings_by_ptr[str] = str;
-        return str;
+const char *CounterImpl::internKey(const char *str) {
+    auto it1 = this->strings_by_ptr.find(str);
+    if (it1 != this->strings_by_ptr.end()) {
+        return it1->second;
     }
 
-    void histogramAdd(const char *histogram, int key, unsigned int value) {
-        if (!enable_counters) {
-            return;
-        }
-        this->histograms[histogram][key] += value;
+    absl::string_view view(str);
+    auto it2 = this->strings_by_value.find(view);
+    if (it2 != this->strings_by_value.end()) {
+        this->strings_by_ptr[str] = it2->second;
+        return it2->second;
     }
 
-    void categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
-        if (!enable_counters) {
-            return;
-        }
+    this->strings_by_value[view] = str;
+    this->strings_by_ptr[str] = str;
+    return str;
+}
 
-        this->counters_by_category[category][counter] += value;
+void CounterImpl::histogramAdd(const char *histogram, int key, unsigned int value) {
+    if (!enable_counters) {
+        return;
+    }
+    this->histograms[histogram][key] += value;
+}
+
+void CounterImpl::categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
+    if (!enable_counters) {
+        return;
     }
 
-    void counterAdd(const char *counter, unsigned int value, bool isProdCounter) {
-        if (!enable_counters && !isProdCounter) {
-            return;
-        }
-        this->counters[counter] += value;
+    this->counters_by_category[category][counter] += value;
+}
+
+void CounterImpl::counterAdd(const char *counter, unsigned int value, bool isProdCounter) {
+    if (!enable_counters && !isProdCounter) {
+        return;
     }
-
-    // absl::string_view isn't hashable, so we use an unordered map. We could
-    // implement hash ourselves, but this is the slowpath anyways.
-    std::map<absl::string_view, const char *> strings_by_value;
-    std::map<const char *, const char *> strings_by_ptr;
-
-    std::map<const char *, std::map<int, CounterType>> histograms;
-    std::map<const char *, CounterType> counters;
-    std::map<const char *, std::map<const char *, CounterType>> counters_by_category;
-};
+    this->counters[counter] += value;
+}
 
 thread_local CounterImpl counterState;
 
@@ -296,117 +271,6 @@ string getCounterStatistics(vector<string> names) {
         }
     }
     return buf.str();
-}
-
-class StatsdClientWrapper {
-    statsd_link *link;
-
-public:
-    StatsdClientWrapper(string host, int port, string prefix)
-        : link(statsd_init_with_namespace(host.c_str(), port, prefix.c_str())) {}
-
-    ~StatsdClientWrapper() {
-        statsd_finalize(link);
-    }
-
-    void gauge(string name, size_t value) {
-        statsd_gauge(link, const_cast<char *>(name.c_str()), value);
-    }
-    void timing(string name, size_t ms) {
-        statsd_timing(link, const_cast<char *>(name.c_str()), ms);
-    }
-};
-
-bool submitCountersToStatsd(std::string host, int port, std::string prefix) {
-    StatsdClientWrapper statsd(host, port, prefix);
-
-    auto canon = counterState.canonicalize();
-    for (auto &cat : canon.counters_by_category) {
-        CounterImpl::CounterType sum = 0;
-        for (auto &e : cat.second) {
-            sum += e.second;
-            statsd.gauge(absl::StrCat(cat.first, ".", e.first), e.second);
-        }
-
-        statsd.gauge(absl::StrCat(cat.first, ".total"), sum);
-    }
-
-    for (auto &hist : canon.histograms) {
-        CounterImpl::CounterType sum = 0;
-        for (auto &e : hist.second) {
-            sum += e.second;
-            statsd.gauge(absl::StrCat(hist.first, ".", e.first), e.second);
-        }
-
-        statsd.gauge(absl::StrCat(hist.first, ".total"), sum);
-    }
-
-    for (auto &e : canon.counters) {
-        statsd.gauge(e.first, e.second);
-    }
-
-    return true;
-}
-
-bool storeCountersToProtoFile(const std::string &fileName, const std::string &prefix, const std::string &repo,
-                              const std::string &branch, const std::string &sha, const std::string &status) {
-    com::stripe::payserver::events::cibot::SourceMetrics metrics;
-    metrics.set_repo(repo);
-    metrics.set_branch(branch);
-    metrics.set_sha(sha);
-    metrics.set_status(status);
-    auto unix_timestamp = std::chrono::seconds(std::time(nullptr));
-    metrics.set_timestamp(unix_timestamp.count());
-
-    // UUID version 1 as specified in RFC 4122
-    string uuid =
-        strprintf("%llx-%x-%x-%x-%llx%x",
-                  (unsigned long long)Random::uniformU8(), // Generates a 64-bit Hex number
-                  Random::uniformU4(),                     // Generates a 32-bit Hex number
-                  Random::uniformU4(0, 0x0fff) |
-                      0x4000, // Generates a 32-bit Hex number of the form 4xxx (4 indicates the UUID version)
-                  Random::uniformU4(0, 0x3fff) | 0x8000, // Generates a 32-bit Hex number in the range [0x8000, 0xbfff]
-                  (unsigned long long)Random::uniformU8(), rand()); // Generates a 96-bit Hex number
-
-    metrics.set_uuid(uuid);
-
-    auto canon = counterState.canonicalize();
-    for (auto &cat : canon.counters_by_category) {
-        CounterImpl::CounterType sum = 0;
-        for (auto &e : cat.second) {
-            sum += e.second;
-            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-            metric->set_name(absl::StrCat(prefix, ".", cat.first, ".", e.first));
-            metric->set_value(e.second);
-        }
-
-        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-        metric->set_name(absl::StrCat(prefix, ".", cat.first, ".total"));
-        metric->set_value(sum);
-    }
-
-    for (auto &hist : canon.histograms) {
-        CounterImpl::CounterType sum = 0;
-        for (auto &e : hist.second) {
-            sum += e.second;
-            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-            metric->set_name(absl::StrCat(prefix, ".", hist.first, ".", e.first));
-            metric->set_value(e.second);
-        }
-        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-        metric->set_name(absl::StrCat(prefix, ".", hist.first, ".total"));
-        metric->set_value(sum);
-    }
-
-    for (auto &e : canon.counters) {
-        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-        metric->set_name(absl::StrCat(prefix, ".", e.first));
-        metric->set_value(e.second);
-    }
-
-    std::string json_string = core::JSON::fromProto(metrics);
-    FileOps::write(fileName, json_string);
-    return true;
 }
 
 } // namespace core
