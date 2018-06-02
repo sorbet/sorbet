@@ -2,6 +2,8 @@
 #include <regex>
 #include <vector>
 
+template class std::vector<std::shared_ptr<ruby_typer::core::File>>;
+template class std::shared_ptr<ruby_typer::core::File>;
 using namespace std;
 
 namespace ruby_typer {
