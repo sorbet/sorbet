@@ -4,44 +4,20 @@ set -e
 
 cd "$(dirname "$0")/../.."
 
-SHA=ad4b2d42459f69158e81dcd1d6fc9666efad9d7b
+buildifier=$(mktemp -t buildifier.XXXXXX)
+cleanup() {
+    rm "$buildifier"
+}
+trap cleanup EXIT
 
 list_build_files() {
-    git ls-files -z -c -m -o --exclude-standard -- '**/BUILD'
+  git ls-files -c -m -o --exclude-standard -- '**/BUILD' | sed "s,^,$(pwd)/,g"
 }
 
+bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildifier
 
-if [ ! -x "$(which buildifier)" ]; then
-
-  if [[ ! -x "$(which go)" ]]; then
-    if [[ ! -x "$(which brew)" ]]; then
-        echo -ne "\\033[0;31m"
-        echo "You need to install golang."
-        echo -ne "\\033[0m"
-        exit 1
-    fi
-    echo "Installing a golang for you."
-    brew install golang
-  fi
-
-  if [[ -z "$GOPATH" ]]; then
-    export GOPATH=~/golang
-    export PATH=$GOPATH/bin:$PATH
-    mkdir -p $GOPATH
-  fi
-
-  if [ ! -x "$(which buildifier)" ]; then
-    go get -d -u github.com/bazelbuild/buildifier/buildifier
-    pushd $GOPATH/src/github.com/bazelbuild/buildifier/
-    git reset --hard $SHA
-    git clean -fdx --quiet
-    go generate github.com/bazelbuild/buildifier/build
-    go install github.com/bazelbuild/buildifier/buildifier
-    popd
-  fi
-fi
 if [ "$1" == "-t" ]; then
-  OUTPUT=$(list_build_files | xargs -0 buildifier -v -mode=diff || :)
+  OUTPUT=$(list_build_files | xargs "$buildifier" -v -mode=diff || :)
   if [ -n "$OUTPUT" ]; then
     echo -ne "\\e[1;31m"
     echo "☢️☢️  Some bazel files need to be reformatted! ☢️☢️"
@@ -51,5 +27,5 @@ if [ "$1" == "-t" ]; then
     exit 1
   fi
 else
-  list_build_files | xargs -0 buildifier -v -mode=fix
+  list_build_files | xargs "$buildifier" -v -mode=fix
 fi

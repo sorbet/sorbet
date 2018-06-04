@@ -4,6 +4,12 @@ load(":externals.bzl", "externals")
 
 externals()
 
+load("@io_bazel_rules_go//go:def.bzl", "go_rules_dependencies", "go_register_toolchains")
+
+go_rules_dependencies()
+
+go_register_toolchains()
+
 BAZEL_VERSION = "0.10.0"
 
 BAZEL_VERSION_SHA = "47e0798caaac4df499bce5fe554a914abd884a855a27085a4473de1d737d9548"

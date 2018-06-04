@@ -43,7 +43,10 @@ cc_library(
     name = "counters_impl",
     srcs = [],
     hdrs = ["Counters_impl.h"],
-    visibility = ["//core:__subpackages__"],
+    visibility = [
+        "//core:__subpackages__",
+        "//tools:__pkg__",
+    ],
     deps = [
         "@com_google_absl//absl/strings",
     ],

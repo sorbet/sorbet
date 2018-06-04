@@ -138,3 +138,15 @@ package(default_visibility = ["//visibility:public"])
         type="tar.xz",
         strip_prefix="clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/",
     )
+
+    git_repository(
+        name = "io_bazel_rules_go",
+        remote = "https://github.com/bazelbuild/rules_go.git",
+        commit = "18835fe2e979043ddf39c46b130d2183470cabca",
+    )
+
+    git_repository(
+        name = "com_github_bazelbuild_buildtools",
+        commit = "82b21607e00913b16fe1c51bec80232d9d6de31c",
+        remote = "https://github.com/bazelbuild/buildifier.git",
+    )
