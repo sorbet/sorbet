@@ -410,25 +410,32 @@ Note:
 ```
 
 <div class="fragment">
+  
 ```ruby
 # typed: true
 # Enables type checking
 ```
+
 <div/>
 
 <div class="fragment">
+  
 ```ruby
 # typed: strict
 # Additionally requires ivars to be declared
 ```
+
 <div/>
 
 <div class="fragment">
+  
 ```ruby
 # typed: strong
 # The safest level: disallows calling untyped code
 ```
+  
 <div/>
+
 ---
 ## Declaration: Generic classes
 
