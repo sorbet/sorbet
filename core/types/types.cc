@@ -265,7 +265,6 @@ bool LiteralType::equalsLiteral(const GlobalState &gs, std::shared_ptr<LiteralTy
     return lklass->symbol == rklass->symbol;
 }
 
-
 OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(std::move(left)), right(std::move(right)) {}
 
 void TupleType::_sanityCheck(core::Context ctx) {
