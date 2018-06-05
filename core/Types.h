@@ -325,6 +325,8 @@ public:
     virtual std::string typeName() const override;
     virtual bool isFullyDefined() final;
 
+    bool equalsLiteral(const GlobalState &gs, std::shared_ptr<LiteralType> rhs);
+
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
