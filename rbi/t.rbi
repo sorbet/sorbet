@@ -20,17 +20,8 @@ module T
   def self.any(arg0, *types); end
   def self.all(arg0, *types); end
   def self.proc(**args); end
-
-  sig(
-    mod: Module
-  ).returns(Object)
   def self.class_of(mod); end
-
   def self.noreturn; end
-
-  sig(
-    values: T::Array[Object],
-  ).returns(Object)
   def self.enum(values); end
 end
 
