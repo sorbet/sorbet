@@ -166,6 +166,9 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
         }
 
         case Names::buildArray()._id: {
+            if (args.empty()) {
+                return Types::arrayOfUntyped();
+            }
             vector<shared_ptr<Type>> elems;
             for (auto &elem : args) {
                 elems.push_back(elem.type);
