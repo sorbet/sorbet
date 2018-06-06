@@ -358,11 +358,14 @@ public:
 };
 
 class TupleType final : public ProxyType {
-    TupleType();
+private:
+    TupleType() = delete;
 
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    TupleType(core::Context ctx, std::vector<std::shared_ptr<Type>> elements);
+
+    TupleType(std::shared_ptr<Type> underlying, std::vector<std::shared_ptr<Type>> elements);
+    static std::shared_ptr<Type> build(core::Context ctx, std::vector<std::shared_ptr<Type>> elements);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -380,7 +383,6 @@ public:
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
-    static std::shared_ptr<TupleType> makeRaw();
 
     // Return the type of the underlying array that this tuple decays into
     std::shared_ptr<Type> elementType();

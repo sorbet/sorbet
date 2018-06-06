@@ -170,7 +170,7 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
             for (auto &elem : args) {
                 elems.push_back(elem.type);
             }
-            return make_unique<TupleType>(ctx, elems);
+            return TupleType::build(ctx, elems);
         }
         default:
             return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
@@ -373,7 +373,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
         for (auto elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(ctx, loc, elem));
         }
-        return make_shared<TupleType>(ctx, unwrappedElems);
+        return TupleType::build(ctx, unwrappedElems);
     } else if (auto *litType = cast_type<LiteralType>(tp.get())) {
         if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
@@ -462,8 +462,7 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                     targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
                     ++it;
                 } else if (attachedClass == core::Symbols::Hash() && i == 2) {
-                    auto tupleArgs = targs;
-                    targs.emplace_back(make_shared<TupleType>(ctx, tupleArgs));
+                    targs.emplace_back(TupleType::build(ctx, targs));
                 } else {
                     targs.emplace_back(core::Types::dynamic());
                 }

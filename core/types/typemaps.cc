@@ -99,7 +99,7 @@ std::shared_ptr<Type> TupleType::_instantiate(core::Context ctx, std::vector<Sym
             newElems[i] = this->elems[i];
             i++;
         }
-        return make_shared<TupleType>(ctx, newElems);
+        return TupleType::build(ctx, newElems);
     }
     return nullptr;
 }
@@ -125,7 +125,7 @@ std::shared_ptr<Type> TupleType::_instantiate(core::Context ctx, const TypeConst
             newElems[i] = this->elems[i];
             i++;
         }
-        return make_shared<TupleType>(ctx, newElems);
+        return TupleType::build(ctx, newElems);
     }
     return nullptr;
 }
@@ -151,7 +151,7 @@ std::shared_ptr<Type> TupleType::_approximate(core::Context ctx, const TypeConst
             newElems[i] = this->elems[i];
             i++;
         }
-        return make_shared<TupleType>(ctx, newElems);
+        return TupleType::build(ctx, newElems);
     }
     return nullptr;
 };

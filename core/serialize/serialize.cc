@@ -324,9 +324,7 @@ std::shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
             for (auto &elem : elems) {
                 elem = unpickleType(p, gs);
             }
-            auto result = TupleType::makeRaw();
-            result->underlying = underlying;
-            result->elems = move(elems);
+            auto result = std::make_shared<TupleType>(underlying, move(elems));
             return result;
         }
         case 6: {
