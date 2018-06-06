@@ -267,6 +267,9 @@ OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(std::move(l
 
 void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
+    auto *applied = cast_type<AppliedType>(this->underlying.get());
+    ENFORCE(applied);
+    ENFORCE(applied->symbol = core::Symbols::Array());
 }
 
 core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
