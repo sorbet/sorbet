@@ -3,6 +3,8 @@ class TestDSLBuilder
   dsl_optional :opt_string, String
   dsl_optional :opt_int_defaulted, Integer, default: 0
   dsl_required :req_string, String
+
+  dsl_optional :root_const, ::Integer
 end
 
 class TestChild < TestDSLBuilder
