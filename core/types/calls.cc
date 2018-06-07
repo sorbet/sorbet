@@ -345,10 +345,14 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
         case core::Names::new_()._id: {
             auto attachedClass = this->symbol.data(ctx).attachedClass(ctx);
             if (!attachedClass.exists()) {
-                // `foo.new(...)`, but foo isn't a Class
-                return nullptr;
+                if (this->symbol == core::Symbols::Class()) {
+                    // `Class.new(...)`, but it isn't a specific Class. We know
+                    // calling .new on a Class will yield some sort of Object
+                    attachedClass = core::Symbols::Object();
+                } else {
+                    return nullptr;
+                }
             }
-
             auto instanceTy = attachedClass.data(ctx).externalType(ctx);
             instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, instanceTy, block);
             return instanceTy;
