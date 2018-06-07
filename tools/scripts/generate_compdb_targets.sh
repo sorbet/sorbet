@@ -5,17 +5,20 @@ cd "$(dirname "$0")/../.."
 
 targets="$(bazel query 'kind("cc_(library|binary|test)", //...)')"
 
+buildifier=$(mktemp -t buildifier.XXXXXX)
 cleanup() {
     rm -rf "tools/BUILD.tmp"
+    rm "$buildifier"
 }
 trap cleanup exit
 
+bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildifier
 
 (
-    sed -n '0,/BEGIN compile_commands/p' tools/BUILD
+    sed -n '1,/BEGIN compile_commands/p' tools/BUILD
     echo "$targets" | sed -e 's/^/"/' -e 's/$/",/'
     sed -n '/END compile_commands/,$p' tools/BUILD
-) | buildifier > tools/BUILD.tmp
+) | "$buildifier" > tools/BUILD.tmp
 
 if [ "$1" == "-t" ]; then
     if ! diff -u tools/BUILD tools/BUILD.tmp; then

@@ -18,16 +18,6 @@ RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev
 
 RUN rbenv exec gem install bundler --no-rdoc --no-ri
 
-RUN /usr/stripe/bin/docker/stripe-install-go 1.9 d70eadefce8e160638a9a6db97f7192d8463069ab33138893ad3bf31b0650a79
-ENV GOPATH /gopath
-ENV PATH $PATH:/usr/local/go/bin:$GOPATH/bin
-# `format_build_files.sh` will pin + install a specific version of
-# buildifier, so don't install it here, just do the fetch to save a
-# little time.
-RUN mkdir -p "$GOPATH" && \
-  go get -d -u github.com/bazelbuild/buildifier/buildifier && \
-  go get -u github.com/stripe/veneur/cmd/veneur-emit
-
 WORKDIR /src
 
 ENV PATH $PATH:/src/

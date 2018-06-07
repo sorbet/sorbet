@@ -947,10 +947,6 @@ public:
             case core::Names::assertType()._id:
             case core::Names::cast()._id: {
                 if (send->args.size() < 2) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidCast)) {
-                        e.setHeader("Not enough arguments to `{}`: Expected: `{}`, got: `{}`",
-                                    "T." + send->fun.toString(ctx), 2, send->args.size());
-                    }
                     return send;
                 }
 

@@ -332,9 +332,14 @@ module Enumerable
   def find(ifnone=_, &blk); end
 
   type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(Enumerator[T.type_parameter(:U)]),
+      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
   .returns(T::Array[T.type_parameter(:U)])
+  type_parameters(:U).sig(
+      blk: T.proc(arg0: Elem).returns(T::Array[T.type_parameter(:U)]),
+  )
+  .returns(T::Array[T.type_parameter(:U)])
+  sig.returns(Enumerator[Elem])
   def flat_map(&blk); end
 
   type_parameters(:U).sig(

@@ -341,7 +341,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
         }
         if (opts.suggestTyped && !f.data(ctx).hadErrors() && f.data(ctx).sigil == core::StrictLevel::Stripe) {
             core::counterInc("types.input.files.suggest_typed");
-            logger->error("Suggest adding # typed: true to: {}", f.data(ctx).path());
+            logger->error("You could add `# typed: true` to: `{}`", f.data(ctx).path());
         }
 
     } catch (SRubyException &) {

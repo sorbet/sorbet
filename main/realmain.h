@@ -81,6 +81,8 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
 
+    u4 reserveMemKiB;
+
     std::string statsdHost;
     std::string statsdPrefix;
     int statsdPort;

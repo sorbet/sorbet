@@ -23,6 +23,18 @@ class Numeric < Object
   .returns(Numeric)
   def -(arg0); end
 
+  sig(
+    arg0: Numeric,
+  )
+  .returns(Numeric)
+  def *(arg0); end
+
+  sig(
+    arg0: Numeric,
+  )
+  .returns(Numeric)
+  def /(arg0); end
+
   sig.returns(Numeric)
   def -@(); end
 

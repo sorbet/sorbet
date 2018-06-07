@@ -1,5 +1,7 @@
 # typed: strict
 module T
+  def self.untyped; end
+
   sig(x: T.untyped).returns(T.untyped)
   def self.unsafe(x); end
 
@@ -9,6 +11,18 @@ module T
     type: Class
   ).returns(T.untyped)
   def self.dynamic_cast(obj, type); end
+
+  # Implemented in C++
+  def self.let(exp, type); end
+  def self.assert_type!(exp, type); end
+  def self.cast(exp, type); end
+  def self.nilable(type); end
+  def self.any(arg0, *types); end
+  def self.all(arg0, *types); end
+  def self.proc(**args); end
+  def self.class_of(mod); end
+  def self.noreturn; end
+  def self.enum(values); end
 end
 
 module T::Helpers

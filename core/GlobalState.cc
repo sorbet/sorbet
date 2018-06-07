@@ -91,8 +91,10 @@ const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(std::shared_ptr<ErrorQueue> errorQueue)
     : globalStateId(globalStateIdCounter++), errorQueue(std::move(errorQueue)) {
-    unsigned int max_name_count = 262144;   // 6MB
-    unsigned int max_symbol_count = 524288; // 32MB
+    // Empirically determined to be the smallest powers of two larger than the
+    // values required by the payload
+    unsigned int max_name_count = 8192;
+    unsigned int max_symbol_count = 16384;
 
     names.reserve(max_name_count);
     symbols.reserve(max_symbol_count);
@@ -290,6 +292,37 @@ void GlobalState::initEmpty() {
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
+}
+
+// https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
+u4 nextPowerOfTwo(u4 v) {
+    v--;
+    v |= v >> 1;
+    v |= v >> 2;
+    v |= v >> 4;
+    v |= v >> 8;
+    v |= v >> 16;
+    v++;
+    return v;
+}
+
+void GlobalState::reserveMemory(u4 kb) {
+    u8 allocated = (sizeof(Name) + sizeof(decltype(names_by_hash)::value_type)) * names.capacity() +
+                   sizeof(Symbol) * symbols.capacity();
+    u8 want = 1024 * kb;
+    if (allocated > want) {
+        return;
+    }
+    u4 scale = nextPowerOfTwo(want / allocated);
+    symbols.reserve(symbols.capacity() * scale);
+    expandNames(scale);
+    sanityCheck();
+
+    allocated = (sizeof(Name) + sizeof(decltype(names_by_hash)::value_type)) * names.capacity() +
+                sizeof(Symbol) * symbols.capacity();
+
+    trace(absl::StrCat("Reserved ", allocated / 1024, "KiB of memory. symbols=", symbols.capacity(),
+                       " names=", names.capacity()));
 }
 
 constexpr decltype(GlobalState::STRINGS_PAGE_SIZE) GlobalState::STRINGS_PAGE_SIZE;
@@ -581,13 +614,12 @@ void moveNames(pair<unsigned int, unsigned int> *from, pair<unsigned int, unsign
     }
 }
 
-void GlobalState::expandNames() {
+void GlobalState::expandNames(int growBy) {
     sanityCheck();
-    ENFORCE(names.size() == names.capacity(), "names have wrong capacity");
 
-    names.reserve(names.size() * 2);
-    vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * 2);
-    moveNames(names_by_hash.data(), new_names_by_hash.data(), names_by_hash.capacity(), new_names_by_hash.capacity());
+    names.reserve(names.capacity() * growBy);
+    vector<pair<unsigned int, unsigned int>> new_names_by_hash(names_by_hash.capacity() * growBy);
+    moveNames(names_by_hash.data(), new_names_by_hash.data(), names_by_hash.size(), new_names_by_hash.capacity());
     names_by_hash.swap(new_names_by_hash);
 }
 
@@ -772,7 +804,8 @@ void GlobalState::sanityCheck() const {
     ENFORCE(!strings.empty(), "empty string table size");
     ENFORCE(!names_by_hash.empty(), "empty name hash table size");
     ENFORCE((names_by_hash.size() & (names_by_hash.size() - 1)) == 0, "name hash table size is not a power of two");
-    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync");
+    ENFORCE(names.capacity() * 2 == names_by_hash.capacity(), "name table and hash name table sizes out of sync",
+            " names.capacity=", names.capacity(), " names_by_hash.capacity=", names_by_hash.capacity());
     ENFORCE(names_by_hash.size() == names_by_hash.capacity(), "hash name table not at full capacity");
     int i = -1;
     for (auto &nm : names) {
