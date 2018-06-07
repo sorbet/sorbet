@@ -40,8 +40,13 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
 
     auto scopeCnst = ast::cast_tree<ast::ConstantLit>(cons->scope.get());
     if (!scopeCnst) {
-        ENFORCE(ast::isa_tree<ast::EmptyTree>(cons->scope.get()));
-        return ast::MK::Constant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
+        if (ast::isa_tree<ast::EmptyTree>(cons->scope.get())) {
+            return ast::MK::Constant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
+        }
+        auto *id = ast::cast_tree<ast::Ident>(cons->scope.get());
+        ENFORCE(id != nullptr);
+        ENFORCE(id->symbol == core::Symbols::root());
+        return ast::MK::Constant(cons->loc, dupType(cons->scope.get()), cons->cnst);
     }
     auto scope = dupType(scopeCnst);
     if (scope == nullptr) {

@@ -53,6 +53,24 @@ class <emptyTree><<constant:<root>>> < ()
     def req_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
+
+    self(<constant:<todo sym>>).sig({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
+
+    def self.root_const<<constant:<todo sym>>>(root_const)
+      <emptyTree>
+    end
+
+    self(<constant:<todo sym>>).sig().returns(::<root>::<constant:Integer>)
+
+    def self.get_root_const<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    self(<constant:<todo sym>>).sig().returns(::<root>::<constant:Integer>)
+
+    def root_const<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
   end
 
   class <emptyTree>::<constant:TestChild><<constant:<todo sym>>> < (<emptyTree>::<constant:TestDSLBuilder>)
