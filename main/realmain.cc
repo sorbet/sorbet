@@ -181,9 +181,6 @@ int realmain(int argc, const char *argv[]) {
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
-    if (opts.reserveMemKiB > 0) {
-        gs->reserveMemory(opts.reserveMemKiB);
-    }
     logger->trace("done building initial global state");
 
     Timer timeall(logger, "Done in");

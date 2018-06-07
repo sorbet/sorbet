@@ -83,9 +83,6 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<vector<string>>(), "path");
     options.add_options("advanced")("debug-log-file", "Path to debug log file",
                                     cxxopts::value<string>()->default_value(""), "file");
-    options.add_options("advanced")("reserve-mem-kb",
-                                    "Preallocate the specified amount of memory for symbol+name tables",
-                                    cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
 
     // Developer options
@@ -269,7 +266,6 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         opts.metricsPrefix = raw["metrics-prefix"].as<string>();
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.typedSource = raw["typed-source"].as<string>();
-        opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
         if (!opts.typedSource.empty()) {
             if (opts.print.TypedSource) {
                 logger->error("`--typed-source " + opts.typedSource +
