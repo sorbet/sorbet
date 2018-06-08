@@ -24,3 +24,6 @@ T.assert_type!(empty[0], NilClass) # error: unable to infer the type
 T.assert_type!(empty.first, NilClass) # error: unable to infer the type
 empty << 1
 empty << 4
+
+# Arrays of literals decay
+["foo"] + ["bar"]

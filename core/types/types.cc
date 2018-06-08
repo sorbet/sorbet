@@ -189,6 +189,13 @@ std::shared_ptr<Type> Types::approximateSubtract(core::Context ctx, std::shared_
     return result;
 }
 
+shared_ptr<Type> Types::dropLiteral(shared_ptr<Type> tp) {
+    if (auto *a = core::cast_type<LiteralType>(tp.get())) {
+        return a->underlying;
+    }
+    return tp;
+}
+
 shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elements) {
     shared_ptr<Type> acc = Types::bottom();
     for (auto &el : elements) {
@@ -245,7 +252,7 @@ core::TupleType::TupleType(shared_ptr<Type> underlying, vector<shared_ptr<Type>>
     : ProxyType(move(underlying)), elems(move(elements)) {}
 
 shared_ptr<Type> core::TupleType::build(core::Context ctx, vector<shared_ptr<Type>> elements) {
-    shared_ptr<Type> underlying = Types::arrayOf(ctx, Types::lubAll(ctx, elements));
+    shared_ptr<Type> underlying = Types::arrayOf(ctx, Types::dropLiteral(Types::lubAll(ctx, elements)));
     return make_shared<TupleType>(move(underlying), move(elements));
 }
 

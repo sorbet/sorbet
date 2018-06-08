@@ -82,6 +82,8 @@ public:
     static std::shared_ptr<Type> approximate(core::Context ctx, std::shared_ptr<core::Type> what,
                                              const TypeConstraint &tc);
 
+    static std::shared_ptr<Type> dropLiteral(std::shared_ptr<Type> type);
+
     /** Internal implementation. You should probably use all(). */
     static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     /** Internal implementation. You should probably use any(). */

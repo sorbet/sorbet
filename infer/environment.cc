@@ -9,12 +9,6 @@ using namespace std;
 namespace ruby_typer {
 namespace infer {
 
-shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
-    if (auto *a = core::cast_type<core::LiteralType>(tp.get())) {
-        return a->underlying;
-    }
-    return tp;
-}
 shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isDynamic()) {
@@ -934,7 +928,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             if (pin != pinnedTypes.end()) {
                 cur = pin->second;
             }
-            bool asGoodAs = core::Types::isSubType(ctx, dropLiteral(tp.type), dropLiteral(cur.type));
+            bool asGoodAs =
+                core::Types::isSubType(ctx, core::Types::dropLiteral(tp.type), core::Types::dropLiteral(cur.type));
 
             {
                 switch (bindMinLoops) {
