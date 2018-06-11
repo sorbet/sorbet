@@ -526,6 +526,7 @@ void Serializer::unpickleGS(UnPickler &p, GlobalState &result) {
     result.trace("Reading name table");
 
     int namesByHashSize = p.getU4();
+    names.reserve(namesByHashSize / 2);
     names_by_hash.reserve(names.capacity() * 2);
     for (int i = 0; i < namesByHashSize; i++) {
         auto hash = p.getU4();
