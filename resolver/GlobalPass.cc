@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace resolver {
 
 namespace {
@@ -251,4 +251,4 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
 }
 }; // namespace resolver
 
-} // namespace ruby_typer
+} // namespace sorbet

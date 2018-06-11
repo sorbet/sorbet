@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 vector<std::unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
@@ -73,4 +73,4 @@ vector<std::unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableCon
     return stats;
 }
 } // namespace dsl
-} // namespace ruby_typer
+} // namespace sorbet

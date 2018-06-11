@@ -3,7 +3,7 @@
 
 #include "ast/ast.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace resolver {
 
 struct ParsedSig {
@@ -50,4 +50,4 @@ public:
 };
 
 } // namespace resolver
-} // namespace ruby_typer
+} // namespace sorbet

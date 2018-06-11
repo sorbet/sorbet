@@ -9,7 +9,7 @@
 #include <tuple>
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class Symbol;
 class GlobalState;
@@ -796,17 +796,17 @@ public:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 namespace std {
-template <> struct hash<ruby_typer::core::SymbolRef> {
-    std::size_t operator()(const ruby_typer::core::SymbolRef k) const {
+template <> struct hash<sorbet::core::SymbolRef> {
+    std::size_t operator()(const sorbet::core::SymbolRef k) const {
         return k._id;
     }
 };
 
-template <> struct hash<ruby_typer::core::LocalVariable> {
-    std::size_t operator()(const ruby_typer::core::LocalVariable k) const {
+template <> struct hash<sorbet::core::LocalVariable> {
+    std::size_t operator()(const sorbet::core::LocalVariable k) const {
         return k._name._id * 63 + k.unique;
     }
 };

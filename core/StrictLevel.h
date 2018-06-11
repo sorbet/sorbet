@@ -1,7 +1,7 @@
 #ifndef SORBET_CORE_STRICT_LEVEL_H
 #define SORBET_CORE_STRICT_LEVEL_H
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 enum class StrictLevel {
     Stripe = 0, // Temporary; A level defined as "whatever Stripe needs it to be
@@ -11,6 +11,6 @@ enum class StrictLevel {
     Strong = 3,
 };
 }
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

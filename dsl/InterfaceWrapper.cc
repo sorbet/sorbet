@@ -10,7 +10,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 std::unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx,
                                                               std::unique_ptr<ast::Send> send) {
@@ -36,4 +36,4 @@ std::unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableConte
     return ast::MK::Let(send->loc, move(send->args.front()), move(send->recv));
 }
 } // namespace dsl
-} // namespace ruby_typer
+} // namespace sorbet

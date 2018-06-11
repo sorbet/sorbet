@@ -5,7 +5,7 @@
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 using namespace std;
@@ -152,4 +152,4 @@ void ErrorColors::disableColors() {
     rang::setControlMode(rang::control::Off);
 }
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

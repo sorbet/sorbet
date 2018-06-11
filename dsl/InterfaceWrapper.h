@@ -2,7 +2,7 @@
 #define SORBET_DSL_INTERFACE_WRAPPER_H
 #include "ast/ast.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 /**
@@ -29,6 +29,6 @@ public:
 };
 
 } // namespace dsl
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

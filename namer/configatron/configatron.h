@@ -2,7 +2,7 @@
 #define SORBET_CONFIGATRON_H
 
 #include "core/core.h"
-namespace ruby_typer {
+namespace sorbet {
 namespace namer {
 
 class configatron {
@@ -11,6 +11,6 @@ public:
                                      std::vector<std::string> files);
 };
 } // namespace namer
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_CONFIGATRON_H

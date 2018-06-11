@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 unique_ptr<ast::Expression> recurse(core::MutableContext ctx, unique_ptr<ast::Expression> body);
@@ -102,4 +102,4 @@ vector<unique_ptr<ast::Expression>> Minitest::replaceDSL(core::MutableContext ct
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

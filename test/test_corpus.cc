@@ -45,7 +45,7 @@ vector<Expectations> getInputs(int myId, int totalShards);
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     string res = arg.param.folder + arg.param.basename;
-    auto ext = ruby_typer::FileOps::getExtension(res);
+    auto ext = sorbet::FileOps::getExtension(res);
     if (ext == "rb") {
         res.erase(res.end() - ext.size() - 1, res.end());
     }
@@ -97,13 +97,13 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(bool raw = false, bool typedSource = false) : raw(raw), typedSource(typedSource){};
     vector<string> cfgs;
-    unique_ptr<ruby_typer::ast::MethodDef> preTransformMethodDef(ruby_typer::core::Context ctx,
-                                                                 unique_ptr<ruby_typer::ast::MethodDef> m) {
-        auto cfg = ruby_typer::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+    unique_ptr<sorbet::ast::MethodDef> preTransformMethodDef(sorbet::core::Context ctx,
+                                                             unique_ptr<sorbet::ast::MethodDef> m) {
+        auto cfg = sorbet::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (raw || typedSource) {
-            cfg = ruby_typer::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
+            cfg = sorbet::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
         }
-        cfg = ruby_typer::infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
+        cfg = sorbet::infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (typedSource) {
             cfg->recordAnnotations(ctx);
         }
@@ -124,37 +124,37 @@ unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",  
                                      "dsl-tree-raw", "name-table",      "name-tree",   "name-tree-raw", "cfg",
                                      "cfg-raw",      "infer",           "typed-source"};
 
-unique_ptr<ruby_typer::ast::Expression> testSerialize(ruby_typer::core::GlobalState &gs,
-                                                      unique_ptr<ruby_typer::ast::Expression> expr) {
-    auto saved = ruby_typer::core::serialize::Serializer::store(gs, expr);
-    auto restored = ruby_typer::core::serialize::Serializer::loadExpression(gs, saved.data());
+unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
+                                                  unique_ptr<sorbet::ast::Expression> expr) {
+    auto saved = sorbet::core::serialize::Serializer::store(gs, expr);
+    auto restored = sorbet::core::serialize::Serializer::loadExpression(gs, saved.data());
     return restored;
 }
 
 TEST(CorpusTest, CloneSubstitutePayload) {
     auto logger = spd::stderr_color_mt("ClonePayload");
-    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
+    auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-    ruby_typer::core::GlobalState gs(errorQueue);
-    ruby_typer::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    sorbet::core::GlobalState gs(errorQueue);
+    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
 
     auto c1 = gs.deepCopy();
     auto c2 = gs.deepCopy();
 
-    ruby_typer::core::NameRef n1;
+    sorbet::core::NameRef n1;
     {
-        ruby_typer::core::UnfreezeNameTable thaw1(*c1);
+        sorbet::core::UnfreezeNameTable thaw1(*c1);
         n1 = c1->enterNameUTF8("test new name");
     }
 
-    ruby_typer::core::GlobalSubstitution subst(*c1, *c2);
+    sorbet::core::GlobalSubstitution subst(*c1, *c2);
     ASSERT_EQ("test new name", subst.substitute(n1).toString(*c2));
     ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
     ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
 }
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
-    vector<unique_ptr<ruby_typer::core::BasicError>> errors;
+    vector<unique_ptr<sorbet::core::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
     SCOPED_TRACE(inputPath);
@@ -171,31 +171,31 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
-    ruby_typer::core::GlobalState gs(errorQueue);
-    ruby_typer::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
-    ruby_typer::core::MutableContext ctx(gs, ruby_typer::core::Symbols::root());
+    auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+    sorbet::core::GlobalState gs(errorQueue);
+    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
 
     // Parser
-    vector<ruby_typer::core::FileRef> files;
+    vector<sorbet::core::FileRef> files;
     {
-        ruby_typer::core::UnfreezeFileTable fileTableAccess(gs);
+        sorbet::core::UnfreezeFileTable fileTableAccess(gs);
 
         for (auto &srcPath : test.sourceFiles) {
             auto path = test.folder + srcPath;
-            auto src = ruby_typer::FileOps::read(path.c_str());
+            auto src = sorbet::FileOps::read(path.c_str());
             files.push_back(gs.enterFile(path, src));
         }
     }
-    vector<unique_ptr<ruby_typer::ast::Expression>> trees;
+    vector<unique_ptr<sorbet::ast::Expression>> trees;
     map<string, string> got;
 
     for (auto file : files) {
-        std::unique_ptr<ruby_typer::parser::Node> nodes;
+        std::unique_ptr<sorbet::parser::Node> nodes;
         {
-            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            nodes = ruby_typer::parser::Parser::run(gs, file);
+            nodes = sorbet::parser::Parser::run(gs, file);
         }
         {
             auto newErrors = errorQueue->drainErrors();
@@ -220,11 +220,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Desugarer
-        std::unique_ptr<ruby_typer::ast::Expression> desugared;
+        std::unique_ptr<sorbet::ast::Expression> desugared;
         {
-            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            desugared = testSerialize(gs, ruby_typer::ast::desugar::node2Tree(ctx, move(nodes)));
+            desugared = testSerialize(gs, sorbet::ast::desugar::node2Tree(ctx, move(nodes)));
         }
 
         expectation = test.expectations.find("ast");
@@ -244,11 +244,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // DSL
-        std::unique_ptr<ruby_typer::ast::Expression> dslUnwound;
+        std::unique_ptr<sorbet::ast::Expression> dslUnwound;
         {
-            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            dslUnwound = testSerialize(gs, ruby_typer::dsl::DSL::run(ctx, move(desugared)));
+            dslUnwound = testSerialize(gs, sorbet::dsl::DSL::run(ctx, move(desugared)));
         }
 
         expectation = test.expectations.find("dsl-tree");
@@ -268,19 +268,19 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Namer
-        std::unique_ptr<ruby_typer::ast::Expression> namedTree;
+        std::unique_ptr<sorbet::ast::Expression> namedTree;
         {
-            ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-            ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, ruby_typer::namer::Namer::run(ctx, move(dslUnwound)));
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            namedTree = testSerialize(gs, sorbet::namer::Namer::run(ctx, move(dslUnwound)));
         }
         trees.emplace_back(move(namedTree));
     }
 
     {
-        ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-        ruby_typer::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = ruby_typer::resolver::Resolver::run(ctx, move(trees));
+        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+        trees = sorbet::resolver::Resolver::run(ctx, move(trees));
     }
 
     auto expectation = test.expectations.find("name-table");
@@ -318,7 +318,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).sigil == ruby_typer::core::StrictLevel::Stripe) {
+            if (file.data(ctx).sigil == sorbet::core::StrictLevel::Stripe) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp expectations must specify # typed:";
@@ -331,11 +331,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
-            auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            auto cfg = sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
+            dot << "digraph \"" << sorbet::FileOps::getFileName(inputPath) << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -352,11 +352,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
-            auto cfg = ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            auto cfg = sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             stringstream dot;
-            dot << "digraph \"" << ruby_typer::FileOps::getFileName(inputPath) << "\" {" << '\n';
+            dot << "digraph \"" << sorbet::FileOps::getFileName(inputPath) << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -373,7 +373,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
-            ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
@@ -388,7 +388,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("infer");
             CFG_Collector_and_Typer collector;
-            ruby_typer::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
             auto checker = test.folder + expectation->second;
             SCOPED_TRACE(checker);
@@ -404,7 +404,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
         auto checker = test.folder + expectation->second;
-        auto expect = ruby_typer::FileOps::read(checker.c_str());
+        auto expect = sorbet::FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
             TEST_COUT << gotPhase.first << " OK" << '\n';
@@ -419,7 +419,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     // Check warnings and errors
 
-    map<pair<ruby_typer::core::FileRef, int>, ErrorAndPos> expectedErrors;
+    map<pair<sorbet::core::FileRef, int>, ErrorAndPos> expectedErrors;
     regex errorRegex("# error: ?(.*)");           // something like 'foo   # error: Badness'
     regex errorPosRegex("([ ]*#[ ]+)(\\^+)[ ]*"); // someting like '   #    ^^^^^  '
     regex commendOut("^[ ]*#");
@@ -459,7 +459,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-    map<pair<ruby_typer::core::FileRef, int>, int> seenErrorLines;
+    map<pair<sorbet::core::FileRef, int>, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
         auto filePath = error->loc.file.data(gs).path();
@@ -566,8 +566,8 @@ bool compareNames(const string &left, const string &right) {
 
     // If the base names match, compare by reverse order on extension, so that
     // .exp comes after .rb.
-    auto lext = ruby_typer::FileOps::getExtension(left);
-    auto rext = ruby_typer::FileOps::getExtension(right);
+    auto lext = sorbet::FileOps::getExtension(left);
+    auto rext = sorbet::FileOps::getExtension(right);
     if (lext != rext) {
         return rext < lext;
     }

@@ -26,7 +26,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <iostream>
 #endif
 
-namespace ruby_typer {
+namespace sorbet {
 
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
 // Uncomment to make vectors debuggable
@@ -40,9 +40,9 @@ constexpr bool debug_mode = false;
 constexpr bool debug_mode = true;
 #endif
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
-#define ENFORCE(x, ...)                                                 \
-    (::ruby_typer::debug_mode && !(x) && (!stopInDebugger() || !(x)) && \
-     ::ruby_typer::Error::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)))
+#define ENFORCE(x, ...)                                             \
+    (::sorbet::debug_mode && !(x) && (!stopInDebugger() || !(x)) && \
+     ::sorbet::Error::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)))
 
 #define DEBUG_ONLY(X) \
     if (debug_mode) { \
@@ -66,10 +66,10 @@ template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = a
 #define UNUSED(x) x
 #endif
 
-#define CheckSize(T, ExpSize, ExpAlign)                                                  \
-    inline void _##T##is##ExpSize##_bytes_long_() {                                      \
-        ruby_typer::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);       \
-        ruby_typer::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned); \
+#define CheckSize(T, ExpSize, ExpAlign)                                              \
+    inline void _##T##is##ExpSize##_bytes_long_() {                                  \
+        sorbet::check_size<T, ExpSize> UNUSED(_##T##is##ExpSize##_bytes_long);       \
+        sorbet::check_align<T, ExpAlign> UNUSED(_##T##is##ExpAlign##_bytes_aligned); \
     }
 
 /**
@@ -106,13 +106,13 @@ template <class From, class To> To *fast_cast(From *what) {
 class FileOps final {
 public:
     static std::string read(const absl::string_view filename);
-    static void write(const absl::string_view filename, const std::vector<ruby_typer::u1> &data);
+    static void write(const absl::string_view filename, const std::vector<sorbet::u1> &data);
     static void write(const absl::string_view filename, const absl::string_view text);
     static absl::string_view getFileName(const absl::string_view path);
     static absl::string_view getExtension(const absl::string_view path);
 };
 
-} // namespace ruby_typer
+} // namespace sorbet
 std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
 ;
 

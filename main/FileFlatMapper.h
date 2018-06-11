@@ -3,7 +3,7 @@
 
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 /** read @file arguments and put them explicitly
  *  Steals the original arguments and will put them back on destruction.
@@ -20,5 +20,5 @@ public:
     ~FileFlatMapper();
 };
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet
 #endif

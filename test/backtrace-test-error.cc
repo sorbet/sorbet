@@ -2,5 +2,5 @@
 #include <csignal>
 
 int main() {
-    ruby_typer::Error::raise("oops");
+    sorbet::Error::raise("oops");
 }

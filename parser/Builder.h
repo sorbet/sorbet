@@ -8,14 +8,14 @@
 
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 class Node;
 
 class Builder final {
 public:
-    Builder(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
+    Builder(sorbet::core::GlobalState &gs, sorbet::core::FileRef file);
     ~Builder();
 
     static ruby_parser::builder interface;
@@ -28,6 +28,6 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 }; // namespace parser
-}; // namespace ruby_typer
+}; // namespace sorbet
 
 #endif

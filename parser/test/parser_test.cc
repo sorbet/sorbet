@@ -11,20 +11,20 @@
 #include <vector>
 
 namespace spd = spdlog;
-using ruby_typer::u4;
+using sorbet::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST(ParserTest, SimpleParse) { // NOLINT
-    ruby_typer::core::GlobalState gs(errorQueue);
+    sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
-    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
-    ruby_typer::core::UnfreezeFileTable ft(gs);
-    ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    ruby_typer::parser::Parser::run(gs, "<test>", "class A; class B; end; end");
-    ruby_typer::parser::Parser::run(gs, "<test>", "class A::B; module B; end; end");
+    sorbet::core::UnfreezeNameTable nameTableAccess(gs);
+    sorbet::core::UnfreezeFileTable ft(gs);
+    sorbet::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
+    sorbet::parser::Parser::run(gs, "<test>", "class A; class B; end; end");
+    sorbet::parser::Parser::run(gs, "<test>", "class A::B; module B; end; end");
 }
 
 struct DedentTest {
@@ -40,7 +40,7 @@ TEST(ParserTest, TestDedent) { // NOLINT
         {2, "  a\n   b\n  c\n", "a\n   b\n  c\n"},
     };
     for (auto &tc : cases) {
-        ruby_typer::parser::Dedenter dedent(tc.level);
+        sorbet::parser::Dedenter dedent(tc.level);
         string got = dedent.dedent(tc.in);
         EXPECT_EQ(got, tc.out);
     }

@@ -7,7 +7,7 @@
 
 namespace spd = spdlog;
 using namespace std;
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 struct PrintOptions {
     std::string option;
@@ -303,4 +303,4 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
 }
 
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet

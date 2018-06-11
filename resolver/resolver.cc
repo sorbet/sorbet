@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace resolver {
 namespace {
 
@@ -1283,4 +1283,4 @@ std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext
 } // namespace namer
 
 } // namespace resolver
-} // namespace ruby_typer
+} // namespace sorbet

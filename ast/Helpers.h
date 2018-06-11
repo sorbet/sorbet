@@ -5,7 +5,7 @@
 #include "core/Names/desugar.h"
 #include "core/Names/dsl.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 class MK {
@@ -268,6 +268,6 @@ public:
 };
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_TREES_H

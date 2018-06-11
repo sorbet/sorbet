@@ -8,7 +8,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 auto logger = spd::stderr_color_mt("parse");
 auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
@@ -127,4 +127,4 @@ TEST(CoreTest, Substitute) { // NOLINT
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

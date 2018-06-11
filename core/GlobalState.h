@@ -9,7 +9,7 @@
 #include <memory>
 #include <mutex>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class Name;
@@ -149,6 +149,6 @@ private:
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_GLOBAL_STATE_H

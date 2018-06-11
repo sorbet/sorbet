@@ -3,7 +3,7 @@
 
 #include "Types.h"
 #include <unordered_map>
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class TypeConstraint {
@@ -46,6 +46,6 @@ public:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_TYPECONSTRAINT_H

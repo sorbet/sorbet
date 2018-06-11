@@ -2,7 +2,7 @@
 
 #include <algorithm> // std::sort
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 // This sorts the underlying `origins`
@@ -33,4 +33,4 @@ std::vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

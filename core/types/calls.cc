@@ -6,8 +6,8 @@
 #include <algorithm> // find_if, sort
 #include <unordered_set>
 
-template class std::vector<ruby_typer::core::SymbolRef>;
-using namespace ruby_typer;
+template class std::vector<sorbet::core::SymbolRef>;
+using namespace sorbet;
 using namespace core;
 using namespace std;
 

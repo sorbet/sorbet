@@ -18,7 +18,7 @@ namespace spd = spdlog;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 std::shared_ptr<spd::logger> logger;
 int returnCode;
@@ -275,4 +275,4 @@ int realmain(int argc, const char *argv[]) {
 EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
     : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet

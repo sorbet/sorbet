@@ -1,6 +1,6 @@
 #include "ast/ast.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 class Verifier {
@@ -9,4 +9,4 @@ public:
 };
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet

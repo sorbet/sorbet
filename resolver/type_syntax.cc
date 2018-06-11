@@ -5,7 +5,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace resolver {
 
 shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
@@ -544,4 +544,4 @@ const ParsedSig::TypeArgSpec &ParsedSig::findTypeArgByName(core::NameRef name) c
     return emptyTypeArgSpec;
 }
 } // namespace resolver
-} // namespace ruby_typer
+} // namespace sorbet

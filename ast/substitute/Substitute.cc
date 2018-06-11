@@ -2,12 +2,12 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 
-using namespace ruby_typer;
-using namespace ruby_typer::ast;
+using namespace sorbet;
+using namespace sorbet::ast;
 
 class SubstWalk {
 private:
-    const ruby_typer::core::GlobalSubstitution &subst;
+    const sorbet::core::GlobalSubstitution &subst;
 
     unique_ptr<ast::Expression> substClassName(core::MutableContext ctx, unique_ptr<ast::Expression> node) {
         auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
@@ -44,7 +44,7 @@ private:
     }
 
 public:
-    SubstWalk(const ruby_typer::core::GlobalSubstitution &subst) : subst(subst) {}
+    SubstWalk(const sorbet::core::GlobalSubstitution &subst) : subst(subst) {}
 
     unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original) {
         original->name = substClassName(ctx, move(original->name));
@@ -104,9 +104,9 @@ public:
     }
 };
 
-std::unique_ptr<Expression> ruby_typer::ast::Substitute::run(core::MutableContext ctx,
-                                                             const ruby_typer::core::GlobalSubstitution &subst,
-                                                             std::unique_ptr<Expression> what) {
+std::unique_ptr<Expression> sorbet::ast::Substitute::run(core::MutableContext ctx,
+                                                         const sorbet::core::GlobalSubstitution &subst,
+                                                         std::unique_ptr<Expression> what) {
     if (subst.useFastPath()) {
         return what;
     }

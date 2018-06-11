@@ -16,12 +16,12 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace infer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("infer_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 class InferFixture : public ::testing::Test {
 public:
@@ -38,11 +38,11 @@ private:
 };
 
 void processSource(core::GlobalState &cb, string str) {
-    ruby_typer::core::UnfreezeNameTable nt(cb);
-    ruby_typer::core::UnfreezeSymbolTable st(cb);
-    ruby_typer::core::UnfreezeFileTable ft(cb);
+    sorbet::core::UnfreezeNameTable nt(cb);
+    sorbet::core::UnfreezeSymbolTable st(cb);
+    sorbet::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
-    ruby_typer::core::MutableContext ctx(cb, core::Symbols::root());
+    sorbet::core::MutableContext ctx(cb, core::Symbols::root());
     auto tree = ast::desugar::node2Tree(ctx, move(ast));
     tree = dsl::DSL::run(ctx, move(tree));
     tree = namer::Namer::run(ctx, move(tree));
@@ -188,4 +188,4 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
 
 } // namespace test
 } // namespace infer
-} // namespace ruby_typer
+} // namespace sorbet

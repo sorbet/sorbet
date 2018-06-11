@@ -3,7 +3,7 @@
 #include "infer.h"
 
 using namespace std;
-namespace ruby_typer {
+namespace sorbet {
 
 bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
     if (bb->exprs.size() > 3) {
@@ -159,4 +159,4 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
 
     return cfg;
 }
-} // namespace ruby_typer
+} // namespace sorbet

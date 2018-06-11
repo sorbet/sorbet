@@ -7,12 +7,12 @@
 #include <sstream>
 #include <string>
 
-template class std::vector<ruby_typer::core::TypeAndOrigins>;
-template class std::vector<ruby_typer::core::LocalVariable>;
-template class std::vector<std::pair<ruby_typer::core::NameRef, ruby_typer::core::SymbolRef>>;
-template class std::vector<const ruby_typer::core::Symbol *>;
+template class std::vector<sorbet::core::TypeAndOrigins>;
+template class std::vector<sorbet::core::LocalVariable>;
+template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::SymbolRef>>;
+template class std::vector<const sorbet::core::Symbol *>;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 using namespace std;
@@ -703,4 +703,4 @@ std::string LocalVariable::toString(const core::GlobalState &gs) const {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

@@ -3,7 +3,7 @@
 #include "main/realmain.h"
 
 using namespace std;
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 vector<string> split(const string &s, char delimiter) {
     vector<string> tokens;
@@ -51,4 +51,4 @@ FileFlatMapper::~FileFlatMapper() {
 }
 
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet

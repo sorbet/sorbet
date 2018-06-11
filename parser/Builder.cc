@@ -14,14 +14,14 @@ using ruby_parser::node_list;
 using ruby_parser::self_ptr;
 using ruby_parser::token;
 
-using ruby_typer::core::GlobalState;
+using sorbet::core::GlobalState;
 using std::make_unique;
 using std::string;
 using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 string Dedenter::dedent(const string &str) {
@@ -87,7 +87,7 @@ public:
         return Loc{file_, clamp((u4)begin->start()), clamp((u4)end->end())};
     }
 
-    Loc collection_loc(const token *begin, ruby_typer::parser::NodeVec &elts, const token *end) {
+    Loc collection_loc(const token *begin, sorbet::parser::NodeVec &elts, const token *end) {
         if (begin != nullptr) {
             ENFORCE(end != nullptr);
             return tok_loc(begin, end);
@@ -99,7 +99,7 @@ public:
         return elts.front()->loc.join(elts.back()->loc);
     }
 
-    Loc collection_loc(ruby_typer::parser::NodeVec &elts) {
+    Loc collection_loc(sorbet::parser::NodeVec &elts) {
         return collection_loc(nullptr, elts, nullptr);
     }
 
@@ -139,7 +139,7 @@ public:
             if (driver_->lex.is_declared(name.toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
-                return make_unique<Send>(node->loc, nullptr, id->name, ruby_typer::parser::NodeVec());
+                return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
             }
         }
         return node;
@@ -153,14 +153,14 @@ public:
         return make_unique<Arg>(tok_loc(name), gs_.enterNameUTF8(name->string()));
     }
 
-    unique_ptr<Node> args(const token *begin, ruby_typer::parser::NodeVec args, const token *end, bool check_args) {
+    unique_ptr<Node> args(const token *begin, sorbet::parser::NodeVec args, const token *end, bool check_args) {
         if (begin == nullptr && args.empty() && end == nullptr) {
             return nullptr;
         }
         return make_unique<Args>(collection_loc(begin, args, end), move(args));
     }
 
-    unique_ptr<Node> array(const token *begin, ruby_typer::parser::NodeVec elements, const token *end) {
+    unique_ptr<Node> array(const token *begin, sorbet::parser::NodeVec elements, const token *end) {
         return make_unique<Array>(collection_loc(begin, elements, end), move(elements));
     }
 
@@ -200,7 +200,7 @@ public:
         }
     }
 
-    unique_ptr<Node> associate(const token *begin, ruby_typer::parser::NodeVec pairs, const token *end) {
+    unique_ptr<Node> associate(const token *begin, sorbet::parser::NodeVec pairs, const token *end) {
         return make_unique<Hash>(collection_loc(begin, pairs, end), move(pairs));
     }
 
@@ -208,9 +208,9 @@ public:
         NameRef method = gs_.enterNameUTF8(selector->string() + "=");
         Loc loc = receiver->loc.join(tok_loc(selector));
         if ((dot != nullptr) && dot->string() == "&.") {
-            return make_unique<CSend>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
+            return make_unique<CSend>(loc, move(receiver), method, sorbet::parser::NodeVec());
         }
-        return make_unique<Send>(loc, move(receiver), method, ruby_typer::parser::NodeVec());
+        return make_unique<Send>(loc, move(receiver), method, sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> back_ref(const token *tok) {
@@ -226,7 +226,7 @@ public:
         }
 
         if (body == nullptr) {
-            return make_unique<Begin>(loc, ruby_typer::parser::NodeVec());
+            return make_unique<Begin>(loc, sorbet::parser::NodeVec());
         }
         if (auto *b = parser::cast_node<Begin>(body.get())) {
             return body;
@@ -234,12 +234,12 @@ public:
         if (auto *m = parser::cast_node<Mlhs>(body.get())) {
             return body;
         }
-        ruby_typer::parser::NodeVec stmts;
+        sorbet::parser::NodeVec stmts;
         stmts.push_back(move(body));
         return make_unique<Begin>(loc, move(stmts));
     }
 
-    unique_ptr<Node> begin_body(unique_ptr<Node> body, ruby_typer::parser::NodeVec rescue_bodies, const token *else_tok,
+    unique_ptr<Node> begin_body(unique_ptr<Node> body, sorbet::parser::NodeVec rescue_bodies, const token *else_tok,
                                 unique_ptr<Node> else_, const token *ensure_tok, unique_ptr<Node> ensure) {
         if (!rescue_bodies.empty()) {
             if (else_ == nullptr) {
@@ -252,7 +252,7 @@ public:
         } else if (else_ != nullptr) {
             // TODO: We're losing the source-level information that there was an
             // `else` here.
-            ruby_typer::parser::NodeVec stmts;
+            sorbet::parser::NodeVec stmts;
             if (body != nullptr) {
                 stmts.push_back(move(body));
             }
@@ -280,18 +280,18 @@ public:
             if (auto *b = parser::cast_node<Begin>(body.get())) {
                 return make_unique<Kwbegin>(loc, move(b->stmts));
             } else {
-                ruby_typer::parser::NodeVec nodes;
+                sorbet::parser::NodeVec nodes;
                 nodes.push_back(move(body));
                 return make_unique<Kwbegin>(loc, move(nodes));
             }
         }
-        return make_unique<Kwbegin>(loc, ruby_typer::parser::NodeVec());
+        return make_unique<Kwbegin>(loc, sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> binary_op(unique_ptr<Node> receiver, const token *oper, unique_ptr<Node> arg) {
         Loc loc = receiver->loc.join(arg->loc);
 
-        ruby_typer::parser::NodeVec args;
+        sorbet::parser::NodeVec args;
         args.push_back(move(arg));
 
         return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
@@ -301,10 +301,10 @@ public:
                            unique_ptr<Node> body, const token *end) {
         if (auto *y = parser::cast_node<Yield>(method_call.get())) {
             error(ruby_parser::dclass::BlockGivenToYield, y->loc);
-            return make_unique<Yield>(y->loc, ruby_typer::parser::NodeVec());
+            return make_unique<Yield>(y->loc, sorbet::parser::NodeVec());
         }
 
-        ruby_typer::parser::NodeVec *callargs = nullptr;
+        sorbet::parser::NodeVec *callargs = nullptr;
         if (auto *s = parser::cast_node<Send>(method_call.get())) {
             callargs = &s->args;
         }
@@ -326,7 +326,7 @@ public:
             return make_unique<Block>(method_call->loc.join(tok_loc(end)), move(method_call), move(args), move(body));
         }
 
-        ruby_typer::parser::NodeVec *exprs;
+        sorbet::parser::NodeVec *exprs;
         typecase(method_call.get(), [&](Break *b) { exprs = &b->exprs; },
 
                  [&](Return *r) { exprs = &r->exprs; },
@@ -364,7 +364,7 @@ public:
     }
 
     unique_ptr<Node> call_method(unique_ptr<Node> receiver, const token *dot, const token *selector,
-                                 const token *lparen, ruby_typer::parser::NodeVec args, const token *rparen) {
+                                 const token *lparen, sorbet::parser::NodeVec args, const token *rparen) {
         Loc selector_loc, start_loc;
         if (selector != nullptr) {
             selector_loc = tok_loc(selector);
@@ -400,7 +400,7 @@ public:
         }
     }
 
-    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, ruby_typer::parser::NodeVec when_bodies,
+    unique_ptr<Node> case_(const token *case_, unique_ptr<Node> expr, sorbet::parser::NodeVec when_bodies,
                            const token *else_tok, unique_ptr<Node> else_body, const token *end) {
         return make_unique<Case>(tok_loc(case_).join(tok_loc(end)), move(expr), move(when_bodies), move(else_body));
     }
@@ -413,7 +413,7 @@ public:
         return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
-    unique_ptr<Node> compstmt(ruby_typer::parser::NodeVec nodes) {
+    unique_ptr<Node> compstmt(sorbet::parser::NodeVec nodes) {
         switch (nodes.size()) {
             case 0:
                 return nullptr;
@@ -574,13 +574,13 @@ public:
         return make_unique<Ident>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
+    unique_ptr<Node> index(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                            const token *rbrack) {
         return make_unique<Send>(receiver->loc.join(tok_loc(rbrack)), move(receiver), core::Names::squareBrackets(),
                                  move(indexes));
     }
 
-    unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, ruby_typer::parser::NodeVec indexes,
+    unique_ptr<Node> index_asgn(unique_ptr<Node> receiver, const token *lbrack, sorbet::parser::NodeVec indexes,
                                 const token *rbrack) {
         return make_unique<Send>(receiver->loc.join(tok_loc(rbrack)), move(receiver), core::Names::squareBracketsEq(),
                                  move(indexes));
@@ -594,7 +594,7 @@ public:
         return make_unique<IVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
+    unique_ptr<Node> keyword_break(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         return make_unique<Break>(loc, move(args));
@@ -604,7 +604,7 @@ public:
         return make_unique<Defined>(tok_loc(keyword).join(arg->loc), move(arg));
     }
 
-    unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
+    unique_ptr<Node> keyword_next(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                   const token *rparen) {
         return make_unique<Next>(tok_loc(keyword).join(collection_loc(lparen, args, rparen)), move(args));
     }
@@ -617,13 +617,13 @@ public:
         return make_unique<Retry>(tok_loc(keyword));
     }
 
-    unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
+    unique_ptr<Node> keyword_return(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                     const token *rparen) {
         Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         return make_unique<Return>(loc, move(args));
     }
 
-    unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
+    unique_ptr<Node> keyword_super(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = tok_loc(keyword);
         Loc argloc = collection_loc(lparen, args, rparen);
@@ -633,7 +633,7 @@ public:
         return make_unique<Super>(loc, move(args));
     }
 
-    unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, ruby_typer::parser::NodeVec args,
+    unique_ptr<Node> keyword_yield(const token *keyword, const token *lparen, sorbet::parser::NodeVec args,
                                    const token *rparen) {
         Loc loc = tok_loc(keyword).join(collection_loc(lparen, args, rparen));
         if (!args.empty() && parser::isa_node<BlockPass>(args.back().get())) {
@@ -707,7 +707,7 @@ public:
         // to support that, we'd need to analyze that here and call
         // `driver_->lex.declare`.
         Loc loc = receiver->loc.join(arg->loc);
-        ruby_typer::parser::NodeVec args;
+        sorbet::parser::NodeVec args;
         args.emplace_back(move(arg));
         return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
     }
@@ -716,7 +716,7 @@ public:
         return make_unique<Masgn>(mlhs->loc.join(rhs->loc), move(mlhs), move(rhs));
     }
 
-    unique_ptr<Node> multi_lhs(const token *begin, ruby_typer::parser::NodeVec items, const token *end) {
+    unique_ptr<Node> multi_lhs(const token *begin, sorbet::parser::NodeVec items, const token *end) {
         return make_unique<Mlhs>(collection_loc(begin, items, end), move(items));
     }
 
@@ -724,7 +724,7 @@ public:
         if (auto *mlhs = parser::cast_node<Mlhs>(item.get())) {
             return item;
         }
-        ruby_typer::parser::NodeVec args;
+        sorbet::parser::NodeVec args;
         args.emplace_back(move(item));
         return make_unique<Mlhs>(collection_loc(begin, args, end), move(args));
     }
@@ -755,13 +755,13 @@ public:
             } else {
                 loc = tok_loc(not_).join(receiver->loc);
             }
-            return make_unique<Send>(loc, move(receiver), core::Names::bang(), ruby_typer::parser::NodeVec());
+            return make_unique<Send>(loc, move(receiver), core::Names::bang(), sorbet::parser::NodeVec());
         }
 
         ENFORCE(begin != nullptr && end != nullptr);
-        auto body = make_unique<Begin>(tok_loc(begin).join(tok_loc(end)), ruby_typer::parser::NodeVec());
+        auto body = make_unique<Begin>(tok_loc(begin).join(tok_loc(end)), sorbet::parser::NodeVec());
         return make_unique<Send>(tok_loc(not_).join(body->loc), move(body), core::Names::bang(),
-                                 ruby_typer::parser::NodeVec());
+                                 sorbet::parser::NodeVec());
     }
 
     unique_ptr<Node> nth_ref(const token *tok) {
@@ -795,7 +795,7 @@ public:
                                  make_unique<Symbol>(tok_loc(key), gs_.enterNameUTF8(key->string())), move(value));
     }
 
-    unique_ptr<Node> pair_quoted(const token *begin, ruby_typer::parser::NodeVec parts, const token *end,
+    unique_ptr<Node> pair_quoted(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                  unique_ptr<Node> value) {
         auto sym = make_unique<DSymbol>(tok_loc(begin).join(tok_loc(end)), move(parts));
         return make_unique<Pair>(tok_loc(begin).join(value->loc), move(sym), move(value));
@@ -831,7 +831,7 @@ public:
         return make_unique<Complex>(tok_loc(tok), tok->string());
     }
 
-    unique_ptr<Node> regexp_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end,
+    unique_ptr<Node> regexp_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end,
                                     unique_ptr<Node> options) {
         Loc loc = tok_loc(begin).join(tok_loc(end)).join(maybe_loc(options));
         return make_unique<Regexp>(loc, move(parts), move(options));
@@ -890,7 +890,7 @@ public:
         return make_unique<String>(tok_loc(string_), gs_.enterNameUTF8(string_->string()));
     }
 
-    unique_ptr<Node> string_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
+    unique_ptr<Node> string_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
         Loc loc = collection_loc(begin, parts, end);
         return make_unique<DString>(loc, move(parts));
     }
@@ -903,7 +903,7 @@ public:
         return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
-    unique_ptr<Node> symbol_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
+    unique_ptr<Node> symbol_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
         return make_unique<DSymbol>(collection_loc(begin, parts, end), move(parts));
     }
 
@@ -911,9 +911,9 @@ public:
         return make_unique<Symbol>(tok_loc(symbol), gs_.enterNameUTF8(symbol->string()));
     }
 
-    unique_ptr<Node> symbols_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
+    unique_ptr<Node> symbols_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
         Loc loc = collection_loc(begin, parts, end);
-        ruby_typer::parser::NodeVec out_parts;
+        sorbet::parser::NodeVec out_parts;
         out_parts.reserve(parts.size());
         for (auto &p : parts) {
             if (auto *s = parser::cast_node<String>(p.get())) {
@@ -937,7 +937,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, ruby_typer::parser::NodeVec types, const token *end) {
+    unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, sorbet::parser::NodeVec types, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -966,13 +966,13 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_genargs(const token *begin, ruby_typer::parser::NodeVec genargs,
-                                ruby_typer::parser::NodeVec constraints, const token *end) {
+    unique_ptr<Node> tr_genargs(const token *begin, sorbet::parser::NodeVec genargs,
+                                sorbet::parser::NodeVec constraints, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, ruby_typer::parser::NodeVec genargs,
-                                ruby_typer::parser::NodeVec constraints, const token *end) {
+    unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
+                                sorbet::parser::NodeVec constraints, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -980,7 +980,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, ruby_typer::parser::NodeVec genargs,
+    unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
                                 const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
@@ -1030,7 +1030,7 @@ public:
         Error::raise("Unsupported TypedRuby syntax");
     }
 
-    unique_ptr<Node> tr_tuple(const token *begin, ruby_typer::parser::NodeVec types, const token *end) {
+    unique_ptr<Node> tr_tuple(const token *begin, sorbet::parser::NodeVec types, const token *end) {
         Error::raise("Unsupported TypedRuby syntax");
     }
 
@@ -1053,10 +1053,10 @@ public:
             op = gs_.enterNameUTF8(oper->string());
         }
 
-        return make_unique<Send>(loc, move(receiver), op, ruby_typer::parser::NodeVec());
+        return make_unique<Send>(loc, move(receiver), op, sorbet::parser::NodeVec());
     }
 
-    unique_ptr<Node> undef_method(const token *undef, ruby_typer::parser::NodeVec name_list) {
+    unique_ptr<Node> undef_method(const token *undef, sorbet::parser::NodeVec name_list) {
         Loc loc = tok_loc(undef);
         if (!name_list.empty()) {
             loc = loc.join(name_list.back()->loc);
@@ -1064,7 +1064,7 @@ public:
         return make_unique<Undef>(loc, move(name_list));
     }
 
-    unique_ptr<Node> when(const token *when, ruby_typer::parser::NodeVec patterns, const token *then,
+    unique_ptr<Node> when(const token *when, sorbet::parser::NodeVec patterns, const token *then,
                           unique_ptr<Node> body) {
         Loc loc = tok_loc(when);
         if (body != nullptr) {
@@ -1077,16 +1077,16 @@ public:
         return make_unique<When>(loc, move(patterns), move(body));
     }
 
-    unique_ptr<Node> word(ruby_typer::parser::NodeVec parts) {
+    unique_ptr<Node> word(sorbet::parser::NodeVec parts) {
         Loc loc = collection_loc(parts);
         return make_unique<DString>(loc, move(parts));
     }
 
-    unique_ptr<Node> words_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
+    unique_ptr<Node> words_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
         return make_unique<Array>(collection_loc(begin, parts, end), move(parts));
     }
 
-    unique_ptr<Node> xstring_compose(const token *begin, ruby_typer::parser::NodeVec parts, const token *end) {
+    unique_ptr<Node> xstring_compose(const token *begin, sorbet::parser::NodeVec parts, const token *end) {
         return make_unique<XString>(collection_loc(begin, parts, end), move(parts));
     }
 
@@ -1112,8 +1112,8 @@ public:
         return reinterpret_cast<foreign_ptr>(foreign_nodes_.size() - 1);
     }
 
-    ruby_typer::parser::NodeVec convert_node_list(const node_list *cargs) {
-        ruby_typer::parser::NodeVec out;
+    sorbet::parser::NodeVec convert_node_list(const node_list *cargs) {
+        sorbet::parser::NodeVec out;
         if (cargs == nullptr) {
             return out;
         }
@@ -1131,12 +1131,12 @@ Builder::Builder(GlobalState &gs, core::FileRef file) : impl_(new Builder::Impl(
 Builder::~Builder() = default;
 
 }; // namespace parser
-}; // namespace ruby_typer
+}; // namespace sorbet
 
 namespace {
 
-using ruby_typer::parser::Builder;
-using ruby_typer::parser::Node;
+using sorbet::parser::Builder;
+using sorbet::parser::Node;
 
 Builder::Impl *cast_builder(self_ptr builder) {
     return const_cast<Builder::Impl *>(reinterpret_cast<const Builder::Impl *>(builder));
@@ -1870,7 +1870,7 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 }
 }; // namespace
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
@@ -2017,4 +2017,4 @@ struct ruby_parser::builder Builder::interface = {
     xstring_compose,
 };
 } // namespace parser
-} // namespace ruby_typer
+} // namespace sorbet

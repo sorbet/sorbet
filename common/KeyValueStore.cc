@@ -2,7 +2,7 @@
 
 #include <utility>
 using namespace std;
-namespace ruby_typer {
+namespace sorbet {
 const string OLD_VERSION_KEY = "VERSION";
 const string VERSION_KEY = "DB_FORMAT_VERSION";
 const size_t MAX_DB_SIZE_BYTES =
@@ -135,4 +135,4 @@ void KeyValueStore::writeString(const absl::string_view key, std::string value) 
     write(key, move(rawData));
 }
 
-} // namespace ruby_typer
+} // namespace sorbet

@@ -7,7 +7,7 @@
 #include <unordered_set>
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
@@ -413,4 +413,4 @@ int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
     }
 }
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet

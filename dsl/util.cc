@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
@@ -68,4 +68,4 @@ unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast:
 }
 
 } // namespace dsl
-} // namespace ruby_typer
+} // namespace sorbet

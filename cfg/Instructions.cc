@@ -4,11 +4,11 @@
 #include "core/TypeConstraint.h"
 #include <utility>
 // helps debugging
-template class std::unique_ptr<ruby_typer::cfg::Instruction>;
+template class std::unique_ptr<sorbet::cfg::Instruction>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 Return::Return(core::LocalVariable what) : what(what) {
@@ -145,4 +145,4 @@ string DebugEnvironment::toString(core::Context ctx) {
     return str;
 }
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet

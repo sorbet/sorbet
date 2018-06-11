@@ -7,9 +7,9 @@
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
 
-template class std::vector<ruby_typer::u4>;
+template class std::vector<sorbet::u4>;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace serialize {
 const u4 Serializer::VERSION;
@@ -1049,4 +1049,4 @@ NameRef Serializer::unpickleNameRef(Serializer::UnPickler &p, GlobalState &gs) {
 } // namespace serialize
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

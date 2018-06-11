@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
@@ -554,5 +554,5 @@ public:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_TYPES_H

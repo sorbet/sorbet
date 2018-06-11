@@ -11,7 +11,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 class DSLReplacer {
@@ -105,4 +105,4 @@ unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::E
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

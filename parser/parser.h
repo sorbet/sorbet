@@ -3,17 +3,16 @@
 
 #include "Node.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 class Parser final {
 public:
-    static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, ruby_typer::core::FileRef file);
-    static std::unique_ptr<Node> run(ruby_typer::core::GlobalState &gs, const std::string &path,
-                                     const std::string &src);
+    static std::unique_ptr<Node> run(sorbet::core::GlobalState &gs, sorbet::core::FileRef file);
+    static std::unique_ptr<Node> run(sorbet::core::GlobalState &gs, const std::string &path, const std::string &src);
 };
 
 } // namespace parser
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_PARSER_PARSER_H

@@ -33,7 +33,7 @@ struct NameDef {
 
     NameDef(const char *srcName, const char *val, int phases) : srcName(srcName), val(val), phases(phases) {
         if (strcmp(srcName, val) == 0) {
-            ruby_typer::Error::raise("Only pass one arg for '", val, "'");
+            sorbet::Error::raise("Only pass one arg for '", val, "'");
         }
     }
     NameDef(const char *srcName, int phases) : srcName(srcName), val(srcName), phases(phases) {}
@@ -298,7 +298,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         classfile << "#include \"core/GlobalState.h\"" << '\n' << '\n';
-        classfile << "namespace ruby_typer {" << '\n';
+        classfile << "namespace sorbet {" << '\n';
         classfile << "namespace core {" << '\n';
         classfile << "namespace {" << '\n';
         for (auto &name : names) {
@@ -336,7 +336,7 @@ int main(int argc, char **argv) {
         }
 
         header << "#include \"core/Names.h\"" << '\n' << '\n';
-        header << "namespace ruby_typer {" << '\n';
+        header << "namespace sorbet {" << '\n';
         header << "namespace core {" << '\n';
         header << "namespace Names {" << '\n';
 

@@ -3,7 +3,7 @@
 #include <iomanip>
 #include <sstream>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 // https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
@@ -45,4 +45,4 @@ std::string JSON::escape(std::string from) {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

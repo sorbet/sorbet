@@ -10,11 +10,11 @@
 #include "absl/strings/str_split.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
-template class std::shared_ptr<ruby_typer::core::GlobalState>;
+template class std::shared_ptr<sorbet::core::GlobalState>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 namespace {
@@ -1020,4 +1020,4 @@ void GlobalState::markAsPayload() {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

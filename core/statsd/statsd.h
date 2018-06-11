@@ -3,7 +3,7 @@
 
 #include "core/core.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class StatsD {
 public:
@@ -12,6 +12,6 @@ public:
     static bool submitCounters(const core::CounterState &counters, std::string host, int port, std::string prefix);
 };
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

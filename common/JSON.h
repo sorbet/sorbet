@@ -3,7 +3,7 @@
 
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 struct JSON {
@@ -11,5 +11,5 @@ struct JSON {
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_JSON

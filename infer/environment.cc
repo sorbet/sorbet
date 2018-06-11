@@ -2,11 +2,11 @@
 #include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
 
-template struct std::pair<ruby_typer::core::LocalVariable, std::shared_ptr<ruby_typer::core::Type>>;
+template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::core::Type>>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace infer {
 
 shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
@@ -1018,4 +1018,4 @@ const TestedKnowledge &Environment::getKnowledge(core::LocalVariable symbol, boo
 TestedKnowledge TestedKnowledge::empty;
 
 } // namespace infer
-} // namespace ruby_typer
+} // namespace sorbet

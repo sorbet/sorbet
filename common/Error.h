@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 extern std::shared_ptr<spdlog::logger> fatalLogger;
 class SRubyException {
 public:
@@ -86,5 +86,5 @@ template <typename... TArgs>
     stopInDebugger();
     throw SRubyException(message.str());
 }
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_ERRO_H

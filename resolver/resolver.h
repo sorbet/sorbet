@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace resolver {
 
 class Resolver final {
@@ -18,6 +18,6 @@ private:
 };
 
 } // namespace resolver
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

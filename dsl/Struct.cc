@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 // TODO this isn't quite right since the scoping will change. This would
@@ -85,4 +85,4 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

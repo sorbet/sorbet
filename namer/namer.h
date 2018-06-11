@@ -3,7 +3,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace namer {
 
 class Namer final {
@@ -14,6 +14,6 @@ public:
 };
 
 } // namespace namer
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

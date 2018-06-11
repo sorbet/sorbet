@@ -1,7 +1,7 @@
 #include "common/common.h"
 #include "gtest/gtest.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace common {
 
 TEST(CommonTest, Levenstein) { // NOLINT
@@ -12,4 +12,4 @@ TEST(CommonTest, Levenstein) { // NOLINT
 }
 
 } // namespace common
-} // namespace ruby_typer
+} // namespace sorbet

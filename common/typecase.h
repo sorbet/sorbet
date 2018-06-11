@@ -7,7 +7,7 @@
 #include <string>
 #include <typeinfo>
 
-namespace ruby_typer {
+namespace sorbet {
 // taken from https://stackoverflow.com/questions/22822836/type-switch-construct-in-c11
 // should be replaced by variant when we're good with c++17
 
@@ -46,10 +46,10 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
         (done = done || typecaseHelper(base, std::function<get_signature<Subclasses>>(funcs)))...};
 
     if (!done) {
-        ruby_typer::Error::raise("not handled typecase case: ", demangle(typeid(*base).name()));
+        sorbet::Error::raise("not handled typecase case: ", demangle(typeid(*base).name()));
     }
 }
-} // namespace ruby_typer
+} // namespace sorbet
 
 // End typecase code
 #endif // SORBET_TYPECASE_H

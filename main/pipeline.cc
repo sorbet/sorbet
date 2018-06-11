@@ -19,7 +19,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 
 bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file) {
@@ -141,7 +141,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
         return dslsInlined;
     } catch (SRubyException &) {
-        if (auto e = lgs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+        if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
         return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -204,8 +204,8 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         try {
                             src = FileOps::read(fileName.c_str());
                         } catch (FileNotFoundException e) {
-                            if (auto e = lgs->beginError(ruby_typer::core::Loc::none(),
-                                                         core::errors::Internal::InternalError)) {
+                            if (auto e =
+                                    lgs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
                                 e.setHeader("File Not Found: `{}`", fileName);
                             }
                             // continue with an empty source, because the
@@ -345,7 +345,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
         }
 
     } catch (SRubyException &) {
-        if (auto e = ctx.state.beginError(ruby_typer::core::Loc::none(f), core::errors::Internal::InternalError)) {
+        if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
     }
@@ -387,8 +387,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
                     namingProgress.reportProgress(i);
                     i++;
                 } catch (SRubyException &) {
-                    if (auto e =
-                            gs.beginError(ruby_typer::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
                         e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
                     }
                 }
@@ -400,13 +399,13 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
         {
             Timer timeit(logger, "Resolving");
             logger->trace("Resolving (global pass)...");
-            core::ErrorRegion errs(gs, ruby_typer::core::FileRef());
+            core::ErrorRegion errs(gs, sorbet::core::FileRef());
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
         }
     } catch (SRubyException &) {
-        if (auto e = gs.beginError(ruby_typer::core::Loc::none(), core::errors::Internal::InternalError)) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
@@ -502,4 +501,4 @@ void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
     }
 }
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet

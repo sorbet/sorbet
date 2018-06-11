@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 void Array::_sanityCheck() {
@@ -182,4 +182,4 @@ void Yield::_sanityCheck() {
 void ZSuperArgs::_sanityCheck() {}
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet

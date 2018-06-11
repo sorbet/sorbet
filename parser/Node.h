@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 using core::Loc;
@@ -53,4 +53,4 @@ typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
 
 #include "parser/Node_gen.h"
 }; // namespace parser
-}; // namespace ruby_typer
+}; // namespace sorbet

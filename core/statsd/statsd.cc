@@ -11,7 +11,7 @@ extern "C" {
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class StatsdClientWrapper {
@@ -65,4 +65,4 @@ bool StatsD::submitCounters(const core::CounterState &counters, string host, int
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

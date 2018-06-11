@@ -1,6 +1,6 @@
 #include "core/Errors.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace errors {
 namespace Infer {
@@ -23,4 +23,4 @@ constexpr ErrorClass GenericMethodConstaintUnsolved{7013, core::StrictLevel::Typ
 } // namespace Infer
 } // namespace errors
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

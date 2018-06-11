@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx, ast::MethodDef *mdef) {
@@ -57,4 +57,4 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

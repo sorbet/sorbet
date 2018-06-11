@@ -3,7 +3,7 @@
 
 #include "core.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class UnfreezeSymbolTable {
@@ -33,5 +33,5 @@ public:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_UNFREEZING_H

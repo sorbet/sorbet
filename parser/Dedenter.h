@@ -1,6 +1,6 @@
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 // This is defined in a Dedent.h only for testing, and is not a public API
@@ -16,4 +16,4 @@ private:
 };
 
 } // namespace parser
-} // namespace ruby_typer
+} // namespace sorbet

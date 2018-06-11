@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 NameRef::NameRef(const GlobalState &gs, unsigned int id) : _id(id) {
@@ -208,4 +208,4 @@ Name Name::deepCopy(const GlobalState &to) const {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

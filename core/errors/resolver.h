@@ -2,7 +2,7 @@
 #define SORBET_CORE_ERRORS_RESOLVER_H
 #include "core/Errors.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace errors {
 namespace Resolver {
@@ -38,6 +38,6 @@ constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::Typed};
 } // namespace Resolver
 } // namespace errors
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

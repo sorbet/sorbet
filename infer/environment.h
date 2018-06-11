@@ -14,7 +14,7 @@
 #include <utility>
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace infer {
 
 class Environment;
@@ -200,6 +200,6 @@ private:
 };
 
 } // namespace infer
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_ENVIRONMENT_H
