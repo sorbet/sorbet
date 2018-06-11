@@ -9,6 +9,9 @@ class TestConfigatron
 
       T.assert_type!(configatron, Configatron::RootStore)
       T.assert_type!(configatron.test_nested, Configatron::Store)
+
+      T.assert_type!(configatron.test_nested.key?(:junk), T.any(TrueClass, FalseClass))
+      T.assert_type!(configatron.key?(:junk), T.any(TrueClass, FalseClass))
   end
 
   def lub_test(param)

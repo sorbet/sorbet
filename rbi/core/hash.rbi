@@ -135,6 +135,17 @@ class Hash < Object
   .returns(T.any(TrueClass, FalseClass))
   def has_value?(arg0); end
 
+  sig.returns(Hash)
+  sig(
+      default: Object,
+  )
+  .returns(Hash)
+  sig(
+      blk: T.proc(hash: Hash, key: Object).returns(Object)
+  )
+  .returns(Hash)
+  def initialize(default=_, &blk); end
+
   sig.returns(String)
   def inspect(); end
 
