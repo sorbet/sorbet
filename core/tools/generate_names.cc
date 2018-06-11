@@ -123,6 +123,7 @@ NameDef names[] = {
     {"must", Core},
     {"declareInterface", "interface!", Namer},
     {"declareAbstract", "abstract!", Namer},
+    {"revealType", "reveal_type", Core},
     // end T keywords
 
     // Ruby DSL methods which we understand

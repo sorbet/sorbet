@@ -501,6 +501,24 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
                 }
             }
             return Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
+        case core::Names::revealType()._id: {
+            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
+                return nullptr;
+            }
+            if (args.size() != 1) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, got: `{}`",
+                                name.toString(ctx), "1", args.size());
+                }
+                return Types::dynamic();
+            }
+
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::RevealType)) {
+                e.setHeader("Revealed type: `{}`", args[0].type->show(ctx));
+                e.addErrorSection(core::ErrorSection("From:", args[0].origins2Explanations(ctx)));
+            }
+            return args[0].type;
+        }
         default:
             return nullptr;
     }
