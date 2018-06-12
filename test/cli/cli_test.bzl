@@ -28,3 +28,30 @@ def cli_test(path):
         ],
         size = 'small',
     )
+
+    native.sh_test(
+        name = "update_{}".format(name),
+        srcs = ["update_one.sh"],
+        args = ["$(location {})".format(path), "$(location {})".format(output)],
+        data = [
+            path,
+            ":run_{}".format(name),
+            output,
+        ],
+        tags = [
+            "manual", "external", "local",
+        ],
+        size = 'small',
+    )
+
+def update_test():
+    existing = native.existing_rules()
+    update_rules = [rule for (rule, data) in existing.items()
+                    if rule.startswith("update_") and data['kind'] == 'sh_test']
+    native.test_suite(
+        name = "update",
+        tags = [
+            "manual", "external", "local",
+        ],
+        tests = update_rules,
+    )

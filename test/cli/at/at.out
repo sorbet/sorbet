@@ -1,7 +1,7 @@
 test/cli/at/at.rb:2: Expression passed as an argument `arg0` to method `+` does not match expected type http://go/e/7002
      2 |1 + "s"
         ^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L__LINE__: Method `+` has specified type of argument `arg0` as `Integer`
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L72: Method `+` has specified type of argument `arg0` as `Integer`
     72 |      arg0: Integer,
               ^^^^^
   Got String("s") originating from:
