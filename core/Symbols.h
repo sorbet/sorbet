@@ -767,7 +767,7 @@ public:
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 51);
+        return SymbolRef(nullptr, 47);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
