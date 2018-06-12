@@ -128,7 +128,7 @@ class Examples
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
-          b = 1 # error: Changing type of a variable in a loop
+          b = 1 # error: Changing the type of a variable in a loop is not permitted
               # b: T.untyped
               #
               # cond: T.untyped (and truthy)
@@ -149,7 +149,7 @@ class Examples
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$11 to be NilClass
               #     a to be Integer(1)
-          b = 2 # error: Changing type of a variable in a loop
+          b = 2 # error: Changing the type of a variable in a loop is not permitted
               # b: T.untyped
               #
               # cond: NilClass | FalseClass
@@ -202,7 +202,7 @@ class Examples
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-          b = 1 # error: Changing type of a variable in a loop
+          b = 1 # error: Changing the type of a variable in a loop is not permitted
               # b: T.untyped
               #
               # cond: T.untyped (and truthy)
@@ -223,7 +223,7 @@ class Examples
               #   Being falsy entails:
               #     <debugEnvironmentTemp>$8 to be NilClass
               #     <selfMethodTemp>$3 to be Examples
-          b = 2 # error: Changing type of a variable in a loop
+          b = 2 # error: Changing the type of a variable in a loop is not permitted
               # b: T.untyped
               #
               # cond: NilClass | FalseClass

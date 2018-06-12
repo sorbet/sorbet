@@ -11,9 +11,9 @@ class Main
   def post_pin
     while foo
         if foo
-            a = 1 # error: Changing type of a variable in a loop, `Integer(1)` is not a subtype of `NilClass`
+            a = 1 # error: Changing the type of a variable in a loop is not permitted
         else
-            a = "1" # error: Changing type of a variable in a loop, `String("1")` is not a subtype of `NilClass`
+            a = "1" # error: Changing the type of a variable in a loop is not permitted
         end
     end
     a
@@ -22,7 +22,7 @@ class Main
   def metatype_pin
     a = 1
     while foo
-        a = T::Array[Integer] # error: Changing type of a variable in a loop, `<Type: T::Array[Integer]>` is not a subtype of `Integer(1)`
+        a = T::Array[Integer] # error: MULTI
     end
     a
   end

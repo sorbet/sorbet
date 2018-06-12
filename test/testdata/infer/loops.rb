@@ -9,7 +9,7 @@ class HasLoops
   def incorrect_assignment
     a = "s"
     while(true)
-      a = 1 # error: Changing type of a variable in a loop
+      a = 1 # error: Changing the type of a variable in a loop is not permitted
     end
   end
 
