@@ -427,13 +427,21 @@ std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::
         }
 
         case core::Names::untyped()._id:
+            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
+                return nullptr;
+            }
+            if (!args.empty()) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`",
+                                name.show(ctx), 0, args.size());
+                }
+            }
+            return core::Types::dynamic();
+
         case core::Names::any()._id:
         case core::Names::all()._id: {
             if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
                 return nullptr;
-            }
-            if (name == core::Names::untyped()) {
-                return Types::dynamic();
             }
 
             if (args.empty()) {
