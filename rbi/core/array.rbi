@@ -563,7 +563,7 @@ class Array < Object
   type_parameters(:U).sig(
       arg0: T::Array[T.type_parameter(:U)],
   )
-  .returns(T::Array[T::Array[T.any(Elem, T.type_parameter(:U))]])
+  .returns(T::Array[[Elem, T.type_parameter(:U)]])
   def zip(*arg0); end
 
   sig(
