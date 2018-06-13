@@ -716,6 +716,30 @@ private:
                 },
 
                 [&](ast::MethodDef *mdef) {
+                    if (debug_mode) {
+                        bool hasSig = !lastSig.empty();
+                        bool DSL = mdef->isDSLSynthesized();
+                        bool isRBI = FileOps::getExtension(mdef->loc.file.data(ctx).path()) == "rbi";
+                        if (hasSig) {
+                            core::categoryCounterInc("method.sig", "true");
+                        } else {
+                            core::categoryCounterInc("method.sig", "false");
+                        }
+                        if (DSL) {
+                            core::categoryCounterInc("method.dsl", "true");
+                        } else {
+                            core::categoryCounterInc("method.dsl", "false");
+                        }
+                        if (isRBI) {
+                            core::categoryCounterInc("method.rbi", "true");
+                        } else {
+                            core::categoryCounterInc("method.rbi", "false");
+                        }
+                        if (hasSig && !isRBI && !DSL) {
+                            core::counterInc("types.sig.human");
+                        }
+                    }
+
                     if (!lastSig.empty()) {
                         core::prodCounterInc("types.sig.count");
 
