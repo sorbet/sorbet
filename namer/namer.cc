@@ -392,7 +392,7 @@ public:
         ++scopeId;
         core::SymbolRef owner = methodOwner(ctx);
 
-        if (method->isSelf) {
+        if (method->isSelf()) {
             if (owner.data(ctx).isClass()) {
                 owner = owner.data(ctx).singletonClass(ctx);
             }
@@ -418,6 +418,9 @@ public:
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
         method->symbol.data(ctx).definitionLoc = method->loc;
+        if (method->isDSLSynthesized()) {
+            method->symbol.data(ctx).setDSLSynthesized();
+        }
 
         pushEnclosingArgs(move(method->args));
 

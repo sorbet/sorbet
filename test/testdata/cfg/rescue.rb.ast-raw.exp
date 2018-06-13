@@ -3,7 +3,7 @@ ClassDef{
   ancestors = []
   rhs = [
     MethodDef{
-      self = 0
+      flags = 0
       name = main<<constant:<todo sym>>>
       args = []
       rhs = InsSeq{
@@ -53,28 +53,28 @@ ClassDef{
     }
 
     MethodDef{
-      self = 0
+      flags = 0
       name = a<<constant:<todo sym>>>
       args = []
       rhs = EmptyTree
     }
 
     MethodDef{
-      self = 0
+      flags = 0
       name = b<<constant:<todo sym>>>
       args = []
       rhs = EmptyTree
     }
 
     MethodDef{
-      self = 0
+      flags = 0
       name = c<<constant:<todo sym>>>
       args = []
       rhs = EmptyTree
     }
 
     MethodDef{
-      self = 0
+      flags = 0
       name = d<<constant:<todo sym>>>
       args = []
       rhs = EmptyTree

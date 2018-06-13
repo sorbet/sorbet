@@ -94,14 +94,27 @@ public:
     ARGS_store args;
 
     core::NameRef name;
-    bool isSelf;
+    u4 flags;
+
+    enum Flags {
+        SelfMethod = 1,
+        DSLSynthesized = 2,
+    };
 
     MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-              std::unique_ptr<Expression> rhs, bool isSelf);
+              std::unique_ptr<Expression> rhs, u4 flags);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+
+    bool isSelf() {
+        return (flags & SelfMethod) != 0;
+    }
+
+    bool isDSLSynthesized() {
+        return (flags & DSLSynthesized) != 0;
+    }
 
 private:
     virtual void _sanityCheck();

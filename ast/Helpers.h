@@ -184,20 +184,20 @@ public:
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::NameRef name, MethodDef::ARGS_store args,
-                                             std::unique_ptr<Expression> rhs, bool self = false) {
-        return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), self);
+                                             std::unique_ptr<Expression> rhs, u4 flags = 0) {
+        return std::make_unique<MethodDef>(loc, core::Symbols::todo(), name, move(args), move(rhs), flags);
     }
 
     static std::unique_ptr<Expression> Method0(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> rhs,
-                                               bool self = false) {
-        return Method(loc, name, {}, move(rhs), self);
+                                               u4 flags = 0) {
+        return Method(loc, name, {}, move(rhs), flags);
     }
 
     static std::unique_ptr<Expression> Method1(core::Loc loc, core::NameRef name, std::unique_ptr<Expression> arg0,
-                                               std::unique_ptr<Expression> rhs, bool self = false) {
+                                               std::unique_ptr<Expression> rhs, u4 flags = 0) {
         MethodDef::ARGS_store args;
         args.emplace_back(move(arg0));
-        return Method(loc, name, move(args), move(rhs), self);
+        return Method(loc, name, move(args), move(rhs), flags);
     }
 
     static std::unique_ptr<ClassDef> Class(core::Loc loc, std::unique_ptr<Expression> name,

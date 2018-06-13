@@ -708,7 +708,7 @@ void Serializer::pickle(Pickler &p, const std::unique_ptr<ast::Expression> &what
              },
              [&](ast::MethodDef *c) {
                  pickleAstHeader(p, 22, c);
-                 p.putU1(c->isSelf);
+                 p.putU4(c->flags);
                  p.putU4(c->name._id);
                  p.putU4(c->symbol._id);
                  p.putU4(c->args.size());
@@ -939,7 +939,7 @@ std::unique_ptr<ast::Expression> Serializer::unpickleExpr(serialize::Serializer:
             return ret;
         }
         case 22: {
-            auto isSelf = p.getU1();
+            auto flags = p.getU4();
             NameRef name = unpickleNameRef(p, gs);
             SymbolRef symbol(gs, p.getU4());
             auto argsSize = p.getU4();
@@ -948,7 +948,8 @@ std::unique_ptr<ast::Expression> Serializer::unpickleExpr(serialize::Serializer:
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs, file);
             }
-            auto ret = ast::MK::Method(loc, name, move(args), move(rhs), isSelf);
+            auto ret = ast::MK::Method(loc, name, move(args), move(rhs));
+            ret->flags = flags;
             ret->symbol = symbol;
             return ret;
         }

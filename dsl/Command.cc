@@ -82,7 +82,8 @@ void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
         newArgs.emplace_back(arg->deepCopy());
     }
 
-    auto selfCall = ast::MK::Method(call->loc, call->name, move(newArgs), ast::MK::Untyped(call->loc), true);
+    auto selfCall =
+        ast::MK::Method(call->loc, call->name, move(newArgs), ast::MK::Untyped(call->loc), ast::MethodDef::SelfMethod);
 
     klass->rhs.insert(klass->rhs.begin() + i + 1, sig->deepCopy());
     klass->rhs.insert(klass->rhs.begin() + i + 2, move(selfCall));

@@ -614,7 +614,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 u2 uniqueCounter1 = 1;
                 unique_ptr<MethodDef> meth =
                     buildMethod(ctx, loc, method->name, method->args, method->body, uniqueCounter1);
-                meth->isSelf = true;
+                meth->flags |= MethodDef::SelfMethod;
                 unique_ptr<Expression> res(meth.release());
                 result.swap(res);
             },

@@ -150,6 +150,11 @@ public:
 
         // Static Field flags
         static constexpr int STATIC_FIELD_TYPE_ALIAS = 0x0100;
+
+        // Flags applying to all symbol types
+
+        // Synthesized by C++ code in a DSL pass
+        static constexpr int DSL_SYNTHESIZED = 0x0001;
     };
 
     SymbolRef owner;
@@ -496,6 +501,13 @@ public:
     inline bool isStaticTypeAlias() {
         ENFORCE(isStaticField());
         return (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
+    }
+
+    inline void setDSLSynthesized() {
+        flags |= Symbol::Flags::DSL_SYNTHESIZED;
+    }
+    inline bool isDSLSynthesized() {
+        return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
     }
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
