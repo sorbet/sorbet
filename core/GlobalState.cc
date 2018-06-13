@@ -61,6 +61,9 @@ const char *sinatra_str = "Sinatra";
 const char *base_str = "Base";
 const char *void_str = "Void";
 const char *typeAliasTemp_str = "<TypeAlias>";
+const char *chalk_str = "Chalk";
+const char *tools_str = "Tools";
+const char *accessible_str = "Accessible";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -166,6 +169,10 @@ void GlobalState::initEmpty() {
     sinatra_base_id.data(*this).superClass = core::Symbols::Object();
     SymbolRef void_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(void_str));
     SymbolRef typeAliasTemp_id = synthesizeClass(typeAliasTemp_str, 0);
+    SymbolRef chalk_id = synthesizeClass(chalk_str, 0, true);
+    SymbolRef chalk_tools_id = enterClassSymbol(Loc::none(), chalk_id, enterNameConstant(tools_str));
+    SymbolRef chalk_tools_accessible_id =
+        enterClassSymbol(Loc::none(), chalk_tools_id, enterNameConstant(accessible_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -215,6 +222,9 @@ void GlobalState::initEmpty() {
     ENFORCE(sinatra_base_id == Symbols::SinatraBase());
     ENFORCE(void_id == Symbols::void_());
     ENFORCE(typeAliasTemp_id == Symbols::typeAliasTemp());
+    ENFORCE(chalk_id == Symbols::Chalk());
+    ENFORCE(chalk_tools_id == Symbols::Chalk_Tools());
+    ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();

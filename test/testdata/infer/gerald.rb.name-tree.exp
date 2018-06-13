@@ -39,7 +39,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<todo sym>, ::Opus::CIBot::Gerald::Matcher::Chalk::Log)
+  class <emptyTree>::<constant:Matcher><<constant:Matcher>> < (::<todo sym>, ::Chalk::Log)
     <emptyTree>
 
     <emptyTree>
