@@ -37,7 +37,7 @@ std::unique_ptr<Expression> MethodDef::_deepCopy(const Expression *avoid, bool r
         throw DeepCopyError();
     }
     return make_unique<MethodDef>(this->loc, this->symbol, this->name, deepCopyVec(avoid, this->args),
-                                  rhs->_deepCopy(avoid), isSelf);
+                                  rhs->_deepCopy(avoid), flags);
 }
 
 std::unique_ptr<Expression> ConstDef::_deepCopy(const Expression *avoid, bool root) const {

@@ -3,7 +3,7 @@ ClassDef{
   ancestors = []
   rhs = [
     MethodDef{
-      self = 0
+      flags = 0
       name = main<<constant:<todo sym>>>
       args = []
       rhs = InsSeq{

@@ -60,7 +60,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
             }
 
             core::NameRef varName = name.addAt(ctx);
-            stats.emplace_back(ast::MK::Method0(loc, name, ast::MK::Instance(loc, varName)));
+            stats.emplace_back(
+                ast::MK::Method0(loc, name, ast::MK::Instance(loc, varName), ast::MethodDef::DSLSynthesized));
         }
     }
 
@@ -74,7 +75,8 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
             core::NameRef varName = name.addAt(ctx);
             core::NameRef setName = name.addEq(ctx);
             auto body = ast::MK::Assign(loc, ast::MK::Instance(loc, varName), ast::MK::Local(loc, name));
-            stats.emplace_back(ast::MK::Method1(loc, setName, ast::MK::Local(loc, name), move(body)));
+            stats.emplace_back(
+                ast::MK::Method1(loc, setName, ast::MK::Local(loc, name), move(body), ast::MethodDef::DSLSynthesized));
         }
     }
 

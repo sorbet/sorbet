@@ -18,12 +18,12 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
     if (mdef->name != core::Names::registered()) {
         return empty;
     }
-    if (mdef->isSelf == false) {
+    if (!mdef->isSelf()) {
         return empty;
     }
 
     mdef->name = core::Names::instanceRegistered();
-    mdef->isSelf = false;
+    mdef->flags &= ~ast::MethodDef::SelfMethod;
 
     vector<unique_ptr<ast::Expression>> ret;
     auto loc = mdef->loc;
@@ -51,7 +51,8 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
         }
     }
 
-    ret.emplace_back(ast::MK::Method(loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs)));
+    ret.emplace_back(ast::MK::Method(loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs),
+                                     ast::MethodDef::DSLSynthesized));
 
     return ret;
 }

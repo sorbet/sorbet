@@ -94,8 +94,8 @@ ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression>
 }
 
 MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
-                     unique_ptr<Expression> rhs, bool isSelf)
-    : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), isSelf(isSelf) {
+                     unique_ptr<Expression> rhs, u4 flags)
+    : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), flags(flags) {
     core::categoryCounterInc("trees", "methoddef");
     core::histogramInc("trees.methodDef.args", this->args.size());
     _sanityCheck();
@@ -421,7 +421,7 @@ string InsSeq::showRaw(const core::GlobalState &gs, int tabs) {
 string MethodDef::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    if (isSelf) {
+    if (isSelf()) {
         buf << "def self.";
     } else {
         buf << "def ";
@@ -460,7 +460,21 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "MethodDef{" << '\n';
     printTabs(buf, tabs + 1);
 
-    buf << "self = " << isSelf << '\n';
+    buf << "flags =";
+    const pair<int, const char *> flags[] = {
+        {SelfMethod, "self"},
+        {DSLSynthesized, "dsl"},
+    };
+    for (auto &ent : flags) {
+        if ((this->flags & ent.first) != 0) {
+            buf << " " << ent.second;
+        }
+    }
+    if (this->flags == 0) {
+        buf << " 0";
+    }
+    buf << "\n";
+
     printTabs(buf, tabs + 1);
     buf << "name = " << name.data(gs).toString(gs) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs)
         << ">" << '\n';
