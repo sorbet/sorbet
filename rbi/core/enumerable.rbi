@@ -317,7 +317,7 @@ module Enumerable
   sig(
       n: Integer,
   )
-  .returns(Enumerator[Elem])
+  .returns(Enumerator[T::Array[Elem]])
   def each_slice(n, &blk); end
 
   sig(
