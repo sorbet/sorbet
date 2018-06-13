@@ -151,10 +151,10 @@ void matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc cal
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.name.toString(ctx),
                         expectedType->show(ctx));
         } else {
-            e.setHeader("Expression passed as an argument `{}` to method `{}` does not match expected type",
-                        argSym.name.toString(ctx), fun.toString(ctx), expectedType->show(ctx));
+            e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
+                        argSym.name.toString(ctx));
             e.addErrorSection(core::ErrorSection({
-                core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified type of argument `{}` as `{}`",
+                core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified `{}` as `{}`",
                                       argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
                                       expectedType->show(ctx)),
             }));

@@ -14,7 +14,7 @@ class TestCasts
 
     s = T.cast(6, String)
     s + "hi"
-    s + 3 # error: does not match expected type
+    s + 3 # error: `Integer(3)` doesn't match `String` for argument `arg0`
 
 
     s = T.cast(6, 7) # error: Unsupported type syntax

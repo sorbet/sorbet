@@ -6,4 +6,4 @@
 # owned by the userland GlobalState. This hit an enforce before we tracked the
 # parent GlobalState.
 
-1 + "raise" # error: Expression passed as an argument
+1 + "raise" # error: `String("raise")` doesn't match `Integer` for argument `arg0`

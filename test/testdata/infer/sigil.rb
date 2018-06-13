@@ -1,4 +1,4 @@
   # typed: strict
 def foo
-    "3" + 3 # error: Expression passed as an argument `arg0` to method `+` does not match expected type
+    "3" + 3 # error: `Integer(3)` doesn't match `String` for argument `arg0`
 end

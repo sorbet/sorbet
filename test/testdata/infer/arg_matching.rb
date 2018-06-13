@@ -40,7 +40,7 @@ class TestArgs
     kwarg(1, b: 2)
     kwarg(1, b: 2, c: 3) # error: Unrecognized keyword argument `c`
     kwarg(1, {}) # error: Missing required keyword argument `b`
-    kwarg(1, b: "hi") # error: Expression passed as an argument `b` to method `kwarg` does not match expected type
+    kwarg(1, b: "hi") # error: `String("hi")` doesn't match `Integer` for argument `b`
     kwarg(1, any)
     kwarg(1, a_hash) # error: Passing an untyped hash
   end
@@ -55,7 +55,7 @@ class TestArgs
   def call_repeated
     repeated
     repeated(1, 2, 3)
-    repeated(1, "hi") # error: Expression passed as an argument `x` to method `repeated` does not match expected type
+    repeated(1, "hi") # error: `String("hi")` doesn't match `Integer` for argument `x`
 
     # We error on each incorrect argument
     repeated("hi", "there") # error: MULTI

@@ -33,18 +33,18 @@ class Main
         one_kwarg(foo: 1)
         one_kwarg(foo: 1, a: "a")
 
-        one_kwarg(foo: "bad", a: "bad") # error: does not match expected type
-        one_kwarg(foo: 1, a: 1) # error: does not match expected type
+        one_kwarg(foo: "bad", a: "bad") # error: `String("bad")` doesn't match `Integer` for argument `foo`
+        one_kwarg(foo: 1, a: 1) # error: `Integer(1)` doesn't match `String` for argument `args`
         one_kwarg(foo: "bad", a: 1) # error: MULTI
         with_type
         with_type(a: 1)
-        with_type(a: "bad") # error: does not match expected type
+        with_type(a: "bad") # error: `String("bad")` doesn't match `Integer` for argument `args`
         with_type(a: "bad", b: "bad") # error: MULTI
 
         # This should assign `z`, instead of assigning `x={z: :foo}`,
         # which would happen with `y={}`
         opt_and_repeated_kw(z: :foo)
         opt_and_repeated_kw("hi")
-        opt_and_repeated_kw("hi", z: "foo") # error: Expression passed as an argument `y` to method `opt_and_repeated_kw` does not match expected type
+        opt_and_repeated_kw("hi", z: "foo") # error: `String("foo")` doesn't match `Symbol` for argument `y`
     end
 end
