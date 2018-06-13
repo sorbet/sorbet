@@ -7,7 +7,7 @@
 #include <utility>
 
 using namespace std;
-using namespace ruby_typer;
+using namespace sorbet;
 
 bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size()) {
@@ -213,8 +213,8 @@ void handleFile(core::GlobalState &gs, std::string file, shared_ptr<Path> rootNo
     }
 }
 
-void ruby_typer::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, std::vector<std::string> folders,
-                                                          std::vector<std::string> files) {
+void sorbet::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, std::vector<std::string> folders,
+                                                      std::vector<std::string> files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
         auto files = listDir(folder.c_str());

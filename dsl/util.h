@@ -5,7 +5,7 @@
 #include "core/Names.h"
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 class ASTUtil {
 public:
@@ -15,5 +15,5 @@ public:
     ASTUtil() = delete;
 };
 } // namespace dsl
-} // namespace ruby_typer
+} // namespace sorbet
 #endif

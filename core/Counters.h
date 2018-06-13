@@ -7,7 +7,7 @@
 #include <string>
 #include <unordered_map>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 constexpr bool enable_counters = debug_mode;
@@ -87,5 +87,5 @@ void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
 std::string getCounterStatistics(std::vector<std::string> names);
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_COUNTERS_H

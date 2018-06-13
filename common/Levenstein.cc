@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-int ruby_typer::Levenstein::distance(absl::string_view s1, absl::string_view s2, int bound) noexcept {
+int sorbet::Levenstein::distance(absl::string_view s1, absl::string_view s2, int bound) noexcept {
     if (s1.data() == s2.data() && s1.size() == s2.size()) {
         return 0;
     }

@@ -9,13 +9,13 @@
 #include <string>
 #include <unordered_map>
 
-template class std::vector<ruby_typer::core::NameRef>;
-template class std::vector<ruby_typer::core::FileRef>;
-template class std::vector<ruby_typer::core::SymbolRef>;
+template class std::vector<sorbet::core::NameRef>;
+template class std::vector<sorbet::core::FileRef>;
+template class std::vector<sorbet::core::SymbolRef>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 SymbolRef MutableContext::selfClass() {
@@ -133,4 +133,4 @@ bool GlobalSubstitution::useFastPath() const {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name) {
@@ -215,4 +215,4 @@ std::string Proto::toJSON(const google::protobuf::Message &message) {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

@@ -1,7 +1,7 @@
 #include "verifier.h"
 #include "ast/treemap/treemap.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 class VerifierWalker {
@@ -26,4 +26,4 @@ std::unique_ptr<Expression> Verifier::run(core::MutableContext ctx, std::unique_
 }
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet

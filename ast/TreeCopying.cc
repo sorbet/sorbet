@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 template <class Elem = Expression, class T> T deepCopyVec(const Expression *avoid, const T &origin) {
@@ -285,4 +285,4 @@ std::unique_ptr<Expression> TreeRef::_deepCopy(const Expression *avoid, bool roo
     return tree->_deepCopy(avoid);
 }
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet

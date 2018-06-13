@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
@@ -151,4 +151,4 @@ unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CF
 }
 
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet

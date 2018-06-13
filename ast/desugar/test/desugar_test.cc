@@ -13,15 +13,15 @@
 
 namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("desugar_test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
-    ruby_typer::core::GlobalState gs(errorQueue);
+    sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();
-    ruby_typer::core::UnfreezeNameTable nameTableAccess(gs);
-    ruby_typer::core::UnfreezeFileTable ft(gs);
+    sorbet::core::UnfreezeNameTable nameTableAccess(gs);
+    sorbet::core::UnfreezeFileTable ft(gs);
 
-    auto ast = ruby_typer::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    ruby_typer::core::MutableContext ctx(gs, ruby_typer::core::Symbols::root());
-    auto o1 = ruby_typer::ast::desugar::node2Tree(ctx, move(ast));
+    auto ast = sorbet::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
+    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
+    auto o1 = sorbet::ast::desugar::node2Tree(ctx, move(ast));
 }

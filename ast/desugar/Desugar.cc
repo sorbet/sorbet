@@ -9,7 +9,7 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 namespace desugar {
 
@@ -1334,4 +1334,4 @@ unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::No
 }
 } // namespace desugar
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet

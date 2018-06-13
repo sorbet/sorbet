@@ -6,7 +6,7 @@
 #include "absl/strings/string_view.h"
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class GlobalState;
 class File;
@@ -89,10 +89,10 @@ public:
     StrictLevel strict;
 };
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 namespace std {
-template <> struct hash<ruby_typer::core::FileRef> {
-    std::size_t operator()(const ruby_typer::core::FileRef k) const {
+template <> struct hash<sorbet::core::FileRef> {
+    std::size_t operator()(const sorbet::core::FileRef k) const {
         return k.id();
     }
 };

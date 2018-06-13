@@ -7,13 +7,13 @@
 #include "absl/strings/str_split.h"
 
 // helps debugging
-template class std::unique_ptr<ruby_typer::cfg::CFG>;
-template class std::unique_ptr<ruby_typer::cfg::BasicBlock>;
-template class std::vector<ruby_typer::cfg::BasicBlock *>;
+template class std::unique_ptr<sorbet::cfg::CFG>;
+template class std::unique_ptr<sorbet::cfg::BasicBlock>;
+template class std::vector<sorbet::cfg::BasicBlock *>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 BasicBlock *CFG::freshBlock(int outerLoops) {
@@ -223,4 +223,4 @@ Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction
     : bind(bind), loc(loc), value(move(value)) {}
 
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet

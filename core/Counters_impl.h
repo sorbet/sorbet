@@ -3,7 +3,7 @@
 
 #include "absl/strings/string_view.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 struct CounterImpl {
     CounterImpl() = default;
@@ -33,6 +33,6 @@ struct CounterImpl {
     std::map<const char *, std::map<const char *, CounterType>> counters_by_category;
 };
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

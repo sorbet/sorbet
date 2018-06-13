@@ -11,7 +11,7 @@
 using std::make_unique;
 using std::unique_ptr;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 class FUNC_EXAMPLE {
@@ -756,6 +756,6 @@ public:
 };
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_TREEMAP_H

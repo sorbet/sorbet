@@ -8,7 +8,7 @@
 #include <memory>
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 
 class Expression {
@@ -662,6 +662,6 @@ private:
  */
 
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_TREES_H

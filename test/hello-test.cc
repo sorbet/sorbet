@@ -14,9 +14,9 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("hello-test");
-auto errorQueue = std::make_shared<ruby_typer::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
-namespace ruby_typer {
+namespace sorbet {
 using namespace ast;
 
 TEST(HelloTest, GetGreet) { // NOLINT
@@ -137,25 +137,23 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
         }
     };
 
-    ruby_typer::core::GlobalState cb(errorQueue);
+    sorbet::core::GlobalState cb(errorQueue);
     cb.initEmpty();
-    ruby_typer::core::MutableContext ctx(cb, core::Symbols::root());
+    sorbet::core::MutableContext ctx(cb, core::Symbols::root());
     static const char *foo_str = "Foo";
-    ruby_typer::core::Loc loc(ruby_typer::core::FileRef(), 42, 91);
-    ruby_typer::core::UnfreezeNameTable nt(ctx);
-    ruby_typer::core::UnfreezeSymbolTable st(ctx);
+    sorbet::core::Loc loc(sorbet::core::FileRef(), 42, 91);
+    sorbet::core::UnfreezeNameTable nt(ctx);
+    sorbet::core::UnfreezeSymbolTable st(ctx);
 
     auto name = ctx.state.enterNameUTF8(foo_str);
-    auto classSym =
-        ctx.state.enterClassSymbol(loc, ruby_typer::core::Symbols::root(), ctx.state.enterNameConstant(name));
+    auto classSym = ctx.state.enterClassSymbol(loc, sorbet::core::Symbols::root(), ctx.state.enterNameConstant(name));
 
     // see if it crashes via failed ENFORCE
-    ctx.state.enterTypeMember(loc, classSym, ctx.state.enterNameConstant(name), ruby_typer::core::Variance::CoVariant);
+    ctx.state.enterTypeMember(loc, classSym, ctx.state.enterNameConstant(name), sorbet::core::Variance::CoVariant);
     auto methodSym = ctx.state.enterMethodSymbol(loc, classSym, name);
 
     // see if it crashes via failed ENFORCE
-    ctx.state.enterTypeArgument(loc, methodSym, ctx.state.enterNameConstant(name),
-                                ruby_typer::core::Variance::CoVariant);
+    ctx.state.enterTypeArgument(loc, methodSym, ctx.state.enterNameConstant(name), sorbet::core::Variance::CoVariant);
 
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
@@ -177,4 +175,4 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     auto r = TreeMap::apply(ctx, c, move(tree));
     EXPECT_EQ(c.count, 3);
 }
-} // namespace ruby_typer
+} // namespace sorbet

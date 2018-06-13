@@ -7,9 +7,9 @@
 #include "lib/lizard_compress.h"
 #include "lib/lizard_decompress.h"
 
-template class std::vector<ruby_typer::u4>;
+template class std::vector<sorbet::u4>;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace serialize {
 const u4 Serializer::VERSION;
@@ -525,6 +525,7 @@ void Serializer::unpickleGS(UnPickler &p, GlobalState &result) {
     result.trace("Reading name table");
 
     int namesByHashSize = p.getU4();
+    names.reserve(namesByHashSize / 2);
     names_by_hash.reserve(names.capacity() * 2);
     for (int i = 0; i < namesByHashSize; i++) {
         auto hash = p.getU4();
@@ -1048,4 +1049,4 @@ NameRef Serializer::unpickleNameRef(Serializer::UnPickler &p, GlobalState &gs) {
 } // namespace serialize
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

@@ -3,7 +3,7 @@
 
 #include "Files.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class GlobalState;
 
@@ -44,6 +44,6 @@ public:
     static Detail offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs);
 };
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_AST_LOC_H

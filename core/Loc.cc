@@ -5,7 +5,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 using namespace std;
@@ -158,4 +158,4 @@ bool Loc::operator!=(const Loc &rhs) const {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

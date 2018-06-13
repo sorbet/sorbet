@@ -11,7 +11,7 @@
 
 #include "proto/pay-server/SourceMetrics.pb.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class Proto {
 public:
@@ -27,6 +27,6 @@ public:
     static std::string toJSON(const google::protobuf::Message &message);
 };
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

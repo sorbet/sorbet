@@ -14,7 +14,7 @@
 #include <thread>
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace realmain {
 const auto PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 int realmain(int argc, const char *argv[]);
@@ -81,6 +81,8 @@ struct Options {
     bool enableCounters = false;
     std::vector<std::string> someCounters;
 
+    u4 reserveMemKiB;
+
     std::string statsdHost;
     std::string statsdPrefix;
     int statsdPort;
@@ -117,5 +119,5 @@ void typecheck(std::shared_ptr<core::GlobalState> &gs, std::vector<std::unique_p
 std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
                                               const Options &opts);
 } // namespace realmain
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // RUBY_TYPER_REAL_MAIN_H

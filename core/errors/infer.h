@@ -1,6 +1,6 @@
 #include "core/Errors.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace errors {
 namespace Infer {
@@ -19,8 +19,9 @@ constexpr ErrorClass IncompleteType{7011, core::StrictLevel::Typed};
 constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, core::StrictLevel::Typed};
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, core::StrictLevel::Typed};
 constexpr ErrorClass GenericMethodConstaintUnsolved{7013, core::StrictLevel::Typed};
+constexpr ErrorClass RevealType{7014, core::StrictLevel::Typed};
 
 } // namespace Infer
 } // namespace errors
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

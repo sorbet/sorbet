@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <utility>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 using namespace std;
@@ -1159,4 +1159,4 @@ std::shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstr
     return nullptr;
 }
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

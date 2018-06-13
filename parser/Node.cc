@@ -3,11 +3,11 @@
 #include <iterator>
 
 // makes lldb work. Do not remove please
-template class std::unique_ptr<ruby_typer::parser::Node>;
+template class std::unique_ptr<sorbet::parser::Node>;
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 void Node::printTabs(stringstream &to, int count) {
@@ -35,4 +35,4 @@ void Node::printNodeJSON(stringstream &to, unique_ptr<Node> &node, const core::G
 }
 
 }; // namespace parser
-} // namespace ruby_typer
+} // namespace sorbet

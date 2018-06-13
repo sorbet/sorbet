@@ -5,7 +5,7 @@
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 
-using namespace ruby_typer;
+using namespace sorbet;
 using namespace core;
 using namespace std;
 

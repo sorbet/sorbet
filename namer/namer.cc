@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace namer {
 
 /**
@@ -710,4 +710,4 @@ unique_ptr<ast::Expression> Namer::run(core::MutableContext ctx, unique_ptr<ast:
 }
 
 } // namespace namer
-}; // namespace ruby_typer
+}; // namespace sorbet

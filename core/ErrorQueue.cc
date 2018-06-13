@@ -1,6 +1,6 @@
 #include "ErrorQueue.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 std::vector<std::unique_ptr<BasicError>> ErrorQueue::drainErrors() {
     ENFORCE(owner == std::this_thread::get_id());
@@ -75,4 +75,4 @@ ErrorQueue::~ErrorQueue() {
     flushErrors(true);
 }
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

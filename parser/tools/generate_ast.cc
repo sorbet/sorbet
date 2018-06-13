@@ -391,7 +391,7 @@ int main(int argc, char **argv) {
             return 1;
         }
         classfile << "#include \"parser/Node.h\"" << '\n' << '\n';
-        classfile << "namespace ruby_typer {" << '\n';
+        classfile << "namespace sorbet {" << '\n';
         classfile << "namespace parser {" << '\n';
         for (auto &node : nodes) {
             emit_node_classfile(classfile, node);

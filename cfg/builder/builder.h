@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 class CFGBuilder final {
 public:
@@ -51,5 +51,5 @@ private:
           rescueScope(rescueScope), aliases(aliases){};
 };
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_BUILDER_H

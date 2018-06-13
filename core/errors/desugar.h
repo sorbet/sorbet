@@ -1,6 +1,6 @@
 #include "core/Errors.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace errors {
 namespace Desugar {
@@ -11,4 +11,4 @@ constexpr ErrorClass FloatOutOfRange{3004, StrictLevel::Typed};
 } // namespace Desugar
 } // namespace errors
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

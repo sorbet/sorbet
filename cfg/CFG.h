@@ -9,7 +9,7 @@
 
 #include "Instructions.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 class BasicBlock;
@@ -118,6 +118,6 @@ private:
 };
 
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_CFG_H

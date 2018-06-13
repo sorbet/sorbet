@@ -5,9 +5,9 @@
 #include "ruby_parser/driver.hh"
 #include <algorithm>
 
-template class std::unique_ptr<ruby_typer::parser::Node>;
+template class std::unique_ptr<sorbet::parser::Node>;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace parser {
 
 extern const char *dclass_strings[];
@@ -55,7 +55,7 @@ public:
     }
 };
 
-std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, core::FileRef file) {
+std::unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
     ruby_parser::typedruby24 driver(string(source.begin(), source.end()), Builder::interface);
@@ -71,10 +71,10 @@ std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, core::FileR
     return ast;
 }
 
-std::unique_ptr<Node> Parser::run(ruby_typer::core::GlobalState &gs, const string &path, const string &src) {
+std::unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, const string &path, const string &src) {
     core::FileRef file = gs.enterFile(path, src);
     return run(gs, file);
 }
 
 }; // namespace parser
-}; // namespace ruby_typer
+}; // namespace sorbet

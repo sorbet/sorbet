@@ -1,6 +1,6 @@
 #include "Unfreeze.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 UnfreezeSymbolTable::UnfreezeSymbolTable(GlobalState &gs) : gs(gs) {
@@ -34,4 +34,4 @@ UnfreezeFileTable::~UnfreezeFileTable() {
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

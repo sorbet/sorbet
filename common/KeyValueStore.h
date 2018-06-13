@@ -5,7 +5,7 @@
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-namespace ruby_typer {
+namespace sorbet {
 
 /**
  * A database with single writer and multiple readers.
@@ -33,6 +33,6 @@ public:
     void write(const absl::string_view key, std::vector<u1> value);
     ~KeyValueStore() noexcept(false);
 };
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_KEYVALUESTORE_H

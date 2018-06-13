@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
@@ -89,4 +89,4 @@ void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

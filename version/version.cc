@@ -1,6 +1,6 @@
 #include "version.h"
 
-namespace ruby_typer {
+namespace sorbet {
 // NOTE: bazel ignores build flags for this.
 // this means that: we can't use c++14\c++11 features here
 // and this code has no debugger support
@@ -40,4 +40,4 @@ const std::string Version::build_timestamp_string =
     makeBuildTimeString(); // non-release build have 1970-01-01 00:00:00 GMT
 const bool Version::isReleaseBuild = build_scm_revision != "dev";
 
-} // namespace ruby_typer
+} // namespace sorbet

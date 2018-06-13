@@ -4,7 +4,7 @@
 #include <chrono>
 #include <string>
 
-namespace ruby_typer {
+namespace sorbet {
 class Version {
 public:
     static const std::string version;
@@ -15,6 +15,6 @@ public:
     static const std::string build_timestamp_string;
     static const bool isReleaseBuild;
 };
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_VERSION_H

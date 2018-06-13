@@ -5,13 +5,13 @@
 #include "parser/parser.h"
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 namespace desugar {
 
 std::unique_ptr<Expression> node2Tree(core::MutableContext ctx, std::unique_ptr<parser::Node> what);
 } // namespace desugar
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_DESUGAR_H

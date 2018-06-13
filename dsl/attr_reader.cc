@@ -9,7 +9,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace dsl {
 
 unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) {
@@ -82,4 +82,4 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
 }
 
 } // namespace dsl
-}; // namespace ruby_typer
+}; // namespace sorbet

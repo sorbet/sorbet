@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace serialize {
 
@@ -76,4 +76,4 @@ TEST(SerializeTest, Strings) { // NOLINT
 } // namespace serialize
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

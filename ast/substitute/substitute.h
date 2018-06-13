@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "core/Context.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace ast {
 class Substitute {
 public:
@@ -12,5 +12,5 @@ public:
                                            std::unique_ptr<Expression> what);
 };
 } // namespace ast
-} // namespace ruby_typer
+} // namespace sorbet
 #endif // SORBET_SUBSTITUTE_H

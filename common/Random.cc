@@ -1,6 +1,6 @@
 #include "Random.h"
 
-namespace ruby_typer {
+namespace sorbet {
 std::random_device Random::rd;
 
 std::default_random_engine Random::re(Random::rd());
@@ -22,4 +22,4 @@ u8 Random::uniformU8(u8 from, u8 to) {
     std::uniform_int_distribution<u8> uniform_dist(from, to);
     return uniform_dist(re);
 }
-} // namespace ruby_typer
+} // namespace sorbet

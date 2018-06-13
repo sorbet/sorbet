@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
@@ -443,4 +443,4 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 }
 
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet

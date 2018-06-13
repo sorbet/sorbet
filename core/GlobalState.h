@@ -9,7 +9,7 @@
 #include <memory>
 #include <mutex>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class Name;
@@ -41,7 +41,12 @@ class GlobalState final {
 
 public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
+
     void initEmpty();
+
+    // Expand tables to use approximate `kb` KiB of memory. Can be used prior to
+    // operation to avoid table resizes.
+    void reserveMemory(u4 kb);
 
     GlobalState(const GlobalState &) = delete;
     GlobalState(GlobalState &&) = delete;
@@ -138,7 +143,7 @@ private:
 
     void _error(std::unique_ptr<BasicError> error) const;
 
-    void expandNames();
+    void expandNames(int growBy = 2);
 
     SymbolRef synthesizeClass(absl::string_view name, u4 superclass = core::Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
@@ -149,6 +154,6 @@ private:
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_GLOBAL_STATE_H

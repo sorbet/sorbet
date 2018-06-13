@@ -20,7 +20,7 @@ string sourceName2funcName(string sourceName) {
 
 void emit_header(vector<string> sourceFiles, ostream &out) {
     out << "#include<string>" << '\n' << "#include<vector>" << '\n';
-    out << "namespace ruby_typer{" << '\n' << "namespace rbi{" << '\n';
+    out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "();" << '\n';
     }
@@ -31,17 +31,17 @@ void emit_header(vector<string> sourceFiles, ostream &out) {
 
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
     out << "#include<string>" << '\n' << "#include<vector>" << '\n';
-    out << "namespace ruby_typer{" << '\n' << "namespace rbi{" << '\n';
+    out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
         out << "  std::string " + sourceName2funcName(file) << "() {" << '\n';
-        out << "  return \"" + absl::CEscape(ruby_typer::FileOps::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
+        out << "  return \"" + absl::CEscape(sorbet::FileOps::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
     }
     out << "std::vector<std::pair<std::string, std::string> > all() {" << '\n';
     out << "  std::vector<std::pair<std::string, std::string> > result;" << '\n';
     for (auto &file : sourceFiles) {
         string version;
-        if (ruby_typer::Version::isReleaseBuild) {
-            version = ruby_typer::Version::build_scm_revision;
+        if (sorbet::Version::isReleaseBuild) {
+            version = sorbet::Version::build_scm_revision;
         } else {
             version = "master";
         }

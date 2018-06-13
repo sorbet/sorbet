@@ -24,13 +24,13 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
     return alreadyExists;
 }
 } // namespace
-shared_ptr<spdlog::logger> ruby_typer::fatalLogger = makeFatalLogger();
+shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
-string ruby_typer::FileOps::read(const absl::string_view filename) {
+string sorbet::FileOps::read(const absl::string_view filename) {
     string fileNameStr(filename.data(), filename.size());
     ifstream fin(fileNameStr);
     if (!fin.good()) {
-        throw ruby_typer::FileNotFoundException();
+        throw sorbet::FileNotFoundException();
     }
     // Determine the file length
     string src;
@@ -42,30 +42,30 @@ string ruby_typer::FileOps::read(const absl::string_view filename) {
     return src;
 }
 
-void ruby_typer::FileOps::write(const absl::string_view filename, const vector<ruby_typer::u1> &data) {
+void sorbet::FileOps::write(const absl::string_view filename, const vector<sorbet::u1> &data) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr, ios::out | ios::binary);
     if (!fout.good()) {
-        throw ruby_typer::FileNotFoundException();
+        throw sorbet::FileNotFoundException();
     }
     fout.write((const char *)data.data(), data.size());
 }
 
-void ruby_typer::FileOps::write(const absl::string_view filename, const absl::string_view text) {
+void sorbet::FileOps::write(const absl::string_view filename, const absl::string_view text) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr);
     if (!fout.good()) {
-        throw ruby_typer::FileNotFoundException();
+        throw sorbet::FileNotFoundException();
     }
     fout << text;
 }
 
-absl::string_view ruby_typer::FileOps::getFileName(const absl::string_view path) {
+absl::string_view sorbet::FileOps::getFileName(const absl::string_view path) {
     std::size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }
 
-absl::string_view ruby_typer::FileOps::getExtension(const absl::string_view path) {
+absl::string_view sorbet::FileOps::getExtension(const absl::string_view path) {
     std::size_t found = path.find_last_of(".");
     if (found == absl::string_view::npos) {
         return absl::string_view();
@@ -93,7 +93,7 @@ string strprintf(const char *format, ...) {
 class SetTerminateHandler {
 public:
     static void on_terminate() {
-        ruby_typer::Error::print_backtrace();
+        sorbet::Error::print_backtrace();
     }
 
     SetTerminateHandler() {
@@ -148,7 +148,7 @@ void filter_unnecessary(string &out) {
 }
 } // namespace
 
-void ruby_typer::Error::print_backtrace() noexcept {
+void sorbet::Error::print_backtrace() noexcept {
     int trace_size = 0;
     auto **messages = (char **)nullptr;
     string program_name = getProgramName();

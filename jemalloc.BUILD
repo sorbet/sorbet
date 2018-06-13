@@ -66,5 +66,6 @@ cc_library(
         "@com_stripe_ruby_typer//tools/config:linux": ["-ldl"],  # side step https://github.com/jemalloc/jemalloc/issues/948
         "//conditions:default": [],
     }),
+    linkstatic = 1,
     visibility = ["//visibility:public"],
 )

@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace cfg {
 
 // TODO: convert it to implicitly numbered instead of explicitly bound
@@ -188,6 +188,6 @@ public:
 };
 
 } // namespace cfg
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_CFG_H

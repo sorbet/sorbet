@@ -5,7 +5,7 @@
 #include "common/common.h"
 #include <vector>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class Context {
@@ -102,6 +102,6 @@ private:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_CONTEXT_H

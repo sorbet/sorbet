@@ -7,7 +7,7 @@
 
 #include "absl/strings/string_view.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 class GlobalState;
 class Name;
@@ -170,16 +170,16 @@ private:
 
 CheckSize(Name, 24, 8);
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
-template <> struct std::hash<ruby_typer::core::NameRef> {
-    size_t operator()(const ruby_typer::core::NameRef &x) const {
+template <> struct std::hash<sorbet::core::NameRef> {
+    size_t operator()(const sorbet::core::NameRef &x) const {
         return x._id;
     }
 };
 
-template <> struct std::equal_to<ruby_typer::core::NameRef> {
-    constexpr bool operator()(const ruby_typer::core::NameRef &lhs, const ruby_typer::core::NameRef &rhs) const {
+template <> struct std::equal_to<sorbet::core::NameRef> {
+    constexpr bool operator()(const sorbet::core::NameRef &lhs, const sorbet::core::NameRef &rhs) const {
         return lhs._id == rhs._id;
     }
 };

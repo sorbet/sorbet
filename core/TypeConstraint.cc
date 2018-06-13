@@ -1,5 +1,5 @@
 #include "TypeConstraint.h"
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 bool TypeConstraint::isEmpty() const {
@@ -227,4 +227,4 @@ std::shared_ptr<Type> TypeConstraint::findSolution(core::SymbolRef forWhat) cons
 }
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

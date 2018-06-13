@@ -1,6 +1,6 @@
 #include "core/Errors.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace errors {
 namespace Namer {
@@ -20,4 +20,4 @@ constexpr ErrorClass InterfaceClass{4013, StrictLevel::Stripe};
 } // namespace Namer
 } // namespace errors
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet

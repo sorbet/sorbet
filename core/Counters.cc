@@ -14,7 +14,7 @@
 
 using namespace std;
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 CounterState::CounterState(unique_ptr<CounterImpl> counters) : counters(move(counters)) {}
 
@@ -274,4 +274,4 @@ string getCounterStatistics(vector<string> names) {
 }
 
 } // namespace core
-}; // namespace ruby_typer
+}; // namespace sorbet

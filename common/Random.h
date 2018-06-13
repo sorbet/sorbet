@@ -4,7 +4,7 @@
 #include "common.h"
 #include <random>
 
-namespace ruby_typer {
+namespace sorbet {
 class Random {
 private:
     static std::random_device rd;
@@ -16,6 +16,6 @@ public:
     static u8 uniformU8();
     static u8 uniformU8(u8 from, u8 to);
 };
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif // SORBET_RANDOM_H

@@ -7,7 +7,7 @@
 #include <initializer_list>
 #include <memory>
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 
 class ErrorClass {
@@ -144,6 +144,6 @@ public:
 };
 
 } // namespace core
-} // namespace ruby_typer
+} // namespace sorbet
 
 #endif

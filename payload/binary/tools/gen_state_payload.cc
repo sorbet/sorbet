@@ -11,9 +11,9 @@ using namespace std;
 int main(int argc, char **argv) {
     ifstream fin(argv[1], std::ios::binary);
     if (!fin.good()) {
-        throw ruby_typer::FileNotFoundException();
+        throw sorbet::FileNotFoundException();
     }
-    std::vector<ruby_typer::u1> data;
+    std::vector<sorbet::u1> data;
 
     fin.seekg(0, std::ios::end);
     size_t filesize = fin.tellg();
@@ -27,7 +27,7 @@ int main(int argc, char **argv) {
 
     classfile << "#include \"common/common.h\"\n"
               << "\n"
-              << "const ruby_typer::u1 nameTablePayload[] = {\n";
+              << "const sorbet::u1 nameTablePayload[] = {\n";
     int i = -1;
     bool first = true;
     for (auto c : data) {
@@ -42,9 +42,8 @@ int main(int argc, char **argv) {
         classfile << (int)c;
     }
     classfile << "};\n";
-    classfile
-        << "extern const ruby_typer::u1 * const getNameTablePayload = (const ruby_typer::u1 * const)&nameTablePayload;"
-        << '\n';
+    classfile << "extern const sorbet::u1 * const getNameTablePayload = (const sorbet::u1 * const)&nameTablePayload;"
+              << '\n';
 
     classfile.close();
 

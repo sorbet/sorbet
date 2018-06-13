@@ -4,7 +4,7 @@
 #include "ast/ast.h"
 #include "core/core.h"
 
-namespace ruby_typer {
+namespace sorbet {
 namespace core {
 namespace serialize {
 class Serializer {
@@ -61,6 +61,6 @@ private:
 };
 } // namespace serialize
 } // namespace core
-}; // namespace ruby_typer
+}; // namespace sorbet
 
 #endif
