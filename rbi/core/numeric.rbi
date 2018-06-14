@@ -219,6 +219,12 @@ class Numeric < Object
   sig.returns(Complex)
   def to_c(); end
 
+  sig.returns(Float)
+  def to_f(); end
+
+  sig.returns(Integer)
+  def to_i(); end
+
   sig.returns(Integer)
   def to_int(); end
 
