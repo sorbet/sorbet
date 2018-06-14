@@ -1,4 +1,5 @@
 #include "main/realmain.h"
+#include "LSPLoop.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
@@ -186,6 +187,11 @@ int realmain(int argc, const char *argv[]) {
     }
     logger->trace("done building initial global state");
 
+    if (opts.runLSP) {
+        LSPLoop loop(gs, opts, logger, workers);
+        loop.runLSP();
+        return 0;
+    }
     Timer timeall(logger, "Done in");
     vector<core::FileRef> inputFiles;
     logger->trace("Files: ");

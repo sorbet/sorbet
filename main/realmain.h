@@ -71,6 +71,7 @@ struct Options {
     bool suggestTyped = false;
     bool silenceErrors = false;
     bool supressNonCriticalErrors = false;
+    bool runLSP = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     std::string typedSource = "";

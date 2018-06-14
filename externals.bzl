@@ -48,6 +48,13 @@ def externals():
 
 
     new_git_repository(
+        name="rapidjson",
+        remote="https://github.com/Tencent/rapidjson.git",
+        commit="b32cd9421c5e3cbe183a99b6537ce11441e50656",
+        build_file="//:rapidjson.BUILD",
+    )
+
+    new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
         commit="6a1ed71450148c8aed57de3179b1bdd81800bada",

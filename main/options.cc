@@ -88,6 +88,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
 
+    options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("stop-after", all_stop_after.str(),
@@ -205,6 +206,12 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw);
+
+        opts.runLSP = raw["lsp"].as<bool>();
+        if (opts.runLSP && !opts.cacheDir.empty()) {
+            logger->info("lsp mode does not yet support caching.");
+            throw EarlyReturnWithCode(1);
+        }
         opts.noStdlib = raw["no-stdlib"].as<bool>();
 
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
@@ -228,7 +235,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             }
             throw EarlyReturnWithCode(0);
         }
-        if (raw.count("e") == 0 && opts.inputFileNames.empty()) {
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP) {
             logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
             throw EarlyReturnWithCode(1);
         }

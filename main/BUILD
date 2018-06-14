@@ -55,6 +55,8 @@ cc_library(
     srcs = [
         "FileFlatMapper.cc",
         "FileFlatMapper.h",
+        "LSPLoop.cc",
+        "LSPLoop.h",
         "options.cc",
         "pipeline.cc",
         "realmain.cc",
@@ -82,5 +84,6 @@ cc_library(
         "//resolver",
         "//version",
         "@cxxopts",
+        "@rapidjson",
     ],
 )
