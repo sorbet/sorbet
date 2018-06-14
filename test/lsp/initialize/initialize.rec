@@ -2,5 +2,5 @@ Read: {"jsonrpc":"2.0","id":0,"method":"initialize","params":{"processId":65622,
 Write: {"jsonrpc":"2.0","id":0,"result":{"capabilities":{"textDocumentSync":1}}}
 Read: {"jsonrpc":"2.0","method":"initialized","params":{}}
 Read: {"jsonrpc":"2.0","id":1,"method":"shutdown","params":null}
-Write: {"jsonrpc":"2.0","id":1,"result":{}}
+Write: {"jsonrpc":"2.0","id":1,"result":null}
 Read: {"jsonrpc":"2.0","method":"exit","params":null}

@@ -153,8 +153,8 @@ void LSPLoop::runLSP() {
             Value result;
             int errorCode = 0;
             string errorString;
-            result.SetObject();
             if (method == LSP::Initialize) {
+                result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
                 string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1}}";
                 Document temp;
