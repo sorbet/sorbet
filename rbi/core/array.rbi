@@ -50,13 +50,13 @@ class Array < Object
   def <<(arg0); end
 
   sig(
-      arg0: T::Range[Integer],
-  )
-  .returns(T.nilable(T::Array[Elem]))
-  sig(
       arg0: T.any(Integer, Float),
   )
   .returns(T.nilable(Elem))
+  sig(
+      arg0: T::Range[Integer],
+  )
+  .returns(T.nilable(T::Array[Elem]))
   sig(
       arg0: Integer,
       arg1: Integer,
