@@ -72,7 +72,7 @@ class Module < Object
       new_name: Symbol,
       old_name: Symbol,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def alias_method(new_name, old_name); end
 
   sig.returns(T::Array[Module])
@@ -81,7 +81,7 @@ class Module < Object
   sig(
       arg0: Module,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def append_features(arg0); end
 
   sig(
@@ -224,10 +224,13 @@ class Module < Object
   .returns(T.untyped)
   def extended(othermod); end
 
+  sig.returns(T.self_type)
+  def freeze(); end
+
   sig(
       arg0: Module,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def include(*arg0); end
 
   sig(
@@ -300,7 +303,7 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def module_function(*arg0); end
 
   sig.returns(String)
@@ -309,13 +312,13 @@ class Module < Object
   sig(
       arg0: Module,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def prepend(*arg0); end
 
   sig(
       arg0: Module,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def prepend_features(arg0); end
 
   sig(
@@ -327,19 +330,19 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def private(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def private_class_method(*arg0); end
 
   sig(
       arg0: Symbol,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def private_constant(*arg0); end
 
   sig(
@@ -357,7 +360,7 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def protected(*arg0); end
 
   sig(
@@ -375,19 +378,19 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def public(*arg0); end
 
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def public_class_method(*arg0); end
 
   sig(
       arg0: Symbol,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def public_constant(*arg0); end
 
   sig(
@@ -412,7 +415,7 @@ class Module < Object
       arg0: Class,
       blk: T.proc(arg0: T.untyped).returns(BasicObject),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def refine(arg0, &blk); end
 
   sig(
@@ -430,7 +433,7 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def remove_method(arg0); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -442,13 +445,13 @@ class Module < Object
   sig(
       arg0: T.any(Symbol, String),
   )
-  .returns(Module)
+  .returns(T.self_type)
   def undef_method(arg0); end
 
   sig(
       arg0: Module,
   )
-  .returns(Module)
+  .returns(T.self_type)
   def using(arg0); end
 
   sig.returns(String)

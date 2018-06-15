@@ -811,6 +811,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
                             ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx)),
                         constr);
+                    expectedType = core::Types::replaceSelfType(
+                        ctx, expectedType, ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfType(ctx));
                 }
 
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {

@@ -176,7 +176,7 @@ class ::<root> < ::Object () @ test/testdata/dsl/prop.rb:2
     class ::NotAODM::IntegerParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:10
     class ::NotAODM::StringParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:11
     method ::NotAODM#<static-init> () @ test/testdata/dsl/prop.rb:2
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L5823
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/dsl/prop.rb:73
   class ::Opus () @ ???
     class ::Opus::Param < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12

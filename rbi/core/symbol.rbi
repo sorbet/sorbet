@@ -62,7 +62,7 @@ class Symbol < Object
   sig.returns(String)
   def inspect(); end
 
-  sig.returns(Symbol)
+  sig.returns(T.self_type)
   def intern(); end
 
   sig.returns(Integer)
@@ -107,6 +107,6 @@ class Symbol < Object
   sig.returns(String)
   def to_s(); end
 
-  sig.returns(Symbol)
+  sig.returns(T.self_type)
   def to_sym(); end
 end

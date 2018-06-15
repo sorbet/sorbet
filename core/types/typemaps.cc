@@ -11,6 +11,7 @@ using namespace std;
 
 shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> what, vector<SymbolRef> params,
                                     const vector<shared_ptr<Type>> &targs) {
+    ENFORCE(what.get());
     auto t = what->_instantiate(ctx, params, targs);
     if (t) {
         return t;
@@ -23,6 +24,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> wh
     if (tc.isEmpty()) {
         return what;
     }
+    ENFORCE(what.get());
     auto t = what->_instantiate(ctx, tc);
     if (t) {
         return t;
@@ -31,6 +33,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> wh
 }
 
 shared_ptr<Type> Types::approximate(core::Context ctx, shared_ptr<core::Type> what, const TypeConstraint &tc) {
+    ENFORCE(what.get());
     auto t = what->_approximate(ctx, tc);
     if (t) {
         return t;
@@ -429,5 +432,58 @@ shared_ptr<Type> Type::_approximate(core::Context ctx, const TypeConstraint &tc)
 }
 
 shared_ptr<Type> Type::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+    return nullptr;
+}
+
+std::shared_ptr<Type> SelfType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
+                                             const std::vector<std::shared_ptr<Type>> &targs) {
+    return nullptr;
+}
+
+std::shared_ptr<Type> Types::replaceSelfType(core::Context ctx, std::shared_ptr<core::Type> what,
+                                             std::shared_ptr<core::Type> receiver) {
+    ENFORCE(what.get());
+    auto t = what->_replaceSelfType(ctx, receiver);
+    if (t) {
+        return t;
+    }
+    return what;
+}
+
+std::shared_ptr<Type> SelfType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+    return receiver;
+}
+
+std::shared_ptr<Type> Type::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+    return nullptr;
+}
+
+std::shared_ptr<Type> OrType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+    auto left = this->left->_replaceSelfType(ctx, receiver);
+    auto right = this->right->_replaceSelfType(ctx, receiver);
+    if (left || right) {
+        if (!left) {
+            left = this->left;
+        }
+        if (!right) {
+            right = this->right;
+        }
+        return Types::any(ctx, left, right);
+    }
+    return nullptr;
+}
+
+std::shared_ptr<Type> AndType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+    auto left = this->left->_replaceSelfType(ctx, receiver);
+    auto right = this->right->_replaceSelfType(ctx, receiver);
+    if (left || right) {
+        if (!left) {
+            left = this->left;
+        }
+        if (!right) {
+            right = this->right;
+        }
+        return Types::all(ctx, left, right);
+    }
     return nullptr;
 }

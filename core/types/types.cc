@@ -356,6 +356,10 @@ int AndType::kind() {
     return 12;
 }
 
+int SelfType::kind() {
+    return 13;
+}
+
 bool ClassType::isFullyDefined() {
     return true;
 }
@@ -607,3 +611,29 @@ bool ShapeType::hasUntyped() {
     return false;
 };
 SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
+
+SelfType::SelfType(){};
+
+std::string SelfType::typeName() const {
+    return "SelfType";
+}
+
+bool SelfType::isFullyDefined() {
+    return false;
+}
+
+std::shared_ptr<Type> SelfType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+    Error::raise("should never happen");
+}
+
+bool SelfType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+    Error::raise("should never happen");
+}
+
+shared_ptr<Type> SelfType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                        std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                        std::shared_ptr<Type> fullType, std::shared_ptr<SendAndBlockLink> link) {
+    Error::raise("should never happen");
+}
+
+void SelfType::_sanityCheck(core::Context ctx) {}

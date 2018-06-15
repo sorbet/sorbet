@@ -30,7 +30,7 @@ class Proc < Object
   sig.returns([String, Integer])
   def source_location(); end
 
-  sig.returns(Proc)
+  sig.returns(T.self_type)
   def to_proc(); end
 
   sig.returns(String)

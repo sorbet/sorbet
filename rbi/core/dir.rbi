@@ -117,7 +117,7 @@ class Dir < Object
   sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(Dir)
+  .returns(T.self_type)
   sig.returns(Enumerator[String])
   def each(&blk); end
 
@@ -149,13 +149,13 @@ class Dir < Object
   sig.returns(T.nilable(String))
   def read(); end
 
-  sig.returns(Dir)
+  sig.returns(T.self_type)
   def rewind(); end
 
   sig(
       arg0: Integer,
   )
-  .returns(Dir)
+  .returns(T.self_type)
   def seek(arg0); end
 
   sig.returns(Integer)

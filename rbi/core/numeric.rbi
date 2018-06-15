@@ -146,7 +146,7 @@ class Numeric < Object
   .returns(T.any(Integer, Float, Rational, BigDecimal))
   def modulo(arg0); end
 
-  type_parameters(:Self).sig.returns(T.nilable(T.type_parameter(:Self)))
+  sig.returns(T.nilable(T.self_type))
   def nonzero?(); end
 
   sig.returns(Integer)

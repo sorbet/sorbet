@@ -375,3 +375,15 @@ string LambdaParam::typeName() const {
 string SelfTypeParam::typeName() const {
     return "SelfTypeParam";
 }
+
+string SelfType::toString(const GlobalState &gs, int tabs) const {
+    return show(gs);
+}
+
+string SelfType::show(const GlobalState &gs) const {
+    return "T.self_type()";
+}
+
+string SelfType::showValue(const GlobalState &gs) const {
+    return show(gs);
+}

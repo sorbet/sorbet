@@ -353,7 +353,7 @@ module Kernel
   .returns(NilClass)
   def =~(other); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def clone(); end
 
   sig(
@@ -362,7 +362,7 @@ module Kernel
   .returns(NilClass)
   def display(port); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def dup(); end
 
   sig(
@@ -390,7 +390,7 @@ module Kernel
   .returns(NilClass)
   def extend(mod); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def freeze(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -522,7 +522,7 @@ module Kernel
   .returns(T::Array[Symbol])
   def singleton_methods(all=_); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def taint(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -544,13 +544,13 @@ module Kernel
   sig.returns(String)
   def to_s(); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def trust(); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def untaint(); end
 
-  sig.returns(Kernel)
+  sig.returns(T.self_type)
   def untrust(); end
 
   sig.returns(T.any(TrueClass, FalseClass))

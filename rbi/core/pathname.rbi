@@ -204,6 +204,9 @@ class Pathname < Object
   .returns(T.any(TrueClass, FalseClass))
   def fnmatch(pattern, flags=_); end
 
+  sig.returns(T.self_type)
+  def freeze(); end
+
   sig.returns(String)
   def ftype(); end
 
@@ -399,6 +402,9 @@ class Pathname < Object
   .returns(Integer)
   def sysopen(mode=_, perm=_); end
 
+  sig.returns(T.self_type)
+  def taint(); end
+
   sig.returns(String)
   def to_path(); end
 
@@ -410,6 +416,9 @@ class Pathname < Object
 
   sig.returns(Integer)
   def unlink(); end
+
+  sig.returns(T.self_type)
+  def untaint(); end
 
   sig(
       atime: Time,

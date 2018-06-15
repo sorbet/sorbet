@@ -143,6 +143,10 @@ void matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc cal
         expectedType = Types::dynamic();
     }
 
+    expectedType = core::Types::replaceSelfType(
+        ctx, expectedType,
+        fullType); // TODO: fullType is actually not the best here. We want the last AND component of fullType
+
     if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
         return;
     }
@@ -597,6 +601,9 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(ctx, resultType, *constr);
     }
+    resultType = Types::replaceSelfType(
+        ctx, resultType,
+        fullType); // TODO: full type is not the best here. We actually want the last AND component of fulltype
 
     if (block != nullptr) {
         core::SymbolRef bspec;

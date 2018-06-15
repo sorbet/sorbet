@@ -371,27 +371,46 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    auto *p1 = cast_type<LambdaParam>(t1.get());
-    auto *p2 = cast_type<LambdaParam>(t2.get());
+    {
+        auto *p1 = cast_type<LambdaParam>(t1.get());
+        auto *p2 = cast_type<LambdaParam>(t2.get());
 
-    if (p1 != nullptr || p2 != nullptr) {
-        return OrType::make_shared(t1, t2);
-    }
-
-    auto *tv1 = cast_type<TypeVar>(t1.get());
-    auto *tv2 = cast_type<TypeVar>(t2.get());
-    if (tv1 != nullptr || tv2 != nullptr) {
-        return OrType::make_shared(t1, t2);
-    }
-
-    auto *s1 = cast_type<SelfTypeParam>(t1.get());
-    auto *s2 = cast_type<SelfTypeParam>(t2.get());
-
-    if (s1 != nullptr || s2 != nullptr) {
-        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+        if (p1 != nullptr || p2 != nullptr) {
             return OrType::make_shared(t1, t2);
-        } else {
-            return t1;
+        }
+    }
+
+    {
+        auto *tv1 = cast_type<TypeVar>(t1.get());
+        auto *tv2 = cast_type<TypeVar>(t2.get());
+        if (tv1 != nullptr || tv2 != nullptr) {
+            return OrType::make_shared(t1, t2);
+        }
+    }
+
+    {
+        auto *s1 = cast_type<SelfTypeParam>(t1.get());
+        auto *s2 = cast_type<SelfTypeParam>(t2.get());
+
+        if (s1 != nullptr || s2 != nullptr) {
+            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+                return OrType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
+        }
+    }
+
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return OrType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
         }
     }
 
@@ -793,24 +812,38 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         }
         return make_shared<AppliedType>(a1->klass, newTargs);
     }
-
-    auto *tv1 = cast_type<TypeVar>(t1.get());
-    auto *tv2 = cast_type<TypeVar>(t2.get());
-    if (tv1 != nullptr || tv2 != nullptr) {
-        return AndType::make_shared(t1, t2);
-    }
-
-    auto *s1 = cast_type<SelfTypeParam>(t1.get());
-    auto *s2 = cast_type<SelfTypeParam>(t2.get());
-
-    if (s1 != nullptr || s2 != nullptr) {
-        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+    {
+        auto *tv1 = cast_type<TypeVar>(t1.get());
+        auto *tv2 = cast_type<TypeVar>(t2.get());
+        if (tv1 != nullptr || tv2 != nullptr) {
             return AndType::make_shared(t1, t2);
-        } else {
-            return t1;
+        }
+    }
+    {
+        auto *s1 = cast_type<SelfTypeParam>(t1.get());
+        auto *s2 = cast_type<SelfTypeParam>(t2.get());
+
+        if (s1 != nullptr || s2 != nullptr) {
+            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+                return AndType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
         }
     }
 
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return AndType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
+        }
+    }
     return glbGround(ctx, t1, t2);
 }
 
@@ -867,23 +900,38 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
     //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
 
-    auto *lambda1 = cast_type<LambdaParam>(t1.get());
-    auto *lambda2 = cast_type<LambdaParam>(t2.get());
-    if (lambda1 != nullptr || lambda2 != nullptr) {
-        // This should only be reachable in resolver.
-        if (lambda1 == nullptr || lambda2 == nullptr) {
-            return false;
+    {
+        auto *lambda1 = cast_type<LambdaParam>(t1.get());
+        auto *lambda2 = cast_type<LambdaParam>(t2.get());
+        if (lambda1 != nullptr || lambda2 != nullptr) {
+            // This should only be reachable in resolver.
+            if (lambda1 == nullptr || lambda2 == nullptr) {
+                return false;
+            }
+            return lambda1->definition == lambda2->definition;
         }
-        return lambda1->definition == lambda2->definition;
     }
 
-    auto *self1 = cast_type<SelfTypeParam>(t1.get());
-    auto *self2 = cast_type<SelfTypeParam>(t2.get());
-    if (self1 != nullptr || self2 != nullptr) {
-        if (self1 == nullptr || self2 == nullptr) {
-            return false;
+    {
+        auto *self1 = cast_type<SelfTypeParam>(t1.get());
+        auto *self2 = cast_type<SelfTypeParam>(t2.get());
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return false;
+            }
+            return self1->definition == self2->definition;
         }
-        return self1->definition == self2->definition;
+    }
+
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return false;
+            }
+            return true;
+        }
     }
 
     if (auto *a1 = cast_type<AppliedType>(t1.get())) {

@@ -9,7 +9,7 @@ class Enumerator < Object
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(T.untyped)
-  sig.returns(Enumerator[Elem])
+  sig.returns(T.self_type)
   def each(&blk); end
 
   sig(
@@ -63,7 +63,7 @@ class Enumerator < Object
   sig.returns(T::Array[Elem])
   def peek_values(); end
 
-  sig.returns(Enumerator[Elem])
+  sig.returns(T.self_type)
   def rewind(); end
 
   sig.returns(T.nilable(T.any(Integer, Float)))

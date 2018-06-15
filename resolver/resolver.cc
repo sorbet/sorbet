@@ -557,7 +557,7 @@ private:
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
 
-        auto sig = TypeSyntax::parseSig(ctx, send, nullptr);
+        auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true);
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (sig.seen.args ||
@@ -937,7 +937,7 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig);
+                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false);
                     }
                 }
             }
@@ -976,7 +976,7 @@ public:
 
                 auto expr = move(send->args[0]);
                 ParsedSig emptySig;
-                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig);
+                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false);
                 return make_unique<ast::Cast>(send->loc, type, move(expr), send->fun);
             }
             default:

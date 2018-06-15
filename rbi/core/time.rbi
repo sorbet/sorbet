@@ -144,7 +144,7 @@ class Time < Object
   sig.returns(Integer)
   def gmt_offset(); end
 
-  sig.returns(Time)
+  sig.returns(T.self_type)
   def gmtime(); end
 
   sig.returns(Integer)
@@ -174,7 +174,7 @@ class Time < Object
   sig(
       utc_offset: String,
   )
-  .returns(Time)
+  .returns(T.self_type)
   def localtime(utc_offset=_); end
 
   sig.returns(Integer)
@@ -252,7 +252,7 @@ class Time < Object
   sig.returns(Numeric)
   def usec(); end
 
-  sig.returns(Time)
+  sig.returns(T.self_type)
   def utc(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
