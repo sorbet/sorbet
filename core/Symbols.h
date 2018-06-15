@@ -15,6 +15,9 @@ class Symbol;
 class GlobalState;
 class Type;
 class MutableContext;
+class Context;
+class TypeAndOrigins;
+class SendAndBlockLink;
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
@@ -556,6 +559,17 @@ public:
     SymbolRef enclosingMethod(const GlobalState &gs) const;
     SymbolRef enclosingClass(const GlobalState &gs) const;
 
+    class IntrinsicMethod {
+    public:
+        virtual std::shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, std::vector<TypeAndOrigins> &args,
+                                            core::SymbolRef self, std::shared_ptr<Type> fullType,
+                                            std::shared_ptr<SendAndBlockLink> linkType) const = 0;
+    };
+
+    // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
+    // why raw pointers are safe.
+    const IntrinsicMethod *intrinsic = nullptr;
+
 private:
     friend class serialize::Serializer;
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
@@ -790,6 +804,10 @@ public:
     }
     static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 50);
+    }
+
+    static SymbolRef T_Generic() {
+        return SymbolRef(nullptr, 51);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

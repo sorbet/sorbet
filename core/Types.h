@@ -88,6 +88,14 @@ public:
     static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
 };
 
+struct Intrinsic {
+    const core::SymbolRef symbol;
+    const bool singleton;
+    const core::NameRef method;
+    const core::Symbol::IntrinsicMethod *impl;
+};
+extern const std::vector<Intrinsic> intrinsicMethods;
+
 class TypeAndOrigins final {
 public:
     std::shared_ptr<core::Type> type;
@@ -112,9 +120,6 @@ public:
                                                const std::vector<std::shared_ptr<Type>> &targs) = 0;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc);
 
-    // blockType is both an in and and out param; If nullptr, it indicates that
-    // the caller is not passing a block; If populated, `dispatchCall` will set
-    // to the type of the block argument to the called method, if any.
     virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
                                                std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
                                                std::shared_ptr<Type> fullType,

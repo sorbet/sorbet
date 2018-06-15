@@ -43,6 +43,7 @@ public:
     GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
 
     void initEmpty();
+    void installIntrinsics();
 
     // Expand tables to use approximate `kb` KiB of memory. Can be used prior to
     // operation to avoid table resizes.

@@ -1278,6 +1278,9 @@ vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vect
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
 
+    ctx.trace("Finalizing ancestor chains");
+    finalizeAncestors(ctx.state);
+
     ctx.trace("Resolving sigs and vars");
     for (auto &tree : trees) {
         tree = ast::TreeMap::apply(ctx, sigs, move(tree));

@@ -387,6 +387,13 @@ public:
         return original;
     }
 
+    // Allow stub symbols created to hold intrinsics to be filled in
+    // with real types from code
+    bool redefinitionOk(core::Context ctx, core::SymbolRef sym) {
+        auto &data = sym.data(ctx);
+        return data.intrinsic != nullptr && data.arguments().empty() && data.resultType == nullptr;
+    }
+
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         scopeStack.emplace_back();
         ++scopeId;
@@ -407,13 +414,17 @@ public:
                 pushEnclosingArgs(move(method->args));
                 return method;
             }
-            if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
-                e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
-                e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
+            if (redefinitionOk(ctx, sym)) {
+                sym.data(ctx).definitionLoc = method->loc;
+            } else {
+                if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
+                    e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
+                }
+                // TODO Check that the previous args match the new ones instead of
+                // just moving the original one to the side
+                ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
             }
-            // TODO Check that the previous args match the new ones instead of
-            // just moving the original one to the side
-            ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
         }
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);

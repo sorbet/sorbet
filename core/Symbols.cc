@@ -616,6 +616,7 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     }
     result.superClass = this->superClass;
     result.uniqueCounter = this->uniqueCounter;
+    result.intrinsic = this->intrinsic;
     return result;
 }
 

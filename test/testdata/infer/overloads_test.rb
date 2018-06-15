@@ -42,6 +42,7 @@ class HasOverloads
 end
 
 class OverloadAndGenerics
+  extend T::Generic
   Elem = type_member
 
   def _; end

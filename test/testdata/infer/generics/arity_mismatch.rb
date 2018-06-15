@@ -1,5 +1,7 @@
 # typed: strict
 class Generic
+  extend T::Generic
+
   T1 = type_member
   T2 = type_member
 end

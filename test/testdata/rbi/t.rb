@@ -28,5 +28,5 @@ T.noreturn(String) # error: Too many arguments provided for method `noreturn`. E
 T.enum # error: Not enough arguments provided for method `enum`. Expected: `1`, got: `0`
 
 T.untyped(String) # error: Too many arguments provided for method `untyped`. Expected: `0`, got: `1`
-T.any # error: `T.any` needs one or more type arguments
-T.all # error: `T.all` needs one or more type arguments
+T.any # error: Not enough arguments provided for method `any`. Expected: `2`, got: `0`
+T.all # error: Not enough arguments provided for method `all`. Expected: `2`, got: `0`

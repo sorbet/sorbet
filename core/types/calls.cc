@@ -333,203 +333,6 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
     return tp;
 }
 
-// This method handles a number of special-case methods that are implemented as
-// intrinsics in C++. If it recognizes the method call, it handles it and
-// returns a type; otherwise, it returns `nullptr.
-shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                                  vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                                                  vector<shared_ptr<Type>> &targs, shared_ptr<SendAndBlockLink> block) {
-    switch (name._id) {
-        case core::Names::new_()._id: {
-            auto attachedClass = this->symbol.data(ctx).attachedClass(ctx);
-            if (!attachedClass.exists()) {
-                if (this->symbol == core::Symbols::Class()) {
-                    // `Class.new(...)`, but it isn't a specific Class. We know
-                    // calling .new on a Class will yield some sort of Object
-                    attachedClass = core::Symbols::Object();
-                } else {
-                    return nullptr;
-                }
-            }
-            auto instanceTy = attachedClass.data(ctx).externalType(ctx);
-            instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, instanceTy, block);
-            return instanceTy;
-        }
-
-        case core::Names::initialize()._id: {
-            // Default initialize() implementation if the class doesn't provide
-            // one in userland
-            if (!args.empty()) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
-                }
-            }
-            return core::Types::dynamic();
-        }
-
-        case core::Names::squareBrackets()._id: {
-            core::SymbolRef attachedClass;
-
-            attachedClass = this->symbol.data(ctx).attachedClass(ctx);
-
-            if (!attachedClass.exists()) {
-                return nullptr;
-            }
-
-            if (attachedClass == core::Symbols::T_Array()) {
-                attachedClass = core::Symbols::Array();
-            } else if (attachedClass == core::Symbols::T_Hash()) {
-                attachedClass = core::Symbols::Hash();
-            } else if (attachedClass == core::Symbols::T_Enumerable()) {
-                attachedClass = core::Symbols::Enumerable();
-            } else if (attachedClass == core::Symbols::T_Range()) {
-                attachedClass = core::Symbols::Range();
-            } else if (attachedClass == core::Symbols::T_Set()) {
-                attachedClass = core::Symbols::Set();
-            }
-
-            auto arity = attachedClass.data(ctx).typeArity(ctx);
-            if (attachedClass == core::Symbols::Hash()) {
-                arity = 2;
-            }
-            if (attachedClass.data(ctx).typeMembers().empty()) {
-                return nullptr;
-            }
-
-            if (args.size() != arity) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                                attachedClass.data(ctx).show(ctx), arity, args.size());
-                }
-            }
-
-            vector<shared_ptr<core::Type>> targs;
-            auto it = args.begin();
-            int i = -1;
-            for (auto mem : attachedClass.data(ctx).typeMembers()) {
-                ++i;
-                if (mem.data(ctx).isFixed()) {
-                    targs.emplace_back(mem.data(ctx).resultType);
-                } else if (it != args.end()) {
-                    targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
-                    ++it;
-                } else if (attachedClass == core::Symbols::Hash() && i == 2) {
-                    auto tupleArgs = targs;
-                    targs.emplace_back(make_shared<TupleType>(tupleArgs));
-                } else {
-                    targs.emplace_back(core::Types::dynamic());
-                }
-            }
-
-            return make_shared<core::MetaType>(make_shared<core::AppliedType>(attachedClass, targs));
-        }
-
-        case core::Names::untyped()._id:
-            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
-                return nullptr;
-            }
-            if (!args.empty()) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                                name.show(ctx), 0, args.size());
-                }
-            }
-            return core::Types::dynamic();
-
-        case core::Names::any()._id:
-        case core::Names::all()._id: {
-            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
-                return nullptr;
-            }
-
-            if (args.empty()) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("`{}` needs one or more type arguments", "T." + name.show(ctx));
-                    if (name == core::Names::any()) {
-                        e.addErrorSection(
-                            core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
-                    }
-                }
-                return core::Types::dynamic();
-            }
-
-            shared_ptr<Type> res = (name == core::Names::all()) ? core::Types::top() : core::Types::bottom();
-            for (auto &arg : args) {
-                auto ty = unwrapType(ctx, arg.origins[0], arg.type);
-                if (name == core::Names::any()) {
-                    res = Types::any(ctx, res, ty);
-                } else {
-                    res = Types::all(ctx, res, ty);
-                }
-            }
-
-            return make_shared<core::MetaType>(res);
-        }
-        case core::Names::class_()._id:
-        case core::Names::singletonClass()._id: {
-            /*
-             * x : Integer
-             * =>
-             * x.class = Integer
-             * x.class : Integer.singleton_class
-             */
-            auto singleton = this->symbol.data(ctx).lookupSingletonClass(ctx);
-            if (singleton.exists()) {
-                return make_shared<ClassType>(singleton);
-            }
-            return core::Types::classClass();
-        }
-
-        case core::Names::must()._id:
-            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
-                return nullptr;
-            }
-            if (args.empty() || args.size() > 2) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                                name.toString(ctx), "1-2", args.size());
-                }
-                return Types::dynamic();
-            }
-            if (!args[0].type->isFullyDefined()) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
-                    e.setHeader("T.must() applied to incomplete type `{}`", args[0].type->show(ctx));
-                }
-                return Types::dynamic();
-            }
-            if (args.size() > 1 && !Types::isSubType(ctx, args[1].type, Types::String())) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
-                    e.setHeader(
-                        "Expression passed as an argument `{}` to method `{}` does not match expected type `{}`", "msg",
-                        name.toString(ctx), "String");
-                    e.addErrorSection(core::ErrorSection("Got " + args[1].type->show(ctx) + " originating from:",
-                                                         args[1].origins2Explanations(ctx)));
-                }
-            }
-            return Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
-        case core::Names::revealType()._id: {
-            if (this->symbol != core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
-                return nullptr;
-            }
-            if (args.size() != 1) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
-                    e.setHeader("Wrong number of arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                                name.toString(ctx), "1", args.size());
-                }
-                return Types::dynamic();
-            }
-
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::RevealType)) {
-                e.setHeader("Revealed type: `{}`", args[0].type->show(ctx));
-                e.addErrorSection(core::ErrorSection("From:", args[0].origins2Explanations(ctx)));
-            }
-            return args[0].type;
-        }
-        default:
-            return nullptr;
-    }
-}
-
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -554,9 +357,17 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
 
     if (!mayBeOverloaded.exists()) {
-        auto special = dispatchCallIntrinsic(ctx, fun, callLoc, args, fullType, targs, block);
-        if (special != nullptr) {
-            return special;
+        if (fun == core::Names::initialize()) {
+            // Special-case initialize(). We should define this on
+            // `BasicObject`, but our method-resolution order is wrong, and
+            // putting it there will inadvertently shadow real definitions in
+            // some cases, so we special-case it here as a last resort.
+            if (!args.empty()) {
+                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                    e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
+                }
+            }
+            return core::Types::dynamic();
         }
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
             if (fullType.get() != this) {
@@ -762,7 +573,15 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         }
     }
 
-    shared_ptr<Type> resultType = Types::resultTypeAsSeenFrom(ctx, method, this->symbol, targs);
+    shared_ptr<Type> resultType = nullptr;
+
+    if (method.data(ctx).intrinsic != nullptr) {
+        resultType = method.data(ctx).intrinsic->apply(ctx, callLoc, args, this->symbol, fullType, block);
+    }
+
+    if (resultType == nullptr) {
+        resultType = Types::resultTypeAsSeenFrom(ctx, method, this->symbol, targs);
+    }
     if (block == nullptr) {
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
@@ -864,3 +683,194 @@ shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, c
 shared_ptr<Type> MetaType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("should never happen");
 }
+
+class T_untyped : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        return core::Types::dynamic();
+    }
+} T_untyped;
+
+class T_must : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return nullptr;
+        }
+        if (!args[0].type->isFullyDefined()) {
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
+                e.setHeader("T.must() applied to incomplete type `{}`", args[0].type->show(ctx));
+            }
+            return nullptr;
+        }
+        return Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
+    }
+} T_must;
+
+class T_any : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return core::Types::dynamic();
+        }
+
+        shared_ptr<Type> res = core::Types::bottom();
+        for (auto &arg : args) {
+            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            res = Types::any(ctx, res, ty);
+        }
+
+        return make_shared<core::MetaType>(res);
+    }
+} T_any;
+
+class T_all : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return core::Types::dynamic();
+        }
+
+        shared_ptr<Type> res = core::Types::top();
+        for (auto &arg : args) {
+            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            res = Types::all(ctx, res, ty);
+        }
+
+        return make_shared<core::MetaType>(res);
+    }
+} T_all;
+
+class T_revealType : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return Types::dynamic();
+        }
+
+        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::RevealType)) {
+            e.setHeader("Revealed type: `{}`", args[0].type->show(ctx));
+            e.addErrorSection(core::ErrorSection("From:", args[0].origins2Explanations(ctx)));
+        }
+        return args[0].type;
+    }
+} T_revealType;
+
+class Object_class : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        auto singleton = self.data(ctx).lookupSingletonClass(ctx);
+        if (singleton.exists()) {
+            return make_shared<ClassType>(singleton);
+        }
+        return core::Types::classClass();
+    }
+} Object_class;
+
+class Class_new : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        auto attachedClass = self.data(ctx).attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            if (self == core::Symbols::Class()) {
+                // `Class.new(...)`, but it isn't a specific Class. We know
+                // calling .new on a Class will yield some sort of Object
+                attachedClass = core::Symbols::Object();
+            } else {
+                return nullptr;
+            }
+        }
+        auto instanceTy = attachedClass.data(ctx).externalType(ctx);
+        instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, instanceTy, linkType);
+        return instanceTy;
+    }
+} Class_new;
+
+class T_Generic_squareBrackets : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        core::SymbolRef attachedClass;
+
+        attachedClass = self.data(ctx).attachedClass(ctx);
+
+        if (!attachedClass.exists()) {
+            return nullptr;
+        }
+
+        if (attachedClass == core::Symbols::T_Array()) {
+            attachedClass = core::Symbols::Array();
+        } else if (attachedClass == core::Symbols::T_Hash()) {
+            attachedClass = core::Symbols::Hash();
+        } else if (attachedClass == core::Symbols::T_Enumerable()) {
+            attachedClass = core::Symbols::Enumerable();
+        } else if (attachedClass == core::Symbols::T_Range()) {
+            attachedClass = core::Symbols::Range();
+        } else if (attachedClass == core::Symbols::T_Set()) {
+            attachedClass = core::Symbols::Set();
+        }
+
+        auto arity = attachedClass.data(ctx).typeArity(ctx);
+        if (attachedClass == core::Symbols::Hash()) {
+            arity = 2;
+        }
+        if (attachedClass.data(ctx).typeMembers().empty()) {
+            return nullptr;
+        }
+
+        if (args.size() != arity) {
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
+                e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
+                            attachedClass.data(ctx).show(ctx), arity, args.size());
+            }
+        }
+
+        vector<shared_ptr<core::Type>> targs;
+        auto it = args.begin();
+        int i = -1;
+        for (auto mem : attachedClass.data(ctx).typeMembers()) {
+            ++i;
+            if (mem.data(ctx).isFixed()) {
+                targs.emplace_back(mem.data(ctx).resultType);
+            } else if (it != args.end()) {
+                targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
+                ++it;
+            } else if (attachedClass == core::Symbols::Hash() && i == 2) {
+                auto tupleArgs = targs;
+                targs.emplace_back(make_shared<TupleType>(tupleArgs));
+            } else {
+                targs.emplace_back(core::Types::dynamic());
+            }
+        }
+
+        return make_shared<core::MetaType>(make_shared<core::AppliedType>(attachedClass, targs));
+    }
+} T_Generic_squareBrackets;
+
+const vector<Intrinsic> sorbet::core::intrinsicMethods{
+    {core::Symbols::T(), true, core::Names::untyped(), &T_untyped},
+    {core::Symbols::T(), true, core::Names::must(), &T_must},
+    {core::Symbols::T(), true, core::Names::all(), &T_all},
+    {core::Symbols::T(), true, core::Names::any(), &T_any},
+    {core::Symbols::T(), true, core::Names::revealType(), &T_revealType},
+
+    {core::Symbols::T_Generic(), false, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+
+    {core::Symbols::T_Array(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {core::Symbols::T_Hash(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {core::Symbols::T_Enumerable(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {core::Symbols::T_Range(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {core::Symbols::T_Set(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+
+    {core::Symbols::Object(), false, core::Names::class_(), &Object_class},
+    {core::Symbols::Object(), false, core::Names::singletonClass(), &Object_class},
+
+    {core::Symbols::Class(), false, core::Names::new_(), &Class_new},
+};

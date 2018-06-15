@@ -554,6 +554,7 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     UnPickler p(data);
     gs.trace("Decompression done");
     unpickleGS(p, gs);
+    gs.installIntrinsics();
     gs.trace("Done reading GS");
 }
 

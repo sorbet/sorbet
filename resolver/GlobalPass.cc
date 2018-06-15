@@ -172,7 +172,7 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
 }
 }; // namespace
 
-void Resolver::finalizeResolution(core::GlobalState &gs) {
+void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -213,6 +213,16 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 
+    core::prodCounterAdd("types.input.classes.total", classCount);
+    core::prodCounterAdd("types.input.methods.total", methodCount);
+}
+
+void Resolver::finalizeResolution(core::GlobalState &gs) {
+    // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
+    // but we currently compute mixes_in_class_methods during the same AST walk
+    // that resolves types and we don't want to introduce additional passes if
+    // we don't have to. It would be a tractable refactor to merge it
+    // `ResolveConstantsWalk` if it becomes necessary to process earlier.
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
         if (!sym.data(gs).isClass()) {
@@ -231,6 +241,7 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             singleton.data(gs).mixins().emplace_back(classMethods);
         }
     }
+
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs).isClass()) {
@@ -246,8 +257,6 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
             validateAbstract(gs, abstractCache, sym);
         }
     }
-    core::prodCounterAdd("types.input.classes.total", classCount);
-    core::prodCounterAdd("types.input.methods.total", methodCount);
 }
 }; // namespace resolver
 

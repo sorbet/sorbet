@@ -1,5 +1,7 @@
 # typed: strict
 class MyProc1
+  extend T::Generic
+
   Return = type_member
   Arg0 = type_member
 

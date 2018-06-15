@@ -64,6 +64,7 @@ const char *typeAliasTemp_str = "<TypeAlias>";
 const char *chalk_str = "Chalk";
 const char *tools_str = "Tools";
 const char *accessible_str = "Accessible";
+const char *generic_str = "Generic";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -173,6 +174,7 @@ void GlobalState::initEmpty() {
     SymbolRef chalk_tools_id = enterClassSymbol(Loc::none(), chalk_id, enterNameConstant(tools_str));
     SymbolRef chalk_tools_accessible_id =
         enterClassSymbol(Loc::none(), chalk_tools_id, enterNameConstant(accessible_str));
+    SymbolRef T_Generic_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(generic_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -225,6 +227,7 @@ void GlobalState::initEmpty() {
     ENFORCE(chalk_id == Symbols::Chalk());
     ENFORCE(chalk_tools_id == Symbols::Chalk_Tools());
     ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
+    ENFORCE(T_Generic_id == Symbols::T_Generic());
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();
@@ -296,12 +299,25 @@ void GlobalState::initEmpty() {
     ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
             "Too many synthetic symbols? have: ", symbols.size(), " expected: ", Symbols::last_synthetic_sym()._id + 1);
 
+    installIntrinsics();
+
     // First file is used to indicate absence of a file
     files.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
+}
+
+void GlobalState::installIntrinsics() {
+    for (auto &entry : intrinsicMethods) {
+        auto symbol = entry.symbol;
+        if (entry.singleton) {
+            symbol = symbol.data(*this).singletonClass(*this);
+        }
+        core::SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
+        method.data(*this).intrinsic = entry.impl;
+    }
 }
 
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
