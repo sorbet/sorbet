@@ -69,13 +69,6 @@ shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                                          shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "shapetype");
-    switch (fun._id) {
-        case Names::freeze()._id: {
-            return selfRef;
-        }
-        default:
-            break;
-    }
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
@@ -84,9 +77,6 @@ shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                          shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "tupletype");
     switch (fun._id) {
-        case Names::freeze()._id: {
-            return selfRef;
-        }
         case Names::squareBrackets()._id: {
             if (args.size() != 1) {
                 break;
