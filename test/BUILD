@@ -38,7 +38,9 @@ cc_test(
         "//ast/treemap",
         "//common",
         "//core",
+        "//core/serialize",
         "//parser",
+        "//payload/binary:some",
         "@cxxopts",
         "@gtest",
         "@gtest//:gtest_main",
@@ -90,27 +92,12 @@ cc_binary(
     deps = ["//common"],
 )
 
-SHARDS = 8
+load(":pipeline_test.bzl", "pipeline_tests")
 
 [
-    sh_test(
-        name = "test_corpus{}".format(shard),
-        size = "small",
-        srcs = ["test_corpus_forwarder.sh"],
-        args = [
-            "--shards_total={}".format(SHARDS),
-            "--my_id={}".format(shard),
-        ],
-        data = glob([
-            "testdata/**/*.rb",
-            "testdata/**/*.exp",
-            "testdata/**/*.exp.svg",
-        ]) + ["test_corpus_sharded"],
-    )
-    for shard in range(SHARDS)
+    pipeline_tests(glob([
+        "testdata/**/*.rb",
+        "testdata/**/*.exp",
+        "testdata/**/*.exp.svg",
+    ])),
 ]
-
-test_suite(
-    name = "test_corpus",
-    tests = ["test_corpus{}".format(shard) for shard in range(SHARDS)],
-)
