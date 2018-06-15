@@ -74,6 +74,9 @@ public:
      */
     static std::shared_ptr<Type> instantiate(core::Context ctx, std::shared_ptr<core::Type> what,
                                              const TypeConstraint &tc);
+
+    static std::shared_ptr<Type> replaceSelfType(core::Context ctx, std::shared_ptr<core::Type> what,
+                                                 std::shared_ptr<core::Type> receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
      * typechecking. We should be careful to only used this type when we are trying to guess a type.
      * We should do proper instatiation and subtype test after we have guessed type variables with
@@ -92,6 +95,14 @@ public:
     static std::shared_ptr<Type> lubAll(core::Context ctx, std::vector<std::shared_ptr<core::Type>> &elements);
     static std::shared_ptr<Type> arrayOf(core::Context ctx, std::shared_ptr<core::Type> elem);
 };
+
+struct Intrinsic {
+    const core::SymbolRef symbol;
+    const bool singleton;
+    const core::NameRef method;
+    const core::Symbol::IntrinsicMethod *impl;
+};
+extern const std::vector<Intrinsic> intrinsicMethods;
 
 class TypeAndOrigins final {
 public:
@@ -116,6 +127,8 @@ public:
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) = 0;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc);
+
+    virtual std::shared_ptr<Type> _replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver);
 
     // blockType is both an in and and out param; If nullptr, it indicates that
     // the caller is not passing a block; If populated, `dispatchCall` will set
@@ -235,6 +248,7 @@ public:
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) override;
 
 private:
     /*
@@ -284,6 +298,7 @@ public:
     virtual bool isFullyDefined() final;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual std::shared_ptr<Type> _replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) override;
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
@@ -308,6 +323,33 @@ private:
         std::shared_ptr<Type> res(new AndType(left, right));
         return res;
     }
+};
+
+/** This is a specific kind of self-type that should only be used in method return position.
+ * It indicates that the method may(or will) return `self` or type that behaves equivalently
+ * to self(e.g. in case of `.clone`).
+ */
+class SelfType final : public Type {
+public:
+    SelfType();
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string showValue(const GlobalState &gs) const final;
+    virtual std::string typeName() const override;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual std::shared_ptr<Type> _replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) override;
+
+    virtual std::shared_ptr<Type> dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                               std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                               std::shared_ptr<Type> fullType,
+                                               std::shared_ptr<SendAndBlockLink> link) final;
+    void _sanityCheck(core::Context ctx) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(core::Context ctx, core::NameRef name, int i) final;
+    virtual bool derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) final;
 };
 
 class LiteralType final : public ProxyType {

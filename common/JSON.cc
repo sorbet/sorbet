@@ -3,12 +3,14 @@
 #include <iomanip>
 #include <sstream>
 
+using namespace std;
+
 namespace sorbet {
 namespace core {
 
 // https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
-std::string JSON::escape(std::string from) {
-    std::ostringstream ss;
+string JSON::escape(string from) {
+    ostringstream ss;
     for (auto ch : from) {
         switch (ch) {
             case '\\':
@@ -34,7 +36,7 @@ std::string JSON::escape(std::string from) {
                 break;
             default:
                 if (ch <= 0x1f) {
-                    ss << "\\u" << std::hex << std::setw(4) << std::setfill('0') << (int)ch;
+                    ss << "\\u" << hex << setw(4) << setfill('0') << (int)ch;
                     break;
                 }
                 ss << ch;

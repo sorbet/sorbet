@@ -45,7 +45,7 @@ class IO < Object
   sig(
       arg0: BasicObject,
   )
-  .returns(IO)
+  .returns(T.self_type)
   def <<(arg0); end
 
   sig(
@@ -65,7 +65,7 @@ class IO < Object
   sig.returns(T.any(TrueClass, FalseClass))
   def autoclose?(); end
 
-  sig.returns(IO)
+  sig.returns(T.self_type)
   def binmode(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -97,7 +97,7 @@ class IO < Object
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig(
       sep: String,
       limit: Integer,
@@ -108,21 +108,21 @@ class IO < Object
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[Integer])
   def each_byte(&blk); end
 
   sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[String])
   def each_char(&blk); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[Integer])
   def each_codepoint(&blk); end
 
@@ -142,7 +142,7 @@ class IO < Object
   sig.returns(Integer)
   def fileno(); end
 
-  sig.returns(IO)
+  sig.returns(T.self_type)
   def flush(); end
 
   sig.returns(T.nilable(Integer))
@@ -304,12 +304,12 @@ class IO < Object
   sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
       int_enc: T.any(String, Encoding),
   )
-  .returns(IO)
+  .returns(T.self_type)
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
   sig.returns(File::Stat)
@@ -347,7 +347,7 @@ class IO < Object
   sig.returns(Integer)
   def tell(); end
 
-  sig.returns(IO)
+  sig.returns(T.self_type)
   def to_io(); end
 
   sig.returns(T.any(TrueClass, FalseClass))
@@ -476,27 +476,27 @@ class IO < Object
       mode: Integer,
       opt: Integer,
   )
-  .returns(IO)
+  .returns(T.self_type)
   def self.for_fd(fd, mode=_, opt=_); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[Integer])
   def bytes(&blk); end
 
   sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[String])
   def chars(&blk); end
 
   sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig.returns(Enumerator[Integer])
   def codepoints(&blk); end
 
@@ -505,7 +505,7 @@ class IO < Object
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig(
       sep: String,
       limit: Integer,
@@ -521,7 +521,7 @@ class IO < Object
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
-  .returns(IO)
+  .returns(T.self_type)
   sig(
       sep: String,
       limit: Integer,

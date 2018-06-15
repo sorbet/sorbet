@@ -56,7 +56,7 @@ class <emptyTree><<constant:<root>>> < ()
       begin
         class <singleton class><<constant:<todo sym>>> < ()
           def inner<<constant:<todo sym>>>()
-            self(<constant:<todo sym>>).singleton_class().g()
+            <emptyTree>::<constant:T>.reveal_type(self(<constant:<todo sym>>))
           end
         end
         self(<constant:<todo sym>>).inner()

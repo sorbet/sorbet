@@ -66,14 +66,15 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         sigValues.emplace_back(ast::MK::Ident(loc, core::Symbols::BasicObject()));
         newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, name), ast::MK::Nil(loc)));
 
-        body.emplace_back(ast::MK::Method0(loc, name, ast::MK::EmptyTree(loc)));
+        body.emplace_back(ast::MK::Method0(loc, name, ast::MK::EmptyTree(loc), ast::MethodDef::DSLSynthesized));
         body.emplace_back(ast::MK::Method1(loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
-                                           ast::MK::Local(loc, core::Names::arg0())));
+                                           ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
     }
 
     body.emplace_back(ast::MK::Sig(loc, ast::MK::Hash(loc, move(sigKeys), move(sigValues)), dupName(asgn->lhs.get())));
-    body.emplace_back(
-        ast::MK::Method(loc, core::Names::new_(), move(newArgs), ast::MK::Cast(loc, dupName(asgn->lhs.get())), true));
+    body.emplace_back(ast::MK::Method(loc, core::Names::new_(), move(newArgs),
+                                      ast::MK::Cast(loc, dupName(asgn->lhs.get())),
+                                      ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     ast::ClassDef::ANCESTORS_store ancestors;
     ancestors.emplace_back(ast::MK::Ident(loc, core::Symbols::Struct()));

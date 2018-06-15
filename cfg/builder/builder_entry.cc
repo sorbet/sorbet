@@ -27,7 +27,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.data(ctx).name;
 
     int i = -1;
-    std::unordered_map<core::SymbolRef, core::LocalVariable> aliases;
+    unordered_map<core::SymbolRef, core::LocalVariable> aliases;
     for (core::SymbolRef argSym : md.symbol.data(ctx).arguments()) {
         i++;
         core::LocalVariable arg(argSym.data(ctx).name, 0);
@@ -41,7 +41,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
     jumpToDead(cont, *res.get(), rvLoc);
 
-    std::vector<Binding> aliasesPrefix;
+    vector<Binding> aliasesPrefix;
     for (auto kv : aliases) {
         core::SymbolRef global = kv.first;
         core::LocalVariable local = kv.second;
@@ -59,8 +59,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     core::histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
     core::histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
-    std::sort(aliasesPrefix.begin(), aliasesPrefix.end(),
-              [](const Binding &l, const Binding &r) -> bool { return l.bind < r.bind; });
+    sort(aliasesPrefix.begin(), aliasesPrefix.end(),
+         [](const Binding &l, const Binding &r) -> bool { return l.bind < r.bind; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
@@ -107,8 +107,8 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
 
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
-        std::sort(bb->backEdges.begin(), bb->backEdges.end(),
-                  [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
+        sort(bb->backEdges.begin(), bb->backEdges.end(),
+             [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
     }
 }
 
@@ -127,7 +127,7 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
-CFGContext CFGContext::withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link) {
+CFGContext CFGContext::withSendAndBlockLink(shared_ptr<core::SendAndBlockLink> link) {
     auto ret = CFGContext(*this);
     ret.link = move(link);
     return ret;

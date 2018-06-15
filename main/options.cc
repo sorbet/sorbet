@@ -10,12 +10,12 @@ using namespace std;
 namespace sorbet {
 namespace realmain {
 struct PrintOptions {
-    std::string option;
+    string option;
     bool Printers::*flag;
     bool supportsCaching = false;
 };
 
-const std::vector<PrintOptions> print_options({
+const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJSON},
     {"ast", &Printers::Desugared},
@@ -33,7 +33,7 @@ const std::vector<PrintOptions> print_options({
 });
 
 struct StopAfterOptions {
-    std::string option;
+    string option;
     Phase flag;
 };
 
@@ -88,6 +88,7 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
 
+    options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("stop-after", all_stop_after.str(),
@@ -103,7 +104,7 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
 
-    int defaultThreads = std::thread::hardware_concurrency();
+    int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
         defaultThreads = 2;
     }
@@ -114,7 +115,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>()->default_value(""),
                                "host");
     options.add_options("dev")("counters", "Print all internal counters");
-    options.add_options("dev")("suggest-typed", "Suggest which files to add @typed to");
+    options.add_options("dev")("suggest-typed", "Suggest which files to add `typed: true` to");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
     options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
@@ -205,6 +206,12 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             throw EarlyReturnWithCode(1);
         }
         opts.stopAfterPhase = extractStopAfter(raw);
+
+        opts.runLSP = raw["lsp"].as<bool>();
+        if (opts.runLSP && !opts.cacheDir.empty()) {
+            logger->info("lsp mode does not yet support caching.");
+            throw EarlyReturnWithCode(1);
+        }
         opts.noStdlib = raw["no-stdlib"].as<bool>();
 
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
@@ -228,7 +235,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             }
             throw EarlyReturnWithCode(0);
         }
-        if (raw.count("e") == 0 && opts.inputFileNames.empty()) {
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP) {
             logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
             throw EarlyReturnWithCode(1);
         }
@@ -285,7 +292,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         }
 
         if (raw["color"].as<string>() == "auto") {
-            if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
+            if (rang::rang_implementation::isTerminal(cerr.rdbuf())) {
                 core::ErrorColors::enableColors();
             }
         } else if (raw["color"].as<string>() == "always") {

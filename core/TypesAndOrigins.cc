@@ -2,12 +2,13 @@
 
 #include <algorithm> // std::sort
 
+using namespace std;
 namespace sorbet {
 namespace core {
 
 // This sorts the underlying `origins`
-std::vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
-    std::vector<ErrorLine> result;
+vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
+    vector<ErrorLine> result;
     auto compare = [](Loc &left, Loc &right) {
         if (left.file != right.file) {
             return left.file.id() < right.file.id();
@@ -20,7 +21,7 @@ std::vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
         }
         return false;
     };
-    std::sort(origins.begin(), origins.end(), compare);
+    sort(origins.begin(), origins.end(), compare);
     core::Loc last;
     for (auto o : origins) {
         if (o == last) {

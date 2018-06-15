@@ -1,5 +1,7 @@
  # typed: strict
  class Parent
+    extend T::Generic
+
     A = type_member
     sig(a: A).returns(A)
     def foo(a)

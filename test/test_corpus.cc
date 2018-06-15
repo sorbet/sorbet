@@ -34,14 +34,14 @@ using namespace std;
 struct Expectations {
     string folder;
     string basename;
+    string testName;
     vector<string> sourceFiles;
     unordered_map<string, string> expectations;
 };
 
-int shardId;
-int totalShards;
+string singleTest;
 
-vector<Expectations> getInputs(int myId, int totalShards);
+vector<Expectations> getInputs(string singleTest);
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     string res = arg.param.folder + arg.param.basename;
@@ -131,32 +131,11 @@ unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
     return restored;
 }
 
-TEST(CorpusTest, CloneSubstitutePayload) {
-    auto logger = spd::stderr_color_mt("ClonePayload");
-    auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
-
-    sorbet::core::GlobalState gs(errorQueue);
-    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
-
-    auto c1 = gs.deepCopy();
-    auto c2 = gs.deepCopy();
-
-    sorbet::core::NameRef n1;
-    {
-        sorbet::core::UnfreezeNameTable thaw1(*c1);
-        n1 = c1->enterNameUTF8("test new name");
-    }
-
-    sorbet::core::GlobalSubstitution subst(*c1, *c2);
-    ASSERT_EQ("test new name", subst.substitute(n1).toString(*c2));
-    ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
-    ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
-}
-
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<sorbet::core::BasicError>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
+    auto rbName = test.basename + ".rb";
     SCOPED_TRACE(inputPath);
 
     for (auto &exp : test.expectations) {
@@ -171,7 +150,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
@@ -191,7 +170,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     map<string, string> got;
 
     for (auto file : files) {
-        std::unique_ptr<sorbet::parser::Node> nodes;
+        unique_ptr<sorbet::parser::Node> nodes;
         {
             sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
@@ -199,28 +178,25 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
         {
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("parse-tree-json");
         if (expectation != test.expectations.end()) {
             got["parse-tree-json"].append(nodes->toJSON(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         // Desugarer
-        std::unique_ptr<sorbet::ast::Expression> desugared;
+        unique_ptr<sorbet::ast::Expression> desugared;
         {
             sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
@@ -231,20 +207,18 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (expectation != test.expectations.end()) {
             got["ast"].append(desugared->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("ast-raw");
         if (expectation != test.expectations.end()) {
             got["ast-raw"].append(desugared->showRaw(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         // DSL
-        std::unique_ptr<sorbet::ast::Expression> dslUnwound;
+        unique_ptr<sorbet::ast::Expression> dslUnwound;
         {
             sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
@@ -255,20 +229,18 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (expectation != test.expectations.end()) {
             got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("dsl-tree-raw");
         if (expectation != test.expectations.end()) {
             got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         // Namer
-        std::unique_ptr<sorbet::ast::Expression> namedTree;
+        unique_ptr<sorbet::ast::Expression> namedTree;
         {
             sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -287,8 +259,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     if (expectation != test.expectations.end()) {
         got["name-table"] = gs.toString() + "\n";
         auto newErrors = errorQueue->drainErrors();
-        errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                      std::make_move_iterator(newErrors.end()));
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
     for (auto &resolvedTree : trees) {
@@ -296,16 +267,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (expectation != test.expectations.end()) {
             got["name-tree"].append(resolvedTree->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("name-tree-raw");
         if (expectation != test.expectations.end()) {
             got["name-tree-raw"].append(resolvedTree->showRaw(gs));
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
 
@@ -335,7 +304,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             resolvedTree.reset();
 
             stringstream dot;
-            dot << "digraph \"" << sorbet::FileOps::getFileName(inputPath) << "\" {" << '\n';
+            dot << "digraph \"" << rbName << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -343,8 +312,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             got["cfg"].append(dot.str());
 
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("cfg-raw");
@@ -356,7 +324,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             resolvedTree.reset();
 
             stringstream dot;
-            dot << "digraph \"" << sorbet::FileOps::getFileName(inputPath) << "\" {" << '\n';
+            dot << "digraph \"" << rbName << "\" {" << '\n';
             for (auto &cfg : collector.cfgs) {
                 dot << cfg << '\n' << '\n';
             }
@@ -364,8 +332,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             got["cfg-raw"].append(dot.str());
 
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("typed-source");
@@ -379,8 +346,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("infer");
@@ -395,8 +361,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
             got["infer"] = "";
             auto newErrors = errorQueue->drainErrors();
-            errors.insert(errors.end(), std::make_move_iterator(newErrors.begin()),
-                          std::make_move_iterator(newErrors.end()));
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
 
@@ -536,7 +501,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << '\n';
 }
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(shardId, totalShards)), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size()) {
@@ -576,6 +541,26 @@ bool compareNames(const string &left, const string &right) {
     return left < right;
 }
 
+string rbFile2BaseTestName(string rbFileName) {
+    auto basename = rbFileName;
+    auto lastDirSeparator = basename.find_last_of("/");
+    if (lastDirSeparator != string::npos) {
+        basename = basename.substr(lastDirSeparator + 1);
+    }
+    auto split = basename.rfind(".");
+    if (split != string::npos) {
+        basename = basename.substr(0, split);
+    }
+    split = basename.find("__");
+    if (split != string::npos) {
+        basename = basename.substr(0, split);
+    }
+    string testName = basename;
+    if (lastDirSeparator != string::npos) {
+        testName = rbFileName.substr(0, lastDirSeparator + 1 + testName.length());
+    }
+    return testName;
+}
 // substrantially modified from https://stackoverflow.com/a/8438663
 vector<Expectations> listDir(const char *name) {
     vector<Expectations> result;
@@ -589,16 +574,7 @@ vector<Expectations> listDir(const char *name) {
 
     while ((entry = readdir(dir)) != nullptr) {
         if (entry->d_type == DT_DIR) {
-            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
-                continue;
-            }
-            if (strcmp(entry->d_name, "disabled") == 0) {
-                continue;
-            }
-            char path[1024];
-            snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
-            auto nested = listDir(path);
-            result.insert(result.end(), nested.begin(), nested.end());
+            continue;
         } else {
             names.emplace_back(entry->d_name);
         }
@@ -608,10 +584,8 @@ vector<Expectations> listDir(const char *name) {
     Expectations current;
     for (auto &s : names) {
         if (endsWith(s, ".rb")) {
-            auto basename = s;
-            auto split = s.find("__");
-            if (split != string::npos) {
-                basename = s.substr(0, split);
+            auto basename = rbFile2BaseTestName(s);
+            if (basename != s) {
                 if (basename == current.basename) {
                     current.sourceFiles.push_back(s);
                     continue;
@@ -626,11 +600,11 @@ vector<Expectations> listDir(const char *name) {
             current.sourceFiles.push_back(s);
             current.folder = name;
             current.folder += "/";
+            current.testName = current.folder + current.basename;
         } else if (endsWith(s, ".exp")) {
             if (startsWith(s, current.basename)) {
-                auto kind_start = s.c_str() + current.basename.size() + 1;
-                auto kind_end = s.c_str() + s.size() - strlen(".exp");
-                string kind(kind_start, kind_end - kind_start);
+                auto kind_start = s.rfind(".", s.size() - strlen(".exp") - 1);
+                string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
                 current.expectations[kind] = s;
             }
         } else {
@@ -645,26 +619,42 @@ vector<Expectations> listDir(const char *name) {
     return result;
 }
 
-vector<Expectations> getInputs(int myId, int totalShards) {
-    auto all = listDir("test/testdata");
+vector<Expectations> getInputs(string singleTest) {
     vector<Expectations> result;
-    for (Expectations &f : all) {
-        if (((std::hash<string>()(f.basename) % totalShards) + totalShards) % totalShards == myId) {
+    if (singleTest.empty()) {
+        sorbet::Error::raise("No test specified. Pass one with --single_test=<test_path>");
+    }
+
+    string parentDir;
+    {
+        auto lastDirSeparator = singleTest.find_last_of("/");
+        if (lastDirSeparator == string::npos) {
+            parentDir = ".";
+        } else {
+            parentDir = singleTest.substr(0, lastDirSeparator);
+        }
+    }
+    auto scan = listDir(parentDir.c_str());
+    auto lookingFor = rbFile2BaseTestName(singleTest);
+    cout << lookingFor;
+    for (Expectations &f : scan) {
+        if (f.testName == lookingFor) {
             result.push_back(f);
         }
+    }
+
+    if (result.empty()) {
+        sorbet::Error::raise("None tests found!");
     }
     return result;
 }
 
 int main(int argc, const char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
-    options.add_options()("shards_total", "Number of parallel test workers", cxxopts::value<int>()->default_value("1"),
-                          "shards");
-    options.add_options()("my_id", "ID of this worker across parallel shards. Should be in [0..shards_total)",
-                          cxxopts::value<int>()->default_value("0"), "id");
+    options.add_options()("single_test", "run over single test.", cxxopts::value<string>()->default_value(""),
+                          "testpath");
     auto res = options.parse(argc, argv);
-    shardId = res["my_id"].as<int>();
-    totalShards = res["shards_total"].as<int>();
+    singleTest = res["single_test"].as<string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);
     return RUN_ALL_TESTS();

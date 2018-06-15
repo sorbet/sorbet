@@ -805,6 +805,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
                             ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx)),
                         constr);
+                    expectedType = core::Types::replaceSelfType(
+                        ctx, expectedType, ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfType(ctx));
                 }
 
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
@@ -965,15 +967,37 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             tp = cur;
                         }
                         break;
-                    default:
+                    default: {
                         if (!asGoodAs || (tp.type->isDynamic() && !cur.type->isDynamic())) {
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
-                                e.setHeader("Changing type of a variable in a loop, `{}` is not a subtype of `{}`",
-                                            tp.type->show(ctx), cur.type->show(ctx));
+                                e.setHeader("Changing the type of a variable in a loop is not permitted");
+                                e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
+                                    "Existing variable has type: `{}`", cur.type->show(ctx))));
+                                e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
+                                    "Attempting to change type to: `{}`\n", tp.type->show(ctx))));
+
+                                if (cur.origins.size() == 1) {
+                                    // NOTE(nelhage): We assume that if there is
+                                    // a single definition location, that
+                                    // corresponds to an initial
+                                    // assignment. This is not necessarily
+                                    // correct if the variable came from some
+                                    // other source (e.g. a function argument)
+                                    auto suggest =
+                                        core::Types::any(ctx, dropConstructor(ctx, tp.origins[0], tp.type), cur.type);
+                                    e.addErrorSection(core::ErrorSection(
+                                        "Consider declaring the variable with T.let():",
+                                        {core::ErrorLine::from(cur.origins[0], "T.let(..., {})", suggest->show(ctx))}));
+                                } else {
+                                    e.addErrorSection(
+                                        core::ErrorSection("Original type from:", cur.origins2Explanations(ctx)));
+                                }
                             }
+
                             tp.type = core::Types::dynamic();
                         }
                         break;
+                    }
                 }
             }
         }

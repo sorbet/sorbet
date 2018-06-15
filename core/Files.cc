@@ -9,7 +9,7 @@ using namespace std;
 namespace sorbet {
 namespace core {
 
-vector<int> findLineBreaks(const std::string &s) {
+vector<int> findLineBreaks(const string &s) {
     vector<int> res;
     int i = -1;
     res.push_back(-1);
@@ -32,7 +32,7 @@ StrictLevel fileSigil(absl::string_view source) {
      */
     static regex sigil(R"(^\s*#\s*typed:\s*(\w+)?\s*$)");
     size_t off = 0;
-    // std::regex is shockingly slow.
+    // regex is shockingly slow.
     //
     // Help it out by manually scanning for the word `typed:`, and then running
     // the regex only over the single line.
@@ -73,21 +73,21 @@ StrictLevel fileSigil(absl::string_view source) {
     }
 }
 
-File::File(std::string &&path_, std::string &&source_, Type source_type)
+File::File(string &&path_, string &&source_, Type source_type)
     : source_type(source_type), path_(path_), source_(source_),
-      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), sigil(fileSigil(this->source())), strict(sigil) {}
+      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), sigil(fileSigil(this->source_)), strict(sigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
 
-const File &FileRef::data(const GlobalState &gs) const {
+const File &FileRef::data(const GlobalState &gs, bool allowTombStones) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(gs.files[_id]->source_type != File::TombStone);
+    ENFORCE(allowTombStones || gs.files[_id]->source_type != File::TombStone);
     return *(gs.files[_id]);
 }
 
-File &FileRef::data(GlobalState &gs) const {
+File &FileRef::data(GlobalState &gs, bool allowTombStones) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(gs.files[_id]->source_type != File::TombStone);
+    ENFORCE(allowTombStones || gs.files[_id]->source_type != File::TombStone);
     return *(gs.files[_id]);
 }
 
@@ -96,6 +96,7 @@ absl::string_view File::path() const {
 }
 
 absl::string_view File::source() const {
+    ENFORCE(this->source_type != Type::TombStone);
     return this->source_;
 }
 
@@ -112,7 +113,8 @@ bool File::isPayload() const {
 }
 
 std::vector<int> &File::line_breaks() const {
-    auto ptr = std::atomic_load(&line_breaks_);
+    ENFORCE(this->source_type != Type::TombStone);
+    auto ptr = atomic_load(&line_breaks_);
     if (ptr) {
         return *ptr;
     } else {
@@ -124,6 +126,13 @@ std::vector<int> &File::line_breaks() const {
 
 int File::lineCount() const {
     return line_breaks().size() - 1;
+}
+
+void File::replaceFrom(const File &other) {
+    ENFORCE(this->path_ == other.path_);
+    this->source_type = other.source_type;
+    this->source_ = other.source_;
+    this->line_breaks_ = other.line_breaks_;
 }
 
 } // namespace core

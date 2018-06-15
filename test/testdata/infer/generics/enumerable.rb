@@ -1,5 +1,7 @@
  # typed: strict
  module MyEnumerable
+    extend T::Generic
+
     A = type_member
     sig(a: MyEnumerable[A]).returns(MyEnumerable[A])
     def -(a)
@@ -14,6 +16,6 @@
 
  module Foo
     def bar
-       MyEnumerable.new() - MyEnumerable.new()
+       MySet.new() - MySet.new()
     end
  end

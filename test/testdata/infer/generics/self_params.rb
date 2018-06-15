@@ -20,5 +20,5 @@ class FooChild < Foo # error: should be declared again
 end
 
 FooChild.bla("mda").length
-FooChild.bla(1) # error: does not match expected type
-  
+FooChild.bla(1) # error: `Integer(1)` doesn't match `String` for argument `arg`
+

@@ -49,7 +49,7 @@ bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
     return false;
 }
 
-ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent) {
+ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType) {
     ParsedSig sig;
 
     {
@@ -75,7 +75,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                                                 name.toString(ctx));
                                 }
                             }
-                            typeArgSpec.type = std::make_shared<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.type = make_shared<core::TypeVar>(core::Symbols::todo());
                             typeArgSpec.loc = arg->loc;
                         } else {
                             if (auto e =
@@ -140,7 +140,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                     if (lit && lit->isSymbol(ctx)) {
                         core::NameRef name = lit->asSymbol(ctx);
                         sig.argTypes.emplace_back(
-                            ParsedSig::ArgSpec{key->loc, name, getResultType(ctx, value, *parent)});
+                            ParsedSig::ArgSpec{key->loc, name, getResultType(ctx, value, *parent, allowSelfType)});
                     }
                 }
                 break;
@@ -180,7 +180,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                     break;
                 }
 
-                sig.returns = getResultType(ctx, send->args.front(), *parent);
+                sig.returns = getResultType(ctx, send->args.front(), *parent, allowSelfType);
 
                 break;
             }
@@ -205,10 +205,12 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
     return sig;
 }
 
-shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig) {
+shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig,
+                                            bool allowSelfType) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
-            return core::Types::any(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig), core::Types::nilClass());
+            return core::Types::any(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType),
+                                    core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -216,10 +218,11 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::dynamic();
             }
-            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
+            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::all(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
+                result =
+                    core::Types::all(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig, allowSelfType));
                 i++;
             }
             return result;
@@ -233,10 +236,11 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::dynamic();
             }
-            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig);
+            auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType);
             int i = 1;
             while (i < send->args.size()) {
-                result = core::Types::any(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig));
+                result =
+                    core::Types::any(ctx, result, TypeSyntax::getResultType(ctx, send->args[i], sig, allowSelfType));
                 i++;
             }
             return result;
@@ -320,7 +324,14 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::untyped()._id:
             return core::Types::dynamic();
-
+        case core::Names::selfType()._id:
+            if (allowSelfType) {
+                return make_shared<core::SelfType>();
+            }
+            if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                e.setHeader("Only top-level T.self_type is supported");
+            }
+            return core::Types::dynamic();
         case core::Names::noreturn()._id:
             return core::Types::bottom();
 
@@ -333,14 +344,14 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
 }
 
 shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
-                                                 const ParsedSig &sigBeingParsed) {
+                                                 const ParsedSig &sigBeingParsed, bool allowSelfType) {
     shared_ptr<core::Type> result;
     typecase(
         expr.get(),
         [&](ast::Array *arr) {
             vector<shared_ptr<core::Type>> elems;
             for (auto &el : arr->elems) {
-                elems.emplace_back(getResultType(ctx, el, sigBeingParsed));
+                elems.emplace_back(getResultType(ctx, el, sigBeingParsed, false));
             }
             result = core::TupleType::build(ctx, elems);
         },
@@ -350,10 +361,10 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
-                auto val = getResultType(ctx, vtree, sigBeingParsed);
+                auto val = getResultType(ctx, vtree, sigBeingParsed, false);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
-                    auto keytype = std::dynamic_pointer_cast<core::LiteralType>(lit->value);
+                    auto keytype = dynamic_pointer_cast<core::LiteralType>(lit->value);
                     ENFORCE(keytype);
                     keys.emplace_back(keytype);
                     values.emplace_back(val);
@@ -390,7 +401,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
         },
         [&](ast::Send *s) {
             if (isTProc(ctx, s)) {
-                auto sig = parseSig(ctx, s, &sigBeingParsed);
+                auto sig = parseSig(ctx, s, &sigBeingParsed, false);
 
                 vector<shared_ptr<core::Type>> targs;
 
@@ -430,7 +441,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 return;
             }
             if (recvi->symbol == core::Symbols::T()) {
-                result = interpretTCombinator(ctx, s, sigBeingParsed);
+                result = interpretTCombinator(ctx, s, sigBeingParsed, allowSelfType);
                 return;
             }
 
@@ -458,11 +469,11 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
             }
 
-            std::vector<core::TypeAndOrigins> targs;
+            vector<core::TypeAndOrigins> targs;
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
-                ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg, sigBeingParsed));
+                ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg, sigBeingParsed, false));
                 targs.emplace_back(ty);
             }
 

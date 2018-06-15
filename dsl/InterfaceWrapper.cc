@@ -12,8 +12,7 @@ using namespace std;
 
 namespace sorbet {
 namespace dsl {
-std::unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx,
-                                                              std::unique_ptr<ast::Send> send) {
+unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ctx, unique_ptr<ast::Send> send) {
     if (send->fun != core::Names::wrapInstance()) {
         return send;
     }

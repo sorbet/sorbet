@@ -1,4 +1,6 @@
 class ::<root> < ::Object () @ test/testdata/infer/gerald.rb:2
+  class ::Chalk () @ ???
+    class ::Chalk::Log < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
   class ::Opus () @ ???
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/gerald.rb:5
     class ::Opus::AutogenLoader < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:3
@@ -91,8 +93,6 @@ class ::<root> < ::Object () @ test/testdata/infer/gerald.rb:2
             argument ::Opus::CIBot::Gerald::MatchTimeout#initialize#rule_token<optional, keyword> @ test/testdata/infer/gerald.rb:11
           method ::Opus::CIBot::Gerald::MatchTimeout#rule_token () @ test/testdata/infer/gerald.rb:9
         class ::Opus::CIBot::Gerald::Matcher < ::Object (<constant:Log>) @ test/testdata/infer/gerald.rb:17
-          class ::Opus::CIBot::Gerald::Matcher::Chalk < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
-            class ::Opus::CIBot::Gerald::Matcher::Chalk::Log < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
           field ::Opus::CIBot::Gerald::Matcher#@rules -> T.untyped @ test/testdata/infer/gerald.rb:23
           method ::Opus::CIBot::Gerald::Matcher#initialize () @ test/testdata/infer/gerald.rb:22
             method ::Opus::CIBot::Gerald::Matcher#initialize#<block> (<block-pass>$2) @ test/testdata/infer/gerald.rb:25

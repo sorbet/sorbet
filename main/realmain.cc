@@ -1,4 +1,5 @@
 #include "main/realmain.h"
+#include "LSPLoop.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
@@ -20,7 +21,7 @@ using namespace std;
 
 namespace sorbet {
 namespace realmain {
-std::shared_ptr<spd::logger> logger;
+shared_ptr<spd::logger> logger;
 int returnCode;
 
 shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
@@ -34,8 +35,8 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr
 
 const string GLOBAL_STATE_KEY = "GlobalState";
 
-void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Options &options,
-                              std::unique_ptr<KeyValueStore> &kvstore) {
+void createInitialGlobalState(shared_ptr<core::GlobalState> &gs, const Options &options,
+                              unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
@@ -66,7 +67,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
         Options emptyOpts;
         emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, logger);
-        vector<std::string> empty;
+        vector<string> empty;
         auto indexed = index(gs, empty, payloadFiles, emptyOpts, workers, kvstore);
         resolve(*gs, move(indexed), emptyOpts); // result is thrown away
     } else {
@@ -84,7 +85,7 @@ void createInitialGlobalState(std::shared_ptr<core::GlobalState> &gs, const Opti
  * Workaround by monitoring for STDOUT to go away and self-HUPing.
  */
 void startHUPMonitor() {
-    std::thread monitor([]() {
+    thread monitor([]() {
         struct pollfd pfd;
         pfd.fd = 1; // STDOUT
         pfd.events = 0;
@@ -118,11 +119,11 @@ int realmain(int argc, const char *argv[]) {
         startHUPMonitor();
     }
     if (!opts.debugLogFile.empty()) {
-        auto fileSink = std::make_shared<spd::sinks::simple_file_sink_mt>(opts.debugLogFile);
+        auto fileSink = make_shared<spd::sinks::simple_file_sink_mt>(opts.debugLogFile);
         fileSink->set_level(spd::level::debug);
         { // replace console & fatal loggers
-            std::vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
-            auto combinedLogger = std::make_shared<spd::logger>("consoleAndFile", begin(sinks), end(sinks));
+            vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
+            auto combinedLogger = make_shared<spd::logger>("consoleAndFile", begin(sinks), end(sinks));
             combinedLogger->flush_on(spdlog::level::err);
             combinedLogger->set_level(spd::level::trace); // pass through everything, let the sinks decide
 
@@ -131,8 +132,8 @@ int realmain(int argc, const char *argv[]) {
             logger = combinedLogger;
         }
         { // replace type error logger
-            std::vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
-            auto combinedLogger = std::make_shared<spd::logger>("typeErrorsAndFile", begin(sinks), end(sinks));
+            vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
+            auto combinedLogger = make_shared<spd::logger>("typeErrorsAndFile", begin(sinks), end(sinks));
             spd::register_logger(combinedLogger);
             combinedLogger->set_level(spd::level::trace); // pass through everything, let the sinks decide
             typeErrorsConsole = combinedLogger;
@@ -160,9 +161,9 @@ int realmain(int argc, const char *argv[]) {
     }
 
     {
-        std::string argsConcat(argv[0]);
+        string argsConcat(argv[0]);
         for (int i = 1; i < argc; i++) {
-            std::string argString(argv[i]);
+            string argString(argv[i]);
             argsConcat = argsConcat + " " + argString;
         }
         logger->debug("Running sorbet version {} with arguments: {}", Version::build_scm_revision, argsConcat);
@@ -170,12 +171,12 @@ int realmain(int argc, const char *argv[]) {
     WorkerPool workers(opts.threads, logger);
 
     shared_ptr<core::GlobalState> gs =
-        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
 
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        kvstore = std::make_unique<KeyValueStore>(Version::build_scm_revision, opts.cacheDir);
+        kvstore = make_unique<KeyValueStore>(Version::build_scm_revision, opts.cacheDir);
     }
     createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -186,6 +187,11 @@ int realmain(int argc, const char *argv[]) {
     }
     logger->trace("done building initial global state");
 
+    if (opts.runLSP) {
+        LSPLoop loop(gs, opts, logger, workers);
+        loop.runLSP();
+        return 0;
+    }
     Timer timeall(logger, "Done in");
     vector<core::FileRef> inputFiles;
     logger->trace("Files: ");

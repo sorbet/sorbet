@@ -41,14 +41,4 @@ done
 
 parallel --joblog - < "$COMMAND_FILE"
 
-# Not all versions of bash have mapfile and read -r isn't reading in all the lines
-# shellcheck disable=SC2207
-cli_tests=($(bazel query 'filter("run_", test/cli/...)'))
-for cli in "${cli_tests[@]}"; do
-    name=${cli#*:run_}
-    pattern='s,\(https://.*.rbi#L\)[0-9]*,\1__LINE__,'
-    echo "bazel run -c opt $cli | sed -e '$pattern' > test/cli/$name/$name.out"
-    bazel run -c opt "$cli" 2>/dev/null | \
-        sed -e "$pattern" > \
-        "test/cli/$name/$name.out"
-done
+bazel test -c opt test/cli:update

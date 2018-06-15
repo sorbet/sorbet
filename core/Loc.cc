@@ -35,7 +35,7 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;
     }
-    auto it = std::lower_bound(file.line_breaks().begin(), file.line_breaks().end(), off);
+    auto it = lower_bound(file.line_breaks().begin(), file.line_breaks().end(), off);
     if (it == file.line_breaks().begin()) {
         pos.line = 1;
         pos.column = off + 1;

@@ -3,6 +3,8 @@
 def _; end
 
 class Box
+  extend T::Generic
+
   A = type_member
 
   def initialize

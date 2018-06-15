@@ -1,2 +1,2 @@
 # typed: strict
-1 + "hi" # error: does not match expected type
+1 + "hi" # error: `String("hi")` doesn't match `Integer` for argument `arg0

@@ -9,15 +9,15 @@
 using namespace std;
 
 int main(int argc, char **argv) {
-    ifstream fin(argv[1], std::ios::binary);
+    ifstream fin(argv[1], ios::binary);
     if (!fin.good()) {
         throw sorbet::FileNotFoundException();
     }
-    std::vector<sorbet::u1> data;
+    vector<sorbet::u1> data;
 
-    fin.seekg(0, std::ios::end);
+    fin.seekg(0, ios::end);
     size_t filesize = fin.tellg();
-    fin.seekg(0, std::ios::beg);
+    fin.seekg(0, ios::beg);
 
     data.resize(filesize);
 

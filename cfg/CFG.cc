@@ -135,7 +135,7 @@ string CFG::toString(core::Context ctx) {
         }
         string label = escaped.str();
         size_t start_pos = 0;
-        while ((start_pos = label.find("\n", start_pos)) != std::string::npos) {
+        while ((start_pos = label.find("\n", start_pos)) != string::npos) {
             label.replace(start_pos, 1, "\\l");
             start_pos += 2;
         }

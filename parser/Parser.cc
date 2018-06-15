@@ -7,6 +7,8 @@
 
 template class std::unique_ptr<sorbet::parser::Node>;
 
+using namespace std;
+
 namespace sorbet {
 namespace parser {
 
@@ -30,7 +32,7 @@ public:
         u4 max_off = file.data(gs).source().size();
 
         for (auto &diag : diagnostics) {
-            std::string level = "unknown";
+            string level = "unknown";
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
                 case ruby_parser::dlevel::WARNING:
@@ -44,7 +46,7 @@ public:
                 default:
                     Error::notImplemented();
             }
-            std::string msg("Parse {}: ");
+            string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
             Loc loc(file, translatePos(diag.location().begin_pos, max_off),
                     translatePos(diag.location().end_pos, max_off));
@@ -55,7 +57,7 @@ public:
     }
 };
 
-std::unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
     ruby_parser::typedruby24 driver(string(source.begin(), source.end()), Builder::interface);
@@ -71,7 +73,7 @@ std::unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef f
     return ast;
 }
 
-std::unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, const string &path, const string &src) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, const string &path, const string &src) {
     core::FileRef file = gs.enterFile(path, src);
     return run(gs, file);
 }

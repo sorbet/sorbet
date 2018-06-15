@@ -26,13 +26,13 @@ class Set < Object
   sig(
       o: Elem,
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def add(o); end
 
-  type_parameters(:Self).sig(
+  sig(
       o: Elem,
   )
-  .returns(T.nilable(T.type_parameter(:Self)))
+  .returns(T.nilable(T.self_type))
   def add?(o); end
 
   type_parameters(:U).sig(
@@ -41,25 +41,25 @@ class Set < Object
   .returns(T::Hash[T.type_parameter(:U), T::Set[Elem]])
   def classify(&blk); end
 
-  sig.returns(T::Set[Elem])
+  sig.returns(T.self_type)
   def clear(); end
 
   sig(
       o: Elem,
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def delete(o); end
 
-  type_parameters(:Self).sig(
+  sig(
       o: Elem,
   )
-  .returns(T.nilable(T.type_parameter(:Self)))
+  .returns(T.nilable(T.self_type))
   def delete?(o); end
 
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def delete_if(&blk); end
 
   sig(
@@ -77,7 +77,7 @@ class Set < Object
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   sig.returns(Enumerator[Elem])
   def each(&blk); end
 
@@ -87,7 +87,7 @@ class Set < Object
   sig.returns(Set)
   def flatten(); end
 
-  type_parameters(:Self).sig.returns(T.nilable(T.type_parameter(:Self)))
+  sig.returns(T.nilable(T.self_type))
   def flatten!(); end
 
   type_parameters(:U).sig(
@@ -111,7 +111,7 @@ class Set < Object
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def keep_if(&blk); end
 
   type_parameters(:U).sig(
@@ -129,7 +129,7 @@ class Set < Object
   sig(
       enum: T::Enumerable[Elem],
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def merge(enum); end
 
   sig(
@@ -144,10 +144,10 @@ class Set < Object
   .returns(T.any(TrueClass, FalseClass))
   def proper_superset?(set); end
 
-  type_parameters(:Self).sig(
+  sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T.nilable(T.type_parameter(:Self)))
+  .returns(T.nilable(T.self_type))
   def reject!(&blk); end
 
   type_parameters(:U).sig(
@@ -156,10 +156,10 @@ class Set < Object
   .returns(T::Set[T.type_parameter(:U)])
   def replace(enum); end
 
-  type_parameters(:Self).sig(
+  sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T.nilable(T.type_parameter(:Self)))
+  .returns(T.nilable(T.self_type))
   def select!(&blk); end
 
   sig.returns(Integer)
@@ -174,7 +174,7 @@ class Set < Object
   sig(
       enum: T::Enumerable[Elem],
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def subtract(enum); end
 
   sig(
@@ -207,7 +207,7 @@ class Set < Object
   sig(
       o: Elem,
   )
-  .returns(T::Set[Elem])
+  .returns(T.self_type)
   def <<(o); end
 
   sig(

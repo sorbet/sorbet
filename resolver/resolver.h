@@ -14,6 +14,7 @@ public:
     Resolver() = delete;
 
 private:
+    static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeResolution(core::GlobalState &gs);
 };
 

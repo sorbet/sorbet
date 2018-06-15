@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet {
 namespace dsl {
-vector<std::unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     bool nilable = false;
@@ -57,18 +57,20 @@ vector<std::unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableCon
     // def self.<prop>
     stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, name), ASTUtil::dupType(type.get()),
                                      ast::MK::Ident(loc, core::Symbols::NilClass())));
-    stats.emplace_back(ast::MK::Method1(loc, name, ast::MK::Local(loc, name), ast::MK::EmptyTree(loc), true));
+    stats.emplace_back(ast::MK::Method1(loc, name, ast::MK::Local(loc, name), ast::MK::EmptyTree(loc),
+                                        ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     // def self.get_<prop>
     core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx).toString(ctx));
     stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-    stats.emplace_back(
-        ast::MK::Method(loc, getName, ast::MethodDef::ARGS_store(), ast::MK::Unsafe(loc, ast::MK::Nil(loc)), true));
+    stats.emplace_back(ast::MK::Method(loc, getName, ast::MethodDef::ARGS_store(),
+                                       ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     // def <prop>()
     stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-    stats.emplace_back(
-        ast::MK::Method(loc, name, ast::MethodDef::ARGS_store(), ast::MK::Unsafe(loc, ast::MK::Nil(loc))));
+    stats.emplace_back(ast::MK::Method(loc, name, ast::MethodDef::ARGS_store(), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                       ast::MethodDef::DSLSynthesized));
 
     return stats;
 }

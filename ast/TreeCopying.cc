@@ -13,8 +13,8 @@ template <class Elem = Expression, class T> T deepCopyVec(const Expression *avoi
     };
     return copy;
 }
-std::unique_ptr<Expression> Expression::deepCopy() const {
-    std::unique_ptr<Expression> res;
+unique_ptr<Expression> Expression::deepCopy() const {
+    unique_ptr<Expression> res;
 
     try {
         res = this->_deepCopy(this, true);
@@ -24,7 +24,7 @@ std::unique_ptr<Expression> Expression::deepCopy() const {
     return res;
 }
 
-std::unique_ptr<Expression> ClassDef::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ClassDef::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -32,22 +32,22 @@ std::unique_ptr<Expression> ClassDef::_deepCopy(const Expression *avoid, bool ro
                                  deepCopyVec(avoid, this->ancestors), deepCopyVec(avoid, this->rhs), this->kind);
 }
 
-std::unique_ptr<Expression> MethodDef::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> MethodDef::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<MethodDef>(this->loc, this->symbol, this->name, deepCopyVec(avoid, this->args),
-                                  rhs->_deepCopy(avoid), isSelf);
+                                  rhs->_deepCopy(avoid), flags);
 }
 
-std::unique_ptr<Expression> ConstDef::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ConstDef::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<ConstDef>(this->loc, this->symbol, this->rhs->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> If::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> If::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -55,49 +55,49 @@ std::unique_ptr<Expression> If::_deepCopy(const Expression *avoid, bool root) co
                            this->elsep->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> While::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> While::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<While>(this->loc, this->cond->_deepCopy(avoid), this->body->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Break::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Break::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Break>(this->loc, this->expr->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Retry::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Retry::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Retry>(this->loc);
 }
 
-std::unique_ptr<Expression> Next::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Next::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Next>(this->loc, this->expr->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Return::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Return::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Return>(this->loc, this->expr->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Yield::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Yield::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Yield>(this->loc, this->expr->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> RescueCase::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> RescueCase::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -105,7 +105,7 @@ std::unique_ptr<Expression> RescueCase::_deepCopy(const Expression *avoid, bool 
                                    body->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Rescue::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Rescue::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -114,42 +114,42 @@ std::unique_ptr<Expression> Rescue::_deepCopy(const Expression *avoid, bool root
                                else_->_deepCopy(avoid), ensure->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Ident::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Ident::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Ident>(loc, symbol);
 }
 
-std::unique_ptr<Expression> Local::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Local::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Local>(loc, localVariable);
 }
 
-std::unique_ptr<Expression> UnresolvedIdent::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> UnresolvedIdent::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<UnresolvedIdent>(loc, kind, name);
 }
 
-std::unique_ptr<Expression> RestArg::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> RestArg::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<RestArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(expr->_deepCopy(avoid).release())));
 }
 
-std::unique_ptr<Expression> KeywordArg::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> KeywordArg::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<KeywordArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(expr->_deepCopy(avoid).release())));
 }
 
-std::unique_ptr<Expression> OptionalArg::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> OptionalArg::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -157,28 +157,28 @@ std::unique_ptr<Expression> OptionalArg::_deepCopy(const Expression *avoid, bool
                                     default_->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> BlockArg::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> BlockArg::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<BlockArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(expr->_deepCopy(avoid).release())));
 }
 
-std::unique_ptr<Expression> ShadowArg::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ShadowArg::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<ShadowArg>(loc, unique_ptr<Reference>(cast_tree<Reference>(expr->_deepCopy(avoid).release())));
 }
 
-std::unique_ptr<Expression> Assign::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Assign::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Assign>(loc, lhs->_deepCopy(avoid), rhs->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> Send::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Send::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -187,70 +187,70 @@ std::unique_ptr<Expression> Send::_deepCopy(const Expression *avoid, bool root) 
                                               : unique_ptr<Block>(cast_tree<Block>(block->_deepCopy(avoid).release())));
 }
 
-std::unique_ptr<Expression> Cast::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Cast::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Cast>(loc, type, arg->_deepCopy(avoid), cast);
 }
 
-std::unique_ptr<Expression> Hash::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Hash::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Hash>(loc, deepCopyVec(avoid, keys), deepCopyVec(avoid, values));
 }
 
-std::unique_ptr<Expression> Array::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Array::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Array>(loc, deepCopyVec(avoid, elems));
 }
 
-std::unique_ptr<Expression> Literal::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Literal::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Literal>(loc, value);
 }
 
-std::unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<ConstantLit>(loc, scope->_deepCopy(avoid), cnst);
 }
 
-std::unique_ptr<Expression> ArraySplat::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ArraySplat::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<ArraySplat>(loc, arg->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> HashSplat::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> HashSplat::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<HashSplat>(loc, arg->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<ZSuperArgs>(loc);
 }
 
-std::unique_ptr<Expression> Self::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Self::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<Self>(loc, claz);
 }
 
-std::unique_ptr<Expression> Block::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Block::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
@@ -259,20 +259,20 @@ std::unique_ptr<Expression> Block::_deepCopy(const Expression *avoid, bool root)
     return res;
 }
 
-std::unique_ptr<Expression> InsSeq::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> InsSeq::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<InsSeq>(loc, deepCopyVec(avoid, stats), expr->_deepCopy(avoid));
 }
 
-std::unique_ptr<Expression> EmptyTree::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> EmptyTree::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
     return make_unique<EmptyTree>(loc);
 }
-std::unique_ptr<Expression> TreeRef::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> TreeRef::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }

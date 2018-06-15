@@ -55,7 +55,7 @@ ClassDef{
   ancestors = []
   rhs = [
     MethodDef{
-      self = 1
+      flags = self
       name = <static-init><<static-init>$65>
       args = []
       rhs = Literal{ value = 1 }

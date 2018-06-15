@@ -207,8 +207,8 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
             return OrType::make_shared(t1, t2);
         }
         if (ltr) {
-            std::swap(a1, a2);
-            std::swap(t1, t2);
+            swap(a1, a2);
+            swap(t1, t2);
         }
         // now a1 <: a2
 
@@ -371,27 +371,46 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
     }
 
-    auto *p1 = cast_type<LambdaParam>(t1.get());
-    auto *p2 = cast_type<LambdaParam>(t2.get());
+    {
+        auto *p1 = cast_type<LambdaParam>(t1.get());
+        auto *p2 = cast_type<LambdaParam>(t2.get());
 
-    if (p1 != nullptr || p2 != nullptr) {
-        return OrType::make_shared(t1, t2);
-    }
-
-    auto *tv1 = cast_type<TypeVar>(t1.get());
-    auto *tv2 = cast_type<TypeVar>(t2.get());
-    if (tv1 != nullptr || tv2 != nullptr) {
-        return OrType::make_shared(t1, t2);
-    }
-
-    auto *s1 = cast_type<SelfTypeParam>(t1.get());
-    auto *s2 = cast_type<SelfTypeParam>(t2.get());
-
-    if (s1 != nullptr || s2 != nullptr) {
-        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+        if (p1 != nullptr || p2 != nullptr) {
             return OrType::make_shared(t1, t2);
-        } else {
-            return t1;
+        }
+    }
+
+    {
+        auto *tv1 = cast_type<TypeVar>(t1.get());
+        auto *tv2 = cast_type<TypeVar>(t2.get());
+        if (tv1 != nullptr || tv2 != nullptr) {
+            return OrType::make_shared(t1, t2);
+        }
+    }
+
+    {
+        auto *s1 = cast_type<SelfTypeParam>(t1.get());
+        auto *s2 = cast_type<SelfTypeParam>(t2.get());
+
+        if (s1 != nullptr || s2 != nullptr) {
+            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+                return OrType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
+        }
+    }
+
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return OrType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
         }
     }
 
@@ -752,7 +771,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
             return AndType::make_shared(t1, t2); // we can as well return nothing here?
         }
         if (ltr) { // swap
-            std::swap(a1, a2);
+            swap(a1, a2);
         }
         // a1 <:< a2
 
@@ -793,24 +812,38 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
         }
         return make_shared<AppliedType>(a1->klass, newTargs);
     }
-
-    auto *tv1 = cast_type<TypeVar>(t1.get());
-    auto *tv2 = cast_type<TypeVar>(t2.get());
-    if (tv1 != nullptr || tv2 != nullptr) {
-        return AndType::make_shared(t1, t2);
-    }
-
-    auto *s1 = cast_type<SelfTypeParam>(t1.get());
-    auto *s2 = cast_type<SelfTypeParam>(t2.get());
-
-    if (s1 != nullptr || s2 != nullptr) {
-        if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+    {
+        auto *tv1 = cast_type<TypeVar>(t1.get());
+        auto *tv2 = cast_type<TypeVar>(t2.get());
+        if (tv1 != nullptr || tv2 != nullptr) {
             return AndType::make_shared(t1, t2);
-        } else {
-            return t1;
+        }
+    }
+    {
+        auto *s1 = cast_type<SelfTypeParam>(t1.get());
+        auto *s2 = cast_type<SelfTypeParam>(t2.get());
+
+        if (s1 != nullptr || s2 != nullptr) {
+            if (s1 == nullptr || s2 == nullptr || s2->definition != s1->definition) {
+                return AndType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
         }
     }
 
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return AndType::make_shared(t1, t2);
+            } else {
+                return t1;
+            }
+        }
+    }
     return glbGround(ctx, t1, t2);
 }
 
@@ -867,23 +900,38 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
     //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
 
-    auto *lambda1 = cast_type<LambdaParam>(t1.get());
-    auto *lambda2 = cast_type<LambdaParam>(t2.get());
-    if (lambda1 != nullptr || lambda2 != nullptr) {
-        // This should only be reachable in resolver.
-        if (lambda1 == nullptr || lambda2 == nullptr) {
-            return false;
+    {
+        auto *lambda1 = cast_type<LambdaParam>(t1.get());
+        auto *lambda2 = cast_type<LambdaParam>(t2.get());
+        if (lambda1 != nullptr || lambda2 != nullptr) {
+            // This should only be reachable in resolver.
+            if (lambda1 == nullptr || lambda2 == nullptr) {
+                return false;
+            }
+            return lambda1->definition == lambda2->definition;
         }
-        return lambda1->definition == lambda2->definition;
     }
 
-    auto *self1 = cast_type<SelfTypeParam>(t1.get());
-    auto *self2 = cast_type<SelfTypeParam>(t2.get());
-    if (self1 != nullptr || self2 != nullptr) {
-        if (self1 == nullptr || self2 == nullptr) {
-            return false;
+    {
+        auto *self1 = cast_type<SelfTypeParam>(t1.get());
+        auto *self2 = cast_type<SelfTypeParam>(t2.get());
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return false;
+            }
+            return self1->definition == self2->definition;
         }
-        return self1->definition == self2->definition;
+    }
+
+    {
+        auto *self1 = cast_type<SelfType>(t1.get());
+        auto *self2 = cast_type<SelfType>(t2.get());
+        if (self1 != nullptr || self2 != nullptr) {
+            if (self1 == nullptr || self2 == nullptr) {
+                return false;
+            }
+            return true;
+        }
     }
 
     if (auto *a1 = cast_type<AppliedType>(t1.get())) {
@@ -1118,20 +1166,20 @@ void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                              const std::vector<std::shared_ptr<Type>> &targs) {
+shared_ptr<Type> AliasType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+                                         const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
-std::string MetaType::toString(const GlobalState &gs, int tabs) const {
+string MetaType::toString(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 
-std::string MetaType::show(const GlobalState &gs) const {
+string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
 }
 
-std::string MetaType::typeName() const {
+string MetaType::typeName() const {
     return "MetaType";
 }
 
@@ -1147,14 +1195,14 @@ bool MetaType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> MetaType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
+shared_ptr<Type> MetaType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+                                        const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(std::move(wrapped)) {}
+MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {}
 
-std::shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }

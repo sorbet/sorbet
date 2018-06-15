@@ -25,7 +25,7 @@ def externals():
     new_git_repository(
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
-        commit="55680db160c3c486ccbbb40e10f6338e4d98e84d", # v0.16.3 - with eol customization
+        commit="560df2878ad308b27873b3cc5e810635d69cfad6", # v0.17.0
         build_file="//:spdlog.BUILD",
     )
 
@@ -48,6 +48,13 @@ def externals():
 
 
     new_git_repository(
+        name="rapidjson",
+        remote="https://github.com/Tencent/rapidjson.git",
+        commit="b32cd9421c5e3cbe183a99b6537ce11441e50656",
+        build_file="//:rapidjson.BUILD",
+    )
+
+    new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
         commit="6a1ed71450148c8aed57de3179b1bdd81800bada",
@@ -57,7 +64,7 @@ def externals():
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
-        commit="e8a63b87c36ac814272d73b503658431d2000055",
+        commit="0ff7ff3ec7b322881fff3bd6d4861fda6e9331d9", # 5.1.0 with some tunning patches
         build_file="//:jemalloc.BUILD",
     )
 
@@ -101,12 +108,12 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="dd9911a004edcc34152850a6216bb3b53ad6bb82"
+        commit="eb686c069f8a6aa87bd6f1ac344a330f361fe9ec"
     )
 
     new_git_repository(
         name = "compdb",
-        commit = "1cf753e9f3486372da026ca629ec8f6760dc31ff",
+        commit = "c4cf16f3162c0a13bb8983b3716a979678ae6dc4",
         remote = "https://github.com/grailbio/bazel-compilation-database.git",
         build_file_content = (
         """

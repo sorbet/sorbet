@@ -35,7 +35,7 @@ class Range < Object
   sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Range[Elem])
+  .returns(T.self_type)
   sig.returns(Enumerator[Elem])
   def each(&blk); end
 
@@ -118,7 +118,7 @@ class Range < Object
       n: Integer,
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
-  .returns(T::Range[Elem])
+  .returns(T.self_type)
   sig(
       n: Integer,
   )

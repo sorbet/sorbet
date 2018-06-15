@@ -15,6 +15,9 @@ class Symbol;
 class GlobalState;
 class Type;
 class MutableContext;
+class Context;
+class TypeAndOrigins;
+class SendAndBlockLink;
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
@@ -150,6 +153,11 @@ public:
 
         // Static Field flags
         static constexpr int STATIC_FIELD_TYPE_ALIAS = 0x0100;
+
+        // Flags applying to all symbol types
+
+        // Synthesized by C++ code in a DSL pass
+        static constexpr int DSL_SYNTHESIZED = 0x0001;
     };
 
     SymbolRef owner;
@@ -498,6 +506,13 @@ public:
         return (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
 
+    inline void setDSLSynthesized() {
+        flags |= Symbol::Flags::DSL_SYNTHESIZED;
+    }
+    inline bool isDSLSynthesized() {
+        return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
+    }
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;
     SymbolRef findConcreteMethodTransitive(const GlobalState &gs, NameRef name) const;
@@ -543,6 +558,17 @@ public:
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
     SymbolRef enclosingClass(const GlobalState &gs) const;
+
+    class IntrinsicMethod {
+    public:
+        virtual std::shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, std::vector<TypeAndOrigins> &args,
+                                            core::SymbolRef self, std::shared_ptr<Type> fullType,
+                                            std::shared_ptr<SendAndBlockLink> linkType) const = 0;
+    };
+
+    // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
+    // why raw pointers are safe.
+    const IntrinsicMethod *intrinsic = nullptr;
 
 private:
     friend class serialize::Serializer;
@@ -768,6 +794,20 @@ public:
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
         return SymbolRef(nullptr, 47);
+    }
+
+    static SymbolRef Chalk() {
+        return SymbolRef(nullptr, 48);
+    }
+    static SymbolRef Chalk_Tools() {
+        return SymbolRef(nullptr, 49);
+    }
+    static SymbolRef Chalk_Tools_Accessible() {
+        return SymbolRef(nullptr, 50);
+    }
+
+    static SymbolRef T_Generic() {
+        return SymbolRef(nullptr, 51);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

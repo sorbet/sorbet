@@ -63,8 +63,8 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     auto &objectScope = core::Symbols::Object().data(ctx);
     ASSERT_EQ(core::Symbols::root(), objectScope.owner);
 
-    ASSERT_EQ(2, objectScope.members.size());
-    auto methodPair = objectScope.members[1];
+    ASSERT_EQ(4, objectScope.members.size());
+    auto methodPair = objectScope.members[3];
     ASSERT_EQ("hello_world", methodPair.first.data(ctx).toString(ctx));
     auto &symbol = methodPair.second.data(ctx);
     ASSERT_EQ(core::Symbols::Object(), symbol.owner);

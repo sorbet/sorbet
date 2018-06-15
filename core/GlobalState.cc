@@ -61,6 +61,10 @@ const char *sinatra_str = "Sinatra";
 const char *base_str = "Base";
 const char *void_str = "Void";
 const char *typeAliasTemp_str = "<TypeAlias>";
+const char *chalk_str = "Chalk";
+const char *tools_str = "Tools";
+const char *accessible_str = "Accessible";
+const char *generic_str = "Generic";
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -89,8 +93,8 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
 int globalStateIdCounter = 1;
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(std::shared_ptr<ErrorQueue> errorQueue)
-    : globalStateId(globalStateIdCounter++), errorQueue(std::move(errorQueue)) {
+GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
+    : globalStateId(globalStateIdCounter++), errorQueue(move(errorQueue)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int max_name_count = 8192;
@@ -166,6 +170,11 @@ void GlobalState::initEmpty() {
     sinatra_base_id.data(*this).superClass = core::Symbols::Object();
     SymbolRef void_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(void_str));
     SymbolRef typeAliasTemp_id = synthesizeClass(typeAliasTemp_str, 0);
+    SymbolRef chalk_id = synthesizeClass(chalk_str, 0, true);
+    SymbolRef chalk_tools_id = enterClassSymbol(Loc::none(), chalk_id, enterNameConstant(tools_str));
+    SymbolRef chalk_tools_accessible_id =
+        enterClassSymbol(Loc::none(), chalk_tools_id, enterNameConstant(accessible_str));
+    SymbolRef T_Generic_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(generic_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -215,6 +224,10 @@ void GlobalState::initEmpty() {
     ENFORCE(sinatra_base_id == Symbols::SinatraBase());
     ENFORCE(void_id == Symbols::void_());
     ENFORCE(typeAliasTemp_id == Symbols::typeAliasTemp());
+    ENFORCE(chalk_id == Symbols::Chalk());
+    ENFORCE(chalk_tools_id == Symbols::Chalk_Tools());
+    ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
+    ENFORCE(T_Generic_id == Symbols::T_Generic());
 
     // Synthesize untyped = dynamic()
     Symbols::untyped().data(*this).resultType = core::Types::dynamic();
@@ -270,7 +283,7 @@ void GlobalState::initEmpty() {
 
     ENFORCE(symbols.size() < Symbols::Proc0()._id);
     while (symbols.size() < Symbols::Proc0()._id) {
-        std::string res(reserved_str);
+        string res(reserved_str);
         res = res + to_string(reservedCount);
         synthesizeClass(res);
         reservedCount++;
@@ -286,12 +299,25 @@ void GlobalState::initEmpty() {
     ENFORCE(symbols.size() == Symbols::last_synthetic_sym()._id + 1,
             "Too many synthetic symbols? have: ", symbols.size(), " expected: ", Symbols::last_synthetic_sym()._id + 1);
 
+    installIntrinsics();
+
     // First file is used to indicate absence of a file
     files.emplace_back();
     freezeNameTable();
     freezeSymbolTable();
     freezeFileTable();
     sanityCheck();
+}
+
+void GlobalState::installIntrinsics() {
+    for (auto &entry : intrinsicMethods) {
+        auto symbol = entry.symbol;
+        if (entry.singleton) {
+            symbol = symbol.data(*this).singletonClass(*this);
+        }
+        core::SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
+        method.data(*this).intrinsic = entry.impl;
+    }
 }
 
 // https://graphics.stanford.edu/~seander/bithacks.html#RoundUpPowerOf2
@@ -707,7 +733,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return NameRef(*this, idx);
 }
 
-FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
+FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE(!fileTableFrozen);
     auto idx = files.size();
     files.emplace_back(file);
@@ -715,8 +741,8 @@ FileRef GlobalState::enterFile(std::shared_ptr<File> file) {
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
-    return GlobalState::enterFile(std::make_shared<File>(string(path.begin(), path.end()),
-                                                         string(source.begin(), source.end()), File::Type::Normal));
+    return GlobalState::enterFile(
+        make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
 FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, int id) {
@@ -730,16 +756,16 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
         }
     }
 
-    return GlobalState::enterNewFileAt(std::make_shared<File>(string(path.begin(), path.end()),
-                                                              string(source.begin(), source.end()), File::Type::Normal),
-                                       id);
+    return GlobalState::enterNewFileAt(
+        make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal),
+        id);
 }
 
-FileRef GlobalState::enterNewFileAt(std::shared_ptr<File> file, int id) {
+FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, int id) {
     ENFORCE(id >= this->files.size() || this->files[id]->source_type == File::Type::TombStone);
     if (id >= this->files.size()) {
         while (id > this->files.size()) {
-            auto file = std::make_shared<File>("", "", File::Type::TombStone);
+            auto file = make_shared<File>("", "", File::Type::TombStone);
             this->enterFile(move(file));
         }
 
@@ -867,7 +893,7 @@ bool GlobalState::unfreezeSymbolTable() {
     return old;
 }
 
-std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
+unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
@@ -898,7 +924,7 @@ std::unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     return result;
 }
 
-void GlobalState::addAnnotation(Loc loc, std::string str, AnnotationPos pos) const {
+void GlobalState::addAnnotation(Loc loc, string str, AnnotationPos pos) const {
     unique_lock<mutex> lk(annotations_mtx);
     annotations.emplace_back(loc, str, pos);
 }
@@ -942,7 +968,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         stringstream buf;
 
         auto pos = annotation.loc.position(*this);
-        std::vector<std::string> lines = absl::StrSplit(annotation.str, "\n");
+        vector<string> lines = absl::StrSplit(annotation.str, "\n");
         while (!lines.empty() && lines.back().empty()) {
             lines.pop_back();
         }
@@ -969,14 +995,14 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
             case GlobalState::AnnotationPos::BEFORE:
                 start_of_line = annotation.loc.begin_pos;
                 start_of_line = outline.find_last_of('\n', start_of_line);
-                if (start_of_line == std::string::npos) {
+                if (start_of_line == string::npos) {
                     start_of_line = 0;
                 }
                 break;
             case GlobalState::AnnotationPos::AFTER:
                 start_of_line = annotation.loc.end_pos;
                 start_of_line = outline.find_first_of('\n', start_of_line);
-                if (start_of_line == std::string::npos) {
+                if (start_of_line == string::npos) {
                     start_of_line = outline.end() - outline.begin();
                 }
                 break;
@@ -1036,7 +1062,7 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
-void GlobalState::trace(const std::string &msg) const {
+void GlobalState::trace(const string &msg) const {
     errorQueue->tracer.trace(msg);
 }
 

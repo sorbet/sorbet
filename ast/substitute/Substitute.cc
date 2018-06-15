@@ -104,9 +104,9 @@ public:
     }
 };
 
-std::unique_ptr<Expression> sorbet::ast::Substitute::run(core::MutableContext ctx,
-                                                         const sorbet::core::GlobalSubstitution &subst,
-                                                         std::unique_ptr<Expression> what) {
+unique_ptr<Expression> sorbet::ast::Substitute::run(core::MutableContext ctx,
+                                                    const sorbet::core::GlobalSubstitution &subst,
+                                                    unique_ptr<Expression> what) {
     if (subst.useFastPath()) {
         return what;
     }

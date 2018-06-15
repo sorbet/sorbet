@@ -29,7 +29,7 @@ export ASAN_SYMBOLIZER_PATH
 bazel test --config=ci --config=dbg --config=sanitize //... --test_output=errors --test_env="ASAN_OPTIONS=detect_leaks=0" --test_env="UBSAN_OPTIONS=print_stacktrace=1" || err=$?
 
 mkdir -p /log/junit
-bazel query  'tests(//...)' | while read -r line; do
+bazel query 'tests(//...) except attr("tags", "manual", //...)' | while read -r line; do
     path="${line/://}"
     path="${path#//}"
     cp "bazel-testlogs/$path/test.xml" /log/junit/"${path//\//_}.xml"

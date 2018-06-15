@@ -4,7 +4,9 @@
 #include "common/common.h"
 #include "core/ErrorQueue.h"
 #include "core/Unfreeze.h"
+#include "core/serialize/serialize.h"
 #include "parser/parser.h"
+#include "payload/binary/binary.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>
@@ -174,5 +176,27 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     auto r = TreeMap::apply(ctx, c, move(tree));
     EXPECT_EQ(c.count, 3);
+}
+
+TEST(PayloadTests, CloneSubstitutePayload) {
+    auto logger = spd::stderr_color_mt("ClonePayload");
+    auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+
+    sorbet::core::GlobalState gs(errorQueue);
+    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+
+    auto c1 = gs.deepCopy();
+    auto c2 = gs.deepCopy();
+
+    sorbet::core::NameRef n1;
+    {
+        sorbet::core::UnfreezeNameTable thaw1(*c1);
+        n1 = c1->enterNameUTF8("test new name");
+    }
+
+    sorbet::core::GlobalSubstitution subst(*c1, *c2);
+    ASSERT_EQ("test new name", subst.substitute(n1).toString(*c2));
+    ASSERT_EQ(c1->symbolsUsed(), c2->symbolsUsed());
+    ASSERT_EQ(c1->symbolsUsed(), gs.symbolsUsed());
 }
 } // namespace sorbet

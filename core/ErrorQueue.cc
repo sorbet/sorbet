@@ -1,10 +1,12 @@
 #include "ErrorQueue.h"
 
+using namespace std;
+
 namespace sorbet {
 namespace core {
-std::vector<std::unique_ptr<BasicError>> ErrorQueue::drainErrors() {
-    ENFORCE(owner == std::this_thread::get_id());
-    std::vector<std::unique_ptr<BasicError>> res;
+vector<unique_ptr<BasicError>> ErrorQueue::drainErrors() {
+    ENFORCE(owner == this_thread::get_id());
+    vector<unique_ptr<BasicError>> res;
     for (auto &alreadyCollected : collected) {
         for (auto &entry : alreadyCollected.second) {
             res.emplace_back(move(entry.error));
@@ -14,17 +16,17 @@ std::vector<std::unique_ptr<BasicError>> ErrorQueue::drainErrors() {
     ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
         if (msg.kind == ErrorQueueMessage::Kind::Error) {
-            res.emplace_back(std::move(msg.error));
+            res.emplace_back(move(msg.error));
         }
     }
     return res;
 }
 
 ErrorQueue::ErrorQueue(spd::logger &logger, spd::logger &tracer) : logger(logger), tracer(tracer) {
-    owner = std::this_thread::get_id();
+    owner = this_thread::get_id();
 }
 
-void ErrorQueue::renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical) {
+void ErrorQueue::renderForFile(core::FileRef whatFile, stringstream &critical, stringstream &nonCritical) {
     auto it = collected.find(whatFile);
     if (it == collected.end()) {
         return;
@@ -37,16 +39,16 @@ void ErrorQueue::renderForFile(core::FileRef whatFile, std::stringstream &critic
 };
 
 void ErrorQueue::flushErrors(bool all) {
-    ENFORCE(owner == std::this_thread::get_id());
+    ENFORCE(owner == this_thread::get_id());
 
-    std::stringstream critical;
-    std::stringstream nonCritical;
+    stringstream critical;
+    stringstream nonCritical;
 
     ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
         if (msg.kind == ErrorQueueMessage::Kind::Error) {
             this->errorCount.fetch_add(1);
-            collected[msg.whatFile].emplace_back(std::move(msg));
+            collected[msg.whatFile].emplace_back(move(msg));
         } else if (msg.kind == ErrorQueueMessage::Kind::Flush) {
             renderForFile(msg.whatFile, critical, nonCritical);
             renderForFile(core::FileRef(), critical, nonCritical);

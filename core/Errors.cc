@@ -26,27 +26,27 @@ constexpr auto RESET_STYLE = rang::style::reset;
  */
 const string REVERT_COLOR_SIGIL = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL restoreColors";
 
-std::string _replaceAll(const std::string &inWhat, const std::string &from, const std::string &to) {
+string _replaceAll(const string &inWhat, const string &from, const string &to) {
     size_t cursor = 0;
-    std::string copy = inWhat;
-    while ((cursor = copy.find(from, cursor)) != std::string::npos) {
+    string copy = inWhat;
+    while ((cursor = copy.find(from, cursor)) != string::npos) {
         copy.replace(cursor, from.length(), to);
         cursor += to.length();
     }
     return copy;
 }
 
-std::string ErrorColors::replaceAll(const std::string &inWhat, const std::string &from, const std::string &to) {
+string ErrorColors::replaceAll(const string &inWhat, const string &from, const string &to) {
     return _replaceAll(inWhat, from, to);
 }
 
-BasicError::BasicError(Loc loc, ErrorClass what, std::string formatted)
+BasicError::BasicError(Loc loc, ErrorClass what, string formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
     ENFORCE(formatted.back() != '.');
-    ENFORCE(formatted.find("\n") == std::string::npos, formatted, " has a newline in it");
+    ENFORCE(formatted.find("\n") == string::npos, formatted, " has a newline in it");
 }
 
-std::string restoreColors(const std::string &formatted, rang::fg color) {
+string restoreColors(const string &formatted, rang::fg color) {
     stringstream buf;
     buf << color;
     return _replaceAll(formatted, REVERT_COLOR_SIGIL, buf.str());
@@ -116,7 +116,7 @@ ErrorRegion::~ErrorRegion() {
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
     : gs(gs), willBuild(willBuild), loc(loc), what(what) {}
 
-void ErrorBuilder::_setHeader(std::string &&header) {
+void ErrorBuilder::_setHeader(string &&header) {
     ENFORCE(willBuild);
     this->header = move(header);
 }

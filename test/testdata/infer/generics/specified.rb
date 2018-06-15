@@ -42,6 +42,8 @@ end
 
 
 class ParentWithMultiple
+  extend T::Generic
+
   K = type_member
   V = type_member
 
@@ -70,7 +72,9 @@ class FullChild < HalfChild
 end
 
 class ParentEnumerable
+  extend T::Generic
   include Enumerable
+
   K = type_member
   V = type_member
   Elem = type_member

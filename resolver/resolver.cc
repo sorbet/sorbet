@@ -63,7 +63,7 @@ private:
         shared_ptr<Nesting> parent;
         core::SymbolRef scope;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
+        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(move(parent)), scope(scope) {}
     };
     shared_ptr<Nesting> nesting_;
 
@@ -531,10 +531,10 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        std::sort(todo.begin(), todo.end(),
-                  [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
+        sort(todo.begin(), todo.end(),
+             [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
 
-        std::sort(todo_ancestors.begin(), todo_ancestors.end(), [ctx](auto &lhs, auto &rhs) -> bool {
+        sort(todo_ancestors.begin(), todo_ancestors.end(), [ctx](auto &lhs, auto &rhs) -> bool {
             return compareLocs(ctx, lhs.resolve.out->loc, rhs.resolve.out->loc);
         });
 
@@ -557,7 +557,7 @@ private:
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
 
-        auto sig = TypeSyntax::parseSig(ctx, send, nullptr);
+        auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true);
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (sig.seen.args ||
@@ -716,6 +716,30 @@ private:
                 },
 
                 [&](ast::MethodDef *mdef) {
+                    if (debug_mode) {
+                        bool hasSig = !lastSig.empty();
+                        bool DSL = mdef->isDSLSynthesized();
+                        bool isRBI = FileOps::getExtension(mdef->loc.file.data(ctx).path()) == "rbi";
+                        if (hasSig) {
+                            core::categoryCounterInc("method.sig", "true");
+                        } else {
+                            core::categoryCounterInc("method.sig", "false");
+                        }
+                        if (DSL) {
+                            core::categoryCounterInc("method.dsl", "true");
+                        } else {
+                            core::categoryCounterInc("method.dsl", "false");
+                        }
+                        if (isRBI) {
+                            core::categoryCounterInc("method.rbi", "true");
+                        } else {
+                            core::categoryCounterInc("method.rbi", "false");
+                        }
+                        if (hasSig && !isRBI && !DSL) {
+                            core::counterInc("types.sig.human");
+                        }
+                    }
+
                     if (!lastSig.empty()) {
                         core::prodCounterInc("types.sig.count");
 
@@ -913,7 +937,7 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig);
+                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false);
                     }
                 }
             }
@@ -952,7 +976,7 @@ public:
 
                 auto expr = move(send->args[0]);
                 ParsedSig emptySig;
-                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig);
+                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false);
                 return make_unique<ast::Cast>(send->loc, type, move(expr), send->fun);
             }
             default:
@@ -1068,7 +1092,7 @@ public:
         return make_unique<ast::EmptyTree>(loc);
     };
 
-    std::unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
         if (classes.empty()) {
             ENFORCE(sortedClasses().empty());
             return tree;
@@ -1092,7 +1116,7 @@ public:
         return tree;
     }
 
-    std::unique_ptr<ast::Expression> addMethods(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree) {
+    unique_ptr<ast::Expression> addMethods(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
         auto &methods = curMethodSet().methods;
         if (methods.empty()) {
             ENFORCE(popCurMethodDefs().empty());
@@ -1249,11 +1273,13 @@ public:
 };
 }; // namespace
 
-std::vector<std::unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx,
-                                                            std::vector<std::unique_ptr<ast::Expression>> trees) {
+vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
+
+    ctx.trace("Finalizing ancestor chains");
+    finalizeAncestors(ctx.state);
 
     ctx.trace("Resolving sigs and vars");
     for (auto &tree : trees) {

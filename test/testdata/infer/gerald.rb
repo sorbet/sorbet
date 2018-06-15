@@ -163,11 +163,11 @@ module Opus::CIBot::Gerald
             next
           elsif line.start_with?('---')
             a_name = line[4..-1]
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Changing type of a variable in a loop, `T.nilable(String)` is not a subtype of `String`
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Changing the type of a variable in a loop is not permitted
                                                                          # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+++')
             b_name = line[4..-1]
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Changing type of a variable in a loop, `T.nilable(String)` is not a subtype of `String`
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Changing the type of a variable in a loop is not permitted
                                                                          # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+')
             added_lines << T.must(line[1..-1])

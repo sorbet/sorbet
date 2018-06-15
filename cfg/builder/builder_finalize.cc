@@ -21,16 +21,15 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             auto *const elseb = bb->bexit.elseb;
             if (bb != cfg.deadBlock() && bb != cfg.entry()) {
                 if (bb->backEdges.empty()) { // remove non reachable
-                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                    thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     if (elseb != thenb) {
-                        elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
+                        elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                                elseb->backEdges.end());
                     }
                     it = cfg.basicBlocks.erase(it);
-                    cfg.forwardsTopoSort.erase(
-                        std::remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb),
-                        cfg.forwardsTopoSort.end());
+                    cfg.forwardsTopoSort.erase(remove(cfg.forwardsTopoSort.begin(), cfg.forwardsTopoSort.end(), bb),
+                                               cfg.forwardsTopoSort.end());
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
@@ -46,8 +45,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
             }
             if (thenb == elseb && thenb != cfg.deadBlock() && thenb != bb) { // can be squashed togather
                 if (thenb->backEdges.size() == 1 && thenb->outerLoops == bb->outerLoops) {
-                    bb->exprs.insert(bb->exprs.end(), std::make_move_iterator(thenb->exprs.begin()),
-                                     std::make_move_iterator(thenb->exprs.end()));
+                    bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
+                                     make_move_iterator(thenb->exprs.end()));
                     thenb->backEdges.clear();
                     bb->bexit = thenb->bexit;
                     bb->bexit.thenb->backEdges.push_back(bb);
@@ -60,7 +59,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 } else if (thenb->bexit.cond != core::LocalVariable::blockCall() && thenb->exprs.empty()) {
                     // Don't remove block headers
                     bb->bexit = thenb->bexit;
-                    thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                    thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     bb->bexit.thenb->backEdges.push_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
@@ -76,7 +75,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
                 thenb->bexit.thenb->backEdges.push_back(bb);
-                thenb->backEdges.erase(std::remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
+                thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
                 changed = true;
                 sanityCheck(ctx, cfg);
@@ -88,7 +87,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
                 bb->bexit.elseb->backEdges.push_back(bb);
-                elseb->backEdges.erase(std::remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
+                elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
                 changed = true;
                 sanityCheck(ctx, cfg);
@@ -114,8 +113,8 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
         if (bb.get() != cfg.entry()) {
             ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block ", bb->id, " was never linked into cfg");
         }
-        auto thenFnd = std::find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
-        auto elseFnd = std::find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
+        auto thenFnd = find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
+        auto elseFnd = find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
         ENFORCE(thenFnd != bb->bexit.thenb->backEdges.end(), "backedge unset for thenb");
         ENFORCE(elseFnd != bb->bexit.elseb->backEdges.end(), "backedge unset for elseb");
     }

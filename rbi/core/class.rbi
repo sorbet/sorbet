@@ -3,6 +3,9 @@ class Class < Module
   sig.returns(T.untyped)
   def allocate(); end
 
+  sig(args: T.untyped).returns(T.untyped)
+  def new(*args); end
+
   sig(
       arg0: Class,
   )

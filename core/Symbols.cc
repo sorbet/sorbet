@@ -25,9 +25,9 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
-std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
+vector<shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
-    std::vector<shared_ptr<core::Type>> targs;
+    vector<shared_ptr<core::Type>> targs;
     for (auto tm : typeMembers()) {
         if (tm.data(gs).isFixed()) {
             targs.emplace_back(tm.data(gs).resultType);
@@ -37,7 +37,7 @@ std::vector<std::shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState 
     }
     return targs;
 }
-std::shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
+shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
@@ -47,13 +47,13 @@ std::shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
     }
 }
 
-std::shared_ptr<core::Type> Symbol::externalType(const GlobalState &gs) const {
+shared_ptr<core::Type> Symbol::externalType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: also cache these?
     if (typeMembers().empty()) {
         return make_shared<ClassType>(ref(gs));
     } else {
-        std::vector<shared_ptr<Type>> targs;
+        vector<shared_ptr<Type>> targs;
         for (auto tm : typeMembers()) {
             if (tm.data(gs).isFixed()) {
                 targs.emplace_back(tm.data(gs).resultType);
@@ -616,6 +616,7 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     }
     result.superClass = this->superClass;
     result.uniqueCounter = this->uniqueCounter;
+    result.intrinsic = this->intrinsic;
     return result;
 }
 
@@ -695,11 +696,11 @@ bool LocalVariable::operator==(const LocalVariable &rhs) const {
 bool LocalVariable::operator!=(const LocalVariable &rhs) const {
     return !this->operator==(rhs);
 }
-std::string LocalVariable::toString(const core::GlobalState &gs) const {
+string LocalVariable::toString(const core::GlobalState &gs) const {
     if (unique == 0) {
         return this->_name.toString(gs);
     }
-    return this->_name.toString(gs) + "$" + std::to_string(this->unique);
+    return this->_name.toString(gs) + "$" + to_string(this->unique);
 }
 
 } // namespace core

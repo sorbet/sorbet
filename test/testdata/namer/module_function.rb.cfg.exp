@@ -60,7 +60,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
     "bb::Funcs#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : <Class:Funcs>\l<statTemp>$6 = :\"f\" : Symbol(:\"f\")\l<statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : Module\l<statTemp>$8 = self : <Class:Funcs>\l<statTemp>$7 = <statTemp>$8.module_function() : Module\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5 = self : <Class:Funcs>\l<statTemp>$6 = :\"f\" : Symbol(:\"f\")\l<statTemp>$4 = <statTemp>$5.module_function(<statTemp>$6) : <Class:Funcs>\l<statTemp>$8 = self : <Class:Funcs>\l<statTemp>$7 = <statTemp>$8.module_function() : <Class:Funcs>\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_1" [style="bold"];

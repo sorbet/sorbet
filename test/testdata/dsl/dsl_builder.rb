@@ -9,7 +9,7 @@ end
 
 class TestChild < TestDSLBuilder
   opt_string "hi"
-  opt_string :nope # error: does not match expected type
+  opt_string :nope # error: `Symbol(:"nope")` doesn't match `String` for argument `opt_string`
   opt_int_defaulted 17
 
   T.assert_type!(get_opt_string, T.nilable(String))

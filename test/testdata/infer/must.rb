@@ -5,7 +5,7 @@ def test_must
   T.assert_type!(T.must(x), String)
 
   T.must(x, "hi")
-  T.must()  # error: Wrong number of arguments
-  T.must(x, "hi", 0)  # error: Wrong number of arguments
-  T.must(x, :foo)  # error: Expression passed as an argument `msg` to method `must` does not match expected type `String`
+  T.must()  # error: Not enough arguments
+  T.must(x, "hi", 0)  # error: Too many arguments
+  T.must(x, :foo)  # error: `Symbol(:"foo")` doesn't match `String` for argument `error`
 end

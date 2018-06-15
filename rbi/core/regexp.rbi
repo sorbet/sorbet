@@ -100,11 +100,11 @@ class Regexp < Object
       options: BasicObject,
       kcode: String,
   )
-  .returns(Regexp)
+  .returns(T.self_type)
   sig(
       arg0: Regexp,
   )
-  .returns(Regexp)
+  .returns(T.self_type)
   def self.compile(arg0, options=_, kcode=_); end
 
   sig(

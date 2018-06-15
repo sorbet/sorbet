@@ -41,8 +41,8 @@ public:
         return _id > 0;
     }
 
-    const File &data(const GlobalState &gs) const;
-    File &data(GlobalState &gs) const;
+    const File &data(const GlobalState &gs, bool allowTombStones = false) const;
+    File &data(GlobalState &gs, bool allowTombStones = false) const;
 
 private:
     int _id;
@@ -76,6 +76,7 @@ public:
     std::vector<int> &line_breaks() const;
     int lineCount() const;
     bool hadErrors() const;
+    void replaceFrom(const File &other);
 
 private:
     std::string path_;
