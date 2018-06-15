@@ -10,12 +10,12 @@ using namespace std;
 namespace sorbet {
 namespace realmain {
 struct PrintOptions {
-    std::string option;
+    string option;
     bool Printers::*flag;
     bool supportsCaching = false;
 };
 
-const std::vector<PrintOptions> print_options({
+const vector<PrintOptions> print_options({
     {"parse-tree", &Printers::ParseTree},
     {"parse-tree-json", &Printers::ParseTreeJSON},
     {"ast", &Printers::Desugared},
@@ -33,7 +33,7 @@ const std::vector<PrintOptions> print_options({
 });
 
 struct StopAfterOptions {
-    std::string option;
+    string option;
     Phase flag;
 };
 
@@ -104,7 +104,7 @@ cxxopts::Options buildOptions() {
                                cxxopts::value<string>()->default_value(""), "dir");
     options.add_options("dev")("suppress-non-critical", "Exit 0 unless there was a critical error");
 
-    int defaultThreads = std::thread::hardware_concurrency();
+    int defaultThreads = thread::hardware_concurrency();
     if (defaultThreads == 0) {
         defaultThreads = 2;
     }
@@ -292,7 +292,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         }
 
         if (raw["color"].as<string>() == "auto") {
-            if (rang::rang_implementation::isTerminal(std::cerr.rdbuf())) {
+            if (rang::rang_implementation::isTerminal(cerr.rdbuf())) {
                 core::ErrorColors::enableColors();
             }
         } else if (raw["color"].as<string>() == "always") {

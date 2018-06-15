@@ -196,8 +196,8 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
     _sanityCheck();
 }
 
-Cast::Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast)
-    : Expression(loc), type(std::move(ty)), arg(move(arg)), cast(cast) {
+Cast::Cast(core::Loc loc, shared_ptr<core::Type> ty, unique_ptr<Expression> arg, core::NameRef cast)
+    : Expression(loc), type(move(ty)), arg(move(arg)), cast(cast) {
     core::categoryCounterInc("trees", "cast");
     _sanityCheck();
 }
@@ -233,7 +233,7 @@ BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), 
     _sanityCheck();
 }
 
-Literal::Literal(core::Loc loc, std::shared_ptr<core::Type> value) : Expression(loc), value(std::move(value)) {
+Literal::Literal(core::Loc loc, shared_ptr<core::Type> value) : Expression(loc), value(move(value)) {
     core::categoryCounterInc("trees", "literal");
     _sanityCheck();
 }
@@ -588,11 +588,11 @@ string Ident::toString(const core::GlobalState &gs, int tabs) {
     return this->symbol.data(gs, true).fullName(gs);
 }
 
-std::string Local::toString(const core::GlobalState &gs, int tabs) {
+string Local::toString(const core::GlobalState &gs, int tabs) {
     return this->localVariable.toString(gs);
 }
 
-std::string Local::nodeName() {
+string Local::nodeName() {
     return "Local";
 }
 
@@ -717,7 +717,7 @@ string Literal::showRaw(const core::GlobalState &gs, int tabs) {
 }
 
 string Literal::toString(const core::GlobalState &gs, int tabs) {
-    std::string res;
+    string res;
     typecase(this->value.get(), [&](core::LiteralType *l) { res = l->showValue(gs); },
              [&](core::ClassType *l) {
                  if (l->symbol == core::Symbols::NilClass()) {
@@ -1204,15 +1204,15 @@ string TreeRef::nodeName() {
     return "TreeRef";
 }
 
-std::string TreeRef::toString(const core::GlobalState &gs, int tabs) {
+string TreeRef::toString(const core::GlobalState &gs, int tabs) {
     return tree ? this->tree->toString(gs, tabs) : "TreeRef(nullptr)";
 }
 
-std::string TreeRef::showRaw(const core::GlobalState &gs, int tabs) {
+string TreeRef::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ underlying = " + (tree ? tree->showRaw(gs, tabs) : "nullptr") + " }";
 }
 
-TreeRef::TreeRef(core::Loc loc, std::unique_ptr<Expression> tree) : Expression(loc), tree(move(tree)) {}
+TreeRef::TreeRef(core::Loc loc, unique_ptr<Expression> tree) : Expression(loc), tree(move(tree)) {}
 void TreeRef::_sanityCheck() {
     tree->_sanityCheck();
 }

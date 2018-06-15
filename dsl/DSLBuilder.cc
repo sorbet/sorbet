@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet {
 namespace dsl {
-vector<std::unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
     bool nilable = false;

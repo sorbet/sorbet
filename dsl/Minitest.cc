@@ -29,7 +29,7 @@ unique_ptr<ast::Expression> prepareBody(core::MutableContext ctx, unique_ptr<ast
 
 string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
     auto argLit = ast::cast_tree<ast::Literal>(arg.get());
-    std::string argString;
+    string argString;
     if (argLit != nullptr) {
         if (argLit->isString(ctx)) {
             return argLit->asString(ctx).toString(ctx);

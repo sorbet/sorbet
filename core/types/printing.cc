@@ -280,19 +280,19 @@ string OrType::show(const GlobalState &gs) const {
     return buf.str();
 }
 
-std::string TypeVar::toString(const GlobalState &gs, int tabs) const {
+string TypeVar::toString(const GlobalState &gs, int tabs) const {
     return "TypeVar(" + sym.data(gs).name.toString(gs) + ")";
 }
 
-std::string TypeVar::show(const GlobalState &gs) const {
+string TypeVar::show(const GlobalState &gs) const {
     return sym.data(gs).name.toString(gs);
 }
 
-std::string TypeVar::typeName() const {
+string TypeVar::typeName() const {
     return "TypeVar";
 }
 
-std::string AppliedType::toString(const GlobalState &gs, int tabs) const {
+string AppliedType::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
     buf << "AppliedType {" << '\n';
     printTabs(buf, tabs + 1);
@@ -320,7 +320,7 @@ std::string AppliedType::toString(const GlobalState &gs, int tabs) const {
     return buf.str();
 }
 
-std::string AppliedType::show(const GlobalState &gs) const {
+string AppliedType::show(const GlobalState &gs) const {
     stringstream buf;
     if (this->klass == core::Symbols::Array()) {
         buf << "T::Array";
@@ -348,30 +348,30 @@ std::string AppliedType::show(const GlobalState &gs) const {
     return buf.str();
 }
 
-std::string AppliedType::typeName() const {
+string AppliedType::typeName() const {
     return "AppliedType";
 }
 
-std::string LambdaParam::toString(const GlobalState &gs, int tabs) const {
+string LambdaParam::toString(const GlobalState &gs, int tabs) const {
     return "LambdaParam(" + this->definition.data(gs).fullName(gs) + ")";
 }
 
-std::string LambdaParam::show(const GlobalState &gs) const {
+string LambdaParam::show(const GlobalState &gs) const {
     return this->definition.data(gs).show(gs);
 }
 
-std::string SelfTypeParam::toString(const GlobalState &gs, int tabs) const {
+string SelfTypeParam::toString(const GlobalState &gs, int tabs) const {
     return "SelfTypeParam(" + this->definition.data(gs).fullName(gs) + ")";
 }
 
-std::string SelfTypeParam::show(const GlobalState &gs) const {
+string SelfTypeParam::show(const GlobalState &gs) const {
     return this->definition.data(gs).show(gs);
 }
 
-std::string LambdaParam::typeName() const {
+string LambdaParam::typeName() const {
     return "LambdaParam";
 }
 
-std::string SelfTypeParam::typeName() const {
+string SelfTypeParam::typeName() const {
     return "SelfTypeParam";
 }

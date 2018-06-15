@@ -75,7 +75,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                                                 name.toString(ctx));
                                 }
                             }
-                            typeArgSpec.type = std::make_shared<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.type = make_shared<core::TypeVar>(core::Symbols::todo());
                             typeArgSpec.loc = arg->loc;
                         } else {
                             if (auto e =
@@ -353,7 +353,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 auto val = getResultType(ctx, vtree, sigBeingParsed);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
-                    auto keytype = std::dynamic_pointer_cast<core::LiteralType>(lit->value);
+                    auto keytype = dynamic_pointer_cast<core::LiteralType>(lit->value);
                     ENFORCE(keytype);
                     keys.emplace_back(keytype);
                     values.emplace_back(val);
@@ -458,7 +458,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
             }
 
-            std::vector<core::TypeAndOrigins> targs;
+            vector<core::TypeAndOrigins> targs;
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);

@@ -783,12 +783,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 int64_t val;
                 try {
                     val = stol(integer->val);
-                } catch (std::out_of_range &) {
+                } catch (out_of_range &) {
                     val = 0;
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
                         e.setHeader("Unsupported large integer literal: `{}`", integer->val);
                     }
-                } catch (std::invalid_argument &) {
+                } catch (invalid_argument &) {
                     val = 0;
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::IntegerOutOfRange)) {
                         e.setHeader("Unsupported integer literal: `{}`", integer->val);
@@ -803,18 +803,18 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 try {
                     val = stod(floatNode->val);
                     if (isinf(val)) {
-                        val = std::numeric_limits<double>::quiet_NaN();
+                        val = numeric_limits<double>::quiet_NaN();
                         if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                             e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
                         }
                     }
-                } catch (std::out_of_range &) {
-                    val = std::numeric_limits<double>::quiet_NaN();
+                } catch (out_of_range &) {
+                    val = numeric_limits<double>::quiet_NaN();
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported large float literal: `{}`", floatNode->val);
                     }
-                } catch (std::invalid_argument &) {
-                    val = std::numeric_limits<double>::quiet_NaN();
+                } catch (invalid_argument &) {
+                    val = numeric_limits<double>::quiet_NaN();
                     if (auto e = ctx.state.beginError(loc, core::errors::Desugar::FloatOutOfRange)) {
                         e.setHeader("Unsupported float literal: `{}`", floatNode->val);
                     }

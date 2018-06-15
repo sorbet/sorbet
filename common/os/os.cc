@@ -3,6 +3,8 @@
 #include <climits>
 #include <pthread.h>
 
+using namespace std;
+
 // 16 Megabytes
 constexpr int REQUIRED_STACK_SIZE = 16 * 1024 * 1024;
 
@@ -11,12 +13,12 @@ void *Joinable::trampoline(void *ptr) {
     return ptr;
 }
 
-std::unique_ptr<Joinable> runInAThread(std::function<void()> function) {
+unique_ptr<Joinable> runInAThread(function<void()> function) {
     // AFAIK this should all be:
     //    - defined behaviour
     //    - available on all posix systems
 
-    std::unique_ptr<Joinable> res = std::make_unique<Joinable>();
+    unique_ptr<Joinable> res = make_unique<Joinable>();
     res->realFunction = move(function);
 
     Joinable *joinablePTR = res.get();

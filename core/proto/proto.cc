@@ -121,7 +121,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     }
     auto by_name = [](pair<string, com::stripe::rubytyper::Symbol> const &a,
                       pair<string, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
-    std::sort(children.begin(), children.end(), by_name);
+    sort(children.begin(), children.end(), by_name);
     for (auto pair : children) {
         *symbolProto.add_children() = pair.second;
     }
@@ -138,7 +138,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const core::GlobalState &gs, Loc loc)
         protoLoc.set_path("???");
     } else {
         auto path = loc.file.data(gs).path();
-        protoLoc.set_path(std::string(path));
+        protoLoc.set_path(string(path));
 
         auto pos = loc.position(gs);
         start->set_line(pos.first.line);
@@ -153,7 +153,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const core::GlobalState &gs, Loc loc)
 com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const core::CounterState &counters,
                                                                     absl::string_view prefix) {
     com::stripe::payserver::events::cibot::SourceMetrics metrics;
-    auto unix_timestamp = std::chrono::seconds(std::time(nullptr));
+    auto unix_timestamp = chrono::seconds(time(nullptr));
     metrics.set_timestamp(unix_timestamp.count());
 
     // UUID version 1 as specified in RFC 4122
@@ -204,8 +204,8 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const core::
     return metrics;
 }
 
-std::string Proto::toJSON(const google::protobuf::Message &message) {
-    std::string json_string;
+string Proto::toJSON(const google::protobuf::Message &message) {
+    string json_string;
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
     options.always_print_primitive_fields = true;

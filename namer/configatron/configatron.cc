@@ -93,7 +93,7 @@ struct Path {
     Path *parent;
     string selector;
     shared_ptr<core::Type> myType;
-    Path(Path *parent, string selector) : parent(parent), selector(std::move(selector)){};
+    Path(Path *parent, string selector) : parent(parent), selector(move(selector)){};
     string toString() {
         if (parent) {
             return parent->toString() + "." + selector;
@@ -110,7 +110,7 @@ struct Path {
         }
         return result.str();
     }
-    std::vector<shared_ptr<Path>> children;
+    vector<shared_ptr<Path>> children;
     shared_ptr<Path> getChild(const string &name) {
         if (!name.empty() && name[0] == ':') {
             string withoutColon(name.c_str() + 1, name.size() - 1);
@@ -156,6 +156,7 @@ struct Path {
         }
     }
 };
+
 template class std::shared_ptr<Path>;
 
 void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> prefix) {
@@ -200,7 +201,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
     }
 }
 
-void handleFile(core::GlobalState &gs, std::string file, shared_ptr<Path> rootNode) {
+void handleFile(core::GlobalState &gs, string file, shared_ptr<Path> rootNode) {
     YAML::Node config = YAML::LoadFile(file);
     switch (config.Type()) {
         case YAML::NodeType::Map:
@@ -213,8 +214,8 @@ void handleFile(core::GlobalState &gs, std::string file, shared_ptr<Path> rootNo
     }
 }
 
-void sorbet::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, std::vector<std::string> folders,
-                                                      std::vector<std::string> files) {
+void sorbet::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, vector<string> folders,
+                                                      vector<string> files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
         auto files = listDir(folder.c_str());

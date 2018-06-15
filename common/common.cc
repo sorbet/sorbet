@@ -61,12 +61,12 @@ void sorbet::FileOps::write(const absl::string_view filename, const absl::string
 }
 
 absl::string_view sorbet::FileOps::getFileName(const absl::string_view path) {
-    std::size_t found = path.find_last_of("/\\");
+    size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }
 
 absl::string_view sorbet::FileOps::getExtension(const absl::string_view path) {
-    std::size_t found = path.find_last_of(".");
+    size_t found = path.find_last_of(".");
     if (found == absl::string_view::npos) {
         return absl::string_view();
     }

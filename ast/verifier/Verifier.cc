@@ -1,6 +1,7 @@
 #include "verifier.h"
 #include "ast/treemap/treemap.h"
 
+using namespace std;
 namespace sorbet {
 namespace ast {
 
@@ -17,7 +18,7 @@ public:
     }
 };
 
-std::unique_ptr<Expression> Verifier::run(core::MutableContext ctx, std::unique_ptr<Expression> node) {
+unique_ptr<Expression> Verifier::run(core::MutableContext ctx, unique_ptr<Expression> node) {
     if (!debug_mode) {
         return node;
     }

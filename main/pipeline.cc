@@ -71,10 +71,9 @@ struct thread_result {
 };
 
 unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                     std::unique_ptr<KeyValueStore> &kvstore,
-                                     const shared_ptr<core::GlobalState> &pgs) {
+                                     unique_ptr<KeyValueStore> &kvstore, const shared_ptr<core::GlobalState> &pgs) {
     auto &print = opts.print;
-    std::unique_ptr<ast::Expression> dslsInlined;
+    unique_ptr<ast::Expression> dslsInlined;
 
     try {
         if (kvstore && file.id() < pgs->filesUsed()) {
@@ -88,7 +87,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
         if (!dslsInlined) {
             // tree isn't cached. Need to start from parser
 
-            std::unique_ptr<parser::Node> nodes;
+            unique_ptr<parser::Node> nodes;
             {
                 logger->trace("Parsing: {}", file.data(lgs).path());
                 core::ErrorRegion errs(lgs, file);
@@ -105,7 +104,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
             }
 
-            std::unique_ptr<ast::Expression> ast;
+            unique_ptr<ast::Expression> ast;
             core::MutableContext ctx(lgs, core::Symbols::root());
             {
                 logger->trace("Desugaring: {}", file.data(lgs).path());
@@ -148,9 +147,9 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
     }
 }
 
-vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std::vector<std::string> frs,
-                                          std::vector<core::FileRef> mainThreadFiles, const Options &opts,
-                                          WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore) {
+vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vector<string> frs,
+                                          vector<core::FileRef> mainThreadFiles, const Options &opts,
+                                          WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
     vector<unique_ptr<ast::Expression>> ret;
     vector<unique_ptr<ast::Expression>> empty;
 
@@ -158,27 +157,27 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
         return empty;
     }
 
-    shared_ptr<ConcurrentBoundedQueue<std::pair<int, std::string>>> fileq;
+    shared_ptr<ConcurrentBoundedQueue<pair<int, string>>> fileq;
 
     shared_ptr<BlockingBoundedQueue<thread_result>> resultq;
 
     {
         Timer timeit(logger, "creating index queues");
 
-        fileq = make_shared<ConcurrentBoundedQueue<std::pair<int, std::string>>>(frs.size());
+        fileq = make_shared<ConcurrentBoundedQueue<pair<int, string>>>(frs.size());
         resultq = make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
     }
 
     int i = gs->filesUsed();
     for (auto f : frs) {
         logger->trace("enqueue: {}", f);
-        std::pair<int, std::string> job(i++, f);
+        pair<int, string> job(i++, f);
         fileq->push(move(job), 1);
     }
 
     gs->sanityCheck();
 
-    const std::shared_ptr<core::GlobalState> cgs = gs;
+    const shared_ptr<core::GlobalState> cgs = gs;
     gs = nullptr;
     logger->trace("Done deep copying global state");
     {
@@ -190,14 +189,14 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
             logger->trace("worker done deep copying global state");
             thread_result threadResult;
             int processedByThread = 0;
-            std::pair<int, std::string> job;
+            pair<int, string> job;
 
             {
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
                         core::ErrorRegion errs(*lgs, core::FileRef(job.first));
                         processedByThread++;
-                        std::string fileName = job.second;
+                        string fileName = job.second;
                         logger->trace("Reading: {}", fileName);
                         int fileId = job.first;
                         string src;
@@ -242,10 +241,10 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
                         core::StrictLevel minStrict = opts.forceMinStrict;
                         core::StrictLevel maxStrict = opts.forceMaxStrict;
                         if (!opts.typedSource.empty() &&
-                            file.data(*lgs).path().find(opts.typedSource) != std::string::npos) {
+                            file.data(*lgs).path().find(opts.typedSource) != string::npos) {
                             minStrict = core::StrictLevel::Typed;
                         }
-                        file.data(*lgs).strict = std::max(std::min(file.data(*lgs).sigil, maxStrict), minStrict);
+                        file.data(*lgs).strict = max(min(file.data(*lgs).sigil, maxStrict), minStrict);
 
                         if (!opts.storeState.empty()) {
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
@@ -313,7 +312,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, std
     auto by_file = [](unique_ptr<ast::Expression> const &a, unique_ptr<ast::Expression> const &b) {
         return a->loc.file < b->loc.file;
     };
-    std::sort(ret.begin(), ret.end(), by_file);
+    sort(ret.begin(), ret.end(), by_file);
 
     return ret;
 }

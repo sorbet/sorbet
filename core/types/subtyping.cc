@@ -207,8 +207,8 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
             return OrType::make_shared(t1, t2);
         }
         if (ltr) {
-            std::swap(a1, a2);
-            std::swap(t1, t2);
+            swap(a1, a2);
+            swap(t1, t2);
         }
         // now a1 <: a2
 
@@ -752,7 +752,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
             return AndType::make_shared(t1, t2); // we can as well return nothing here?
         }
         if (ltr) { // swap
-            std::swap(a1, a2);
+            swap(a1, a2);
         }
         // a1 <:< a2
 
@@ -1118,20 +1118,20 @@ void AliasType::_sanityCheck(core::Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-std::shared_ptr<Type> AliasType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                              const std::vector<std::shared_ptr<Type>> &targs) {
+shared_ptr<Type> AliasType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+                                         const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
-std::string MetaType::toString(const GlobalState &gs, int tabs) const {
+string MetaType::toString(const GlobalState &gs, int tabs) const {
     return "MetaType";
 }
 
-std::string MetaType::show(const GlobalState &gs) const {
+string MetaType::show(const GlobalState &gs) const {
     return "<Type: " + wrapped->show(gs) + ">";
 }
 
-std::string MetaType::typeName() const {
+string MetaType::typeName() const {
     return "MetaType";
 }
 
@@ -1147,14 +1147,14 @@ bool MetaType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     return false;
 }
 
-std::shared_ptr<Type> MetaType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
-                                             const std::vector<std::shared_ptr<Type>> &targs) {
+shared_ptr<Type> MetaType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+                                        const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(std::move(wrapped)) {}
+MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {}
 
-std::shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }

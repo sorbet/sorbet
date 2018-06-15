@@ -56,7 +56,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
 }
 
 core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &inWhat,
-                                 std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
+                                 unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
         const core::Symbol &data = what.data(ctx);
@@ -348,7 +348,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex.get(), rescueHandlersBlock);
 
                         auto isaCheck = cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
-                        std::vector<core::LocalVariable> args;
+                        vector<core::LocalVariable> args;
                         args.emplace_back(exceptionClass);
 
                         rescueHandlersBlock->exprs.emplace_back(

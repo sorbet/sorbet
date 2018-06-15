@@ -79,9 +79,9 @@ shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, c
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
-std::shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                              shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "tupletype");
     switch (fun._id) {
         case Names::freeze()._id: {
@@ -186,8 +186,8 @@ int getArity(core::Context ctx, core::SymbolRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::SymbolRef primary,
-                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
-                              std::vector<std::shared_ptr<Type>> &targs, bool hasBlock) {
+                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, vector<shared_ptr<Type>> &targs,
+                              bool hasBlock) {
     core::counterInc("calls.overloaded_invocations");
     ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
     core::SymbolRef fallback = primary;
@@ -284,7 +284,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
             Comp(core::Context ctx) : ctx(ctx){};
         } cmp(ctx);
 
-        auto er = std::equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
+        auto er = equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
         if (er.first != leftCandidates.end()) {
             leftCandidates.erase(leftCandidates.begin(), er.first);
         }
@@ -336,11 +336,9 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
 // This method handles a number of special-case methods that are implemented as
 // intrinsics in C++. If it recognizes the method call, it handles it and
 // returns a type; otherwise, it returns `nullptr.
-std::shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                                       std::vector<TypeAndOrigins> &args,
-                                                       std::shared_ptr<Type> fullType,
-                                                       std::vector<std::shared_ptr<Type>> &targs,
-                                                       shared_ptr<SendAndBlockLink> block) {
+shared_ptr<Type> ClassType::dispatchCallIntrinsic(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                                  vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
+                                                  vector<shared_ptr<Type>> &targs, shared_ptr<SendAndBlockLink> block) {
     switch (name._id) {
         case core::Names::new_()._id: {
             auto attachedClass = this->symbol.data(ctx).attachedClass(ctx);
@@ -612,8 +610,8 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     if (data.isGenericMethod()) {
         constr->defineDomain(ctx, data.typeArguments());
     }
-    bool hasKwargs = std::any_of(data.arguments().begin(), data.arguments().end(),
-                                 [&ctx](core::SymbolRef arg) { return arg.data(ctx).isKeyword(); });
+    bool hasKwargs = any_of(data.arguments().begin(), data.arguments().end(),
+                            [&ctx](core::SymbolRef arg) { return arg.data(ctx).isKeyword(); });
 
     auto pit = data.arguments().begin();
     auto pend = data.arguments().end();
@@ -660,7 +658,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     }
 
     if (hasKwargs && ait != aend) {
-        std::unordered_set<NameRef> consumed;
+        unordered_set<NameRef> consumed;
         auto &hashArg = *(aend - 1);
 
         // find keyword arguments and advance `pend` before them; We'll walk
@@ -836,19 +834,19 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     }
 }
 
-std::shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                              std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                              shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                         shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     Error::raise("AliasType::dispatchCall");
 }
 
-std::shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("AliasType::getCallArgumentType");
 }
 
-std::shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                             std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                             std::shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                        vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                                        shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     switch (name._id) {
         case core::Names::new_()._id: {
             wrapped->dispatchCall(ctx, core::Names::initialize(), callLoc, args, wrapped, wrapped, block);
@@ -863,6 +861,6 @@ std::shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef na
     }
 }
 
-std::shared_ptr<Type> MetaType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> MetaType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     Error::raise("should never happen");
 }

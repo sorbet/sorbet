@@ -7,8 +7,7 @@ const string OLD_VERSION_KEY = "VERSION";
 const string VERSION_KEY = "DB_FORMAT_VERSION";
 const size_t MAX_DB_SIZE_BYTES =
     4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
-KeyValueStore::KeyValueStore(std::string version, string path)
-    : path(std::move(path)), writerId(this_thread::get_id()) {
+KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), writerId(this_thread::get_id()) {
     int rc;
     rc = mdb_env_create(&env);
     if (rc != 0) {
@@ -127,7 +126,7 @@ absl::string_view KeyValueStore::readString(const absl::string_view key) {
     return result;
 }
 
-void KeyValueStore::writeString(const absl::string_view key, std::string value) {
+void KeyValueStore::writeString(const absl::string_view key, string value) {
     vector<u1> rawData(value.size() + sizeof(size_t));
     size_t sz = value.size();
     memcpy(rawData.data(), &sz, sizeof(sz));

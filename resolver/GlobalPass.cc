@@ -92,7 +92,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
                     }
                     ENFORCE(foundIdx < inSym.typeMembers().size());
                     // quadratic
-                    std::swap(inSym.typeMembers()[foundIdx], inSym.typeMembers()[i]);
+                    swap(inSym.typeMembers()[foundIdx], inSym.typeMembers()[i]);
                 }
                 i++;
             }
