@@ -115,7 +115,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>()->default_value(""),
                                "host");
     options.add_options("dev")("counters", "Print all internal counters");
-    options.add_options("dev")("suggest-typed", "Suggest which files to add @typed to");
+    options.add_options("dev")("suggest-typed", "Suggest which files to add `typed: true` to");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
     options.add_options("dev")("statsd-port", "StatsD sever port", cxxopts::value<int>()->default_value("8200"),
