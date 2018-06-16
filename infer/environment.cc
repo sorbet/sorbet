@@ -22,7 +22,7 @@ shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_
                 e.setHeader("Unsupported usage of bare type");
             }
         }
-        return core::Types::dynamic();
+        return core::Types::untyped();
     }
     return tp;
 }
@@ -689,11 +689,11 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
 
 shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<core::Type> procType) {
     if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
-        return core::Types::dynamic();
+        return core::Types::untyped();
     }
     auto *applied = core::cast_type<core::AppliedType>(procType.get());
     if (applied == nullptr || applied->targs.empty()) {
-        return core::Types::dynamic();
+        return core::Types::untyped();
     }
     // Proc types have their return type as the first targ
     return applied->targs.front();
@@ -721,14 +721,14 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->link) {
-                    send->link->returnTp = core::Types::dynamic();
-                    send->link->blockPreType = core::Types::dynamic();
-                    send->link->sendTp = core::Types::dynamic();
+                    send->link->returnTp = core::Types::untyped();
+                    send->link->blockPreType = core::Types::untyped();
+                    send->link->sendTp = core::Types::untyped();
                     checkFullyDefined = false;
                 }
                 if (send->fun == core::Names::super()) {
                     // TODO
-                    tp.type = core::Types::dynamic();
+                    tp.type = core::Types::untyped();
                 } else {
                     tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, recvType.type,
                                                           send->link);
@@ -763,7 +763,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         tp.origins.push_back(data.definitionLoc);
                     } else {
                         tp.origins.push_back(core::Loc::none());
-                        tp.type = core::Types::dynamic();
+                        tp.type = core::Types::untyped();
                     }
                 } else {
                     Error::notImplemented();
@@ -793,7 +793,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             [&](cfg::LoadYieldParam *i) {
                 auto &procType = i->link->blockPreType;
                 if (procType == nullptr) {
-                    tp.type = core::Types::dynamic();
+                    tp.type = core::Types::untyped();
                 } else {
                     tp.type = procType->getCallArgumentType(ctx, core::Names::call(), i->arg);
                 }
@@ -803,7 +803,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             [&](cfg::Return *i) {
                 auto expectedType = ctx.owner.data(ctx).resultType;
                 if (!expectedType) {
-                    expectedType = core::Types::dynamic();
+                    expectedType = core::Types::untyped();
                 } else {
                     expectedType = core::Types::instantiate(
                         ctx,
@@ -816,7 +816,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
 
                 if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
-                    expectedType = core::Types::dynamic();
+                    expectedType = core::Types::untyped();
                 }
 
                 tp.type = core::Types::bottom();
@@ -867,7 +867,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Unanalyzable *i) {
-                tp.type = core::Types::dynamic();
+                tp.type = core::Types::untyped();
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Cast *c) {
@@ -917,7 +917,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 e.setHeader("Expression does not have a fully-defined type (Did you reference another class's type "
                             "members?)");
             }
-            tp.type = core::Types::dynamic();
+            tp.type = core::Types::untyped();
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
@@ -999,7 +999,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                                 }
                             }
 
-                            tp.type = core::Types::dynamic();
+                            tp.type = core::Types::untyped();
                         }
                         break;
                     }

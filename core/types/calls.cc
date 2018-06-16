@@ -140,7 +140,7 @@ void matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc cal
                   shared_ptr<core::Type> &fullType, vector<shared_ptr<Type>> &targs, bool mayBeSetter = false) {
     shared_ptr<Type> expectedType = core::Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
-        expectedType = Types::dynamic();
+        expectedType = Types::untyped();
     }
 
     expectedType = core::Types::replaceSelfType(
@@ -310,7 +310,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
             }
-            return Types::dynamic();
+            return Types::untyped();
         }
 
         return attachedClass.data(ctx).externalType(ctx);
@@ -332,7 +332,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
         if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
-        return Types::dynamic();
+        return Types::untyped();
     }
     return tp;
 }
@@ -343,19 +343,19 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
 // Known incompleteness or inconsistencies with Ruby:
 //  - Missing coercion to keyword arguments via `#to_hash`
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
-//    We should, at a minimum, probably allow one to satisfy an **kwargs : dynamic
+//    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
 shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef fun, core::Loc callLoc,
                                                   vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
                                                   vector<shared_ptr<Type>> &targs, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "classtype");
     if (isDynamic()) {
-        return Types::dynamic();
+        return Types::untyped();
     } else if (this->symbol == core::Symbols::void_()) {
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", fun.data(ctx).toString(ctx));
         }
-        return Types::dynamic();
+        return Types::untyped();
     }
 
     core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
@@ -371,7 +371,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
                 }
             }
-            return core::Types::dynamic();
+            return core::Types::untyped();
         }
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
             if (fullType.get() != this) {
@@ -402,7 +402,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                 }
             }
         }
-        return Types::dynamic();
+        return Types::untyped();
     }
 
     core::SymbolRef method = mayBeOverloaded.data(ctx).isOverloaded()
@@ -597,7 +597,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
     }
 
     if (!resultType) {
-        resultType = Types::dynamic();
+        resultType = Types::untyped();
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(ctx, resultType, *constr);
     }
@@ -615,7 +615,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         } else {
             shared_ptr<Type> blockType = Types::resultTypeAsSeenFrom(ctx, bspec, this->symbol, targs);
             if (!blockType) {
-                blockType = Types::dynamic();
+                blockType = Types::untyped();
             }
 
             block->returnTp = Types::getProcReturnType(ctx, blockType);
@@ -639,7 +639,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
 
 shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
     if (isDynamic()) {
-        return Types::dynamic();
+        return Types::untyped();
     }
     core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
@@ -649,14 +649,14 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
         if (data.arguments().size() > i) { // todo: this should become actual argument matching
             shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
             if (!resultType) {
-                resultType = Types::dynamic();
+                resultType = Types::untyped();
             }
             return resultType;
         } else {
-            return Types::dynamic();
+            return Types::untyped();
         }
     } else {
-        return Types::dynamic();
+        return Types::untyped();
     }
 }
 
@@ -682,7 +682,7 @@ shared_ptr<Type> MetaType::dispatchCall(core::Context ctx, core::NameRef name, c
             if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
             }
-            return Types::dynamic();
+            return Types::untyped();
         }
     }
 }
@@ -695,7 +695,7 @@ class T_untyped : public Symbol::IntrinsicMethod {
 public:
     shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        return core::Types::dynamic();
+        return core::Types::untyped();
     }
 } T_untyped;
 
@@ -721,7 +721,7 @@ public:
     shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
-            return core::Types::dynamic();
+            return core::Types::untyped();
         }
 
         shared_ptr<Type> res = core::Types::bottom();
@@ -739,7 +739,7 @@ public:
     shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
-            return core::Types::dynamic();
+            return core::Types::untyped();
         }
 
         shared_ptr<Type> res = core::Types::top();
@@ -757,7 +757,7 @@ public:
     shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, core::SymbolRef self,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
-            return Types::dynamic();
+            return Types::untyped();
         }
 
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::RevealType)) {
@@ -853,7 +853,7 @@ public:
                 auto tupleArgs = targs;
                 targs.emplace_back(make_shared<TupleType>(tupleArgs));
             } else {
-                targs.emplace_back(core::Types::dynamic());
+                targs.emplace_back(core::Types::untyped());
             }
         }
 
