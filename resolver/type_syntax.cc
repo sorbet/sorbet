@@ -504,7 +504,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));
             auto out = ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, targs, ctype, ctype, nullptr);
 
-            if (out->isDynamic()) {
+            if (out->isUntyped()) {
                 result = out;
                 return;
             }

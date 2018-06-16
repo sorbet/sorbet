@@ -123,7 +123,7 @@ shared_ptr<Type> Types::falsyTypes() {
 shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, shared_ptr<Type> from, core::SymbolRef klass) {
     shared_ptr<Type> result;
 
-    if (from->isDynamic()) {
+    if (from->isUntyped()) {
         return from;
     }
 
@@ -145,7 +145,7 @@ shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, shared_ptr<Type> from,
                  }
              },
              [&](ClassType *c) {
-                 if (c->isDynamic()) {
+                 if (c->isUntyped()) {
                      result = from;
                  } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
                      result = Types::bottom();
@@ -161,7 +161,7 @@ shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, shared_ptr<Type> from,
 }
 
 bool Types::canBeTruthy(core::Context ctx, shared_ptr<Type> what) {
-    if (what->isDynamic()) {
+    if (what->isUntyped()) {
         return true;
     }
     auto truthyPart =
@@ -170,7 +170,7 @@ bool Types::canBeTruthy(core::Context ctx, shared_ptr<Type> what) {
 }
 
 bool Types::canBeFalsy(core::Context ctx, shared_ptr<Type> what) {
-    if (what->isDynamic()) {
+    if (what->isUntyped()) {
         return true;
     }
     return Types::isSubType(ctx, Types::falseClass(), what) ||
@@ -200,7 +200,7 @@ void ProxyType::_sanityCheck(core::Context ctx) {
     this->underlying->sanityCheck(ctx);
 }
 
-bool Type::isDynamic() {
+bool Type::isUntyped() {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == core::Symbols::untyped();
 }
@@ -273,8 +273,8 @@ void AndType::_sanityCheck(core::Context ctx) {
 
        */
 
-    ENFORCE(!left->isDynamic());
-    ENFORCE(!right->isDynamic());
+    ENFORCE(!left->isUntyped());
+    ENFORCE(!right->isUntyped());
     // TODO: reenable
     //    ENFORCE(!Types::isSubType(ctx, left, right),
     //            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " +
@@ -289,8 +289,8 @@ void OrType::_sanityCheck(core::Context ctx) {
     right->_sanityCheck(ctx);
     //    ENFORCE(!isa_type<ProxyType>(left.get()));
     //    ENFORCE(!isa_type<ProxyType>(right.get()));
-    ENFORCE(!left->isDynamic());
-    ENFORCE(!right->isDynamic());
+    ENFORCE(!left->isUntyped());
+    ENFORCE(!right->isUntyped());
     //  TODO: @dmitry, reenable
     //    ENFORCE(!Types::isSubType(ctx, left, right),
     //            this->toString(ctx) + " should have collapsed: " + left->toString(ctx) + " <: " +
@@ -573,7 +573,7 @@ bool Type::hasUntyped() {
 }
 
 bool ClassType::hasUntyped() {
-    return isDynamic();
+    return isUntyped();
 }
 
 bool OrType::hasUntyped() {

@@ -141,7 +141,7 @@ public:
         _sanityCheck(ctx);
     }
 
-    bool isDynamic();
+    bool isUntyped();
     bool isBottom();
     bool isTop();
     virtual bool hasUntyped();
@@ -167,7 +167,6 @@ public:
     std::shared_ptr<Type> returnTp;
     std::shared_ptr<Type> blockPreType;
     std::shared_ptr<Type> sendTp;
-    bool isDynamic = false;
     SendAndBlockLink(const SendAndBlockLink &) = delete;
     SendAndBlockLink(SymbolRef block);
 };

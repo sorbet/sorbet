@@ -21,13 +21,13 @@ shared_ptr<core::Type> core::Types::any(core::Context ctx, shared_ptr<Type> t1, 
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t1 || ret->isDynamic(),
+    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t1 || ret->isUntyped(),
     //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
     //
     //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
     //
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense!
-    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t2 || ret->isUntyped() || ret == t1 ||
     //                Types::isSubTypeUnderConstraint(ctx, t2, t1),
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
     //                " was lubbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
@@ -230,7 +230,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1, t2);
                 }
-                if (a1->targs[i]->isDynamic()) {
+                if (a1->targs[i]->isUntyped()) {
                     newTargs.push_back(a1->targs[i]);
                 } else {
                     newTargs.push_back(a2->targs[j]);
@@ -525,13 +525,13 @@ shared_ptr<core::Type> core::Types::all(core::Context ctx, shared_ptr<Type> t1, 
                                                 " was glbbing with " + t1->toString(ctx));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t1 || ret->isDynamic(),
+    //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t1 || ret->isUntyped(),
     //            "we do pointer comparisons in order to see if one is subtype of another. " + t1->toString(ctx) +
     //
     //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
     //
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
-    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t2 || ret->isDynamic() || ret == t1 ||
+    //                !Types::isSubTypeUnderConstraint(ctx, t2, t1) || ret == t2 || ret->isUntyped() || ret == t1 ||
     //                Types::isSubTypeUnderConstraint(ctx, t1, t2),
     //            "we do pointer comparisons in order to see if one is subtype of another " + t1->toString(ctx) +
     //                " was glbbing with " + t2->toString(ctx) + " got " + ret->toString(ctx));
@@ -799,7 +799,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, 
                     if (!Types::equiv(ctx, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
-                    if (a1->targs[j]->isDynamic()) {
+                    if (a1->targs[j]->isUntyped()) {
                         newTargs.push_back(a2->targs[i]);
                     } else {
                         newTargs.push_back(a1->targs[j]);

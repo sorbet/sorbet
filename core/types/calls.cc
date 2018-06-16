@@ -349,7 +349,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
                                                   vector<TypeAndOrigins> &args, shared_ptr<Type> fullType,
                                                   vector<shared_ptr<Type>> &targs, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "classtype");
-    if (isDynamic()) {
+    if (isUntyped()) {
         return Types::untyped();
     } else if (this->symbol == core::Symbols::void_()) {
         if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
@@ -484,7 +484,7 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
         }
         pend = kwit;
 
-        if (hashArg.type->isDynamic()) {
+        if (hashArg.type->isUntyped()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
         } else if (auto *hash = cast_type<ShapeType>(hashArg.type.get())) {
@@ -638,7 +638,7 @@ shared_ptr<Type> ClassType::dispatchCall(core::Context ctx, core::NameRef fun, c
 }
 
 shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    if (isDynamic()) {
+    if (isUntyped()) {
         return Types::untyped();
     }
     core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);

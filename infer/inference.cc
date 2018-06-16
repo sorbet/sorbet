@@ -130,7 +130,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                 current.ensureGoodAssignTarget(ctx, bind.bind);
                 bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
                                                   *constr);
-                if (bind.tpe && !bind.tpe->isDynamic() && cfg::isa_instruction<cfg::Send>(bind.value.get())) {
+                if (bind.tpe && !bind.tpe->isUntyped() && cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     typedSendCount++;
                 }
                 ENFORCE(bind.tpe);

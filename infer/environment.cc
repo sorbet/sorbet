@@ -17,7 +17,7 @@ shared_ptr<core::Type> dropLiteral(shared_ptr<core::Type> tp) {
 }
 shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
-        if (!mt->wrapped->isDynamic()) {
+        if (!mt->wrapped->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
             }
@@ -125,7 +125,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
             // would be otherwise; Many of the performance optimizations in this
             // file effectively exist to support this feature.
             //
-            if (isNeeded && !env.types[i].type->isDynamic()) {
+            if (isNeeded && !env.types[i].type->isUntyped()) {
                 copy.mutate().yesTypeTests.emplace_back(local, env.types[i].type);
             }
         } else {
@@ -175,11 +175,11 @@ void KnowledgeFact::sanityCheck() const {
     }
     for (auto &a : yesTypeTests) {
         ENFORCE(a.second.get() != nullptr);
-        ENFORCE(!a.second->isDynamic());
+        ENFORCE(!a.second->isUntyped());
     }
     for (auto &a : noTypeTests) {
         ENFORCE(a.second.get() != nullptr);
-        ENFORCE(!a.second->isDynamic());
+        ENFORCE(!a.second->isUntyped());
     }
 }
 
@@ -394,7 +394,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
             if (attachedClass.exists()) {
                 auto ty = attachedClass.data(ctx).externalType(ctx);
-                if (!ty->isDynamic()) {
+                if (!ty->isUntyped()) {
                     whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, ty);
                     whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, ty);
                 }
@@ -411,10 +411,10 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
 
         ENFORCE(tp1.type.get() != nullptr);
         ENFORCE(tp2.type.get() != nullptr);
-        if (!tp1.type->isDynamic()) {
+        if (!tp1.type->isUntyped()) {
             whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, tp1.type);
         }
-        if (!tp2.type->isDynamic()) {
+        if (!tp2.type->isUntyped()) {
             whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], tp2.type);
         }
         whoKnows.sanityCheck();
@@ -436,7 +436,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
         if (attachedClass.exists()) {
             auto ty = attachedClass.data(ctx).externalType(ctx);
-            if (!ty->isDynamic()) {
+            if (!ty->isUntyped()) {
                 whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], ty);
                 whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0], ty);
             }
@@ -499,7 +499,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
 
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, cond);
         tp.origins.emplace_back(loc);
-        if (tp.type->isDynamic()) {
+        if (tp.type->isUntyped()) {
             tp.type = core::Types::falsyTypes();
         } else {
             tp.type = core::Types::all(ctx, tp.type, core::Types::falsyTypes());
@@ -535,7 +535,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
         tp.origins.emplace_back(loc);
-        if (tp.type->isDynamic()) { // this is actually incorrect, as it may be some more exact type, but this rule
+        if (tp.type->isUntyped()) { // this is actually incorrect, as it may be some more exact type, but this rule
             // makes it easier to migrate code
             tp.type = typeTested.second;
         } else {
@@ -556,7 +556,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
         tp.origins.emplace_back(loc);
 
-        if (!tp.type->isDynamic()) {
+        if (!tp.type->isUntyped()) {
             tp.type = core::Types::approximateSubtract(ctx, tp.type, typeTested.second);
             setTypeAndOrigin(typeTested.first, tp);
             if (tp.type->isBottom()) {
@@ -884,7 +884,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 if (c->cast != core::Names::cast()) {
                     auto ty = getTypeAndOrigin(ctx, c->value);
-                    if (c->cast == core::Names::assertType() && ty.type->isDynamic()) {
+                    if (c->cast == core::Names::assertType() && ty.type->isUntyped()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
                             e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
@@ -973,7 +973,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         }
                         break;
                     default: {
-                        if (!asGoodAs || (tp.type->isDynamic() && !cur.type->isDynamic())) {
+                        if (!asGoodAs || (tp.type->isUntyped() && !cur.type->isUntyped())) {
                             if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::PinnedVariableMismatch)) {
                                 e.setHeader("Changing the type of a variable in a loop is not permitted");
                                 e.addErrorSection(core::ErrorSection(core::ErrorColors::format(
