@@ -229,8 +229,8 @@ void GlobalState::initEmpty() {
     ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
     ENFORCE(T_Generic_id == Symbols::T_Generic());
 
-    // Synthesize untyped = dynamic()
-    Symbols::untyped().data(*this).resultType = core::Types::dynamic();
+    // Synthesize untyped = T.untyped
+    Symbols::untyped().data(*this).resultType = core::Types::untyped();
 
     // <Magic> has a special Type
     Symbols::Magic().data(*this).resultType = make_shared<MagicType>();
@@ -256,7 +256,7 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = core::Types::arrayOfUntyped();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::dynamic();
+    method.data(*this).resultType = core::Types::untyped();
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
