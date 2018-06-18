@@ -116,6 +116,7 @@ NameDef names[] = {
     {"class_", "class", Core},
     {"classOf", "class_of", Resolver},
     {"selfType", "self_type", Resolver},
+    {"coerce", DSL},
 
     {"assertType", "assert_type!", Resolver | CFG | Infer},
     {"cast", DSL | Resolver | CFG | Infer},

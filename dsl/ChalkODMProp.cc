@@ -152,6 +152,12 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (type == nullptr) {
         return empty;
     }
+    if (auto *snd = ast::cast_tree<ast::Send>(type.get())) {
+        if (snd->fun == core::Names::coerce()) {
+            // TODO: either support T.coerce or remove it from pay-server
+            return empty;
+        }
+    }
     // Yay, we have a type
     ENFORCE(type != nullptr, "No obvious type AST for this prop");
 
