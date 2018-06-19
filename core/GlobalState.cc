@@ -735,8 +735,20 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE(!fileTableFrozen);
-    auto idx = files.size();
-    files.emplace_back(file);
+    int idx = 0;
+    for (auto &f : this->files) {
+        if (f) {
+            if (f->path() == file->path()) {
+                break;
+            }
+        }
+        ++idx;
+    }
+    if (idx < files.size()) {
+        files[idx] = file;
+    } else {
+        files.emplace_back(file);
+    }
     return FileRef(idx);
 }
 
@@ -762,11 +774,11 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
 }
 
 FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, int id) {
+    ENFORCE(!fileTableFrozen);
     ENFORCE(id >= this->files.size() || this->files[id]->source_type == File::Type::TombStone);
     if (id >= this->files.size()) {
         while (id > this->files.size()) {
-            auto file = make_shared<File>("", "", File::Type::TombStone);
-            this->enterFile(move(file));
+            files.emplace_back(make_shared<File>("", "", File::Type::TombStone));
         }
 
         core::FileRef result = this->enterFile(file);

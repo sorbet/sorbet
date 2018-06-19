@@ -1,4 +1,5 @@
 #include "LSPLoop.h"
+#include "absl/strings/str_cat.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
@@ -13,8 +14,8 @@ using namespace sorbet::realmain::LSP;
 namespace sorbet {
 namespace realmain {
 
-static bool startsWith(const string &str, const string &prefix) {
-    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
+static bool startsWith(const absl::string_view str, const absl::string_view prefix) {
+    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.data(), prefix.size());
 }
 
 bool safeGetline(std::istream &is, std::string &t) {
@@ -101,9 +102,7 @@ void LSPLoop::runLSP() {
                                     string uri(change["uri"].GetString(), change["uri"].GetStringLength());
                                     string content(change["content"].GetString(), change["content"].GetStringLength());
                                     if (startsWith(uri, rootUri)) {
-                                        string subName(uri.c_str() + 1 + rootUri.length(),
-                                                       uri.length() - rootUri.length() - 1);
-                                        files.emplace_back(make_shared<core::File>(move(subName), move(content),
+                                        files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(content),
                                                                                    core::File::Type::Normal));
                                     }
                                 }
@@ -127,8 +126,8 @@ void LSPLoop::runLSP() {
                 string content(edits["contentChanges"][0]["text"].GetString(),
                                edits["contentChanges"][0]["text"].GetStringLength());
                 if (startsWith(uri, rootUri)) {
-                    string subName(uri.c_str() + 1 + rootUri.length(), uri.length() - rootUri.length() - 1);
-                    files.emplace_back(make_shared<core::File>(move(subName), move(content), core::File::Type::Normal));
+                    files.emplace_back(
+                        make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
 
                     tryFastPath(files);
                     pushErrors();
@@ -156,13 +155,28 @@ void LSPLoop::runLSP() {
             if (method == LSP::Initialize) {
                 result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-                string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1}}";
+                string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true}}";
                 Document temp;
                 auto &r = temp.Parse(serverCap.c_str());
                 ENFORCE(!r.HasParseError());
                 result.CopyFrom(temp, alloc);
             } else if (method == LSP::Shutdown) {
                 // return default value: null
+            } else if (method == LSP::TextDocumentDocumentSymbol) {
+                result.SetArray();
+                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
+                                  d["params"]["textDocument"]["uri"].GetStringLength());
+                auto fref = uri2FileRef(uri);
+                for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
+                    core::SymbolRef ref(finalGs.get(), idx);
+                    if (ref.data(*finalGs).definitionLoc.file == fref) {
+                        auto data = symbolRef2SymbolInformation(ref);
+                        if (data) {
+                            result.PushBack(move(*data), alloc);
+                        }
+                    }
+                }
+
             } else {
                 ENFORCE(!method.isSupported, "failing a supported method");
                 errorCode = (int)LSP::LSPErrorCodes::MethodNotFound;
@@ -176,6 +190,111 @@ void LSPLoop::runLSP() {
             }
         }
     }
+}
+
+/**
+ * Represents information about programming constructs like variables, classes,
+ * interfaces etc.
+ *
+ *        interface SymbolInformation {
+ *                 // The name of this symbol.
+ *                name: string;
+ *                 // The kind of this symbol.
+ *                kind: number;
+ *
+ *                 // Indicates if this symbol is deprecated.
+ *                deprecated?: boolean;
+ *
+ *                 *
+ *                 * The location of this symbol. The location's range is used by a tool
+ *                 * to reveal the location in the editor. If the symbol is selected in the
+ *                 * tool the range's start information is used to position the cursor. So
+ *                 * the range usually spans more then the actual symbol's name and does
+ *                 * normally include things like visibility modifiers.
+ *                 *
+ *                 * The range doesn't have to denote a node range in the sense of a abstract
+ *                 * syntax tree. It can therefore not be used to re-construct a hierarchy of
+ *                 * the symbols.
+ *                 *
+ *                location: Location;
+ *
+ *                 *
+ *                 * The name of the symbol containing this symbol. This information is for
+ *                 * user interface purposes (e.g. to render a qualifier in the user interface
+ *                 * if necessary). It can't be used to re-infer a hierarchy for the document
+ *                 * symbols.
+ *
+ *                containerName?: string;
+ *        }
+ **/
+unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
+    auto &sym = symRef.data(*finalGs);
+    rapidjson::Value result;
+    result.SetObject();
+    result.AddMember("name", sym.name.show(*finalGs), alloc);
+    result.AddMember("location", loc2Location(sym.definitionLoc), alloc);
+    result.AddMember("containerName", sym.owner.data(*finalGs).fullName(*finalGs), alloc);
+
+    /**
+     * A symbol kind.
+     *
+     *      export namespace SymbolKind {
+     *          export const File = 1;
+     *          export const Module = 2;
+     *          export const Namespace = 3;
+     *          export const Package = 4;
+     *          export const Class = 5;
+     *          export const Method = 6;
+     *          export const Property = 7;
+     *          export const Field = 8;
+     *          export const Constructor = 9;
+     *          export const Enum = 10;
+     *          export const Interface = 11;
+     *          export const Function = 12;
+     *          export const Variable = 13;
+     *          export const Constant = 14;
+     *          export const String = 15;
+     *          export const Number = 16;
+     *          export const Boolean = 17;
+     *          export const Array = 18;
+     *          export const Object = 19;
+     *          export const Key = 20;
+     *          export const Null = 21;
+     *          export const EnumMember = 22;
+     *          export const Struct = 23;
+     *          export const Event = 24;
+     *          export const Operator = 25;
+     *          export const TypeParameter = 26;
+     *      }
+     **/
+    if (sym.isClass()) {
+        if (sym.isClassModule()) {
+            result.AddMember("kind", 2, alloc);
+        }
+        if (sym.isClassClass()) {
+            result.AddMember("kind", 5, alloc);
+        }
+    } else if (sym.isMethod()) {
+        if (sym.name == core::Names::initialize()) {
+            result.AddMember("kind", 9, alloc);
+        } else {
+            result.AddMember("kind", 6, alloc);
+        }
+    } else if (sym.isField()) {
+        result.AddMember("kind", 8, alloc);
+    } else if (sym.isStaticField()) {
+        result.AddMember("kind", 14, alloc);
+    } else if (sym.isMethodArgument()) {
+        result.AddMember("kind", 13, alloc);
+    } else if (sym.isTypeMember()) {
+        result.AddMember("kind", 26, alloc);
+    } else if (sym.isTypeArgument()) {
+        result.AddMember("kind", 26, alloc);
+    } else {
+        return nullptr;
+    }
+
+    return make_unique<rapidjson::Value>(move(result));
 }
 
 void LSPLoop::sendRaw(Document &raw) {
@@ -195,17 +314,8 @@ void LSPLoop::sendNotification(LSPMethod meth, Value &data) {
     request.SetObject();
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
-    {
-        // fill in method
-        Value method;
-        method.SetString(meth.name.data(), meth.name.size());
-        request.AddMember("method", method, alloc);
-    }
-
-    {
-        // fill in params
-        request.AddMember("params", data, alloc);
-    }
+    request.AddMember("method", meth.name, alloc);
+    request.AddMember("params", data, alloc);
 
     sendRaw(request);
 }
@@ -217,24 +327,9 @@ void LSPLoop::sendRequest(LSPMethod meth, Value &data, std::function<void(Value 
     request.SetObject();
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
-    {
-        // fill in ID
-        Value id;
-        id.SetString(idStr.c_str(), alloc);
-        request.AddMember("id", id, alloc);
-    }
-
-    {
-        // fill in method
-        Value method;
-        method.SetString(meth.name.data(), meth.name.size());
-        request.AddMember("method", method, alloc);
-    }
-
-    {
-        // fill in params
-        request.AddMember("params", data, alloc);
-    }
+    request.AddMember("id", idStr, alloc);
+    request.AddMember("method", meth.name, alloc);
+    request.AddMember("params", data, alloc);
 
     awaitingResponse[idStr] = ResponseHandler{move(onComplete), move(onFail)};
 
@@ -299,6 +394,19 @@ Value LSPLoop::loc2Range(core::Loc loc) {
     return ret;
 }
 
+Value LSPLoop::loc2Location(core::Loc loc) {
+    //        interface Location {
+    //                uri: DocumentUri;
+    //                range: Range;
+    //        }
+    Value ret;
+    ret.SetObject();
+
+    ret.AddMember("uri", fileRef2Uri(loc.file), alloc);
+    ret.AddMember("range", loc2Range(loc), alloc);
+    return ret;
+}
+
 void LSPLoop::pushErrors() {
     drainErrors();
 
@@ -325,15 +433,13 @@ void LSPLoop::pushErrors() {
 
             publishDiagnosticsParams.SetObject();
             { // uri
-                Value uri;
                 string uriStr;
                 if (file.data(*finalGs).source_type == core::File::Type::Payload) {
                     uriStr = (string)file.data(*finalGs).path();
                 } else {
                     uriStr = fmt::format("{}/{}", rootUri, file.data(*finalGs).path());
                 }
-                uri.SetString(uriStr.c_str(), uriStr.length(), alloc);
-                publishDiagnosticsParams.AddMember("uri", uri, alloc);
+                publishDiagnosticsParams.AddMember("uri", uriStr, alloc);
             }
 
             {
@@ -346,9 +452,7 @@ void LSPLoop::pushErrors() {
 
                     diagnostic.AddMember("range", loc2Range(e->loc), alloc);
                     diagnostic.AddMember("code", e->what.code, alloc);
-                    Value message;
-                    message.SetString(e->formatted.c_str(), e->formatted.length(), alloc);
-                    diagnostic.AddMember("message", message, alloc);
+                    diagnostic.AddMember("message", e->formatted, alloc);
 
                     // TODO: add other lines
 
@@ -473,6 +577,38 @@ const LSP::LSPMethod LSP::getMethod(const absl::string_view name) {
 
 void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> changedFiles) {
     runSlowPath(changedFiles);
+}
+
+std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
+    ENFORCE(startsWith(uri, rootUri));
+    return string(uri.data() + 1 + rootUri.length(), uri.length() - rootUri.length() - 1);
+}
+
+std::string LSPLoop::localName2Remote(const absl::string_view uri) {
+    ENFORCE(!startsWith(uri, rootUri));
+    return absl::StrCat(rootUri, "/", uri);
+}
+
+core::FileRef LSPLoop::uri2FileRef(const absl::string_view uri) {
+    if (!startsWith(uri, rootUri)) {
+        return core::FileRef();
+    }
+    auto needle = remoteName2Local(uri);
+    for (int i = 1; i < finalGs->filesUsed(); i++) {
+        core::FileRef fref(i);
+        const auto &file = fref.data(*finalGs, true);
+        if (file.source_type == core::File::Type::TombStone) {
+            continue;
+        }
+        if (file.path() == needle) {
+            return fref;
+        }
+    }
+    return core::FileRef();
+}
+
+std::string LSPLoop::fileRef2Uri(core::FileRef file) {
+    return localName2Remote((string)file.data(*finalGs).path());
 }
 
 } // namespace realmain

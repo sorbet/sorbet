@@ -5,6 +5,7 @@
 #include "core/Files.h"
 #include "realmain.h"
 #define RAPIDJSON_ASSERT(x) ENFORCE(x)
+#define RAPIDJSON_HAS_STDSTRING 1
 #include "common/KeyValueStore.h"
 #include "common/WorkerPool.h"
 #include "rapidjson/document.h"
@@ -63,6 +64,7 @@ const LSPMethod UnRegisterCapability{"client/unregisterCapability", false, LSPMe
 const LSPMethod DidChangeWatchedFiles{"workspace/didChangeWatchedFiles", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod PushDiagnostics{"textDocument/publishDiagnostics", true, LSPMethod::Kind::ServerInitiated};
 const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
+const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
 
 /** List of all LSP Methods that we are aware of */
@@ -76,6 +78,7 @@ const LSPMethod ALL[] = {CancelRequest,
                          DidChangeWatchedFiles,
                          PushDiagnostics,
                          TextDocumentDidChange,
+                         TextDocumentDocumentSymbol,
                          ReadFile};
 
 const LSPMethod getMethod(const absl::string_view name);
@@ -148,6 +151,7 @@ class LSPLoop {
     void pushErrors();
     void drainErrors();
     rapidjson::Value loc2Range(core::Loc loc);
+    rapidjson::Value loc2Location(core::Loc loc);
 
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
@@ -159,6 +163,17 @@ class LSPLoop {
     void runSlowPath(std::vector<std::shared_ptr<core::File>> changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
     void tryFastPath(std::vector<std::shared_ptr<core::File>> changedFiles);
+
+    core::FileRef uri2FileRef(const absl::string_view uri);
+    std::string fileRef2Uri(core::FileRef);
+
+    std::string remoteName2Local(const absl::string_view uri);
+    std::string localName2Remote(const absl::string_view uri);
+
+    /** Used to implement textDocument/documentSymbol
+     * Returns `nullptr` if symbol kind is not supported by LSP
+     * */
+    std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
 
 public:
     LSPLoop(std::shared_ptr<core::GlobalState> &gs, const Options &opts, std::shared_ptr<spd::logger> &logger,
