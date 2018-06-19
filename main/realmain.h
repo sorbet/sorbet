@@ -78,6 +78,7 @@ struct Options {
     std::string cacheDir = "";
     std::vector<std::string> configatronDirs;
     std::vector<std::string> configatronFiles;
+    std::unordered_map<std::string, core::StrictLevel> strictnessOverrides;
     std::string storeState = "";
     bool enableCounters = false;
     std::vector<std::string> someCounters;
