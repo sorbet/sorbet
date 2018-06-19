@@ -31,6 +31,8 @@ module T
 
   sig(arg: T.untyped, error: String).returns(T.untyped)
   def self.must(arg, error=""); end
+
+  def self.coerce(type); end
 end
 
 module T::Helpers
