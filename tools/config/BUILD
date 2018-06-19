@@ -29,5 +29,9 @@ config_setting(
     name = "more-static",
     values = {
         "define": "more-static=true",
+
+        # more-static doesn't work on macOS. Limit it to Linux for
+        # now.
+        "host_cpu": "k8",
     },
 )

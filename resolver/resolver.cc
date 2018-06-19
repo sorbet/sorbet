@@ -237,7 +237,7 @@ private:
 
             core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, inner->cnst);
             stub.data(ctx).superClass = core::Symbols::StubClass();
-            stub.data(ctx).resultType = core::Types::dynamic();
+            stub.data(ctx).resultType = core::Types::untyped();
             stub.data(ctx).setIsModule(false);
             bool resolved = resolveJob(ctx, job, typeAliases, true);
             return resolved;
@@ -606,7 +606,7 @@ private:
             } else if (arg.data(ctx).resultType != nullptr) {
                 ++it;
             } else {
-                arg.data(ctx).resultType = core::Types::dynamic();
+                arg.data(ctx).resultType = core::Types::untyped();
                 if (sig.seen.args || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
                     if (auto e = ctx.state.beginError(arg.data(ctx).definitionLoc,
@@ -834,7 +834,7 @@ private:
                      }
                      result = cast->type;
                  },
-                 [&](ast::Expression *) { result = core::Types::dynamic(); });
+                 [&](ast::Expression *) { result = core::Types::untyped(); });
         return result;
     }
 
@@ -1233,7 +1233,7 @@ public:
             } else {
                 sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
             }
-            sym.data(ctx).resultType = core::Types::dynamic();
+            sym.data(ctx).resultType = core::Types::untyped();
         }
 
         return make_unique<ast::Ident>(id->loc, sym);

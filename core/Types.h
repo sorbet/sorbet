@@ -33,7 +33,7 @@ public:
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
     static std::shared_ptr<Type> nilClass();
-    static std::shared_ptr<Type> dynamic();
+    static std::shared_ptr<Type> untyped();
     static std::shared_ptr<Type> void_();
     static std::shared_ptr<Type> trueClass();
     static std::shared_ptr<Type> falseClass();
@@ -146,7 +146,7 @@ public:
         _sanityCheck(ctx);
     }
 
-    bool isDynamic();
+    bool isUntyped();
     bool isBottom();
     bool isTop();
     virtual bool hasUntyped();
@@ -172,7 +172,6 @@ public:
     std::shared_ptr<Type> returnTp;
     std::shared_ptr<Type> blockPreType;
     std::shared_ptr<Type> sendTp;
-    bool isDynamic = false;
     SendAndBlockLink(const SendAndBlockLink &) = delete;
     SendAndBlockLink(SymbolRef block);
 };
@@ -510,7 +509,7 @@ public:
 // Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
 // of the *value* `A`, MetaType[T] is the *type* of a *value* that holds the
 // type T during execution. For instance, the type of `T.untyped` is
-// `MetaType(Types::dynamic())`.
+// `MetaType(Types::untyped())`.
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.

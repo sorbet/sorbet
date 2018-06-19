@@ -608,7 +608,7 @@ public:
 
                         // TODO(nelhage): This creates an order
                         // dependency in the resolver. See RUBYPLAT-520
-                        sym.data(ctx).resultType = core::Types::dynamic();
+                        sym.data(ctx).resultType = core::Types::untyped();
 
                         asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
                         return asgn;
@@ -678,7 +678,7 @@ public:
             auto name = core::Names::blkArg();
             blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
             blockArg.data(ctx).setBlockArgument();
-            blockArg.data(ctx).resultType = core::Types::dynamic();
+            blockArg.data(ctx).resultType = core::Types::untyped();
             method.data(ctx).arguments().push_back(blockArg);
 
             // Also put it in the MethodDef since we rely on that being correct for blocks

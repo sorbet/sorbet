@@ -58,7 +58,7 @@ shared_ptr<core::Type> Symbol::externalType(const GlobalState &gs) const {
             if (tm.data(gs).isFixed()) {
                 targs.emplace_back(tm.data(gs).resultType);
             } else {
-                targs.emplace_back(Types::dynamic());
+                targs.emplace_back(Types::untyped());
             }
         }
         return make_shared<AppliedType>(ref(gs), targs);
