@@ -1540,8 +1540,25 @@ Begin {
                                     lhs = LVarLhs {
                                       name = added_lines
                                     }
-                                    rhs = Array {
-                                      elts = [
+                                    rhs = Send {
+                                      receiver = Send {
+                                        receiver = Const {
+                                          scope = Const {
+                                            scope = NULL
+                                            name = <constant:T>
+                                          }
+                                          name = <constant:Array>
+                                        }
+                                        method = []
+                                        args = [
+                                          Const {
+                                            scope = NULL
+                                            name = <constant:String>
+                                          }
+                                        ]
+                                      }
+                                      method = new
+                                      args = [
                                       ]
                                     }
                                   }
@@ -1549,8 +1566,25 @@ Begin {
                                     lhs = LVarLhs {
                                       name = removed_lines
                                     }
-                                    rhs = Array {
-                                      elts = [
+                                    rhs = Send {
+                                      receiver = Send {
+                                        receiver = Const {
+                                          scope = Const {
+                                            scope = NULL
+                                            name = <constant:T>
+                                          }
+                                          name = <constant:Array>
+                                        }
+                                        method = []
+                                        args = [
+                                          Const {
+                                            scope = NULL
+                                            name = <constant:String>
+                                          }
+                                        ]
+                                      }
+                                      method = new
+                                      args = [
                                       ]
                                     }
                                   }
@@ -1797,18 +1831,27 @@ Begin {
                                               method = <<
                                               args = [
                                                 Send {
-                                                  receiver = LVar {
-                                                    name = line
+                                                  receiver = Const {
+                                                    scope = NULL
+                                                    name = <constant:T>
                                                   }
-                                                  method = []
+                                                  method = must
                                                   args = [
-                                                    IRange {
-                                                      from = Integer {
-                                                        val = "1"
+                                                    Send {
+                                                      receiver = LVar {
+                                                        name = line
                                                       }
-                                                      to = Integer {
-                                                        val = "-1"
-                                                      }
+                                                      method = []
+                                                      args = [
+                                                        IRange {
+                                                          from = Integer {
+                                                            val = "1"
+                                                          }
+                                                          to = Integer {
+                                                            val = "-1"
+                                                          }
+                                                        }
+                                                      ]
                                                     }
                                                   ]
                                                 }
@@ -1837,18 +1880,27 @@ Begin {
                                                 method = <<
                                                 args = [
                                                   Send {
-                                                    receiver = LVar {
-                                                      name = line
+                                                    receiver = Const {
+                                                      scope = NULL
+                                                      name = <constant:T>
                                                     }
-                                                    method = []
+                                                    method = must
                                                     args = [
-                                                      IRange {
-                                                        from = Integer {
-                                                          val = "1"
+                                                      Send {
+                                                        receiver = LVar {
+                                                          name = line
                                                         }
-                                                        to = Integer {
-                                                          val = "-1"
-                                                        }
+                                                        method = []
+                                                        args = [
+                                                          IRange {
+                                                            from = Integer {
+                                                              val = "1"
+                                                            }
+                                                            to = Integer {
+                                                              val = "-1"
+                                                            }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }

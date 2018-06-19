@@ -328,8 +328,7 @@ shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
             for (auto &elem : elems) {
                 elem = unpickleType(p, gs);
             }
-            auto result = make_shared<TupleType>(elems);
-            result->underlying = underlying;
+            auto result = make_shared<TupleType>(underlying, move(elems));
             return result;
         }
         case 6: {

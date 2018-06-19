@@ -188,6 +188,26 @@ shared_ptr<Type> Types::approximateSubtract(core::Context ctx, shared_ptr<Type> 
     return result;
 }
 
+shared_ptr<Type> Types::dropLiteral(shared_ptr<Type> tp) {
+    if (auto *a = core::cast_type<LiteralType>(tp.get())) {
+        return a->underlying;
+    }
+    return tp;
+}
+
+shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elements) {
+    shared_ptr<Type> acc = Types::bottom();
+    for (auto &el : elements) {
+        acc = Types::lub(ctx, acc, el);
+    }
+    return acc;
+}
+
+shared_ptr<Type> Types::arrayOf(core::Context ctx, shared_ptr<Type> elem) {
+    vector<shared_ptr<Type>> targs{move(elem)};
+    return make_shared<AppliedType>(core::Symbols::Array(), targs);
+}
+
 core::ClassType::ClassType(core::SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
@@ -227,15 +247,35 @@ core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
 core::LiteralType::LiteralType(bool val)
     : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
-core::TupleType::TupleType(vector<shared_ptr<Type>> elements)
-    : ProxyType(Types::arrayOfUntyped()), elems(move(elements)) {}
+core::TupleType::TupleType(shared_ptr<Type> underlying, vector<shared_ptr<Type>> elements)
+    : ProxyType(move(underlying)), elems(move(elements)) {}
+
+shared_ptr<Type> core::TupleType::build(core::Context ctx, vector<shared_ptr<Type>> elements) {
+    shared_ptr<Type> underlying = Types::arrayOf(ctx, Types::dropLiteral(Types::lubAll(ctx, elements)));
+    return make_shared<TupleType>(move(underlying), move(elements));
+}
 
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {}
+
+bool LiteralType::equals(shared_ptr<LiteralType> rhs) const {
+    if (this->value != rhs->value) {
+        return false;
+    }
+    auto *lklass = cast_type<ClassType>(this->underlying.get());
+    auto *rklass = cast_type<ClassType>(rhs->underlying.get());
+    if (!lklass || !rklass) {
+        return false;
+    }
+    return lklass->symbol == rklass->symbol;
+}
 
 OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {}
 
 void TupleType::_sanityCheck(core::Context ctx) {
     ProxyType::_sanityCheck(ctx);
+    auto *applied = cast_type<AppliedType>(this->underlying.get());
+    ENFORCE(applied);
+    ENFORCE(applied->klass == core::Symbols::Array());
 }
 
 core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
@@ -611,6 +651,14 @@ bool ShapeType::hasUntyped() {
     return false;
 };
 SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
+
+shared_ptr<Type> TupleType::elementType() const {
+    auto *ap = cast_type<AppliedType>(this->underlying.get());
+    ENFORCE(ap);
+    ENFORCE(ap->klass == core::Symbols::Array());
+    ENFORCE(ap->targs.size() == 1);
+    return ap->targs.front();
+}
 
 SelfType::SelfType(){};
 

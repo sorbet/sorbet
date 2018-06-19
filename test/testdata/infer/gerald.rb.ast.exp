@@ -218,8 +218,8 @@ class <emptyTree><<constant:<root>>> < ()
                 lines = part.split("
 ")
                 a_name = b_name = <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
-                added_lines = []
-                removed_lines = []
+                added_lines = <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>).new()
+                removed_lines = <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>).new()
                 lines.each() do |line|
                   if line.start_with?("index ", "@@", "new file mode")
                     next(<emptyTree>)
@@ -253,10 +253,10 @@ class <emptyTree><<constant:<root>>> < ()
                         end
                       else
                         if line.start_with?("+")
-                          added_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
+                          added_lines.<<(<emptyTree>::<constant:T>.must(line.[](<emptyTree>::<constant:Range>.new(1, -1))))
                         else
                           if line.start_with?("-")
-                            removed_lines.<<(line.[](<emptyTree>::<constant:Range>.new(1, -1)))
+                            removed_lines.<<(<emptyTree>::<constant:T>.must(line.[](<emptyTree>::<constant:Range>.new(1, -1))))
                           else
                             <emptyTree>
                           end

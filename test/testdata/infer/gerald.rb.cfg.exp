@@ -136,7 +136,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Matcher#match" {
 
     "bb::Opus::CIBot::Gerald::Matcher#match_1" -> "bb::Opus::CIBot::Gerald::Matcher#match_1" [style="bold"];
     "bb::Opus::CIBot::Gerald::Matcher#match_2" [
-        label = "block[id=2](<constant:<Magic>>$28, match_context)\l<statTemp>$15 = self : Opus::CIBot::Gerald::Matcher\l<statTemp>$14 = <statTemp>$15.log() : T.untyped\l<statTemp>$19 = \"Gerald skipping large PR with \" : String(\"Gerald skipping large PR with \")\l<statTemp>$23 = match_context.diff() : T.untyped\l<statTemp>$22 = <statTemp>$23.affected_files() : T.untyped\l<statTemp>$21 = <statTemp>$22.count() : T.untyped\l<statTemp>$20 = <statTemp>$21.to_s() : T.untyped\l<statTemp>$18 = <statTemp>$19.concat(<statTemp>$20) : String\l<statTemp>$26 = \" affected files\" : String(\" affected files\")\l<statTemp>$25 = <statTemp>$26.to_s() : String\l<statTemp>$17 = <statTemp>$18.concat(<statTemp>$25) : String\l<statTemp>$16 = <statTemp>$17.to_s() : String\l<statTemp>$13 = <statTemp>$14.warn(<statTemp>$16) : T.untyped\l<returnTemp>$27 = <constant:<Magic>>$28.<build-array>() : TupleType {\l}\l<statTemp>$5 = return <returnTemp>$27 : <impossible>\l<unconditional>\l"
+        label = "block[id=2](<constant:<Magic>>$28, match_context)\l<statTemp>$15 = self : Opus::CIBot::Gerald::Matcher\l<statTemp>$14 = <statTemp>$15.log() : T.untyped\l<statTemp>$19 = \"Gerald skipping large PR with \" : String(\"Gerald skipping large PR with \")\l<statTemp>$23 = match_context.diff() : T.untyped\l<statTemp>$22 = <statTemp>$23.affected_files() : T.untyped\l<statTemp>$21 = <statTemp>$22.count() : T.untyped\l<statTemp>$20 = <statTemp>$21.to_s() : T.untyped\l<statTemp>$18 = <statTemp>$19.concat(<statTemp>$20) : String\l<statTemp>$26 = \" affected files\" : String(\" affected files\")\l<statTemp>$25 = <statTemp>$26.to_s() : String\l<statTemp>$17 = <statTemp>$18.concat(<statTemp>$25) : String\l<statTemp>$16 = <statTemp>$17.to_s() : String\l<statTemp>$13 = <statTemp>$14.warn(<statTemp>$16) : T.untyped\l<returnTemp>$27 = <constant:<Magic>>$28.<build-array>() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<statTemp>$5 = return <returnTemp>$27 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Matcher#match_2" -> "bb::Opus::CIBot::Gerald::Matcher#match_1" [style="bold"];
@@ -744,7 +744,7 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#parse" {
     "bb::Opus::CIBot::Gerald::Diff#parse_1" [shape = parallelogram];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_0" [
-        label = "block[id=0]()\l<constant:Range>$17 = alias <constant:Range> : <Class:Range>\l<constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>\l<constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff\ldiff = load_arg(<selfMethodTemp>$4#parse, 0) : T.untyped\l<statTemp>$11 = \"^diff [^\\n]*\\n\" : String(\"^diff [^\\n]*\\n\")\l<statTemp>$13 = 0 : Integer(0)\l<statTemp>$14 = 4 : Integer(4)\l<statTemp>$12 = <statTemp>$13.|(<statTemp>$14) : Integer\l<statTemp>$8 = <constant:Regexp>$10.new(<statTemp>$11, <statTemp>$12) : Regexp\l<statTemp>$6 = diff.split(<statTemp>$8) : T.untyped\l<statTemp>$18 = 1 : Integer(1)\l<statTemp>$19 = -1 : Integer(-1)\l<statTemp>$15 = <constant:Range>$17.new(<statTemp>$18, <statTemp>$19) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lparts = <statTemp>$6.[](<statTemp>$15) : T.untyped\lparts\l"
+        label = "block[id=0]()\l<constant:String>$39 = alias <constant:String> : <Class:String>\l<constant:Array>$37 = alias <constant:Array> : <Class:T::Array>\l<constant:T>$97 = alias <constant:T> : <Class:T>\l<constant:Range>$17 = alias <constant:Range> : <Class:Range>\l<constant:Regexp>$10 = alias <constant:Regexp> : <Class:Regexp>\l<constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>\l<selfMethodTemp>$4 = self : Opus::CIBot::Gerald::Diff\ldiff = load_arg(<selfMethodTemp>$4#parse, 0) : T.untyped\l<statTemp>$11 = \"^diff [^\\n]*\\n\" : String(\"^diff [^\\n]*\\n\")\l<statTemp>$13 = 0 : Integer(0)\l<statTemp>$14 = 4 : Integer(4)\l<statTemp>$12 = <statTemp>$13.|(<statTemp>$14) : Integer\l<statTemp>$8 = <constant:Regexp>$10.new(<statTemp>$11, <statTemp>$12) : Regexp\l<statTemp>$6 = diff.split(<statTemp>$8) : T.untyped\l<statTemp>$18 = 1 : Integer(1)\l<statTemp>$19 = -1 : Integer(-1)\l<statTemp>$15 = <constant:Range>$17.new(<statTemp>$18, <statTemp>$19) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lparts = <statTemp>$6.[](<statTemp>$15) : T.untyped\lparts\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_0" -> "bb::Opus::CIBot::Gerald::Diff#parse_4" [style="bold"];
@@ -756,160 +756,160 @@ subgraph "cluster_::Opus::CIBot::Gerald::Diff#parse" {
 
     "bb::Opus::CIBot::Gerald::Diff#parse_1" -> "bb::Opus::CIBot::Gerald::Diff#parse_1" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_3" [
-        label = "block[id=3](<constant:Range>$17, <constant:<Magic>>$22)\lparts = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\l<unconditional>\l"
+        label = "block[id=3](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22)\lparts = <constant:<Magic>>$22.<build-array>() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_3" -> "bb::Opus::CIBot::Gerald::Diff#parse_4" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_4" [
-        label = "block[id=4](<constant:Range>$17, <constant:<Magic>>$22, parts)\l<castTemp$24 = parts : T.untyped\lparts = cast(<castTemp$24, AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}); : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<block-pre-call-temp>$27 = parts.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+        label = "block[id=4](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, parts)\l<castTemp$24 = parts : T.untyped\lparts = cast(<castTemp$24, AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}); : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<block-pre-call-temp>$27 = parts.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_4" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_5" [
-        label = "block[id=5](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=5](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_5" -> "bb::Opus::CIBot::Gerald::Diff#parse_7" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_5" -> "bb::Opus::CIBot::Gerald::Diff#parse_6" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_6" [
-        label = "block[id=6]()\l<statTemp>$25 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => TupleType {\l              }\l            Symbol(:\"removed_lines\") => TupleType {\l              }\l          }\l  ]\l}\l<returnMethodTemp>$3 = <statTemp>$25.compact() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => TupleType {\l              }\l            Symbol(:\"removed_lines\") => TupleType {\l              }\l          }\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=6]()\l<statTemp>$25 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => AppliedType {\l                klass = ::Array\l                targs = [\l                  <constant:Elem> = String\l                ]\l              }\l            Symbol(:\"removed_lines\") => AppliedType {\l                klass = ::Array\l                targs = [\l                  <constant:Elem> = String\l                ]\l              }\l          }\l  ]\l}\l<returnMethodTemp>$3 = <statTemp>$25.compact() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = NilClass | ShapeType {\l            Symbol(:\"a_name\") => String\l            Symbol(:\"b_name\") => String | NilClass\l            Symbol(:\"added_lines\") => AppliedType {\l                klass = ::Array\l                targs = [\l                  <constant:Elem> = String\l                ]\l              }\l            Symbol(:\"removed_lines\") => AppliedType {\l                klass = ::Array\l                targs = [\l                  <constant:Elem> = String\l                ]\l              }\l          }\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_6" -> "bb::Opus::CIBot::Gerald::Diff#parse_1" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_7" [
-        label = "block[id=7](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\lpart$19 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>, 0) : String\l<statTemp>$31 = \"\l\" : String(\"\l\")\llines$19 = part$19.split(<statTemp>$31) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<castTemp$33 = nil : NilClass\lb_name$19 = cast(<castTemp$33, String | NilClass); : String | NilClass\la_name$19 = b_name$19 : String | NilClass\ladded_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\lremoved_lines$19 = <constant:<Magic>>$22.<build-array>() : TupleType {\l}\l<block-pre-call-temp>$38 = lines$19.each() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<unconditional>\l"
+        label = "block[id=7](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\lpart$19 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>, 0) : String\l<statTemp>$31 = \"\l\" : String(\"\l\")\llines$19 = part$19.split(<statTemp>$31) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<castTemp$33 = nil : NilClass\lb_name$19 = cast(<castTemp$33, String | NilClass); : String | NilClass\la_name$19 = b_name$19 : String | NilClass\l<statTemp>$35 = <constant:Array>$37.[](<constant:String>$39) : MetaType\ladded_lines$19 = <statTemp>$35.new() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<statTemp>$41 = <constant:Array>$37.[](<constant:String>$39) : MetaType\lremoved_lines$19 = <statTemp>$41.new() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<block-pre-call-temp>$46 = lines$19.each() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_7" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_8" [
-        label = "block[id=8](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<block-call>\l"
+        label = "block[id=8](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<block-call>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_8" -> "bb::Opus::CIBot::Gerald::Diff#parse_10" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_8" -> "bb::Opus::CIBot::Gerald::Diff#parse_9" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_9" [
-        label = "block[id=9](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<statTemp>$36 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<ifTemp>$105 = a_name$19.nil?() : TrueClass | FalseClass\l<ifTemp>$105\l"
+        label = "block[id=9](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<statTemp>$44 = Solve<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<ifTemp>$118 = a_name$19.nil?() : TrueClass | FalseClass\l<ifTemp>$118\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_9" -> "bb::Opus::CIBot::Gerald::Diff#parse_37" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_9" -> "bb::Opus::CIBot::Gerald::Diff#parse_38" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_10" [
-        label = "block[id=10](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\lline$20 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>#<block>, 0) : String\l<statTemp>$42 = \"index \" : String(\"index \")\l<statTemp>$43 = \"@@\" : String(\"@@\")\l<statTemp>$44 = \"new file mode\" : String(\"new file mode\")\l<ifTemp>$40 = line$20.start_with?(<statTemp>$42, <statTemp>$43, <statTemp>$44) : TrueClass | FalseClass\l<ifTemp>$40\l"
+        label = "block[id=10](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\lline$20 = load_yield_param(::Opus::CIBot::Gerald::Diff#parse#<block>#<block>, 0) : String\l<statTemp>$50 = \"index \" : String(\"index \")\l<statTemp>$51 = \"@@\" : String(\"@@\")\l<statTemp>$52 = \"new file mode\" : String(\"new file mode\")\l<ifTemp>$48 = line$20.start_with?(<statTemp>$50, <statTemp>$51, <statTemp>$52) : TrueClass | FalseClass\l<ifTemp>$48\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_10" -> "bb::Opus::CIBot::Gerald::Diff#parse_11" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_10" -> "bb::Opus::CIBot::Gerald::Diff#parse_12" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_11" [
-        label = "block[id=11](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$46 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$45 : <impossible>\l<unconditional>\l"
+        label = "block[id=11](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$54 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$53 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_11" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_12" [
-        label = "block[id=12](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$49 = \"---\" : String(\"---\")\l<ifTemp>$47 = line$20.start_with?(<statTemp>$49) : TrueClass | FalseClass\l<ifTemp>$47\l"
+        label = "block[id=12](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$57 = \"---\" : String(\"---\")\l<ifTemp>$55 = line$20.start_with?(<statTemp>$57) : TrueClass | FalseClass\l<ifTemp>$55\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_12" -> "bb::Opus::CIBot::Gerald::Diff#parse_13" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_12" -> "bb::Opus::CIBot::Gerald::Diff#parse_14" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_13" [
-        label = "block[id=13](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$54 = 4 : Integer(4)\l<statTemp>$55 = -1 : Integer(-1)\l<statTemp>$52 = <constant:Range>$17.new(<statTemp>$54, <statTemp>$55) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\la_name$19 = line$20.[](<statTemp>$52) : String | NilClass\la_name$19\l"
+        label = "block[id=13](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$62 = 4 : Integer(4)\l<statTemp>$63 = -1 : Integer(-1)\l<statTemp>$60 = <constant:Range>$17.new(<statTemp>$62, <statTemp>$63) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\la_name$19 = line$20.[](<statTemp>$60) : String | NilClass\la_name$19\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_13" -> "bb::Opus::CIBot::Gerald::Diff#parse_15" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_13" -> "bb::Opus::CIBot::Gerald::Diff#parse_16" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_14" [
-        label = "block[id=14](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$67 = \"+++\" : String(\"+++\")\l<ifTemp>$65 = line$20.start_with?(<statTemp>$67) : TrueClass | FalseClass\l<ifTemp>$65\l"
+        label = "block[id=14](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$75 = \"+++\" : String(\"+++\")\l<ifTemp>$73 = line$20.start_with?(<statTemp>$75) : TrueClass | FalseClass\l<ifTemp>$73\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_14" -> "bb::Opus::CIBot::Gerald::Diff#parse_21" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_14" -> "bb::Opus::CIBot::Gerald::Diff#parse_22" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_15" [
-        label = "block[id=15](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$59 = \"a/\" : String(\"a/\")\l<ifTemp>$56 = a_name$19.start_with?(<statTemp>$59) : TrueClass | FalseClass\l<ifTemp>$56\l"
+        label = "block[id=15](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$67 = \"a/\" : String(\"a/\")\l<ifTemp>$64 = a_name$19.start_with?(<statTemp>$67) : TrueClass | FalseClass\l<ifTemp>$64\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_15" -> "bb::Opus::CIBot::Gerald::Diff#parse_18" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_15" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_16" [
-        label = "block[id=16](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$56 = a_name$19 : NilClass\l<ifTemp>$56\l"
+        label = "block[id=16](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$64 = a_name$19 : NilClass\l<ifTemp>$64\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_16" -> "bb::Opus::CIBot::Gerald::Diff#parse_18" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_16" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_18" [
-        label = "block[id=18](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$60 = a_name$19 : String\l<statTemp>$63 = 2 : Integer(2)\l<statTemp>$64 = -1 : Integer(-1)\l<statTemp>$61 = <constant:Range>$17.new(<statTemp>$63, <statTemp>$64) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\la_name$19 = <statTemp>$60.[](<statTemp>$61) : T.untyped\l<blockReturnTemp>$39 = a_name$19 : T.untyped\l<unconditional>\l"
+        label = "block[id=18](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$68 = a_name$19 : String\l<statTemp>$71 = 2 : Integer(2)\l<statTemp>$72 = -1 : Integer(-1)\l<statTemp>$69 = <constant:Range>$17.new(<statTemp>$71, <statTemp>$72) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\la_name$19 = <statTemp>$68.[](<statTemp>$69) : T.untyped\l<blockReturnTemp>$47 = a_name$19 : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_18" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_21" [
-        label = "block[id=21](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$72 = 4 : Integer(4)\l<statTemp>$73 = -1 : Integer(-1)\l<statTemp>$70 = <constant:Range>$17.new(<statTemp>$72, <statTemp>$73) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lb_name$19 = line$20.[](<statTemp>$70) : String | NilClass\lb_name$19\l"
+        label = "block[id=21](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$80 = 4 : Integer(4)\l<statTemp>$81 = -1 : Integer(-1)\l<statTemp>$78 = <constant:Range>$17.new(<statTemp>$80, <statTemp>$81) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lb_name$19 = line$20.[](<statTemp>$78) : String | NilClass\lb_name$19\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_21" -> "bb::Opus::CIBot::Gerald::Diff#parse_23" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_21" -> "bb::Opus::CIBot::Gerald::Diff#parse_24" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_22" [
-        label = "block[id=22](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$85 = \"+\" : String(\"+\")\l<ifTemp>$83 = line$20.start_with?(<statTemp>$85) : TrueClass | FalseClass\l<ifTemp>$83\l"
+        label = "block[id=22](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$93 = \"+\" : String(\"+\")\l<ifTemp>$91 = line$20.start_with?(<statTemp>$93) : TrueClass | FalseClass\l<ifTemp>$91\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_22" -> "bb::Opus::CIBot::Gerald::Diff#parse_29" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_22" -> "bb::Opus::CIBot::Gerald::Diff#parse_30" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_23" [
-        label = "block[id=23](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$77 = \"b/\" : String(\"b/\")\l<ifTemp>$74 = b_name$19.start_with?(<statTemp>$77) : TrueClass | FalseClass\l<ifTemp>$74\l"
+        label = "block[id=23](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$85 = \"b/\" : String(\"b/\")\l<ifTemp>$82 = b_name$19.start_with?(<statTemp>$85) : TrueClass | FalseClass\l<ifTemp>$82\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_23" -> "bb::Opus::CIBot::Gerald::Diff#parse_26" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_23" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_24" [
-        label = "block[id=24](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$74 = b_name$19 : NilClass\l<ifTemp>$74\l"
+        label = "block[id=24](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<ifTemp>$82 = b_name$19 : NilClass\l<ifTemp>$82\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_24" -> "bb::Opus::CIBot::Gerald::Diff#parse_26" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_24" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_26" [
-        label = "block[id=26](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$78 = b_name$19 : String\l<statTemp>$81 = 2 : Integer(2)\l<statTemp>$82 = -1 : Integer(-1)\l<statTemp>$79 = <constant:Range>$17.new(<statTemp>$81, <statTemp>$82) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lb_name$19 = <statTemp>$78.[](<statTemp>$79) : T.untyped\l<blockReturnTemp>$39 = b_name$19 : T.untyped\l<unconditional>\l"
+        label = "block[id=26](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<statTemp>$86 = b_name$19 : String\l<statTemp>$89 = 2 : Integer(2)\l<statTemp>$90 = -1 : Integer(-1)\l<statTemp>$87 = <constant:Range>$17.new(<statTemp>$89, <statTemp>$90) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\lb_name$19 = <statTemp>$86.[](<statTemp>$87) : T.untyped\l<blockReturnTemp>$47 = b_name$19 : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_26" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_29" [
-        label = "block[id=29](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$91 = 1 : Integer(1)\l<statTemp>$92 = -1 : Integer(-1)\l<statTemp>$89 = <constant:Range>$17.new(<statTemp>$91, <statTemp>$92) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<statTemp>$87 = line$20.[](<statTemp>$89) : String | NilClass\l<blockReturnTemp>$39 = added_lines$19.<<(<statTemp>$87) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<unconditional>\l"
+        label = "block[id=29](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$102 = 1 : Integer(1)\l<statTemp>$103 = -1 : Integer(-1)\l<statTemp>$100 = <constant:Range>$17.new(<statTemp>$102, <statTemp>$103) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<statTemp>$98 = line$20.[](<statTemp>$100) : String | NilClass\l<statTemp>$95 = <constant:T>$97.must(<statTemp>$98) : String\l<blockReturnTemp>$47 = added_lines$19.<<(<statTemp>$95) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_29" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_30" [
-        label = "block[id=30](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$95 = \"-\" : String(\"-\")\l<ifTemp>$93 = line$20.start_with?(<statTemp>$95) : TrueClass | FalseClass\l<ifTemp>$93\l"
+        label = "block[id=30](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$106 = \"-\" : String(\"-\")\l<ifTemp>$104 = line$20.start_with?(<statTemp>$106) : TrueClass | FalseClass\l<ifTemp>$104\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_30" -> "bb::Opus::CIBot::Gerald::Diff#parse_31" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_30" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="tapered"];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_31" [
-        label = "block[id=31](<constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$101 = 1 : Integer(1)\l<statTemp>$102 = -1 : Integer(-1)\l<statTemp>$99 = <constant:Range>$17.new(<statTemp>$101, <statTemp>$102) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<statTemp>$97 = line$20.[](<statTemp>$99) : String | NilClass\l<blockReturnTemp>$39 = removed_lines$19.<<(<statTemp>$97) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<unconditional>\l"
+        label = "block[id=31](<constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19, line$20)\louterLoops: 2\l<statTemp>$114 = 1 : Integer(1)\l<statTemp>$115 = -1 : Integer(-1)\l<statTemp>$112 = <constant:Range>$17.new(<statTemp>$114, <statTemp>$115) : AppliedType {\l  klass = ::Range\l  targs = [\l    <constant:Elem> = T.untyped\l  ]\l}\l<statTemp>$110 = line$20.[](<statTemp>$112) : String | NilClass\l<statTemp>$108 = <constant:T>$97.must(<statTemp>$110) : String\l<blockReturnTemp>$47 = removed_lines$19.<<(<statTemp>$108) : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = String\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_31" -> "bb::Opus::CIBot::Gerald::Diff#parse_36" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_36" [
-        label = "block[id=36](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$103 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$39 : <impossible>\l<unconditional>\l"
+        label = "block[id=36](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 2\l<blockReturnTemp>$116 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>#<block>> <blockReturnTemp>$47 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_36" -> "bb::Opus::CIBot::Gerald::Diff#parse_8" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_37" [
-        label = "block[id=37](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<blockReturnTemp>$108 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$107 : <impossible>\l<unconditional>\l"
+        label = "block[id=37](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22)\louterLoops: 1\l<blockReturnTemp>$121 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$120 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_37" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];
     "bb::Opus::CIBot::Gerald::Diff#parse_38" [
-        label = "block[id=38](<blockReturnTemp>$39, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<hashTemp>$109 = :\"a_name\" : Symbol(:\"a_name\")\l<hashTemp>$111 = :\"b_name\" : Symbol(:\"b_name\")\l<hashTemp>$113 = :\"added_lines\" : Symbol(:\"added_lines\")\l<hashTemp>$115 = :\"removed_lines\" : Symbol(:\"removed_lines\")\l<blockReturnTemp>$28 = <constant:<Magic>>$22.<build-hash>(<hashTemp>$109, a_name$19, <hashTemp>$111, b_name$19, <hashTemp>$113, added_lines$19, <hashTemp>$115, removed_lines$19) : ShapeType {\l  Symbol(:\"a_name\") => String\l  Symbol(:\"b_name\") => String | NilClass\l  Symbol(:\"added_lines\") => TupleType {\l    }\l  Symbol(:\"removed_lines\") => TupleType {\l    }\l}\l<blockReturnTemp>$117 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$28 : <impossible>\l<unconditional>\l"
+        label = "block[id=38](<blockReturnTemp>$47, <constant:String>$39, <constant:Array>$37, <constant:T>$97, <constant:Range>$17, <constant:<Magic>>$22, a_name$19, b_name$19, added_lines$19, removed_lines$19)\louterLoops: 1\l<hashTemp>$122 = :\"a_name\" : Symbol(:\"a_name\")\l<hashTemp>$124 = :\"b_name\" : Symbol(:\"b_name\")\l<hashTemp>$126 = :\"added_lines\" : Symbol(:\"added_lines\")\l<hashTemp>$128 = :\"removed_lines\" : Symbol(:\"removed_lines\")\l<blockReturnTemp>$28 = <constant:<Magic>>$22.<build-hash>(<hashTemp>$122, a_name$19, <hashTemp>$124, b_name$19, <hashTemp>$126, added_lines$19, <hashTemp>$128, removed_lines$19) : ShapeType {\l  Symbol(:\"a_name\") => String\l  Symbol(:\"b_name\") => String | NilClass\l  Symbol(:\"added_lines\") => AppliedType {\l      klass = ::Array\l      targs = [\l        <constant:Elem> = String\l      ]\l    }\l  Symbol(:\"removed_lines\") => AppliedType {\l      klass = ::Array\l      targs = [\l        <constant:Elem> = String\l      ]\l    }\l}\l<blockReturnTemp>$130 = blockreturn<::Opus::CIBot::Gerald::Diff#parse#<block>> <blockReturnTemp>$28 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Opus::CIBot::Gerald::Diff#parse_38" -> "bb::Opus::CIBot::Gerald::Diff#parse_5" [style="bold"];

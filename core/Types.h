@@ -85,10 +85,15 @@ public:
     static std::shared_ptr<Type> approximate(core::Context ctx, std::shared_ptr<core::Type> what,
                                              const TypeConstraint &tc);
 
+    static std::shared_ptr<Type> dropLiteral(std::shared_ptr<Type> type);
+
     /** Internal implementation. You should probably use all(). */
     static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
     /** Internal implementation. You should probably use any(). */
     static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+
+    static std::shared_ptr<Type> lubAll(core::Context ctx, std::vector<std::shared_ptr<core::Type>> &elements);
+    static std::shared_ptr<Type> arrayOf(core::Context ctx, std::shared_ptr<core::Type> elem);
 };
 
 struct Intrinsic {
@@ -363,6 +368,8 @@ public:
     virtual std::string typeName() const override;
     virtual bool isFullyDefined() final;
 
+    bool equals(std::shared_ptr<LiteralType> rhs) const;
+
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
@@ -394,9 +401,14 @@ public:
 };
 
 class TupleType final : public ProxyType {
+private:
+    TupleType() = delete;
+
 public:
     std::vector<std::shared_ptr<Type>> elems;
-    TupleType(std::vector<std::shared_ptr<Type>> elements);
+
+    TupleType(std::shared_ptr<Type> underlying, std::vector<std::shared_ptr<Type>> elements);
+    static std::shared_ptr<Type> build(core::Context ctx, std::vector<std::shared_ptr<Type>> elements);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -414,6 +426,9 @@ public:
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
+
+    // Return the type of the underlying array that this tuple decays into
+    std::shared_ptr<Type> elementType() const;
 };
 
 // MagicType is the type of the built-in core::Symbols::Magic()

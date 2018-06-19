@@ -1,7 +1,3 @@
  # typed: strict
- module Foo
-    sig().returns(Integer)
-    def bar()
-        days_delay = [1, 2].max
-    end
- end
+
+T.assert_type!([1,2][0], Integer)

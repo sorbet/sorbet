@@ -69,13 +69,6 @@ shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                          vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                                          shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "shapetype");
-    switch (fun._id) {
-        case Names::freeze()._id: {
-            return selfRef;
-        }
-        default:
-            break;
-    }
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
@@ -84,8 +77,55 @@ shared_ptr<Type> TupleType::dispatchCall(core::Context ctx, core::NameRef fun, c
                                          shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     core::categoryCounterInc("dispatch_call", "tupletype");
     switch (fun._id) {
-        case Names::freeze()._id: {
-            return selfRef;
+        case Names::squareBrackets()._id: {
+            if (args.size() != 1) {
+                break;
+            }
+            auto *lit = cast_type<LiteralType>(args.front().type.get());
+            if (!lit || !lit->underlying->derivesFrom(ctx, core::Symbols::Integer())) {
+                break;
+            }
+            auto idx = lit->value;
+            if (idx >= this->elems.size()) {
+                return Types::nilClass();
+            }
+            return this->elems[idx];
+        }
+        case Names::last()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elems.back();
+        }
+        case Names::first()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elems.front();
+        }
+        case Names::min()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elementType();
+        }
+        case Names::max()._id: {
+            if (!args.empty()) {
+                break;
+            }
+            if (this->elems.empty()) {
+                return Types::nilClass();
+            }
+            return this->elementType();
         }
         default:
             break;
@@ -116,11 +156,14 @@ shared_ptr<Type> MagicType::dispatchCall(core::Context ctx, core::NameRef fun, c
         }
 
         case Names::buildArray()._id: {
+            if (args.empty()) {
+                return Types::arrayOfUntyped();
+            }
             vector<shared_ptr<Type>> elems;
             for (auto &elem : args) {
                 elems.push_back(elem.type);
             }
-            return make_unique<TupleType>(elems);
+            return TupleType::build(ctx, elems);
         }
         default:
             return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
@@ -327,7 +370,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
         for (auto elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(ctx, loc, elem));
         }
-        return make_shared<TupleType>(unwrappedElems);
+        return TupleType::build(ctx, unwrappedElems);
     } else if (auto *litType = cast_type<LiteralType>(tp.get())) {
         if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
@@ -851,7 +894,7 @@ public:
                 ++it;
             } else if (attachedClass == core::Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
-                targs.emplace_back(make_shared<TupleType>(tupleArgs));
+                targs.emplace_back(TupleType::build(ctx, tupleArgs));
             } else {
                 targs.emplace_back(core::Types::untyped());
             }

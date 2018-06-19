@@ -302,8 +302,8 @@ begin
             lines$19 = part$19.split("
 ")
             a_name$19 = b_name$19 = T.cast(nil, String | NilClass)
-            added_lines$19 = []
-            removed_lines$19 = []
+            added_lines$19 = ::T::Array.[](::String).new()
+            removed_lines$19 = ::T::Array.[](::String).new()
             lines$19.each() do |line$20|
               if line$20.start_with?("index ", "@@", "new file mode")
                 next(<emptyTree>)
@@ -337,10 +337,10 @@ begin
                     end
                   else
                     if line$20.start_with?("+")
-                      added_lines$19.<<(line$20.[](::Range.new(1, -1)))
+                      added_lines$19.<<(::T.must(line$20.[](::Range.new(1, -1))))
                     else
                       if line$20.start_with?("-")
-                        removed_lines$19.<<(line$20.[](::Range.new(1, -1)))
+                        removed_lines$19.<<(::T.must(line$20.[](::Range.new(1, -1))))
                       else
                         <emptyTree>
                       end

@@ -156,8 +156,8 @@ module Opus::CIBot::Gerald
         lines = part.split("\n")
 
         a_name = b_name = T.cast(nil, T.nilable(String))
-        added_lines = []
-        removed_lines = []
+        added_lines = T::Array[String].new
+        removed_lines = T::Array[String].new
         lines.each do |line|
           if line.start_with?("index ", '@@', 'new file mode')
             next
@@ -170,9 +170,9 @@ module Opus::CIBot::Gerald
             b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Changing the type of a variable in a loop is not permitted
                                                                          # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+')
-            added_lines << line[1..-1]
+            added_lines << T.must(line[1..-1])
           elsif line.start_with?('-')
-            removed_lines << line[1..-1]
+            removed_lines << T.must(line[1..-1])
           end
         end
         next if a_name.nil?
