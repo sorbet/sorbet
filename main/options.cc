@@ -3,10 +3,13 @@
 #include "main/FileFlatMapper.h"
 #include "main/realmain.h"
 #include "rang.hpp"
+#include "spdlog/fmt/ostr.h"
 #include "version/version.h"
+#include "yaml-cpp/yaml.h"
 
 namespace spd = spdlog;
 using namespace std;
+
 namespace sorbet {
 namespace realmain {
 struct PrintOptions {
@@ -41,6 +44,54 @@ StopAfterOptions stop_after_options[] = {
     {"init", Phase::INIT},   {"parser", Phase::PARSER}, {"desugarer", Phase::DESUGARER},   {"dsl", Phase::DSL},
     {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
 };
+
+core::StrictLevel text2StrictLevel(absl::string_view key) {
+    if (key == "ruby" || key == "stripe") {
+        return core::StrictLevel::Stripe;
+    } else if (key == "typed" || key == "true") {
+        return core::StrictLevel::Typed;
+    } else if (key == "strict") {
+        return core::StrictLevel::Strict;
+    } else if (key == "strong") {
+        return core::StrictLevel::Strong;
+    } else {
+        logger->error("Unknow strictness level {}", key);
+        throw EarlyReturnWithCode(1);
+    }
+}
+
+std::unordered_map<std::string, core::StrictLevel> extractStricnessOverrides(string fileName) {
+    std::unordered_map<std::string, core::StrictLevel> result;
+    YAML::Node config = YAML::LoadFile(fileName);
+    switch (config.Type()) {
+        case YAML::NodeType::Map:
+            for (const auto &child : config) {
+                auto key = child.first.as<string>();
+                core::StrictLevel level = text2StrictLevel(key);
+                switch (child.second.Type()) {
+                    case YAML::NodeType::Sequence:
+                        for (const auto &file : child.second) {
+                            if (file.IsScalar()) {
+                                result[file.as<string>()] = level;
+                            } else {
+                                logger->error("Cannot parse strictness override format. Invalid file name.");
+                                throw EarlyReturnWithCode(1);
+                            }
+                        }
+                        break;
+                    default:
+                        logger->error(
+                            "Cannot parse strictness override format. File names should be specified as a sequence.");
+                        throw EarlyReturnWithCode(1);
+                }
+            }
+            break;
+        default:
+            logger->error("Cannot parse strictness override format. Map is expected on top level.");
+            throw EarlyReturnWithCode(1);
+    }
+    return result;
+}
 
 cxxopts::Options buildOptions() {
     cxxopts::Options options("ruby_typer", "Typechecker for Ruby");
@@ -96,6 +147,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
+    options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
+                               cxxopts::value<string>()->default_value(""), "filepath.yaml");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>()->default_value(""),
                                "file");
     options.add_options("dev")("typed-source", "Print the specified file with type annotations",
@@ -242,17 +295,8 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
 
         string typed = raw["typed"].as<string>();
         opts.logLevel = raw.count("v");
-        if (typed == "auto") {
-        } else if (typed == "ruby" || typed == "stripe") {
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Stripe;
-        } else if (typed == "typed" || typed == "true") {
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Typed;
-        } else if (typed == "strict") {
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strict;
-        } else if (typed == "strong") {
-            opts.forceMinStrict = opts.forceMaxStrict = core::StrictLevel::Strong;
-        } else {
-            logger->error("Invalid value for `--typed`: {}", typed);
+        if (typed != "auto") {
+            opts.forceMinStrict = opts.forceMaxStrict = text2StrictLevel(typed);
         }
 
         opts.showProgress = raw.count("P") != 0;
@@ -307,6 +351,28 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
 
         opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
+        if (!raw["typed-override"].as<string>().empty()) {
+            opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>());
+        }
+
+        {
+            // check if opts.strictnessOverrides are all valid
+            auto stricntessChecksLeft = opts.strictnessOverrides;
+            for (auto &s : opts.inputFileNames) {
+                stricntessChecksLeft.erase(s);
+                if (stricntessChecksLeft.empty()) {
+                    break;
+                }
+            }
+            if (!stricntessChecksLeft.empty()) {
+                stringstream buf;
+                for (auto &e : stricntessChecksLeft) {
+                    buf << "  " << e.first << endl;
+                }
+                logger->error("Cannot find files with overriden strictness level:\n{}", buf.str());
+                throw EarlyReturnWithCode(1);
+            }
+        }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         throw EarlyReturnWithCode(1);

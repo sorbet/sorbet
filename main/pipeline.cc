@@ -6,6 +6,7 @@
 #include "common/ConcurrentQueue.h"
 #include "common/ProgressIndicator.h"
 #include "core/Unfreeze.h"
+#include "core/errors/parser.h"
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
@@ -244,7 +245,20 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
                             file.data(*lgs).path().find(opts.typedSource) != string::npos) {
                             minStrict = core::StrictLevel::Typed;
                         }
-                        file.data(*lgs).strict = max(min(file.data(*lgs).sigil, maxStrict), minStrict);
+                        auto fnd = opts.strictnessOverrides.find((string)file.data(*lgs).path());
+                        if (fnd != opts.strictnessOverrides.end()) {
+                            if (fnd->second == file.data(*lgs).sigil) {
+                                if (auto e = lgs->beginError(sorbet::core::Loc::none(file),
+                                                             core::errors::Parser::ParserError)) {
+                                    e.setHeader("Useless override of strictness level for {}", file.data(*lgs).path());
+                                }
+                            }
+                            file.data(*lgs).strict = fnd->second;
+                        } else {
+                            file.data(*lgs).strict = file.data(*lgs).sigil;
+                        }
+
+                        file.data(*lgs).strict = max(min(file.data(*lgs).strict, maxStrict), minStrict);
 
                         if (!opts.storeState.empty()) {
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
