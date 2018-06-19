@@ -368,7 +368,7 @@ public:
     virtual std::string typeName() const override;
     virtual bool isFullyDefined() final;
 
-    bool equalsLiteral(const GlobalState &gs, std::shared_ptr<LiteralType> rhs);
+    bool equals(std::shared_ptr<LiteralType> rhs) const;
 
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, std::vector<SymbolRef> params,
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
@@ -428,7 +428,7 @@ public:
     virtual std::shared_ptr<Type> _instantiate(core::Context ctx, const TypeConstraint &tc) override;
 
     // Return the type of the underlying array that this tuple decays into
-    std::shared_ptr<Type> elementType();
+    std::shared_ptr<Type> elementType() const;
 };
 
 // MagicType is the type of the built-in core::Symbols::Magic()

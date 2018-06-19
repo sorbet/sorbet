@@ -257,7 +257,7 @@ shared_ptr<Type> core::TupleType::build(core::Context ctx, vector<shared_ptr<Typ
 
 AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {}
 
-bool LiteralType::equalsLiteral(const GlobalState &gs, shared_ptr<LiteralType> rhs) {
+bool LiteralType::equals(shared_ptr<LiteralType> rhs) const {
     if (this->value != rhs->value) {
         return false;
     }
@@ -652,7 +652,7 @@ bool ShapeType::hasUntyped() {
 };
 SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
 
-shared_ptr<Type> TupleType::elementType() {
+shared_ptr<Type> TupleType::elementType() const {
     auto *ap = cast_type<AppliedType>(this->underlying.get());
     ENFORCE(ap);
     ENFORCE(ap->klass == core::Symbols::Array());
