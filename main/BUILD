@@ -70,6 +70,7 @@ cc_library(
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
+        "//common/kvstore",
         "//core",
         "//core/proto",
         "//core/serialize",

@@ -6,8 +6,8 @@
 #include "realmain.h"
 #define RAPIDJSON_ASSERT(x) ENFORCE(x)
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "common/KeyValueStore.h"
 #include "common/WorkerPool.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
