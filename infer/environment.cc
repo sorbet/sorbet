@@ -780,16 +780,43 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                tp.type = core::Types::instantiate(
-                    ctx, getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg), constr);
+                auto argType = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
+                ENFORCE(argType != nullptr);
+                tp.type = core::Types::instantiate(ctx, argType, constr);
                 tp.origins.push_back(bind.loc);
             },
-            [&](cfg::LoadYieldParam *i) {
-                auto &procType = i->link->blockPreType;
-                if (procType == nullptr) {
-                    tp.type = core::Types::untyped();
+            [&](cfg::LoadYieldParams *insn) {
+                auto &procType = insn->link->blockPreType;
+                vector<shared_ptr<core::Type>> types;
+                auto narg = insn->block.data(ctx).arguments().size();
+
+                int lastArg = 0;
+                for (int i = 0; i < narg; ++i) {
+                    shared_ptr<core::Type> arg;
+                    if (procType == nullptr) {
+                        arg = core::Types::untyped();
+                    } else {
+                        arg = procType->getCallArgumentType(ctx, core::Names::call(), i);
+                    }
+                    if (arg == nullptr) {
+                        arg = core::Types::untyped();
+                    } else {
+                        lastArg = i;
+                    }
+                    types.emplace_back(move(arg));
+                }
+
+                // A multi-arg proc, if provided a single arg which is an array,
+                // will implicitly splat it out.
+                //
+                // TODO(nelhage): If this block is a lambda, not a proc, this
+                // rule doesn't apply. We don't model the distinction accurately
+                // yet.
+                if (lastArg == 0 && narg > 1 && types.front()->derivesFrom(ctx, core::Symbols::Array()) &&
+                    !types.front()->isUntyped()) {
+                    tp.type = move(types.front());
                 } else {
-                    tp.type = procType->getCallArgumentType(ctx, core::Names::call(), i->arg);
+                    tp.type = make_shared<core::TupleType>(core::Types::arrayOfUntyped(), move(types));
                 }
 
                 tp.origins.push_back(bind.loc);

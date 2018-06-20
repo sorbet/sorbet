@@ -209,15 +209,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     const core::Symbol &data = sym.data(cctx.ctx);
 
+                    core::LocalVariable argTemp =
+                        cctx.ctx.state.newTemporary(core::Names::blkArg(), cctx.inWhat.symbol);
+                    core::LocalVariable idxTmp = cctx.ctx.state.newTemporary(core::Names::blkArg(), cctx.inWhat.symbol);
+                    bodyBlock->exprs.emplace_back(argTemp, data.definitionLoc, make_unique<LoadYieldParams>(link, sym));
+
                     for (int i = 0; i < data.arguments().size(); ++i) {
                         auto &arg = s->block->args[i];
-
-                        if (auto id = ast::cast_tree<ast::Local>(arg.get())) {
-                            core::LocalVariable argLoc = id->localVariable;
-                            bodyBlock->exprs.emplace_back(argLoc, arg->loc, make_unique<LoadYieldParam>(link, i));
-                        } else {
-                            Error::raise("Should have been removed by namer");
-                        }
+                        auto id = ast::cast_tree<ast::Local>(arg.get());
+                        ENFORCE(id, "Should have been removed by namer");
+                        core::LocalVariable argLoc = id->localVariable;
+                        bodyBlock->exprs.emplace_back(idxTmp, id->loc,
+                                                      make_unique<Literal>(make_shared<core::LiteralType>(int64_t(i))));
+                        vector<core::LocalVariable> idxVec{idxTmp};
+                        bodyBlock->exprs.emplace_back(
+                            argLoc, id->loc, make_unique<Send>(argTemp, core::Names::squareBrackets(), idxVec));
                     }
 
                     conditionalJump(headerBlock, core::LocalVariable::blockCall(), bodyBlock, postBlock, cctx.inWhat,

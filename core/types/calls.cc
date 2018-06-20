@@ -62,7 +62,15 @@ shared_ptr<Type> AndType::dispatchCall(core::Context ctx, core::NameRef name, co
 }
 
 shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    return Types::any(ctx, left->getCallArgumentType(ctx, name, i), right->getCallArgumentType(ctx, name, i));
+    auto l = left->getCallArgumentType(ctx, name, i);
+    auto r = right->getCallArgumentType(ctx, name, i);
+    if (l == nullptr) {
+        return r;
+    }
+    if (r == nullptr) {
+        return l;
+    }
+    return Types::any(ctx, l, r);
 }
 
 shared_ptr<Type> ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
@@ -686,21 +694,40 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     }
     core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
-    if (method.exists()) {
-        const core::Symbol &data = method.data(ctx);
-
-        if (data.arguments().size() > i) { // todo: this should become actual argument matching
-            shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
-            if (!resultType) {
-                resultType = Types::untyped();
-            }
-            return resultType;
-        } else {
-            return Types::untyped();
-        }
-    } else {
-        return Types::untyped();
+    if (!method.exists()) {
+        return nullptr;
     }
+    const core::Symbol &data = method.data(ctx);
+
+    if (i >= data.arguments().size()) { // todo: this should become actual argument matching
+        return nullptr;
+    }
+
+    shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
+    if (!resultType) {
+        resultType = Types::untyped();
+    }
+    return resultType;
+}
+
+shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+    core::SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
+
+    if (!method.exists()) {
+        return nullptr;
+    }
+
+    const core::Symbol &data = method.data(ctx);
+
+    if (i >= data.arguments().size()) { // todo: this should become actual argument matching
+        return nullptr;
+    }
+
+    shared_ptr<Type> resultType = Types::resultTypeAsSeenFrom(ctx, data.arguments()[i], this->klass, this->targs);
+    if (!resultType) {
+        resultType = Types::untyped();
+    }
+    return resultType;
 }
 
 shared_ptr<Type> AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,

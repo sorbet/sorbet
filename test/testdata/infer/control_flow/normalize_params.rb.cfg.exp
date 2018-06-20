@@ -52,7 +52,7 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_8" [
-        label = "block[id=8]()\louterLoops: 1\le$2 = load_yield_param(::Test#normalize_params#<block>, 0) : T.untyped\l<statTemp>$20 = self : Test\l<blockReturnTemp>$19 = <statTemp>$20.normalize_params(e$2) : T.untyped\l<blockReturnTemp>$22 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$19 : <impossible>\l<unconditional>\l"
+        label = "block[id=8]()\louterLoops: 1\l<blk>$19 = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$20 = 0 : Integer(0)\le$2 = <blk>$19.[](<blk>$20) : T.untyped\l<statTemp>$22 = self : Test\l<blockReturnTemp>$21 = <statTemp>$22.normalize_params(e$2) : T.untyped\l<blockReturnTemp>$24 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$21 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_8" -> "bb::Test#normalize_params_6" [style="bold"];

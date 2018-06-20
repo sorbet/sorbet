@@ -46,7 +46,7 @@ subgraph "cluster_::Bar#baz" {
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\la$2 = load_yield_param(::Bar#baz#<block>, 0) : T.untyped\l<statTemp>$9 = self : Bar\l<blockReturnTemp>$8 = <statTemp>$9.puts(a$2) : NilClass\l<blockReturnTemp>$11 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$8 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$8 = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$9 = 0 : Integer(0)\la$2 = <blk>$8.[](<blk>$9) : T.untyped\l<statTemp>$11 = self : Bar\l<blockReturnTemp>$10 = <statTemp>$11.puts(a$2) : NilClass\l<blockReturnTemp>$13 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_4" -> "bb::Bar#baz_2" [style="bold"];
