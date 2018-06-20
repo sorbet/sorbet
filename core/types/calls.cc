@@ -216,6 +216,15 @@ void matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc cal
         }
         e.addErrorSection(core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
                                              argTpe.origins2Explanations(ctx)));
+        auto *ot = cast_type<OrType>(argTpe.type.get());
+        if (ot) {
+            auto *lt = cast_type<ClassType>(ot->left.get());
+            auto *rt = cast_type<ClassType>(ot->right.get());
+            if ((lt != nullptr && lt->symbol == core::Symbols::NilClass()) ||
+                (rt != nullptr && rt->symbol == core::Symbols::NilClass())) {
+                e.addErrorSection(core::ErrorSection("You could wrap it in `T.must()` before passing the argument."));
+            }
+        }
     }
 }
 
@@ -428,6 +437,10 @@ shared_ptr<Type> ClassType::dispatchCallWithTargs(core::Context ctx, core::NameR
             if (fullType.get() != this) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", fun.data(ctx).toString(ctx),
                             this->show(ctx), fullType->show(ctx));
+                if (this->symbol == core::Symbols::NilClass()) {
+                    e.addErrorSection(
+                        core::ErrorSection("You could wrap it in `T.must()` before calling the function."));
+                }
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
                 auto alternatives = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
