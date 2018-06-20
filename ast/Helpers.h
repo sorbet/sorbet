@@ -246,7 +246,12 @@ public:
     }
 
     static std::unique_ptr<Expression> Cast(core::Loc loc, std::unique_ptr<Expression> type) {
-        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Nil(loc), move(type));
+        if (auto *send = cast_tree<ast::Send>(type.get())) {
+            if (send->fun == core::Names::untyped()) {
+                return Unsafe(loc, Nil(loc));
+            }
+        }
+        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Unsafe(loc, Nil(loc)), move(type));
     }
 
     static std::unique_ptr<Expression> Let(core::Loc loc, std::unique_ptr<Expression> value,

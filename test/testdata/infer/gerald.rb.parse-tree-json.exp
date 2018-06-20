@@ -1923,41 +1923,71 @@
                                       "name" : "a_name"
                                     },
                                     "rhs" : {
-                                      "type" : "Assign",
-                                      "lhs" : {
-                                        "type" : "LVarLhs",
-                                        "name" : "b_name"
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "Const",
+                                        "scope" : null,
+                                        "name" : "T"
                                       },
-                                      "rhs" : {
-                                        "type" : "Send",
-                                        "receiver" : {
-                                          "type" : "Const",
-                                          "scope" : null,
-                                          "name" : "T"
+                                      "method" : "let",
+                                      "args" : [
+                                        {
+                                          "type" : "Nil"
                                         },
-                                        "method" : "cast",
-                                        "args" : [
-                                          {
-                                            "type" : "Nil"
+                                        {
+                                          "type" : "Send",
+                                          "receiver" : {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "T"
                                           },
-                                          {
-                                            "type" : "Send",
-                                            "receiver" : {
+                                          "method" : "nilable",
+                                          "args" : [
+                                            {
                                               "type" : "Const",
                                               "scope" : null,
-                                              "name" : "T"
-                                            },
-                                            "method" : "nilable",
-                                            "args" : [
-                                              {
-                                                "type" : "Const",
-                                                "scope" : null,
-                                                "name" : "String"
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      }
+                                              "name" : "String"
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type" : "Assign",
+                                    "lhs" : {
+                                      "type" : "LVarLhs",
+                                      "name" : "b_name"
+                                    },
+                                    "rhs" : {
+                                      "type" : "Send",
+                                      "receiver" : {
+                                        "type" : "Const",
+                                        "scope" : null,
+                                        "name" : "T"
+                                      },
+                                      "method" : "let",
+                                      "args" : [
+                                        {
+                                          "type" : "Nil"
+                                        },
+                                        {
+                                          "type" : "Send",
+                                          "receiver" : {
+                                            "type" : "Const",
+                                            "scope" : null,
+                                            "name" : "T"
+                                          },
+                                          "method" : "nilable",
+                                          "args" : [
+                                            {
+                                              "type" : "Const",
+                                              "scope" : null,
+                                              "name" : "String"
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
                                   },
                                   {

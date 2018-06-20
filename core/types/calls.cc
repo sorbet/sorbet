@@ -755,7 +755,13 @@ public:
             }
             return nullptr;
         }
-        return Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
+        auto ret = Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
+        if (ret == args[0].type) {
+            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::InvalidCast)) {
+                e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args[0].type->show(ctx));
+            }
+        }
+        return ret;
     }
 } T_must;
 
