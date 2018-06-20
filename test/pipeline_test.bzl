@@ -12,7 +12,6 @@ def dropExtension(p):
   "TODO: handle multiple . in name"
   return p.partition(".")[0]
 
-
 def pipeline_tests(all_paths):
     tests = {} # test_name-> {"path": String, "prefix": String, "sentinel": String}
     for path in all_paths:
@@ -39,3 +38,4 @@ def pipeline_tests(all_paths):
                          ]) + ["test_corpus_sharded"],
           size = 'small',
       )
+    return ["test_{}".format(test) for test in tests]
