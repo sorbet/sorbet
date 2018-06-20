@@ -107,10 +107,7 @@ string ComplexError::toString(const GlobalState &gs) {
 }
 
 ErrorRegion::~ErrorRegion() {
-    ErrorQueueMessage msg;
-    msg.kind = ErrorQueueMessage::Kind::Flush;
-    msg.whatFile = this->f;
-    gs.errorQueue->queue.push(move(msg), 1);
+    gs.errorQueue->flushFile(this->f);
 }
 
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)

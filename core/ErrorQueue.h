@@ -19,12 +19,13 @@ struct ErrorQueue {
 private:
     std::thread::id owner;
     std::unordered_map<core::FileRef, std::vector<ErrorQueueMessage>> collected;
+    ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
+
     void renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
 
 public:
     spd::logger &logger;
     spd::logger &tracer;
-    ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
     std::atomic<bool> hadCritical{false};
     std::atomic<int> errorCount{0};
 
@@ -32,6 +33,8 @@ public:
     ~ErrorQueue();
 
     std::vector<std::unique_ptr<BasicError>> drainErrors();
+    void push(ErrorQueueMessage msg);
+    void flushFile(FileRef file);
     void flushErrors(bool all = false);
 };
 } // namespace core
