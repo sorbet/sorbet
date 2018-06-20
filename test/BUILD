@@ -94,10 +94,13 @@ cc_binary(
 
 load(":pipeline_test.bzl", "pipeline_tests")
 
-[
-    pipeline_tests(glob([
-        "testdata/**/*.rb",
-        "testdata/**/*.exp",
-        "testdata/**/*.exp.svg",
-    ])),
-]
+corpus_tests = pipeline_tests(glob([
+    "testdata/**/*.rb",
+    "testdata/**/*.exp",
+    "testdata/**/*.exp.svg",
+]))
+
+test_suite(
+    name = "test_corpus",
+    tests = corpus_tests,
+)
