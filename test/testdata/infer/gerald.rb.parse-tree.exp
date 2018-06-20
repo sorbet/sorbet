@@ -1506,34 +1506,58 @@ Begin {
                                     lhs = LVarLhs {
                                       name = a_name
                                     }
-                                    rhs = Assign {
-                                      lhs = LVarLhs {
-                                        name = b_name
+                                    rhs = Send {
+                                      receiver = Const {
+                                        scope = NULL
+                                        name = <constant:T>
                                       }
-                                      rhs = Send {
-                                        receiver = Const {
-                                          scope = NULL
-                                          name = <constant:T>
+                                      method = let
+                                      args = [
+                                        Nil {
                                         }
-                                        method = cast
-                                        args = [
-                                          Nil {
+                                        Send {
+                                          receiver = Const {
+                                            scope = NULL
+                                            name = <constant:T>
                                           }
-                                          Send {
-                                            receiver = Const {
+                                          method = nilable
+                                          args = [
+                                            Const {
                                               scope = NULL
-                                              name = <constant:T>
+                                              name = <constant:String>
                                             }
-                                            method = nilable
-                                            args = [
-                                              Const {
-                                                scope = NULL
-                                                name = <constant:String>
-                                              }
-                                            ]
-                                          }
-                                        ]
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                  Assign {
+                                    lhs = LVarLhs {
+                                      name = b_name
+                                    }
+                                    rhs = Send {
+                                      receiver = Const {
+                                        scope = NULL
+                                        name = <constant:T>
                                       }
+                                      method = let
+                                      args = [
+                                        Nil {
+                                        }
+                                        Send {
+                                          receiver = Const {
+                                            scope = NULL
+                                            name = <constant:T>
+                                          }
+                                          method = nilable
+                                          args = [
+                                            Const {
+                                              scope = NULL
+                                              name = <constant:String>
+                                            }
+                                          ]
+                                        }
+                                      ]
                                     }
                                   }
                                   Assign {

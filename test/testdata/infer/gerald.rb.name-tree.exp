@@ -301,7 +301,8 @@ begin
           begin
             lines$19 = part$19.split("
 ")
-            a_name$19 = b_name$19 = T.cast(nil, String | NilClass)
+            a_name$19 = T.let(nil, String | NilClass)
+            b_name$19 = T.let(nil, String | NilClass)
             added_lines$19 = ::T::Array.[](::String).new()
             removed_lines$19 = ::T::Array.[](::String).new()
             lines$19.each() do |line$20|

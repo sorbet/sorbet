@@ -217,7 +217,8 @@ class <emptyTree><<constant:<root>>> < ()
               begin
                 lines = part.split("
 ")
-                a_name = b_name = <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+                a_name = <emptyTree>::<constant:T>.let(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+                b_name = <emptyTree>::<constant:T>.let(nil, <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
                 added_lines = <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>).new()
                 removed_lines = <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>).new()
                 lines.each() do |line|

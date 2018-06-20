@@ -7,13 +7,13 @@ class <emptyTree><<constant:<root>>> < ()
     self(<constant:<todo sym>>).sig({}).returns(::T.nilable(<emptyTree>::<constant:String>))
 
     def foo<<constant:<todo sym>>>()
-      ::T.cast(nil, ::T.nilable(<emptyTree>::<constant:String>))
+      ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
     end
 
     self(<constant:<todo sym>>).sig({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
 
     def foo=<<constant:<todo sym>>>(arg0)
-      ::T.cast(nil, <emptyTree>::<constant:String>)
+      ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
     self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:Other>))

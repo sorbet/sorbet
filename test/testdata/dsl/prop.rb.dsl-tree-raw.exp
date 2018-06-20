@@ -272,7 +272,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -333,7 +342,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -382,7 +400,17 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = ConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = EmptyTree
@@ -520,7 +548,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -581,7 +618,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -623,7 +669,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -675,7 +730,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -726,7 +790,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -787,7 +860,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -829,7 +911,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -881,7 +972,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -931,7 +1031,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -989,7 +1098,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:Object>
               }
@@ -1030,7 +1148,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
@@ -1082,7 +1209,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
@@ -1133,7 +1269,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:Array>
@@ -1212,7 +1357,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:Array>
@@ -1263,7 +1417,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
@@ -1315,7 +1478,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
@@ -1370,7 +1542,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = ConstantLit{
@@ -1461,7 +1642,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = ConstantLit{
@@ -1533,7 +1723,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = ConstantLit{
@@ -1636,7 +1835,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = ConstantLit{
@@ -1704,7 +1912,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -1783,7 +2000,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -1843,7 +2069,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -1904,7 +2139,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -1946,7 +2190,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2016,7 +2269,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2077,7 +2339,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = ConstantLit{
                   scope = EmptyTree
@@ -2177,7 +2448,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2238,7 +2518,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2280,7 +2569,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2331,7 +2629,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2384,19 +2691,10 @@ ClassDef{
             recv = Ident{
               symbol = <constant:T>
             }
-            name = cast
+            name = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
-              Send{
-                recv = Ident{
-                  symbol = <constant:T>
-                }
-                name = untyped
-                block = nullptr
-                args = [
-                ]
-              }
             ]
           }
         }
@@ -2443,7 +2741,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2504,7 +2811,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2617,7 +2933,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2678,7 +3003,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2791,7 +3125,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -2852,7 +3195,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -2965,7 +3317,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Send{
                 recv = Ident{
                   symbol = <constant:T>
@@ -3026,7 +3387,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               ConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
@@ -3136,7 +3506,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:String>
               }
@@ -3185,7 +3564,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:String>
               }
@@ -3225,7 +3613,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:Float>
               }
@@ -3274,7 +3671,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:Float>
               }
@@ -3325,7 +3731,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:String>
               }
@@ -3374,7 +3789,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:String>
               }
@@ -3414,7 +3838,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:Float>
               }
@@ -3465,7 +3898,16 @@ ClassDef{
             name = cast
             block = nullptr
             args = [
-              Literal{ value = nil }
+              Send{
+                recv = Ident{
+                  symbol = <constant:T>
+                }
+                name = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
               Ident{
                 symbol = <constant:String>
               }

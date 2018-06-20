@@ -2,7 +2,7 @@
 T.dynamic_cast(nil, String)
 T.let("foo", String)
 T.assert_type!("foo", String)
-T.cast("foo", String)
+T.cast("foo", String) # error: Useless cast
 T.unsafe(String)
 T.nilable(String)
 T.proc

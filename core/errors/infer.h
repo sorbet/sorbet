@@ -20,6 +20,7 @@ constexpr ErrorClass GlobalReassignmentTypeMismatch{7012, core::StrictLevel::Typ
 constexpr ErrorClass FieldReassignmentTypeMismatch{7013, core::StrictLevel::Typed};
 constexpr ErrorClass GenericMethodConstaintUnsolved{7013, core::StrictLevel::Typed};
 constexpr ErrorClass RevealType{7014, core::StrictLevel::Typed};
+constexpr ErrorClass InvalidCast{7015, core::StrictLevel::Strict};
 
 } // namespace Infer
 } // namespace errors

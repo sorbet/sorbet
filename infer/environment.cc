@@ -876,8 +876,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     noLoopChecking = true;
                 }
 
+                auto ty = getTypeAndOrigin(ctx, c->value);
                 if (c->cast != core::Names::cast()) {
-                    auto ty = getTypeAndOrigin(ctx, c->value);
                     if (c->cast == core::Names::assertType() && ty.type->isUntyped()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
                             e.setHeader("The typechecker was unable to infer the type of the asserted value");
@@ -890,6 +890,17 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             e.setHeader("Argument does not have asserted type `{}`", castType->show(ctx));
                             e.addErrorSection(core::ErrorSection("Got " + ty.type->show(ctx) + " originating from:",
                                                                  ty.origins2Explanations(ctx)));
+                        }
+                    }
+                } else {
+                    if (castType->isUntyped()) {
+                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
+                            e.setHeader("Please use `T.unsafe(...)` to cast to T.untyped");
+                        }
+                    } else if (!ty.type->isUntyped() && core::Types::isSubType(ctx, ty.type, castType)) {
+                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::InvalidCast)) {
+                            e.setHeader("Useless cast: inferred type `{}` is already a subtype of `{}`",
+                                        ty.type->show(ctx), castType->show(ctx));
                         }
                     }
                 }

@@ -154,8 +154,8 @@ module Opus::CIBot::Gerald
       parts = T.cast(parts, T::Array[String])
       parts.map do |part|
         lines = part.split("\n")
-
-        a_name = b_name = T.cast(nil, T.nilable(String))
+        a_name = T.let(nil, T.nilable(String))
+        b_name = T.let(nil, T.nilable(String))
         added_lines = T::Array[String].new
         removed_lines = T::Array[String].new
         lines.each do |line|
@@ -163,11 +163,11 @@ module Opus::CIBot::Gerald
             next
           elsif line.start_with?('---')
             a_name = line[4..-1]
-            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/') # error: Changing the type of a variable in a loop is not permitted
+            a_name = a_name[2..-1] if a_name && a_name.start_with?('a/')
                                                                          # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+++')
             b_name = line[4..-1]
-            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/') # error: Changing the type of a variable in a loop is not permitted
+            b_name = b_name[2..-1] if b_name && b_name.start_with?('b/')
                                                                          # https://jira.corp.stripe.com/browse/RUBYPLAT-583
           elsif line.start_with?('+')
             added_lines << T.must(line[1..-1])

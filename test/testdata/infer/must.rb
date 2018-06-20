@@ -1,7 +1,7 @@
 # typed: strict
 
 def test_must
-  x = T.cast(nil, T.nilable(String))
+  x = T.cast(nil, T.nilable(String)) # error: Useless cast
   T.assert_type!(T.must(x), String)
 
   T.must(x, "hi")

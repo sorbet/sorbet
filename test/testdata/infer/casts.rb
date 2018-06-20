@@ -16,8 +16,10 @@ class TestCasts
     s + "hi"
     s + 3 # error: `Integer(3)` doesn't match `String` for argument `arg0`
 
+    s = T.cast(6, Integer) # error: Useless cast
+    s = T.cast(6, T.untyped) # error: Please use `T.unsafe(...)`
 
-    s = T.cast(6, 7) # error: Unsupported type syntax
+    s = T.cast(6, 7) # error: MULTI
 
     # s ends up as `untyped`, so these are all OK
     s + "hi"

@@ -34,7 +34,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
       def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-        ::T.cast(nil, <emptyTree>::<constant:A>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
       end
     end
   end
@@ -78,7 +78,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
       def self.new<<constant:<todo sym>>>(foo = nil)
-        ::T.cast(nil, <emptyTree>::<constant:A>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
       end
     end
 
@@ -94,7 +94,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
 
       def self.new<<constant:<todo sym>>>(foo = nil)
-        ::T.cast(nil, <emptyTree>::<constant:B>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:B>)
       end
     end
   end
@@ -124,7 +124,7 @@ class <emptyTree><<constant:<root>>> < ()
       self(<constant:<todo sym>>).sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
 
       def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
-        ::T.cast(nil, <emptyTree>::<constant:A>)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
       end
     end
   end
