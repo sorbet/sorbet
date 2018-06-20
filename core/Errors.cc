@@ -5,6 +5,7 @@
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
+template class std::unique_ptr<sorbet::core::BasicError>;
 namespace sorbet {
 namespace core {
 

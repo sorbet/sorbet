@@ -454,8 +454,55 @@ void LSPLoop::pushErrors() {
                     diagnostic.AddMember("code", e->what.code, alloc);
                     diagnostic.AddMember("message", e->formatted, alloc);
 
-                    // TODO: add other lines
+                    typecase(e.get(), [&](core::ComplexError *ce) {
+                        Value relatedInformation;
+                        relatedInformation.SetArray();
+                        for (auto &section : ce->sections) {
+                            Value relatedInfo;
+                            relatedInfo.SetObject();
+                            Value location;
+                            location.SetObject();
+                            string sectionHeader = section.header;
 
+                            for (auto &errorLine : section.messages) {
+                                core::File &messageFile = errorLine.loc.file.data(*finalGs);
+                                string formattedMessageFilePath;
+                                if (messageFile.source_type == core::File::Type::Payload) {
+                                    // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+                                    // error) to the uri before it shows it in the UI since this is the format that
+                                    // VSCode uses to denote which location to jump to. However, if you append #L4
+                                    // to the end of the uri, this will work on github (it will ignore the #4,3)
+                                    //
+                                    // As an example, in VSCode, on hover you might see
+                                    //
+                                    // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+                                    //
+                                    // When you click on the link, in the browser it appears as
+                                    // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+                                    // but shows you the same thing as
+                                    // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+                                    formattedMessageFilePath =
+                                        fmt::format("{}#L{}", (string)messageFile.path(),
+                                                    std::to_string((int)(errorLine.loc.position(*finalGs).first.line)));
+                                } else {
+                                    formattedMessageFilePath = fmt::format("{}/{}", rootUri, messageFile.path());
+                                }
+                                location.AddMember("uri", formattedMessageFilePath, alloc);
+                                location.AddMember("range", loc2Range(errorLine.loc), alloc);
+                                relatedInfo.AddMember("location", location, alloc);
+
+                                string relatedInfoMessage;
+                                if (errorLine.formattedMessage.length() > 0) {
+                                    relatedInfoMessage = errorLine.formattedMessage;
+                                } else {
+                                    relatedInfoMessage = sectionHeader;
+                                }
+                                relatedInfo.AddMember("message", relatedInfoMessage, alloc);
+                                relatedInformation.PushBack(relatedInfo, alloc);
+                            }
+                        }
+                        diagnostic.AddMember("relatedInformation", relatedInformation, alloc);
+                    });
                     diagnostics.PushBack(diagnostic, alloc);
                 }
                 publishDiagnosticsParams.AddMember("diagnostics", diagnostics, alloc);
