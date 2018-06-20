@@ -1,11 +1,11 @@
 #ifndef RUBY_TYPER_REAL_MAIN_H
 #define RUBY_TYPER_REAL_MAIN_H
 #include "ast/ast.h"
-#include "common/KeyValueStore.h"
 #include "common/ProgressIndicator.h"
 #include "common/Timer.h"
 #include "common/WorkerPool.h"
 #include "common/common.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "core/StrictLevel.h"
 #include "spdlog/spdlog.h"
 #include <cxxopts.hpp>

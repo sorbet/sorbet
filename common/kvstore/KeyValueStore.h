@@ -1,6 +1,6 @@
 #ifndef SORBET_KEYVALUESTORE_H
 #define SORBET_KEYVALUESTORE_H
-#include "common.h"
+#include "common/common.h"
 #include "lmdb.h"
 #include <mutex>
 #include <thread>

@@ -44,6 +44,7 @@ compilation_database(
         "//core:generate_names",
         "//core:counters_impl",
         "//core:core_test",
+        "//common/kvstore:kvstore",
         "//common:common_test",
         "//cfg/builder:builder",
         "//cfg:cfg",
