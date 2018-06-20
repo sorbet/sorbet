@@ -1035,7 +1035,7 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
     msg.whatFile = error->loc.file;
     msg.text = error->toString(*this);
     msg.error = move(error);
-    errorQueue->queue.push(move(msg), 1);
+    errorQueue->push(move(msg));
 }
 
 bool GlobalState::hadCriticalError() const {

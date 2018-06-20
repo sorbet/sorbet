@@ -73,6 +73,17 @@ void ErrorQueue::flushErrors(bool all) {
     }
 }
 
+void ErrorQueue::flushFile(FileRef file) {
+    ErrorQueueMessage msg;
+    msg.kind = ErrorQueueMessage::Kind::Flush;
+    msg.whatFile = file;
+    push(move(msg));
+}
+
+void ErrorQueue::push(ErrorQueueMessage msg) {
+    this->queue.push(move(msg), 1);
+}
+
 ErrorQueue::~ErrorQueue() {
     flushErrors(true);
 }
