@@ -210,7 +210,7 @@ NameDef names[] = {
     {"forTemp", Desugar},
     {"new_", "new", Core | Desugar},
     {"blockCall", "<block-call>", CFG | Infer | Core},
-    {"blkArg", "<blk>", Namer},
+    {"blkArg", "<blk>", CFG | Namer},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end

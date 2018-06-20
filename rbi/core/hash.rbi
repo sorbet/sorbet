@@ -77,7 +77,7 @@ class Hash < Object
   def delete_if(&blk); end
 
   sig(
-      blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
+      blk: T.proc(arg0: [K, V]).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   sig.returns(Enumerator[[K, V]])

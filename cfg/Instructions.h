@@ -155,12 +155,12 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class LoadYieldParam final : public Instruction {
+class LoadYieldParams final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    u4 arg;
+    core::SymbolRef block;
 
-    LoadYieldParam(std::shared_ptr<core::SendAndBlockLink> link, u4 arg) : link(link), arg(arg) {
+    LoadYieldParams(std::shared_ptr<core::SendAndBlockLink> link, core::SymbolRef blk) : link(link), block(blk) {
         core::categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);

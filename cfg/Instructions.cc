@@ -115,11 +115,11 @@ string LoadArg::toString(core::Context ctx) {
     return buf.str();
 }
 
-string LoadYieldParam::toString(core::Context ctx) {
+string LoadYieldParams::toString(core::Context ctx) {
     stringstream buf;
-    buf << "load_yield_param(";
+    buf << "load_yield_params(";
     buf << this->link->block.data(ctx).fullName(ctx);
-    buf << ", " << this->arg << ")";
+    buf << ", " << this->block.show(ctx) << ")";
     return buf.str();
 }
 

@@ -234,7 +234,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<ArraySplat>(bind.value.get()) ||
                     isa_instruction<HashSplat>(bind.value.get()) || isa_instruction<Literal>(bind.value.get()) ||
                     isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
-                    isa_instruction<LoadYieldParam>(bind.value.get())) {
+                    isa_instruction<LoadYieldParams>(bind.value.get())) {
                     expIt = it->exprs.erase(expIt);
                 } else {
                     ++expIt;

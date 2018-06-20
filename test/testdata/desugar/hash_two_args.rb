@@ -1,7 +1,5 @@
 # typed: strict
 
-# This test is broken. The commented out things should be fixed.
-
 sig(foo: T::Hash[Symbol, Integer]).void
 def test_enumeration(foo)
     foo.each do |k, v|
@@ -9,21 +7,21 @@ def test_enumeration(foo)
         T.assert_type!(v, Integer)
     end
     foo.map do |k, v|
-        # T.assert_type!(k, Symbol)
-        # T.assert_type!(v, Integer)
+        T.assert_type!(k, Symbol)
+        T.assert_type!(v, Integer)
     end
 
     foo.each do |(k, v)|
-        # T.assert_type!(k, Symbol)
-        # T.assert_type!(v, Integer)
+        T.assert_type!(k, Symbol)
+        T.assert_type!(v, Integer)
     end
     foo.map do |(k, v)|
-        # T.assert_type!(k, Symbol)
-        # T.assert_type!(v, Integer)
+        T.assert_type!(k, Symbol)
+        T.assert_type!(v, Integer)
     end
 
     foo.each do |kv|
-        # T.assert_type!(kv, [Symbol, Integer])
+        T.assert_type!(kv, [Symbol, Integer])
     end
     foo.map do |kv|
         T.assert_type!(kv, [Symbol, Integer])

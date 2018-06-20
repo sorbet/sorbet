@@ -540,27 +540,6 @@ void AppliedType::_sanityCheck(core::Context ctx) {
     }
 }
 
-shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    core::SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
-
-    if (method.exists()) {
-        const core::Symbol &data = method.data(ctx);
-
-        if (data.arguments().size() > i) { // todo: this should become actual argument matching
-            shared_ptr<Type> resultType =
-                Types::resultTypeAsSeenFrom(ctx, data.arguments()[i], this->klass, this->targs);
-            if (!resultType) {
-                resultType = Types::untyped();
-            }
-            return resultType;
-        } else {
-            return Types::untyped();
-        }
-    } else {
-        return Types::untyped();
-    }
-}
-
 bool AppliedType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
