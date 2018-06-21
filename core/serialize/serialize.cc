@@ -276,26 +276,24 @@ void Serializer::pickle(Pickler &p, Type *what) {
         for (auto &el : hash->values) {
             pickle(p, el.get());
         }
-    } else if (auto *hash = cast_type<MagicType>(what)) {
-        p.putU4(7);
     } else if (auto *alias = cast_type<AliasType>(what)) {
-        p.putU4(8);
+        p.putU4(7);
         p.putU4(alias->symbol._id);
     } else if (auto *lp = cast_type<LambdaParam>(what)) {
-        p.putU4(9);
+        p.putU4(8);
         p.putU4(lp->definition._id);
     } else if (auto *at = cast_type<AppliedType>(what)) {
-        p.putU4(10);
+        p.putU4(9);
         p.putU4(at->klass._id);
         p.putU4(at->targs.size());
         for (auto &t : at->targs) {
             pickle(p, t.get());
         }
     } else if (auto *tp = cast_type<TypeVar>(what)) {
-        p.putU4(11);
+        p.putU4(10);
         p.putU4(tp->sym._id);
     } else if (auto *st = cast_type<SelfType>(what)) {
-        p.putU4(12);
+        p.putU4(11);
     } else {
         Error::notImplemented();
     }
@@ -350,13 +348,11 @@ shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
             return result;
         }
         case 7:
-            return make_shared<MagicType>();
-        case 8:
             return make_shared<AliasType>(SymbolRef(gs, p.getU4()));
-        case 9: {
+        case 8: {
             return make_shared<LambdaParam>(SymbolRef(gs, p.getU4()));
         }
-        case 10: {
+        case 9: {
             SymbolRef klass(gs, p.getU4());
             int sz = p.getU4();
             vector<shared_ptr<Type>> targs(sz);
@@ -365,11 +361,11 @@ shared_ptr<Type> Serializer::unpickleType(UnPickler &p, GlobalState *gs) {
             }
             return make_shared<AppliedType>(klass, targs);
         }
-        case 11: {
+        case 10: {
             SymbolRef sym(gs, p.getU4());
             return make_shared<TypeVar>(sym);
         }
-        case 12: {
+        case 11: {
             return std::make_shared<SelfType>();
         }
         default:

@@ -63,10 +63,6 @@ string ShapeType::typeName() const {
     return "ShapeType";
 }
 
-string MagicType::typeName() const {
-    return "MagicType";
-}
-
 string AliasType::typeName() const {
     return "AliasType";
 }
@@ -153,14 +149,6 @@ string ShapeType::show(const GlobalState &gs) const {
     }
     buf << "}";
     return buf.str();
-}
-
-string MagicType::toString(const GlobalState &gs, int tabs) const {
-    return underlying->toString(gs, tabs);
-}
-
-string MagicType::show(const GlobalState &gs) const {
-    return underlying->show(gs);
 }
 
 string AliasType::toString(const GlobalState &gs, int tabs) const {

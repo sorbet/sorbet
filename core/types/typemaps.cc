@@ -72,11 +72,6 @@ shared_ptr<Type> LiteralType::_instantiate(core::Context ctx, vector<SymbolRef> 
     return nullptr;
 }
 
-shared_ptr<Type> MagicType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                         const vector<shared_ptr<Type>> &targs) {
-    return nullptr;
-}
-
 shared_ptr<Type> TupleType::_instantiate(core::Context ctx, vector<SymbolRef> params,
                                          const vector<shared_ptr<Type>> &targs) {
     bool changed = false;

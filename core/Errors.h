@@ -115,8 +115,29 @@ struct ErrorQueueMessage {
 };
 
 class ErrorBuilder {
+    // An ErrorBuilder can be in three states:
+    //
+    //  - Unreported: This error is silenced and no error will be generated or
+    //    reported. No method is valid on an Unreported ErrorBuilder other than
+    //    `operator bool()`.
+    //
+    //  - WillBuild: This error builder is live and in the process of
+    //    constructing an error. This is the only state in which mutation
+    //    methods (setHeader, etc) are valid.
+    //
+    //  - DidBuild: This error builder has built an error. No further method
+    //    calls on this object are valid.
+    //
+    //  build() converts a WillBuild state into a DidBuild state, and is used by
+    //  callers who need finer-grained control over error reporting than the
+    //  default behavior of reporting on destruction.
+    enum class State {
+        Unreported,
+        WillBuild,
+        DidBuild,
+    };
     const GlobalState &gs;
-    bool willBuild;
+    State state;
     Loc loc;
     ErrorClass what;
     std::string header;
@@ -129,7 +150,8 @@ public:
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
     ~ErrorBuilder();
     inline explicit operator bool() const {
-        return willBuild;
+        ENFORCE(state != State::DidBuild);
+        return state == State::WillBuild;
     }
     void addErrorSection(ErrorSection &&section);
     template <typename... Args> void addErrorLine(Loc loc, const std::string &msg, const Args &... args) {
@@ -141,6 +163,12 @@ public:
         std::string formatted = ErrorColors::format(msg, args...);
         _setHeader(move(formatted));
     }
+
+    // build() builds and returns the reported Error. Only valid if state ==
+    // WillBuild. This passes ownership of the error to the caller; ErrorBuilder
+    // will no longer report the error, and is the caller's responsibility to
+    // pass it to GlobalState::_error if the error should actually be recorded.
+    std::unique_ptr<BasicError> build();
 };
 
 } // namespace core
