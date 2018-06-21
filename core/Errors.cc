@@ -112,30 +112,37 @@ ErrorRegion::~ErrorRegion() {
 }
 
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
-    : gs(gs), willBuild(willBuild), loc(loc), what(what) {}
+    : gs(gs), state(willBuild ? State::WillBuild : State::Unreported), loc(loc), what(what) {}
 
 void ErrorBuilder::_setHeader(string &&header) {
-    ENFORCE(willBuild);
+    ENFORCE(state == State::WillBuild);
     this->header = move(header);
 }
 
 void ErrorBuilder::addErrorSection(ErrorSection &&section) {
-    ENFORCE(willBuild);
+    ENFORCE(state == State::WillBuild);
     this->sections.emplace_back(move(section));
 }
 
 ErrorBuilder::~ErrorBuilder() {
-    if (!willBuild) {
+    if (state != State::WillBuild) {
         return;
     }
+    this->gs._error(build());
+}
+
+unique_ptr<BasicError> ErrorBuilder::build() {
+    ENFORCE(state == State::WillBuild);
+    state = State::DidBuild;
+
     unique_ptr<ComplexError> err =
         make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
     if (this->what == errors::Internal::InternalError) {
         err->isCritical = true;
-        gs.errorQueue->hadCritical = true;
     }
-    this->gs._error(move(err));
+    return err;
 }
+
 const string ErrorColors::coloredPatternSigil = "`{}`";
 string ErrorColors::coloredPatternReplace = coloredPatternSigil;
 

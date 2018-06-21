@@ -23,6 +23,21 @@ end
 class RubyTyper::StubClass
 end
 
+# C++ code delegates the implementation of many methods on tuples
+# (arrays of known shape) this class. All the actual methods on this
+# class are implemented in C++.
+class RubyTyper::Tuple < Array
+  extend T::Generic
+  Elem = type_member(:out)
+
+  def [](*args); end
+
+  def last(*args); end
+  def first(*args); end
+  def min(*args); end
+  def max(*args); end
+end
+
 class RubyTyper::ENVClass
   extend T::Generic
   include Enumerable

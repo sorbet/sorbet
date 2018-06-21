@@ -294,12 +294,6 @@ void ShapeType::_sanityCheck(core::Context ctx) {
     }
 }
 
-MagicType::MagicType() : ProxyType(make_shared<ClassType>(core::Symbols::Magic())) {}
-
-void MagicType::_sanityCheck(core::Context ctx) {
-    ProxyType::_sanityCheck(ctx);
-}
-
 AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
 
 void AndType::_sanityCheck(core::Context ctx) {
@@ -384,20 +378,16 @@ int AliasType::kind() {
     return 9;
 }
 
-int MagicType::kind() {
+int OrType::kind() {
     return 10;
 }
 
-int OrType::kind() {
+int AndType::kind() {
     return 11;
 }
 
-int AndType::kind() {
-    return 12;
-}
-
 int SelfType::kind() {
-    return 13;
+    return 12;
 }
 
 bool ClassType::isFullyDefined() {
@@ -414,10 +404,6 @@ bool ShapeType::isFullyDefined() {
 
 bool TupleType::isFullyDefined() {
     return true; // might not be true if we support uninstantiated types inside tuples. For now, we don't
-}
-
-bool MagicType::isFullyDefined() {
-    return true;
 }
 
 bool AliasType::isFullyDefined() {
@@ -564,15 +550,15 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core::Nam
     return Types::untyped()->getCallArgumentType(ctx, name, i);
 }
 
-shared_ptr<Type> LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                           vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
-                                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
+                                         shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                             vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
-                                             shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                           vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
+                                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
     return Types::untyped()->dispatchCall(ctx, name, callLoc, args, selfType, fullType, block);
 }
 
@@ -657,9 +643,9 @@ bool SelfType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
     Error::raise("should never happen");
 }
 
-shared_ptr<Type> SelfType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                        std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                        std::shared_ptr<Type> fullType, std::shared_ptr<SendAndBlockLink> link) {
+DispatchResult SelfType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
+                                      std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
+                                      std::shared_ptr<Type> fullType, std::shared_ptr<SendAndBlockLink> link) {
     Error::raise("should never happen");
 }
 

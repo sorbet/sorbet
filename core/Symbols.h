@@ -562,7 +562,7 @@ public:
     class IntrinsicMethod {
     public:
         virtual std::shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, std::vector<TypeAndOrigins> &args,
-                                            core::SymbolRef self, std::shared_ptr<Type> fullType,
+                                            std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
                                             std::shared_ptr<SendAndBlockLink> linkType) const = 0;
     };
 
@@ -808,6 +808,10 @@ public:
 
     static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 51);
+    }
+
+    static SymbolRef Tuple() {
+        return SymbolRef(nullptr, 52);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

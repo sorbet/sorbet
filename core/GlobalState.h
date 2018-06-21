@@ -102,6 +102,7 @@ public:
     bool hadCriticalError() const;
 
     ErrorBuilder beginError(Loc loc, ErrorClass what) const;
+    void _error(std::unique_ptr<BasicError> error) const;
 
     int totalErrors() const;
     void flushErrors();
@@ -141,8 +142,6 @@ private:
     bool nameTableFrozen = false;
     bool symbolTableFrozen = false;
     bool fileTableFrozen = false;
-
-    void _error(std::unique_ptr<BasicError> error) const;
 
     void expandNames(int growBy = 2);
 

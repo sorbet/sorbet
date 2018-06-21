@@ -724,8 +724,16 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     // TODO
                     tp.type = core::Types::untyped();
                 } else {
-                    tp.type = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type, recvType.type,
-                                                          send->link);
+                    auto dispatched = recvType.type->dispatchCall(ctx, send->fun, bind.loc, args, recvType.type,
+                                                                  recvType.type, send->link);
+
+                    core::histogramInc("dispatchCall.components", dispatched.components.size());
+                    tp.type = dispatched.returnType;
+                    for (auto &comp : dispatched.components) {
+                        for (auto &err : comp.errors) {
+                            ctx.state._error(move(err));
+                        }
+                    }
                 }
                 tp.origins.push_back(bind.loc);
             },

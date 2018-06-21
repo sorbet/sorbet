@@ -65,6 +65,8 @@ const char *chalk_str = "Chalk";
 const char *tools_str = "Tools";
 const char *accessible_str = "Accessible";
 const char *generic_str = "Generic";
+const char *tuple_str = "Tuple";
+
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
@@ -175,6 +177,7 @@ void GlobalState::initEmpty() {
     SymbolRef chalk_tools_accessible_id =
         enterClassSymbol(Loc::none(), chalk_tools_id, enterNameConstant(accessible_str));
     SymbolRef T_Generic_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(generic_str));
+    SymbolRef tuple_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(tuple_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -228,26 +231,27 @@ void GlobalState::initEmpty() {
     ENFORCE(chalk_tools_id == Symbols::Chalk_Tools());
     ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
     ENFORCE(T_Generic_id == Symbols::T_Generic());
+    ENFORCE(tuple_id == Symbols::Tuple());
 
     // Synthesize untyped = T.untyped
     Symbols::untyped().data(*this).resultType = core::Types::untyped();
 
-    // <Magic> has a special Type
-    Symbols::Magic().data(*this).resultType = make_shared<MagicType>();
+    // <Magic> has its own type
+    Symbols::Magic().data(*this).resultType = make_shared<ClassType>(Symbols::Magic());
 
-    // Synthesize <Magic>#build_hash(*vs : Object) => Hash
+    // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = core::Types::Object();
+    arg.data(*this).resultType = core::Types::untyped();
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = core::Types::hashOfUntyped();
 
-    // Synthesize <Magic>#build_array(*vs : Object) => Array
+    // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = core::Types::Object();
+    arg.data(*this).resultType = core::Types::untyped();
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = core::Types::arrayOfUntyped();
 
@@ -1030,6 +1034,10 @@ int GlobalState::totalErrors() const {
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
     ENFORCE(shouldReportErrorOn(error->loc, error->what));
+    if (error->isCritical) {
+        errorQueue->hadCritical = true;
+    }
+
     ErrorQueueMessage msg;
     msg.kind = ErrorQueueMessage::Kind::Error;
     msg.whatFile = error->loc.file;
