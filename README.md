@@ -9,7 +9,7 @@ It is still in its early days and should be considered alpha-quality.
 You are welcome to try it, though, but your experience might still be rough.
 
 # Trying out
-Install [Dependencies](#Dependencies) first.
+Install [Dependencies](#dependencies) first.
 
 You'll need to build sorbet.
 In order to build the production version please run `./bazel build //main:sorbet -c opt`.
