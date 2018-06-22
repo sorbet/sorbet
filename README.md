@@ -1,31 +1,46 @@
-# `sorbet` -- an experimental Ruby typechecker
+# `Sorbet` -- an experimental Ruby typechecker
 
-This repository contains `sorbet`, a work-in-progress experiment
+This repository contains `Sorbet`, a work-in-progress experiment
 aimed at producing a static typechecker for a subset of Ruby.
 
-You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW)
+You can read more in our [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW).
 
 It is still in its early days and should be considered alpha-quality.
 You are welcome to try it, though, but your experience might still be rough.
 
-# Trying out
+# Running
 Install [Dependencies](#dependencies) first.
 
-You'll need to build sorbet.
-In order to build the production version please run `./bazel build //main:sorbet -c opt`.
+You'll need to build Sorbet.  In order to build the production version run:
 
-The resulting executable will be in `bazel-bin/main/sorbet`.
+```
+./bazel build //main:sorbet -c opt
+```
+
+The resulting executable will be runable with:
+
+```
+bazel-bin/main/sorbet my_file1.rb my_file2.rb
+```
+
 It should be statically linked and have no dependencies, so feel free to copy it.
 
 In order to build a release version please run `./bazel build //main:sorbet --config=release`.
+
 # Security concerns
-Note that in order to speed up startup time, `sorbet` preloads some ruby code into itself.
+
+Note that in order to speed up startup time, `Sorbet` preloads some ruby code into itself.
 Please do not spread those executables outside of Stripe.
 
-# Developing on `sorbet`
+# Developing on `Sorbet`
 
-We build using [bazel](https://bazel.build/); Run `./bazel test
-//...` to build and run the tests(`//...` stands for "everything", you literaly need to type `//...`).
+We build using [bazel](https://bazel.build/); Run: 
+
+```
+./bazel test //...
+```
+
+to build and run the tests(`//...` stands for "everything", you literaly need to type `//...`).
 
 # Code conventions
 
@@ -44,7 +59,6 @@ We build using [bazel](https://bazel.build/); Run `./bazel test
 - [autoconf](https://www.gnu.org/software/autoconf/autoconf.html) for building jemalloc from source;
 - [gnu coreutils](http://www.gnu.org/software/coreutils/coreutils.html) and [gnu parallel](https://www.gnu.org/software/parallel/) are used by some of bash scripts;
 - platform headers for [ncurses5](https://www.gnu.org/software/ncurses/).
-
 
 ### On macOS
 
