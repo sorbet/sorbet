@@ -20,6 +20,7 @@ class KeyValueStore {
     const std::thread::id writerId;
     std::unordered_map<std::thread::id, MDB_txn *> readers;
     std::mutex readersLock;
+    bool commited = false;
 
     void clear();
     void refreshMainTransaction();
@@ -33,6 +34,7 @@ public:
     /** can only be called from main thread */
     void write(const absl::string_view key, std::vector<u1> value);
     ~KeyValueStore() noexcept(false);
+    static bool commit(std::unique_ptr<KeyValueStore>);
 };
 } // namespace sorbet
 
