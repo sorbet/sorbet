@@ -753,7 +753,9 @@ FileRef GlobalState::enterFile(shared_ptr<File> file) {
     })
 
     files.emplace_back(file);
-    return FileRef(filesUsed() - 1);
+    auto ret = FileRef(filesUsed() - 1);
+    fileRefByPath[(string)file->path()] = ret;
+    return ret;
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
@@ -916,6 +918,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->strings = this->strings;
     result->strings_last_page_used = STRINGS_PAGE_SIZE;
     result->files = this->files;
+    result->fileRefByPath = this->fileRefByPath;
 
     result->names.reserve(this->names.capacity());
     for (auto &nm : this->names) {
@@ -1100,13 +1103,9 @@ std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalStat
 }
 
 FileRef GlobalState::findFileByPath(absl::string_view path) {
-    auto filesTotal = filesUsed();
-    for (unsigned int i = 1; i < filesTotal; i++) {
-        core::FileRef fref(i);
-        const auto &file = fref.data(*this, true);
-        if (file.path() == path) {
-            return fref;
-        }
+    auto fnd = fileRefByPath.find((string)path);
+    if (fnd != fileRefByPath.end()) {
+        return fnd->second;
     }
     return core::FileRef();
 }

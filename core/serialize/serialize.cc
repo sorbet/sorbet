@@ -1,4 +1,5 @@
 #include "serialize.h"
+#include "../GlobalState.h"
 #include "absl/base/casts.h"
 #include "ast/Helpers.h"
 #include "core/ErrorQueue.h"
@@ -535,7 +536,17 @@ void Serializer::unpickleGS(UnPickler &p, GlobalState &result) {
         auto value = p.getU4();
         names_by_hash.emplace_back(make_pair(hash, value));
     }
+
+    std::unordered_map<std::string, FileRef> fileRefByPath;
     result.trace("moving");
+    int i = 0;
+    for (auto f : files) {
+        if (f && !f->path().empty()) {
+            fileRefByPath[(string)f->path()] = FileRef(i);
+        }
+        i++;
+    }
+    result.fileRefByPath = move(fileRefByPath);
     result.files = move(files);
     result.names = move(names);
     result.symbols = move(symbols);
