@@ -3,7 +3,7 @@ set -eux
 
 . /usr/stripe/bin/docker/stripe-init-build
 
-DIR=./pay-server
+PAY_SERVER=./pay-server
 
 
 export TIME='cmd: "%C"
@@ -40,11 +40,11 @@ export RUBY_TYPER_CACHE_DIR
 
 GIT_SHA=$(git rev-parse HEAD)
 
-if [ ! -d $DIR ]; then
-    echo "$DIR doesn't exist"
+if [ ! -d $PAY_SERVER ]; then
+    echo "$PAY_SERVER doesn't exist"
     exit 1
 fi
-cd $DIR
+cd $PAY_SERVER
 
 if [ ! -f "../ci/stripe-internal-sorbet-pay-server-sha" ]; then
     echo "ci/stripe-internal-sorbet-pay-server-sha doesn't exist"
