@@ -1,6 +1,8 @@
-# This file was inspired by https://github.com/bazelbuild/bazel at d6fec93.
-
 #!/bin/bash
+
+set -e
+
+# This file was inspired by https://github.com/bazelbuild/bazel at d6fec93.
 
 # This script will be run bazel when building process starts to
 # generate key-value information that represents the status of the
@@ -14,18 +16,14 @@
 
 # The code below presents an implementation that works for git repository
 git_rev=$(git rev-parse HEAD)
-if [[ $? != 0 ]];
-then
-    exit 1
-fi
 echo "BUILD_SCM_REVISION ${git_rev}"
 
 # Check whether there are any uncommited changes
-git diff-index --quiet HEAD --
-if [[ $? == 0 ]];
-then
+set +e
+if git diff-index --quiet HEAD --; then
     tree_status=""
 else
     tree_status="-Dirty"
 fi
+set -e
 echo "BUILD_SCM_STATUS ${tree_status}"
