@@ -90,6 +90,7 @@ if [ -s "$OUT" ]; then
 fi
 cat "$TIMEFILE1"
 
+# Run 2 more times to exercise caching
 /usr/local/bin/junit-script-output \
     typecheck-cached \
     /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
