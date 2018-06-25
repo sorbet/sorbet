@@ -1,6 +1,7 @@
 #include "serialize.h"
 #include "../GlobalState.h"
 #include "absl/base/casts.h"
+#include "absl/types/span.h"
 #include "ast/Helpers.h"
 #include "core/ErrorQueue.h"
 #include "core/GlobalState.h"
@@ -434,12 +435,24 @@ Symbol Serializer::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     return result;
 }
 
-Serializer::Pickler Serializer::pickle(const GlobalState &gs) {
+Serializer::Pickler Serializer::pickle(const GlobalState &gs, bool payloadOnly) {
     Pickler result;
     result.putU4(VERSION);
-    result.putU4(gs.files.size());
+
+    absl::Span<const shared_ptr<core::File>> wantFiles;
+    if (payloadOnly) {
+        auto lastPayload = find_if(gs.files.begin() + 1, gs.files.end(),
+                                   [](auto &file) { return file->source_type != core::File::Payload; });
+        ENFORCE(
+            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->source_type == core::File::Payload; }));
+        wantFiles = absl::Span<const shared_ptr<core::File>>(gs.files.data(), lastPayload - gs.files.begin());
+    } else {
+        wantFiles = absl::Span<const shared_ptr<core::File>>(gs.files.data(), gs.files.size());
+    }
+
+    result.putU4(wantFiles.size());
     int i = -1;
-    for (auto &f : gs.files) {
+    for (auto &f : wantFiles) {
         ++i;
         if (i != 0) {
             pickle(result, *f);
@@ -559,6 +572,11 @@ vector<u1> Serializer::store(GlobalState &gs) {
     return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
 }
 
+vector<u1> Serializer::storePayloadAndNameTable(GlobalState &gs) {
+    Pickler p = pickle(gs, true);
+    return p.result(GLOBAL_STATE_COMPRESSION_DEGREE);
+}
+
 void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     gs.trace("Starting global state deserialization");
     ENFORCE(gs.files.empty() && gs.names.empty() && gs.symbols.empty(), "Can't load into a non-empty state");
@@ -569,10 +587,10 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     gs.trace("Done reading GS");
 }
 
-template <class T> void pickleTree(Serializer::Pickler &p, unique_ptr<T> &t) {
+template <class T> void Serializer::pickleTree(Serializer::Pickler &p, unique_ptr<T> &t) {
     T *raw = t.get();
     unique_ptr<ast::Expression> tmp(t.release());
-    Serializer::pickle(p, tmp);
+    pickle(p, tmp);
     t.reset(raw);
     tmp.release();
 }
@@ -1044,13 +1062,14 @@ unique_ptr<ast::Expression> Serializer::unpickleExpr(serialize::Serializer::UnPi
     Error::raise("Not handled {}", kind);
 }
 
-unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p) {
+unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p, u4 forceId) {
     serialize::Serializer::UnPickler up(p);
-    FileRef fileId(up.getU4());
+    u4 loaded = up.getU4();
+    FileRef fileId(forceId > 0 ? forceId : loaded);
     return unpickleExpr(up, gs, fileId);
 }
 
-vector<u1> Serializer::store(GlobalState &gs, unique_ptr<ast::Expression> &e) {
+vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expression> &e) {
     serialize::Serializer::Pickler pickler;
     pickler.putU4(e->loc.file.id());
     pickle(pickler, e);

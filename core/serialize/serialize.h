@@ -14,9 +14,21 @@ public:
         10; // >20 introduce decompression slowdown, >10 introduces compression slowdown
     static const u1 FILE_COMPRESSION_DEGREE =
         10; // >20 introduce decompression slowdown, >10 introduces compression slowdown
+
+    // Serialize a global state
     static std::vector<u1> store(GlobalState &gs);
-    static std::vector<u1> store(GlobalState &gs, std::unique_ptr<ast::Expression> &e);
-    static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p);
+
+    // Stores a GlobalState, but only includes `File`s with Type ==
+    // Payload. This can be used in conjunction with `store(GlobalState,
+    // ast::Expression)` to store a global state containing a name table along
+    // side a large number of individual cached files, which can be loaded
+    // independently.
+    static std::vector<u1> storePayloadAndNameTable(GlobalState &gs);
+    static std::vector<u1> storeExpression(GlobalState &gs, std::unique_ptr<ast::Expression> &e);
+
+    // Loads an ast::Expression saved by storeExpression. Optionally overrides
+    // the saved file ID to the caller-specified ID.
+    static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p, u4 forceId = 0);
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
 
     class Pickler {
@@ -43,14 +55,17 @@ public:
         absl::string_view getStr();
         explicit UnPickler(const u1 *const compressed);
     };
-    static Pickler pickle(const GlobalState &gs);
+
+private:
+    static Pickler pickle(const GlobalState &gs, bool payloadOnly = false);
     static void pickle(Pickler &p, const File &what);
     static void pickle(Pickler &p, const Name &what);
     static void pickle(Pickler &p, Type *what);
     static void pickle(Pickler &p, const Symbol &what);
     static void pickle(Pickler &p, const std::unique_ptr<ast::Expression> &what);
 
-private:
+    template <class T> static void pickleTree(Pickler &p, std::unique_ptr<T> &t);
+
     static std::shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
     static std::shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);

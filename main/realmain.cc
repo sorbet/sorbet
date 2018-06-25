@@ -226,7 +226,7 @@ int realmain(int argc, const char *argv[]) {
 
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
         Timer timeit(logger, "caching global state");
-        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::store(*gs));
+        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
         KeyValueStore::commit(move(kvstore));
     }
 

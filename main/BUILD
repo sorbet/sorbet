@@ -84,6 +84,7 @@ cc_library(
         "//payload/text",
         "//resolver",
         "//version",
+        "@com_github_blake2_libb2",
         "@cxxopts",
         "@rapidjson",
     ],

@@ -74,8 +74,7 @@ StrictLevel fileSigil(absl::string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type source_type)
-    : source_type(source_type), path_(path_), source_(source_),
-      hashKey_(this->path_ + "-" + to_string(_hash(this->source_))), sigil(fileSigil(this->source_)), strict(sigil) {}
+    : source_type(source_type), path_(path_), source_(source_), sigil(fileSigil(this->source_)), strict(sigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
 
@@ -98,10 +97,6 @@ absl::string_view File::path() const {
 absl::string_view File::source() const {
     ENFORCE(this->source_type != Type::TombStone);
     return this->source_;
-}
-
-absl::string_view File::hashKey() const {
-    return this->hashKey_;
 }
 
 bool File::hadErrors() const {

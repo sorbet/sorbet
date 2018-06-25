@@ -18,6 +18,10 @@
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 
+extern "C" {
+#include "blake2.h"
+};
+
 using namespace std;
 
 namespace sorbet {
@@ -71,6 +75,26 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
+const char *HEX_CHARS = "0123456789ABCDEF";
+
+string fileKey(core::GlobalState &gs, core::FileRef file) {
+    auto path = file.data(gs).path();
+    string key(path.begin(), path.end());
+    key += "//";
+    char out[BLAKE2B_OUTBYTES];
+    char hex[2 * BLAKE2B_OUTBYTES];
+
+    auto src = file.data(gs).source();
+    int err = blake2b((uint8_t *)&out[0], src.begin(), nullptr, sizeof(out), src.size(), 0);
+    ENFORCE(err == 0);
+    for (int i = 0; i < BLAKE2B_OUTBYTES; ++i) {
+        hex[2 * i] = HEX_CHARS[out[i] & 0xF];
+        hex[2 * i + 1] = HEX_CHARS[out[i] >> 4];
+    }
+    key.insert(key.end(), hex, hex + 1);
+    return key;
+}
+
 unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
                                      unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
@@ -78,11 +102,13 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 
     try {
         if (kvstore && file.id() < lgs.filesUsed()) {
-            auto maybeCached = kvstore->read(file.data(lgs).hashKey());
+            string fileHashKey = fileKey(lgs, file);
+            auto maybeCached = kvstore->read(fileHashKey);
             if (maybeCached) {
                 logger->trace("Reading from cache: {}", file.data(lgs).path());
-                auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached);
+                auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached, file.id());
                 t->loc.file.data(lgs).cachedParseTree = true;
+                ENFORCE(t->loc.file == file);
                 dslsInlined = move(t);
             }
         }
@@ -219,9 +245,11 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
 
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
-                            lgs = core::GlobalState::replaceFile(
-                                move(lgs), file,
-                                make_shared<core::File>(string(fileName), move(src), core::File::Type::Normal));
+                            auto entered =
+                                lgs->enterNewFileAt(make_shared<core::File>(string(fileName.begin(), fileName.end()),
+                                                                            move(src), core::File::Normal),
+                                                    file);
+                            ENFORCE(entered == file);
                         }
                         if (core::enable_counters) {
                             core::counterAdd("types.input.lines", file.data(*lgs).lineCount());
@@ -306,8 +334,8 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                         if (!file.data(*gs).cachedParseTree) {
                             auto subst = ast::Substitute::run(ctx, substitution, move(tree));
                             if (kvstore) {
-                                kvstore->write(file.data(*gs).hashKey(),
-                                               core::serialize::Serializer::store(*gs, subst));
+                                string fileHashKey = fileKey(*gs, file);
+                                kvstore->write(fileHashKey, core::serialize::Serializer::storeExpression(*gs, subst));
                             }
                             ret.emplace_back(move(subst));
                         } else {
