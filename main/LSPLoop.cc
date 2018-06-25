@@ -139,7 +139,7 @@ void LSPLoop::runLSP() {
                     Timer timeit(logger, "index");
                     reIndex(true);
                     vector<shared_ptr<core::File>> changedFiles;
-                    runSlowPath(changedFiles);
+                    runSlowPath(move(changedFiles));
                     pushErrors();
                 }
             }
@@ -602,7 +602,13 @@ void LSPLoop::runSlowPath(std::vector<shared_ptr<core::File>> changedFiles) {
     }
     std::vector<core::FileRef> changedFileRefs;
     for (auto &t : changedFiles) {
-        changedFileRefs.emplace_back(initialGS->enterFile(t));
+        auto existing = initialGS->findFileByPath(t->path());
+        if (existing.exists()) {
+            initialGS = core::GlobalState::replaceFile(move(initialGS), existing, move(t));
+            changedFileRefs.emplace_back(existing);
+        } else {
+            changedFileRefs.emplace_back(initialGS->enterFile(move(t)));
+        }
     }
 
     std::vector<std::string> emptyInputNames;
@@ -623,7 +629,7 @@ const LSP::LSPMethod LSP::getMethod(const absl::string_view name) {
 }
 
 void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> changedFiles) {
-    runSlowPath(changedFiles);
+    runSlowPath(move(changedFiles));
 }
 
 std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
@@ -641,17 +647,7 @@ core::FileRef LSPLoop::uri2FileRef(const absl::string_view uri) {
         return core::FileRef();
     }
     auto needle = remoteName2Local(uri);
-    for (int i = 1; i < finalGs->filesUsed(); i++) {
-        core::FileRef fref(i);
-        const auto &file = fref.data(*finalGs, true);
-        if (file.source_type == core::File::Type::TombStone) {
-            continue;
-        }
-        if (file.path() == needle) {
-            return fref;
-        }
-    }
-    return core::FileRef();
+    return initialGS->findFileByPath(needle);
 }
 
 std::string LSPLoop::fileRef2Uri(core::FileRef file) {

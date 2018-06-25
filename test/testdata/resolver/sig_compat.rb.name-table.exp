@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/sig_compat.rb:3
   class ::A < ::Object () @ test/testdata/resolver/sig_compat.rb:3
     method ::A#f (a, b) -> T.untyped @ test/testdata/resolver/sig_compat.rb:8

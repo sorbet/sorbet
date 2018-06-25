@@ -109,13 +109,13 @@ struct Options {
 void readOptions(Options &, int argc, const char *argv[]) throw(EarlyReturnWithCode);
 std::unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
                                           std::unique_ptr<KeyValueStore> &kvstore);
-std::vector<std::unique_ptr<ast::Expression>> index(std::shared_ptr<core::GlobalState> &gs,
+std::vector<std::unique_ptr<ast::Expression>> index(std::unique_ptr<core::GlobalState> &gs,
                                                     std::vector<std::string> frs,
                                                     std::vector<core::FileRef> mainThreadFiles, const Options &opts,
                                                     WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore);
 std::vector<std::unique_ptr<ast::Expression>>
 resolve(core::GlobalState &gs, std::vector<std::unique_ptr<ast::Expression>> what, const Options &opts);
-void typecheck(std::shared_ptr<core::GlobalState> &gs, std::vector<std::unique_ptr<ast::Expression>> what,
+void typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<std::unique_ptr<ast::Expression>> what,
                const Options &opts, WorkerPool &workers);
 std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
                                               const Options &opts);

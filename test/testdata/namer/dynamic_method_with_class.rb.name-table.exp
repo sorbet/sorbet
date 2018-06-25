@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:F> < ::<Class:Object> () @ test/testdata/namer/dynamic_method_with_class.rb:2
   class ::F < ::Object () @ test/testdata/namer/dynamic_method_with_class.rb:2
     method ::F#bar (baz) @ test/testdata/namer/dynamic_method_with_class.rb:8

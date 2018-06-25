@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:BlockTest> < ::<Class:Object> () @ test/testdata/cfg/blocks.rb:2
   class ::BlockTest < ::Object () @ test/testdata/cfg/blocks.rb:2
     method ::BlockTest#block_pass () @ test/testdata/cfg/blocks.rb:3

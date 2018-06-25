@@ -63,6 +63,6 @@ genrule(
     outs = [
         "state-payload-raw",
     ],
-    cmd = "$(location //main:sorbet-orig) --store-state $(location state-payload-raw) -e 1",
+    cmd = "$(location //main:sorbet-orig) --store-state $(location state-payload-raw)",
     tools = ["//main:sorbet-orig"],
 )

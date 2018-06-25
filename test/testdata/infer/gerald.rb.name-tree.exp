@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$65>()
+    def self.<static-init><<static-init>$64>()
       begin
         self(<singleton class:<constant:<root>>>).require_relative("../../../extn")
         ::Opus::AutogenLoader.init("__FILE__")

@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:NS> < ::Module () @ test/testdata/resolver/inherit_alias.rb:2
   class ::NS (<constant:BasicObject>) @ test/testdata/resolver/inherit_alias.rb:2
     class ::NS::<Class:C1> < ::NS::<Class:Dest> () @ test/testdata/resolver/inherit_alias.rb:3

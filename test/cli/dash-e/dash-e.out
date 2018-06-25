@@ -1,5 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:Foo> < ::<Class:Object> () @ -e:1
   class ::Foo < ::Object () @ -e:1
-  method #<static-init> () @ -e:1
 

@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:TestLocals> < ::<Class:Object> () @ test/testdata/namer/locals.rb:2
   class ::TestLocals < ::Object () @ test/testdata/namer/locals.rb:2
     method ::TestLocals#method () @ test/testdata/namer/locals.rb:3

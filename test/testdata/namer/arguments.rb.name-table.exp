@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/namer/arguments.rb:2
   class ::A < ::Object () @ test/testdata/namer/arguments.rb:2
     method ::A#take_arguments (a, b, c, d, e, f, g) @ test/testdata/namer/arguments.rb:3

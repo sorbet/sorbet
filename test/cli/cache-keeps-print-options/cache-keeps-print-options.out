@@ -1,8 +1,8 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 

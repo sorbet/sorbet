@@ -35,13 +35,19 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr
 
 const string GLOBAL_STATE_KEY = "GlobalState";
 
-void createInitialGlobalState(shared_ptr<core::GlobalState> &gs, const Options &options,
+void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const Options &options,
                               unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
             Timer timeit(logger, "Read cached global state");
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
+            for (unsigned int i = 1; i < gs->filesUsed(); i++) {
+                core::FileRef fref(i);
+                if (fref.data(*gs, true).source_type == core::File::Type::Normal) {
+                    gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
+                }
+            }
             return;
         }
     }
@@ -170,8 +176,8 @@ int realmain(int argc, const char *argv[]) {
     }
     WorkerPool workers(opts.threads, logger);
 
-    shared_ptr<core::GlobalState> gs =
-        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+    unique_ptr<core::GlobalState> gs =
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
 
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
@@ -188,7 +194,7 @@ int realmain(int argc, const char *argv[]) {
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
-        LSPLoop loop(gs, opts, logger, workers);
+        LSPLoop loop(move(gs), opts, logger, workers);
         loop.runLSP();
         return 0;
     }

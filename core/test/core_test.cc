@@ -35,8 +35,9 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
                                     {"line 1\nline 2\nline3", 7, 2, 1}};
     int i = 0;
     for (auto &tc : cases) {
-        SCOPED_TRACE(string("case: ") + to_string(i));
-        core::FileRef f = gs.enterFile(string(""), tc.src);
+        auto name = string("case: ") + to_string(i);
+        SCOPED_TRACE(name);
+        core::FileRef f = gs.enterFile(move(name), tc.src);
 
         auto detail = Loc::offset2Pos(f, tc.off, gs);
 

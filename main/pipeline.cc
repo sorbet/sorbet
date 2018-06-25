@@ -149,7 +149,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
     }
 }
 
-vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vector<string> frs,
+vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vector<string> frs,
                                           vector<core::FileRef> mainThreadFiles, const Options &opts,
                                           WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
     vector<unique_ptr<ast::Expression>> ret;
@@ -172,14 +172,16 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
 
     for (auto f : frs) {
         logger->trace("enqueue: {}", f);
-        auto job = gs->reserveFileRef(f);
+        auto job = gs->findFileByPath(f);
+        if (!job.exists()) {
+            job = gs->reserveFileRef(f);
+        }
         fileq->push(move(job), 1);
     }
 
     gs->sanityCheck();
 
-    const shared_ptr<core::GlobalState> cgs = gs;
-    gs = nullptr;
+    const shared_ptr<core::GlobalState> cgs = move(gs);
     logger->trace("Done deep copying global state");
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
@@ -217,7 +219,9 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
 
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
-                            file = lgs->enterFileAt(fileName, src, file);
+                            lgs = core::GlobalState::replaceFile(
+                                move(lgs), file,
+                                make_shared<core::File>(string(fileName), move(src), core::File::Type::Normal));
                         }
                         if (core::enable_counters) {
                             core::counterAdd("types.input.lines", file.data(*lgs).lineCount());
@@ -276,7 +280,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
         });
 
         logger->trace("Deep copying global state");
-        auto mainTheadGs = cgs->deepCopy();
+        unique_ptr<core::GlobalState> mainTheadGs = cgs->deepCopy();
         logger->trace("Done deep copying global state");
 
         for (auto f : mainThreadFiles) {
@@ -442,7 +446,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
 
 // If ever given a result type, it should be something along the lines of
 // vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
-void typecheck(shared_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
+void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
                WorkerPool &workers) {
     vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 

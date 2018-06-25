@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::Opus () @ ???
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
     class ::Opus::CIBot () @ test/testdata/infer/lub_tuples.rb:2
