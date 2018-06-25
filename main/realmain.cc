@@ -283,6 +283,12 @@ int realmain(int argc, const char *argv[]) {
         returnCode = 1;
     }
 
+    // Let it go: leak memory so that we don't need to call destructors
+    for (auto &e : indexed) {
+        e.release();
+    }
+    gs.release();
+
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
 
     return returnCode;
