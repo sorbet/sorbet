@@ -18,17 +18,6 @@ maxrss: %M
     release-build \
     bazel build main:sorbet --config=release
 
-ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer"
-export ASAN_SYMBOLIZER_PATH
-ASAN_OPTIONS=detect_leaks=0
-export ASAN_OPTIONS
-UBSAN_OPTIONS=print_stacktrace=1
-export UBSAN_OPTIONS
-LSAN_OPTIONS=verbosity=1:log_threads=1
-export LSAN_OPTIONS
-
-
-
 mkdir -p /build/bin
 cp bazel-bin/main/sorbet /build/bin
 
@@ -117,6 +106,14 @@ fi
 
 
 # Run 2: Make sure we don't crash on all of pay-server with ASAN on
+ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_6_0_0_linux/bin/llvm-symbolizer"
+export ASAN_SYMBOLIZER_PATH
+ASAN_OPTIONS=detect_leaks=0
+export ASAN_OPTIONS
+UBSAN_OPTIONS=print_stacktrace=1
+export UBSAN_OPTIONS
+LSAN_OPTIONS=verbosity=1:log_threads=1
+export LSAN_OPTIONS
 
 (
     cd -
