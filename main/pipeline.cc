@@ -72,16 +72,17 @@ struct thread_result {
 };
 
 unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                     unique_ptr<KeyValueStore> &kvstore, const shared_ptr<core::GlobalState> &pgs) {
+                                     unique_ptr<KeyValueStore> &kvstore) {
     auto &print = opts.print;
     unique_ptr<ast::Expression> dslsInlined;
 
     try {
-        if (kvstore && file.id() < pgs->filesUsed()) {
-            auto maybeCached = kvstore->read(file.data(*pgs).hashKey());
+        if (kvstore && file.id() < lgs.filesUsed()) {
+            auto maybeCached = kvstore->read(file.data(lgs).hashKey());
             if (maybeCached) {
-                auto t = core::serialize::Serializer::loadExpression(*pgs, maybeCached);
-                t->loc.file.data(*pgs).cachedParseTree = true;
+                logger->trace("Reading from cache: {}", file.data(lgs).path());
+                auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached);
+                t->loc.file.data(lgs).cachedParseTree = true;
                 dslsInlined = move(t);
             }
         }
@@ -158,21 +159,20 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
         return empty;
     }
 
-    shared_ptr<ConcurrentBoundedQueue<pair<int, string>>> fileq;
+    shared_ptr<ConcurrentBoundedQueue<core::FileRef>> fileq;
 
     shared_ptr<BlockingBoundedQueue<thread_result>> resultq;
 
     {
         Timer timeit(logger, "creating index queues");
 
-        fileq = make_shared<ConcurrentBoundedQueue<pair<int, string>>>(frs.size());
+        fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(frs.size());
         resultq = make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
     }
 
-    int i = gs->filesUsed();
     for (auto f : frs) {
         logger->trace("enqueue: {}", f);
-        pair<int, string> job(i++, f);
+        auto job = gs->reserveFileRef(f);
         fileq->push(move(job), 1);
     }
 
@@ -190,19 +190,19 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
             logger->trace("worker done deep copying global state");
             thread_result threadResult;
             int processedByThread = 0;
-            pair<int, string> job;
+            core::FileRef job;
 
             {
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
-                        core::ErrorRegion errs(*lgs, core::FileRef(job.first));
+                        core::FileRef file = job;
+                        core::ErrorRegion errs(*lgs, file);
                         processedByThread++;
-                        string fileName = job.second;
+                        auto fileName = file.data(*lgs, true).path();
                         logger->trace("Reading: {}", fileName);
-                        int fileId = job.first;
                         string src;
                         try {
-                            src = FileOps::read(fileName.c_str());
+                            src = FileOps::read(fileName);
                         } catch (FileNotFoundException e) {
                             if (auto e =
                                     lgs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
@@ -215,10 +215,9 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
                         core::prodCounterAdd("types.input.bytes", src.size());
                         core::prodCounterInc("types.input.files");
 
-                        core::FileRef file;
                         {
                             core::UnfreezeFileTable unfreezeFiles(*lgs);
-                            file = lgs->enterFileAt(fileName, src, fileId);
+                            file = lgs->enterFileAt(fileName, src, file);
                         }
                         if (core::enable_counters) {
                             core::counterAdd("types.input.lines", file.data(*lgs).lineCount());
@@ -264,7 +263,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
-                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, cgs));
+                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore));
                     }
                 }
             }
@@ -281,7 +280,7 @@ vector<unique_ptr<ast::Expression>> index(shared_ptr<core::GlobalState> &gs, vec
         logger->trace("Done deep copying global state");
 
         for (auto f : mainThreadFiles) {
-            ret.emplace_back(indexOne(opts, *mainTheadGs, f, kvstore, cgs));
+            ret.emplace_back(indexOne(opts, *mainTheadGs, f, kvstore));
         }
 
         gs = move(mainTheadGs);

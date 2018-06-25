@@ -74,9 +74,10 @@ public:
     NameRef enterNameConstant(absl::string_view original);
 
     FileRef enterFile(absl::string_view path, absl::string_view source);
-    FileRef enterFileAt(absl::string_view path, absl::string_view source, int id);
+    FileRef enterFileAt(absl::string_view path, absl::string_view source, FileRef id);
     FileRef enterFile(std::shared_ptr<File> file);
-    FileRef enterNewFileAt(std::shared_ptr<File> file, int id);
+    FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
+    FileRef reserveFileRef(std::string path);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
 

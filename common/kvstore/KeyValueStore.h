@@ -22,6 +22,7 @@ class KeyValueStore {
     std::mutex readersLock;
 
     void clear();
+    void refreshMainTransaction();
 
 public:
     KeyValueStore(std::string version, std::string path);

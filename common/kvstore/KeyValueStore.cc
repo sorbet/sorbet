@@ -21,15 +21,7 @@ KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), wr
     if (rc != 0) {
         goto fail;
     }
-    rc = mdb_txn_begin(env, nullptr, 0, &txn);
-    if (rc != 0) {
-        goto fail;
-    }
-    rc = mdb_open(txn, nullptr, MDB_CREATE, &dbi);
-    if (rc != 0) {
-        goto fail;
-    }
-    readers[writerId] = txn;
+    refreshMainTransaction();
     {
         if (read(OLD_VERSION_KEY)) { // remove databases that use old(non-string) versioning scheme.
             clear();
@@ -111,8 +103,16 @@ void KeyValueStore::clear() {
     }
     int rc = mdb_drop(txn, dbi, 0);
     if (rc != 0) {
-        throw invalid_argument("failed to clear the database");
+        goto fail;
     }
+    rc = mdb_txn_commit(txn);
+    if (rc != 0) {
+        goto fail;
+    }
+    refreshMainTransaction();
+    return;
+fail:
+    throw invalid_argument("failed to clear the database");
 }
 
 absl::string_view KeyValueStore::readString(const absl::string_view key) {
@@ -132,6 +132,24 @@ void KeyValueStore::writeString(const absl::string_view key, string value) {
     memcpy(rawData.data(), &sz, sizeof(sz));
     memcpy(rawData.data() + sizeof(sz), value.data(), sz);
     write(key, move(rawData));
+}
+
+void KeyValueStore::refreshMainTransaction() {
+    if (writerId != this_thread::get_id()) {
+        throw invalid_argument("KeyValueStore can only write from thread that created it");
+    }
+    auto rc = mdb_txn_begin(env, nullptr, 0, &txn);
+    if (rc != 0) {
+        goto fail;
+    }
+    rc = mdb_open(txn, nullptr, MDB_CREATE, &dbi);
+    if (rc != 0) {
+        goto fail;
+    }
+    readers[writerId] = txn;
+    return;
+fail:
+    throw invalid_argument("failed to create transaction");
 }
 
 } // namespace sorbet
