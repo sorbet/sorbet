@@ -764,7 +764,7 @@ FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source)
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
-FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, int id) {
+FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, FileRef id) {
     int i = -1;
     for (auto &f : this->files) {
         ++i;
@@ -775,28 +775,28 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
         }
     }
 
-    return GlobalState::enterNewFileAt(
+    auto ret = GlobalState::enterNewFileAt(
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal),
         id);
+    ENFORCE(ret == id);
+    return ret;
 }
 
-FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, int id) {
+FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE(!fileTableFrozen);
-    ENFORCE(id >= this->files.size() || this->files[id]->source_type == File::Type::TombStone);
-    if (id >= this->files.size()) {
-        while (id > this->files.size()) {
-            files.emplace_back(make_shared<File>("", "", File::Type::TombStone));
-        }
-
-        core::FileRef result = this->enterFile(file);
-        ENFORCE(result.id() == id);
-        return result;
+    ENFORCE(id.id() >= this->files.size() || this->files[id.id()]->source_type == File::Type::TombStone);
+    if (id.id() >= this->files.size()) {
+        Error::raise("Should never happen, reserveFileRef should have created a tombstone");
     } else {
         // was a tombstone before.
-        this->files[id] = file;
+        this->files[id.id()] = file;
         core::FileRef result(id);
         return result;
     }
+}
+
+FileRef GlobalState::reserveFileRef(std::string path) {
+    return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::TombStone));
 }
 
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {

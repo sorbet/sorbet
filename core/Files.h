@@ -76,12 +76,11 @@ public:
     std::vector<int> &line_breaks() const;
     int lineCount() const;
     bool hadErrors() const;
-    void replaceFrom(const File &other);
 
 private:
-    std::string path_;
-    std::string source_;
-    std::string hashKey_;
+    const std::string path_;
+    const std::string source_;
+    const std::string hashKey_;
     mutable std::shared_ptr<std::vector<int>> line_breaks_;
     mutable bool hadErrors_ = false;
 

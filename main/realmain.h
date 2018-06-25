@@ -108,8 +108,7 @@ struct Options {
 
 void readOptions(Options &, int argc, const char *argv[]) throw(EarlyReturnWithCode);
 std::unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                          std::unique_ptr<KeyValueStore> &kvstore,
-                                          const std::shared_ptr<core::GlobalState> &pgs);
+                                          std::unique_ptr<KeyValueStore> &kvstore);
 std::vector<std::unique_ptr<ast::Expression>> index(std::shared_ptr<core::GlobalState> &gs,
                                                     std::vector<std::string> frs,
                                                     std::vector<core::FileRef> mainThreadFiles, const Options &opts,

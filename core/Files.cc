@@ -128,12 +128,5 @@ int File::lineCount() const {
     return line_breaks().size() - 1;
 }
 
-void File::replaceFrom(const File &other) {
-    ENFORCE(this->path_ == other.path_);
-    this->source_type = other.source_type;
-    this->source_ = other.source_;
-    this->line_breaks_ = other.line_breaks_;
-}
-
 } // namespace core
 } // namespace sorbet
