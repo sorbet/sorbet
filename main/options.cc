@@ -354,25 +354,6 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>());
         }
-
-        {
-            // check if opts.strictnessOverrides are all valid
-            auto stricntessChecksLeft = opts.strictnessOverrides;
-            for (auto &s : opts.inputFileNames) {
-                stricntessChecksLeft.erase(s);
-                if (stricntessChecksLeft.empty()) {
-                    break;
-                }
-            }
-            if (!stricntessChecksLeft.empty()) {
-                stringstream buf;
-                for (auto &e : stricntessChecksLeft) {
-                    buf << "  " << e.first << endl;
-                }
-                logger->error("Cannot find files with overriden strictness level:\n{}", buf.str());
-                throw EarlyReturnWithCode(1);
-            }
-        }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         throw EarlyReturnWithCode(1);
