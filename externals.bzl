@@ -157,3 +157,10 @@ package(default_visibility = ["//visibility:public"])
         commit = "82b21607e00913b16fe1c51bec80232d9d6de31c",
         remote = "https://github.com/bazelbuild/buildifier.git",
     )
+
+    new_git_repository(
+        name = "com_github_blake2_libb2",
+        commit = "9b1cc685934c78967a186851e3fdfde9f53a7858",
+        remote ="https://github.com/BLAKE2/libb2",
+        build_file="//:libb2.BUILD",
+    )

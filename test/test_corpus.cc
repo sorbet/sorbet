@@ -126,7 +126,7 @@ unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",  
 
 unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
                                                   unique_ptr<sorbet::ast::Expression> expr) {
-    auto saved = sorbet::core::serialize::Serializer::store(gs, expr);
+    auto saved = sorbet::core::serialize::Serializer::storeExpression(gs, expr);
     auto restored = sorbet::core::serialize::Serializer::loadExpression(gs, saved.data());
     return restored;
 }

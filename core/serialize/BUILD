@@ -7,6 +7,7 @@ cc_library(
     deps = [
         "//ast",
         "//core",
+        "@com_google_absl//absl/types:span",
         "@lizard",
     ],
 )

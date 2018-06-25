@@ -63,7 +63,6 @@ public:
 
     absl::string_view path() const;
     absl::string_view source() const;
-    absl::string_view hashKey() const;
     Type source_type;
 
     bool isPayload() const;
@@ -80,7 +79,6 @@ public:
 private:
     const std::string path_;
     const std::string source_;
-    const std::string hashKey_;
     mutable std::shared_ptr<std::vector<int>> line_breaks_;
     mutable bool hadErrors_ = false;
 
