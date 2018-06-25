@@ -280,11 +280,11 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         }
         if (raw["version"].as<bool>()) {
             if (Version::isReleaseBuild) {
-                logger->info("Ruby Typer{}{} git {}{} built on {}", Version::version, Version::codename,
-                             Version::build_scm_revision, Version::build_scm_status, Version::build_timestamp_string);
+                cout << "Ruby Typer" << Version::version << Version::codename << " git " << Version::build_scm_revision
+                     << Version::build_scm_status << " built on " << Version::build_timestamp_string;
             } else {
-                logger->info("Ruby Typer non-release build. Binary format version {}",
-                             core::serialize::Serializer::VERSION);
+                cout << "Ruby Typer non-release build"
+                     << ". Binary format version " << core::serialize::Serializer::VERSION << ".";
             }
             throw EarlyReturnWithCode(0);
         }
