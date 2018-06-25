@@ -37,17 +37,14 @@ fail:
     throw invalid_argument("failed to create database");
 }
 KeyValueStore::~KeyValueStore() noexcept(false) {
-    int rc;
-    rc = mdb_txn_commit(txn);
-    if (rc != 0) {
-        goto fail;
+    if (commited) {
+        return;
     }
+
+    mdb_txn_abort(txn);
     mdb_close(env, dbi);
     mdb_env_close(env);
     return;
-
-fail:
-    throw invalid_argument("failed to close the database");
 }
 
 void KeyValueStore::write(const absl::string_view key, vector<u1> value) {
@@ -150,6 +147,19 @@ void KeyValueStore::refreshMainTransaction() {
     return;
 fail:
     throw invalid_argument("failed to create transaction");
+}
+
+bool KeyValueStore::commit(unique_ptr<KeyValueStore> k) {
+    int rc;
+    k->commited = true;
+    rc = mdb_txn_commit(k->txn);
+
+    if (rc != 0) {
+        return false;
+    }
+    mdb_close(k->env, k->dbi);
+    mdb_env_close(k->env);
+    return true;
 }
 
 } // namespace sorbet

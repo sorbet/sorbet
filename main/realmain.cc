@@ -218,9 +218,10 @@ int realmain(int argc, const char *argv[]) {
         indexed = index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore);
     }
 
-    if (kvstore && gs->wasModified()) {
+    if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
         Timer timeit(logger, "caching global state");
         kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::store(*gs));
+        KeyValueStore::commit(move(kvstore));
     }
 
     { typecheck(gs, resolve(*gs, move(indexed), opts), opts, workers); }
