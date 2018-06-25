@@ -72,7 +72,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$4 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$4 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$4 : <impossible>\ldead=1\l<returnMethodTemp>$4: Integer(1)\l\l<finalReturn>: <impossible>\l\l<unconditional>\l"
+        label = "block[id=0]()\l<returnMethodTemp>$2 = 1 : Integer(1)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\ldead=1\l<returnMethodTemp>$2: Integer(1)\l\l<finalReturn>: <impossible>\l\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_#<static-init>" {
 --- typed-source start ---
 1
 # dead=1
-# <returnMethodTemp>$4: Integer(1)
+# <returnMethodTemp>$2: Integer(1)
 #
 # <finalReturn>: <impossible>
 --- typed-source end ---

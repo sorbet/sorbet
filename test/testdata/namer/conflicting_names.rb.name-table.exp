@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:A> < ::Module () @ test/testdata/namer/conflicting_names.rb:2
   class ::A (<constant:BasicObject>) @ test/testdata/namer/conflicting_names.rb:2
     class ::A::<Class:Foo> < ::<Class:Object> () @ test/testdata/namer/conflicting_names.rb:6

@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:Constants> < ::Module () @ test/testdata/namer/constant_types.rb:2
   class ::Constants (<constant:BasicObject>) @ test/testdata/namer/constant_types.rb:2
     static-field ::Constants#A -> Integer(1) @ test/testdata/namer/constant_types.rb:3

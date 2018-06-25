@@ -6,7 +6,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$65>()
+    def self.<static-init><<static-init>$64>()
       #<constant:A> = 91
     end
   end

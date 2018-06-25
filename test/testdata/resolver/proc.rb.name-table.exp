@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:TestProc> < ::<Class:Object> () @ test/testdata/resolver/proc.rb:3
   class ::TestProc < ::Object () @ test/testdata/resolver/proc.rb:3
     method ::TestProc#bad (x, y, z, w) -> NilClass @ test/testdata/resolver/proc.rb:22

@@ -122,11 +122,11 @@ class LSPLoop {
 
     /** GlobalState that is used for indexing. It effectively accumulates a huge nametable.
      * It is never discarded. */
-    std::shared_ptr<core::GlobalState> &initialGS;
+    std::unique_ptr<core::GlobalState> initialGS;
     /** A clone of `initialGs` that is used for typechecking.
      * Discarded on every clean run.
      */
-    std::shared_ptr<core::GlobalState> finalGs;
+    std::unique_ptr<core::GlobalState> finalGs;
     const Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> &logger;
@@ -176,9 +176,9 @@ class LSPLoop {
     std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
 
 public:
-    LSPLoop(std::shared_ptr<core::GlobalState> &gs, const Options &opts, std::shared_ptr<spd::logger> &logger,
+    LSPLoop(std::unique_ptr<core::GlobalState> gs, const Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers)
-        : initialGS(gs), opts(opts), logger(logger), workers(workers) {}
+        : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {}
     void runLSP();
 
     void invalidateAllErrors();

@@ -22,9 +22,9 @@ TEST(ParserTest, SimpleParse) { // NOLINT
     gs.initEmpty();
     sorbet::core::UnfreezeNameTable nameTableAccess(gs);
     sorbet::core::UnfreezeFileTable ft(gs);
-    sorbet::parser::Parser::run(gs, "<test>", "def hello_world; p :hello; end");
-    sorbet::parser::Parser::run(gs, "<test>", "class A; class B; end; end");
-    sorbet::parser::Parser::run(gs, "<test>", "class A::B; module B; end; end");
+    sorbet::parser::Parser::run(gs, "<test1>", "def hello_world; p :hello; end");
+    sorbet::parser::Parser::run(gs, "<test2>", "class A; class B; end; end");
+    sorbet::parser::Parser::run(gs, "<test3>", "class A::B; module B; end; end");
 }
 
 struct DedentTest {

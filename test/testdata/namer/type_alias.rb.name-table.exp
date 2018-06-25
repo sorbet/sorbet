@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:A> < ::Module () @ test/testdata/namer/type_alias.rb:2
   class ::A (<constant:BasicObject>) @ test/testdata/namer/type_alias.rb:2
     class ::A::<Class:C1> < ::<Class:Object> () @ test/testdata/namer/type_alias.rb:3

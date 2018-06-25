@@ -288,10 +288,6 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             }
             throw EarlyReturnWithCode(0);
         }
-        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP) {
-            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
-            throw EarlyReturnWithCode(1);
-        }
 
         string typed = raw["typed"].as<string>();
         opts.logLevel = raw.count("v");
@@ -321,6 +317,12 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.typedSource = raw["typed-source"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+
+        if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
+            logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());
+            throw EarlyReturnWithCode(1);
+        }
+
         if (!opts.typedSource.empty()) {
             if (opts.print.TypedSource) {
                 logger->error("`--typed-source " + opts.typedSource +

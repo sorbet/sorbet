@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:LetErrors> < ::<Class:Object> () @ test/testdata/resolver/let_errors.rb:2
     field ::<Class:LetErrors>#@b -> String @ test/testdata/resolver/let_errors.rb:12
   class ::LetErrors < ::Object () @ test/testdata/resolver/let_errors.rb:2

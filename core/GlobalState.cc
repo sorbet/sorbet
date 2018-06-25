@@ -742,21 +742,18 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
 
 FileRef GlobalState::enterFile(shared_ptr<File> file) {
     ENFORCE(!fileTableFrozen);
-    int idx = 0;
-    for (auto &f : this->files) {
+
+    DEBUG_ONLY(for (auto &f
+                    : this->files) {
         if (f) {
             if (f->path() == file->path()) {
-                break;
+                Error::raise("should never happen");
             }
         }
-        ++idx;
-    }
-    if (idx < files.size()) {
-        files[idx] = file;
-    } else {
-        files.emplace_back(file);
-    }
-    return FileRef(idx);
+    })
+
+    files.emplace_back(file);
+    return FileRef(filesUsed() - 1);
 }
 
 FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
@@ -765,14 +762,8 @@ FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source)
 }
 
 FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, FileRef id) {
-    int i = -1;
-    for (auto &f : this->files) {
-        ++i;
-        if (f && f->source_type != File::Type::TombStone) {
-            if (f->path() == path && f->source() == source) {
-                return i;
-            }
-        }
+    if (this->files[id.id()] && this->files[id.id()]->source_type != File::Type::TombStone) {
+        Error::raise("should never happen");
     }
 
     auto ret = GlobalState::enterNewFileAt(
@@ -784,15 +775,14 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
 
 FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE(!fileTableFrozen);
-    ENFORCE(id.id() >= this->files.size() || this->files[id.id()]->source_type == File::Type::TombStone);
-    if (id.id() >= this->files.size()) {
-        Error::raise("Should never happen, reserveFileRef should have created a tombstone");
-    } else {
-        // was a tombstone before.
-        this->files[id.id()] = file;
-        core::FileRef result(id);
-        return result;
-    }
+    ENFORCE(id.id() < this->files.size());
+    ENFORCE(this->files[id.id()]->source_type == File::Type::TombStone);
+    ENFORCE(this->files[id.id()]->path() == file->path());
+
+    // was a tombstone before.
+    this->files[id.id()] = file;
+    core::FileRef result(id);
+    return result;
 }
 
 FileRef GlobalState::reserveFileRef(std::string path) {
@@ -1099,6 +1089,32 @@ void GlobalState::markAsPayload() {
         }
         f->source_type = File::Type::Payload;
     }
+}
+
+std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalState> inWhat, core::FileRef whatFile,
+                                                      std::shared_ptr<File> withWhat) {
+    ENFORCE(whatFile.id() < inWhat->filesUsed());
+    ENFORCE(whatFile.data(*inWhat, true).path() == withWhat->path());
+    inWhat->files[whatFile.id()] = move(withWhat);
+    return inWhat;
+}
+
+FileRef GlobalState::findFileByPath(absl::string_view path) {
+    auto filesTotal = filesUsed();
+    for (unsigned int i = 1; i < filesTotal; i++) {
+        core::FileRef fref(i);
+        const auto &file = fref.data(*this, true);
+        if (file.path() == path) {
+            return fref;
+        }
+    }
+    return core::FileRef();
+}
+
+std::unique_ptr<GlobalState> GlobalState::markFileAsTombStone(std::unique_ptr<GlobalState> what, core::FileRef fref) {
+    ENFORCE(fref.id() < what->filesUsed());
+    what->files[fref.id()]->source_type = File::Type::TombStone;
+    return what;
 }
 
 } // namespace core

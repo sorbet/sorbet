@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:Test> < ::<Class:Object> () @ test/testdata/todo/const_in_block.rb:2
     method ::<Class:Test>#<block> () @ test/testdata/todo/const_in_block.rb:3
       class ::<Class:Test>#<block>::<Class:A> < ::<Class:Object> () @ test/testdata/todo/const_in_block.rb:4

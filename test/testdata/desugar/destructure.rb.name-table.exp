@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:Destructure> < ::<Class:Object> () @ test/testdata/desugar/destructure.rb:2
   class ::Destructure < ::Object () @ test/testdata/desugar/destructure.rb:2
     method ::Destructure#f (<destructure>$2, z) @ test/testdata/desugar/destructure.rb:3

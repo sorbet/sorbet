@@ -78,6 +78,10 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
     FileRef reserveFileRef(std::string path);
+    static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, core::FileRef whatFile,
+                                                    std::shared_ptr<File> withWhat);
+    static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, core::FileRef fref);
+    FileRef findFileByPath(absl::string_view path);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
 

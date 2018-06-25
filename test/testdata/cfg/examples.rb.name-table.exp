@@ -1,4 +1,4 @@
-class ::<root> < ::Object () @ -e:1
+class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:Examples> < ::<Class:Object> () @ test/testdata/cfg/examples.rb:2
   class ::Examples < ::Object () @ test/testdata/cfg/examples.rb:2
     method ::Examples#i_like_exps () @ test/testdata/cfg/examples.rb:11
