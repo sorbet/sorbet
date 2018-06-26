@@ -35,6 +35,11 @@ string sorbet::FileOps::read(const absl::string_view filename) {
     // Determine the file length
     string src;
     fin.seekg(0, ios::end);
+    if (!fin.good()) {
+        // Probably a directory or something else other than a normal
+        // file. Treat it as nonexistent.
+        throw sorbet::FileNotFoundException();
+    }
     src.reserve(fin.tellg());
     fin.seekg(0, ios::beg);
 
