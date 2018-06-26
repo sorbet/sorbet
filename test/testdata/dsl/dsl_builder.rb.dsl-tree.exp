@@ -54,6 +54,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.unsafe(nil)
     end
 
+    self(<constant:<todo sym>>).sig({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+
+    def self.implied_string<<constant:<todo sym>>>(implied_string = ::T.untyped())
+      <emptyTree>
+    end
+
+    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+    def self.get_implied_string<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
+    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+
+    def implied_string<<constant:<todo sym>>>()
+      ::T.unsafe(nil)
+    end
+
     self(<constant:<todo sym>>).sig({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
 
     def self.root_const<<constant:<todo sym>>>(root_const)
@@ -76,9 +94,13 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:TestChild><<constant:<todo sym>>> < (<emptyTree>::<constant:TestDSLBuilder>)
     self(<constant:<todo sym>>).opt_string("hi")
 
+    self(<constant:<todo sym>>).opt_string()
+
     self(<constant:<todo sym>>).opt_string(:"nope")
 
     self(<constant:<todo sym>>).opt_int_defaulted(17)
+
+    self(<constant:<todo sym>>).implied_string()
 
     <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
 

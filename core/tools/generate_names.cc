@@ -171,6 +171,7 @@ NameDef names[] = {
 
     {"dslOptional", "dsl_optional", DSL},
     {"dslRequired", "dsl_required", DSL},
+    {"implied", DSL},
 
     {"wrapInstance", "wrap_instance", DSL},
 
