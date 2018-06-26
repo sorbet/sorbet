@@ -105,7 +105,7 @@ public:
 };
 
 namespace serialize {
-class Serializer;
+class SerializerImpl;
 }
 
 class Symbol final {
@@ -571,7 +571,7 @@ public:
     const IntrinsicMethod *intrinsic = nullptr;
 
 private:
-    friend class serialize::Serializer;
+    friend class serialize::SerializerImpl;
     FuzzySearchResult findMemberFuzzyMatchUTF8(const GlobalState &gs, NameRef name, int betterThan = -1) const;
     std::vector<FuzzySearchResult> findMemberFuzzyMatchConstant(const GlobalState &gs, NameRef name,
                                                                 int betterThan = -1) const;

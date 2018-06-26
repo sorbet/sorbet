@@ -22,7 +22,8 @@ struct ErrorQueue;
 
 namespace serialize {
 class Serializer;
-}
+class SerializerImpl;
+} // namespace serialize
 
 class GlobalState final {
     friend Name;
@@ -35,6 +36,7 @@ class GlobalState final {
     friend ErrorRegion;
     friend ErrorBuilder;
     friend serialize::Serializer;
+    friend serialize::SerializerImpl;
     friend class UnfreezeNameTable;
     friend class UnfreezeSymbolTable;
     friend class UnfreezeFileTable;
