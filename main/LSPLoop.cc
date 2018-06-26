@@ -229,6 +229,9 @@ void LSPLoop::runLSP() {
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
     auto &sym = symRef.data(*finalGs);
+    if (!sym.definitionLoc.file.exists()) {
+        return nullptr;
+    }
     rapidjson::Value result;
     result.SetObject();
     result.AddMember("name", sym.name.show(*finalGs), alloc);
