@@ -32,6 +32,7 @@ build:dbg --config=debugsymbols
 build:dbg --config=nopie
 
 # release version: optimized, with debug symbols and version information
+build:release --define release=true
 build:release --compilation_mode=opt
 build:release --config=debugsymbols
 build:release --config=nopie

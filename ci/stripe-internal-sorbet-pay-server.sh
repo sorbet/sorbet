@@ -18,6 +18,15 @@ maxrss: %M
     release-build \
     bazel build main:sorbet --config=release
 
+# Validate the build
+VERSION=$(./bazel-bin/main/sorbet --version)
+EXPECTED_VERSION='Ruby Typer git [0-9a-f]{40} .*'
+if ! [[ $VERSION =~ $EXPECTED_VERSION ]]; then
+    git status
+    echo "Bad Version: $VERSION"
+    exit 1
+fi
+
 mkdir -p /build/bin
 cp bazel-bin/main/sorbet /build/bin
 
