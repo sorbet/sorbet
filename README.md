@@ -27,11 +27,6 @@ It should be statically linked and have no dependencies, so feel free to copy it
 
 In order to build a release version please run `./bazel build //main:sorbet --config=release`.
 
-# Security concerns
-
-Note that in order to speed up startup time, `Sorbet` preloads some ruby code into itself.
-Please do not spread those executables outside of Stripe.
-
 # Developing on `Sorbet`
 
 We build using [bazel](https://bazel.build/); Run: 
