@@ -16,14 +16,14 @@ set -e
 
 # The code below presents an implementation that works for git repository
 git_rev=$(git rev-parse HEAD)
-echo "BUILD_SCM_REVISION ${git_rev}"
+echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
 
 # Check whether there are any uncommited changes
 set +e
 if git diff-index --quiet HEAD --; then
-    tree_status=""
+    clean="1"
 else
-    tree_status="-dirty"
+    clean="0"
 fi
 set -e
-echo "BUILD_SCM_STATUS ${tree_status}"
+echo "STABLE_BUILD_SCM_CLEAN ${clean}"
