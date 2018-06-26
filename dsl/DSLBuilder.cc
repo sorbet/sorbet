@@ -15,6 +15,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     vector<unique_ptr<ast::Expression>> empty;
 
     bool nilable = false;
+    bool implied = false;
     unique_ptr<ast::Expression> type;
     core::NameRef name = core::NameRef::noName();
 
@@ -48,6 +49,9 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         if (ASTUtil::getHashValue(ctx, opts, core::Names::default_())) {
             nilable = false;
         }
+        if (ASTUtil::getHashValue(ctx, opts, core::Names::implied())) {
+            implied = true;
+        }
     }
 
     auto loc = send->loc;
@@ -57,7 +61,12 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     // def self.<prop>
     stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, name), ASTUtil::dupType(type.get()),
                                      ast::MK::Ident(loc, core::Symbols::NilClass())));
-    stats.emplace_back(ast::MK::Method1(loc, name, ast::MK::Local(loc, name), ast::MK::EmptyTree(loc),
+    unique_ptr<ast::Reference> arg = ast::MK::Local(loc, name);
+    if (implied) {
+        auto default_ = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
+        arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));
+    }
+    stats.emplace_back(ast::MK::Method1(loc, name, move(arg), ast::MK::EmptyTree(loc),
                                         ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     // def self.get_<prop>
