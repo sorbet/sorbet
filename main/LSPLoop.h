@@ -156,9 +156,11 @@ class LSPLoop {
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
     bool handleReplies(rapidjson::Document &d);
-    /** Invalidate all currently cached trees and re-index them.
+
+    void addNewFile(std::shared_ptr<core::File> file);
+    /** Invalidate all currently cached trees and re-index them from file system.
      * This runs code that is not considered performance critical and this is expected to be slow */
-    void reIndex(bool initial = false);
+    void reIndexFromFileSystem();
     /** Conservatively rerun entire pipeline without caching any trees */
     void runSlowPath(std::vector<std::shared_ptr<core::File>> changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */

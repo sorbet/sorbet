@@ -333,15 +333,16 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
             }
         }
 
-        if (raw["color"].as<string>() == "auto") {
+        if ((raw["color"].as<string>() == "never") || opts.runLSP) {
+            core::ErrorColors::disableColors();
+        } else if (raw["color"].as<string>() == "auto") {
             if (rang::rang_implementation::isTerminal(cerr.rdbuf())) {
                 core::ErrorColors::enableColors();
             }
         } else if (raw["color"].as<string>() == "always") {
             core::ErrorColors::enableColors();
-        } else if (raw["color"].as<string>() == "never") {
-            core::ErrorColors::disableColors();
         }
+
         if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Stripe) {
             logger->error("--suggest-typed requires --typed=typed or higher.");
             throw EarlyReturnWithCode(1);
