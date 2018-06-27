@@ -1,4 +1,5 @@
 #include "LSPLoop.h"
+#include "../core/Files.h"
 #include "absl/strings/str_cat.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
@@ -137,7 +138,7 @@ void LSPLoop::runLSP() {
                 // initialize ourselves
                 {
                     Timer timeit(logger, "index");
-                    reIndex(true);
+                    reIndexFromFileSystem();
                     vector<shared_ptr<core::File>> changedFiles;
                     runSlowPath(move(changedFiles));
                     pushErrors();
@@ -565,22 +566,35 @@ bool LSPLoop::handleReplies(Document &d) {
     return false;
 }
 
-void LSPLoop::reIndex(bool initial) {
-    indexed.clear();
-    vector<core::FileRef> inputFiles;
-    vector<string> inputNames;
-    if (!initial) {
-        for (int i = 1; i < initialGS->filesUsed(); i++) {
-            core::FileRef f(i);
-            if (f.data(*initialGS, true).source_type == core::File::Type::Normal) {
-                inputFiles.emplace_back(f);
-            }
-        }
+void LSPLoop::addNewFile(shared_ptr<core::File> file) {
+    core::FileRef fref = initialGS->findFileByPath(file->path());
+    if (fref.exists()) {
+        initialGS = core::GlobalState::replaceFile(move(initialGS), fref, move(file));
     } else {
-        inputNames = opts.inputFileNames;
+        fref = initialGS->enterFile(move(file));
     }
 
-    for (auto &t : index(initialGS, inputNames, inputFiles, opts, workers, kvstore)) {
+    std::vector<std::string> emptyInputNames;
+    auto t = indexOne(opts, *initialGS, fref, kvstore);
+    int id = t->loc.file.id();
+    if (id >= indexed.size()) {
+        indexed.resize(id + 1);
+    }
+    indexed[id] = move(t);
+}
+
+void LSPLoop::reIndexFromFileSystem() {
+    indexed.clear();
+    unordered_set<string> fileNamesDedup(opts.inputFileNames.begin(), opts.inputFileNames.end());
+    for (int i = 1; i < initialGS->filesUsed(); i++) {
+        core::FileRef f(i);
+        if (f.data(*initialGS, true).source_type == core::File::Type::Normal) {
+            fileNamesDedup.insert((string)f.data(*initialGS, true).path());
+        }
+    }
+    std::vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
+    std::vector<core::FileRef> emptyInputFiles;
+    for (auto &t : index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore)) {
         int id = t->loc.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
@@ -597,27 +611,20 @@ void LSPLoop::invalidateAllErrors() {
 void LSPLoop::runSlowPath(std::vector<shared_ptr<core::File>> changedFiles) {
     logger->info("Taking slow path");
     invalidateAllErrors();
+
+    std::vector<core::FileRef> changedFileRefs;
+    indexed.reserve(indexed.size() + changedFiles.size());
+    for (auto &t : changedFiles) {
+        addNewFile(t);
+    }
+
     vector<unique_ptr<ast::Expression>> indexedCopies;
     for (const auto &tree : indexed) {
         if (tree) {
             indexedCopies.emplace_back(tree->deepCopy());
         }
     }
-    std::vector<core::FileRef> changedFileRefs;
-    for (auto &t : changedFiles) {
-        auto existing = initialGS->findFileByPath(t->path());
-        if (existing.exists()) {
-            initialGS = core::GlobalState::replaceFile(move(initialGS), existing, move(t));
-            changedFileRefs.emplace_back(existing);
-        } else {
-            changedFileRefs.emplace_back(initialGS->enterFile(move(t)));
-        }
-    }
 
-    std::vector<std::string> emptyInputNames;
-    for (auto &t : index(initialGS, emptyInputNames, changedFileRefs, opts, workers, kvstore)) {
-        indexedCopies.emplace_back(move(t));
-    }
     finalGs = initialGS->deepCopy(true);
     typecheck(finalGs, resolve(*finalGs, move(indexedCopies), opts), opts, workers);
 }
