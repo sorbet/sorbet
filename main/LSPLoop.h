@@ -63,6 +63,7 @@ const LSPMethod RegisterCapability{"client/registerCapability", false, LSPMethod
 const LSPMethod UnRegisterCapability{"client/unregisterCapability", false, LSPMethod::Kind::ServerInitiated};
 const LSPMethod DidChangeWatchedFiles{"workspace/didChangeWatchedFiles", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod PushDiagnostics{"textDocument/publishDiagnostics", true, LSPMethod::Kind::ServerInitiated};
+const LSPMethod TextDocumentDidOpen{"textDocument/didOpen", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};

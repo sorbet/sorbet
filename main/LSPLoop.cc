@@ -134,6 +134,27 @@ void LSPLoop::runLSP() {
                     pushErrors();
                 }
             }
+            if (method == LSP::TextDocumentDidOpen) {
+                Timer timeit(logger, "handle open");
+                vector<shared_ptr<core::File>> files;
+                auto &edits = d["params"];
+                ENFORCE(edits.IsObject());
+                /*
+                  {
+                  "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
+                    "contentChanges":[{"text":"..."}]
+                    */
+                string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+                string content(edits["textDocument"]["text"].GetString(),
+                               edits["textDocument"]["text"].GetStringLength());
+                if (startsWith(uri, rootUri)) {
+                    files.emplace_back(
+                        make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+
+                    tryFastPath(files);
+                    pushErrors();
+                }
+            }
             if (method == LSP::Inititalized) {
                 // initialize ourselves
                 {
