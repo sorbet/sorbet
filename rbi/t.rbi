@@ -43,18 +43,18 @@ module T::Generic
   def [](*types); end
 end
 
-class T::Array
+module T::Array
   def self.[](*types); end
 end
-class T::Hash
+module T::Hash
   def self.[](*types); end
 end
-class T::Set
+module T::Set
   def self.[](*types); end
 end
-class T::Range
+module T::Range
   def self.[](*types); end
 end
-class T::Enumerable
+module T::Enumerable
   def self.[](*types); end
 end
