@@ -129,7 +129,7 @@ export LSAN_OPTIONS
     cp bazelrc-jenkins .bazelrc
     /usr/local/bin/junit-script-output \
         sanitized-build \
-        bazel build main:sorbet -c opt --config=ci --config=sanitize
+        bazel build main:sorbet --config=ci
 )
 
 TIMEFILE2=$(mktemp)
