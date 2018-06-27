@@ -47,6 +47,11 @@ build:ci --copt=-DFORCE_DEBUG
 build:ci --copt=-g3
 build:ci --cxxopt=-DFORCE_DEBUG
 build:ci --cxxopt=-g3
+build:ci --config=sanitize
+build:ci --copt=-O2
+build:ci --cxxopt=-O2
+build:ci --config=debugsymbols
+build:ci --config=nopie
 
 # Used to build --stamp build that contains version and build time.
 build --workspace_status_command=tools/buildstamp/get_workspace_status
