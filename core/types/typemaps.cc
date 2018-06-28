@@ -9,7 +9,7 @@ using namespace sorbet;
 using namespace core;
 using namespace std;
 
-shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> what, vector<SymbolRef> params,
+shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Type> &what, vector<SymbolRef> params,
                                     const vector<shared_ptr<Type>> &targs) {
     ENFORCE(what.get());
     auto t = what->_instantiate(ctx, params, targs);
@@ -19,7 +19,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> wh
     return what;
 }
 
-shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> what, const TypeConstraint &tc) {
+shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Type> &what, const TypeConstraint &tc) {
     ENFORCE(tc.isSolved());
     if (tc.isEmpty()) {
         return what;
@@ -32,7 +32,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, shared_ptr<core::Type> wh
     return what;
 }
 
-shared_ptr<Type> Types::approximate(core::Context ctx, shared_ptr<core::Type> what, const TypeConstraint &tc) {
+shared_ptr<Type> Types::approximate(core::Context ctx, const shared_ptr<core::Type> &what, const TypeConstraint &tc) {
     ENFORCE(what.get());
     auto t = what->_approximate(ctx, tc);
     if (t) {
@@ -435,8 +435,8 @@ std::shared_ptr<Type> SelfType::_instantiate(core::Context ctx, std::vector<Symb
     return nullptr;
 }
 
-std::shared_ptr<Type> Types::replaceSelfType(core::Context ctx, std::shared_ptr<core::Type> what,
-                                             std::shared_ptr<core::Type> receiver) {
+std::shared_ptr<Type> Types::replaceSelfType(core::Context ctx, const std::shared_ptr<core::Type> &what,
+                                             const std::shared_ptr<core::Type> &receiver) {
     ENFORCE(what.get());
     auto t = what->_replaceSelfType(ctx, receiver);
     if (t) {

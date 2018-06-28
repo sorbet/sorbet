@@ -10,9 +10,10 @@ namespace core {
 
 using namespace std;
 
-shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2);
+shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2);
 
-shared_ptr<core::Type> core::Types::any(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::any(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                        const std::shared_ptr<Type> &t2) {
     auto ret = lub(ctx, t1, t2);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
                                                 " was lubbing with " + t2->toString(ctx));
@@ -37,14 +38,15 @@ shared_ptr<core::Type> core::Types::any(core::Context ctx, shared_ptr<Type> t1, 
     return ret;
 }
 
-shared_ptr<core::Type> underlying(shared_ptr<Type> t1) {
+const shared_ptr<core::Type> &underlying(const std::shared_ptr<Type> &t1) {
     if (auto *f = cast_type<ProxyType>(t1.get())) {
         return f->underlying;
     }
     return t1;
 }
 
-shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> lubDistributeOr(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                       const std::shared_ptr<Type> &t2) {
     auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
     shared_ptr<core::Type> n1 = Types::any(ctx, o1->left, t2);
@@ -76,7 +78,8 @@ shared_ptr<core::Type> lubDistributeOr(core::Context ctx, shared_ptr<Type> t1, s
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
-shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                        const std::shared_ptr<Type> &t2) {
     auto *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
     shared_ptr<core::Type> n1 = Types::all(ctx, a1->left, t2);
@@ -110,7 +113,8 @@ shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, shared_ptr<Type> t1, 
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
-shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> dropLubComponents(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                         const std::shared_ptr<Type> &t2) {
     if (auto *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
@@ -136,7 +140,8 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, shared_ptr<Type> t1,
     return t1;
 }
 
-shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                        const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         core::categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -208,8 +213,9 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         }
         if (ltr) {
             swap(a1, a2);
-            swap(t1, t2);
         }
+        const std::shared_ptr<Type> &t1s = ltr ? t2 : t1;
+        const std::shared_ptr<Type> &t2s = ltr ? t1 : t2;
         // now a1 <: a2
 
         vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
@@ -228,7 +234,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
                 newTargs.push_back(Types::any(ctx, a1->targs[i], a2->targs[j]));
             } else if (idx.data(ctx).isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
-                    return OrType::make_shared(t1, t2);
+                    return OrType::make_shared(t1s, t2s);
                 }
                 if (a1->targs[i]->isUntyped()) {
                     newTargs.push_back(a1->targs[i]);
@@ -245,7 +251,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
         if (changed) {
             return make_shared<AppliedType>(a2->klass, newTargs);
         } else {
-            return t2;
+            return t2s;
         }
     }
 
@@ -418,7 +424,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, shared_ptr<Type> t1, 
     return lubGround(ctx, t1, t2);
 }
 
-shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -465,7 +471,7 @@ shared_ptr<core::Type> lubGround(core::Context ctx, shared_ptr<Type> t1, shared_
     }
 }
 
-shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> glbGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -514,7 +520,8 @@ shared_ptr<core::Type> glbGround(core::Context ctx, shared_ptr<Type> t1, shared_
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<core::Type> core::Types::all(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::all(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                        const std::shared_ptr<Type> &t2) {
     auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
@@ -539,7 +546,8 @@ shared_ptr<core::Type> core::Types::all(core::Context ctx, shared_ptr<Type> t1, 
     return ret;
 }
 
-shared_ptr<core::Type> core::Types::glb(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                        const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         core::categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -855,8 +863,8 @@ bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRe
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, shared_ptr<Type> t1,
-                                    shared_ptr<Type> t2) {
+bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
+                                    const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1060,8 +1068,8 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, s
     }
 }
 
-bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, shared_ptr<Type> t1,
-                                           shared_ptr<Type> t2) {
+bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1135,7 +1143,7 @@ bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &co
     return isSubTypeUnderConstraintSingle(ctx, constr, t1, t2); // 1
 }
 
-bool core::Types::equiv(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool core::Types::equiv(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 

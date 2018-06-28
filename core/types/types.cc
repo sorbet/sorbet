@@ -120,7 +120,7 @@ shared_ptr<Type> Types::falsyTypes() {
     return res;
 }
 
-shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, shared_ptr<Type> from, core::SymbolRef klass) {
+shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, const std::shared_ptr<Type> &from, core::SymbolRef klass) {
     shared_ptr<Type> result;
 
     if (from->isUntyped()) {
@@ -160,7 +160,7 @@ shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, shared_ptr<Type> from,
     return result;
 }
 
-bool Types::canBeTruthy(core::Context ctx, shared_ptr<Type> what) {
+bool Types::canBeTruthy(core::Context ctx, const std::shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -169,7 +169,7 @@ bool Types::canBeTruthy(core::Context ctx, shared_ptr<Type> what) {
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
-bool Types::canBeFalsy(core::Context ctx, shared_ptr<Type> what) {
+bool Types::canBeFalsy(core::Context ctx, const std::shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -178,7 +178,8 @@ bool Types::canBeFalsy(core::Context ctx, shared_ptr<Type> what) {
                             what); // check if inhabited by falsy values
 }
 
-shared_ptr<Type> Types::approximateSubtract(core::Context ctx, shared_ptr<Type> from, shared_ptr<Type> what) {
+shared_ptr<Type> Types::approximateSubtract(core::Context ctx, const std::shared_ptr<Type> &from,
+                                            const std::shared_ptr<Type> &what) {
     shared_ptr<Type> result;
     typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
              [&](OrType *o) {
@@ -188,7 +189,7 @@ shared_ptr<Type> Types::approximateSubtract(core::Context ctx, shared_ptr<Type> 
     return result;
 }
 
-shared_ptr<Type> Types::dropLiteral(shared_ptr<Type> tp) {
+shared_ptr<Type> Types::dropLiteral(const std::shared_ptr<Type> &tp) {
     if (auto *a = core::cast_type<LiteralType>(tp.get())) {
         return a->underlying;
     }
@@ -203,7 +204,7 @@ shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elem
     return acc;
 }
 
-shared_ptr<Type> Types::arrayOf(core::Context ctx, shared_ptr<Type> elem) {
+shared_ptr<Type> Types::arrayOf(core::Context ctx, const std::shared_ptr<Type> &elem) {
     vector<shared_ptr<Type>> targs{move(elem)};
     return make_shared<AppliedType>(core::Symbols::Array(), targs);
 }
@@ -469,7 +470,7 @@ shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef 
     return instantiate(ctx, original.resultType, currentAlignment, targs);
 }
 
-shared_ptr<core::Type> Types::getProcReturnType(core::Context ctx, shared_ptr<core::Type> procType) {
+shared_ptr<core::Type> Types::getProcReturnType(core::Context ctx, const shared_ptr<core::Type> &procType) {
     if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
         return core::Types::untyped();
     }
@@ -481,7 +482,7 @@ shared_ptr<core::Type> Types::getProcReturnType(core::Context ctx, shared_ptr<co
     return applied->targs.front();
 }
 
-bool Types::isSubType(core::Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool Types::isSubType(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     return isSubTypeUnderConstraint(ctx, core::TypeConstraint::EmptyFrozenConstraint, t1, t2);
 }
 
