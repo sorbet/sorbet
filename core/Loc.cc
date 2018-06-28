@@ -47,6 +47,14 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
     return pos;
 }
 
+u4 Loc::pos2Offset(core::FileRef source, Loc::Detail pos, const core::GlobalState &gs) {
+    const core::File &file = source.data(gs);
+
+    auto l = pos.line - 1;
+    auto lineOffset = file.line_breaks()[l];
+    return lineOffset + pos.column;
+}
+
 pair<Loc::Detail, Loc::Detail> Loc::position(const core::GlobalState &gs) const {
     Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
     Loc::Detail end(offset2Pos(this->file, end_pos, gs));
@@ -147,6 +155,10 @@ string Loc::filePosToString(const GlobalState &gs) const {
         // pos.second.line; is intentionally not printed so that iterm2 can open file name:line_number as links
     }
     return buf.str();
+}
+
+bool Loc::contains(const Loc &other) const {
+    return file == other.file && other.begin_pos >= begin_pos && other.end_pos <= end_pos;
 }
 
 bool Loc::operator==(const Loc &rhs) const {

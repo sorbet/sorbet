@@ -178,7 +178,7 @@ void LSPLoop::runLSP() {
                 result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
                 string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
-                                   "\"workspaceSymbolProvider\": true}}";
+                                   "\"workspaceSymbolProvider\": true, \"definitionProvider\": true}}";
                 Document temp;
                 auto &r = temp.Parse(serverCap.c_str());
                 ENFORCE(!r.HasParseError());
@@ -213,6 +213,47 @@ void LSPLoop::runLSP() {
                         }
                     }
                 }
+            } else if (method == LSP::TextDocumentDefinition) {
+                result.SetArray();
+
+                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
+                                  d["params"]["textDocument"]["uri"].GetStringLength());
+                auto fref = uri2FileRef(uri);
+
+                core::Loc::Detail reqPos;
+                reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
+                reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
+                auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
+
+                initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+
+                vector<shared_ptr<core::File>> files;
+                files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+                tryFastPath(files);
+
+                initialGS->lspInfoQueryLoc = core::Loc::none();
+
+                auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+                if (!queryResponses.empty()) {
+                    auto resp = std::move(queryResponses[0]);
+
+                    if (resp->kind == core::QueryResponse::Kind::SEND) {
+                        for (auto &component : resp->dispatchComponents) {
+                            if (component.method.exists()) {
+                                result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                            }
+                        }
+                    } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
+                        result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
+                    } else {
+                        for (auto &component : resp->dispatchComponents) {
+                            if (component.method.exists()) {
+                                result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                            }
+                        }
+                    }
+                }
+
             } else {
                 ENFORCE(!method.isSupported, "failing a supported method");
                 errorCode = (int)LSP::LSPErrorCodes::MethodNotFound;

@@ -29,7 +29,7 @@ cc_library(
     ],
     hdrs = [
         "core.h",
-    ] + glob(["errors/*.h"]) + NAME_HEADERS,
+    ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]) + NAME_HEADERS,
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [

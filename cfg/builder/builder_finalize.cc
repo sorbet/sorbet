@@ -11,6 +11,10 @@ namespace sorbet {
 namespace cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
+    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+        return;
+    }
+
     sanityCheck(ctx, cfg);
     bool changed = true;
     while (changed) {
@@ -139,6 +143,10 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
+    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+        return;
+    }
+
     vector<unordered_map<core::LocalVariable, core::LocalVariable>> outAliases;
 
     outAliases.resize(cfg.maxBasicBlockId);

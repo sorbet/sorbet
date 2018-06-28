@@ -693,6 +693,24 @@ shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<
     return applied->targs.front();
 }
 
+void Environment::setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
+                                   core::DispatchResult::ComponentVec dispatchComponents,
+                                   std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
+                                   core::TypeAndOrigins retType) {
+    auto queryResponse = make_unique<core::QueryResponse>();
+    queryResponse->kind = kind;
+    queryResponse->dispatchComponents = std::move(dispatchComponents);
+    queryResponse->constraint = constraint;
+    queryResponse->termLoc = termLoc;
+    queryResponse->retType = retType;
+
+    core::ErrorQueueMessage msg;
+    msg.kind = core::ErrorQueueMessage::Kind::QueryResponse;
+    msg.queryResponse = std::move(queryResponse);
+
+    ctx.state.errorQueue->push(std::move(msg));
+}
+
 shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount,
                                                    int bindMinLoops, KnowledgeFilter &knowledgeFilter,
                                                    core::TypeConstraint &constr) {
@@ -702,6 +720,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             cfg::isa_instruction<cfg::Alias>(bind.value.get()) || cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
 
         bool checkFullyDefined = true;
+        bool lspQueryMatch = !ctx.state.lspInfoQueryLoc.is_none() && bind.loc.contains(ctx.state.lspInfoQueryLoc);
 
         typecase(
             bind.value.get(),
@@ -734,6 +753,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             ctx.state._error(move(err));
                         }
                     }
+
+                    if (lspQueryMatch) {
+                        setQueryResponse(ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
+                                         nullptr, bind.loc, tp);
+                    }
                 }
                 tp.origins.push_back(bind.loc);
             },
@@ -741,6 +765,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 auto typeAndOrigin = getOrCreateTypeAndOrigin(ctx, i->what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
+
+                if (lspQueryMatch) {
+                    setQueryResponse(ctx, core::QueryResponse::Kind::IDENT, {}, nullptr, bind.loc, tp);
+                }
+
                 ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias *a) {
@@ -769,6 +798,13 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     }
                 } else {
                     Error::notImplemented();
+                }
+
+                if (lspQueryMatch) {
+                    core::DispatchResult::ComponentVec components;
+                    components.push_back(core::DispatchComponent{tp.type, symbol, {}});
+                    setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, std::move(components), nullptr, bind.loc,
+                                     tp);
                 }
                 pinnedTypes[bind.bind] = tp;
             },

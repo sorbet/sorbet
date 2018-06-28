@@ -4,6 +4,19 @@ using namespace std;
 
 namespace sorbet {
 namespace core {
+vector<unique_ptr<QueryResponse>> ErrorQueue::drainQueryResponses() {
+    ENFORCE(owner == this_thread::get_id());
+    vector<unique_ptr<QueryResponse>> res;
+
+    ErrorQueueMessage msg;
+    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
+        if (msg.kind == ErrorQueueMessage::Kind::QueryResponse) {
+            res.emplace_back(move(msg.queryResponse));
+        }
+    }
+    return res;
+}
+
 vector<unique_ptr<BasicError>> ErrorQueue::drainErrors() {
     ENFORCE(owner == this_thread::get_id());
     vector<unique_ptr<BasicError>> res;
