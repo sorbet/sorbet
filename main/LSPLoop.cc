@@ -177,7 +177,8 @@ void LSPLoop::runLSP() {
             if (method == LSP::Initialize) {
                 result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-                string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true}}";
+                string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
+                                   "\"workspaceSymbolProvider\": true}}";
                 Document temp;
                 auto &r = temp.Parse(serverCap.c_str());
                 ENFORCE(!r.HasParseError());
@@ -199,6 +200,19 @@ void LSPLoop::runLSP() {
                     }
                 }
 
+            } else if (method == LSP::WorkspaceSymbolsRequest) {
+                result.SetArray();
+                string searchString = d["params"]["query"].GetString();
+
+                for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
+                    core::SymbolRef ref(finalGs.get(), idx);
+                    if (ref.data(*finalGs).name.show(*finalGs).compare(searchString) == 0) {
+                        auto data = symbolRef2SymbolInformation(ref);
+                        if (data) {
+                            result.PushBack(move(*data), alloc);
+                        }
+                    }
+                }
             } else {
                 ENFORCE(!method.isSupported, "failing a supported method");
                 errorCode = (int)LSP::LSPErrorCodes::MethodNotFound;
@@ -420,10 +434,10 @@ Value LSPLoop::loc2Range(core::Loc loc) {
 }
 
 Value LSPLoop::loc2Location(core::Loc loc) {
-    //        interface Location {
-    //                uri: DocumentUri;
-    //                range: Range;
-    //        }
+    //  interface Location {
+    //      uri: DocumentUri;
+    //      range: Range;
+    //  }
     Value ret;
     ret.SetObject();
 

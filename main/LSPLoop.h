@@ -67,6 +67,7 @@ const LSPMethod TextDocumentDidOpen{"textDocument/didOpen", true, LSPMethod::Kin
 const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
+const LSPMethod WorkspaceSymbolsRequest{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
 
 /** List of all LSP Methods that we are aware of */
 const LSPMethod ALL[] = {CancelRequest,
@@ -80,7 +81,8 @@ const LSPMethod ALL[] = {CancelRequest,
                          PushDiagnostics,
                          TextDocumentDidChange,
                          TextDocumentDocumentSymbol,
-                         ReadFile};
+                         ReadFile,
+                         WorkspaceSymbolsRequest};
 
 const LSPMethod getMethod(const absl::string_view name);
 
