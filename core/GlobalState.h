@@ -123,6 +123,10 @@ public:
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;
 
+    // When set, contains a location at which the typechecker should generate information
+    // See ErrorQueue#queryResponse
+    Loc lspInfoQueryLoc;
+
     void trace(const std::string &msg) const;
 
 private:

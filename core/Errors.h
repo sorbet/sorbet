@@ -106,14 +106,6 @@ private:
     FileRef f;
 };
 
-struct ErrorQueueMessage {
-    enum class Kind { Error, Flush };
-    Kind kind;
-    FileRef whatFile;
-    std::string text;
-    std::unique_ptr<BasicError> error;
-};
-
 class ErrorBuilder {
     // An ErrorBuilder can be in three states:
     //

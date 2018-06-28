@@ -3,6 +3,7 @@
 
 #include "cfg/CFG.h"
 #include "core/Context.h"
+#include "core/ErrorQueue.h"
 #include "core/Names/infer.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
@@ -197,6 +198,10 @@ public:
 
 private:
     Environment &operator=(const Environment &rhs) = default;
+    void setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
+                          core::DispatchResult::ComponentVec dispatchComponents,
+                          std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
+                          core::TypeAndOrigins retType);
 };
 
 } // namespace infer

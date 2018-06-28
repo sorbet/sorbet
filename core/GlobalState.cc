@@ -920,6 +920,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->strings_last_page_used = STRINGS_PAGE_SIZE;
     result->files = this->files;
     result->fileRefByPath = this->fileRefByPath;
+    result->lspInfoQueryLoc = this->lspInfoQueryLoc;
 
     result->names.reserve(this->names.capacity());
     for (auto &nm : this->names) {

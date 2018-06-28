@@ -66,6 +66,7 @@ const LSPMethod PushDiagnostics{"textDocument/publishDiagnostics", true, LSPMeth
 const LSPMethod TextDocumentDidOpen{"textDocument/didOpen", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
+const LSPMethod TextDocumentDefinition{"textDocument/definition", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
 const LSPMethod WorkspaceSymbolsRequest{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
 
@@ -79,10 +80,12 @@ const LSPMethod ALL[] = {CancelRequest,
                          UnRegisterCapability,
                          DidChangeWatchedFiles,
                          PushDiagnostics,
+                         TextDocumentDidOpen,
                          TextDocumentDidChange,
                          TextDocumentDocumentSymbol,
                          ReadFile,
-                         WorkspaceSymbolsRequest};
+                         WorkspaceSymbolsRequest,
+                         TextDocumentDefinition};
 
 const LSPMethod getMethod(const absl::string_view name);
 
