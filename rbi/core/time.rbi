@@ -6,11 +6,7 @@ class Time < Object
   RFC2822_MONTH_NAME = T.let(T.unsafe(nil), Array)
 
   sig(
-      seconds: Time,
-  )
-  .returns(Time)
-  sig(
-      seconds: Numeric,
+      seconds: T.any(Time, Numeric)
   )
   .returns(Time)
   sig(
