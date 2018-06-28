@@ -17,18 +17,20 @@ class SendAndBlockLink;
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
-    static std::shared_ptr<Type> all(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> all(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                     const std::shared_ptr<Type> &t2);
 
     /** Lower upper bound: the narrowest type that is supper type of both t1 and t2 */
-    static std::shared_ptr<Type> any(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> any(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                     const std::shared_ptr<Type> &t2);
 
     /** is every instance of  t1 an  instance of t2? */
-    static bool isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, std::shared_ptr<Type> t1,
-                                         std::shared_ptr<Type> t2);
+    static bool isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
+                                         const std::shared_ptr<Type> &t2);
 
     /** is every instance of  t1 an  instance of t2 when not allowed to modify constraint */
-    static bool isSubType(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    static bool equiv(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static bool isSubType(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2);
+    static bool equiv(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2);
 
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
@@ -51,11 +53,12 @@ public:
     static std::shared_ptr<Type> classClass();
     static std::shared_ptr<Type> falsyTypes();
 
-    static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, std::shared_ptr<Type> from, core::SymbolRef klass);
-    static std::shared_ptr<Type> approximateSubtract(core::Context ctx, std::shared_ptr<Type> from,
-                                                     std::shared_ptr<Type> what);
-    static bool canBeTruthy(core::Context ctx, std::shared_ptr<Type> what);
-    static bool canBeFalsy(core::Context ctx, std::shared_ptr<Type> what);
+    static std::shared_ptr<Type> dropSubtypesOf(core::Context ctx, const std::shared_ptr<Type> &from,
+                                                core::SymbolRef klass);
+    static std::shared_ptr<Type> approximateSubtract(core::Context ctx, const std::shared_ptr<Type> &from,
+                                                     const std::shared_ptr<Type> &what);
+    static bool canBeTruthy(core::Context ctx, const std::shared_ptr<Type> &what);
+    static bool canBeFalsy(core::Context ctx, const std::shared_ptr<Type> &what);
     enum Combinator { OR, AND };
 
     static std::shared_ptr<Type> resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
@@ -65,35 +68,38 @@ public:
                                                           const std::vector<std::shared_ptr<Type>> &targs,
                                                           core::SymbolRef asIf);
     // Extract the return value type from a proc.
-    static std::shared_ptr<core::Type> getProcReturnType(core::Context ctx, std::shared_ptr<core::Type> procType);
-    static std::shared_ptr<Type> instantiate(core::Context ctx, std::shared_ptr<core::Type> what,
+    static std::shared_ptr<core::Type> getProcReturnType(core::Context ctx,
+                                                         const std::shared_ptr<core::Type> &procType);
+    static std::shared_ptr<Type> instantiate(core::Context ctx, const std::shared_ptr<core::Type> &what,
                                              std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs);
     /** Replace all type variables in `what` with their instantiations.
      * Requires that `tc` has already been solved.
      */
-    static std::shared_ptr<Type> instantiate(core::Context ctx, std::shared_ptr<core::Type> what,
+    static std::shared_ptr<Type> instantiate(core::Context ctx, const std::shared_ptr<core::Type> &what,
                                              const TypeConstraint &tc);
 
-    static std::shared_ptr<Type> replaceSelfType(core::Context ctx, std::shared_ptr<core::Type> what,
-                                                 std::shared_ptr<core::Type> receiver);
+    static std::shared_ptr<Type> replaceSelfType(core::Context ctx, const std::shared_ptr<core::Type> &what,
+                                                 const std::shared_ptr<core::Type> &receiver);
     /** Get rid of type variables in `what` and return a type that we deem close enough to continue
      * typechecking. We should be careful to only used this type when we are trying to guess a type.
      * We should do proper instatiation and subtype test after we have guessed type variables with
      * tc.solve(). If the constraint has already been solved, use `instantiate` instead.
      */
-    static std::shared_ptr<Type> approximate(core::Context ctx, std::shared_ptr<core::Type> what,
+    static std::shared_ptr<Type> approximate(core::Context ctx, const std::shared_ptr<core::Type> &what,
                                              const TypeConstraint &tc);
 
-    static std::shared_ptr<Type> dropLiteral(std::shared_ptr<Type> type);
+    static std::shared_ptr<Type> dropLiteral(const std::shared_ptr<Type> &type);
 
     /** Internal implementation. You should probably use all(). */
-    static std::shared_ptr<Type> glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> glb(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                     const std::shared_ptr<Type> &t2);
     /** Internal implementation. You should probably use any(). */
-    static std::shared_ptr<Type> lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    static std::shared_ptr<Type> lub(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                     const std::shared_ptr<Type> &t2);
 
     static std::shared_ptr<Type> lubAll(core::Context ctx, std::vector<std::shared_ptr<core::Type>> &elements);
-    static std::shared_ptr<Type> arrayOf(core::Context ctx, std::shared_ptr<core::Type> elem);
+    static std::shared_ptr<Type> arrayOf(core::Context ctx, const std::shared_ptr<Type> &elem);
 };
 
 struct Intrinsic {
@@ -127,10 +133,10 @@ struct DispatchResult {
     ComponentVec components;
 
     DispatchResult() = default;
-    DispatchResult(std::shared_ptr<Type> returnType, ComponentVec components)
+    DispatchResult(const std::shared_ptr<Type> &returnType, ComponentVec components)
         : returnType(move(returnType)), components(move(components)){};
 
-    DispatchResult(std::shared_ptr<Type> returnType, std::shared_ptr<Type> receiver, SymbolRef method)
+    DispatchResult(const std::shared_ptr<Type> &returnType, const std::shared_ptr<Type> &receiver, SymbolRef method)
         : returnType(move(returnType)) {
         components.emplace_back(DispatchComponent{move(receiver), method, std::vector<std::unique_ptr<BasicError>>()});
     }
@@ -281,10 +287,14 @@ private:
     friend std::shared_ptr<Type> Types::Boolean();
     friend class core::GlobalSubstitution;
     friend class core::serialize::SerializerImpl;
-    friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> lubGround(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> Types::lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> Types::glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> lubDistributeOr(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                                 const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> lubGround(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::lub(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::glb(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new OrType(left, right));
@@ -326,11 +336,16 @@ private:
     friend class core::serialize::SerializerImpl;
     friend class core::TypeConstraint;
 
-    friend std::shared_ptr<Type> lubGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> glbGround(Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> Types::lub(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
-    friend std::shared_ptr<Type> Types::glb(core::Context ctx, std::shared_ptr<Type> t1, std::shared_ptr<Type> t2);
+    friend std::shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, const std::shared_ptr<Type> &t1,
+                                                  const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbGround(Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::lub(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::glb(core::Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
 
     static inline std::shared_ptr<Type> make_shared(std::shared_ptr<Type> left, std::shared_ptr<Type> right) {
         std::shared_ptr<Type> res(new AndType(left, right));
