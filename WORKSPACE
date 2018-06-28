@@ -1,6 +1,6 @@
 workspace(name = "com_stripe_ruby_typer")
 
-load(":externals.bzl", "externals")
+load(":third_party/externals.bzl", "externals")
 
 externals()
 

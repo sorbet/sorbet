@@ -9,7 +9,7 @@ def externals():
         name = "gtest",
         url = "https://github.com/google/googletest/archive/release-1.8.0.zip",
         sha256 = "f3ed3b58511efd272eb074a3a6d6fb79d7c2e6a0e374323d1e6bcbcc1ef141bf",
-        build_file = "gtest.BUILD",
+        build_file = "//third_party:gtest.BUILD",
         strip_prefix = "googletest-release-1.8.0",
     )
 
@@ -17,7 +17,7 @@ def externals():
         name = "yaml_cpp",
         url = "https://github.com/jbeder/yaml-cpp/archive/yaml-cpp-0.6.2.zip",
         sha256 = "292c8de66bfda19a2ca08a32a8c1ec39b709ac75f54e6be0735940db2dbdff76",
-        build_file = "//:yaml_cpp.BUILD",
+        build_file = "//third_party:yaml_cpp.BUILD",
         strip_prefix = "yaml-cpp-yaml-cpp-0.6.2",
     )
 
@@ -26,7 +26,7 @@ def externals():
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
         commit="560df2878ad308b27873b3cc5e810635d69cfad6", # v0.17.0
-        build_file="//:spdlog.BUILD",
+        build_file = "//third_party:spdlog.BUILD",
     )
 
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
@@ -43,7 +43,7 @@ def externals():
         name="lmdb",
         remote="https://github.com/LMDB/lmdb.git",
         commit="86a90cad721cbdc0bb0a9c3bf15396f5c946ae95",
-        build_file="//:lmdb.BUILD",
+        build_file = "//third_party:lmdb.BUILD",
     )
 
 
@@ -51,49 +51,49 @@ def externals():
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
         commit="b32cd9421c5e3cbe183a99b6537ce11441e50656",
-        build_file="//:rapidjson.BUILD",
+        build_file = "//third_party:rapidjson.BUILD",
     )
 
     new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
         commit="6a1ed71450148c8aed57de3179b1bdd81800bada",
-        build_file="//:lizard.BUILD",
+        build_file = "//third_party:lizard.BUILD",
     )
 
     new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
         commit="0ff7ff3ec7b322881fff3bd6d4861fda6e9331d9", # 5.1.0 with some tunning patches
-        build_file="//:jemalloc.BUILD",
+        build_file = "//third_party:jemalloc.BUILD",
     )
 
     new_git_repository(
         name="progressbar",
         remote="https://github.com/doches/progressbar.git",
         commit="c4c54f891ab05cfc411ec5c2ed147dd4cad1ccf3",
-        build_file="//:progressbar.BUILD",
+        build_file = "//third_party:progressbar.BUILD",
     )
 
     new_git_repository(
         name="concurrentqueue",
         remote="https://github.com/cameron314/concurrentqueue.git",
         commit="8f7e861dd9411a0bf77a6b9de83a47b3424fafba",
-        build_file="//:concurrentqueue.BUILD",
+        build_file = "//third_party:concurrentqueue.BUILD",
     )
 
     new_git_repository(
         name="statsd",
         remote="https://github.com/romanbsd/statsd-c-client.git",
         commit="0caa5ef05d6a786bb4695394534a7182a3c94427",
-        build_file="//:statsd.BUILD",
+        build_file = "//third_party:statsd.BUILD",
     )
 
     native.new_http_archive(
         name="cxxopts",
         url="https://github.com/jarro2783/cxxopts/archive/v2.1.0.zip",
         sha256="9cd036f58b147d21d43b27144c811b06f32dfa63a4bba89e8dace4699428a8b1",
-        build_file="//:cxxopts.BUILD",
+        build_file = "//third_party:cxxopts.BUILD",
         strip_prefix = "cxxopts-2.1.0",
     )
 
@@ -101,7 +101,7 @@ def externals():
         name="rang",
         url = "https://github.com/agauniyal/rang/archive/v3.1.0.zip",
         sha256="658adeb8a36d36981d4339fc839f2deedc0e75cb421db1982041d8a0a255835d",
-        build_file = "rang.BUILD",
+        build_file = "//third_party:rang.BUILD",
         strip_prefix = "rang-3.1.0",
     )
 
@@ -131,7 +131,7 @@ package(default_visibility = ["//visibility:public"])
     native.new_http_archive(
         name="clang_6_0_0_darwin",
         url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz",
-        build_file="//:clang.BUILD",
+        build_file = "//third_party:clang.BUILD",
         sha256="0ef8e99e9c9b262a53ab8f2821e2391d041615dd3f3ff36fdf5370916b0f4268",
         type="tar.xz",
         strip_prefix="clang+llvm-6.0.0-x86_64-apple-darwin/",
@@ -140,7 +140,7 @@ package(default_visibility = ["//visibility:public"])
     native.new_http_archive(
         name="clang_6_0_0_linux",
         url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
-        build_file="//:clang.BUILD",
+        build_file = "//third_party:clang.BUILD",
         sha256="114e78b2f6db61aaee314c572e07b0d635f653adc5d31bd1cd0bf31a3db4a6e5",
         type="tar.xz",
         strip_prefix="clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/",
@@ -162,5 +162,5 @@ package(default_visibility = ["//visibility:public"])
         name = "com_github_blake2_libb2",
         commit = "9b1cc685934c78967a186851e3fdfde9f53a7858",
         remote ="https://github.com/BLAKE2/libb2",
-        build_file="//:libb2.BUILD",
+        build_file = "//third_party:libb2.BUILD",
     )
