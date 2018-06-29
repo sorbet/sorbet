@@ -258,6 +258,7 @@ class Array < Object
   .returns(T::Array[Elem])
   def first(arg0=_); end
 
+  # This is implemented in C++ to fix the return type
   sig.returns(T::Array[T.untyped])
   def flatten(); end
 

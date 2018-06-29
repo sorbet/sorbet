@@ -244,6 +244,12 @@ NameDef names[] = {
     {"min", Core},
     {"max", Core},
 
+    // Enumerable#flat_map has special-case logic in Infer
+    {"flatMap", "flat_map", Infer},
+
+    // Array#flatten is also custom-implemented
+    {"flatten", Core},
+
     {"staticInit", "<static-init>", Resolver},
 };
 

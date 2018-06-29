@@ -616,7 +616,8 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(core::SymbolRef block) : block(block), constr(make_shared<core::TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(core::SymbolRef block, core::NameRef fun)
+    : block(block), fun(fun), constr(make_shared<core::TypeConstraint>()) {}
 
 shared_ptr<Type> TupleType::elementType() const {
     auto *ap = cast_type<AppliedType>(this->underlying.get());

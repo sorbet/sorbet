@@ -197,7 +197,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 if (s->block != nullptr) {
                     vector<core::LocalVariable> argsCopy = args;
                     core::SymbolRef sym = s->block->symbol;
-                    auto link = make_shared<core::SendAndBlockLink>(sym);
+                    auto link = make_shared<core::SendAndBlockLink>(sym, s->fun);
                     auto send = make_unique<Send>(recv, s->fun, argsCopy, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp =

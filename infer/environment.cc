@@ -711,6 +711,42 @@ void Environment::setQueryResponse(core::Context ctx, core::QueryResponse::Kind 
     ctx.state.errorQueue->push(std::move(msg));
 }
 
+shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> type) {
+    shared_ptr<core::Type> result;
+
+    typecase(type.get(),
+
+             [&](core::OrType *o) {
+                 result = core::Types::any(ctx, flattenArrays(ctx, o->left), flattenArrays(ctx, o->right));
+             },
+
+             [&](core::AppliedType *a) {
+                 if (a->klass != core::Symbols::Array()) {
+                     result = type;
+                     return;
+                 }
+                 ENFORCE(a->targs.size() == 1);
+                 result = a->targs.front();
+             },
+
+             [&](core::TupleType *t) { result = t->elementType(); },
+
+             [&](core::Type *t) { result = move(type); });
+    return result;
+}
+
+shared_ptr<core::Type> flatmapHack(core::Context ctx, const std::shared_ptr<core::SendAndBlockLink> &link,
+                                   shared_ptr<core::Type> returnType) {
+    if (link->fun != core::Names::flatMap()) {
+        return returnType;
+    }
+    if (!link->receiver->derivesFrom(ctx, core::Symbols::Enumerable())) {
+        return returnType;
+    }
+
+    return core::Types::arrayOf(ctx, flattenArrays(ctx, returnType));
+}
+
 shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount,
                                                    int bindMinLoops, KnowledgeFilter &knowledgeFilter,
                                                    core::TypeConstraint &constr) {
@@ -734,6 +770,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->link) {
+                    send->link->receiver = recvType.type;
                     send->link->returnTp = core::Types::untyped();
                     send->link->blockPreType = core::Types::untyped();
                     send->link->sendTp = core::Types::untyped();
@@ -815,7 +852,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     }
                 }
 
-                tp.type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
+                auto type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
+                type = flatmapHack(ctx, i->link, type);
+                tp.type = move(type);
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Self *i) {

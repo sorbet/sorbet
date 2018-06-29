@@ -1112,6 +1112,50 @@ public:
     }
 } Tuple_minMax;
 
+class Array_flatten : public Symbol::IntrinsicMethod {
+    static shared_ptr<Type> recursivelyFlattenArrays(core::Context ctx, shared_ptr<Type> type) {
+        shared_ptr<Type> result;
+
+        typecase(type.get(),
+
+                 [&](OrType *o) {
+                     result = Types::any(ctx, recursivelyFlattenArrays(ctx, o->left),
+                                         recursivelyFlattenArrays(ctx, o->right));
+                 },
+
+                 [&](AppliedType *a) {
+                     if (a->klass != Symbols::Array()) {
+                         result = type;
+                         return;
+                     }
+                     ENFORCE(a->targs.size() == 1);
+                     result = recursivelyFlattenArrays(ctx, a->targs.front());
+                 },
+
+                 [&](TupleType *t) { result = recursivelyFlattenArrays(ctx, t->elementType()); },
+
+                 [&](Type *t) { result = move(type); });
+        return result;
+    }
+
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        shared_ptr<Type> element;
+        if (auto *ap = cast_type<AppliedType>(selfRef.get())) {
+            ENFORCE(ap->klass == core::Symbols::Array() ||
+                    ap->klass.data(ctx).derivesFrom(ctx, core::Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            element = ap->targs.front();
+        } else if (auto *tuple = cast_type<TupleType>(selfRef.get())) {
+            element = tuple->elementType();
+        } else {
+            ENFORCE(false, "Array#flatten on unexpected type: ", selfRef->show(ctx));
+        }
+        return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element));
+    }
+} Array_flatten;
+
 const vector<Intrinsic> sorbet::core::intrinsicMethods{
     {core::Symbols::T(), true, core::Names::untyped(), &T_untyped},
     {core::Symbols::T(), true, core::Names::must(), &T_must},
@@ -1141,4 +1185,6 @@ const vector<Intrinsic> sorbet::core::intrinsicMethods{
     {core::Symbols::Tuple(), false, core::Names::last(), &Tuple_last},
     {core::Symbols::Tuple(), false, core::Names::min(), &Tuple_minMax},
     {core::Symbols::Tuple(), false, core::Names::max(), &Tuple_minMax},
+
+    {core::Symbols::Array(), false, core::Names::flatten(), &Array_flatten},
 };

@@ -192,12 +192,14 @@ template <class To> bool isa_type(Type *what) {
 class SendAndBlockLink {
 public:
     core::SymbolRef block;
+    std::shared_ptr<Type> receiver;
+    core::NameRef fun;
     std::shared_ptr<TypeConstraint> constr;
     std::shared_ptr<Type> returnTp;
     std::shared_ptr<Type> blockPreType;
     std::shared_ptr<Type> sendTp;
     SendAndBlockLink(const SendAndBlockLink &) = delete;
-    SendAndBlockLink(SymbolRef block);
+    SendAndBlockLink(SymbolRef block, core::NameRef fun);
 };
 
 class GroundType : public Type {};
