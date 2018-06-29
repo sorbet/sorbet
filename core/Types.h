@@ -176,6 +176,7 @@ public:
     virtual bool isFullyDefined() = 0;
     virtual int kind() = 0;
     virtual std::shared_ptr<Type> _approximate(core::Context ctx, const TypeConstraint &tc);
+    unsigned int hash(const core::GlobalState &gs) const;
 };
 
 template <class To> To *cast_type(Type *what) {

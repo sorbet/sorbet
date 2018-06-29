@@ -171,6 +171,8 @@ public:
     SymbolRef superClass;
     std::shared_ptr<Type> resultType;
 
+    unsigned int hash(const GlobalState &gs) const;
+
     inline std::vector<SymbolRef> &arguments() {
         ENFORCE(!isClass());
         return argumentsOrMixins;

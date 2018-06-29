@@ -163,6 +163,7 @@ void LSPLoop::runLSP() {
                     vector<shared_ptr<core::File>> changedFiles;
                     runSlowPath(move(changedFiles));
                     pushErrors();
+                    this->globalStateHashes = computeStateHashes(finalGs->getFiles());
                 }
             }
             if (method == LSP::Exit) {
@@ -219,36 +220,38 @@ void LSPLoop::runLSP() {
                 auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
                                   d["params"]["textDocument"]["uri"].GetStringLength());
                 auto fref = uri2FileRef(uri);
+                if (fref.exists()) {
+                    core::Loc::Detail reqPos;
+                    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
+                    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
+                    auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
 
-                core::Loc::Detail reqPos;
-                reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
-                reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
-                auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
+                    initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+                    finalGs->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+                    vector<shared_ptr<core::File>> files;
+                    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+                    tryFastPath(files);
 
-                initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+                    initialGS->lspInfoQueryLoc = core::Loc::none();
+                    finalGs->lspInfoQueryLoc = core::Loc::none();
 
-                vector<shared_ptr<core::File>> files;
-                files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
-                tryFastPath(files);
+                    auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+                    if (!queryResponses.empty()) {
+                        auto resp = std::move(queryResponses[0]);
 
-                initialGS->lspInfoQueryLoc = core::Loc::none();
-
-                auto queryResponses = finalGs->errorQueue->drainQueryResponses();
-                if (!queryResponses.empty()) {
-                    auto resp = std::move(queryResponses[0]);
-
-                    if (resp->kind == core::QueryResponse::Kind::SEND) {
-                        for (auto &component : resp->dispatchComponents) {
-                            if (component.method.exists()) {
-                                result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                        if (resp->kind == core::QueryResponse::Kind::SEND) {
+                            for (auto &component : resp->dispatchComponents) {
+                                if (component.method.exists()) {
+                                    result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                                }
                             }
-                        }
-                    } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
-                        result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
-                    } else {
-                        for (auto &component : resp->dispatchComponents) {
-                            if (component.method.exists()) {
-                                result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                        } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
+                            result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
+                        } else {
+                            for (auto &component : resp->dispatchComponents) {
+                                if (component.method.exists()) {
+                                    result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                                }
                             }
                         }
                     }
@@ -637,8 +640,11 @@ bool LSPLoop::handleReplies(Document &d) {
     return false;
 }
 
-void LSPLoop::addNewFile(shared_ptr<core::File> file) {
-    core::FileRef fref = initialGS->findFileByPath(file->path());
+core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
+    core::FileRef fref;
+    if (!file)
+        return fref;
+    fref = initialGS->findFileByPath(file->path());
     if (fref.exists()) {
         initialGS = core::GlobalState::replaceFile(move(initialGS), fref, move(file));
     } else {
@@ -652,6 +658,70 @@ void LSPLoop::addNewFile(shared_ptr<core::File> file) {
         indexed.resize(id + 1);
     }
     indexed[id] = move(t);
+    return fref;
+}
+
+vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
+    std::vector<unsigned int> res(files.size());
+    shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
+    for (int i = 0; i < files.size(); i++) {
+        auto copy = i;
+        fileq->push(move(copy), 1);
+    }
+
+    res.resize(files.size());
+
+    shared_ptr<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>>(files.size());
+    const auto &opts = this->opts;
+    workers.multiplexJob([fileq, resultq, &opts, files, logger = this->logger]() {
+        vector<std::pair<int, unsigned int>> threadResult;
+        int processedByThread = 0;
+        int job;
+
+        {
+            for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
+                if (result.gotItem()) {
+                    processedByThread++;
+
+                    if (!files[job]) {
+                        threadResult.emplace_back(make_pair(job, 0));
+                        continue;
+                    }
+                    shared_ptr<core::GlobalState> lgs =
+                        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*logger, *logger)));
+                    lgs->initEmpty();
+                    lgs->silenceErrors = true;
+                    core::UnfreezeFileTable fileTableAccess(*lgs);
+                    core::UnfreezeSymbolTable symbolTable(*lgs);
+                    core::UnfreezeNameTable nameTable(*lgs);
+                    auto fref = lgs->enterFile(files[job]);
+                    vector<unique_ptr<ast::Expression>> single;
+                    unique_ptr<KeyValueStore> kvstore;
+                    single.emplace_back(indexOne(opts, *lgs, fref, kvstore));
+                    resolve(*lgs, move(single), opts);
+                    threadResult.emplace_back(make_pair(job, lgs->hash()));
+                }
+            }
+        }
+
+        if (processedByThread > 0) {
+            resultq->push(move(threadResult), processedByThread);
+        }
+    });
+
+    {
+        std::vector<std::pair<int, unsigned int>> threadResult;
+        for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
+             result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+            if (result.gotItem()) {
+                for (auto &a : threadResult) {
+                    res[a.first] = a.second;
+                }
+            }
+        }
+    }
+    return res;
 }
 
 void LSPLoop::reIndexFromFileSystem() {
@@ -679,7 +749,16 @@ void LSPLoop::invalidateAllErrors() {
     updatedErrors.clear();
 }
 
-void LSPLoop::runSlowPath(std::vector<shared_ptr<core::File>> changedFiles) {
+void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
+    for (auto f : vec) {
+        auto fnd = errorsAccumulated.find(f);
+        if (fnd != errorsAccumulated.end()) {
+            errorsAccumulated.erase(fnd);
+        }
+    }
+}
+
+void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFiles) {
     logger->info("Taking slow path");
     invalidateAllErrors();
 
@@ -709,8 +788,57 @@ const LSP::LSPMethod LSP::getMethod(const absl::string_view name) {
     return LSPMethod{(string)name, true, LSPMethod::Kind::ClientInitiated, false};
 }
 
-void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> changedFiles) {
-    runSlowPath(move(changedFiles));
+void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> &changedFiles) {
+    logger->info("Trying to see if happy path is available after {} file changes", changedFiles.size());
+    bool good = true;
+    auto hashes = computeStateHashes(changedFiles);
+    ENFORCE(changedFiles.size() == hashes.size());
+    vector<core::FileRef> subset;
+    int i = -1;
+    for (auto &f : changedFiles) {
+        ++i;
+        if (!f) {
+            continue;
+        }
+        auto wasFiles = initialGS->filesUsed();
+        auto fref = addNewFile(f);
+        if (wasFiles != initialGS->filesUsed()) {
+            logger->info("Taking sad path because {} is a new file", changedFiles[i]->path());
+            good = false;
+            if (globalStateHashes.size() <= fref.id()) {
+                globalStateHashes.resize(fref.id() + 1);
+                globalStateHashes[fref.id()] = hashes[i];
+            }
+        } else {
+            if (hashes[i] != globalStateHashes[fref.id()]) {
+                logger->info("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+                good = false;
+                globalStateHashes[fref.id()] = hashes[i];
+            }
+            if (good) {
+                finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
+            }
+
+            subset.emplace_back(fref);
+        }
+    }
+
+    if (good) {
+        invalidateErrorsFor(subset);
+        logger->info("Taking happy path");
+        // Yaay, reuse existing global state.
+        vector<std::string> empty;
+        auto updatedIndexed = index(finalGs, empty, subset, opts, workers, kvstore);
+        ENFORCE(subset.size() == updatedIndexed.size());
+        for (auto &t : updatedIndexed) {
+            int id = t->loc.file.id();
+            indexed[id] = move(t);
+            t = indexed[id]->deepCopy();
+        }
+        typecheck(finalGs, resolve(*finalGs, move(updatedIndexed), opts), opts, workers);
+    } else {
+        runSlowPath(changedFiles);
+    }
 }
 
 std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
