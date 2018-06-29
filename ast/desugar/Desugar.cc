@@ -135,26 +135,15 @@ unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *n
     return MK::EmptyTree(node->loc);
 }
 
-// Desugar a multi-assignment
-//
-// TODO(nelhage): Known incompletenesses:
-//
-//  - If the array is too small, and there are elements after a splat, we read
-//    from the back of the array instead of padding with nil.
-//
-//     e.g. in `*b,c = x`, we assign `c = x[-1]`, even if x has only a single
-//     element
-//  - If `rhs` is not an array, we index into it anyways, instead of
-//    `nil`-padding.
 unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, parser::Mlhs *lhs,
                                    unique_ptr<Expression> rhs, u2 &uniqueCounter) {
     InsSeq::STATS_store stats;
 
     core::NameRef tempName =
         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(), ++uniqueCounter);
-    stats.emplace_back(MK::Assign(loc, tempName, move(rhs)));
 
     int i = 0;
+    int before = 0, after = 0;
     bool didSplat = false;
 
     for (auto &c : lhs->exprs) {
@@ -180,6 +169,11 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
             }
             i = -right;
         } else {
+            if (didSplat) {
+                ++after;
+            } else {
+                ++before;
+            }
             auto val = MK::Send1(loc, MK::Local(loc, tempName), core::Names::squareBrackets(), MK::Int(loc, i));
 
             if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
@@ -193,6 +187,10 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
             i++;
         }
     }
+
+    auto expanded = MK::Send3(loc, MK::Ident(loc, core::Symbols::Magic()), core::Names::expandSplat(), move(rhs),
+                              MK::Int(loc, before), MK::Int(loc, after));
+    stats.insert(stats.begin(), MK::Assign(loc, tempName, move(expanded)));
 
     return MK::InsSeq(loc, move(stats), MK::Local(loc, tempName));
 }

@@ -8,14 +8,14 @@ class <emptyTree><<constant:<root>>> < ()
   $gv = 1
 
   begin
-    <assignTemp$2 = [nil, nil]
+    <assignTemp$2 = ::<Magic>.<expand-splat>([nil, nil], 2, 0)
     self(<constant:<todo sym>>).x().var=(<assignTemp$2.[](0))
     y = <assignTemp$2.[](1)
     <assignTemp$2
   end
 
   begin
-    <assignTemp$3 = self(<constant:<todo sym>>).zaaaz()
+    <assignTemp$3 = ::<Magic>.<expand-splat>(self(<constant:<todo sym>>).zaaaz(), 2, 0)
     baaaar = <assignTemp$3.[](0)
     naaar = <assignTemp$3.[](1)
     <assignTemp$3
@@ -79,7 +79,7 @@ class <emptyTree><<constant:<root>>> < ()
   self(<constant:<todo sym>>).arr().each() do |*forTemp$6|
     begin
       begin
-        <assignTemp$7 = forTemp$6
+        <assignTemp$7 = ::<Magic>.<expand-splat>(forTemp$6, 1, 0)
         x = <assignTemp$7.[](0)
         <assignTemp$7
       end
@@ -134,10 +134,10 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   begin
-    <assignTemp$8 = 1
+    <assignTemp$8 = ::<Magic>.<expand-splat>(1, 2, 0)
     a = <assignTemp$8.[](0)
     begin
-      <assignTemp$9 = <assignTemp$8.[](1)
+      <assignTemp$9 = ::<Magic>.<expand-splat>(<assignTemp$8.[](1), 1, 0)
       x = <assignTemp$9.[](0)
       <assignTemp$9
     end
@@ -167,7 +167,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   begin
-    <assignTemp$10 = y.to_a()
+    <assignTemp$10 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
     x = <assignTemp$10.slice(::Range.new(0, -1, false))
     <assignTemp$10
   end

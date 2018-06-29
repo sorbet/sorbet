@@ -992,6 +992,50 @@ public:
     }
 } Magic_buildArray;
 
+class Magic_expandSplat : public Symbol::IntrinsicMethod {
+    static shared_ptr<Type> expandArray(core::Context ctx, shared_ptr<Type> type, int expandTo) {
+        if (auto *ot = cast_type<OrType>(type.get())) {
+            return Types::any(ctx, expandArray(ctx, ot->left, expandTo), expandArray(ctx, ot->right, expandTo));
+        }
+
+        auto *tuple = cast_type<TupleType>(type.get());
+        if (tuple == nullptr && type->derivesFrom(ctx, Symbols::Array())) {
+            // If this is an array and not a tuple, just pass it through. We
+            // can't say anything about the elements.
+            return type;
+        }
+        vector<shared_ptr<Type>> types;
+        if (tuple) {
+            types.insert(types.end(), tuple->elems.begin(), tuple->elems.end());
+        } else {
+            types.push_back(type);
+        }
+        if (types.size() < expandTo) {
+            types.resize(expandTo, core::Types::nilClass());
+        }
+
+        return TupleType::build(ctx, types);
+    }
+
+public:
+    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.size() != 3) {
+            return Types::arrayOfUntyped();
+        }
+        auto val = args.front().type;
+        auto *beforeLit = cast_type<LiteralType>(args[1].type.get());
+        auto *afterLit = cast_type<LiteralType>(args[2].type.get());
+        if (!(beforeLit->underlying->derivesFrom(ctx, Symbols::Integer()) &&
+              afterLit->underlying->derivesFrom(ctx, Symbols::Integer()))) {
+            return core::Types::untyped();
+        }
+        int before = (int)beforeLit->value;
+        int after = (int)afterLit->value;
+        return expandArray(ctx, val, before + after);
+    }
+} Magic_expandSplat;
+
 class Tuple_squareBrackets : public Symbol::IntrinsicMethod {
 public:
     shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
@@ -1007,6 +1051,9 @@ public:
         }
 
         auto idx = lit->value;
+        if (idx < 0) {
+            idx = tuple->elems.size() + idx;
+        }
         if (idx >= tuple->elems.size()) {
             return Types::nilClass();
         }
@@ -1087,6 +1134,7 @@ const vector<Intrinsic> sorbet::core::intrinsicMethods{
 
     {core::Symbols::Magic(), false, core::Names::buildHash(), &Magic_buildHash},
     {core::Symbols::Magic(), false, core::Names::buildArray(), &Magic_buildArray},
+    {core::Symbols::Magic(), false, core::Names::expandSplat(), &Magic_expandSplat},
 
     {core::Symbols::Tuple(), false, core::Names::squareBrackets(), &Tuple_squareBrackets},
     {core::Symbols::Tuple(), false, core::Names::first(), &Tuple_first},

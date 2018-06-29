@@ -227,7 +227,10 @@ NameDef names[] = {
     {"buildHash", "<build-hash>", CFG | Core},
     {"buildArray", "<build-array>", CFG | Core},
     {"splat", "<splat>", Desugar | Core | Resolver},
+    {"expandSplat", "<expand-splat>", Desugar | Core},
     {"arg0", Core | Resolver | DSL},
+    {"arg1", Core},
+    {"arg2", Core},
     {"opts", DSL},
 
     {"is_a_p", "is_a?", Infer | CFG},

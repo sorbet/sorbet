@@ -47,9 +47,9 @@ begin
     def initialize<initialize>()
       begin
         begin
-          <assignTemp$3 = ::Opus::CIBot::Model::GeraldRule.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2$2|
-            <block-pass>$2$2.valid?()
-          end
+          <assignTemp$3 = ::<Magic>.<expand-splat>(::Opus::CIBot::Model::GeraldRule.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2$2|
+              <block-pass>$2$2.valid?()
+            end, 2, 0)
           ::Opus::CIBot::Gerald::Matcher#@rules = <assignTemp$3.[](0)
           invalid_rules = <assignTemp$3.[](1)
           <assignTemp$3
