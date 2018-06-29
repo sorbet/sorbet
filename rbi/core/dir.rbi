@@ -84,6 +84,12 @@ class Dir < Object
   def self.mkdir(arg0, arg1=_); end
 
   sig(
+    prefix_suffix: T.any(String, T::Array[String]),
+    rest: String,
+  ).returns(String)
+  def self.mktmpdir(prefix_suffix = nil, *rest); end
+
+  sig(
       arg0: String,
       arg1: Encoding,
   )
