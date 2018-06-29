@@ -273,6 +273,19 @@ void GlobalState::initEmpty() {
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = core::Types::Boolean();
 
+    // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this).resultType = core::Types::untyped();
+    method.data(*this).arguments().push_back(arg);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
+    arg.data(*this).resultType = core::Types::Integer();
+    method.data(*this).arguments().push_back(arg);
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
+    arg.data(*this).resultType = core::Types::Integer();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = core::Types::untyped();
+
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes

@@ -23,9 +23,9 @@ class <emptyTree><<constant:<root>>> < ()
       def initialize<<constant:<todo sym>>>()
         begin
           begin
-            <assignTemp$3 = <emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2|
-              <block-pass>$2.valid?()
-            end
+            <assignTemp$3 = ::<Magic>.<expand-splat>(<emptyTree>::<constant:Opus>::<constant:CIBot>::<constant:Model>::<constant:GeraldRule>.query_by(:"deleted_at_is_nil").load_all({}).partition() do |<block-pass>$2|
+                <block-pass>$2.valid?()
+              end, 2, 0)
             @rules = <assignTemp$3.[](0)
             invalid_rules = <assignTemp$3.[](1)
             <assignTemp$3
