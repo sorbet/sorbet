@@ -331,14 +331,21 @@ module Enumerable
   .returns(Enumerator[Elem])
   def find(ifnone=_, &blk); end
 
+  # N.B. this signature is wrong; Our generic method implementation
+  # cannot model the correct signature, so we pass through the return
+  # type of the block and then fix it up in an ad-hoc way in Ruby. A
+  # more-correct signature might be:
+  #   type_parameters(:U).sig(
+  #       blk: T.proc(arg0: Elem).returns(T.any(T::Array[T.type_parameter(:U)], T.type_parameter(:U)),
+  #   )
+  #   .returns(T.type_parameter(:U))
+  #
+  # But that would require a lot more sophistication from our generic
+  # method inference.
   type_parameters(:U).sig(
       blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
   )
-  .returns(T::Array[T.type_parameter(:U)])
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(T::Array[T.type_parameter(:U)]),
-  )
-  .returns(T::Array[T.type_parameter(:U)])
+  .returns(T.type_parameter(:U))
   sig.returns(Enumerator[Elem])
   def flat_map(&blk); end
 
