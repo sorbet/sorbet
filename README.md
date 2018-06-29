@@ -37,15 +37,16 @@ We build using [bazel](https://bazel.build/); Run:
 
 to build and run the tests(`//...` stands for "everything", you literaly need to type `//...`).
 
-During development we pass `--config=dbg` to build debug version of `sorbet` that also includes additional sanity checks that check consistency of internal datastructures(see `sanityCheck` methods in code). This build can also print pretty stack traces on failures when run on Mac(adding Linux support is welcome)
+During development we pass `--config=dbg` to build debug version of `sorbet` that also includes additional sanity checks that check consistency of internal datastructures (see `sanityCheck` methods in code). This build can also print pretty stack traces on failures when run on Mac (adding Linux support is welcome)
 
 Our CI runs builds under `--config=ci`. Those are optimized builds that include sanity checks and additionally include checks added by [address sanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [undefined behaviour sanitizer](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html).
 
 This project can take some time to build, in particular, if you change build configurations frequently. We have found that defining following bazel caching options (in `sorbet/.bazelrc`) helps. Note that those options could sometimes unveil bazel bugs, so if something is weird, disable them and nuke the cache by deleting files in it.
 
 ```
-build  --experimental_local_disk_cache --experimental_local_disk_cache_path=/Users/dmitry/tmp/bazel-cache
-test  --experimental_local_disk_cache --experimental_local_disk_cache_path=/Users/dmitry/tmp/bazel-cache
+# mkdir /tmp/bazel-cache
+build  --experimental_local_disk_cache --experimental_local_disk_cache_path=/tmp/bazel-cache
+test  --experimental_local_disk_cache --experimental_local_disk_cache_path=/tmp/bazel-cache
 ```
 
 # Code conventions
