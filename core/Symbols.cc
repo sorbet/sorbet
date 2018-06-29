@@ -664,6 +664,31 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
     return owner;
 }
 
+unsigned int Symbol::hash(const GlobalState &gs) const {
+    unsigned int result = name._id;
+    result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
+    result = mix(result, this->flags);
+    result = mix(result, this->owner._id);
+    result = mix(result, this->superClass._id);
+    // argumentsOrMixins, typeParams, typeAliases
+    for (const auto &e : members) {
+        result = mix(result, e.first._id);
+        result = mix(result, e.second._id);
+    }
+    for (const auto &e : argumentsOrMixins) {
+        result = mix(result, e._id);
+    }
+    for (const auto &e : typeParams) {
+        result = mix(result, e._id);
+    }
+    for (const auto &e : typeAliases) {
+        result = mix(result, e.first._id);
+        result = mix(result, e.second._id);
+    }
+
+    return result;
+}
+
 LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
 LocalVariable::LocalVariable() {}
 bool LocalVariable::exists() const {

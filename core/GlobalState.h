@@ -129,6 +129,9 @@ public:
 
     void trace(const std::string &msg) const;
 
+    unsigned int hash() const;
+    std::vector<std::shared_ptr<File>> getFiles() const;
+
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;

@@ -482,3 +482,7 @@ std::shared_ptr<Type> AndType::_replaceSelfType(core::Context ctx, std::shared_p
     }
     return nullptr;
 }
+
+unsigned int Type::hash(const core::GlobalState &gs) const {
+    return _hash(this->toString(gs)); // TODO: make something better
+}

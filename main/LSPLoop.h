@@ -118,6 +118,8 @@ class LSPLoop {
     rapidjson::MemoryPoolAllocator<> alloc;
     /** Trees that have been indexed and can be reused between different runs */
     std::vector<std::unique_ptr<const ast::Expression>> indexed;
+    /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
+    std::vector<unsigned int> globalStateHashes;
     /** List of errors that have never yet been sent to LSP client */
     std::vector<core::FileRef> updatedErrors;
     /** LSP clients do not store errors on their side. We have to resend the entire list of errors
@@ -163,14 +165,17 @@ class LSPLoop {
      * already registered request*/
     bool handleReplies(rapidjson::Document &d);
 
-    void addNewFile(std::shared_ptr<core::File> file);
+    core::FileRef addNewFile(const std::shared_ptr<core::File> &file);
     /** Invalidate all currently cached trees and re-index them from file system.
      * This runs code that is not considered performance critical and this is expected to be slow */
     void reIndexFromFileSystem();
     /** Conservatively rerun entire pipeline without caching any trees */
-    void runSlowPath(std::vector<std::shared_ptr<core::File>> changedFiles);
+    void runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    void tryFastPath(std::vector<std::shared_ptr<core::File>> changedFiles);
+    void tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles);
+
+    std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
+    void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
 
     core::FileRef uri2FileRef(const absl::string_view uri);
     std::string fileRef2Uri(core::FileRef);
