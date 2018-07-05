@@ -5,7 +5,7 @@
 namespace sorbet {
 namespace core {
 struct QueryResponse {
-    enum class Kind { SEND, IDENT, CONSTANT };
+    enum class Kind { SEND, IDENT, LITERAL, CONSTANT };
 
     Kind kind;
     DispatchResult::ComponentVec dispatchComponents;
