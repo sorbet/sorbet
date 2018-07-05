@@ -6,9 +6,21 @@
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 
-using namespace sorbet;
-using namespace core;
 using namespace std;
+
+namespace sorbet {
+namespace core {
+
+namespace {
+
+void printTabs(stringstream &to, int count) {
+    int i = 0;
+    while (i < count) {
+        to << "  ";
+        i++;
+    }
+}
+} // namespace
 
 string ClassType::toString(const GlobalState &gs, int tabs) const {
     return this->symbol.data(gs).show(gs);
@@ -73,14 +85,6 @@ string AndType::typeName() const {
 
 string OrType::typeName() const {
     return "OrType";
-}
-
-void printTabs(stringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
 }
 
 string TupleType::toString(const GlobalState &gs, int tabs) const {
@@ -375,3 +379,5 @@ string SelfType::show(const GlobalState &gs) const {
 string SelfType::showValue(const GlobalState &gs) const {
     return show(gs);
 }
+} // namespace core
+} // namespace sorbet

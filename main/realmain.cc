@@ -194,7 +194,7 @@ int realmain(int argc, const char *argv[]) {
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
-        LSPLoop loop(move(gs), opts, logger, workers);
+        LSP::LSPLoop loop(move(gs), opts, logger, workers);
         loop.runLSP();
         return 0;
     }

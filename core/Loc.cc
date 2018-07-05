@@ -60,7 +60,7 @@ pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
     Loc::Detail end(offset2Pos(this->file, end_pos, gs));
     return make_pair(begin, end);
 }
-
+namespace {
 void printTabs(stringstream &to, int count) {
     int i = 0;
     while (i < count) {
@@ -93,6 +93,7 @@ void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int po
     buf.write(filed.source().data() + filed.line_breaks()[line] + 1, endPos - filed.line_breaks()[line]);
     buf << endl;
 }
+} // namespace
 
 string Loc::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
