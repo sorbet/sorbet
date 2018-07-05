@@ -11,7 +11,7 @@ using namespace std;
 namespace sorbet {
 namespace core {
 auto logger = spd::stderr_color_mt("parse");
-auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<ErrorQueue>(*logger, *logger);
 
 struct Offset2PosTest {
     string src;
@@ -21,9 +21,9 @@ struct Offset2PosTest {
 };
 
 TEST(ASTTest, TestOffset2Pos) { // NOLINT
-    core::GlobalState gs(errorQueue);
+    GlobalState gs(errorQueue);
     gs.initEmpty();
-    core::UnfreezeFileTable fileTableAccess(gs);
+    UnfreezeFileTable fileTableAccess(gs);
 
     vector<Offset2PosTest> cases = {{"hello", 0, 1, 1},
                                     {"line 1\nline 2", 1, 1, 2},
@@ -37,7 +37,7 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
     for (auto &tc : cases) {
         auto name = string("case: ") + to_string(i);
         SCOPED_TRACE(name);
-        core::FileRef f = gs.enterFile(move(name), tc.src);
+        FileRef f = gs.enterFile(move(name), tc.src);
 
         auto detail = Loc::offset2Pos(f, tc.off, gs);
 
@@ -48,11 +48,11 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
 }
 
 TEST(ASTTest, Errors) { // NOLINT
-    core::GlobalState gs(errorQueue);
+    GlobalState gs(errorQueue);
     gs.initEmpty();
-    core::UnfreezeFileTable fileTableAccess(gs);
-    core::FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
-    if (auto e = gs.beginError(core::Loc{f, 0, 3}, core::errors::Internal::InternalError)) {
+    UnfreezeFileTable fileTableAccess(gs);
+    FileRef f = gs.enterFile(string("a/foo.rb"), string("def foo\n  hi\nend\n"));
+    if (auto e = gs.beginError(Loc{f, 0, 3}, errors::Internal::InternalError)) {
         e.setHeader("Use of metavariable: `{}`", "foo");
     }
     ASSERT_TRUE(gs.hadCriticalError());
@@ -61,9 +61,9 @@ TEST(ASTTest, Errors) { // NOLINT
 }
 
 TEST(ASTTest, SymbolRef) { // NOLINT
-    core::GlobalState gs(errorQueue);
+    GlobalState gs(errorQueue);
     gs.initEmpty();
-    core::SymbolRef ref = core::Symbols::Object();
+    SymbolRef ref = Symbols::Object();
     EXPECT_EQ(ref, ref.data(gs).ref(gs));
 }
 
@@ -95,17 +95,17 @@ TEST(CoreTest, FileIsTyped) { // NOLINT
 }
 
 TEST(CoreTest, Substitute) { // NOLINT
-    core::GlobalState gs1(errorQueue);
+    GlobalState gs1(errorQueue);
     gs1.initEmpty();
 
-    core::GlobalState gs2(errorQueue);
+    GlobalState gs2(errorQueue);
     gs2.initEmpty();
 
-    core::NameRef foo1, bar1, other1;
-    core::NameRef foo2, bar2;
+    NameRef foo1, bar1, other1;
+    NameRef foo2, bar2;
     {
-        core::UnfreezeNameTable thaw1(gs1);
-        core::UnfreezeNameTable thaw2(gs2);
+        UnfreezeNameTable thaw1(gs1);
+        UnfreezeNameTable thaw2(gs2);
 
         foo1 = gs1.enterNameUTF8("foo");
         bar1 = gs1.enterNameUTF8("bar");
@@ -116,14 +116,14 @@ TEST(CoreTest, Substitute) { // NOLINT
         bar2 = gs1.enterNameUTF8("bar");
     }
 
-    core::GlobalSubstitution subst(gs1, gs2);
+    GlobalSubstitution subst(gs1, gs2);
 
     EXPECT_EQ(subst.substitute(foo1), foo2);
     EXPECT_EQ(subst.substitute(bar1), bar2);
 
     auto other2 = subst.substitute(other1);
     ASSERT_TRUE(other2.exists());
-    ASSERT_TRUE(other2.data(gs2).kind == core::UTF8);
+    ASSERT_TRUE(other2.data(gs2).kind == UTF8);
     ASSERT_EQ("other", other2.toString(gs2));
 }
 

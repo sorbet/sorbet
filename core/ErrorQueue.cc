@@ -39,7 +39,7 @@ ErrorQueue::ErrorQueue(spd::logger &logger, spd::logger &tracer) : logger(logger
     owner = this_thread::get_id();
 }
 
-void ErrorQueue::renderForFile(core::FileRef whatFile, stringstream &critical, stringstream &nonCritical) {
+void ErrorQueue::renderForFile(FileRef whatFile, stringstream &critical, stringstream &nonCritical) {
     auto it = collected.find(whatFile);
     if (it == collected.end()) {
         return;
@@ -64,7 +64,7 @@ void ErrorQueue::flushErrors(bool all) {
             collected[msg.whatFile].emplace_back(move(msg));
         } else if (msg.kind == ErrorQueueMessage::Kind::Flush) {
             renderForFile(msg.whatFile, critical, nonCritical);
-            renderForFile(core::FileRef(), critical, nonCritical);
+            renderForFile(FileRef(), critical, nonCritical);
         }
     }
 

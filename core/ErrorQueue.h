@@ -28,10 +28,10 @@ struct ErrorQueueMessage {
 struct ErrorQueue {
 private:
     std::thread::id owner;
-    std::unordered_map<core::FileRef, std::vector<ErrorQueueMessage>> collected;
+    std::unordered_map<FileRef, std::vector<ErrorQueueMessage>> collected;
     ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
 
-    void renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
+    void renderForFile(FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
 
 public:
     spd::logger &logger;

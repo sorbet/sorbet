@@ -128,7 +128,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     return symbolProto;
 }
 
-com::stripe::rubytyper::Loc Proto::toProto(const core::GlobalState &gs, Loc loc) {
+com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
     com::stripe::rubytyper::Loc protoLoc;
     auto position = protoLoc.mutable_position();
     auto start = position->mutable_start();
@@ -150,7 +150,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const core::GlobalState &gs, Loc loc)
     return protoLoc;
 }
 
-com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const core::CounterState &counters,
+com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const CounterState &counters,
                                                                     absl::string_view prefix) {
     com::stripe::payserver::events::cibot::SourceMetrics metrics;
     auto unix_timestamp = chrono::seconds(time(nullptr));

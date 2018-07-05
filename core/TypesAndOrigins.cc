@@ -7,7 +7,7 @@ namespace sorbet {
 namespace core {
 
 // This sorts the underlying `origins`
-vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
+vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
     vector<ErrorLine> result;
     auto compare = [](Loc &left, Loc &right) {
         if (left.file != right.file) {
@@ -22,7 +22,7 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(core::Context ctx) {
         return false;
     };
     sort(origins.begin(), origins.end(), compare);
-    core::Loc last;
+    Loc last;
     for (auto o : origins) {
         if (o == last) {
             continue;

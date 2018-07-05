@@ -10,10 +10,9 @@ namespace core {
 
 using namespace std;
 
-shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2);
+shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2);
 
-shared_ptr<core::Type> core::Types::any(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                        const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> Types::any(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto ret = lub(ctx, t1, t2);
     ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
                                                 " was lubbing with " + t2->toString(ctx));
@@ -38,83 +37,80 @@ shared_ptr<core::Type> core::Types::any(core::Context ctx, const std::shared_ptr
     return ret;
 }
 
-const shared_ptr<core::Type> &underlying(const std::shared_ptr<Type> &t1) {
+const shared_ptr<Type> &underlying(const std::shared_ptr<Type> &t1) {
     if (auto *f = cast_type<ProxyType>(t1.get())) {
         return f->underlying;
     }
     return t1;
 }
 
-shared_ptr<core::Type> lubDistributeOr(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                       const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> lubDistributeOr(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    shared_ptr<core::Type> n1 = Types::any(ctx, o1->left, t2);
+    shared_ptr<Type> n1 = Types::any(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "t1");
+        categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<core::Type> n2 = Types::any(ctx, o1->right, t2);
+    shared_ptr<Type> n2 = Types::any(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "n2'");
+        categoryCounterInc("lubDistributeOr.outcome", "n2'");
         return n2;
     }
     if (n2.get() == o1->right.get()) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "t1'");
+        categoryCounterInc("lubDistributeOr.outcome", "t1'");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "n1'");
+        categoryCounterInc("lubDistributeOr.outcome", "n1'");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "n2''");
+        categoryCounterInc("lubDistributeOr.outcome", "n2''");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "n1'''");
+        categoryCounterInc("lubDistributeOr.outcome", "n1'''");
         return n1;
     }
-    core::categoryCounterInc("lubDistributeOr.outcome", "worst");
+    categoryCounterInc("lubDistributeOr.outcome", "worst");
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
-shared_ptr<core::Type> glbDistributeAnd(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                        const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> glbDistributeAnd(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
-    shared_ptr<core::Type> n1 = Types::all(ctx, a1->left, t2);
+    shared_ptr<Type> n1 = Types::all(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
-        core::categoryCounterInc("lubDistributeOr.outcome", "t1");
+        categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<core::Type> n2 = Types::all(ctx, a1->right, t2);
+    shared_ptr<Type> n2 = Types::all(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
-        core::categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
     }
     if (n2.get() == a1->right.get()) {
-        core::categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zt1");
         return t1;
     }
     if (n2.get() == t2.get()) {
-        core::categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
+        categoryCounterInc("glbDistributeAnd.outcome", "Zn1");
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        core::categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
         return n2;
     } else if (Types::isSubType(ctx, n2, n1)) {
-        core::categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
         return n1;
     }
 
-    core::categoryCounterInc("glbDistributeAnd.outcome", "worst");
+    categoryCounterInc("glbDistributeAnd.outcome", "worst");
     return AndType::make_shared(t1, t2);
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
-shared_ptr<core::Type> dropLubComponents(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                         const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> dropLubComponents(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     if (auto *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
@@ -140,10 +136,9 @@ shared_ptr<core::Type> dropLubComponents(core::Context ctx, const std::shared_pt
     return t1;
 }
 
-shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                        const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
-        core::categoryCounterInc("lub", "ref-eq");
+        categoryCounterInc("lub", "ref-eq");
         return t1;
     }
 
@@ -152,40 +147,40 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
     }
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
-            core::categoryCounterInc("lub", "<untyped");
+        if (mayBeSpecial1->symbol == Symbols::untyped()) {
+            categoryCounterInc("lub", "<untyped");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
-            core::categoryCounterInc("lub", "<bottom");
+        if (mayBeSpecial1->symbol == Symbols::bottom()) {
+            categoryCounterInc("lub", "<bottom");
             return t2;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::top()) {
-            core::categoryCounterInc("lub", "<top");
+        if (mayBeSpecial1->symbol == Symbols::top()) {
+            categoryCounterInc("lub", "<top");
             return t1;
         }
     }
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
-            core::categoryCounterInc("lub", "untyped>");
+        if (mayBeSpecial2->symbol == Symbols::untyped()) {
+            categoryCounterInc("lub", "untyped>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
-            core::categoryCounterInc("lub", "bottom>");
+        if (mayBeSpecial2->symbol == Symbols::bottom()) {
+            categoryCounterInc("lub", "bottom>");
             return t1;
         }
-        if (mayBeSpecial2->symbol == core::Symbols::top()) {
-            core::categoryCounterInc("lub", "top>");
+        if (mayBeSpecial2->symbol == Symbols::top()) {
+            categoryCounterInc("lub", "top>");
             return t2;
         }
     }
 
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 5, 6
-        core::categoryCounterInc("lub", "or>");
+        categoryCounterInc("lub", "or>");
         return lubDistributeOr(ctx, t2, t1);
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2, 4
-        core::categoryCounterInc("lub", "and>");
+        categoryCounterInc("lub", "and>");
         auto t1d = underlying(t1);
         auto t2filtered = dropLubComponents(ctx, t2, t1d);
         if (t2filtered != t2) {
@@ -193,7 +188,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
         }
         return OrType::make_shared(t1, t2filtered);
     } else if (cast_type<OrType>(t1.get()) != nullptr) {
-        core::categoryCounterInc("lub", "<or");
+        categoryCounterInc("lub", "<or");
         return lubDistributeOr(ctx, t1, t2);
     }
 
@@ -256,17 +251,17 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
     }
 
     if (auto *p1 = cast_type<ProxyType>(t1.get())) {
-        core::categoryCounterInc("lub", "<proxy");
+        categoryCounterInc("lub", "<proxy");
         if (auto *p2 = cast_type<ProxyType>(t2.get())) {
-            core::categoryCounterInc("lub", "proxy>");
+            categoryCounterInc("lub", "proxy>");
             // both are proxy
-            shared_ptr<core::Type> result;
+            shared_ptr<Type> result;
             typecase(
                 p1,
                 [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                     if (auto *a2 = cast_type<TupleType>(p2)) {
                         if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                            vector<shared_ptr<core::Type>> elemLubs;
+                            vector<shared_ptr<Type>> elemLubs;
                             int i = -1;
                             bool differ1 = false;
                             bool differ2 = false;
@@ -284,7 +279,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
                                 result = TupleType::build(ctx, elemLubs);
                             }
                         } else {
-                            result = core::Types::arrayOfUntyped();
+                            result = Types::arrayOfUntyped();
                         }
                     } else {
                         result = lub(ctx, p1->underlying, p2->underlying);
@@ -295,8 +290,8 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = -1;
-                            vector<shared_ptr<core::LiteralType>> keys;
-                            vector<shared_ptr<core::Type>> valueLubs;
+                            vector<shared_ptr<LiteralType>> keys;
+                            vector<shared_ptr<Type>> valueLubs;
                             bool differ1 = false;
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
@@ -313,7 +308,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
                                     differ1 = differ1 || valueLubs.back() != h1->values[fnd - h1->keys.begin()];
                                     differ2 = differ2 || valueLubs.back() != h2->values[i];
                                 } else {
-                                    result = core::Types::hashOfUntyped();
+                                    result = Types::hashOfUntyped();
                                     return;
                                 }
                             }
@@ -325,7 +320,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
                                 result = make_shared<ShapeType>(keys, valueLubs);
                             }
                         } else {
-                            result = core::Types::hashOfUntyped();
+                            result = Types::hashOfUntyped();
                         }
                     } else {
                         result = lub(ctx, p1->underlying, p2->underlying);
@@ -424,7 +419,7 @@ shared_ptr<core::Type> core::Types::lub(core::Context ctx, const std::shared_ptr
     return lubGround(ctx, t1, t2);
 }
 
-shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -437,7 +432,7 @@ shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> 
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
-        core::categoryCounterInc("lub", "ref-eq2");
+        categoryCounterInc("lub", "ref-eq2");
         return t1;
     }
 
@@ -449,29 +444,29 @@ shared_ptr<core::Type> lubGround(core::Context ctx, const std::shared_ptr<Type> 
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<core::Type> result;
+    shared_ptr<Type> result;
 
     // 1 :-)
     auto *c1 = cast_type<ClassType>(t1.get());
     auto *c2 = cast_type<ClassType>(t2.get());
-    core::categoryCounterInc("lub", "<class>");
+    categoryCounterInc("lub", "<class>");
     ENFORCE(c1 != nullptr && c2 != nullptr);
 
-    core::SymbolRef sym1 = c1->symbol;
-    core::SymbolRef sym2 = c2->symbol;
+    SymbolRef sym1 = c1->symbol;
+    SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym2.data(ctx).derivesFrom(ctx, sym1)) {
-        core::categoryCounterInc("lub.<class>.collapsed", "yes");
+        categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
     } else if (sym1.data(ctx).derivesFrom(ctx, sym2)) {
-        core::categoryCounterInc("lub.<class>.collapsed", "yes");
+        categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
     } else {
-        core::categoryCounterInc("lub.<class>.collapsed", "no");
+        categoryCounterInc("lub.<class>.collapsed", "no");
         return OrType::make_shared(t1, t2);
     }
 }
 
-shared_ptr<core::Type> glbGround(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> glbGround(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -484,7 +479,7 @@ shared_ptr<core::Type> glbGround(core::Context ctx, const std::shared_ptr<Type> 
      * The more complex types we have, the more likely this bet is to be wrong.
      */
     if (t1.get() == t2.get()) {
-        core::categoryCounterInc("glb", "ref-eq2");
+        categoryCounterInc("glb", "ref-eq2");
         return t1;
     }
 
@@ -496,32 +491,31 @@ shared_ptr<core::Type> glbGround(core::Context ctx, const std::shared_ptr<Type> 
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<core::Type> result;
+    shared_ptr<Type> result;
     // 1 :-)
     auto *c1 = cast_type<ClassType>(t1.get());
     auto *c2 = cast_type<ClassType>(t2.get());
     ENFORCE(c1 != nullptr && c2 != nullptr);
-    core::categoryCounterInc("glb", "<class>");
+    categoryCounterInc("glb", "<class>");
 
-    core::SymbolRef sym1 = c1->symbol;
-    core::SymbolRef sym2 = c2->symbol;
+    SymbolRef sym1 = c1->symbol;
+    SymbolRef sym2 = c2->symbol;
     if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
-        core::categoryCounterInc("glb.<class>.collapsed", "yes");
+        categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
     } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
-        core::categoryCounterInc("glb.<class>.collapsed", "yes");
+        categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
         if (sym1.data(ctx).isClassClass() && sym2.data(ctx).isClassClass()) {
-            core::categoryCounterInc("glb.<class>.collapsed", "bottom");
+            categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
-        core::categoryCounterInc("glb.<class>.collapsed", "no");
+        categoryCounterInc("glb.<class>.collapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<core::Type> core::Types::all(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                        const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> Types::all(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
@@ -546,39 +540,38 @@ shared_ptr<core::Type> core::Types::all(core::Context ctx, const std::shared_ptr
     return ret;
 }
 
-shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr<Type> &t1,
-                                        const std::shared_ptr<Type> &t2) {
+shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
-        core::categoryCounterInc("glb", "ref-eq");
+        categoryCounterInc("glb", "ref-eq");
         return t1;
     }
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
-            core::categoryCounterInc("glb", "<untyped");
+        if (mayBeSpecial1->symbol == Symbols::untyped()) {
+            categoryCounterInc("glb", "<untyped");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
-            core::categoryCounterInc("glb", "<bottom");
+        if (mayBeSpecial1->symbol == Symbols::bottom()) {
+            categoryCounterInc("glb", "<bottom");
             return t1;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::top()) {
-            core::categoryCounterInc("glb", "<top");
+        if (mayBeSpecial1->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "<top");
             return t2;
         }
     }
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
-            core::categoryCounterInc("glb", "untyped>");
+        if (mayBeSpecial2->symbol == Symbols::untyped()) {
+            categoryCounterInc("glb", "untyped>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
-            core::categoryCounterInc("glb", "bottom>");
+        if (mayBeSpecial2->symbol == Symbols::bottom()) {
+            categoryCounterInc("glb", "bottom>");
             return t2;
         }
-        if (mayBeSpecial2->symbol == core::Symbols::top()) {
-            core::categoryCounterInc("glb", "top>");
+        if (mayBeSpecial2->symbol == Symbols::top()) {
+            categoryCounterInc("glb", "top>");
             return t1;
         }
     }
@@ -587,10 +580,10 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
         return glb(ctx, t2, t1);
     }
     if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
-        core::categoryCounterInc("glb", "<and");
+        categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
     } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2
-        core::categoryCounterInc("glb", "and>");
+        categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     }
 
@@ -599,13 +592,13 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
             if (typeid(*p1) != typeid(*p2)) {
                 return Types::bottom();
             }
-            shared_ptr<core::Type> result;
+            shared_ptr<Type> result;
             typecase(p1,
                      [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                          auto *a2 = cast_type<TupleType>(p2);
                          ENFORCE(a2 != nullptr);
                          if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                             vector<shared_ptr<core::Type>> elemGlbs;
+                             vector<shared_ptr<Type>> elemGlbs;
                              int i = -1;
                              for (auto &el2 : a2->elems) {
                                  ++i;
@@ -628,8 +621,8 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
                          if (h2->keys.size() == h1->keys.size()) {
                              // have enough keys.
                              int i = -1;
-                             vector<shared_ptr<core::LiteralType>> keys;
-                             vector<shared_ptr<core::Type>> valueLubs;
+                             vector<shared_ptr<LiteralType>> keys;
+                             vector<shared_ptr<Type>> valueLubs;
                              for (auto &el2 : h2->keys) {
                                  ++i;
                                  auto *u2 = cast_type<ClassType>(el2->underlying.get());
@@ -695,25 +688,25 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
     if (auto *o2 = cast_type<OrType>(t2.get())) { // 3, 6
         bool collapseInLeft = Types::isSubType(ctx, t1, t2);
         if (collapseInLeft) {
-            core::categoryCounterInc("glb", "Zor");
+            categoryCounterInc("glb", "Zor");
             return t1;
         }
 
         bool collapseInRight = Types::isSubType(ctx, t2, t1);
         if (collapseInRight) {
-            core::categoryCounterInc("glb", "ZZor");
+            categoryCounterInc("glb", "ZZor");
             return t2;
         }
 
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
             auto lft = Types::all(ctx, t1, o2->left);
             if (Types::isSubType(ctx, lft, o2->right)) {
-                core::categoryCounterInc("glb", "ZZZorClass");
+                categoryCounterInc("glb", "ZZZorClass");
                 return lft;
             }
             auto rght = Types::all(ctx, t1, o2->right);
             if (Types::isSubType(ctx, rght, o2->left)) {
-                core::categoryCounterInc("glb", "ZZZZorClass");
+                categoryCounterInc("glb", "ZZZZorClass");
                 return rght;
             }
             if (lft->isBottom()) {
@@ -754,7 +747,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
                 return Types::any(ctx, Types::any(ctx, t11, t12), Types::any(ctx, t21, t22));
             }
         }
-        core::categoryCounterInc("glb.orcollapsed", "no");
+        categoryCounterInc("glb.orcollapsed", "no");
         return AndType::make_shared(t1, t2);
     }
 
@@ -855,7 +848,7 @@ shared_ptr<core::Type> core::Types::glb(core::Context ctx, const std::shared_ptr
     return glbGround(ctx, t1, t2);
 }
 
-bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRef c2) {
+bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
     ENFORCE(c1.data(ctx).isClass());
     ENFORCE(c2.data(ctx).isClass());
     return c1 == c2 || c1.data(ctx).derivesFrom(ctx, c2);
@@ -863,7 +856,7 @@ bool classSymbolIsAsGoodAs(core::Context ctx, core::SymbolRef c1, core::SymbolRe
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
+bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
                                     const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
@@ -878,16 +871,15 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, c
     }
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
-        if (mayBeSpecial1->symbol == core::Symbols::untyped()) {
+        if (mayBeSpecial1->symbol == Symbols::untyped()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::bottom()) {
+        if (mayBeSpecial1->symbol == Symbols::bottom()) {
             return true;
         }
-        if (mayBeSpecial1->symbol == core::Symbols::top()) {
+        if (mayBeSpecial1->symbol == Symbols::top()) {
             if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-                return mayBeSpecial2->symbol == core::Symbols::top() ||
-                       mayBeSpecial2->symbol == core::Symbols::untyped();
+                return mayBeSpecial2->symbol == Symbols::top() || mayBeSpecial2->symbol == Symbols::untyped();
             } else {
                 return false;
             }
@@ -895,13 +887,13 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, c
     }
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
-        if (mayBeSpecial2->symbol == core::Symbols::untyped()) {
+        if (mayBeSpecial2->symbol == Symbols::untyped()) {
             return true;
         }
-        if (mayBeSpecial2->symbol == core::Symbols::bottom()) {
+        if (mayBeSpecial2->symbol == Symbols::bottom()) {
             return false; // (bot, bot) is handled above.
         }
-        if (mayBeSpecial2->symbol == core::Symbols::top()) {
+        if (mayBeSpecial2->symbol == Symbols::top()) {
             return true;
         }
     }
@@ -1068,8 +1060,8 @@ bool isSubTypeUnderConstraintSingle(core::Context ctx, TypeConstraint &constr, c
     }
 }
 
-bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
-                                           const std::shared_ptr<Type> &t2) {
+bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const std::shared_ptr<Type> &t1,
+                                     const std::shared_ptr<Type> &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1143,39 +1135,38 @@ bool core::Types::isSubTypeUnderConstraint(core::Context ctx, TypeConstraint &co
     return isSubTypeUnderConstraintSingle(ctx, constr, t1, t2); // 1
 }
 
-bool core::Types::equiv(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
+bool Types::equiv(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
-bool ProxyType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return underlying->derivesFrom(gs, klass);
 }
 
-bool ClassType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
-    if (symbol == core::Symbols::untyped() || symbol == klass) {
+bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
+    if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
     }
     return symbol.data(gs).derivesFrom(gs, klass);
 }
 
-bool OrType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return left->derivesFrom(gs, klass) && right->derivesFrom(gs, klass);
 }
 
-bool AndType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return left->derivesFrom(gs, klass) || right->derivesFrom(gs, klass);
 }
 
-bool AliasType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("AliasType.derivesfrom");
 }
 
-void AliasType::_sanityCheck(core::Context ctx) {
+void AliasType::_sanityCheck(Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-shared_ptr<Type> AliasType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                         const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> AliasType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
@@ -1191,7 +1182,7 @@ string MetaType::typeName() const {
     return "MetaType";
 }
 
-void MetaType::_sanityCheck(core::Context ctx) {
+void MetaType::_sanityCheck(Context ctx) {
     this->wrapped->sanityCheck(ctx);
 }
 
@@ -1199,18 +1190,17 @@ bool MetaType::isFullyDefined() {
     return true; // this is kinda true but kinda false. it's false for subtyping but true for inferencer.
 }
 
-bool MetaType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return false;
 }
 
-shared_ptr<Type> MetaType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                        const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> MetaType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
 MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {}
 
-shared_ptr<Type> MetaType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }

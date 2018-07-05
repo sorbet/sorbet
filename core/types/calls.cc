@@ -11,21 +11,21 @@ using namespace sorbet;
 using namespace core;
 using namespace std;
 
-DispatchResult ProxyType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "proxytype");
+DispatchResult ProxyType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                       shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                       shared_ptr<SendAndBlockLink> block) {
+    categoryCounterInc("dispatch_call", "proxytype");
     return underlying->dispatchCall(ctx, name, callLoc, args, underlying, fullType, block);
 }
 
-shared_ptr<Type> ProxyType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i) {
     return underlying->getCallArgumentType(ctx, name, i);
 }
 
-DispatchResult OrType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                    vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+DispatchResult OrType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                    shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                     shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "ortype");
+    categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(ctx, name, callLoc, args, left, fullType, block);
     auto rightRet = right->dispatchCall(ctx, name, callLoc, args, right, fullType, block);
     DispatchResult::ComponentVec components = move(leftRet.components);
@@ -38,28 +38,28 @@ DispatchResult OrType::dispatchCall(core::Context ctx, core::NameRef name, core:
     return ret;
 }
 
-shared_ptr<Type> OrType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> OrType::getCallArgumentType(Context ctx, NameRef name, int i) {
     return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
 }
 
-DispatchResult AppliedType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                         shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "appliedType");
+DispatchResult AppliedType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                         shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                         shared_ptr<SendAndBlockLink> block) {
+    categoryCounterInc("dispatch_call", "appliedType");
     ClassType ct(this->klass);
     return ct.dispatchCallWithTargs(ctx, name, callLoc, args, selfRef, fullType, this->targs, block);
 }
 
-DispatchResult TypeVar::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                     vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+DispatchResult TypeVar::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                     shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                      shared_ptr<SendAndBlockLink> block) {
     Error::raise("should never happen");
 }
 
-DispatchResult AndType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                     vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+DispatchResult AndType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                     shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                      shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "andtype");
+    categoryCounterInc("dispatch_call", "andtype");
     auto leftRet = left->dispatchCall(ctx, name, callLoc, args, left, fullType, block);
     auto rightRet = right->dispatchCall(ctx, name, callLoc, args, right, fullType, block);
 
@@ -85,7 +85,7 @@ DispatchResult AndType::dispatchCall(core::Context ctx, core::NameRef name, core
     return ret;
 }
 
-shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> AndType::getCallArgumentType(Context ctx, NameRef name, int i) {
     auto l = left->getCallArgumentType(ctx, name, i);
     auto r = right->getCallArgumentType(ctx, name, i);
     if (l == nullptr) {
@@ -97,17 +97,17 @@ shared_ptr<Type> AndType::getCallArgumentType(core::Context ctx, core::NameRef n
     return Types::any(ctx, l, r);
 }
 
-DispatchResult ShapeType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "shapetype");
+DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, vector<TypeAndOrigins> &args,
+                                       shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                       shared_ptr<SendAndBlockLink> block) {
+    categoryCounterInc("dispatch_call", "shapetype");
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
-DispatchResult TupleType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
-    auto method = core::Symbols::Tuple().data(ctx).findMember(ctx, fun);
+DispatchResult TupleType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, vector<TypeAndOrigins> &args,
+                                       shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                       shared_ptr<SendAndBlockLink> block) {
+    auto method = Symbols::Tuple().data(ctx).findMember(ctx, fun);
     if (method.exists() && method.data(ctx).intrinsic != nullptr) {
         auto result = method.data(ctx).intrinsic->apply(ctx, callLoc, args, selfRef, fullType, block);
         if (result != nullptr) {
@@ -121,51 +121,50 @@ DispatchResult TupleType::dispatchCall(core::Context ctx, core::NameRef fun, cor
 }
 
 namespace {
-bool isSetter(core::Context ctx, core::NameRef fun) {
+bool isSetter(Context ctx, NameRef fun) {
     if (fun.data(ctx).kind != NameKind::UTF8) {
         return false;
     }
     return fun.data(ctx).raw.utf8.back() == '=';
 }
 
-unique_ptr<BasicError> matchArgType(core::Context ctx, core::TypeConstraint &constr, core::Loc callLoc,
-                                    core::SymbolRef inClass, core::NameRef fun, TypeAndOrigins &argTpe,
-                                    const core::Symbol &argSym, shared_ptr<core::Type> &fullType,
+unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, SymbolRef inClass, NameRef fun,
+                                    TypeAndOrigins &argTpe, const Symbol &argSym, shared_ptr<Type> &fullType,
                                     vector<shared_ptr<Type>> &targs, bool mayBeSetter = false) {
-    shared_ptr<Type> expectedType = core::Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
+    shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped();
     }
 
-    expectedType = core::Types::replaceSelfType(
+    expectedType = Types::replaceSelfType(
         ctx, expectedType,
         fullType); // TODO: fullType is actually not the best here. We want the last AND component of fullType
 
     if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
         return nullptr;
     }
-    if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
+    if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
         if (mayBeSetter && isSetter(ctx, fun)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.name.toString(ctx),
                         expectedType->show(ctx));
         } else {
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
                         argSym.name.toString(ctx));
-            e.addErrorSection(core::ErrorSection({
-                core::ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified `{}` as `{}`",
-                                      argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
-                                      expectedType->show(ctx)),
+            e.addErrorSection(ErrorSection({
+                ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified `{}` as `{}`",
+                                argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
+                                expectedType->show(ctx)),
             }));
         }
-        e.addErrorSection(core::ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:",
-                                             argTpe.origins2Explanations(ctx)));
+        e.addErrorSection(
+            ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:", argTpe.origins2Explanations(ctx)));
         auto *ot = cast_type<OrType>(argTpe.type.get());
         if (ot) {
             auto *lt = cast_type<ClassType>(ot->left.get());
             auto *rt = cast_type<ClassType>(ot->right.get());
-            if ((lt != nullptr && lt->symbol == core::Symbols::NilClass()) ||
-                (rt != nullptr && rt->symbol == core::Symbols::NilClass())) {
-                e.addErrorSection(core::ErrorSection("You could wrap it in `T.must()` before passing the argument."));
+            if ((lt != nullptr && lt->symbol == Symbols::NilClass()) ||
+                (rt != nullptr && rt->symbol == Symbols::NilClass())) {
+                e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before passing the argument."));
             }
         }
         return e.build();
@@ -173,8 +172,8 @@ unique_ptr<BasicError> matchArgType(core::Context ctx, core::TypeConstraint &con
     return nullptr;
 }
 
-unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, core::NameRef method, SymbolRef arg) {
-    if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, NameRef method, SymbolRef arg) {
+    if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
         e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx).name.toString(ctx),
                     method.toString(ctx));
         return e.build();
@@ -183,7 +182,7 @@ unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, core::NameRef method
 }
 }; // namespace
 
-int getArity(core::Context ctx, core::SymbolRef method) {
+int getArity(Context ctx, SymbolRef method) {
     int arity = method.data(ctx).arguments().size();
     if (arity == 0) {
         return 0;
@@ -196,23 +195,21 @@ int getArity(core::Context ctx, core::SymbolRef method) {
 
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
-core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::SymbolRef primary,
-                              vector<TypeAndOrigins> &args, shared_ptr<Type> fullType, vector<shared_ptr<Type>> &targs,
-                              bool hasBlock) {
-    core::counterInc("calls.overloaded_invocations");
+SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary, vector<TypeAndOrigins> &args,
+                        shared_ptr<Type> fullType, vector<shared_ptr<Type>> &targs, bool hasBlock) {
+    counterInc("calls.overloaded_invocations");
     ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
-    core::SymbolRef fallback = primary;
-    vector<core::SymbolRef> allCandidates;
+    SymbolRef fallback = primary;
+    vector<SymbolRef> allCandidates;
 
     allCandidates.push_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
-        core::SymbolRef current = primary;
+        SymbolRef current = primary;
         while (current.data(ctx).isOverloaded()) {
             i++;
-            core::NameRef overloadName =
-                ctx.state.getNameUnique(core::UniqueNameKind::Overload, primary.data(ctx).name, i);
-            core::SymbolRef overload = primary.data(ctx).owner.data(ctx).findMember(ctx, overloadName);
+            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx).name, i);
+            SymbolRef overload = primary.data(ctx).owner.data(ctx).findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
             } else {
@@ -221,7 +218,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
             }
         }
 
-        sort(allCandidates.begin(), allCandidates.end(), [&](core::SymbolRef s1, core::SymbolRef s2) -> bool {
+        sort(allCandidates.begin(), allCandidates.end(), [&](SymbolRef s1, SymbolRef s2) -> bool {
             if (getArity(ctx, s1) < getArity(ctx, s2)) {
                 return true;
             }
@@ -232,7 +229,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
         });
     }
 
-    vector<core::SymbolRef> leftCandidates = allCandidates;
+    vector<SymbolRef> leftCandidates = allCandidates;
 
     {
         // Lets see if we can filter them out using arguments.
@@ -240,14 +237,13 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
         for (auto &arg : args) {
             i++;
             for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-                core::SymbolRef candidate = *it;
+                SymbolRef candidate = *it;
                 if (i >= getArity(ctx, candidate)) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
 
-                auto argType =
-                    core::Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx).arguments()[i], inClass, targs);
+                auto argType = Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx).arguments()[i], inClass, targs);
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg.type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -264,7 +260,7 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
 
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
-            core::SymbolRef candidate = *it;
+            SymbolRef candidate = *it;
             auto args = candidate.data(ctx).arguments();
             if (args.empty()) {
                 if (hasBlock) {
@@ -284,15 +280,15 @@ core::SymbolRef guessOverload(core::Context ctx, core::SymbolRef inClass, core::
 
     { // keep only candidates with closest arity
         struct Comp {
-            core::Context ctx;
+            Context ctx;
 
-            bool operator()(core::SymbolRef s, int i) const {
+            bool operator()(SymbolRef s, int i) const {
                 return getArity(ctx, s) < i;
             }
-            bool operator()(int i, core::SymbolRef s) const {
+            bool operator()(int i, SymbolRef s) const {
                 return i < getArity(ctx, s);
             }
-            Comp(core::Context ctx) : ctx(ctx){};
+            Comp(Context ctx) : ctx(ctx){};
         } cmp(ctx);
 
         auto er = equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
@@ -352,31 +348,30 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
 //  - We never allow a non-shaped Hash to satisfy keyword arguments;
 //    We should, at a minimum, probably allow one to satisfy an **kwargs : untyped
 //    (with a subtype check on the key type, once we have generics)
-DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                                vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                                shared_ptr<Type> fullType, vector<shared_ptr<Type>> &targs,
-                                                shared_ptr<SendAndBlockLink> block) {
-    core::categoryCounterInc("dispatch_call", "classtype");
+DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc callLoc, vector<TypeAndOrigins> &args,
+                                                shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                                vector<shared_ptr<Type>> &targs, shared_ptr<SendAndBlockLink> block) {
+    categoryCounterInc("dispatch_call", "classtype");
     if (isUntyped()) {
         return DispatchResult(Types::untyped(), move(selfRef), Symbols::untyped());
-    } else if (this->symbol == core::Symbols::void_()) {
-        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
+    } else if (this->symbol == Symbols::void_()) {
+        if (auto e = ctx.state.beginError(callLoc, errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", fun.data(ctx).toString(ctx));
         }
         return DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
     }
 
-    core::SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
+    SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
 
     if (!mayBeOverloaded.exists()) {
-        if (fun == core::Names::initialize()) {
+        if (fun == Names::initialize()) {
             // Special-case initialize(). We should define this on
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
             auto result = DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
             if (!args.empty()) {
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
                     result.components.front().errors.emplace_back(e.build());
                 }
@@ -384,36 +379,32 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
             return result;
         }
         auto result = DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
-        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::UnknownMethod)) {
+        if (auto e = ctx.state.beginError(callLoc, errors::Infer::UnknownMethod)) {
             if (fullType.get() != this) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", fun.data(ctx).toString(ctx),
                             this->show(ctx), fullType->show(ctx));
-                if (this->symbol == core::Symbols::NilClass()) {
-                    e.addErrorSection(
-                        core::ErrorSection("You could wrap it in `T.must()` before calling the function."));
+                if (this->symbol == Symbols::NilClass()) {
+                    e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before calling the function."));
                 }
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
                 auto alternatives = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
                 if (!alternatives.empty()) {
-                    vector<core::ErrorLine> lines;
+                    vector<ErrorLine> lines;
                     for (auto alternative : alternatives) {
-                        lines.emplace_back(core::ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
-                                                                 "Did you mean: `{}`?",
-                                                                 alternative.name.toString(ctx)));
+                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
+                                                           "Did you mean: `{}`?", alternative.name.toString(ctx)));
                     }
-                    e.addErrorSection(core::ErrorSection(lines));
+                    e.addErrorSection(ErrorSection(lines));
                 }
 
                 auto attached = this->symbol.data(ctx).attachedClass(ctx);
-                if (attached.exists() &&
-                    this->symbol.data(ctx).derivesFrom(ctx, core::Symbols::Chalk_Tools_Accessible())) {
-                    e.addErrorSection(core::ErrorSection(
+                if (attached.exists() && this->symbol.data(ctx).derivesFrom(ctx, Symbols::Chalk_Tools_Accessible())) {
+                    e.addErrorSection(ErrorSection(
                         "If this method is generated by Chalk::Tools::Accessible, you "
                         "may need to re-generate the .rbi. Try running:\n" +
-                        core::ErrorColors::format(
-                            "  scripts/bin/remote-script sorbet/shim_generation/make_accessible.rb {}",
-                            attached.data(ctx).fullName(ctx))));
+                        ErrorColors::format("  scripts/bin/remote-script sorbet/shim_generation/make_accessible.rb {}",
+                                            attached.data(ctx).fullName(ctx))));
                 }
             }
             result.components.front().errors.emplace_back(e.build());
@@ -421,15 +412,15 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
         return result;
     }
 
-    core::SymbolRef method = mayBeOverloaded.data(ctx).isOverloaded()
-                                 ? guessOverload(ctx.withOwner(mayBeOverloaded), this->symbol, mayBeOverloaded, args,
-                                                 fullType, targs, block != nullptr)
-                                 : mayBeOverloaded;
+    SymbolRef method = mayBeOverloaded.data(ctx).isOverloaded()
+                           ? guessOverload(ctx.withOwner(mayBeOverloaded), this->symbol, mayBeOverloaded, args,
+                                           fullType, targs, block != nullptr)
+                           : mayBeOverloaded;
 
     DispatchResult result;
     result.components.emplace_back(DispatchComponent{selfRef, method, vector<unique_ptr<BasicError>>()});
 
-    const core::Symbol &data = method.data(ctx);
+    const Symbol &data = method.data(ctx);
     unique_ptr<TypeConstraint> maybeConstraint;
     TypeConstraint *constr;
     if (block) {
@@ -445,7 +436,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
         constr->defineDomain(ctx, data.typeArguments());
     }
     bool hasKwargs = any_of(data.arguments().begin(), data.arguments().end(),
-                            [&ctx](core::SymbolRef arg) { return arg.data(ctx).isKeyword(); });
+                            [&ctx](SymbolRef arg) { return arg.data(ctx).isKeyword(); });
 
     auto pit = data.arguments().begin();
     auto pend = data.arguments().end();
@@ -458,12 +449,12 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
     auto aend = args.end();
 
     while (pit != pend && ait != aend) {
-        const core::Symbol &spec = pit->data(ctx);
+        const Symbol &spec = pit->data(ctx);
         auto &arg = *ait;
         if (spec.isKeyword()) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, core::Symbols::Hash()) &&
+        if (ait + 1 == aend && hasKwargs && arg.type->derivesFrom(ctx, Symbols::Hash()) &&
             (spec.isOptional() || spec.isRepeated())) {
             break;
         }
@@ -482,7 +473,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
     if (pit != pend) {
         if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
               pit->data(ctx).isBlockArgument())) {
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                 e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
                             fun.toString(ctx),
                             // TODO(nelhage): report actual counts of required arguments,
@@ -514,14 +505,14 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
             --aend;
 
             while (kwit != data.arguments().end()) {
-                const core::Symbol &spec = kwit->data(ctx);
+                const Symbol &spec = kwit->data(ctx);
                 if (spec.isBlockArgument()) {
                     break;
                 } else if (spec.isRepeated()) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = *it;
                         SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
-                        if (klass != core::Symbols::Symbol()) {
+                        if (klass != Symbols::Symbol()) {
                             continue;
                         }
 
@@ -544,7 +535,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
                 ++kwit;
 
                 auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<LiteralType> lit) {
-                    return cast_type<ClassType>(lit->underlying.get())->symbol == core::Symbols::Symbol() &&
+                    return cast_type<ClassType>(lit->underlying.get())->symbol == Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -565,24 +556,23 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
             }
             for (auto &key : hash->keys) {
                 SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
-                if (klass == core::Symbols::Symbol() &&
-                    consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
+                if (klass == Symbols::Symbol() && consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
                     continue;
                 }
                 NameRef arg(ctx.state, key->value);
 
-                if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+                if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.toString(ctx),
                                 fun.toString(ctx));
                     result.components.front().errors.emplace_back(e.build());
                 }
             }
-        } else if (hashArg.type->derivesFrom(ctx, core::Symbols::Hash())) {
+        } else if (hashArg.type->derivesFrom(ctx, Symbols::Hash())) {
             --aend;
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentMismatch)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
                 e.setHeader("Passing an untyped hash to keyword arguments");
-                e.addErrorSection(core::ErrorSection("Got " + hashArg.type->show(ctx) + " originating from:",
-                                                     hashArg.origins2Explanations(ctx)));
+                e.addErrorSection(ErrorSection("Got " + hashArg.type->show(ctx) + " originating from:",
+                                               hashArg.origins2Explanations(ctx)));
                 result.components.front().errors.emplace_back(e.build());
             }
         }
@@ -601,7 +591,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
     }
 
     if (ait != aend) {
-        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::MethodArgumentCountMismatch)) {
+        if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
             e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", fun.toString(ctx),
 
                         // TODO(nelhage): report actual counts of required arguments,
@@ -625,7 +615,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
         // if block is there we do not attempt to solve the constaint. CFG adds an explicit solve
         // node that triggers constraint solving
         if (!constr->solve(ctx)) {
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericMethodConstaintUnsolved)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::GenericMethodConstaintUnsolved)) {
                 e.setHeader("Could not find valid instantiation of type parameters");
                 result.components.front().errors.emplace_back(e.build());
             }
@@ -642,7 +632,7 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
         fullType); // TODO: full type is not the best here. We actually want the last AND component of fulltype
 
     if (block != nullptr) {
-        core::SymbolRef bspec;
+        SymbolRef bspec;
         if (!data.arguments().empty()) {
             bspec = data.arguments().back();
         }
@@ -666,23 +656,23 @@ DispatchResult ClassType::dispatchCallWithTargs(core::Context ctx, core::NameRef
     return result;
 }
 
-DispatchResult ClassType::dispatchCall(core::Context ctx, core::NameRef fun, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult ClassType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, vector<TypeAndOrigins> &args,
+                                       shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                       shared_ptr<SendAndBlockLink> block) {
     vector<shared_ptr<Type>> empty;
     return dispatchCallWithTargs(ctx, fun, callLoc, args, selfRef, fullType, empty, block);
 }
 
-shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i) {
     if (isUntyped()) {
         return Types::untyped();
     }
-    core::SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
+    SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
     if (!method.exists()) {
         return nullptr;
     }
-    const core::Symbol &data = method.data(ctx);
+    const Symbol &data = method.data(ctx);
 
     if (i >= data.arguments().size()) { // todo: this should become actual argument matching
         return nullptr;
@@ -695,14 +685,14 @@ shared_ptr<Type> ClassType::getCallArgumentType(core::Context ctx, core::NameRef
     return resultType;
 }
 
-shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
-    core::SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
+shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int i) {
+    SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
 
     if (!method.exists()) {
         return nullptr;
     }
 
-    const core::Symbol &data = method.data(ctx);
+    const Symbol &data = method.data(ctx);
 
     if (i >= data.arguments().size()) { // todo: this should become actual argument matching
         return nullptr;
@@ -715,31 +705,30 @@ shared_ptr<Type> AppliedType::getCallArgumentType(core::Context ctx, core::NameR
     return resultType;
 }
 
-DispatchResult AliasType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                       vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                                       shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult AliasType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                       shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                                       shared_ptr<SendAndBlockLink> block) {
     Error::raise("AliasType::dispatchCall");
 }
 
-shared_ptr<Type> AliasType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> AliasType::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("AliasType::getCallArgumentType");
 }
 
-DispatchResult MetaType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                      vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+DispatchResult MetaType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                      shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                       shared_ptr<SendAndBlockLink> block) {
     switch (name._id) {
-        case core::Names::new_()._id: {
-            auto res =
-                DispatchResult(wrapped, selfRef, core::Symbols::Class().data(ctx).findMember(ctx, core::Names::new_()));
-            auto inner = wrapped->dispatchCall(ctx, core::Names::initialize(), callLoc, args, wrapped, wrapped, block);
+        case Names::new_()._id: {
+            auto res = DispatchResult(wrapped, selfRef, Symbols::Class().data(ctx).findMember(ctx, Names::new_()));
+            auto inner = wrapped->dispatchCall(ctx, Names::initialize(), callLoc, args, wrapped, wrapped, block);
             res.components.insert(res.components.end(), make_move_iterator(inner.components.begin()),
                                   make_move_iterator(inner.components.end()));
             return res;
         }
         default: {
-            auto res = DispatchResult(Types::untyped(), selfRef, core::Symbols::noSymbol());
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
+            auto res = DispatchResult(Types::untyped(), selfRef, Symbols::noSymbol());
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
                 res.components.front().errors.emplace_back(e.build());
             }
@@ -748,12 +737,12 @@ DispatchResult MetaType::dispatchCall(core::Context ctx, core::NameRef name, cor
     }
 }
 
-shared_ptr<Type> MetaType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> MetaType::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("should never happen");
 }
 
-core::SymbolRef unwrapSymbol(shared_ptr<Type> type) {
-    core::SymbolRef result;
+SymbolRef unwrapSymbol(shared_ptr<Type> type) {
+    SymbolRef result;
     while (!result.exists()) {
         typecase(type.get(),
 
@@ -770,28 +759,28 @@ core::SymbolRef unwrapSymbol(shared_ptr<Type> type) {
 
 class T_untyped : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        return core::Types::untyped();
+        return Types::untyped();
     }
 } T_untyped;
 
 class T_must : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
             return nullptr;
         }
         if (!args[0].type->isFullyDefined()) {
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::BareTypeUsage)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("T.must() applied to incomplete type `{}`", args[0].type->show(ctx));
             }
             return nullptr;
         }
-        auto ret = Types::approximateSubtract(ctx, args[0].type, core::Types::nilClass());
+        auto ret = Types::approximateSubtract(ctx, args[0].type, Types::nilClass());
         if (ret == args[0].type) {
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::InvalidCast)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::InvalidCast)) {
                 e.setHeader("T.must(): Expected a `T.nilable` type, got: `{}`", args[0].type->show(ctx));
             }
         }
@@ -801,51 +790,51 @@ public:
 
 class T_any : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        if (args.empty()) {
-            return core::Types::untyped();
-        }
-
-        shared_ptr<Type> res = core::Types::bottom();
-        for (auto &arg : args) {
-            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
-            res = Types::any(ctx, res, ty);
-        }
-
-        return make_shared<core::MetaType>(res);
-    }
-} T_any;
-
-class T_all : public Symbol::IntrinsicMethod {
-public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
-                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        if (args.empty()) {
-            return core::Types::untyped();
-        }
-
-        shared_ptr<Type> res = core::Types::top();
-        for (auto &arg : args) {
-            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
-            res = Types::all(ctx, res, ty);
-        }
-
-        return make_shared<core::MetaType>(res);
-    }
-} T_all;
-
-class T_revealType : public Symbol::IntrinsicMethod {
-public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
             return Types::untyped();
         }
 
-        if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::RevealType)) {
+        shared_ptr<Type> res = Types::bottom();
+        for (auto &arg : args) {
+            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            res = Types::any(ctx, res, ty);
+        }
+
+        return make_shared<MetaType>(res);
+    }
+} T_any;
+
+class T_all : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return Types::untyped();
+        }
+
+        shared_ptr<Type> res = Types::top();
+        for (auto &arg : args) {
+            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            res = Types::all(ctx, res, ty);
+        }
+
+        return make_shared<MetaType>(res);
+    }
+} T_all;
+
+class T_revealType : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        if (args.empty()) {
+            return Types::untyped();
+        }
+
+        if (auto e = ctx.state.beginError(callLoc, errors::Infer::RevealType)) {
             e.setHeader("Revealed type: `{}`", args[0].type->show(ctx));
-            e.addErrorSection(core::ErrorSection("From:", args[0].origins2Explanations(ctx)));
+            e.addErrorSection(ErrorSection("From:", args[0].origins2Explanations(ctx)));
         }
         return args[0].type;
     }
@@ -853,36 +842,36 @@ public:
 
 class Object_class : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        core::SymbolRef self = unwrapSymbol(selfRef);
+        SymbolRef self = unwrapSymbol(selfRef);
         auto singleton = self.data(ctx).lookupSingletonClass(ctx);
         if (singleton.exists()) {
             return make_shared<ClassType>(singleton);
         }
-        return core::Types::classClass();
+        return Types::classClass();
     }
 } Object_class;
 
 class Class_new : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        core::SymbolRef self = unwrapSymbol(selfRef);
+        SymbolRef self = unwrapSymbol(selfRef);
 
         auto attachedClass = self.data(ctx).attachedClass(ctx);
         if (!attachedClass.exists()) {
-            if (self == core::Symbols::Class()) {
+            if (self == Symbols::Class()) {
                 // `Class.new(...)`, but it isn't a specific Class. We know
                 // calling .new on a Class will yield some sort of Object
-                attachedClass = core::Symbols::Object();
+                attachedClass = Symbols::Object();
             } else {
                 return nullptr;
             }
         }
         auto instanceTy = attachedClass.data(ctx).externalType(ctx);
         auto dispatched =
-            instanceTy->dispatchCall(ctx, core::Names::initialize(), callLoc, args, instanceTy, instanceTy, linkType);
+            instanceTy->dispatchCall(ctx, Names::initialize(), callLoc, args, instanceTy, instanceTy, linkType);
         // TODO(nelhage): Arguably apply() should also return a DispatchResult
         // and we should pass these errors up to the caller.
         for (auto &comp : dispatched.components) {
@@ -896,31 +885,31 @@ public:
 
 class T_Generic_squareBrackets : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
-        core::SymbolRef attachedClass;
+        SymbolRef attachedClass;
 
-        core::SymbolRef self = unwrapSymbol(selfRef);
+        SymbolRef self = unwrapSymbol(selfRef);
         attachedClass = self.data(ctx).attachedClass(ctx);
 
         if (!attachedClass.exists()) {
             return nullptr;
         }
 
-        if (attachedClass == core::Symbols::T_Array()) {
-            attachedClass = core::Symbols::Array();
-        } else if (attachedClass == core::Symbols::T_Hash()) {
-            attachedClass = core::Symbols::Hash();
-        } else if (attachedClass == core::Symbols::T_Enumerable()) {
-            attachedClass = core::Symbols::Enumerable();
-        } else if (attachedClass == core::Symbols::T_Range()) {
-            attachedClass = core::Symbols::Range();
-        } else if (attachedClass == core::Symbols::T_Set()) {
-            attachedClass = core::Symbols::Set();
+        if (attachedClass == Symbols::T_Array()) {
+            attachedClass = Symbols::Array();
+        } else if (attachedClass == Symbols::T_Hash()) {
+            attachedClass = Symbols::Hash();
+        } else if (attachedClass == Symbols::T_Enumerable()) {
+            attachedClass = Symbols::Enumerable();
+        } else if (attachedClass == Symbols::T_Range()) {
+            attachedClass = Symbols::Range();
+        } else if (attachedClass == Symbols::T_Set()) {
+            attachedClass = Symbols::Set();
         }
 
         auto arity = attachedClass.data(ctx).typeArity(ctx);
-        if (attachedClass == core::Symbols::Hash()) {
+        if (attachedClass == Symbols::Hash()) {
             arity = 2;
         }
         if (attachedClass.data(ctx).typeMembers().empty()) {
@@ -928,13 +917,13 @@ public:
         }
 
         if (args.size() != arity) {
-            if (auto e = ctx.state.beginError(callLoc, core::errors::Infer::GenericArgumentCountMismatch)) {
+            if (auto e = ctx.state.beginError(callLoc, errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
                             attachedClass.data(ctx).show(ctx), arity, args.size());
             }
         }
 
-        vector<shared_ptr<core::Type>> targs;
+        vector<shared_ptr<Type>> targs;
         auto it = args.begin();
         int i = -1;
         for (auto mem : attachedClass.data(ctx).typeMembers()) {
@@ -944,21 +933,21 @@ public:
             } else if (it != args.end()) {
                 targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
                 ++it;
-            } else if (attachedClass == core::Symbols::Hash() && i == 2) {
+            } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
                 targs.emplace_back(TupleType::build(ctx, tupleArgs));
             } else {
-                targs.emplace_back(core::Types::untyped());
+                targs.emplace_back(Types::untyped());
             }
         }
 
-        return make_shared<core::MetaType>(make_shared<core::AppliedType>(attachedClass, targs));
+        return make_shared<MetaType>(make_shared<AppliedType>(attachedClass, targs));
     }
 } T_Generic_squareBrackets;
 
 class Magic_buildHash : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         ENFORCE(args.size() % 2 == 0);
 
@@ -967,7 +956,7 @@ public:
         for (int i = 0; i < args.size(); i += 2) {
             auto *key = cast_type<LiteralType>(args[i].type.get());
             if (key == nullptr) {
-                return core::Types::hashOfUntyped();
+                return Types::hashOfUntyped();
             }
 
             keys.push_back(shared_ptr<LiteralType>(args[i].type, key));
@@ -979,7 +968,7 @@ public:
 
 class Magic_buildArray : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.empty()) {
             return Types::arrayOfUntyped();
@@ -993,7 +982,7 @@ public:
 } Magic_buildArray;
 
 class Magic_expandSplat : public Symbol::IntrinsicMethod {
-    static shared_ptr<Type> expandArray(core::Context ctx, shared_ptr<Type> type, int expandTo) {
+    static shared_ptr<Type> expandArray(Context ctx, shared_ptr<Type> type, int expandTo) {
         if (auto *ot = cast_type<OrType>(type.get())) {
             return Types::any(ctx, expandArray(ctx, ot->left, expandTo), expandArray(ctx, ot->right, expandTo));
         }
@@ -1011,14 +1000,14 @@ class Magic_expandSplat : public Symbol::IntrinsicMethod {
             types.push_back(type);
         }
         if (types.size() < expandTo) {
-            types.resize(expandTo, core::Types::nilClass());
+            types.resize(expandTo, Types::nilClass());
         }
 
         return TupleType::build(ctx, types);
     }
 
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         if (args.size() != 3) {
             return Types::arrayOfUntyped();
@@ -1028,7 +1017,7 @@ public:
         auto *afterLit = cast_type<LiteralType>(args[2].type.get());
         if (!(beforeLit->underlying->derivesFrom(ctx, Symbols::Integer()) &&
               afterLit->underlying->derivesFrom(ctx, Symbols::Integer()))) {
-            return core::Types::untyped();
+            return Types::untyped();
         }
         int before = (int)beforeLit->value;
         int after = (int)afterLit->value;
@@ -1038,15 +1027,15 @@ public:
 
 class Tuple_squareBrackets : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
-        core::LiteralType *lit = nullptr;
+        LiteralType *lit = nullptr;
         if (args.size() == 1) {
             lit = cast_type<LiteralType>(args.front().type.get());
         }
-        if (!lit || !lit->underlying->derivesFrom(ctx, core::Symbols::Integer())) {
+        if (!lit || !lit->underlying->derivesFrom(ctx, Symbols::Integer())) {
             return nullptr;
         }
 
@@ -1063,7 +1052,7 @@ public:
 
 class Tuple_last : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1080,7 +1069,7 @@ public:
 
 class Tuple_first : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1097,7 +1086,7 @@ public:
 
 class Tuple_minMax : public Symbol::IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1113,7 +1102,7 @@ public:
 } Tuple_minMax;
 
 class Array_flatten : public Symbol::IntrinsicMethod {
-    static shared_ptr<Type> recursivelyFlattenArrays(core::Context ctx, shared_ptr<Type> type) {
+    static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, shared_ptr<Type> type) {
         shared_ptr<Type> result;
 
         typecase(type.get(),
@@ -1139,12 +1128,11 @@ class Array_flatten : public Symbol::IntrinsicMethod {
     }
 
 public:
-    shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
                            shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
         shared_ptr<Type> element;
         if (auto *ap = cast_type<AppliedType>(selfRef.get())) {
-            ENFORCE(ap->klass == core::Symbols::Array() ||
-                    ap->klass.data(ctx).derivesFrom(ctx, core::Symbols::Array()));
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx).derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
         } else if (auto *tuple = cast_type<TupleType>(selfRef.get())) {
@@ -1157,34 +1145,34 @@ public:
 } Array_flatten;
 
 const vector<Intrinsic> sorbet::core::intrinsicMethods{
-    {core::Symbols::T(), true, core::Names::untyped(), &T_untyped},
-    {core::Symbols::T(), true, core::Names::must(), &T_must},
-    {core::Symbols::T(), true, core::Names::all(), &T_all},
-    {core::Symbols::T(), true, core::Names::any(), &T_any},
-    {core::Symbols::T(), true, core::Names::revealType(), &T_revealType},
+    {Symbols::T(), true, Names::untyped(), &T_untyped},
+    {Symbols::T(), true, Names::must(), &T_must},
+    {Symbols::T(), true, Names::all(), &T_all},
+    {Symbols::T(), true, Names::any(), &T_any},
+    {Symbols::T(), true, Names::revealType(), &T_revealType},
 
-    {core::Symbols::T_Generic(), false, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Generic(), false, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {core::Symbols::T_Array(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
-    {core::Symbols::T_Hash(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
-    {core::Symbols::T_Enumerable(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
-    {core::Symbols::T_Range(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
-    {core::Symbols::T_Set(), true, core::Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Array(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Hash(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Enumerable(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Range(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
+    {Symbols::T_Set(), true, Names::squareBrackets(), &T_Generic_squareBrackets},
 
-    {core::Symbols::Object(), false, core::Names::class_(), &Object_class},
-    {core::Symbols::Object(), false, core::Names::singletonClass(), &Object_class},
+    {Symbols::Object(), false, Names::class_(), &Object_class},
+    {Symbols::Object(), false, Names::singletonClass(), &Object_class},
 
-    {core::Symbols::Class(), false, core::Names::new_(), &Class_new},
+    {Symbols::Class(), false, Names::new_(), &Class_new},
 
-    {core::Symbols::Magic(), false, core::Names::buildHash(), &Magic_buildHash},
-    {core::Symbols::Magic(), false, core::Names::buildArray(), &Magic_buildArray},
-    {core::Symbols::Magic(), false, core::Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), false, Names::buildHash(), &Magic_buildHash},
+    {Symbols::Magic(), false, Names::buildArray(), &Magic_buildArray},
+    {Symbols::Magic(), false, Names::expandSplat(), &Magic_expandSplat},
 
-    {core::Symbols::Tuple(), false, core::Names::squareBrackets(), &Tuple_squareBrackets},
-    {core::Symbols::Tuple(), false, core::Names::first(), &Tuple_first},
-    {core::Symbols::Tuple(), false, core::Names::last(), &Tuple_last},
-    {core::Symbols::Tuple(), false, core::Names::min(), &Tuple_minMax},
-    {core::Symbols::Tuple(), false, core::Names::max(), &Tuple_minMax},
+    {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
+    {Symbols::Tuple(), false, Names::first(), &Tuple_first},
+    {Symbols::Tuple(), false, Names::last(), &Tuple_last},
+    {Symbols::Tuple(), false, Names::min(), &Tuple_minMax},
+    {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
 
-    {core::Symbols::Array(), false, core::Names::flatten(), &Array_flatten},
+    {Symbols::Array(), false, Names::flatten(), &Array_flatten},
 };

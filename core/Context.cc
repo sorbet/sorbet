@@ -66,13 +66,13 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
         int fileIdx = 0; // Skip file 0
         while (fileIdx + 1 < from.filesUsed()) {
             fileIdx++;
-            if (from.files[fileIdx]->source_type == core::File::TombStone) {
+            if (from.files[fileIdx]->source_type == File::TombStone) {
                 continue;
             }
             if (fileIdx < to.filesUsed() && from.files[fileIdx].get() == to.files[fileIdx].get()) {
                 continue;
             }
-            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->source_type == core::File::TombStone);
+            ENFORCE(fileIdx >= to.filesUsed() || to.files[fileIdx]->source_type == File::TombStone);
             to.enterNewFileAt(from.files[fileIdx], fileIdx);
         }
     }

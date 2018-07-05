@@ -10,15 +10,15 @@ using namespace sorbet;
 using namespace core;
 using namespace std;
 
-string core::ClassType::toString(const GlobalState &gs, int tabs) const {
+string ClassType::toString(const GlobalState &gs, int tabs) const {
     return this->symbol.data(gs).show(gs);
 }
 
-string core::ClassType::show(const GlobalState &gs) const {
+string ClassType::show(const GlobalState &gs) const {
     return this->symbol.data(gs).show(gs);
 }
 
-string core::ClassType::typeName() const {
+string ClassType::typeName() const {
     return "ClassType";
 }
 
@@ -241,7 +241,7 @@ string showOrs(const GlobalState &gs, shared_ptr<Type> left, shared_ptr<Type> ri
 
 string showOrSpecialCase(const GlobalState &gs, shared_ptr<Type> type, shared_ptr<Type> rest) {
     auto *ct = cast_type<ClassType>(type.get());
-    if (ct != nullptr && ct->symbol == core::Symbols::NilClass()) {
+    if (ct != nullptr && ct->symbol == Symbols::NilClass()) {
         stringstream buf;
         buf << "T.nilable(";
         buf << rest->show(gs);
@@ -310,9 +310,9 @@ string AppliedType::toString(const GlobalState &gs, int tabs) const {
 
 string AppliedType::show(const GlobalState &gs) const {
     stringstream buf;
-    if (this->klass == core::Symbols::Array()) {
+    if (this->klass == Symbols::Array()) {
         buf << "T::Array";
-    } else if (this->klass == core::Symbols::Hash()) {
+    } else if (this->klass == Symbols::Hash()) {
         buf << "T::Hash";
     } else {
         buf << this->klass.data(gs).show(gs);
@@ -321,7 +321,7 @@ string AppliedType::show(const GlobalState &gs) const {
 
     bool first = true;
     for (auto &targ : this->targs) {
-        if (this->klass == core::Symbols::Hash() && &targ == &this->targs.back()) {
+        if (this->klass == Symbols::Hash() && &targ == &this->targs.back()) {
             break;
         }
         if (first) {

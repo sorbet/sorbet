@@ -80,9 +80,9 @@ public:
     FileRef enterFile(std::shared_ptr<File> file);
     FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
     FileRef reserveFileRef(std::string path);
-    static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, core::FileRef whatFile,
+    static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                     std::shared_ptr<File> withWhat);
-    static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, core::FileRef fref);
+    static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(absl::string_view path);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
@@ -160,7 +160,7 @@ private:
 
     void expandNames(int growBy = 2);
 
-    SymbolRef synthesizeClass(absl::string_view name, u4 superclass = core::Symbols::todo()._id, bool isModule = false);
+    SymbolRef synthesizeClass(absl::string_view name, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);
