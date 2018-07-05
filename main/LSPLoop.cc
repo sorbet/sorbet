@@ -9,11 +9,10 @@
 #include "spdlog/fmt/ostr.h"
 
 using namespace std;
-using namespace rapidjson;
-using namespace sorbet::realmain::LSP;
 
 namespace sorbet {
 namespace realmain {
+namespace LSP {
 
 static bool startsWith(const absl::string_view str, const absl::string_view prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.data(), prefix.size());
@@ -53,7 +52,7 @@ bool safeGetline(std::istream &is, std::string &t) {
 
 void LSPLoop::runLSP() {
     std::string json;
-    Document d(&alloc);
+    rapidjson::Document d(&alloc);
 
     while (true) {
         int length = -1;
@@ -93,13 +92,13 @@ void LSPLoop::runLSP() {
             logger->info("Processing notification {} ", (string)method.name);
             if (method == LSP::DidChangeWatchedFiles) {
                 sendRequest(LSP::ReadFile, d["params"],
-                            [&](Value &edits) -> void {
+                            [&](rapidjson::Value &edits) -> void {
                                 ENFORCE(edits.IsArray());
                                 Timer timeit(logger, "handle update");
                                 vector<shared_ptr<core::File>> files;
 
                                 for (auto it = edits.Begin(); it != edits.End(); ++it) {
-                                    Value &change = *it;
+                                    rapidjson::Value &change = *it;
                                     string uri(change["uri"].GetString(), change["uri"].GetStringLength());
                                     string content(change["content"].GetString(), change["content"].GetStringLength());
                                     if (startsWith(uri, rootUri)) {
@@ -111,7 +110,7 @@ void LSPLoop::runLSP() {
                                 tryFastPath(files);
                                 pushErrors();
                             },
-                            [](Value &error) -> void {});
+                            [](rapidjson::Value &error) -> void {});
             }
             if (method == LSP::TextDocumentDidChange) {
                 Timer timeit(logger, "handle update");
@@ -172,7 +171,7 @@ void LSPLoop::runLSP() {
         } else {
             logger->info("Processing request {}", method.name);
             // is request
-            Value result;
+            rapidjson::Value result;
             int errorCode = 0;
             string errorString;
             if (method == LSP::Initialize) {
@@ -180,7 +179,7 @@ void LSPLoop::runLSP() {
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
                 string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
                                    "\"workspaceSymbolProvider\": true, \"definitionProvider\": true}}";
-                Document temp;
+                rapidjson::Document temp;
                 auto &r = temp.Parse(serverCap.c_str());
                 ENFORCE(!r.HasParseError());
                 result.CopyFrom(temp, alloc);
@@ -380,9 +379,9 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRe
     return make_unique<rapidjson::Value>(move(result));
 }
 
-void LSPLoop::sendRaw(Document &raw) {
-    StringBuffer strbuf;
-    Writer<StringBuffer> writer(strbuf);
+void LSPLoop::sendRaw(rapidjson::Document &raw) {
+    rapidjson::StringBuffer strbuf;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
     raw.Accept(writer);
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
     logger->info("Write: {}", strbuf.GetString());
@@ -390,10 +389,10 @@ void LSPLoop::sendRaw(Document &raw) {
     std::cout << outResult << std::flush;
 }
 
-void LSPLoop::sendNotification(LSPMethod meth, Value &data) {
+void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {
     ENFORCE(meth.isNotification);
     ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
-    Document request(&alloc);
+    rapidjson::Document request(&alloc);
     request.SetObject();
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
@@ -402,11 +401,12 @@ void LSPLoop::sendNotification(LSPMethod meth, Value &data) {
 
     sendRaw(request);
 }
-void LSPLoop::sendRequest(LSPMethod meth, Value &data, std::function<void(Value &)> onComplete,
-                          std::function<void(Value &)> onFail) {
+
+void LSPLoop::sendRequest(LSPMethod meth, rapidjson::Value &data, std::function<void(rapidjson::Value &)> onComplete,
+                          std::function<void(rapidjson::Value &)> onFail) {
     ENFORCE(!meth.isNotification);
     ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
-    Document request(&alloc);
+    rapidjson::Document request(&alloc);
     request.SetObject();
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
@@ -451,18 +451,18 @@ void LSPLoop::drainErrors() {
     }
 }
 
-Value LSPLoop::loc2Range(core::Loc loc) {
+rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
     /**
        {
         start: { line: 5, character: 23 }
         end : { line 6, character : 0 }
         }
      */
-    Value ret;
+    rapidjson::Value ret;
     ret.SetObject();
-    Value start;
+    rapidjson::Value start;
     start.SetObject();
-    Value end;
+    rapidjson::Value end;
     end.SetObject();
 
     auto pair = loc.position(*finalGs);
@@ -477,12 +477,12 @@ Value LSPLoop::loc2Range(core::Loc loc) {
     return ret;
 }
 
-Value LSPLoop::loc2Location(core::Loc loc) {
+rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
     //  interface Location {
     //      uri: DocumentUri;
     //      range: Range;
     //  }
-    Value ret;
+    rapidjson::Value ret;
     ret.SetObject();
     auto &messageFile = loc.file.data(*finalGs);
     string uri;
@@ -516,7 +516,7 @@ void LSPLoop::pushErrors() {
 
     for (auto file : updatedErrors) {
         if (file.exists()) {
-            Value publishDiagnosticsParams;
+            rapidjson::Value publishDiagnosticsParams;
 
             /**
              * interface PublishDiagnosticsParams {
@@ -548,10 +548,10 @@ void LSPLoop::pushErrors() {
 
             {
                 // diagnostics
-                Value diagnostics;
+                rapidjson::Value diagnostics;
                 diagnostics.SetArray();
                 for (auto &e : errorsAccumulated[file]) {
-                    Value diagnostic;
+                    rapidjson::Value diagnostic;
                     diagnostic.SetObject();
 
                     diagnostic.AddMember("range", loc2Range(e->loc), alloc);
@@ -559,10 +559,10 @@ void LSPLoop::pushErrors() {
                     diagnostic.AddMember("message", e->formatted, alloc);
 
                     typecase(e.get(), [&](core::ComplexError *ce) {
-                        Value relatedInformation;
+                        rapidjson::Value relatedInformation;
                         relatedInformation.SetArray();
                         for (auto &section : ce->sections) {
-                            Value relatedInfo;
+                            rapidjson::Value relatedInfo;
                             relatedInfo.SetObject();
                             string sectionHeader = section.header;
 
@@ -592,26 +592,26 @@ void LSPLoop::pushErrors() {
     updatedErrors.clear();
 }
 
-void LSPLoop::sendResult(Document &forRequest, Value &result) {
+void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &result) {
     forRequest.AddMember("result", result, alloc);
     forRequest.RemoveMember("method");
     forRequest.RemoveMember("params");
     sendRaw(forRequest);
 }
 
-void LSPLoop::sendError(Document &forRequest, int errorCode, string errorStr) {
+void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, string errorStr) {
     forRequest.RemoveMember("method");
     forRequest.RemoveMember("params");
-    Value error;
+    rapidjson::Value error;
     error.SetObject();
     error.AddMember("code", errorCode, alloc);
-    Value message(errorStr.c_str(), alloc);
+    rapidjson::Value message(errorStr.c_str(), alloc);
     error.AddMember("message", message, alloc);
     forRequest.AddMember("error", error, alloc);
     sendRaw(forRequest);
 }
 
-bool LSPLoop::handleReplies(Document &d) {
+bool LSPLoop::handleReplies(rapidjson::Document &d) {
     if (d.FindMember("result") != d.MemberEnd()) {
         if (d.FindMember("id") != d.MemberEnd()) {
             string key(d["id"].GetString(), d["id"].GetStringLength());
@@ -758,8 +758,11 @@ void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
     }
 }
 
-void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFiles) {
+void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
+
+                              &changedFiles) {
     logger->info("Taking slow path");
+
     invalidateAllErrors();
 
     std::vector<core::FileRef> changedFileRefs;
@@ -779,7 +782,7 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFile
     typecheck(finalGs, resolve(*finalGs, move(indexedCopies), opts), opts, workers);
 }
 
-const LSP::LSPMethod LSP::getMethod(const absl::string_view name) {
+const LSP::LSPMethod getMethod(const absl::string_view name) {
     for (auto &candidate : ALL) {
         if (candidate.name == name) {
             return candidate;
@@ -788,7 +791,9 @@ const LSP::LSPMethod LSP::getMethod(const absl::string_view name) {
     return LSPMethod{(string)name, true, LSPMethod::Kind::ClientInitiated, false};
 }
 
-void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> &changedFiles) {
+void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
+
+                              &changedFiles) {
     logger->info("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
@@ -867,5 +872,6 @@ std::string LSPLoop::fileRef2Uri(core::FileRef file) {
     }
 }
 
+} // namespace LSP
 } // namespace realmain
 } // namespace sorbet

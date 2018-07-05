@@ -19,7 +19,6 @@ auto logger = spd::stderr_color_mt("hello-test");
 auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
-using namespace ast;
 
 TEST(HelloTest, GetGreet) { // NOLINT
     EXPECT_EQ("Hello Bazel", "Hello Bazel");
@@ -39,101 +38,105 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     class Counter {
     public:
         int count = 0;
-        unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original) {
+        unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
             count++;
             return original;
         }
-        unique_ptr<MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original) {
-            count++;
-            return original;
-        }
-
-        unique_ptr<If> preTransformIf(core::MutableContext ctx, unique_ptr<If> original) {
+        unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx,
+                                                         unique_ptr<ast::MethodDef> original) {
             count++;
             return original;
         }
 
-        unique_ptr<While> preTransformWhile(core::MutableContext ctx, unique_ptr<While> original) {
+        unique_ptr<ast::If> preTransformIf(core::MutableContext ctx, unique_ptr<ast::If> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Break> postTransformBreak(core::MutableContext ctx, unique_ptr<Break> original) {
+        unique_ptr<ast::While> preTransformWhile(core::MutableContext ctx, unique_ptr<ast::While> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Next> postTransformNext(core::MutableContext ctx, unique_ptr<Next> original) {
+        unique_ptr<ast::Break> postTransformBreak(core::MutableContext ctx, unique_ptr<ast::Break> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Return> preTransformReturn(core::MutableContext ctx, unique_ptr<Return> original) {
+        unique_ptr<ast::Next> postTransformNext(core::MutableContext ctx, unique_ptr<ast::Next> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original) {
+        unique_ptr<ast::Return> preTransformReturn(core::MutableContext ctx, unique_ptr<ast::Return> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Ident> postTransformIdent(core::MutableContext ctx, unique_ptr<Ident> original) {
+        unique_ptr<ast::Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<ast::Rescue> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original) {
+        unique_ptr<ast::Ident> postTransformIdent(core::MutableContext ctx, unique_ptr<ast::Ident> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Send> preTransformSend(core::MutableContext ctx, unique_ptr<Send> original) {
+        unique_ptr<ast::Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Hash> preTransformHash(core::MutableContext ctx, unique_ptr<Hash> original) {
+        unique_ptr<ast::Send> preTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original) {
+        unique_ptr<ast::Hash> preTransformHash(core::MutableContext ctx, unique_ptr<ast::Hash> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Literal> postTransformLiteral(core::MutableContext ctx, unique_ptr<Literal> original) {
+        unique_ptr<ast::Array> preTransformArray(core::MutableContext ctx, unique_ptr<ast::Array> original) {
             count++;
             return original;
         }
 
-        unique_ptr<ConstantLit> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {
+        unique_ptr<ast::Literal> postTransformLiteral(core::MutableContext ctx, unique_ptr<ast::Literal> original) {
             count++;
             return original;
         }
 
-        unique_ptr<ArraySplat> preTransformArraySplat(core::MutableContext ctx, unique_ptr<ArraySplat> original) {
+        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
+                                                              unique_ptr<ast::ConstantLit> original) {
             count++;
             return original;
         }
 
-        unique_ptr<HashSplat> preTransformHashSplat(core::MutableContext ctx, unique_ptr<HashSplat> original) {
+        unique_ptr<ast::ArraySplat> preTransformArraySplat(core::MutableContext ctx,
+                                                           unique_ptr<ast::ArraySplat> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Self> postTransformSelf(core::MutableContext ctx, unique_ptr<Self> original) {
+        unique_ptr<ast::HashSplat> preTransformHashSplat(core::MutableContext ctx,
+                                                         unique_ptr<ast::HashSplat> original) {
             count++;
             return original;
         }
 
-        unique_ptr<Block> preTransformBlock(core::MutableContext ctx, unique_ptr<Block> original) {
+        unique_ptr<ast::Self> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
             count++;
             return original;
         }
 
-        unique_ptr<InsSeq> preTransformInsSeq(core::MutableContext ctx, unique_ptr<InsSeq> original) {
+        unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
+            count++;
+            return original;
+        }
+
+        unique_ptr<ast::InsSeq> preTransformInsSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> original) {
             count++;
             return original;
         }
@@ -159,22 +162,22 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
-    unique_ptr<Expression> rhs(ast::MK::Int(loc, 5));
-    auto arg = unique_ptr<Expression>(new Local(loc, argumentSym));
-    MethodDef::ARGS_store args;
+    unique_ptr<ast::Expression> rhs(ast::MK::Int(loc, 5));
+    auto arg = unique_ptr<ast::Expression>(new ast::Local(loc, argumentSym));
+    ast::MethodDef::ARGS_store args;
     args.emplace_back(move(arg));
 
-    unique_ptr<Expression> methodDef(new MethodDef(loc, methodSym, name, move(args), move(rhs), false));
-    auto emptyTree = unique_ptr<Expression>(new EmptyTree(loc));
-    auto cnst = unique_ptr<Expression>(new ConstantLit(loc, move(emptyTree), name));
+    unique_ptr<ast::Expression> methodDef(new ast::MethodDef(loc, methodSym, name, move(args), move(rhs), false));
+    auto emptyTree = unique_ptr<ast::Expression>(new ast::EmptyTree(loc));
+    auto cnst = unique_ptr<ast::Expression>(new ast::ConstantLit(loc, move(emptyTree), name));
 
-    ClassDef::RHS_store classrhs;
+    ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));
-    unique_ptr<Expression> tree(
-        new ClassDef(loc, classSym, move(cnst), ClassDef::ANCESTORS_store(), move(classrhs), ClassDefKind::Class));
+    unique_ptr<ast::Expression> tree(new ast::ClassDef(loc, classSym, move(cnst), ast::ClassDef::ANCESTORS_store(),
+                                                       move(classrhs), ast::ClassDefKind::Class));
     Counter c;
 
-    auto r = TreeMap::apply(ctx, c, move(tree));
+    auto r = ast::TreeMap::apply(ctx, c, move(tree));
     EXPECT_EQ(c.count, 3);
 }
 

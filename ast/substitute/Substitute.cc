@@ -2,17 +2,18 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 
-using namespace sorbet;
-using namespace sorbet::ast;
+namespace sorbet {
+namespace ast {
 
+namespace {
 class SubstWalk {
 private:
-    const sorbet::core::GlobalSubstitution &subst;
+    const core::GlobalSubstitution &subst;
 
-    unique_ptr<ast::Expression> substClassName(core::MutableContext ctx, unique_ptr<ast::Expression> node) {
-        auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
+    unique_ptr<Expression> substClassName(core::MutableContext ctx, unique_ptr<Expression> node) {
+        auto constLit = cast_tree<ConstantLit>(node.get());
         if (constLit == nullptr) { // uncommon case. something is strange
-            if (ast::isa_tree<ast::EmptyTree>(node.get())) {
+            if (isa_tree<EmptyTree>(node.get())) {
                 return node;
             }
             return TreeMap::apply(ctx, *this, move(node));
@@ -21,21 +22,19 @@ private:
         auto scope = substClassName(ctx, move(constLit->scope));
         auto cnst = subst.substitute(constLit->cnst);
 
-        return make_unique<ast::ConstantLit>(constLit->loc, move(scope), cnst);
+        return make_unique<ConstantLit>(constLit->loc, move(scope), cnst);
     }
 
-    unique_ptr<ast::Expression> substArg(core::MutableContext ctx, unique_ptr<ast::Expression> argp) {
-        ast::Expression *arg = argp.get();
+    unique_ptr<Expression> substArg(core::MutableContext ctx, unique_ptr<Expression> argp) {
+        Expression *arg = argp.get();
         while (arg != nullptr) {
-            typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
-                     [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](ast::OptionalArg *opt) {
+            typecase(arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
+                     [&](OptionalArg *opt) {
                          opt->default_ = TreeMap::apply(ctx, *this, move(opt->default_));
                          arg = opt->expr.get();
                      },
-                     [&](ast::BlockArg *opt) { arg = opt->expr.get(); },
-                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); },
-                     [&](ast::UnresolvedIdent *nm) {
+                     [&](BlockArg *opt) { arg = opt->expr.get(); }, [&](ShadowArg *opt) { arg = opt->expr.get(); },
+                     [&](UnresolvedIdent *nm) {
                          nm->name = subst.substitute(nm->name);
                          arg = nullptr;
                      });
@@ -44,7 +43,7 @@ private:
     }
 
 public:
-    SubstWalk(const sorbet::core::GlobalSubstitution &subst) : subst(subst) {}
+    SubstWalk(const core::GlobalSubstitution &subst) : subst(subst) {}
 
     unique_ptr<ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ClassDef> original) {
         original->name = substClassName(ctx, move(original->name));
@@ -53,6 +52,7 @@ public:
         }
         return original;
     }
+
     unique_ptr<MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original) {
         original->name = subst.substitute(original->name);
         for (auto &arg : original->args) {
@@ -78,6 +78,7 @@ public:
         original->fun = subst.substitute(original->fun);
         return original;
     }
+
     unique_ptr<Expression> postTransformLiteral(core::MutableContext ctx, unique_ptr<Literal> original) {
         if (original->isString(ctx)) {
             auto nameRef = original->asString(ctx);
@@ -97,16 +98,17 @@ public:
         }
         return original;
     }
+
     unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {
         original->cnst = subst.substitute(original->cnst);
         original->scope = substClassName(ctx, move(original->scope));
         return original;
     }
 };
+} // namespace
 
-unique_ptr<Expression> sorbet::ast::Substitute::run(core::MutableContext ctx,
-                                                    const sorbet::core::GlobalSubstitution &subst,
-                                                    unique_ptr<Expression> what) {
+unique_ptr<Expression> Substitute::run(core::MutableContext ctx, const core::GlobalSubstitution &subst,
+                                       unique_ptr<Expression> what) {
     if (subst.useFastPath()) {
         return what;
     }
@@ -114,3 +116,6 @@ unique_ptr<Expression> sorbet::ast::Substitute::run(core::MutableContext ctx,
     what = TreeMap::apply(ctx, walk, move(what));
     return what;
 }
+
+} // namespace ast
+} // namespace sorbet

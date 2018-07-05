@@ -7,8 +7,9 @@
 #include <utility>
 
 using namespace std;
-using namespace sorbet;
-
+namespace sorbet {
+namespace namer {
+namespace {
 bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size()) {
         return false;
@@ -63,11 +64,11 @@ StringKind classifyString(const string &str) {
     }
     switch (dotCount) {
         case 0:
-            return StringKind ::Integer;
+            return StringKind::Integer;
         case 1:
-            return StringKind ::Float;
+            return StringKind::Float;
         default:
-            return StringKind ::String;
+            return StringKind::String;
     }
 }
 
@@ -78,13 +79,13 @@ shared_ptr<core::Type> getType(core::GlobalState &gs, const YAML::Node &node) {
         return core::Types::Boolean();
     }
     switch (classifyString(value)) {
-        case StringKind ::Integer:
+        case StringKind::Integer:
             return core::Types::Integer();
-        case StringKind ::Float:
+        case StringKind::Float:
             return core::Types::Float();
-        case StringKind ::String:
+        case StringKind::String:
             return core::Types::String();
-        case StringKind ::Symbol:
+        case StringKind::Symbol:
             return core::Types::Symbol();
     }
 }
@@ -93,13 +94,16 @@ struct Path {
     Path *parent;
     string selector;
     shared_ptr<core::Type> myType;
+
     Path(Path *parent, string selector) : parent(parent), selector(move(selector)){};
+
     string toString() {
         if (parent) {
             return parent->toString() + "." + selector;
         };
         return selector;
     }
+
     string show(core::GlobalState &gs) {
         stringstream result;
         if (myType) {
@@ -110,7 +114,9 @@ struct Path {
         }
         return result.str();
     }
+
     vector<shared_ptr<Path>> children;
+
     shared_ptr<Path> getChild(const string &name) {
         if (!name.empty() && name[0] == ':') {
             string withoutColon(name.c_str() + 1, name.size() - 1);
@@ -156,8 +162,6 @@ struct Path {
         }
     }
 };
-
-template class std::shared_ptr<Path>;
 
 void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> prefix) {
     switch (node.Type()) {
@@ -213,9 +217,9 @@ void handleFile(core::GlobalState &gs, string file, shared_ptr<Path> rootNode) {
             break;
     }
 }
+} // namespace
 
-void sorbet::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, vector<string> folders,
-                                                      vector<string> files) {
+void configatron::fillInFromFileSystem(core::GlobalState &gs, vector<string> folders, vector<string> files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
         auto files = listDir(folder.c_str());
@@ -237,3 +241,5 @@ void sorbet::namer::configatron::fillInFromFileSystem(core::GlobalState &gs, vec
 
     //    cout << configatron.toString(gs, 1, 1);
 }
+} // namespace namer
+} // namespace sorbet

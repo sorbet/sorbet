@@ -105,8 +105,6 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
-} // namespace LSP
-
 class LSPLoop {
     int requestCounter = 1;
     struct ResponseHandler {
@@ -196,6 +194,7 @@ public:
 
     void invalidateAllErrors();
 };
+} // namespace LSP
 
 } // namespace realmain
 } // namespace sorbet

@@ -7,9 +7,10 @@
 #include <unordered_set>
 
 template class std::vector<sorbet::core::SymbolRef>;
-using namespace sorbet;
-using namespace core;
 using namespace std;
+
+namespace sorbet {
+namespace core {
 
 DispatchResult ProxyType::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
                                        shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
@@ -285,9 +286,11 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary, vecto
             bool operator()(SymbolRef s, int i) const {
                 return getArity(ctx, s) < i;
             }
+
             bool operator()(int i, SymbolRef s) const {
                 return i < getArity(ctx, s);
             }
+
             Comp(Context ctx) : ctx(ctx){};
         } cmp(ctx);
 
@@ -756,6 +759,7 @@ SymbolRef unwrapSymbol(shared_ptr<Type> type) {
     }
     return result;
 }
+namespace {
 
 class T_untyped : public Symbol::IntrinsicMethod {
 public:
@@ -1143,8 +1147,9 @@ public:
         return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element));
     }
 } Array_flatten;
+} // namespace
 
-const vector<Intrinsic> sorbet::core::intrinsicMethods{
+const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), true, Names::untyped(), &T_untyped},
     {Symbols::T(), true, Names::must(), &T_must},
     {Symbols::T(), true, Names::all(), &T_all},
@@ -1176,3 +1181,6 @@ const vector<Intrinsic> sorbet::core::intrinsicMethods{
 
     {Symbols::Array(), false, Names::flatten(), &Array_flatten},
 };
+
+} // namespace core
+} // namespace sorbet
