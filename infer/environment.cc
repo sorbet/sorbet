@@ -793,7 +793,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                     if (lspQueryMatch) {
                         setQueryResponse(ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
-                                         nullptr, bind.loc, tp);
+                                         send->link ? send->link->constr : nullptr, bind.loc, tp);
                     }
                 }
                 tp.origins.push_back(bind.loc);
@@ -969,6 +969,10 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             [&](cfg::Literal *i) {
                 tp.type = i->value;
                 tp.origins.push_back(bind.loc);
+
+                if (lspQueryMatch) {
+                    setQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, {}, nullptr, bind.loc, tp);
+                }
             },
             [&](cfg::Unanalyzable *i) {
                 tp.type = core::Types::untyped();

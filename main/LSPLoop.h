@@ -67,6 +67,7 @@ const LSPMethod TextDocumentDidOpen{"textDocument/didOpen", true, LSPMethod::Kin
 const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod TextDocumentDefinition{"textDocument/definition", false, LSPMethod::Kind::ClientInitiated};
+const LSPMethod TextDocumentHover{"textDocument/hover", false, LSPMethod::Kind::ClientInitiated};
 const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
 const LSPMethod WorkspaceSymbolsRequest{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
 
@@ -85,7 +86,8 @@ const LSPMethod ALL[] = {CancelRequest,
                          TextDocumentDocumentSymbol,
                          ReadFile,
                          WorkspaceSymbolsRequest,
-                         TextDocumentDefinition};
+                         TextDocumentDefinition,
+                         TextDocumentHover};
 
 const LSPMethod getMethod(const absl::string_view name);
 
@@ -185,6 +187,9 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
+    void setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d);
+    void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
+    void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const Options &opts, std::shared_ptr<spd::logger> &logger,

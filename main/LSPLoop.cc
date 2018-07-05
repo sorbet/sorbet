@@ -50,6 +50,25 @@ bool safeGetline(std::istream &is, std::string &t) {
     }
 }
 
+shared_ptr<core::Type> getResultType(core::GlobalState &gs, core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,
+                                     shared_ptr<core::TypeConstraint> constr) {
+    core::Context ctx(gs, core::Symbols::root());
+    auto resultType = ofWhat.data(gs).resultType;
+    if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
+        /* instantiate generic classes */
+        resultType = core::Types::resultTypeAsSeenFrom(ctx, ofWhat, applied->klass, applied->targs);
+    }
+    if (!resultType) {
+        resultType = core::Types::untyped();
+    }
+
+    resultType = core::Types::replaceSelfType(ctx, resultType, receiver); // instantiate self types
+    if (constr) {
+        resultType = core::Types::instantiate(ctx, resultType, *constr); // instantiate generic methods
+    }
+    return resultType;
+}
+
 void LSPLoop::runLSP() {
     std::string json;
     rapidjson::Document d(&alloc);
@@ -177,14 +196,17 @@ void LSPLoop::runLSP() {
             if (method == LSP::Initialize) {
                 result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-                string serverCap = "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
-                                   "\"workspaceSymbolProvider\": true, \"definitionProvider\": true}}";
+                string serverCap =
+                    "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
+                    "\"workspaceSymbolProvider\": true, \"definitionProvider\": true, \"hoverProvider\": true}}";
                 rapidjson::Document temp;
                 auto &r = temp.Parse(serverCap.c_str());
                 ENFORCE(!r.HasParseError());
                 result.CopyFrom(temp, alloc);
+                sendResult(d, result);
             } else if (method == LSP::Shutdown) {
                 // return default value: null
+                sendResult(d, result);
             } else if (method == LSP::TextDocumentDocumentSymbol) {
                 result.SetArray();
                 auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
@@ -199,7 +221,7 @@ void LSPLoop::runLSP() {
                         }
                     }
                 }
-
+                sendResult(d, result);
             } else if (method == LSP::WorkspaceSymbolsRequest) {
                 result.SetArray();
                 string searchString = d["params"]["query"].GetString();
@@ -213,62 +235,163 @@ void LSPLoop::runLSP() {
                         }
                     }
                 }
+                sendResult(d, result);
             } else if (method == LSP::TextDocumentDefinition) {
-                result.SetArray();
-
-                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
-                                  d["params"]["textDocument"]["uri"].GetStringLength());
-                auto fref = uri2FileRef(uri);
-                if (fref.exists()) {
-                    core::Loc::Detail reqPos;
-                    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
-                    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
-                    auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
-
-                    initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
-                    finalGs->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
-                    vector<shared_ptr<core::File>> files;
-                    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
-                    tryFastPath(files);
-
-                    initialGS->lspInfoQueryLoc = core::Loc::none();
-                    finalGs->lspInfoQueryLoc = core::Loc::none();
-
-                    auto queryResponses = finalGs->errorQueue->drainQueryResponses();
-                    if (!queryResponses.empty()) {
-                        auto resp = std::move(queryResponses[0]);
-
-                        if (resp->kind == core::QueryResponse::Kind::SEND) {
-                            for (auto &component : resp->dispatchComponents) {
-                                if (component.method.exists()) {
-                                    result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
-                                }
-                            }
-                        } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
-                            result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
-                        } else {
-                            for (auto &component : resp->dispatchComponents) {
-                                if (component.method.exists()) {
-                                    result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
-                                }
-                            }
-                        }
-                    }
-                }
-
+                handleTextDocumentDefinition(result, d);
+            } else if (method == LSP::TextDocumentHover) {
+                handleTextDocumentHover(result, d);
             } else {
                 ENFORCE(!method.isSupported, "failing a supported method");
                 errorCode = (int)LSP::LSPErrorCodes::MethodNotFound;
                 errorString = fmt::format("Unknown method: {}", method.name);
-            }
-
-            if (errorCode == 0) {
-                sendResult(d, result);
-            } else {
                 sendError(d, errorCode, errorString);
             }
         }
     }
+}
+
+void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
+    result.SetArray();
+
+    auto uri =
+        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
+    auto fref = uri2FileRef(uri);
+    if (fref.exists()) {
+        setupLSPQueryByLoc(fref, d);
+
+        auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+        if (!queryResponses.empty()) {
+            auto resp = std::move(queryResponses[0]);
+
+            if (resp->kind == core::QueryResponse::Kind::SEND) {
+                for (auto &component : resp->dispatchComponents) {
+                    if (component.method.exists()) {
+                        result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                    }
+                }
+            } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
+                result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
+            } else {
+                for (auto &component : resp->dispatchComponents) {
+                    if (component.method.exists()) {
+                        result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                    }
+                }
+            }
+        }
+    }
+
+    sendResult(d, result);
+}
+
+void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
+    result.SetObject();
+    int errorCode;
+    string errorString;
+    auto uri =
+        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
+    auto fref = uri2FileRef(uri);
+
+    if (!fref.exists()) {
+        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorString = fmt::format("Did not find file at uri {} in textDocument/hover", uri);
+        sendError(d, errorCode, errorString);
+        return;
+    }
+
+    setupLSPQueryByLoc(fref, d);
+
+    auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+    if (queryResponses.empty()) {
+        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorString = "Did not find symbol at hover location in textDocument/hover";
+        sendError(d, errorCode, errorString);
+        return;
+    }
+
+    auto resp = std::move(queryResponses[0]);
+    if (resp->kind == core::QueryResponse::Kind::SEND) {
+        if (resp->dispatchComponents.empty()) {
+            errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+            errorString = "Did not find any dispatchComponents for a SEND QueryResponse in "
+                          "textDocument/hover";
+            sendError(d, errorCode, errorString);
+            return;
+        }
+        string contents = "";
+        for (auto &dispatchComponent : resp->dispatchComponents) {
+            auto retType = resp->retType.type;
+            if (resp->constraint) {
+                retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
+                                                   *resp->constraint);
+            }
+            string methodReturnType = retType->show(*finalGs);
+            string methodName = dispatchComponent.method.show(*finalGs);
+            std::vector<string> typeAndArgNames;
+
+            if (dispatchComponent.method.exists()) {
+                if (dispatchComponent.method.data(*finalGs).isMethod()) {
+                    for (auto &argSym : dispatchComponent.method.data(*finalGs).arguments()) {
+                        typeAndArgNames.push_back(
+                            argSym.data(*finalGs).name.show(*finalGs) + ": " +
+                            getResultType(*finalGs, argSym, dispatchComponent.receiver, resp->constraint)
+                                ->show(*finalGs));
+                    }
+                }
+
+                std::stringstream ss;
+                for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
+                    if (i != 0) {
+                        ss << ", ";
+                    }
+                    ss << typeAndArgNames[i];
+                }
+                std::string joinedTypeAndArgNames = ss.str();
+
+                if (contents.size() > 0) {
+                    contents += " ";
+                }
+                contents += fmt::format("```{} {}({})```", methodReturnType, methodName, joinedTypeAndArgNames);
+            }
+        }
+        rapidjson::Value markupContents;
+        markupContents.SetObject();
+        // We use markdown here because if we just use a string, VSCode tries to interpret
+        // things like <Class:Foo> as html tags and make them clickable (but the click takes
+        // you somewhere nonsensical)
+        markupContents.AddMember("kind", "markdown", alloc);
+        markupContents.AddMember("value", contents, alloc);
+        result.AddMember("contents", markupContents, alloc);
+        sendResult(d, result);
+    } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
+               resp->kind == core::QueryResponse::Kind::LITERAL) {
+        rapidjson::Value markupContents;
+        markupContents.SetObject();
+        markupContents.AddMember("kind", "markdown", alloc);
+        markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
+        result.AddMember("contents", markupContents, alloc);
+        sendResult(d, result);
+    } else {
+        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorString = "Unhandled QueryResponse kind in textDocument/hover";
+        sendError(d, errorCode, errorString);
+    }
+}
+
+void LSPLoop::setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d) {
+    core::Loc::Detail reqPos;
+    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
+    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
+    auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
+
+    initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+    finalGs->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+    vector<shared_ptr<core::File>> files;
+    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+    tryFastPath(files);
+
+    initialGS->lspInfoQueryLoc = core::Loc::none();
+    finalGs->lspInfoQueryLoc = core::Loc::none();
 }
 
 /**
@@ -562,11 +685,11 @@ void LSPLoop::pushErrors() {
                         rapidjson::Value relatedInformation;
                         relatedInformation.SetArray();
                         for (auto &section : ce->sections) {
-                            rapidjson::Value relatedInfo;
-                            relatedInfo.SetObject();
                             string sectionHeader = section.header;
 
                             for (auto &errorLine : section.messages) {
+                                rapidjson::Value relatedInfo;
+                                relatedInfo.SetObject();
                                 relatedInfo.AddMember("location", loc2Location(errorLine.loc), alloc);
 
                                 string relatedInfoMessage;
