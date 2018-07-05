@@ -35,15 +35,15 @@ public:
     };
 
     bool contains(const Loc &other) const;
-    std::pair<Detail, Detail> position(const core::GlobalState &gs) const;
-    std::string toString(const core::GlobalState &gs, int tabs = 0) const;
+    std::pair<Detail, Detail> position(const GlobalState &gs) const;
+    std::string toString(const GlobalState &gs, int tabs = 0) const;
     std::string filePosToString(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static u4 pos2Offset(core::FileRef source, Detail pos, const core::GlobalState &gs);
-    static Detail offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs);
+    static u4 pos2Offset(FileRef source, Detail pos, const GlobalState &gs);
+    static Detail offset2Pos(FileRef source, u4 off, const GlobalState &gs);
 };
 } // namespace core
 } // namespace sorbet

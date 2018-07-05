@@ -19,9 +19,9 @@ public:
 
     static com::stripe::rubytyper::Name toProto(const GlobalState &gs, NameRef name);
     static com::stripe::rubytyper::Symbol toProto(const GlobalState &gs, SymbolRef sym);
-    static com::stripe::rubytyper::Loc toProto(const core::GlobalState &gs, Loc loc);
+    static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);
 
-    static com::stripe::payserver::events::cibot::SourceMetrics toProto(const core::CounterState &counters,
+    static com::stripe::payserver::events::cibot::SourceMetrics toProto(const CounterState &counters,
                                                                         absl::string_view prefix);
 
     static std::string toJSON(const google::protobuf::Message &message);

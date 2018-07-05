@@ -33,7 +33,7 @@ public:
     }
 };
 
-bool StatsD::submitCounters(const core::CounterState &counters, string host, int port, string prefix) {
+bool StatsD::submitCounters(const CounterState &counters, string host, int port, string prefix) {
     StatsdClientWrapper statsd(host, port, prefix);
 
     auto canon = counters.counters->canonicalize();

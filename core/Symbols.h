@@ -57,7 +57,7 @@ public:
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     std::string show(const GlobalState &gs) const;
 
-    SymbolRef dealiasAt(GlobalState &gs, core::SymbolRef klass) const;
+    SymbolRef dealiasAt(GlobalState &gs, SymbolRef klass) const;
 
     u4 _id;
 
@@ -95,13 +95,13 @@ public:
     }
 
     static inline LocalVariable noVariable() {
-        return LocalVariable(core::NameRef::noName(), 0);
+        return LocalVariable(NameRef::noName(), 0);
     };
 
     static inline LocalVariable blockCall() {
-        return LocalVariable(core::Names::blockCall(), 0);
+        return LocalVariable(Names::blockCall(), 0);
     }
-    std::string toString(const core::GlobalState &gs) const;
+    std::string toString(const GlobalState &gs) const;
 };
 
 namespace serialize {
@@ -319,7 +319,7 @@ public:
         return (flags & Symbol::Flags::TYPE_FIXED) != 0;
     }
 
-    core::Variance variance() const {
+    Variance variance() const {
         if (isInvariant())
             return Variance::Invariant;
         if (isCovariant())
@@ -563,7 +563,7 @@ public:
 
     class IntrinsicMethod {
     public:
-        virtual std::shared_ptr<Type> apply(core::Context ctx, core::Loc callLoc, std::vector<TypeAndOrigins> &args,
+        virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, std::vector<TypeAndOrigins> &args,
                                             std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
                                             std::shared_ptr<SendAndBlockLink> linkType) const = 0;
     };

@@ -92,7 +92,7 @@ struct ComplexError : public BasicError {
  * Used to batch errors in an RAII fashion:
  *
  * {
- *   core::ErrorRegion errs(gs);
+ *   ErrorRegion errs(gs);
  *   runNamer();
  * }
  */

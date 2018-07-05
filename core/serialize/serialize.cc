@@ -30,9 +30,9 @@ public:
     static void pickle(Pickler &p, const Name &what);
     static void pickle(Pickler &p, Type *what);
     static void pickle(Pickler &p, const Symbol &what);
-    static void pickle(Pickler &p, core::FileRef file, const std::unique_ptr<ast::Expression> &what);
+    static void pickle(Pickler &p, FileRef file, const std::unique_ptr<ast::Expression> &what);
 
-    template <class T> static void pickleTree(Pickler &p, core::FileRef file, std::unique_ptr<T> &t);
+    template <class T> static void pickleTree(Pickler &p, FileRef file, std::unique_ptr<T> &t);
 
     static std::shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
@@ -464,15 +464,14 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     Pickler result;
     result.putU4(Serializer::VERSION);
 
-    absl::Span<const shared_ptr<core::File>> wantFiles;
+    absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
         auto lastPayload = find_if(gs.files.begin() + 1, gs.files.end(),
-                                   [](auto &file) { return file->source_type != core::File::Payload; });
-        ENFORCE(
-            none_of(lastPayload, gs.files.end(), [](auto &file) { return file->source_type == core::File::Payload; }));
-        wantFiles = absl::Span<const shared_ptr<core::File>>(gs.files.data(), lastPayload - gs.files.begin());
+                                   [](auto &file) { return file->source_type != File::Payload; });
+        ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->source_type == File::Payload; }));
+        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
     } else {
-        wantFiles = absl::Span<const shared_ptr<core::File>>(gs.files.data(), gs.files.size());
+        wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());
     }
 
     result.putU4(wantFiles.size());
@@ -612,7 +611,7 @@ void Serializer::loadGlobalState(GlobalState &gs, const u1 *const data) {
     gs.trace("Done reading GS");
 }
 
-template <class T> void SerializerImpl::pickleTree(Pickler &p, core::FileRef file, unique_ptr<T> &t) {
+template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t) {
     T *raw = t.get();
     unique_ptr<ast::Expression> tmp(t.release());
     pickle(p, file, tmp);
@@ -626,7 +625,7 @@ void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree) {
     p.putU4(tree->loc.end_pos);
 }
 
-void SerializerImpl::pickle(Pickler &p, core::FileRef file, const unique_ptr<ast::Expression> &what) {
+void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what) {
     if (what == nullptr) {
         p.putU1(1);
         return;
@@ -848,7 +847,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
     if (kind == 1) {
         return nullptr;
     }
-    core::Loc loc;
+    Loc loc;
     loc.file = file;
     loc.begin_pos = p.getU4();
     loc.end_pos = p.getU4();
@@ -911,7 +910,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
         case 10: {
             NameRef nm = unpickleNameRef(p, gs);
             auto unique = p.getU4();
-            core::LocalVariable lv(nm, unique);
+            LocalVariable lv(nm, unique);
             return make_unique<ast::Local>(loc, lv);
         }
         case 11: {

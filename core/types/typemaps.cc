@@ -9,7 +9,7 @@ using namespace sorbet;
 using namespace core;
 using namespace std;
 
-shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Type> &what, vector<SymbolRef> params,
+shared_ptr<Type> Types::instantiate(Context ctx, const shared_ptr<Type> &what, vector<SymbolRef> params,
                                     const vector<shared_ptr<Type>> &targs) {
     ENFORCE(what.get());
     auto t = what->_instantiate(ctx, params, targs);
@@ -19,7 +19,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Ty
     return what;
 }
 
-shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Type> &what, const TypeConstraint &tc) {
+shared_ptr<Type> Types::instantiate(Context ctx, const shared_ptr<Type> &what, const TypeConstraint &tc) {
     ENFORCE(tc.isSolved());
     if (tc.isEmpty()) {
         return what;
@@ -32,7 +32,7 @@ shared_ptr<Type> Types::instantiate(core::Context ctx, const shared_ptr<core::Ty
     return what;
 }
 
-shared_ptr<Type> Types::approximate(core::Context ctx, const shared_ptr<core::Type> &what, const TypeConstraint &tc) {
+shared_ptr<Type> Types::approximate(Context ctx, const shared_ptr<Type> &what, const TypeConstraint &tc) {
     ENFORCE(what.get());
     auto t = what->_approximate(ctx, tc);
     if (t) {
@@ -41,16 +41,15 @@ shared_ptr<Type> Types::approximate(core::Context ctx, const shared_ptr<core::Ty
     return what;
 }
 
-shared_ptr<Type> TypeVar::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                       const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> TypeVar::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-shared_ptr<Type> TypeVar::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> TypeVar::_instantiate(Context ctx, const TypeConstraint &tc) {
     return tc.getInstantiation(sym);
 }
 
-shared_ptr<Type> TypeVar::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> TypeVar::_approximate(Context ctx, const TypeConstraint &tc) {
     if (tc.hasUpperBound(sym)) {
         auto bound = tc.findUpperBound(sym);
         if (bound->isFullyDefined()) {
@@ -62,18 +61,16 @@ shared_ptr<Type> TypeVar::_approximate(core::Context ctx, const TypeConstraint &
     return Types::top();
 }
 
-shared_ptr<Type> ClassType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                         const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> ClassType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-shared_ptr<Type> LiteralType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+shared_ptr<Type> LiteralType::_instantiate(Context ctx, vector<SymbolRef> params,
                                            const vector<shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-shared_ptr<Type> TupleType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                         const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> TupleType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
     for (auto &a : this->elems) {
@@ -99,7 +96,7 @@ shared_ptr<Type> TupleType::_instantiate(core::Context ctx, vector<SymbolRef> pa
     return nullptr;
 }
 
-shared_ptr<Type> TupleType::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> TupleType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
     for (auto &a : this->elems) {
@@ -125,7 +122,7 @@ shared_ptr<Type> TupleType::_instantiate(core::Context ctx, const TypeConstraint
     return nullptr;
 }
 
-shared_ptr<Type> TupleType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> TupleType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
     for (auto &a : this->elems) {
@@ -151,8 +148,7 @@ shared_ptr<Type> TupleType::_approximate(core::Context ctx, const TypeConstraint
     return nullptr;
 };
 
-shared_ptr<Type> ShapeType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                         const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> ShapeType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
     for (auto &a : this->values) {
@@ -178,7 +174,7 @@ shared_ptr<Type> ShapeType::_instantiate(core::Context ctx, vector<SymbolRef> pa
     return nullptr;
 }
 
-shared_ptr<Type> ShapeType::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> ShapeType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
     for (auto &a : this->values) {
@@ -204,7 +200,7 @@ shared_ptr<Type> ShapeType::_instantiate(core::Context ctx, const TypeConstraint
     return nullptr;
 }
 
-shared_ptr<Type> ShapeType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> ShapeType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
     for (auto &a : this->values) {
@@ -230,8 +226,7 @@ shared_ptr<Type> ShapeType::_approximate(core::Context ctx, const TypeConstraint
     return nullptr;
 }
 
-shared_ptr<Type> OrType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                      const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> OrType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     auto left = this->left->_instantiate(ctx, params, targs);
     auto right = this->right->_instantiate(ctx, params, targs);
     if (left || right) {
@@ -246,7 +241,7 @@ shared_ptr<Type> OrType::_instantiate(core::Context ctx, vector<SymbolRef> param
     return nullptr;
 }
 
-shared_ptr<Type> OrType::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> OrType::_instantiate(Context ctx, const TypeConstraint &tc) {
     auto left = this->left->_instantiate(ctx, tc);
     auto right = this->right->_instantiate(ctx, tc);
     if (left || right) {
@@ -261,7 +256,7 @@ shared_ptr<Type> OrType::_instantiate(core::Context ctx, const TypeConstraint &t
     return nullptr;
 }
 
-shared_ptr<Type> OrType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> OrType::_approximate(Context ctx, const TypeConstraint &tc) {
     auto left = this->left->_approximate(ctx, tc);
     auto right = this->right->_approximate(ctx, tc);
     if (left || right) {
@@ -276,8 +271,7 @@ shared_ptr<Type> OrType::_approximate(core::Context ctx, const TypeConstraint &t
     return nullptr;
 }
 
-shared_ptr<Type> AndType::_instantiate(core::Context ctx, vector<SymbolRef> params,
-                                       const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> AndType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
     auto left = this->left->_instantiate(ctx, params, targs);
     auto right = this->right->_instantiate(ctx, params, targs);
     if (left || right) {
@@ -292,7 +286,7 @@ shared_ptr<Type> AndType::_instantiate(core::Context ctx, vector<SymbolRef> para
     return nullptr;
 }
 
-shared_ptr<Type> AndType::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> AndType::_instantiate(Context ctx, const TypeConstraint &tc) {
     auto left = this->left->_instantiate(ctx, tc);
     auto right = this->right->_instantiate(ctx, tc);
     if (left || right) {
@@ -307,7 +301,7 @@ shared_ptr<Type> AndType::_instantiate(core::Context ctx, const TypeConstraint &
     return nullptr;
 }
 
-shared_ptr<Type> AndType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> AndType::_approximate(Context ctx, const TypeConstraint &tc) {
     auto left = this->left->_approximate(ctx, tc);
     auto right = this->right->_approximate(ctx, tc);
     if (left || right) {
@@ -322,7 +316,7 @@ shared_ptr<Type> AndType::_approximate(core::Context ctx, const TypeConstraint &
     return nullptr;
 }
 
-shared_ptr<Type> AppliedType::_instantiate(core::Context ctx, vector<SymbolRef> params,
+shared_ptr<Type> AppliedType::_instantiate(Context ctx, vector<SymbolRef> params,
                                            const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
@@ -351,7 +345,7 @@ shared_ptr<Type> AppliedType::_instantiate(core::Context ctx, vector<SymbolRef> 
     return nullptr;
 }
 
-shared_ptr<Type> AppliedType::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> AppliedType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
     // TODO: make it not allocate if returns nullptr
@@ -379,7 +373,7 @@ shared_ptr<Type> AppliedType::_instantiate(core::Context ctx, const TypeConstrai
     return nullptr;
 }
 
-shared_ptr<Type> AppliedType::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> AppliedType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
     // TODO: make it not allocate if returns nullptr
@@ -407,12 +401,12 @@ shared_ptr<Type> AppliedType::_approximate(core::Context ctx, const TypeConstrai
     return nullptr;
 }
 
-shared_ptr<Type> SelfTypeParam::_instantiate(core::Context ctx, vector<SymbolRef> params,
+shared_ptr<Type> SelfTypeParam::_instantiate(Context ctx, vector<SymbolRef> params,
                                              const vector<shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-shared_ptr<Type> LambdaParam::_instantiate(core::Context ctx, vector<SymbolRef> params,
+shared_ptr<Type> LambdaParam::_instantiate(Context ctx, vector<SymbolRef> params,
                                            const vector<shared_ptr<Type>> &targs) {
     for (auto &el : params) {
         if (el == this->definition) {
@@ -422,21 +416,21 @@ shared_ptr<Type> LambdaParam::_instantiate(core::Context ctx, vector<SymbolRef> 
     return nullptr;
 }
 
-shared_ptr<Type> Type::_approximate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> Type::_approximate(Context ctx, const TypeConstraint &tc) {
     return nullptr;
 }
 
-shared_ptr<Type> Type::_instantiate(core::Context ctx, const TypeConstraint &tc) {
+shared_ptr<Type> Type::_instantiate(Context ctx, const TypeConstraint &tc) {
     return nullptr;
 }
 
-std::shared_ptr<Type> SelfType::_instantiate(core::Context ctx, std::vector<SymbolRef> params,
+std::shared_ptr<Type> SelfType::_instantiate(Context ctx, std::vector<SymbolRef> params,
                                              const std::vector<std::shared_ptr<Type>> &targs) {
     return nullptr;
 }
 
-std::shared_ptr<Type> Types::replaceSelfType(core::Context ctx, const std::shared_ptr<core::Type> &what,
-                                             const std::shared_ptr<core::Type> &receiver) {
+std::shared_ptr<Type> Types::replaceSelfType(Context ctx, const std::shared_ptr<Type> &what,
+                                             const std::shared_ptr<Type> &receiver) {
     ENFORCE(what.get());
     auto t = what->_replaceSelfType(ctx, receiver);
     if (t) {
@@ -445,15 +439,15 @@ std::shared_ptr<Type> Types::replaceSelfType(core::Context ctx, const std::share
     return what;
 }
 
-std::shared_ptr<Type> SelfType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> SelfType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
     return receiver;
 }
 
-std::shared_ptr<Type> Type::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> Type::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
     return nullptr;
 }
 
-std::shared_ptr<Type> OrType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> OrType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
     auto left = this->left->_replaceSelfType(ctx, receiver);
     auto right = this->right->_replaceSelfType(ctx, receiver);
     if (left || right) {
@@ -468,7 +462,7 @@ std::shared_ptr<Type> OrType::_replaceSelfType(core::Context ctx, std::shared_pt
     return nullptr;
 }
 
-std::shared_ptr<Type> AndType::_replaceSelfType(core::Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> AndType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
     auto left = this->left->_replaceSelfType(ctx, receiver);
     auto right = this->right->_replaceSelfType(ctx, receiver);
     if (left || right) {
@@ -483,6 +477,6 @@ std::shared_ptr<Type> AndType::_replaceSelfType(core::Context ctx, std::shared_p
     return nullptr;
 }
 
-unsigned int Type::hash(const core::GlobalState &gs) const {
+unsigned int Type::hash(const GlobalState &gs) const {
     return _hash(this->toString(gs)); // TODO: make something better
 }

@@ -8,48 +8,49 @@
 
 #include "core/Types.h"
 
-using namespace sorbet;
-using namespace core;
+// improve debugging.
+template class std::shared_ptr<sorbet::core::Type>;
+template class std::shared_ptr<sorbet::core::TypeConstraint>;
+template class std::shared_ptr<sorbet::core::SendAndBlockLink>;
+template class std::vector<sorbet::core::Loc>;
+
+namespace sorbet {
+namespace core {
+
 using namespace std;
 
-// improve debugging.
-template class std::shared_ptr<core::Type>;
-template class std::shared_ptr<core::TypeConstraint>;
-template class std::shared_ptr<core::SendAndBlockLink>;
-template class std::vector<core::Loc>;
-
 shared_ptr<Type> Types::top() {
-    static auto res = make_shared<ClassType>(core::Symbols::top());
+    static auto res = make_shared<ClassType>(Symbols::top());
     return res;
 }
 
 shared_ptr<Type> Types::bottom() {
-    static auto res = make_shared<ClassType>(core::Symbols::bottom());
+    static auto res = make_shared<ClassType>(Symbols::bottom());
     return res;
 }
 
 shared_ptr<Type> Types::nilClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::NilClass());
+    static auto res = make_shared<ClassType>(Symbols::NilClass());
     return res;
 }
 
 shared_ptr<Type> Types::untyped() {
-    static auto res = make_shared<ClassType>(core::Symbols::untyped());
+    static auto res = make_shared<ClassType>(Symbols::untyped());
     return res;
 }
 
 shared_ptr<Type> Types::void_() {
-    static auto res = make_shared<ClassType>(core::Symbols::void_());
+    static auto res = make_shared<ClassType>(Symbols::void_());
     return res;
 }
 
 shared_ptr<Type> Types::trueClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::TrueClass());
+    static auto res = make_shared<ClassType>(Symbols::TrueClass());
     return res;
 }
 
 shared_ptr<Type> Types::falseClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::FalseClass());
+    static auto res = make_shared<ClassType>(Symbols::FalseClass());
     return res;
 }
 
@@ -59,59 +60,59 @@ shared_ptr<Type> Types::Boolean() {
 }
 
 shared_ptr<Type> Types::Integer() {
-    static auto res = make_shared<ClassType>(core::Symbols::Integer());
+    static auto res = make_shared<ClassType>(Symbols::Integer());
     return res;
 }
 
 shared_ptr<Type> Types::Float() {
-    static auto res = make_shared<ClassType>(core::Symbols::Float());
+    static auto res = make_shared<ClassType>(Symbols::Float());
     return res;
 }
 
 shared_ptr<Type> Types::arrayClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::Array());
+    static auto res = make_shared<ClassType>(Symbols::Array());
     return res;
 }
 
 shared_ptr<Type> Types::hashClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::Hash());
+    static auto res = make_shared<ClassType>(Symbols::Hash());
     return res;
 }
 
 shared_ptr<Type> Types::arrayOfUntyped() {
-    static vector<shared_ptr<Type>> targs{core::Types::untyped()};
-    static auto res = make_shared<core::AppliedType>(core::Symbols::Array(), targs);
+    static vector<shared_ptr<Type>> targs{Types::untyped()};
+    static auto res = make_shared<AppliedType>(Symbols::Array(), targs);
     return res;
 }
 
 shared_ptr<Type> Types::hashOfUntyped() {
-    static vector<shared_ptr<Type>> targs{core::Types::untyped(), core::Types::untyped(), core::Types::untyped()};
-    static auto res = make_shared<core::AppliedType>(core::Symbols::Hash(), targs);
+    static vector<shared_ptr<Type>> targs{Types::untyped(), Types::untyped(), Types::untyped()};
+    static auto res = make_shared<AppliedType>(Symbols::Hash(), targs);
     return res;
 }
 
 shared_ptr<Type> Types::procClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::Proc());
+    static auto res = make_shared<ClassType>(Symbols::Proc());
     return res;
 }
 
 shared_ptr<Type> Types::classClass() {
-    static auto res = make_shared<ClassType>(core::Symbols::Class());
+    static auto res = make_shared<ClassType>(Symbols::Class());
     return res;
 }
 
 shared_ptr<Type> Types::String() {
-    static auto res = make_shared<ClassType>(core::Symbols::String());
+    static auto res = make_shared<ClassType>(Symbols::String());
     return res;
 }
 
 shared_ptr<Type> Types::Symbol() {
-    static auto res = make_shared<ClassType>(core::Symbols::Symbol());
+    static auto res = make_shared<ClassType>(Symbols::Symbol());
     return res;
 }
 
 shared_ptr<Type> Types::Object() {
-    static auto res = make_shared<ClassType>(core::Symbols::Object());
+    static auto res = make_shared<ClassType>(Symbols::Object());
     return res;
 }
 
@@ -120,7 +121,7 @@ shared_ptr<Type> Types::falsyTypes() {
     return res;
 }
 
-shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, const std::shared_ptr<Type> &from, core::SymbolRef klass) {
+shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> &from, SymbolRef klass) {
     shared_ptr<Type> result;
 
     if (from->isUntyped()) {
@@ -160,7 +161,7 @@ shared_ptr<Type> Types::dropSubtypesOf(core::Context ctx, const std::shared_ptr<
     return result;
 }
 
-bool Types::canBeTruthy(core::Context ctx, const std::shared_ptr<Type> &what) {
+bool Types::canBeTruthy(Context ctx, const std::shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -169,7 +170,7 @@ bool Types::canBeTruthy(core::Context ctx, const std::shared_ptr<Type> &what) {
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
-bool Types::canBeFalsy(core::Context ctx, const std::shared_ptr<Type> &what) {
+bool Types::canBeFalsy(Context ctx, const std::shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -178,7 +179,7 @@ bool Types::canBeFalsy(core::Context ctx, const std::shared_ptr<Type> &what) {
                             what); // check if inhabited by falsy values
 }
 
-shared_ptr<Type> Types::approximateSubtract(core::Context ctx, const std::shared_ptr<Type> &from,
+shared_ptr<Type> Types::approximateSubtract(Context ctx, const std::shared_ptr<Type> &from,
                                             const std::shared_ptr<Type> &what) {
     shared_ptr<Type> result;
     typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
@@ -190,13 +191,13 @@ shared_ptr<Type> Types::approximateSubtract(core::Context ctx, const std::shared
 }
 
 shared_ptr<Type> Types::dropLiteral(const std::shared_ptr<Type> &tp) {
-    if (auto *a = core::cast_type<LiteralType>(tp.get())) {
+    if (auto *a = cast_type<LiteralType>(tp.get())) {
         return a->underlying;
     }
     return tp;
 }
 
-shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elements) {
+shared_ptr<Type> Types::lubAll(Context ctx, vector<shared_ptr<Type>> &elements) {
     shared_ptr<Type> acc = Types::bottom();
     for (auto &el : elements) {
         acc = Types::lub(ctx, acc, el);
@@ -204,18 +205,18 @@ shared_ptr<Type> Types::lubAll(core::Context ctx, vector<shared_ptr<Type>> &elem
     return acc;
 }
 
-shared_ptr<Type> Types::arrayOf(core::Context ctx, const std::shared_ptr<Type> &elem) {
+shared_ptr<Type> Types::arrayOf(Context ctx, const std::shared_ptr<Type> &elem) {
     vector<shared_ptr<Type>> targs{move(elem)};
-    return make_shared<AppliedType>(core::Symbols::Array(), targs);
+    return make_shared<AppliedType>(Symbols::Array(), targs);
 }
 
-core::ClassType::ClassType(core::SymbolRef symbol) : symbol(symbol) {
+ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-core::ProxyType::ProxyType(shared_ptr<core::Type> underlying) : underlying(move(underlying)) {}
+ProxyType::ProxyType(shared_ptr<Type> underlying) : underlying(move(underlying)) {}
 
-void ProxyType::_sanityCheck(core::Context ctx) {
+void ProxyType::_sanityCheck(Context ctx) {
     ENFORCE(cast_type<ClassType>(this->underlying.get()) != nullptr ||
             cast_type<AppliedType>(this->underlying.get()) != nullptr);
     this->underlying->sanityCheck(ctx);
@@ -223,35 +224,34 @@ void ProxyType::_sanityCheck(core::Context ctx) {
 
 bool Type::isUntyped() {
     auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == core::Symbols::untyped();
+    return t != nullptr && t->symbol == Symbols::untyped();
 }
 
 bool Type::isTop() {
     auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == core::Symbols::top();
+    return t != nullptr && t->symbol == Symbols::top();
 }
 
 bool Type::isBottom() {
     auto *t = cast_type<ClassType>(this);
-    return t != nullptr && t->symbol == core::Symbols::bottom();
+    return t != nullptr && t->symbol == Symbols::bottom();
 }
 
-core::LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
+LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {}
 
-core::LiteralType::LiteralType(double val) : ProxyType(Types::Float()), floatval(val) {}
+LiteralType::LiteralType(double val) : ProxyType(Types::Float()), floatval(val) {}
 
-core::LiteralType::LiteralType(core::SymbolRef klass, core::NameRef val)
-    : ProxyType(klass == core::Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
-    ENFORCE(klass == core::Symbols::String() || klass == core::Symbols::Symbol());
+LiteralType::LiteralType(SymbolRef klass, NameRef val)
+    : ProxyType(klass == Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
+    ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
-core::LiteralType::LiteralType(bool val)
-    : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
+LiteralType::LiteralType(bool val) : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {}
 
-core::TupleType::TupleType(shared_ptr<Type> underlying, vector<shared_ptr<Type>> elements)
+TupleType::TupleType(shared_ptr<Type> underlying, vector<shared_ptr<Type>> elements)
     : ProxyType(move(underlying)), elems(move(elements)) {}
 
-shared_ptr<Type> core::TupleType::build(core::Context ctx, vector<shared_ptr<Type>> elements) {
+shared_ptr<Type> TupleType::build(Context ctx, vector<shared_ptr<Type>> elements) {
     shared_ptr<Type> underlying = Types::arrayOf(ctx, Types::dropLiteral(Types::lubAll(ctx, elements)));
     return make_shared<TupleType>(move(underlying), move(elements));
 }
@@ -272,19 +272,19 @@ bool LiteralType::equals(shared_ptr<LiteralType> rhs) const {
 
 OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {}
 
-void TupleType::_sanityCheck(core::Context ctx) {
+void TupleType::_sanityCheck(Context ctx) {
     ProxyType::_sanityCheck(ctx);
     auto *applied = cast_type<AppliedType>(this->underlying.get());
     ENFORCE(applied);
-    ENFORCE(applied->klass == core::Symbols::Array());
+    ENFORCE(applied->klass == Symbols::Array());
 }
 
-core::ShapeType::ShapeType() : ProxyType(core::Types::hashOfUntyped()) {}
+ShapeType::ShapeType() : ProxyType(Types::hashOfUntyped()) {}
 
-core::ShapeType::ShapeType(vector<shared_ptr<LiteralType>> keys, vector<shared_ptr<Type>> values)
-    : ProxyType(core::Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
+ShapeType::ShapeType(vector<shared_ptr<LiteralType>> keys, vector<shared_ptr<Type>> values)
+    : ProxyType(Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {}
 
-void ShapeType::_sanityCheck(core::Context ctx) {
+void ShapeType::_sanityCheck(Context ctx) {
     ProxyType::_sanityCheck(ctx);
     ENFORCE(this->values.size() == this->keys.size());
     for (auto &v : this->keys) {
@@ -295,9 +295,9 @@ void ShapeType::_sanityCheck(core::Context ctx) {
     }
 }
 
-AliasType::AliasType(core::SymbolRef other) : symbol(other) {}
+AliasType::AliasType(SymbolRef other) : symbol(other) {}
 
-void AndType::_sanityCheck(core::Context ctx) {
+void AndType::_sanityCheck(Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
     /*
@@ -319,7 +319,7 @@ void AndType::_sanityCheck(core::Context ctx) {
     //            left->toString(ctx));
 }
 
-void OrType::_sanityCheck(core::Context ctx) {
+void OrType::_sanityCheck(Context ctx) {
     left->_sanityCheck(ctx);
     right->_sanityCheck(ctx);
     //    ENFORCE(!isa_type<ProxyType>(left.get()));
@@ -335,7 +335,7 @@ void OrType::_sanityCheck(core::Context ctx) {
     //            left->toString(ctx));
 }
 
-void ClassType::_sanityCheck(core::Context ctx) {
+void ClassType::_sanityCheck(Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
@@ -422,13 +422,13 @@ bool OrType::isFullyDefined() {
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
-vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::SymbolRef what,
-                                                 const vector<shared_ptr<Type>> &targs, core::SymbolRef asIf) {
+vector<SymbolRef> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<shared_ptr<Type>> &targs,
+                                           SymbolRef asIf) {
     ENFORCE(asIf.data(ctx).isClass());
     ENFORCE(what.data(ctx).isClass());
     ENFORCE(what == asIf || what.data(ctx).derivesFrom(ctx, asIf) || asIf.data(ctx).derivesFrom(ctx, what),
             what.data(ctx).name.toString(ctx), asIf.data(ctx).name.toString(ctx));
-    vector<core::SymbolRef> currentAlignment;
+    vector<SymbolRef> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
@@ -438,7 +438,7 @@ vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::Symbol
     } else {
         for (auto originalTp : asIf.data(ctx).typeMembers()) {
             auto name = originalTp.data(ctx).name;
-            core::SymbolRef align;
+            SymbolRef align;
             int i = 0;
             for (auto x : what.data(ctx).typeMembers()) {
                 if (x.data(ctx).name == name) {
@@ -456,51 +456,51 @@ vector<core::SymbolRef> Types::alignBaseTypeArgs(core::Context ctx, core::Symbol
     return currentAlignment;
 }
 
-shared_ptr<Type> Types::resultTypeAsSeenFrom(core::Context ctx, core::SymbolRef what, core::SymbolRef inWhat,
+shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat,
                                              const vector<shared_ptr<Type>> &targs) {
-    const core::Symbol &original = what.data(ctx);
-    core::SymbolRef originalOwner = what.data(ctx).enclosingClass(ctx);
+    const sorbet::core::Symbol &original = what.data(ctx);
+    SymbolRef originalOwner = what.data(ctx).enclosingClass(ctx);
 
     if (originalOwner.data(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
         return original.resultType;
     }
 
-    vector<core::SymbolRef> currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
+    vector<SymbolRef> currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
     return instantiate(ctx, original.resultType, currentAlignment, targs);
 }
 
-shared_ptr<core::Type> Types::getProcReturnType(core::Context ctx, const shared_ptr<core::Type> &procType) {
-    if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
-        return core::Types::untyped();
+shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &procType) {
+    if (!procType->derivesFrom(ctx, Symbols::Proc())) {
+        return Types::untyped();
     }
-    auto *applied = core::cast_type<core::AppliedType>(procType.get());
+    auto *applied = cast_type<AppliedType>(procType.get());
     if (applied == nullptr || applied->targs.empty()) {
-        return core::Types::untyped();
+        return Types::untyped();
     }
     // Proc types have their return type as the first targ
     return applied->targs.front();
 }
 
-bool Types::isSubType(core::Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
-    return isSubTypeUnderConstraint(ctx, core::TypeConstraint::EmptyFrozenConstraint, t1, t2);
+bool Types::isSubType(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
+    return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
 }
 
-bool core::TypeVar::isFullyDefined() {
+bool TypeVar::isFullyDefined() {
     return false;
 }
 
-shared_ptr<Type> core::TypeVar::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> TypeVar::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("should never happen");
 }
 
-bool TypeVar::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("should never happen");
 }
 
 TypeVar::TypeVar(SymbolRef sym) : sym(sym) {}
 
-void TypeVar::_sanityCheck(core::Context ctx) {
+void TypeVar::_sanityCheck(Context ctx) {
     ENFORCE(this->sym.exists());
 }
 
@@ -513,9 +513,9 @@ bool AppliedType::isFullyDefined() {
     return true;
 }
 
-void AppliedType::_sanityCheck(core::Context ctx) {
+void AppliedType::_sanityCheck(Context ctx) {
     ENFORCE(this->klass.data(ctx).isClass());
-    ENFORCE(this->klass != core::Symbols::untyped());
+    ENFORCE(this->klass != Symbols::untyped());
 
     ENFORCE(this->klass.data(ctx).typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
@@ -527,7 +527,7 @@ void AppliedType::_sanityCheck(core::Context ctx) {
     }
 }
 
-bool AppliedType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     ClassType und(this->klass);
     return und.derivesFrom(gs, klass);
 }
@@ -535,36 +535,36 @@ bool AppliedType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {}
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {}
 
-bool LambdaParam::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-bool SelfTypeParam::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> LambdaParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> LambdaParam::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> SelfTypeParam::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, int i) {
     return Types::untyped()->getCallArgumentType(ctx, name, i);
 }
 
-DispatchResult LambdaParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                         vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
-                                         shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                         shared_ptr<Type> selfType, shared_ptr<Type> fullType,
+                                         shared_ptr<SendAndBlockLink> block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-DispatchResult SelfTypeParam::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                           vector<TypeAndOrigins> &args, shared_ptr<Type> selfType,
-                                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> block) {
+DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+                                           shared_ptr<Type> selfType, shared_ptr<Type> fullType,
+                                           shared_ptr<SendAndBlockLink> block) {
     return Types::untyped()->dispatchCall(ctx, name, callLoc, args, selfType, fullType, block);
 }
 
-void LambdaParam::_sanityCheck(core::Context ctx) {}
-void SelfTypeParam::_sanityCheck(core::Context ctx) {}
+void LambdaParam::_sanityCheck(Context ctx) {}
+void SelfTypeParam::_sanityCheck(Context ctx) {}
 
 bool LambdaParam::isFullyDefined() {
     return false;
@@ -616,13 +616,13 @@ bool ShapeType::hasUntyped() {
     }
     return false;
 };
-SendAndBlockLink::SendAndBlockLink(core::SymbolRef block, core::NameRef fun)
-    : block(block), fun(fun), constr(make_shared<core::TypeConstraint>()) {}
+SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun)
+    : block(block), fun(fun), constr(make_shared<TypeConstraint>()) {}
 
 shared_ptr<Type> TupleType::elementType() const {
     auto *ap = cast_type<AppliedType>(this->underlying.get());
     ENFORCE(ap);
-    ENFORCE(ap->klass == core::Symbols::Array());
+    ENFORCE(ap->klass == Symbols::Array());
     ENFORCE(ap->targs.size() == 1);
     return ap->targs.front();
 }
@@ -637,18 +637,21 @@ bool SelfType::isFullyDefined() {
     return false;
 }
 
-std::shared_ptr<Type> SelfType::getCallArgumentType(core::Context ctx, core::NameRef name, int i) {
+std::shared_ptr<Type> SelfType::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("should never happen");
 }
 
-bool SelfType::derivesFrom(const core::GlobalState &gs, core::SymbolRef klass) {
+bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("should never happen");
 }
 
-DispatchResult SelfType::dispatchCall(core::Context ctx, core::NameRef name, core::Loc callLoc,
-                                      std::vector<TypeAndOrigins> &args, std::shared_ptr<Type> selfRef,
-                                      std::shared_ptr<Type> fullType, std::shared_ptr<SendAndBlockLink> link) {
+DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, std::vector<TypeAndOrigins> &args,
+                                      std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
+                                      std::shared_ptr<SendAndBlockLink> link) {
     Error::raise("should never happen");
 }
 
-void SelfType::_sanityCheck(core::Context ctx) {}
+void SelfType::_sanityCheck(Context ctx) {}
+
+} // namespace core
+} // namespace sorbet

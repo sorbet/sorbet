@@ -125,7 +125,7 @@ void GlobalState::initEmpty() {
     Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(top_str), top_id);
     Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(bottom_str), bottom_id);
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
-    SymbolRef object_id = synthesizeClass(object_str, core::Symbols::BasicObject()._id);
+    SymbolRef object_id = synthesizeClass(object_str, Symbols::BasicObject()._id);
     SymbolRef integer_id = synthesizeClass(integer_str);
     SymbolRef float_id = synthesizeClass(float_str);
     SymbolRef string_id = synthesizeClass(string_str);
@@ -138,7 +138,7 @@ void GlobalState::initEmpty() {
     SymbolRef untyped_id = synthesizeClass(untyped_str, 0);
     SymbolRef opus_id = synthesizeClass(opus_str, 0, true);
 
-    SymbolRef T_id = synthesizeClass(T_str, core::Symbols::todo()._id, true);
+    SymbolRef T_id = synthesizeClass(T_str, Symbols::todo()._id, true);
     T_id.data(*this).setIsModule(true);
 
     SymbolRef class_id = synthesizeClass(class_str, 0);
@@ -171,7 +171,7 @@ void GlobalState::initEmpty() {
     SymbolRef sinatra_id = synthesizeClass(sinatra_str, 0, true);
     SymbolRef sinatra_base_id = enterClassSymbol(Loc::none(), Symbols::Sinatra(), enterNameConstant(base_str));
     sinatra_base_id.data(*this).setIsModule(false);
-    sinatra_base_id.data(*this).superClass = core::Symbols::Object();
+    sinatra_base_id.data(*this).superClass = Symbols::Object();
     SymbolRef void_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(void_str));
     SymbolRef typeAliasTemp_id = synthesizeClass(typeAliasTemp_str, 0);
     SymbolRef chalk_id = synthesizeClass(chalk_str, 0, true);
@@ -238,7 +238,7 @@ void GlobalState::initEmpty() {
     ENFORCE(SUBCLASSES_id == Symbols::Subclasses());
 
     // Synthesize untyped = T.untyped
-    Symbols::untyped().data(*this).resultType = core::Types::untyped();
+    Symbols::untyped().data(*this).resultType = Types::untyped();
 
     // <Magic> has its own type
     Symbols::Magic().data(*this).resultType = make_shared<ClassType>(Symbols::Magic());
@@ -247,51 +247,51 @@ void GlobalState::initEmpty() {
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = core::Types::untyped();
+    arg.data(*this).resultType = Types::untyped();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::hashOfUntyped();
+    method.data(*this).resultType = Types::hashOfUntyped();
 
     // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = core::Types::untyped();
+    arg.data(*this).resultType = Types::untyped();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::arrayOfUntyped();
+    method.data(*this).resultType = Types::arrayOfUntyped();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.data(*this).resultType = core::Types::arrayOfUntyped();
+    arg.data(*this).resultType = Types::arrayOfUntyped();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::untyped();
+    method.data(*this).resultType = Types::untyped();
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.data(*this).resultType = core::Types::Object();
+    arg.data(*this).resultType = Types::Object();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::Boolean();
+    method.data(*this).resultType = Types::Boolean();
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.data(*this).resultType = core::Types::untyped();
+    arg.data(*this).resultType = Types::untyped();
     method.data(*this).arguments().push_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
-    arg.data(*this).resultType = core::Types::Integer();
+    arg.data(*this).resultType = Types::Integer();
     method.data(*this).arguments().push_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
-    arg.data(*this).resultType = core::Types::Integer();
+    arg.data(*this).resultType = Types::Integer();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = core::Types::untyped();
+    method.data(*this).resultType = Types::untyped();
 
     int reservedCount = 0;
 
     // Set the correct resultTypes for all synthesized classes
     // Does it in two passes since the singletonClass will go in the Symbols::root() members which will invalidate the
     // iterator
-    vector<core::SymbolRef> needSingletons;
+    vector<SymbolRef> needSingletons;
     for (auto &sym : symbols) {
         auto ref = sym.ref(*this);
         if (ref.exists() && sym.isClass()) {
@@ -336,7 +336,7 @@ void GlobalState::installIntrinsics() {
         if (entry.singleton) {
             symbol = symbol.data(*this).singletonClass(*this);
         }
-        core::SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
+        SymbolRef method = enterMethodSymbol(Loc::none(), symbol, entry.method);
         method.data(*this).intrinsic = entry.impl;
     }
 }
@@ -380,13 +380,13 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     Symbol &ownerScope = owner.data(*this, true);
     auto from = ownerScope.members.begin();
     auto to = ownerScope.members.end();
-    core::histogramInc("symbol_enter_by_name", ownerScope.members.size());
+    histogramInc("symbol_enter_by_name", ownerScope.members.size());
 
     while (from != to) {
         auto &el = *from;
         if (el.first == name) {
             ENFORCE((from->second.data(*this).flags & flags) == flags, "existing symbol has wrong flags");
-            core::counterInc("symbols.hit");
+            counterInc("symbols.hit");
             return from->second;
         }
         from++;
@@ -403,17 +403,17 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data.owner = owner;
     data.definitionLoc = loc;
     if (data.isBlockSymbol(*this)) {
-        core::categoryCounterInc("symbols", "block");
+        categoryCounterInc("symbols", "block");
     } else if (data.isClass()) {
-        core::categoryCounterInc("symbols", "class");
+        categoryCounterInc("symbols", "class");
     } else if (data.isMethod()) {
-        core::categoryCounterInc("symbols", "method");
+        categoryCounterInc("symbols", "method");
     } else if (data.isField()) {
-        core::categoryCounterInc("symbols", "field");
+        categoryCounterInc("symbols", "field");
     } else if (data.isStaticField()) {
-        core::categoryCounterInc("symbols", "static_field");
+        categoryCounterInc("symbols", "static_field");
     } else if (data.isMethodArgument()) {
-        core::categoryCounterInc("symbols", "argument");
+        categoryCounterInc("symbols", "argument");
     }
 
     if (!reallocate) {
@@ -521,7 +521,7 @@ absl::string_view GlobalState::enterString(absl::string_view nm) {
         from = strings.back()->data() + strings_last_page_used;
     }
 
-    core::counterInc("strings");
+    counterInc("strings");
     memcpy(from, nm.data(), nm.size());
     strings_last_page_used += nm.size();
     return absl::string_view(from, nm.size());
@@ -540,10 +540,10 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
             auto name_id = bucket.second;
             auto &nm2 = names[name_id];
             if (nm2.kind == NameKind::UTF8 && nm2.raw.utf8 == nm) {
-                core::counterInc("names.utf8.hit");
+                counterInc("names.utf8.hit");
                 return nm2.ref(*this);
             } else {
-                core::counterInc("names.hash_collision.utf8");
+                counterInc("names.hash_collision.utf8");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -574,7 +574,7 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
     names[idx].kind = NameKind::UTF8;
     names[idx].raw.utf8 = enterString(nm);
     ENFORCE(names[idx].hash(*this) == hs);
-    core::categoryCounterInc("names", "utf8");
+    categoryCounterInc("names", "utf8");
 
     wasModified_ = true;
     return NameRef(*this, idx);
@@ -595,10 +595,10 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         if (bucket.first == hs) {
             auto &nm2 = names[bucket.second];
             if (nm2.kind == CONSTANT && nm2.cnst.original == original) {
-                core::counterInc("names.constant.hit");
+                counterInc("names.constant.hit");
                 return nm2.ref(*this);
             } else {
-                core::counterInc("names.hash_collision.constant");
+                counterInc("names.hash_collision.constant");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -633,7 +633,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     names[idx].cnst.original = original;
     ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
-    core::categoryCounterInc("names", "constant");
+    categoryCounterInc("names", "constant");
     return NameRef(*this, idx);
 }
 
@@ -684,10 +684,10 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
-                core::counterInc("names.unique.hit");
+                counterInc("names.unique.hit");
                 return nm2.ref(*this);
             } else {
-                core::counterInc("names.hash_collision.unique");
+                counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -710,10 +710,10 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
             auto &nm2 = names[bucket.second];
             if (nm2.kind == UNIQUE && nm2.unique.uniqueNameKind == uniqueNameKind && nm2.unique.num == num &&
                 nm2.unique.original == original) {
-                core::counterInc("names.unique.hit");
+                counterInc("names.unique.hit");
                 return nm2.ref(*this);
             } else {
-                core::counterInc("names.hash_collision.unique");
+                counterInc("names.hash_collision.unique");
             }
         }
         bucketId = (bucketId + probe_count) & mask;
@@ -750,7 +750,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     names[idx].unique.original = original;
     ENFORCE(names[idx].hash(*this) == hs);
     wasModified_ = true;
-    core::categoryCounterInc("names", "unique");
+    categoryCounterInc("names", "unique");
     return NameRef(*this, idx);
 }
 
@@ -797,7 +797,7 @@ FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
 
     // was a tombstone before.
     this->files[id.id()] = file;
-    core::FileRef result(id);
+    FileRef result(id);
     return result;
 }
 
@@ -811,7 +811,7 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNam
     for (auto &mem : members) {
         if (mem.first == origName) {
             int collisionCount = 1;
-            core::NameRef name;
+            NameRef name;
             do {
                 name = freshNameUnique(kind, origName, collisionCount++);
             } while (owner.data(*this).findMember(*this, name).exists());
@@ -1071,7 +1071,7 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     }
     bool report = shouldReportErrorOn(loc, what);
     if (report) {
-        core::histogramAdd("error", what.code, 1);
+        histogramAdd("error", what.code, 1);
     }
     report = (what == errors::Internal::InternalError) || (report && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
@@ -1109,7 +1109,7 @@ void GlobalState::markAsPayload() {
     }
 }
 
-std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalState> inWhat, core::FileRef whatFile,
+std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                       std::shared_ptr<File> withWhat) {
     ENFORCE(whatFile.id() < inWhat->filesUsed());
     ENFORCE(whatFile.data(*inWhat, true).path() == withWhat->path());
@@ -1122,10 +1122,10 @@ FileRef GlobalState::findFileByPath(absl::string_view path) {
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
     }
-    return core::FileRef();
+    return FileRef();
 }
 
-std::unique_ptr<GlobalState> GlobalState::markFileAsTombStone(std::unique_ptr<GlobalState> what, core::FileRef fref) {
+std::unique_ptr<GlobalState> GlobalState::markFileAsTombStone(std::unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE(fref.id() < what->filesUsed());
     what->files[fref.id()]->source_type = File::Type::TombStone;
     return what;

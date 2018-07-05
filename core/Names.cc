@@ -24,7 +24,7 @@ bool NameRef::isWellKnownName() const {
     return def || (_id <= Names::LAST_WELL_KNOWN_NAME);
 }
 
-core::Name::~Name() noexcept {
+Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
         unique.~UniqueName();
     }
@@ -120,7 +120,7 @@ bool Name::isClassName(const GlobalState &gs) const {
         case UTF8:
             return false;
         case UNIQUE: {
-            return (this->unique.uniqueNameKind == core::Singleton || this->unique.uniqueNameKind == core::Namer) &&
+            return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == Namer) &&
                    this->unique.original.data(gs).isClassName(gs);
         }
         case CONSTANT:

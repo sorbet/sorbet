@@ -26,10 +26,10 @@ Loc Loc::join(Loc other) {
     return Loc{this->file, min(this->begin_pos, other.begin_pos), max(this->end_pos, other.end_pos)};
 }
 
-Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalState &gs) {
+Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
     Loc::Detail pos;
 
-    const core::File &file = source.data(gs);
+    const File &file = source.data(gs);
     ENFORCE(off <= file.source().size(), "file offset out of bounds");
     if (off >= file.source().size()) {
         // parser generate positions out of file \facepalm.
@@ -47,15 +47,15 @@ Loc::Detail Loc::offset2Pos(core::FileRef source, u4 off, const core::GlobalStat
     return pos;
 }
 
-u4 Loc::pos2Offset(core::FileRef source, Loc::Detail pos, const core::GlobalState &gs) {
-    const core::File &file = source.data(gs);
+u4 Loc::pos2Offset(FileRef source, Loc::Detail pos, const GlobalState &gs) {
+    const File &file = source.data(gs);
 
     auto l = pos.line - 1;
     auto lineOffset = file.line_breaks()[l];
     return lineOffset + pos.column;
 }
 
-pair<Loc::Detail, Loc::Detail> Loc::position(const core::GlobalState &gs) const {
+pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
     Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
     Loc::Detail end(offset2Pos(this->file, end_pos, gs));
     return make_pair(begin, end);
@@ -94,7 +94,7 @@ void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int po
     buf << endl;
 }
 
-string Loc::toString(const core::GlobalState &gs, int tabs) const {
+string Loc::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
     const File &filed = this->file.data(gs);
     auto pos = this->position(gs);

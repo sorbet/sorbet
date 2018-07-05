@@ -25,29 +25,29 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
-vector<shared_ptr<core::Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
+vector<shared_ptr<Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
-    vector<shared_ptr<core::Type>> targs;
+    vector<shared_ptr<Type>> targs;
     for (auto tm : typeMembers()) {
         if (tm.data(gs).isFixed()) {
             targs.emplace_back(tm.data(gs).resultType);
         } else {
-            targs.emplace_back(make_shared<core::SelfTypeParam>(tm));
+            targs.emplace_back(make_shared<SelfTypeParam>(tm));
         }
     }
     return targs;
 }
-shared_ptr<core::Type> Symbol::selfType(const GlobalState &gs) const {
+shared_ptr<Type> Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return make_shared<core::ClassType>(ref(gs));
+        return make_shared<ClassType>(ref(gs));
     } else {
-        return make_shared<core::AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_shared<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
 }
 
-shared_ptr<core::Type> Symbol::externalType(const GlobalState &gs) const {
+shared_ptr<Type> Symbol::externalType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: also cache these?
     if (typeMembers().empty()) {
@@ -124,7 +124,7 @@ string SymbolRef::show(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
-    core::histogramInc("find_member_scope_size", members.size());
+    histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
             return member.second.data(gs).dealias(gs);
@@ -145,20 +145,20 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
                                                int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
-        if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
+        if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
             e.setHeader("findMemberTransitive hit a loop while resolving `{}` in `{}`. Parents are: ",
                         name.toString(gs), this->fullName(gs));
         }
         int i = -1;
         for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
             i++;
-            if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
+            if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
                 e.setHeader("`{}`:- `{}`", i, it->data(gs).fullName(gs));
             }
             int j = 0;
             for (auto it2 = it->data(gs).argumentsOrMixins.rbegin(); it2 != it->data(gs).argumentsOrMixins.rend();
                  ++it2) {
-                if (auto e = gs.beginError(core::Loc::none(), core::errors::Internal::InternalError)) {
+                if (auto e = gs.beginError(Loc::none(), errors::Internal::InternalError)) {
                     e.setHeader("`{}`:`{}` `{}`", i, j, it2->data(gs).fullName(gs));
                 }
                 j++;
@@ -223,12 +223,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
 
     // Find the closest by following outer scopes
     {
-        core::SymbolRef base = ref(gs);
+        SymbolRef base = ref(gs);
         do {
             // follow outer scopes
 
             // find scopes that would be considered for search
-            vector<core::SymbolRef> candidateScopes;
+            vector<SymbolRef> candidateScopes;
             candidateScopes.emplace_back(base);
             int i = 0;
             // this is quadratic in number of scopes that we traverse, but YOLO, this should rarely run
@@ -263,16 +263,16 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             }
 
             base = base.data(gs).owner;
-        } while (best.distance > 0 && base.data(gs).owner.exists() && base != core::Symbols::root());
+        } while (best.distance > 0 && base.data(gs).owner.exists() && base != Symbols::root());
     }
 
     if (best.distance > 0) {
         // find the closest by global dfs.
         auto globalBest = best;
-        vector<core::SymbolRef> yetToGoDeeper;
+        vector<SymbolRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
         while (globalBest.distance > 0 && !yetToGoDeeper.empty()) {
-            const core::SymbolRef thisIter = yetToGoDeeper.back();
+            const SymbolRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.data(gs).isClass());
             for (auto member : thisIter.data(gs).members) {
@@ -348,7 +348,7 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
 
 string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
-    if (this->owner.exists() && this->owner != core::Symbols::root()) {
+    if (this->owner.exists() && this->owner != Symbols::root()) {
         owner_str = this->owner.data(gs).fullName(gs);
     }
 
@@ -508,7 +508,7 @@ string Symbol::show(const GlobalState &gs) const {
         }
     }
 
-    if (this->owner.exists() && this->owner != core::Symbols::root()) {
+    if (this->owner.exists() && this->owner != Symbols::root()) {
         owner_str = this->owner.data(gs).show(gs);
         if (this->isClass()) {
             owner_str = owner_str + "::";
@@ -531,9 +531,9 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.data(gs);
 
-    core::counterInc("singleton_classes");
+    counterInc("singleton_classes");
     singletonInfo.members.emplace_back(Names::attached(), selfRef);
-    singletonInfo.superClass = core::Symbols::todo();
+    singletonInfo.superClass = Symbols::todo();
     singletonInfo.setIsModule(false);
 
     selfRef.data(gs).members.emplace_back(Names::singleton(), singleton);
@@ -570,11 +570,11 @@ SymbolRef Symbol::dealias(const GlobalState &gs) const {
 }
 
 bool Symbol::isBlockSymbol(const GlobalState &gs) const {
-    const core::Name &nm = name.data(gs);
+    const Name &nm = name.data(gs);
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
-SymbolRef SymbolRef::dealiasAt(GlobalState &gs, core::SymbolRef klass) const {
+SymbolRef SymbolRef::dealiasAt(GlobalState &gs, SymbolRef klass) const {
     ENFORCE(data(gs).isTypeMember());
     if (data(gs).owner == klass) {
         return *this;
@@ -702,16 +702,15 @@ bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
     if (unique == 0) {
         return false;
     }
-    return _name == core::Names::whileTemp() || _name == core::Names::ifTemp() || _name == core::Names::returnTemp() ||
-           _name == core::Names::statTemp() || _name == core::Names::assignTemp() ||
-           _name == core::Names::returnMethodTemp() || _name == core::Names::blockReturnTemp() ||
-           _name == core::Names::selfMethodTemp() || _name == core::Names::hashTemp() ||
-           _name == core::Names::arrayTemp() || _name == core::Names::rescueTemp() ||
-           _name == core::Names::castTemp() || _name == core::Names::finalReturn();
+    return _name == Names::whileTemp() || _name == Names::ifTemp() || _name == Names::returnTemp() ||
+           _name == Names::statTemp() || _name == Names::assignTemp() || _name == Names::returnMethodTemp() ||
+           _name == Names::blockReturnTemp() || _name == Names::selfMethodTemp() || _name == Names::hashTemp() ||
+           _name == Names::arrayTemp() || _name == Names::rescueTemp() || _name == Names::castTemp() ||
+           _name == Names::finalReturn();
 }
 
 bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {
-    return _name == core::Names::cfgAlias();
+    return _name == Names::cfgAlias();
 }
 
 bool LocalVariable::operator==(const LocalVariable &rhs) const {
@@ -721,7 +720,7 @@ bool LocalVariable::operator==(const LocalVariable &rhs) const {
 bool LocalVariable::operator!=(const LocalVariable &rhs) const {
     return !this->operator==(rhs);
 }
-string LocalVariable::toString(const core::GlobalState &gs) const {
+string LocalVariable::toString(const GlobalState &gs) const {
     if (unique == 0) {
         return this->_name.toString(gs);
     }
