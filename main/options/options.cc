@@ -1,17 +1,18 @@
+#include "options.h"
+#include "FileFlatMapper.h"
 #include "core/Errors.h"
-#include "core/serialize/serialize.h"
-#include "main/FileFlatMapper.h"
-#include "main/realmain.h"
 #include "rang.hpp"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
 #include "yaml-cpp/yaml.h"
+#include <cxxopts.hpp>
 
 namespace spd = spdlog;
 using namespace std;
 
 namespace sorbet {
 namespace realmain {
+namespace options {
 struct PrintOptions {
     string option;
     bool Printers::*flag;
@@ -45,7 +46,7 @@ StopAfterOptions stop_after_options[] = {
     {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
 };
 
-core::StrictLevel text2StrictLevel(absl::string_view key) {
+core::StrictLevel text2StrictLevel(absl::string_view key, std::shared_ptr<spdlog::logger> logger) {
     if (key == "ruby" || key == "stripe") {
         return core::StrictLevel::Stripe;
     } else if (key == "typed" || key == "true") {
@@ -60,14 +61,15 @@ core::StrictLevel text2StrictLevel(absl::string_view key) {
     }
 }
 
-std::unordered_map<std::string, core::StrictLevel> extractStricnessOverrides(string fileName) {
+std::unordered_map<std::string, core::StrictLevel> extractStricnessOverrides(string fileName,
+                                                                             std::shared_ptr<spdlog::logger> logger) {
     std::unordered_map<std::string, core::StrictLevel> result;
     YAML::Node config = YAML::LoadFile(fileName);
     switch (config.Type()) {
         case YAML::NodeType::Map:
             for (const auto &child : config) {
                 auto key = child.first.as<string>();
-                core::StrictLevel level = text2StrictLevel(key);
+                core::StrictLevel level = text2StrictLevel(key, logger);
                 switch (child.second.Type()) {
                     case YAML::NodeType::Sequence:
                         for (const auto &file : child.second) {
@@ -190,7 +192,7 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-bool extractPrinters(cxxopts::ParseResult &raw, Options &opts) {
+bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, std::shared_ptr<spdlog::logger> logger) {
     if (raw.count("print") == 0) {
         return true;
     }
@@ -225,7 +227,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts) {
     return true;
 }
 
-Phase extractStopAfter(cxxopts::ParseResult &raw) {
+Phase extractStopAfter(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger) {
     string opt = raw["stop-after"].as<string>();
     for (auto &known : stop_after_options) {
         if (known.option == opt) {
@@ -243,8 +245,9 @@ Phase extractStopAfter(cxxopts::ParseResult &raw) {
     return Phase::INIT;
 }
 
-void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnWithCode) {
-    FileFlatMapper flatMapper(argc, argv);
+void readOptions(Options &opts, int argc, const char *argv[],
+                 std::shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode) {
+    FileFlatMapper flatMapper(argc, argv, logger);
 
     cxxopts::Options options = buildOptions();
     try {
@@ -255,10 +258,10 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         }
 
         opts.cacheDir = raw["cache-dir"].as<string>();
-        if (!extractPrinters(raw, opts)) {
+        if (!extractPrinters(raw, opts, logger)) {
             throw EarlyReturnWithCode(1);
         }
-        opts.stopAfterPhase = extractStopAfter(raw);
+        opts.stopAfterPhase = extractStopAfter(raw, logger);
 
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
@@ -288,7 +291,7 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         string typed = raw["typed"].as<string>();
         opts.logLevel = raw.count("v");
         if (typed != "auto") {
-            opts.forceMinStrict = opts.forceMaxStrict = text2StrictLevel(typed);
+            opts.forceMinStrict = opts.forceMaxStrict = text2StrictLevel(typed, logger);
         }
 
         opts.showProgress = raw.count("P") != 0;
@@ -351,13 +354,18 @@ void readOptions(Options &opts, int argc, const char *argv[]) throw(EarlyReturnW
         opts.inlineInput = raw["e"].as<string>();
         opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
         if (!raw["typed-override"].as<string>().empty()) {
-            opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>());
+            opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
         }
     } catch (cxxopts::OptionParseException &e) {
         logger->info("{}\n\n{}", e.what(), options.help({"", "advanced", "dev"}));
         throw EarlyReturnWithCode(1);
     }
 }
+
+EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
+    : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
+
+} // namespace options
 
 } // namespace realmain
 } // namespace sorbet

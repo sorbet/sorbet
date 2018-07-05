@@ -1,10 +1,11 @@
-#include "main/FileFlatMapper.h"
+#include "FileFlatMapper.h"
 #include "common/common.h"
-#include "main/realmain.h"
+#include "options.h"
 
 using namespace std;
 namespace sorbet {
 namespace realmain {
+namespace options {
 vector<string> split(const string &s, char delimiter) {
     vector<string> tokens;
     string token;
@@ -15,7 +16,8 @@ vector<string> split(const string &s, char delimiter) {
     return tokens;
 }
 
-FileFlatMapper::FileFlatMapper(int &argc, const char **&argv) : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
+FileFlatMapper::FileFlatMapper(int &argc, const char **&argv, std::shared_ptr<spdlog::logger> logger)
+    : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
     for (int i = 0; i < argc; i++) {
         if (argv[i][0] == '@') {
             try {
@@ -49,6 +51,6 @@ FileFlatMapper::~FileFlatMapper() {
         free((void *)c);
     }
 }
-
+} // namespace options
 } // namespace realmain
 } // namespace sorbet

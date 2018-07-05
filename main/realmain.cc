@@ -1,11 +1,12 @@
 #include "main/realmain.h"
-#include "LSPLoop.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "core/statsd/statsd.h"
+#include "main/lsp/lsp.h"
+#include "main/pipeline/pipeline.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
 #include "spdlog/fmt/ostr.h"
@@ -35,7 +36,7 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr
 
 const string GLOBAL_STATE_KEY = "GlobalState";
 
-void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const Options &options,
+void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::Options &options,
                               unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
@@ -70,12 +71,12 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const Options &
                 payloadFiles.push_back(move(file));
             }
         }
-        Options emptyOpts;
+        options::Options emptyOpts;
         emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, logger);
         vector<string> empty;
-        auto indexed = index(gs, empty, payloadFiles, emptyOpts, workers, kvstore);
-        resolve(*gs, move(indexed), emptyOpts); // result is thrown away
+        auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);
+        pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
     } else {
         Timer timeit(logger, "Read serialized payload");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
@@ -119,8 +120,8 @@ int realmain(int argc, const char *argv[]) {
 
     auto typeErrorsConsole = spd::details::registry::instance().create("typeErrors", stderr_color_sink);
 
-    Options opts;
-    readOptions(opts, argc, argv);
+    options::Options opts;
+    options::readOptions(opts, argc, argv, logger);
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
     }
@@ -194,7 +195,7 @@ int realmain(int argc, const char *argv[]) {
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
-        LSP::LSPLoop loop(move(gs), opts, logger, workers);
+        lsp::LSPLoop loop(move(gs), opts, logger, workers);
         loop.runLSP();
         return 0;
     }
@@ -221,7 +222,7 @@ int realmain(int argc, const char *argv[]) {
     vector<unique_ptr<ast::Expression>> indexed;
     {
         Timer timeit(logger, "index");
-        indexed = index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore);
+        indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
     }
 
     if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
@@ -230,7 +231,7 @@ int realmain(int argc, const char *argv[]) {
         KeyValueStore::commit(move(kvstore));
     }
 
-    { typecheck(gs, resolve(*gs, move(indexed), opts), opts, workers); }
+    { pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger); }
     logger->trace("sorbet done");
 
     if (!opts.storeState.empty()) {
@@ -294,7 +295,5 @@ int realmain(int argc, const char *argv[]) {
     return returnCode;
 }
 
-EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
-    : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 } // namespace realmain
 } // namespace sorbet
