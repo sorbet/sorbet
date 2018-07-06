@@ -224,7 +224,7 @@ class Time < Object
   sig.returns(Float)
   def to_f(); end
 
-  sig.returns(Numeric)
+  sig.returns(Integer)
   def to_i(); end
 
   sig.returns(Rational)
