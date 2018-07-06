@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$64>()
+    def self.<static-init><<static-init>$66>()
       begin
         ::A::B#C
         ::A::B#D
