@@ -247,8 +247,9 @@ NameDef names[] = {
     // Enumerable#flat_map has special-case logic in Infer
     {"flatMap", "flat_map", Infer},
 
-    // Array#flatten is also custom-implemented
+    // Array#flatten and #compact are also custom-implemented
     {"flatten", Core},
+    {"compact", Core},
 
     {"staticInit", "<static-init>", Resolver},
 };
