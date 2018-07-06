@@ -1,3 +1,4 @@
+#include "pipeline.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
@@ -5,6 +6,7 @@
 #include "cfg/builder/builder.h"
 #include "common/ConcurrentQueue.h"
 #include "common/ProgressIndicator.h"
+#include "common/Timer.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/proto/proto.h"
@@ -14,7 +16,6 @@
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
-#include "realmain.h"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 
@@ -26,8 +27,9 @@ using namespace std;
 
 namespace sorbet {
 namespace realmain {
+namespace pipeline {
 
-bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file) {
+bool wantTypedSource(const options::Options &opts, core::Context ctx, core::FileRef file) {
     if (opts.print.TypedSource) {
         return true;
     }
@@ -38,10 +40,10 @@ bool wantTypedSource(const Options &opts, core::Context ctx, core::FileRef file)
 }
 
 class CFG_Collector_and_Typer {
-    const Options &opts;
+    const options::Options &opts;
 
 public:
-    CFG_Collector_and_Typer(const Options &opts) : opts(opts){};
+    CFG_Collector_and_Typer(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->loc.file.data(ctx).strict == core::StrictLevel::Stripe) {
@@ -55,7 +57,7 @@ public:
         if (print.CFGRaw || printSrc) {
             cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
         }
-        if (opts.stopAfterPhase == Phase::CFG) {
+        if (opts.stopAfterPhase == options::Phase::CFG) {
             return m;
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
@@ -95,8 +97,8 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     return key;
 }
 
-unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                     unique_ptr<KeyValueStore> &kvstore) {
+unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                                     unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger) {
     auto &print = opts.print;
     unique_ptr<ast::Expression> dslsInlined;
 
@@ -128,7 +130,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
             if (print.ParseTreeJSON) {
                 cout << nodes->toJSON(lgs, 0) << '\n';
             }
-            if (opts.stopAfterPhase == Phase::PARSER) {
+            if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
             }
 
@@ -146,7 +148,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
             if (print.DesugaredRaw) {
                 cout << ast->showRaw(lgs) << '\n';
             }
-            if (opts.stopAfterPhase == Phase::DESUGARER) {
+            if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
             }
 
@@ -162,7 +164,7 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
         if (print.DSLTreeRaw) {
             cout << dslsInlined->showRaw(lgs) << '\n';
         }
-        if (opts.stopAfterPhase == Phase::DSL) {
+        if (opts.stopAfterPhase == options::Phase::DSL) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
         }
 
@@ -176,12 +178,13 @@ unique_ptr<ast::Expression> indexOne(const Options &opts, core::GlobalState &lgs
 }
 
 vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vector<string> frs,
-                                          vector<core::FileRef> mainThreadFiles, const Options &opts,
-                                          WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore) {
+                                          vector<core::FileRef> mainThreadFiles, const options::Options &opts,
+                                          WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
+                                          shared_ptr<spdlog::logger> logger) {
     vector<unique_ptr<ast::Expression>> ret;
     vector<unique_ptr<ast::Expression>> empty;
 
-    if (opts.stopAfterPhase == Phase::INIT) {
+    if (opts.stopAfterPhase == options::Phase::INIT) {
         return empty;
     }
 
@@ -212,7 +215,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-        workers.multiplexJob([cgs, &opts, fileq, resultq, &kvstore]() {
+        workers.multiplexJob([cgs, &opts, fileq, resultq, &kvstore, logger]() {
             logger->trace("worker deep copying global state");
             auto lgs = cgs->deepCopy();
             logger->trace("worker done deep copying global state");
@@ -295,7 +298,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                             file.data(*lgs).source_type = core::File::PayloadGeneration;
                         }
 
-                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore));
+                        threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, logger));
                     }
                 }
             }
@@ -312,7 +315,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
         logger->trace("Done deep copying global state");
 
         for (auto f : mainThreadFiles) {
-            ret.emplace_back(indexOne(opts, *mainTheadGs, f, kvstore));
+            ret.emplace_back(indexOne(opts, *mainTheadGs, f, kvstore, logger));
         }
 
         gs = move(mainTheadGs);
@@ -362,10 +365,11 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
     return ret;
 }
 
-unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expression> resolved, const Options &opts) {
+unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expression> resolved,
+                                         const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file;
-    if (opts.stopAfterPhase == Phase::NAMER) {
+    if (opts.stopAfterPhase == options::Phase::NAMER) {
         return make_unique<ast::EmptyTree>(core::Loc::none(f));
     }
 
@@ -404,7 +408,7 @@ struct typecheck_thread_result {
 };
 
 vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
-                                            const Options &opts) {
+                                            const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     try {
         {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
@@ -474,8 +478,8 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
 
 // If ever given a result type, it should be something along the lines of
 // vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
-void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what, const Options &opts,
-               WorkerPool &workers) {
+void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what,
+               const options::Options &opts, WorkerPool &workers, shared_ptr<spdlog::logger> logger) {
     vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
 
     {
@@ -498,7 +502,7 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob([ctx, &opts, fileq, resultq]() {
+            workers.multiplexJob([ctx, &opts, fileq, resultq, logger]() {
                 typecheck_thread_result threadResult;
                 unique_ptr<ast::Expression> job;
                 int processedByThread = 0;
@@ -510,7 +514,7 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
                             core::FileRef file = job->loc.file;
                             core::ErrorRegion errs(ctx, file);
                             try {
-                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts));
+                                threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
                             } catch (SRubyException &) {
                                 logger->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                             }
@@ -552,5 +556,6 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
         return;
     }
 }
+} // namespace pipeline
 } // namespace realmain
 } // namespace sorbet

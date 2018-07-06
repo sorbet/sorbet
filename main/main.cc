@@ -3,7 +3,7 @@
 int main(int argc, const char *argv[]) {
     try {
         return sorbet::realmain::realmain(argc, argv);
-    } catch (sorbet::realmain::EarlyReturnWithCode &c) {
+    } catch (sorbet::realmain::options::EarlyReturnWithCode &c) {
         return c.returnCode;
     } catch (sorbet::SRubyException &e) {
         return 1;

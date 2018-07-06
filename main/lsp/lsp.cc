@@ -1,18 +1,20 @@
-#include "LSPLoop.h"
-#include "../core/Files.h"
+#include "lsp.h"
 #include "absl/strings/str_cat.h"
+#include "common/Timer.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "main/pipeline/pipeline.h"
 #include "spdlog/fmt/ostr.h"
+#include <unordered_set>
 
 using namespace std;
 
 namespace sorbet {
 namespace realmain {
-namespace LSP {
+namespace lsp {
 
 static bool startsWith(const absl::string_view str, const absl::string_view prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.data(), prefix.size());
@@ -104,13 +106,13 @@ void LSPLoop::runLSP() {
             continue;
         }
 
-        const LSPMethod method = LSP::getMethod({d["method"].GetString(), d["method"].GetStringLength()});
+        const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
         ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
         if (method.isNotification) {
             logger->info("Processing notification {} ", (string)method.name);
-            if (method == LSP::DidChangeWatchedFiles) {
-                sendRequest(LSP::ReadFile, d["params"],
+            if (method == LSPMethod::DidChangeWatchedFiles()) {
+                sendRequest(LSPMethod::ReadFile(), d["params"],
                             [&](rapidjson::Value &edits) -> void {
                                 ENFORCE(edits.IsArray());
                                 Timer timeit(logger, "handle update");
@@ -131,7 +133,7 @@ void LSPLoop::runLSP() {
                             },
                             [](rapidjson::Value &error) -> void {});
             }
-            if (method == LSP::TextDocumentDidChange) {
+            if (method == LSPMethod::TextDocumentDidChange()) {
                 Timer timeit(logger, "handle update");
                 vector<shared_ptr<core::File>> files;
                 auto &edits = d["params"];
@@ -152,7 +154,7 @@ void LSPLoop::runLSP() {
                     pushErrors();
                 }
             }
-            if (method == LSP::TextDocumentDidOpen) {
+            if (method == LSPMethod::TextDocumentDidOpen()) {
                 Timer timeit(logger, "handle open");
                 vector<shared_ptr<core::File>> files;
                 auto &edits = d["params"];
@@ -173,7 +175,7 @@ void LSPLoop::runLSP() {
                     pushErrors();
                 }
             }
-            if (method == LSP::Inititalized) {
+            if (method == LSPMethod::Inititalized()) {
                 // initialize ourselves
                 {
                     Timer timeit(logger, "index");
@@ -184,7 +186,7 @@ void LSPLoop::runLSP() {
                     this->globalStateHashes = computeStateHashes(finalGs->getFiles());
                 }
             }
-            if (method == LSP::Exit) {
+            if (method == LSPMethod::Exit()) {
                 return;
             }
         } else {
@@ -193,7 +195,7 @@ void LSPLoop::runLSP() {
             rapidjson::Value result;
             int errorCode = 0;
             string errorString;
-            if (method == LSP::Initialize) {
+            if (method == LSPMethod::Initialize()) {
                 result.SetObject();
                 rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
                 string serverCap =
@@ -204,10 +206,10 @@ void LSPLoop::runLSP() {
                 ENFORCE(!r.HasParseError());
                 result.CopyFrom(temp, alloc);
                 sendResult(d, result);
-            } else if (method == LSP::Shutdown) {
+            } else if (method == LSPMethod::Shutdown()) {
                 // return default value: null
                 sendResult(d, result);
-            } else if (method == LSP::TextDocumentDocumentSymbol) {
+            } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
                 result.SetArray();
                 auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
                                   d["params"]["textDocument"]["uri"].GetStringLength());
@@ -222,7 +224,7 @@ void LSPLoop::runLSP() {
                     }
                 }
                 sendResult(d, result);
-            } else if (method == LSP::WorkspaceSymbolsRequest) {
+            } else if (method == LSPMethod::WorkspaceSymbolsRequest()) {
                 result.SetArray();
                 string searchString = d["params"]["query"].GetString();
 
@@ -236,13 +238,13 @@ void LSPLoop::runLSP() {
                     }
                 }
                 sendResult(d, result);
-            } else if (method == LSP::TextDocumentDefinition) {
+            } else if (method == LSPMethod::TextDocumentDefinition()) {
                 handleTextDocumentDefinition(result, d);
-            } else if (method == LSP::TextDocumentHover) {
+            } else if (method == LSPMethod::TextDocumentHover()) {
                 handleTextDocumentHover(result, d);
             } else {
                 ENFORCE(!method.isSupported, "failing a supported method");
-                errorCode = (int)LSP::LSPErrorCodes::MethodNotFound;
+                errorCode = (int)LSPErrorCodes::MethodNotFound;
                 errorString = fmt::format("Unknown method: {}", method.name);
                 sendError(d, errorCode, errorString);
             }
@@ -293,7 +295,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
     auto fref = uri2FileRef(uri);
 
     if (!fref.exists()) {
-        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorCode = (int)LSPErrorCodes::InvalidParams;
         errorString = fmt::format("Did not find file at uri {} in textDocument/hover", uri);
         sendError(d, errorCode, errorString);
         return;
@@ -303,7 +305,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
 
     auto queryResponses = finalGs->errorQueue->drainQueryResponses();
     if (queryResponses.empty()) {
-        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorCode = (int)LSPErrorCodes::InvalidParams;
         errorString = "Did not find symbol at hover location in textDocument/hover";
         sendError(d, errorCode, errorString);
         return;
@@ -312,7 +314,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
     auto resp = std::move(queryResponses[0]);
     if (resp->kind == core::QueryResponse::Kind::SEND) {
         if (resp->dispatchComponents.empty()) {
-            errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+            errorCode = (int)LSPErrorCodes::InvalidParams;
             errorString = "Did not find any dispatchComponents for a SEND QueryResponse in "
                           "textDocument/hover";
             sendError(d, errorCode, errorString);
@@ -372,7 +374,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
         result.AddMember("contents", markupContents, alloc);
         sendResult(d, result);
     } else {
-        errorCode = (int)LSP::LSPErrorCodes::InvalidParams;
+        errorCode = (int)LSPErrorCodes::InvalidParams;
         errorString = "Unhandled QueryResponse kind in textDocument/hover";
         sendError(d, errorCode, errorString);
     }
@@ -709,7 +711,7 @@ void LSPLoop::pushErrors() {
                 publishDiagnosticsParams.AddMember("diagnostics", diagnostics, alloc);
             }
 
-            sendNotification(LSP::PushDiagnostics, publishDiagnosticsParams);
+            sendNotification(LSPMethod::PushDiagnostics(), publishDiagnosticsParams);
         }
     }
     updatedErrors.clear();
@@ -775,7 +777,7 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     }
 
     std::vector<std::string> emptyInputNames;
-    auto t = indexOne(opts, *initialGS, fref, kvstore);
+    auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
     int id = t->loc.file.id();
     if (id >= indexed.size()) {
         indexed.resize(id + 1);
@@ -821,8 +823,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     auto fref = lgs->enterFile(files[job]);
                     vector<unique_ptr<ast::Expression>> single;
                     unique_ptr<KeyValueStore> kvstore;
-                    single.emplace_back(indexOne(opts, *lgs, fref, kvstore));
-                    resolve(*lgs, move(single), opts);
+                    single.emplace_back(pipeline::indexOne(opts, *lgs, fref, kvstore, logger));
+                    pipeline::resolve(*lgs, move(single), opts, logger);
                     threadResult.emplace_back(make_pair(job, lgs->hash()));
                 }
             }
@@ -835,8 +837,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
     {
         std::vector<std::pair<int, unsigned int>> threadResult;
-        for (auto result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS); !result.done();
-             result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
+        for (auto result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS);
+             !result.done(); result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS)) {
             if (result.gotItem()) {
                 for (auto &a : threadResult) {
                     res[a.first] = a.second;
@@ -858,7 +860,7 @@ void LSPLoop::reIndexFromFileSystem() {
     }
     std::vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
     std::vector<core::FileRef> emptyInputFiles;
-    for (auto &t : index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore)) {
+    for (auto &t : pipeline::index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
         int id = t->loc.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
@@ -902,11 +904,27 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
     }
 
     finalGs = initialGS->deepCopy(true);
-    typecheck(finalGs, resolve(*finalGs, move(indexedCopies), opts), opts, workers);
+    pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(indexedCopies), opts, logger), opts, workers, logger);
 }
 
-const LSP::LSPMethod getMethod(const absl::string_view name) {
-    for (auto &candidate : ALL) {
+const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
+                                                    Initialize(),
+                                                    Shutdown(),
+                                                    Exit(),
+                                                    RegisterCapability(),
+                                                    UnRegisterCapability(),
+                                                    DidChangeWatchedFiles(),
+                                                    PushDiagnostics(),
+                                                    TextDocumentDidOpen(),
+                                                    TextDocumentDidChange(),
+                                                    TextDocumentDocumentSymbol(),
+                                                    TextDocumentDefinition(),
+                                                    TextDocumentHover(),
+                                                    ReadFile(),
+                                                    WorkspaceSymbolsRequest()};
+
+const LSPMethod LSPMethod::getByName(const absl::string_view name) {
+    for (auto &candidate : ALL_METHODS) {
         if (candidate.name == name) {
             return candidate;
         }
@@ -956,14 +974,15 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
         logger->info("Taking happy path");
         // Yaay, reuse existing global state.
         vector<std::string> empty;
-        auto updatedIndexed = index(finalGs, empty, subset, opts, workers, kvstore);
+        auto updatedIndexed = pipeline::index(finalGs, empty, subset, opts, workers, kvstore, logger);
         ENFORCE(subset.size() == updatedIndexed.size());
         for (auto &t : updatedIndexed) {
             int id = t->loc.file.id();
             indexed[id] = move(t);
             t = indexed[id]->deepCopy();
         }
-        typecheck(finalGs, resolve(*finalGs, move(updatedIndexed), opts), opts, workers);
+        pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(updatedIndexed), opts, logger), opts, workers,
+                            logger);
     } else {
         runSlowPath(changedFiles);
     }
@@ -995,6 +1014,6 @@ std::string LSPLoop::fileRef2Uri(core::FileRef file) {
     }
 }
 
-} // namespace LSP
+} // namespace lsp
 } // namespace realmain
 } // namespace sorbet

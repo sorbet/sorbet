@@ -163,18 +163,19 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     auto empty = vector<core::SymbolRef>();
     auto argumentSym = core::LocalVariable(name, 0);
     unique_ptr<ast::Expression> rhs(ast::MK::Int(loc, 5));
-    auto arg = unique_ptr<ast::Expression>(new ast::Local(loc, argumentSym));
+    unique_ptr<ast::Expression> arg = make_unique<ast::Local>(loc, argumentSym);
     ast::MethodDef::ARGS_store args;
     args.emplace_back(move(arg));
 
-    unique_ptr<ast::Expression> methodDef(new ast::MethodDef(loc, methodSym, name, move(args), move(rhs), false));
-    auto emptyTree = unique_ptr<ast::Expression>(new ast::EmptyTree(loc));
-    auto cnst = unique_ptr<ast::Expression>(new ast::ConstantLit(loc, move(emptyTree), name));
+    unique_ptr<ast::Expression> methodDef =
+        make_unique<ast::MethodDef>(loc, methodSym, name, move(args), move(rhs), false);
+    unique_ptr<ast::Expression> emptyTree = make_unique<ast::EmptyTree>(loc);
+    unique_ptr<ast::Expression> cnst = make_unique<ast::ConstantLit>(loc, move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));
-    unique_ptr<ast::Expression> tree(new ast::ClassDef(loc, classSym, move(cnst), ast::ClassDef::ANCESTORS_store(),
-                                                       move(classrhs), ast::ClassDefKind::Class));
+    unique_ptr<ast::Expression> tree = make_unique<ast::ClassDef>(
+        loc, classSym, move(cnst), ast::ClassDef::ANCESTORS_store(), move(classrhs), ast::ClassDefKind::Class);
     Counter c;
 
     auto r = ast::TreeMap::apply(ctx, c, move(tree));

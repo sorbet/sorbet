@@ -3,7 +3,7 @@
 
 #include "ast/ast.h"
 #include "core/Files.h"
-#include "realmain.h"
+#include "main/options/options.h"
 #define RAPIDJSON_ASSERT(x) ENFORCE(x)
 #define RAPIDJSON_HAS_STDSTRING 1
 #include "common/WorkerPool.h"
@@ -30,7 +30,7 @@ namespace realmain {
 // So far, we only handle changes via "textDocument/didChange" request.
 // This is the main request that is used by VSCode.
 // VI uses "textDocument/didSave" that is very similar and should be easy to support.
-namespace LSP {
+namespace lsp {
 /** This structure represents a method defined by LSP.
  * It is used as an enum to indicate properties of method in common request handling code.
  */
@@ -52,44 +52,59 @@ struct LSPMethod {
     inline bool operator==(const LSPMethod &other) const {
         return other.name == this->name;
     }
+    static const inline LSPMethod CancelRequest() {
+        return LSPMethod{"$/cancelRequest", true, LSPMethod::Kind::Both};
+    };
+    static const inline LSPMethod Initialize() {
+        return LSPMethod{"initialize", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod Inititalized() {
+        return LSPMethod{"initialized", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod Shutdown() {
+        return LSPMethod{"shutdown", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod Exit() {
+        return LSPMethod{"exit", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod RegisterCapability() {
+        return LSPMethod{"client/registerCapability", false, LSPMethod::Kind::ServerInitiated};
+    };
+    static const inline LSPMethod UnRegisterCapability() {
+        return LSPMethod{"client/unregisterCapability", false, LSPMethod::Kind::ServerInitiated};
+    };
+    static const inline LSPMethod DidChangeWatchedFiles() {
+        return LSPMethod{"workspace/didChangeWatchedFiles", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod PushDiagnostics() {
+        return LSPMethod{"textDocument/publishDiagnostics", true, LSPMethod::Kind::ServerInitiated};
+    };
+    static const inline LSPMethod TextDocumentDidOpen() {
+        return LSPMethod{"textDocument/didOpen", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod TextDocumentDidChange() {
+        return LSPMethod{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod TextDocumentDocumentSymbol() {
+        return LSPMethod{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod TextDocumentDefinition() {
+        return LSPMethod{"textDocument/definition", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod TextDocumentHover() {
+        return LSPMethod{"textDocument/hover", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod ReadFile() {
+        return LSPMethod{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
+    };
+    static const inline LSPMethod WorkspaceSymbolsRequest() {
+        return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const std::vector<LSPMethod> ALL_METHODS;
+    static const LSPMethod getByName(const absl::string_view name);
 };
 
-const LSPMethod CancelRequest{"$/cancelRequest", true, LSPMethod::Kind::Both};
-const LSPMethod Initialize{"initialize", false, LSPMethod::Kind::ClientInitiated};
-const LSPMethod Inititalized{"initialized", true, LSPMethod::Kind::ClientInitiated};
-const LSPMethod Shutdown{"shutdown", false, LSPMethod::Kind::ClientInitiated};
-const LSPMethod Exit{"exit", true, LSPMethod::Kind::ClientInitiated};
-const LSPMethod RegisterCapability{"client/registerCapability", false, LSPMethod::Kind::ServerInitiated};
-const LSPMethod UnRegisterCapability{"client/unregisterCapability", false, LSPMethod::Kind::ServerInitiated};
-const LSPMethod DidChangeWatchedFiles{"workspace/didChangeWatchedFiles", true, LSPMethod::Kind::ClientInitiated};
-const LSPMethod PushDiagnostics{"textDocument/publishDiagnostics", true, LSPMethod::Kind::ServerInitiated};
-const LSPMethod TextDocumentDidOpen{"textDocument/didOpen", true, LSPMethod::Kind::ClientInitiated};
-const LSPMethod TextDocumentDidChange{"textDocument/didChange", true, LSPMethod::Kind::ClientInitiated};
-const LSPMethod TextDocumentDocumentSymbol{"textDocument/documentSymbol", false, LSPMethod::Kind::ClientInitiated};
-const LSPMethod TextDocumentDefinition{"textDocument/definition", false, LSPMethod::Kind::ClientInitiated};
-const LSPMethod TextDocumentHover{"textDocument/hover", false, LSPMethod::Kind::ClientInitiated};
-const LSPMethod ReadFile{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
-const LSPMethod WorkspaceSymbolsRequest{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
-
 /** List of all LSP Methods that we are aware of */
-const LSPMethod ALL[] = {CancelRequest,
-                         Initialize,
-                         Inititalized,
-                         Shutdown,
-                         Exit,
-                         RegisterCapability,
-                         UnRegisterCapability,
-                         DidChangeWatchedFiles,
-                         PushDiagnostics,
-                         TextDocumentDidOpen,
-                         TextDocumentDidChange,
-                         TextDocumentDocumentSymbol,
-                         ReadFile,
-                         WorkspaceSymbolsRequest,
-                         TextDocumentDefinition,
-                         TextDocumentHover};
-
-const LSPMethod getMethod(const absl::string_view name);
 
 enum class LSPErrorCodes {
     // Defined by JSON RPC
@@ -135,7 +150,7 @@ class LSPLoop {
      * Discarded on every clean run.
      */
     std::unique_ptr<core::GlobalState> finalGs;
-    const Options &opts;
+    const options::Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> &logger;
     WorkerPool &workers;
@@ -144,13 +159,13 @@ class LSPLoop {
     void sendRaw(rapidjson::Document &raw);
 
     /* Send `data` as payload of notification 'meth' */
-    void sendNotification(LSP::LSPMethod meth, rapidjson::Value &data);
+    void sendNotification(LSPMethod meth, rapidjson::Value &data);
     /* Send `data` as payload of request `meth`. Execute `onComplete` when Client replies, execute
      * `onFail` if client reports failure.
      * TODO(dmitry): misbehaving clients may drop requests on floor without reporting either success or
      * error. We will currently leak lambdas&their captures in such case.
      */
-    void sendRequest(LSP::LSPMethod meth, rapidjson::Value &data, std::function<void(rapidjson::Value &)> onComplete,
+    void sendRequest(LSPMethod meth, rapidjson::Value &data, std::function<void(rapidjson::Value &)> onComplete,
                      std::function<void(rapidjson::Value &)> onFail);
 
     void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
@@ -192,14 +207,14 @@ class LSPLoop {
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
 
 public:
-    LSPLoop(std::unique_ptr<core::GlobalState> gs, const Options &opts, std::shared_ptr<spd::logger> &logger,
+    LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers)
         : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {}
     void runLSP();
 
     void invalidateAllErrors();
 };
-} // namespace LSP
+} // namespace lsp
 
 } // namespace realmain
 } // namespace sorbet
