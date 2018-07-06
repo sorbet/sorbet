@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$66>()
+    def self.<static-init><<static-init>$71>()
       #$a = 1
     end
   end
