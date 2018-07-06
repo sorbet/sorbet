@@ -59,14 +59,14 @@ public:
     unique_ptr<Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original);
     unique_ptr<Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original);
 
-    unique_ptr<Send> *preTransformSend(core::MutableContext ctx, unique_ptr<Send> original);
+    unique_ptr<Send> preTransformSend(core::MutableContext ctx, unique_ptr<Send> original);
     unique_ptr<Expression> postTransformSend(core::MutableContext ctx, unique_ptr<Send> original);
 
     unique_ptr<Hash> preTransformHash(core::MutableContext ctx, unique_ptr<Hash> original);
     unique_ptr<Expression> postTransformHash(core::MutableContext ctx, unique_ptr<Hash> original);
 
     unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original);
-    Expression *postransformArray(core::MutableContext ctx, unique_ptr<Array> original);
+    unique_ptr<Expression> postransformArray(core::MutableContext ctx, unique_ptr<Array> original);
 
     unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original);
 
