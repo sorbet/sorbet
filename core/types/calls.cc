@@ -1147,6 +1147,25 @@ public:
         return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element));
     }
 } Array_flatten;
+
+class Array_compact : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        shared_ptr<Type> element;
+        if (auto *ap = cast_type<AppliedType>(selfRef.get())) {
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx).derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(!ap->targs.empty());
+            element = ap->targs.front();
+        } else if (auto *tuple = cast_type<TupleType>(selfRef.get())) {
+            element = tuple->elementType();
+        } else {
+            ENFORCE(false, "Array#compact on unexpected type: ", selfRef->show(ctx));
+        }
+        auto ret = Types::approximateSubtract(ctx, element, Types::nilClass());
+        return Types::arrayOf(ctx, ret);
+    }
+} Array_compact;
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -1180,6 +1199,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
 
     {Symbols::Array(), false, Names::flatten(), &Array_flatten},
+    {Symbols::Array(), false, Names::compact(), &Array_compact},
 };
 
 } // namespace core

@@ -115,7 +115,8 @@ class Array < Object
   .returns(Enumerator[Elem])
   def combination(arg0, &blk); end
 
-  sig.returns(T::Array[Elem])
+  # This is implemented in C++ to fix the return type
+  sig.returns(T::Array[T.untyped])
   def compact(); end
 
   sig.returns(T::Array[Elem])
