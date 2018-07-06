@@ -1,3 +1,5 @@
+# typed: strict
+
 module Exception2MessageMapper
   sig(err: Exception, rest: T.untyped).void
   def Raise(err, *rest); end
