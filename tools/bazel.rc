@@ -69,9 +69,9 @@ build:lto --config=nopie
 build --define unsanitized=true
 # sanitize build: run with ASAN and UBSAN. Catches most memory and
 # undefined-behavior errors, substantially larger and slower binary.
-build:sanitize --copt=-fsanitize=address
-build:sanitize --cxxopt=-fsanitize=address
-build:sanitize --linkopt=-fsanitize=address
+build:sanitize --copt=-fsanitize=address --copt=-fsanitize-address-use-after-scope
+build:sanitize --cxxopt=-fsanitize=address --cxxopt=-fsanitize-address-use-after-scope
+build:sanitize --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-after-scope
 build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined

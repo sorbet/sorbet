@@ -1,4 +1,5 @@
 #include "pipeline.h"
+#include "absl/strings/escaping.h" // BytesToHexString
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
@@ -84,16 +85,11 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     string key(path.begin(), path.end());
     key += "//";
     char out[BLAKE2B_OUTBYTES];
-    char hex[2 * BLAKE2B_OUTBYTES];
 
     auto src = file.data(gs).source();
     int err = blake2b((uint8_t *)&out[0], src.begin(), nullptr, sizeof(out), src.size(), 0);
     ENFORCE(err == 0);
-    for (int i = 0; i < BLAKE2B_OUTBYTES; ++i) {
-        hex[2 * i] = HEX_CHARS[out[i] & 0xF];
-        hex[2 * i + 1] = HEX_CHARS[out[i] >> 4];
-    }
-    key.insert(key.end(), hex, hex + 1);
+    key += absl::BytesToHexString(absl::string_view{&out[0], BLAKE2B_OUTBYTES});
     return key;
 }
 
