@@ -369,6 +369,24 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, core::Types::nilClass());
         whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, core::Types::nilClass());
         whoKnows.sanityCheck();
+    } else if (send->fun == core::Names::present_p()) {
+        if (!knowledgeFilter.isNeeded(local)) {
+            return;
+        }
+        // Note that this assumes that .present? is a rails compatible monkey patch on both NilClass
+        // and Object. In all other cases this flow analysis might produce incorrect assumptions.
+        core::TypeAndOrigins receiverType = getTypeAndOrigin(ctx, send->recv);
+        auto originalType = receiverType.type;
+        auto knowledgeTypeWithoutNil =
+            core::Types::approximateSubtract(ctx, receiverType.type, core::Types::nilClass());
+        auto knowledgeTypeWithoutFalse =
+            core::Types::approximateSubtract(ctx, knowledgeTypeWithoutNil, core::Types::falseClass());
+
+        if (!core::Types::equiv(ctx, knowledgeTypeWithoutFalse, originalType)) {
+            auto &whoKnows = getKnowledge(local);
+            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, knowledgeTypeWithoutFalse);
+            whoKnows.sanityCheck();
+        }
     }
 
     if (send->args.empty()) {

@@ -219,6 +219,7 @@ NameDef names[] = {
 
     {"lambda", Parser | DSL},
     {"nil_p", "nil?", Desugar | Infer},
+    {"present_p", "present?", Infer},
     {"nil", DSL | Infer},
     {"NilClass", DSL},
     {"super", Desugar | Infer},
