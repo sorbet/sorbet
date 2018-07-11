@@ -951,12 +951,12 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         e.addErrorSection(core::ErrorSection(
                             "Expected " + expectedType->show(ctx),
                             {
-                                core::ErrorLine::from(ctx.owner.data(ctx).definitionLoc,
-                                                      "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx).name.toString(ctx), expectedType->show(ctx)),
+                                core::ErrorLine::from(
+                                    ctx.owner.data(ctx).definitionLoc, "Method `{}` has return type `{}`",
+                                    ctx.owner.data(ctx).name.toString(ctx), expectedType->toString(ctx)),
                             }));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
+                            core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx)));
                     }
                 }
