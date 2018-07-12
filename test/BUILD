@@ -19,6 +19,7 @@ cc_binary(
         "//core/serialize",
         "//dsl",
         "//infer",
+        "//main/errorqueue",
         "//namer",
         "//payload/binary:some",
         "//resolver",

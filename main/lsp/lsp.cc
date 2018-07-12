@@ -1,11 +1,12 @@
 #include "lsp.h"
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
-#include "core/ErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "core/lsp/QueryResponse.h"
 #include "main/pipeline/pipeline.h"
 #include "spdlog/fmt/ostr.h"
 #include <unordered_set>
@@ -50,6 +51,13 @@ bool safeGetline(std::istream &is, std::string &t) {
                 t += (char)c;
         }
     }
+}
+
+LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
+                 std::shared_ptr<spd::logger> &logger, WorkerPool &workers)
+    : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {
+    errorQueue = dynamic_pointer_cast<realmain::ConcurrentErrorQueue>(initialGS->errorQueue);
+    ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
 }
 
 shared_ptr<core::Type> getResultType(core::GlobalState &gs, core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,
@@ -261,7 +269,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
     if (fref.exists()) {
         setupLSPQueryByLoc(fref, d);
 
-        auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+        auto queryResponses = errorQueue->drainQueryResponses();
         if (!queryResponses.empty()) {
             auto resp = std::move(queryResponses[0]);
 
@@ -303,7 +311,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
 
     setupLSPQueryByLoc(fref, d);
 
-    auto queryResponses = finalGs->errorQueue->drainQueryResponses();
+    auto queryResponses = errorQueue->drainQueryResponses();
     if (queryResponses.empty()) {
         errorCode = (int)LSPErrorCodes::InvalidParams;
         errorString = "Did not find symbol at hover location in textDocument/hover";
@@ -554,7 +562,7 @@ bool silenceError(core::ErrorClass what) {
 }
 
 void LSPLoop::drainErrors() {
-    for (auto &e : initialGS->errorQueue->drainErrors()) {
+    for (auto &e : errorQueue->drainErrors()) {
         if (silenceError(e->what)) {
             continue;
         }
@@ -813,8 +821,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         threadResult.emplace_back(make_pair(job, 0));
                         continue;
                     }
-                    shared_ptr<core::GlobalState> lgs =
-                        make_shared<core::GlobalState>((std::make_shared<core::ErrorQueue>(*logger, *logger)));
+                    shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>(
+                        (std::make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
                     lgs->silenceErrors = true;
                     core::UnfreezeFileTable fileTableAccess(*lgs);

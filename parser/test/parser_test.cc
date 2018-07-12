@@ -1,5 +1,6 @@
 #include "common/common.h"
-#include "core/ErrorQueue.h"
+#include "core/BufferedErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
 #include "parser/Dedenter.h"
@@ -15,7 +16,7 @@ using sorbet::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
-auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 TEST(ParserTest, SimpleParse) { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);

@@ -1,6 +1,7 @@
 #ifndef SORBET_CONCURRENTQUEUE_H
 #define SORBET_CONCURRENTQUEUE_H
 #include "blockingconcurrentqueue.h"
+#include "common/common.h"
 #include <atomic>
 #include <chrono>
 

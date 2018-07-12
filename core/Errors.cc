@@ -1,6 +1,6 @@
 #include "core/errors/errors.h"
 #include "Context.h"
-#include "ErrorQueue.h"
+#include "Errors.h"
 #include "rang.hpp"
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
@@ -156,5 +156,10 @@ void ErrorColors::disableColors() {
     coloredPatternReplace = coloredPatternSigil;
     rang::setControlMode(rang::control::Off);
 }
+
+ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer) : logger(logger), tracer(tracer) {}
+
+ErrorQueue::~ErrorQueue() {}
+
 } // namespace core
 } // namespace sorbet

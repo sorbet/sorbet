@@ -18,7 +18,7 @@ class Symbol;
 class SymbolRef;
 class GlobalSubstitution;
 class ErrorRegion;
-struct ErrorQueue;
+class ErrorQueue;
 
 namespace serialize {
 class Serializer;

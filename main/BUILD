@@ -65,6 +65,7 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//core/statsd",
+        "//main/errorqueue",
         "//main/lsp",
         "//main/options",
         "//main/pipeline",

@@ -2,8 +2,8 @@
 #define RUBY_TYPER_PIPELINE_H
 #include "ast/ast.h"
 #include "common/ProgressIndicator.h"
-#include "common/WorkerPool.h"
 #include "common/common.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "main/options/options.h"
 

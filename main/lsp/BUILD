@@ -13,6 +13,7 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//core/statsd",
+        "//main/errorqueue",
         "//main/options",
         "//main/pipeline",
         "//payload/binary",

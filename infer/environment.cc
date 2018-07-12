@@ -722,11 +722,7 @@ void Environment::setQueryResponse(core::Context ctx, core::QueryResponse::Kind 
     queryResponse->termLoc = termLoc;
     queryResponse->retType = retType;
 
-    core::ErrorQueueMessage msg;
-    msg.kind = core::ErrorQueueMessage::Kind::QueryResponse;
-    msg.queryResponse = std::move(queryResponse);
-
-    ctx.state.errorQueue->push(std::move(msg));
+    ctx.state.errorQueue->pushQueryResponse(std::move(queryResponse));
 }
 
 shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> type) {

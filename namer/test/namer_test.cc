@@ -1,7 +1,8 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
-#include "core/ErrorQueue.h"
+#include "core/BufferedErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
 #include "namer/namer.h"
@@ -18,7 +19,7 @@ namespace namer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("namer_test");
-auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 class NamerFixture : public ::testing::Test {
 public:

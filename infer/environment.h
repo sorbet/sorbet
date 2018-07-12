@@ -3,11 +3,12 @@
 
 #include "cfg/CFG.h"
 #include "core/Context.h"
-#include "core/ErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Names/infer.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"
+#include "core/lsp/QueryResponse.h"
 #include "inference.h"
 #include <memory>
 #include <unordered_map>
