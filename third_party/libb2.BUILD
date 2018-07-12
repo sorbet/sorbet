@@ -5,18 +5,9 @@ BLAKE2_COPTS = [
 
 genrule(
     name = "stub_config",
-    srcs = [],
+    srcs = ["src/blake2-config.h"],
     outs = ["src/config.h"],
-    cmd = """
-    cat > $@ << EOF
-#define HAVE_AVX
-#define HAVE_SSE2
-#define HAVE_SSE3
-#define HAVE_SSSE3
-#define HAVE_SSE4_1
-#define HAVE_SSE4_2
-EOF
-""",
+    cmd = "cat $(location src/blake2-config.h) > $@",
 )
 
 cc_library(
@@ -25,7 +16,7 @@ cc_library(
     hdrs = [
         "src/blake2.h",
     ],
-    copts = BLAKE2_COPTS + ["-msse2", "-mssse3", "-msse4.1", "-mavx"],
+    copts = BLAKE2_COPTS,
     includes = [
         "src",
     ],
