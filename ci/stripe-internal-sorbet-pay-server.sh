@@ -1,6 +1,7 @@
 #!/bin/bash
 set -eux
 
+# shellcheck disable=SC1091
 . /usr/stripe/bin/docker/stripe-init-build
 
 PAY_SERVER=./pay-server

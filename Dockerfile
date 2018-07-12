@@ -8,7 +8,7 @@ RUN export JAVA_HOME
 
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update
 
-RUN apt-get update && apt-get install -y g++-7 libncurses5-dev shellcheck build-essential realpath time libtinfo-dev
+RUN apt-get update && apt-get install -y g++-7 libncurses5-dev build-essential realpath time libtinfo-dev
 
 # Dependencies for the parser
 RUN apt-get update && apt-get install -y ragel bison ruby autoconf
@@ -17,6 +17,9 @@ RUN apt-get update && apt-get install -y ragel bison ruby autoconf
 RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev
 
 RUN rbenv exec gem install bundler --no-rdoc --no-ri
+
+ADD https://shellcheck.storage.googleapis.com/shellcheck-v0.5.0.linux.x86_64.tar.xz /tmp
+RUN tar -xf /tmp/shellcheck-v0.5.0.linux.x86_64.tar.xz -C /usr/local/bin --strip-components=1 shellcheck-v0.5.0/shellcheck
 
 WORKDIR /src
 
