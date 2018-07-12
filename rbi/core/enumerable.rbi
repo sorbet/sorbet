@@ -91,7 +91,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Integer).returns(BasicObject),
   )
   .returns(T::Enumerable[Elem])
-  sig.returns(T::Enumerable[Elem])
+  sig.returns(Enumerator[[Elem, Integer]])
   def each_with_index(&blk); end
 
   sig.returns(T::Array[Elem])
