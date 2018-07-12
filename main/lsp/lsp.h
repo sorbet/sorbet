@@ -59,7 +59,7 @@ struct LSPMethod {
     static const inline LSPMethod Initialize() {
         return LSPMethod{"initialize", false, LSPMethod::Kind::ClientInitiated};
     };
-    static const inline LSPMethod Inititalized() {
+    static const inline LSPMethod Initialized() {
         return LSPMethod{"initialized", true, LSPMethod::Kind::ClientInitiated};
     };
     static const inline LSPMethod Shutdown() {
@@ -100,6 +100,12 @@ struct LSPMethod {
     };
     static const inline LSPMethod WorkspaceSymbolsRequest() {
         return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod Pause() {
+        return LSPMethod{"__PAUSE__", true, LSPMethod::Kind::ClientInitiated};
+    };
+    static const inline LSPMethod Resume() {
+        return LSPMethod{"__RESUME__", true, LSPMethod::Kind::ClientInitiated};
     };
     static const std::vector<LSPMethod> ALL_METHODS;
     static const LSPMethod getByName(const absl::string_view name);
@@ -179,6 +185,7 @@ class LSPLoop {
     rapidjson::Value loc2Range(core::Loc loc);
     rapidjson::Value loc2Location(core::Loc loc);
 
+    void processRequest(rapidjson::Document &d);
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
     bool handleReplies(rapidjson::Document &d);

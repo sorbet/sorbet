@@ -9,6 +9,9 @@
 #include "core/lsp/QueryResponse.h"
 #include "main/pipeline/pipeline.h"
 #include "spdlog/fmt/ostr.h"
+#include <condition_variable> // std::condition_variable
+#include <deque>
+#include <mutex> // std::mutex, std::unique_lock
 #include <unordered_set>
 
 using namespace std;
@@ -79,183 +82,181 @@ shared_ptr<core::Type> getResultType(core::GlobalState &gs, core::SymbolRef ofWh
     return resultType;
 }
 
-void LSPLoop::runLSP() {
-    std::string json;
-    rapidjson::Document d(&alloc);
-
-    while (true) {
-        int length = -1;
-        {
-            std::string line;
-            while (safeGetline(cin, line)) {
-                logger->trace("raw read: {}", line);
-                if (line == "") {
-                    break;
-                }
-                sscanf(line.c_str(), "Content-Length: %i", &length);
+bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &logger) {
+    int length = -1;
+    {
+        std::string line;
+        while (safeGetline(cin, line)) {
+            logger->trace("raw read: {}", line);
+            if (line == "") {
+                break;
             }
-            logger->trace("final raw read: {}, length: {}", line, length);
+            sscanf(line.c_str(), "Content-Length: %i", &length);
         }
-        if (length < 0) {
-            logger->info("eof");
-            return;
-        }
+        logger->trace("final raw read: {}, length: {}", line, length);
+    }
+    if (length < 0) {
+        logger->info("eof");
+        return false;
+    }
 
-        json.resize(length);
-        cin.read(&json[0], length);
+    string json(length + 1, '\0');
+    cin.read(&json[0], length);
+    logger->info("Read: {}", json);
+    if (d.Parse(json.c_str()).HasParseError()) {
+        logger->error("json parse error");
+        throw options::EarlyReturnWithCode(2);
+    }
+    return true;
+}
 
-        logger->info("Read: {}", json);
-        if (d.Parse(json.c_str()).HasParseError()) {
-            logger->info("json parse error");
-            return;
-        }
+void LSPLoop::processRequest(rapidjson::Document &d) {
+    const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
-        if (handleReplies(d)) {
-            continue;
-        }
+    ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
+    if (method.isNotification) {
+        logger->info("Processing notification {} ", (string)method.name);
+        if (method == LSPMethod::DidChangeWatchedFiles()) {
+            sendRequest(LSPMethod::ReadFile(), d["params"],
+                        [&](rapidjson::Value &edits) -> void {
+                            ENFORCE(edits.IsArray());
+                            Timer timeit(logger, "handle update");
+                            vector<shared_ptr<core::File>> files;
 
-        const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
-
-        ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
-        if (method.isNotification) {
-            logger->info("Processing notification {} ", (string)method.name);
-            if (method == LSPMethod::DidChangeWatchedFiles()) {
-                sendRequest(LSPMethod::ReadFile(), d["params"],
-                            [&](rapidjson::Value &edits) -> void {
-                                ENFORCE(edits.IsArray());
-                                Timer timeit(logger, "handle update");
-                                vector<shared_ptr<core::File>> files;
-
-                                for (auto it = edits.Begin(); it != edits.End(); ++it) {
-                                    rapidjson::Value &change = *it;
-                                    string uri(change["uri"].GetString(), change["uri"].GetStringLength());
-                                    string content(change["content"].GetString(), change["content"].GetStringLength());
-                                    if (startsWith(uri, rootUri)) {
-                                        files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(content),
-                                                                                   core::File::Type::Normal));
-                                    }
+                            for (auto it = edits.Begin(); it != edits.End(); ++it) {
+                                rapidjson::Value &change = *it;
+                                string uri(change["uri"].GetString(), change["uri"].GetStringLength());
+                                string content(change["content"].GetString(), change["content"].GetStringLength());
+                                if (startsWith(uri, rootUri)) {
+                                    files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(content),
+                                                                               core::File::Type::Normal));
                                 }
+                            }
 
-                                tryFastPath(files);
-                                pushErrors();
-                            },
-                            [](rapidjson::Value &error) -> void {});
+                            tryFastPath(files);
+                            pushErrors();
+                        },
+                        [](rapidjson::Value &error) -> void {});
+        }
+        if (method == LSPMethod::TextDocumentDidChange()) {
+            Timer timeit(logger, "handle update");
+            vector<shared_ptr<core::File>> files;
+            auto &edits = d["params"];
+            ENFORCE(edits.IsObject());
+            /*
+              {
+              "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
+                "contentChanges":[{"text":"..."}]
+                */
+            string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+            string content(edits["contentChanges"][0]["text"].GetString(),
+                           edits["contentChanges"][0]["text"].GetStringLength());
+            // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
+            // taught about it too: it merges consecutive TextDocumentDidChange
+            if (startsWith(uri, rootUri)) {
+                files.emplace_back(
+                    make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+
+                tryFastPath(files);
+                pushErrors();
             }
-            if (method == LSPMethod::TextDocumentDidChange()) {
-                Timer timeit(logger, "handle update");
-                vector<shared_ptr<core::File>> files;
-                auto &edits = d["params"];
-                ENFORCE(edits.IsObject());
-                /*
-                  {
-                  "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
-                    "contentChanges":[{"text":"..."}]
-                    */
-                string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
-                string content(edits["contentChanges"][0]["text"].GetString(),
-                               edits["contentChanges"][0]["text"].GetStringLength());
-                if (startsWith(uri, rootUri)) {
-                    files.emplace_back(
-                        make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+        }
+        if (method == LSPMethod::TextDocumentDidOpen()) {
+            Timer timeit(logger, "handle open");
+            vector<shared_ptr<core::File>> files;
+            auto &edits = d["params"];
+            ENFORCE(edits.IsObject());
+            /*
+              {
+              "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
+                "contentChanges":[{"text":"..."}]
+                */
+            string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+            string content(edits["textDocument"]["text"].GetString(), edits["textDocument"]["text"].GetStringLength());
+            if (startsWith(uri, rootUri)) {
+                files.emplace_back(
+                    make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
 
-                    tryFastPath(files);
-                    pushErrors();
+                tryFastPath(files);
+                pushErrors();
+            }
+        }
+        if (method == LSPMethod::Initialized()) {
+            // initialize ourselves
+            {
+                Timer timeit(logger, "index");
+                reIndexFromFileSystem();
+                vector<shared_ptr<core::File>> changedFiles;
+                runSlowPath(move(changedFiles));
+                pushErrors();
+                this->globalStateHashes = computeStateHashes(finalGs->getFiles());
+            }
+        }
+        if (method == LSPMethod::Exit()) {
+            return;
+        }
+    } else {
+        logger->info("Processing request {}", method.name);
+        // is request
+        rapidjson::Value result;
+        int errorCode = 0;
+        string errorString;
+        if (d.FindMember("cancelled") != d.MemberEnd()) {
+            errorCode = (int)LSPErrorCodes::RequestCancelled;
+            errorString = "Request was cancelled";
+            sendError(d, errorCode, errorString);
+        } else if (method == LSPMethod::Initialize()) {
+            result.SetObject();
+            rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
+            string serverCap =
+                "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
+                "\"workspaceSymbolProvider\": true, \"definitionProvider\": true, \"hoverProvider\":true}}";
+            rapidjson::Document temp;
+            auto &r = temp.Parse(serverCap.c_str());
+            ENFORCE(!r.HasParseError());
+            result.CopyFrom(temp, alloc);
+            sendResult(d, result);
+        } else if (method == LSPMethod::Shutdown()) {
+            // return default value: null
+            sendResult(d, result);
+        } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
+            result.SetArray();
+            auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
+                              d["params"]["textDocument"]["uri"].GetStringLength());
+            auto fref = uri2FileRef(uri);
+            for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
+                core::SymbolRef ref(finalGs.get(), idx);
+                if (ref.data(*finalGs).definitionLoc.file == fref) {
+                    auto data = symbolRef2SymbolInformation(ref);
+                    if (data) {
+                        result.PushBack(move(*data), alloc);
+                    }
                 }
             }
-            if (method == LSPMethod::TextDocumentDidOpen()) {
-                Timer timeit(logger, "handle open");
-                vector<shared_ptr<core::File>> files;
-                auto &edits = d["params"];
-                ENFORCE(edits.IsObject());
-                /*
-                  {
-                  "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
-                    "contentChanges":[{"text":"..."}]
-                    */
-                string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
-                string content(edits["textDocument"]["text"].GetString(),
-                               edits["textDocument"]["text"].GetStringLength());
-                if (startsWith(uri, rootUri)) {
-                    files.emplace_back(
-                        make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+            sendResult(d, result);
+        } else if (method == LSPMethod::WorkspaceSymbolsRequest()) {
+            result.SetArray();
+            string searchString = d["params"]["query"].GetString();
 
-                    tryFastPath(files);
-                    pushErrors();
+            for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
+                core::SymbolRef ref(finalGs.get(), idx);
+                if (ref.data(*finalGs).name.show(*finalGs).compare(searchString) == 0) {
+                    auto data = symbolRef2SymbolInformation(ref);
+                    if (data) {
+                        result.PushBack(move(*data), alloc);
+                    }
                 }
             }
-            if (method == LSPMethod::Inititalized()) {
-                // initialize ourselves
-                {
-                    Timer timeit(logger, "index");
-                    reIndexFromFileSystem();
-                    vector<shared_ptr<core::File>> changedFiles;
-                    runSlowPath(move(changedFiles));
-                    pushErrors();
-                    this->globalStateHashes = computeStateHashes(finalGs->getFiles());
-                }
-            }
-            if (method == LSPMethod::Exit()) {
-                return;
-            }
+            sendResult(d, result);
+        } else if (method == LSPMethod::TextDocumentDefinition()) {
+            handleTextDocumentDefinition(result, d);
+        } else if (method == LSPMethod::TextDocumentHover()) {
+            handleTextDocumentHover(result, d);
         } else {
-            logger->info("Processing request {}", method.name);
-            // is request
-            rapidjson::Value result;
-            int errorCode = 0;
-            string errorString;
-            if (method == LSPMethod::Initialize()) {
-                result.SetObject();
-                rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-                string serverCap =
-                    "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
-                    "\"workspaceSymbolProvider\": true, \"definitionProvider\": true, \"hoverProvider\": true}}";
-                rapidjson::Document temp;
-                auto &r = temp.Parse(serverCap.c_str());
-                ENFORCE(!r.HasParseError());
-                result.CopyFrom(temp, alloc);
-                sendResult(d, result);
-            } else if (method == LSPMethod::Shutdown()) {
-                // return default value: null
-                sendResult(d, result);
-            } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
-                result.SetArray();
-                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
-                                  d["params"]["textDocument"]["uri"].GetStringLength());
-                auto fref = uri2FileRef(uri);
-                for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
-                    core::SymbolRef ref(finalGs.get(), idx);
-                    if (ref.data(*finalGs).definitionLoc.file == fref) {
-                        auto data = symbolRef2SymbolInformation(ref);
-                        if (data) {
-                            result.PushBack(move(*data), alloc);
-                        }
-                    }
-                }
-                sendResult(d, result);
-            } else if (method == LSPMethod::WorkspaceSymbolsRequest()) {
-                result.SetArray();
-                string searchString = d["params"]["query"].GetString();
-
-                for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
-                    core::SymbolRef ref(finalGs.get(), idx);
-                    if (ref.data(*finalGs).name.show(*finalGs).compare(searchString) == 0) {
-                        auto data = symbolRef2SymbolInformation(ref);
-                        if (data) {
-                            result.PushBack(move(*data), alloc);
-                        }
-                    }
-                }
-                sendResult(d, result);
-            } else if (method == LSPMethod::TextDocumentDefinition()) {
-                handleTextDocumentDefinition(result, d);
-            } else if (method == LSPMethod::TextDocumentHover()) {
-                handleTextDocumentHover(result, d);
-            } else {
-                ENFORCE(!method.isSupported, "failing a supported method");
-                errorCode = (int)LSPErrorCodes::MethodNotFound;
-                errorString = fmt::format("Unknown method: {}", method.name);
-                sendError(d, errorCode, errorString);
-            }
+            ENFORCE(!method.isSupported, "failing a supported method");
+            errorCode = (int)LSPErrorCodes::MethodNotFound;
+            errorString = fmt::format("Unknown method: {}", method.name);
+            sendError(d, errorCode, errorString);
         }
     }
 }
@@ -385,6 +386,114 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
         errorCode = (int)LSPErrorCodes::InvalidParams;
         errorString = "Unhandled QueryResponse kind in textDocument/hover";
         sendError(d, errorCode, errorString);
+    }
+}
+
+void LSPLoop::runLSP() {
+    // Naming convention: thread that executes this function is called coordinator thread
+    deque<rapidjson::Document> pendingRequests;
+    bool terminate = false;
+    std::mutex mtx;
+    std::condition_variable cv;
+    rapidjson::MemoryPoolAllocator<>
+        inner_alloc; // we need objects created by inner thread to outlive the thread itself.
+
+    auto readerThread = runInAThread([&pendingRequests, &mtx, &cv, &terminate, logger = this->logger, &inner_alloc] {
+        // Thread that executes this lambda is called reader thread.
+        // This thread _intentionally_ does not capture `this`.
+        unique_lock<mutex> globalLock(mtx, defer_lock);
+        while (true) {
+            rapidjson::Document d(&inner_alloc);
+            if (!getNewRequest(d, logger)) {
+                break;
+            }
+            unique_ptr<unique_lock<mutex>> lck = globalLock ? nullptr : make_unique<unique_lock<mutex>>(mtx);
+            if (!pendingRequests.empty()) {
+                // see if we can be smarter about requests that are waiting to be processed.
+
+                const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
+                if (method == LSPMethod::Pause()) {
+                    if (!globalLock) {
+                        ENFORCE(lck);
+                        globalLock = move(*lck);
+                    }
+                    continue;
+                } else if (method == LSPMethod::Resume()) {
+                    if (globalLock) {
+                        globalLock.unlock();
+                    }
+                    continue;
+                } else if (method == LSPMethod::TextDocumentDidChange()) {
+                    // see if previous notification is modification of the same file, if so, take the most recent
+                    // version.
+                    // TODO: if we ever support diffs, this would need to be extended.
+                    auto &prev = pendingRequests.back();
+                    auto prevMethod =
+                        LSPMethod::getByName({prev["method"].GetString(), prev["method"].GetStringLength()});
+                    if (prevMethod == LSPMethod::TextDocumentDidChange()) {
+                        string thisURI(d["params"]["textDocument"]["uri"].GetString(),
+                                       d["params"]["textDocument"]["uri"].GetStringLength());
+                        string prevURI(prev["params"]["textDocument"]["uri"].GetString(),
+                                       prev["params"]["textDocument"]["uri"].GetStringLength());
+                        if (prevURI == thisURI) {
+                            pendingRequests.pop_back();
+                        }
+                    }
+                } else if (method == LSPMethod::CancelRequest()) {
+                    // see if they are cancelling request that we didn't yet even start processing.
+                    for (auto &current : pendingRequests) {
+                        auto fnd = current.FindMember("id");
+                        if (fnd != current.MemberEnd()) {
+                            if (d["params"]["id"].IsString()) {
+                                if (current["id"].IsString() &&
+                                    current["id"].GetString() == d["params"]["id"].GetString()) {
+                                    current.AddMember("cancelled", move(d), current.GetAllocator());
+                                    break;
+                                }
+                            } else if (d["params"]["id"].IsInt()) {
+                                if (current["id"].IsInt() && current["id"].GetInt() == d["params"]["id"].GetInt()) {
+                                    current.AddMember("cancelled", move(d), current.GetAllocator());
+                                    break;
+                                }
+                            } else {
+                                Error::raise("should never happen. Request id is neither int nor string.");
+                            }
+                        }
+                    }
+
+                    // if we started processing it already, well... swallow the cancellation request and continue
+                    // computing.
+                    continue;
+                }
+            }
+
+            pendingRequests.emplace_back(move(d));
+            cv.notify_one();
+        }
+        {
+            // signal that coordinator thread should die
+            unique_ptr<unique_lock<mutex>> lck = globalLock ? nullptr : make_unique<unique_lock<mutex>>(mtx);
+            terminate = true;
+            cv.notify_one();
+        }
+    });
+
+    while (true) {
+        rapidjson::Document doc;
+        {
+            unique_lock<mutex> lck(mtx);
+            while (pendingRequests.empty() && !terminate) {
+                cv.wait(lck);
+            }
+            if (terminate) {
+                return;
+            }
+            doc.CopyFrom(pendingRequests.front(), alloc);
+            pendingRequests.pop_front();
+        }
+        if (!handleReplies(doc)) {
+            processRequest(doc);
+        }
     }
 }
 
@@ -735,6 +844,7 @@ void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &resu
 void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, string errorStr) {
     forRequest.RemoveMember("method");
     forRequest.RemoveMember("params");
+    forRequest.RemoveMember("cancelled");
     rapidjson::Value error;
     error.SetObject();
     error.AddMember("code", errorCode, alloc);
@@ -929,7 +1039,10 @@ const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                     TextDocumentDefinition(),
                                                     TextDocumentHover(),
                                                     ReadFile(),
-                                                    WorkspaceSymbolsRequest()};
+                                                    WorkspaceSymbolsRequest(),
+                                                    CancelRequest(),
+                                                    Pause(),
+                                                    Resume()};
 
 const LSPMethod LSPMethod::getByName(const absl::string_view name) {
     for (auto &candidate : ALL_METHODS) {
