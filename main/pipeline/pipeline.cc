@@ -1,11 +1,11 @@
 #include "pipeline.h"
+#include "ProgressIndicator.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
 #include "ast/treemap/treemap.h"
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
-#include "common/ProgressIndicator.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/Unfreeze.h"

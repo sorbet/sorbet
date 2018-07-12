@@ -1,6 +1,5 @@
 #ifndef RUBY_TYPER_REAL_MAIN_H
 #define RUBY_TYPER_REAL_MAIN_H
-#include "common/ProgressIndicator.h"
 #include "common/Timer.h"
 #include "main/options/options.h"
 #include "spdlog/spdlog.h"

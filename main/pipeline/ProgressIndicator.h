@@ -1,7 +1,7 @@
 #ifndef SORBET_PROGRESSINDICATOR_H
 #define SORBET_PROGRESSINDICATOR_H
 
-#include "common.h"
+#include "common/common.h"
 #include "progressbar/progressbar.h"
 #include <atomic>
 #include <chrono>
