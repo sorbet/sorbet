@@ -385,11 +385,6 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
         if (opts.print.CFG || opts.print.CFGRaw) {
             cout << "}" << '\n' << '\n';
         }
-        if (opts.suggestTyped && !f.data(ctx).hadErrors() && f.data(ctx).sigil == core::StrictLevel::Stripe) {
-            core::counterInc("types.input.files.suggest_typed");
-            logger->error("You could add `# typed: true` to: `{}`", f.data(ctx).path());
-        }
-
     } catch (SRubyException &) {
         if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
@@ -472,11 +467,11 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
     return what;
 }
 
-// If ever given a result type, it should be something along the lines of
-// vector<pair<vector<unique_ptr<ast::Expression>>, unique_ptr<core::GlobalState>>>
-void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Expression>> what,
-               const options::Options &opts, WorkerPool &workers, shared_ptr<spdlog::logger> logger) {
-    vector<vector<unique_ptr<ast::Expression>>> typecheck_result;
+std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
+                                                        vector<unique_ptr<ast::Expression>> what,
+                                                        const options::Options &opts, WorkerPool &workers,
+                                                        shared_ptr<spdlog::logger> logger) {
+    vector<unique_ptr<ast::Expression>> typecheck_result;
 
     {
         Timer timeit(logger, "Infer+CFG");
@@ -529,7 +524,8 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
                      result = resultq->wait_pop_timed(threadResult, PROGRESS_REFRESH_TIME_MILLIS)) {
                     if (result.gotItem()) {
                         counterConsume(move(threadResult.counters));
-                        typecheck_result.emplace_back(move(threadResult.trees));
+                        typecheck_result.insert(typecheck_result.end(), make_move_iterator(threadResult.trees.begin()),
+                                                make_move_iterator(threadResult.trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
                     if (!opts.runLSP) {
@@ -549,7 +545,7 @@ void typecheck(unique_ptr<core::GlobalState> &gs, vector<unique_ptr<ast::Express
         if (opts.print.NameTableFull) {
             cout << gs->toString(true) << '\n';
         }
-        return;
+        return typecheck_result;
     }
 }
 } // namespace pipeline

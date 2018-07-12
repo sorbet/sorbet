@@ -187,11 +187,33 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
-            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
-            metric->set_name(absl::StrCat(prefix, ".", hist.first, ".", e.first));
-            metric->set_value(e.second);
+        }
+        CounterImpl::CounterType running = 0;
+        vector<pair<int, bool>> percentiles = {{25, false}, {50, false}, {75, false}, {90, false}};
+        for (auto &e : hist.second) {
+            running += e.second;
+            for (auto &pct : percentiles) {
+                if (pct.second) {
+                    continue;
+                }
+                if (running >= sum * pct.first / 100) {
+                    pct.second = true;
+                    com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric =
+                        metrics.add_metrics();
+                    metric->set_name(absl::StrCat(prefix, ".", hist.first, ".p", pct.first));
+                    metric->set_value(e.first);
+                }
+            }
         }
         com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".", hist.first, ".min"));
+        metric->set_value(hist.second.begin()->first);
+
+        metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".", hist.first, ".max"));
+        metric->set_value((--hist.second.end())->first);
+
+        metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".total"));
         metric->set_value(sum);
     }

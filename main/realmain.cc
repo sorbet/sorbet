@@ -12,6 +12,9 @@
 #include "payload/text/text.h"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
+
+#include "absl/strings/str_cat.h"
+
 #include <algorithm> // find
 #include <csignal>
 #include <iostream>
@@ -232,8 +235,18 @@ int realmain(int argc, const char *argv[]) {
         KeyValueStore::commit(move(kvstore));
     }
 
-    { pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger); }
+    indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
     logger->trace("sorbet done");
+
+    if (opts.suggestTyped) {
+        for (auto &tree : indexed) {
+            auto f = tree->loc.file;
+            if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
+                core::counterInc("types.input.files.suggest_typed");
+                logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
+            }
+        }
+    }
 
     if (!opts.storeState.empty()) {
         gs->markAsPayload();
@@ -269,6 +282,17 @@ int realmain(int argc, const char *argv[]) {
             status = "Failure";
         } else {
             status = "Success";
+        }
+
+        if (opts.suggestTyped) {
+            for (auto &tree : indexed) {
+                auto f = tree->loc.file;
+                if (f.data(*gs).sigil == core::StrictLevel::Stripe) {
+                    auto *metric = metrics.add_metrics();
+                    metric->set_name(absl::StrCat(opts.metricsPrefix, ".suggest.", f.data(*gs).path()));
+                    metric->set_value(!f.data(*gs).hadErrors());
+                }
+            }
         }
 
         metrics.set_repo(opts.metricsRepo);
