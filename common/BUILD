@@ -24,7 +24,6 @@ cc_library(
     deps = [
         "@com_google_absl//absl/container:inlined_vector",
         "@com_google_absl//absl/strings",
-        "@concurrentqueue",
         "@progressbar",
         "@spdlog",
     ],

@@ -1,10 +1,11 @@
 #include "main/realmain.h"
-#include "core/ErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "core/statsd/statsd.h"
+#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/binary/binary.h"
@@ -178,7 +179,7 @@ int realmain(int argc, const char *argv[]) {
     WorkerPool workers(opts.threads, logger);
 
     unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger)));
+        make_unique<core::GlobalState>((make_shared<ConcurrentErrorQueue>(*typeErrorsConsole, *logger)));
 
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;

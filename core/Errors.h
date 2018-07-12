@@ -10,6 +10,8 @@
 namespace sorbet {
 namespace core {
 
+struct QueryResponse;
+
 class ErrorClass {
 public:
     u2 code;
@@ -161,6 +163,23 @@ public:
     // will no longer report the error, and is the caller's responsibility to
     // pass it to GlobalState::_error if the error should actually be recorded.
     std::unique_ptr<BasicError> build();
+};
+
+class ErrorQueue {
+private:
+public:
+    spdlog::logger &logger;
+    spdlog::logger &tracer;
+    std::atomic<bool> hadCritical{false};
+    std::atomic<int> errorCount{0};
+
+    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);
+    virtual ~ErrorQueue();
+
+    virtual void pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) = 0;
+    virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) = 0;
+    virtual void flushFile(FileRef file) = 0;
+    virtual void flushErrors(bool all = false) = 0;
 };
 
 } // namespace core

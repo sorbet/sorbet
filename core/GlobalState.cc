@@ -1,6 +1,6 @@
 #include "GlobalState.h"
 
-#include "ErrorQueue.h"
+#include "Errors.h"
 #include "Types.h"
 #include "core/Names/core.h"
 #include "core/errors/errors.h"
@@ -1048,13 +1048,7 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
     if (error->isCritical) {
         errorQueue->hadCritical = true;
     }
-
-    ErrorQueueMessage msg;
-    msg.kind = ErrorQueueMessage::Kind::Error;
-    msg.whatFile = error->loc.file;
-    msg.text = error->toString(*this);
-    msg.error = move(error);
-    errorQueue->push(move(msg));
+    errorQueue->pushError(*this, move(error));
 }
 
 bool GlobalState::hadCriticalError() const {

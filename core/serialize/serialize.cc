@@ -2,7 +2,7 @@
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
-#include "core/ErrorQueue.h"
+#include "core/Errors.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"

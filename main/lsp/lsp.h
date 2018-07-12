@@ -3,10 +3,11 @@
 
 #include "ast/ast.h"
 #include "core/Files.h"
+#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/options/options.h"
 #define RAPIDJSON_ASSERT(x) ENFORCE(x)
 #define RAPIDJSON_HAS_STDSTRING 1
-#include "common/WorkerPool.h"
+#include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -15,7 +16,7 @@ namespace sorbet {
 namespace realmain {
 
 //  _     ____  ____
-// | |   / ___||  _ \-
+// | |   / ___||  _ _\
 // | |   \___ \| |_) |
 // | |___ ___) |  __/
 // |_____|____/|_|
@@ -143,6 +144,8 @@ class LSPLoop {
     /** Root of LSP client workspace */
     std::string rootUri;
 
+    /** Concrete error queue shared by all global states */
+    std::shared_ptr<ConcurrentErrorQueue> errorQueue;
     /** GlobalState that is used for indexing. It effectively accumulates a huge nametable.
      * It is never discarded. */
     std::unique_ptr<core::GlobalState> initialGS;
@@ -208,8 +211,7 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
-            WorkerPool &workers)
-        : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {}
+            WorkerPool &workers);
     void runLSP();
 
     void invalidateAllErrors();

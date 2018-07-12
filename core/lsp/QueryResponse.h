@@ -1,3 +1,5 @@
+#ifndef SORBET_LSP_QUERYRESPONSE
+#define SORBET_LSP_QUERYRESPONSE
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
@@ -15,3 +17,4 @@ struct QueryResponse {
 };
 } // namespace core
 } // namespace sorbet
+#endif

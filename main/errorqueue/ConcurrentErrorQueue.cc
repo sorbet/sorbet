@@ -1,12 +1,12 @@
-#include "ErrorQueue.h"
+#include "ConcurrentErrorQueue.h"
 
 using namespace std;
 
 namespace sorbet {
-namespace core {
-vector<unique_ptr<QueryResponse>> ErrorQueue::drainQueryResponses() {
+namespace realmain {
+vector<unique_ptr<core::QueryResponse>> ConcurrentErrorQueue::drainQueryResponses() {
     ENFORCE(owner == this_thread::get_id());
-    vector<unique_ptr<QueryResponse>> res;
+    vector<unique_ptr<core::QueryResponse>> res;
 
     ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
@@ -17,9 +17,9 @@ vector<unique_ptr<QueryResponse>> ErrorQueue::drainQueryResponses() {
     return res;
 }
 
-vector<unique_ptr<BasicError>> ErrorQueue::drainErrors() {
+vector<unique_ptr<core::BasicError>> ConcurrentErrorQueue::drainErrors() {
     ENFORCE(owner == this_thread::get_id());
-    vector<unique_ptr<BasicError>> res;
+    vector<unique_ptr<core::BasicError>> res;
     for (auto &alreadyCollected : collected) {
         for (auto &entry : alreadyCollected.second) {
             res.emplace_back(move(entry.error));
@@ -35,11 +35,7 @@ vector<unique_ptr<BasicError>> ErrorQueue::drainErrors() {
     return res;
 }
 
-ErrorQueue::ErrorQueue(spd::logger &logger, spd::logger &tracer) : logger(logger), tracer(tracer) {
-    owner = this_thread::get_id();
-}
-
-void ErrorQueue::renderForFile(FileRef whatFile, stringstream &critical, stringstream &nonCritical) {
+void ConcurrentErrorQueue::renderForFile(core::FileRef whatFile, stringstream &critical, stringstream &nonCritical) {
     auto it = collected.find(whatFile);
     if (it == collected.end()) {
         return;
@@ -51,7 +47,7 @@ void ErrorQueue::renderForFile(FileRef whatFile, stringstream &critical, strings
     collected[whatFile].clear();
 };
 
-void ErrorQueue::flushErrors(bool all) {
+void ConcurrentErrorQueue::flushErrors(bool all) {
     ENFORCE(owner == this_thread::get_id());
 
     stringstream critical;
@@ -64,7 +60,7 @@ void ErrorQueue::flushErrors(bool all) {
             collected[msg.whatFile].emplace_back(move(msg));
         } else if (msg.kind == ErrorQueueMessage::Kind::Flush) {
             renderForFile(msg.whatFile, critical, nonCritical);
-            renderForFile(FileRef(), critical, nonCritical);
+            renderForFile(core::FileRef(), critical, nonCritical);
         }
     }
 
@@ -86,19 +82,35 @@ void ErrorQueue::flushErrors(bool all) {
     }
 }
 
-void ErrorQueue::flushFile(FileRef file) {
+void ConcurrentErrorQueue::flushFile(core::FileRef file) {
     ErrorQueueMessage msg;
     msg.kind = ErrorQueueMessage::Kind::Flush;
     msg.whatFile = file;
-    push(move(msg));
-}
-
-void ErrorQueue::push(ErrorQueueMessage msg) {
     this->queue.push(move(msg), 1);
 }
 
-ErrorQueue::~ErrorQueue() {
+void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::BasicError> error) {
+    ErrorQueueMessage msg;
+    msg.kind = ErrorQueueMessage::Kind::Error;
+    msg.whatFile = error->loc.file;
+    msg.text = error->toString(gs);
+    msg.error = move(error);
+    this->queue.push(move(msg), 1);
+}
+
+void ConcurrentErrorQueue::pushQueryResponse(unique_ptr<core::QueryResponse> queryResponse) {
+    ErrorQueueMessage msg;
+    msg.kind = ErrorQueueMessage::Kind::QueryResponse;
+    msg.queryResponse = move(queryResponse);
+    this->queue.push(move(msg), 1);
+}
+
+ConcurrentErrorQueue::ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer) : ErrorQueue(logger, tracer) {
+    owner = this_thread::get_id();
+}
+
+ConcurrentErrorQueue::~ConcurrentErrorQueue() {
     flushErrors(true);
 }
-} // namespace core
+} // namespace realmain
 } // namespace sorbet

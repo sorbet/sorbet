@@ -12,6 +12,7 @@ cc_library(
         "//ast/treemap",
         "//cfg",
         "//cfg/builder",
+        "//common/concurrency",
         "//common/kvstore",
         "//core",
         "//core/proto",

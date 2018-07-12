@@ -1,4 +1,5 @@
-#include "core/ErrorQueue.h"
+#include "core/BufferedErrorQueue.h"
+#include "core/Errors.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
 #include "core/errors/internal.h"
@@ -11,7 +12,7 @@ using namespace std;
 namespace sorbet {
 namespace core {
 auto logger = spd::stderr_color_mt("parse");
-auto errorQueue = make_shared<ErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<BufferedErrorQueue>(*logger, *logger);
 
 struct Offset2PosTest {
     string src;

@@ -2,8 +2,8 @@
 #define SORBET_WORKERPOOL_H
 
 #include "blockingconcurrentqueue.h"
-#include "common.h"
-#include "os/os.h"
+#include "common/common.h"
+#include "common/os/os.h"
 #include "spdlog/spdlog.h"
 #include <memory>
 #include <vector>
