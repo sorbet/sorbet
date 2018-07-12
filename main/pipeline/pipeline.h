@@ -26,8 +26,10 @@ std::vector<std::unique_ptr<ast::Expression>> resolve(core::GlobalState &gs,
                                                       const options::Options &opts,
                                                       std::shared_ptr<spdlog::logger> logger);
 
-void typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<std::unique_ptr<ast::Expression>> what,
-               const options::Options &opts, WorkerPool &workers, std::shared_ptr<spdlog::logger> logger);
+std::vector<std::unique_ptr<ast::Expression>> typecheck(std::unique_ptr<core::GlobalState> &gs,
+                                                        std::vector<std::unique_ptr<ast::Expression>> what,
+                                                        const options::Options &opts, WorkerPool &workers,
+                                                        std::shared_ptr<spdlog::logger> logger);
 
 std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
                                               const options::Options &opts, std::shared_ptr<spdlog::logger> logger);
