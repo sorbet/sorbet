@@ -1,6 +1,8 @@
 cc_library(
     name = "pipeline",
     srcs = [
+        "ProgressIndicator.cc",
+        "ProgressIndicator.h",
         "pipeline.cc",
     ],
     hdrs = ["pipeline.h"],

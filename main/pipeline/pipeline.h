@@ -1,7 +1,7 @@
 #ifndef RUBY_TYPER_PIPELINE_H
 #define RUBY_TYPER_PIPELINE_H
+#include "ProgressIndicator.h"
 #include "ast/ast.h"
-#include "common/ProgressIndicator.h"
 #include "common/common.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
