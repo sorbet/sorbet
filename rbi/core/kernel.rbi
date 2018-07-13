@@ -711,6 +711,13 @@ module Kernel
   def load(filename, arg0=_); end
 
   sig(
+      blk: T.proc().returns(T.untyped)
+  )
+  .returns(NilClass)
+  sig.returns(Enumerator[T.untyped])
+  def loop(&blk); end
+
+  sig(
       name: String,
       rest: T.any(String, Integer),
       block: String,

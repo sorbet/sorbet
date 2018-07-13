@@ -73,6 +73,17 @@ test  --experimental_local_disk_cache --experimental_local_disk_cache_path=/tmp/
 brew install ragel bison autoconf coreutils parallel
 ```
 
+#### Known Issues
+If you see a build error that looks like,
+```
+Executing genrule @parser//:bison_parser failed
+```
+then you might need to run:
+```
+brew link bison --force
+```
+to symlink the correct version into `/usr/local/bin/` so it appears on your `$PATH`.
+
 ### On Ubuntu 16.04
 
 ```
