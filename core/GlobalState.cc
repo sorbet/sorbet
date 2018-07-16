@@ -1059,6 +1059,10 @@ void GlobalState::flushErrors() {
     this->errorQueue->flushErrors();
 }
 
+void GlobalState::flushErrorCount() {
+    this->errorQueue->flushErrorCount();
+}
+
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     if (loc.file.exists()) {
         loc.file.data(*this).hadErrors_ = true;

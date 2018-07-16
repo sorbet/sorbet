@@ -113,6 +113,7 @@ public:
 
     int totalErrors() const;
     void flushErrors();
+    void flushErrorCount();
     bool wasModified() const;
 
     int globalStateId;

@@ -8,3 +8,4 @@ test/cli/dedup_loc/dedup_loc.rb:5: Argument does not have asserted type `NilClas
     test/cli/dedup_loc/dedup_loc.rb:4:
      4 |rescue Exception => e
                ^^^^^^^^^
+Errors: 1

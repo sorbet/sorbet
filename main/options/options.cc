@@ -142,6 +142,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
 
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
+    options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     // Developer options
     options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
     options.add_options("dev")("stop-after", all_stop_after.str(),
@@ -268,8 +269,8 @@ void readOptions(Options &opts, int argc, const char *argv[],
             logger->info("lsp mode does not yet support caching.");
             throw EarlyReturnWithCode(1);
         }
+        opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
-
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
 
         opts.threads = min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));

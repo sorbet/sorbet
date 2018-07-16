@@ -8,3 +8,4 @@ test/cli/override-typed/override-typed.rb:1: `String("s")` doesn't match `Intege
     test/cli/override-typed/override-typed.rb:1:
      1 |1 + "s"
             ^^^
+Errors: 1

@@ -1,12 +1,16 @@
 test/cli/parser-error/parser-error-1.rb:1: Parse Error: no .<digit> floating literal anymore; put 0 before dot http://go/e/2001
      1 |a.123
          ^^^^
+Errors: 1
 test/cli/parser-error/parser-error-2.rb:1: Parse Error: no .<digit> floating literal anymore; put 0 before dot http://go/e/2001
      1 |a.123
          ^^^^
+Errors: 1
 test/cli/parser-error/parser-error-3.rb:1: Parse Error: unexpected token: syntax error http://go/e/2001
      1 |.
         ^
+Errors: 1
 test/cli/parser-error/parser-error-4.rb:2: Parse Error: unexpected `@' http://go/e/2001
      2 |  d!@
             ^
+Errors: 1

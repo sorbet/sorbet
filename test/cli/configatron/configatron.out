@@ -1,3 +1,4 @@
 test/cli/configatron/configatron.rb:24: This code is unreachable http://go/e/7006
     24 |    if config && 4
                ^^^^^^
+Errors: 1

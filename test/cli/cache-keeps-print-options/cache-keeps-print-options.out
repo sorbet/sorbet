@@ -1,22 +1,28 @@
+No errors! Great job.
 class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 
+No errors! Great job.
 class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
   class ::<Class:CCCCCCCCC> < ::<Class:Object> () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
   class ::CCCCCCCCC < ::Object () @ test/cli/cache-keeps-print-options/cache-keeps-print-options.rb:1
 
 --print=ast is incompatible with --cacheDir. Ignoring cache
+No errors! Great job.
 class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
 --print=ast is incompatible with --cacheDir. Ignoring cache
+No errors! Great job.
 class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
+No errors! Great job.
 class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
   <emptyTree>
 end
+No errors! Great job.
 class <emptyTree>::<constant:CCCCCCCCC><<constant:<todo sym>>> < (::<todo sym>)
   <emptyTree>
 end

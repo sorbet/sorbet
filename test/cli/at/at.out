@@ -8,3 +8,4 @@ test/cli/at/at.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` h
     test/cli/at/at.rb:2:
      2 |1 + "s"
             ^^^
+Errors: 1

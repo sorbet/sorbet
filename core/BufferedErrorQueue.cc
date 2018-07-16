@@ -19,6 +19,7 @@ void BufferedErrorQueue::pushQueryResponse(std::unique_ptr<QueryResponse> respon
 
 void BufferedErrorQueue::flushFile(FileRef file) {}
 void BufferedErrorQueue::flushErrors(bool all) {}
+void BufferedErrorQueue::flushErrorCount(){};
 
 vector<unique_ptr<QueryResponse>> BufferedErrorQueue::drainQueryResponses() {
     vector<unique_ptr<QueryResponse>> out;

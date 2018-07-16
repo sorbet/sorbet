@@ -9,3 +9,4 @@ test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match
     test/cli/override-typed-bad/override-typed-bad.rb:2:
      2 |1 + "s"
             ^^^
+Errors: 2

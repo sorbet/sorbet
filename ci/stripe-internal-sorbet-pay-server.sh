@@ -84,7 +84,7 @@ TIMEFILE1=$(mktemp)
 /usr/local/bin/junit-script-output \
     typecheck-uncached \
     /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
-if [ -s "$OUT" ]; then
+if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
 cat "$TIMEFILE1"
@@ -93,7 +93,7 @@ cat "$TIMEFILE1"
 /usr/local/bin/junit-script-output \
     typecheck-cached \
     /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
-if [ -s "$OUT" ]; then
+if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
 cat "$TIMEFILE1"
@@ -101,7 +101,7 @@ cat "$TIMEFILE1"
 /usr/local/bin/junit-script-output \
     typecheck-final \
     /usr/bin/time -o "$TIMEFILE1" ./scripts/bin/typecheck 2>&1 | tee "$OUT"
-if [ -s "$OUT" ]; then
+if [ "$(cat "$OUT")" != "No errors! Great job." ]; then
     exit 1
 fi
 cat "$TIMEFILE1"

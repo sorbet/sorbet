@@ -23,6 +23,7 @@ public:
     virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) override;
     virtual void flushFile(FileRef file) override;
     virtual void flushErrors(bool all = false) override;
+    virtual void flushErrorCount() override;
 
     std::vector<std::unique_ptr<QueryResponse>> drainQueryResponses();
     std::vector<std::unique_ptr<BasicError>> drainErrors();

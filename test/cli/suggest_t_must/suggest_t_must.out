@@ -13,3 +13,4 @@ test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   You could wrap it in `T.must()` before passing the argument.
+Errors: 2

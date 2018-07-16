@@ -82,6 +82,14 @@ void ConcurrentErrorQueue::flushErrors(bool all) {
     }
 }
 
+void ConcurrentErrorQueue::flushErrorCount() {
+    if (this->errorCount == 0) {
+        this->logger.log(spdlog::level::err, "No errors! Great job.\n", this->errorCount);
+    } else {
+        this->logger.log(spdlog::level::err, "Errors: {}\n", this->errorCount);
+    }
+}
+
 void ConcurrentErrorQueue::flushFile(core::FileRef file) {
     ErrorQueueMessage msg;
     msg.kind = ErrorQueueMessage::Kind::Flush;

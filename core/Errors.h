@@ -180,6 +180,7 @@ public:
     virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) = 0;
     virtual void flushFile(FileRef file) = 0;
     virtual void flushErrors(bool all = false) = 0;
+    virtual void flushErrorCount() = 0;
 };
 
 } // namespace core

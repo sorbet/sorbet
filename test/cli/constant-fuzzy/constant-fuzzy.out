@@ -19,3 +19,4 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constan
     test/cli/constant-fuzzy/constant-fuzzy.rb:5: Did you mean: `::A#Constant`?
      5 |module A; Constant = 1; end;
                   ^^^^^^^^
+Errors: 4
