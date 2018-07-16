@@ -363,7 +363,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     if (ref(gs).isSynthetic()) {
         return true;
     }
-    return definitionLoc.file.id() < 0 || definitionLoc.file.data(gs).source_type == File::Payload;
+    return loc.file.id() < 0 || loc.file.data(gs).source_type == File::Payload;
 }
 
 string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {
@@ -487,7 +487,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     if (this->resultType) {
         os << " -> " << this->resultType->toString(gs, tabs);
     }
-    os << " @ " << this->definitionLoc.filePosToString(gs);
+    os << " @ " << this->loc.filePosToString(gs);
     os << '\n';
 
     sort(children.begin(), children.end());
@@ -530,7 +530,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     SymbolRef selfRef = this->ref(gs);
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->definitionLoc, this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->loc, this->owner, singletonName);
     Symbol &singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
@@ -608,7 +608,7 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.argumentsOrMixins = this->argumentsOrMixins;
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name.id());
-    result.definitionLoc = this->definitionLoc;
+    result.loc = this->loc;
     result.typeParams = this->typeParams;
     result.typeAliases = this->typeAliases;
 
@@ -639,8 +639,7 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2 =
-            const_cast<GlobalState &>(gs).enterSymbol(this->definitionLoc, this->owner, this->name, this->flags);
+        SymbolRef current2 = const_cast<GlobalState &>(gs).enterSymbol(this->loc, this->owner, this->name, this->flags);
         ENFORCE(current == current2);
     }
 }

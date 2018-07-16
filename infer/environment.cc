@@ -265,7 +265,7 @@ core::TypeAndOrigins Environment::getTypeAndOrigin(core::Context ctx, core::Loca
     if (fnd == vars.end()) {
         core::TypeAndOrigins ret;
         ret.type = core::Types::nilClass();
-        ret.origins.push_back(ctx.owner.data(ctx).definitionLoc);
+        ret.origins.push_back(ctx.owner.data(ctx).loc);
         return ret;
     }
     ENFORCE(types[fnd - vars.begin()].type.get() != nullptr);
@@ -285,7 +285,7 @@ core::TypeAndOrigins Environment::getOrCreateTypeAndOrigin(core::Context ctx, co
     if (fnd == vars.end()) {
         core::TypeAndOrigins ret;
         ret.type = core::Types::nilClass();
-        ret.origins.push_back(ctx.owner.data(ctx).definitionLoc);
+        ret.origins.push_back(ctx.owner.data(ctx).loc);
         vars.emplace_back(symbol);
         types.push_back(ret);
         knowledge.emplace_back();
@@ -832,7 +832,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     } else {
                         tp.type = data.resultType;
                     }
-                    tp.origins.push_back(symbol.data(ctx).definitionLoc);
+                    tp.origins.push_back(symbol.data(ctx).loc);
                 } else if (data.isField() || data.isStaticField() || data.isMethodArgument() || data.isTypeMember()) {
                     if (data.resultType.get() != nullptr) {
                         if (data.isField()) {
@@ -842,7 +842,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         } else {
                             tp.type = data.resultType;
                         }
-                        tp.origins.push_back(data.definitionLoc);
+                        tp.origins.push_back(data.loc);
                     } else {
                         tp.origins.push_back(core::Loc::none());
                         tp.type = core::Types::untyped();
@@ -947,9 +947,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         e.addErrorSection(core::ErrorSection(
                             "Expected " + expectedType->show(ctx),
                             {
-                                core::ErrorLine::from(
-                                    ctx.owner.data(ctx).definitionLoc, "Method `{}` has return type `{}`",
-                                    ctx.owner.data(ctx).name.toString(ctx), expectedType->toString(ctx)),
+                                core::ErrorLine::from(ctx.owner.data(ctx).loc, "Method `{}` has return type `{}`",
+                                                      ctx.owner.data(ctx).name.toString(ctx),
+                                                      expectedType->toString(ctx)),
                             }));
                         e.addErrorSection(
                             core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",

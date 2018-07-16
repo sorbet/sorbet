@@ -226,7 +226,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             auto fref = uri2FileRef(uri);
             for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
                 core::SymbolRef ref(finalGs.get(), idx);
-                if (ref.data(*finalGs).definitionLoc.file == fref) {
+                if (ref.data(*finalGs).loc.file == fref) {
                     auto data = symbolRef2SymbolInformation(ref);
                     if (data) {
                         result.PushBack(move(*data), alloc);
@@ -277,7 +277,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
             if (resp->kind == core::QueryResponse::Kind::SEND) {
                 for (auto &component : resp->dispatchComponents) {
                     if (component.method.exists()) {
-                        result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                        result.PushBack(loc2Location(component.method.data(*finalGs).loc), alloc);
                     }
                 }
             } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
@@ -285,7 +285,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
             } else {
                 for (auto &component : resp->dispatchComponents) {
                     if (component.method.exists()) {
-                        result.PushBack(loc2Location(component.method.data(*finalGs).definitionLoc), alloc);
+                        result.PushBack(loc2Location(component.method.data(*finalGs).loc), alloc);
                     }
                 }
             }
@@ -550,13 +550,13 @@ void LSPLoop::setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d) {
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
     auto &sym = symRef.data(*finalGs);
-    if (!sym.definitionLoc.file.exists()) {
+    if (!sym.loc.file.exists()) {
         return nullptr;
     }
     rapidjson::Value result;
     result.SetObject();
     result.AddMember("name", sym.name.show(*finalGs), alloc);
-    result.AddMember("location", loc2Location(sym.definitionLoc), alloc);
+    result.AddMember("location", loc2Location(sym.loc), alloc);
     result.AddMember("containerName", sym.owner.data(*finalGs).fullName(*finalGs), alloc);
 
     /**

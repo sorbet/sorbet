@@ -421,9 +421,9 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
 
     pickle(p, what.resultType.get());
-    p.putU4(what.definitionLoc.file.id());
-    p.putU4(what.definitionLoc.begin_pos);
-    p.putU4(what.definitionLoc.end_pos);
+    p.putU4(what.loc.file.id());
+    p.putU4(what.loc.begin_pos);
+    p.putU4(what.loc.end_pos);
 }
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
@@ -454,9 +454,9 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     }
     result.resultType = unpickleType(p, gs);
 
-    result.definitionLoc.file = FileRef(p.getU4());
-    result.definitionLoc.begin_pos = p.getU4();
-    result.definitionLoc.end_pos = p.getU4();
+    result.loc.file = FileRef(p.getU4());
+    result.loc.begin_pos = p.getU4();
+    result.loc.end_pos = p.getU4();
     return result;
 }
 

@@ -20,9 +20,9 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     core::SymbolRef my = inSym.findMember(gs, name);
     if (!my.exists()) {
         if (parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable())) {
-            my = gs.enterTypeMember(inSym.definitionLoc, sym, name, parentVariance);
+            my = gs.enterTypeMember(inSym.loc, sym, name, parentVariance);
         } else {
-            if (auto e = gs.beginError(inSym.definitionLoc, core::errors::Resolver::ParentTypeNotDeclared)) {
+            if (auto e = gs.beginError(inSym.loc, core::errors::Resolver::ParentTypeNotDeclared)) {
                 e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.toString(gs),
                             parent.data(gs).show(gs));
             }
@@ -31,7 +31,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     }
     auto &data = my.data(gs);
     if (!data.isTypeMember() && !data.isTypeArgument()) {
-        if (auto e = gs.beginError(data.definitionLoc, core::errors::Resolver::NotATypeVariable)) {
+        if (auto e = gs.beginError(data.loc, core::errors::Resolver::NotATypeVariable)) {
             e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.toString(gs));
         }
         return false;
@@ -39,7 +39,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     auto myVariance = data.variance();
     if (!inSym.derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
         myVariance != core::Variance::Invariant) {
-        if (auto e = gs.beginError(data.definitionLoc, core::errors::Resolver::ParentVarianceMismatch)) {
+        if (auto e = gs.beginError(data.loc, core::errors::Resolver::ParentVarianceMismatch)) {
             e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs).show(gs));
         }
         return true;
@@ -55,10 +55,9 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
         for (core::SymbolRef tp : inSym.typeMembers()) {
             auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.data(gs).definitionLoc;
+                auto loc = tp.data(gs).loc;
                 if (!loc.file.data(gs).isPayload()) {
-                    if (auto e = gs.beginError(tp.data(gs).definitionLoc,
-                                               core::errors::Resolver::VariantTypeMemberInClass)) {
+                    if (auto e = gs.beginError(tp.data(gs).loc, core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");
                     }
                     return;
@@ -82,8 +81,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
                 core::SymbolRef my = tp.dealiasAt(gs, sym);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (inSym.typeMembers()[i] != my) {
-                    if (auto e =
-                            gs.beginError(my.data(gs).definitionLoc, core::errors::Resolver::TypeMembersInWrongOrder)) {
+                    if (auto e = gs.beginError(my.data(gs).loc, core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members in wrong order");
                     }
                     int foundIdx = 0;
@@ -163,9 +161,9 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
 
         auto mem = sym.data(gs).findConcreteMethodTransitive(gs, proto.data(gs).name);
         if (!mem.exists()) {
-            if (auto e = gs.beginError(sym.data(gs).definitionLoc, core::errors::Resolver::BadAbstractMethod)) {
+            if (auto e = gs.beginError(sym.data(gs).loc, core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Missing definition for abstract method `{}`", proto.data(gs).show(gs));
-                e.addErrorLine(proto.data(gs).definitionLoc, "defined here");
+                e.addErrorLine(proto.data(gs).loc, "defined here");
             }
         }
     }
@@ -177,8 +175,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &data = core::SymbolRef(&gs, i).data(gs);
-        if (data.definitionLoc.file.exists() &&
-            data.definitionLoc.file.data(gs).source_type == core::File::Type::Normal) {
+        if (data.loc.file.exists() && data.loc.file.data(gs).source_type == core::File::Type::Normal) {
             if (data.isMethod()) {
                 methodCount++;
             } else if (data.isClass()) {

@@ -107,7 +107,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             i++;
             if (uninitialized.type.get() == nullptr) {
                 uninitialized.type = core::Types::nilClass();
-                uninitialized.origins.push_back(ctx.owner.data(ctx).definitionLoc);
+                uninitialized.origins.push_back(ctx.owner.data(ctx).loc);
             } else {
                 uninitialized.type->sanityCheck(ctx);
             }

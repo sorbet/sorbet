@@ -401,7 +401,7 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     data.name = name;
     data.flags = flags;
     data.owner = owner;
-    data.definitionLoc = loc;
+    data.loc = loc;
     if (data.isBlockSymbol(*this)) {
         categoryCounterInc("symbols", "block");
     } else if (data.isClass()) {
@@ -481,7 +481,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 nu
     SymbolRef res = enterMethodSymbol(loc, original.data(*this).owner, name);
     res.data(*this).arguments().reserve(original.data(*this).arguments().size());
     for (auto &arg : original.data(*this).arguments()) {
-        Loc loc = arg.data(*this).definitionLoc;
+        Loc loc = arg.data(*this).loc;
         NameRef nm = arg.data(*this).name;
         SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
         newArg.data(*this).flags = arg.data(*this).flags;

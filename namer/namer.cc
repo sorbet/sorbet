@@ -147,7 +147,7 @@ class NameInserter {
     }
 
     void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx).definitionLoc, owner, newName);
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx).loc, owner, newName);
         alias.data(ctx).resultType = make_shared<core::AliasType>(method);
     }
 
@@ -183,7 +183,7 @@ public:
             if (!klass->symbol.data(ctx).isClass()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
                     e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx).show(ctx));
-                    e.addErrorLine(klass->symbol.data(ctx).definitionLoc, "Previous definition");
+                    e.addErrorLine(klass->symbol.data(ctx).loc, "Previous definition");
                 }
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name, core::UniqueNameKind::Namer);
                 klass->symbol = squashNames(ctx, ctx.owner, klass->name);
@@ -237,7 +237,7 @@ public:
             klass->symbol.data(ctx).superClass = core::Symbols::todo();
         }
 
-        klass->symbol.data(ctx).definitionLoc = klass->loc;
+        klass->symbol.data(ctx).loc = klass->loc;
         klass->symbol.data(ctx).singletonClass(ctx); // force singleton class into existance
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
@@ -408,18 +408,18 @@ public:
 
         auto sym = owner.data(ctx).findMember(ctx, method->name);
         if (sym.exists()) {
-            if (method->loc == sym.data(ctx).definitionLoc) {
+            if (method->loc == sym.data(ctx).loc) {
                 // Reparsing the same file
                 method->symbol = sym;
                 pushEnclosingArgs(move(method->args));
                 return method;
             }
             if (redefinitionOk(ctx, sym)) {
-                sym.data(ctx).definitionLoc = method->loc;
+                sym.data(ctx).loc = method->loc;
             } else {
                 if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
                     e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
-                    e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
+                    e.addErrorLine(sym.data(ctx).loc, "Previous definition");
                 }
                 // TODO Check that the previous args match the new ones instead of
                 // just moving the original one to the side
@@ -428,7 +428,7 @@ public:
         }
         method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
-        method->symbol.data(ctx).definitionLoc = method->loc;
+        method->symbol.data(ctx).loc = method->loc;
         if (method->isDSLSynthesized()) {
             method->symbol.data(ctx).setDSLSynthesized();
         }
@@ -529,7 +529,7 @@ public:
         if (sym.exists() && !sym.data(ctx).isStaticField()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx).show(ctx));
-                e.addErrorLine(sym.data(ctx).definitionLoc, "Previous definition");
+                e.addErrorLine(sym.data(ctx).loc, "Previous definition");
             }
             ctx.state.mangleRenameSymbol(sym, sym.data(ctx).name, core::UniqueNameKind::Namer);
         }

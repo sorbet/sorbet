@@ -31,7 +31,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     for (core::SymbolRef argSym : md.symbol.data(ctx).arguments()) {
         i++;
         core::LocalVariable arg(argSym.data(ctx).name, 0);
-        entry->exprs.emplace_back(arg, argSym.data(ctx).definitionLoc, make_unique<LoadArg>(selfSym, methodName, i));
+        entry->exprs.emplace_back(arg, argSym.data(ctx).loc, make_unique<LoadArg>(selfSym, methodName, i));
         aliases[argSym] = arg;
     }
     auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
@@ -48,7 +48,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         if (global.data(ctx).isMethodArgument()) {
             res->minLoops[local] = 0; // method arguments are pinned only in loops
         } else {
-            aliasesPrefix.emplace_back(local, global.data(ctx).definitionLoc, make_unique<Alias>(global));
+            aliasesPrefix.emplace_back(local, global.data(ctx).loc, make_unique<Alias>(global));
             if (global.data(ctx).isField() || global.data(ctx).isStaticField()) {
                 res->minLoops[local] = CFG::MIN_LOOP_FIELD;
             } else {

@@ -152,7 +152,7 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
                         argSym.name.toString(ctx));
             e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.definitionLoc, "Method `{}` has specified `{}` as `{}`",
+                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`",
                                 argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
                                 expectedType->show(ctx)),
             }));
@@ -395,8 +395,8 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;
                     for (auto alternative : alternatives) {
-                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).definitionLoc,
-                                                           "Did you mean: `{}`?", alternative.name.toString(ctx)));
+                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc, "Did you mean: `{}`?",
+                                                           alternative.name.toString(ctx)));
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }
@@ -483,7 +483,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                             // and account for keyword arguments
                             data.arguments().size(),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
-                e.addErrorLine(method.data(ctx).definitionLoc, "`{}` defined here", fun.toString(ctx));
+                e.addErrorLine(method.data(ctx).loc, "`{}` defined here", fun.toString(ctx));
                 result.components.front().errors.emplace_back(e.build());
             }
         }
@@ -600,7 +600,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments
                         data.arguments().size(), aend - args.begin());
-            e.addErrorLine(method.data(ctx).definitionLoc, "`{}` defined here", fun.toString(ctx));
+            e.addErrorLine(method.data(ctx).loc, "`{}` defined here", fun.toString(ctx));
             result.components.front().errors.emplace_back(e.build());
         }
     }

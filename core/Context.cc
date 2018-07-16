@@ -30,7 +30,7 @@ bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
-    auto &file = owner.data(*this).definitionLoc.file.data(*this);
+    auto &file = owner.data(*this).loc.file.data(*this);
     constexpr char const *whitelistedTest = "overloads_test.rb";
     return file.isPayload() || FileOps::getFileName(file.path()) == whitelistedTest;
 }
