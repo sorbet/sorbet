@@ -511,7 +511,9 @@ string Symbol::show(const GlobalState &gs) const {
     if (this->owner.exists() && this->owner != Symbols::root()) {
         owner_str = this->owner.data(gs).show(gs);
         if (this->isClass()) {
-            owner_str = owner_str + "::";
+            if (!owner_str.empty()) {
+                owner_str = owner_str + "::";
+            }
         } else {
             owner_str = owner_str + "#";
         }
