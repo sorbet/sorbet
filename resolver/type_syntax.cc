@@ -392,6 +392,14 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = sym.data(ctx).externalType(ctx);
             } else if (sym.data(ctx).isTypeMember()) {
                 result = make_shared<core::LambdaParam>(sym);
+            } else if (sym.data(ctx).isStaticField()) {
+                if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
+                    e.setHeader("Constant `{}` is not a class or type alias", i->symbol.show(ctx));
+                    e.addErrorLine(sym.data(ctx).definitionLoc,
+                                   "If you are trying to define a type alias, you should use `{}` here",
+                                   "T.type_alias");
+                }
+                result = core::Types::untyped();
             } else {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Not a class type `{}`", i->symbol.show(ctx));
