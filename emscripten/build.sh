@@ -30,28 +30,34 @@ CFLAGS="$CFLAGS -Oz"
 
 CXXFLAGS="$CFLAGS -std=c++14"
 
+if ! [ "$EMSCRIPTEN" ]; then
+    emscripten_root="$(brew --prefix emscripten)"
+    export EMSCRIPTEN="$emscripten_root/libexec"
+    export LLVM="$emscripten_root/libexec/llvm/bin"
+fi
+
 set -x
 
 emcc $CXXFLAGS core/*.cc core/types/*.cc \
      "$genfiles/core/Names_gen.cc" \
-     -o _obj/core.bc
+     -o $objdir/core.bc
 
 emcc $CXXFLAGS common/*.cc common/os/*.cc \
-     -o _obj/common.bc
+     -o $objdir/common.bc
 
-emcc $CXXFLAGS "$genfiles/payload/binary/binary.cc" -o _obj/payload.bc
+emcc $CXXFLAGS "$genfiles/payload/binary/binary.cc" -o $objdir/payload.bc
 
-emcc $CXXFLAGS ast/desugar/*.cc -o _obj/ast_desugar.bc
+emcc $CXXFLAGS ast/desugar/*.cc -o $objdir/ast_desugar.bc
 
-emcc $CXXFLAGS dsl/*.cc -o _obj/dsl.bc
+emcc $CXXFLAGS dsl/*.cc -o $objdir/dsl.bc
 
-emcc $CXXFLAGS namer/*.cc -o _obj/namer.bc
+emcc $CXXFLAGS namer/*.cc -o $objdir/namer.bc
 
-emcc $CXXFLAGS resolver/*.cc -o _obj/resolver.bc
+emcc $CXXFLAGS resolver/*.cc -o $objdir/resolver.bc
 
-emcc $CXXFLAGS cfg/*.cc cfg/builder/*.cc -o _obj/cfg.bc
+emcc $CXXFLAGS cfg/*.cc cfg/builder/*.cc -o $objdir/cfg.bc
 
-emcc $CXXFLAGS infer/*.cc -o _obj/infer.bc
+emcc $CXXFLAGS infer/*.cc -o $objdir/infer.bc
 
 emcc $CXXFLAGS parser/*.cc \
      -I "$genfiles/external/parser/include/" \
@@ -63,7 +69,7 @@ emcc $CXXFLAGS parser/*.cc \
      "$genfiles/external/parser/cc/lexer.cc" \
      "$genfiles/external/parser/cc/grammars/typedruby24.cc" \
      "$root/external/parser/cc/"*.cc \
-     -o _obj/parser.bc
+     -o $objdir/parser.bc
 
 emcc $CXXFLAGS \
      "$absl/absl/strings/string_view.cc" \
@@ -71,32 +77,32 @@ emcc $CXXFLAGS \
      "$absl/absl/strings/numbers.cc" \
      "$absl/absl/strings/internal/memutil.cc" \
      "$absl/absl/base/internal/throw_delegate.cc" \
-     -o _obj/absl.bc
+     -o $objdir/absl.bc
 
-emcc $CXXFLAGS ast/*.cc ast/verifier/*.cc -o _obj/ast.bc
+emcc $CXXFLAGS ast/*.cc ast/verifier/*.cc -o $objdir/ast.bc
 
-emcc $CXXFLAGS "$root/external/lizard/lib"/*.c \
+emcc $CFLAGS "$root/external/lizard/lib"/*.c \
      -DLIZARD_NO_HUFFMAN \
-     -o _obj/lizard.bc
+     -o $objdir/lizard.bc
 
 emcc $CXXFLAGS core/serialize/*.cc \
-     -o _obj/serialize.bc
+     -o $objdir/serialize.bc
 
 emcc $CXXFLAGS emscripten/main.cc \
-     _obj/common.bc \
-     _obj/core.bc \
-     _obj/payload.bc \
-     _obj/parser.bc \
-     _obj/ast.bc \
-     _obj/ast_desugar.bc \
-     _obj/dsl.bc \
-     _obj/absl.bc \
-     _obj/namer.bc \
-     _obj/resolver.bc \
-     _obj/cfg.bc \
-     _obj/infer.bc \
-     _obj/serialize.bc \
-     _obj/lizard.bc \
+     $objdir/common.bc \
+     $objdir/core.bc \
+     $objdir/payload.bc \
+     $objdir/parser.bc \
+     $objdir/ast.bc \
+     $objdir/ast_desugar.bc \
+     $objdir/dsl.bc \
+     $objdir/absl.bc \
+     $objdir/namer.bc \
+     $objdir/resolver.bc \
+     $objdir/cfg.bc \
+     $objdir/infer.bc \
+     $objdir/serialize.bc \
+     $objdir/lizard.bc \
      -s EXPORT_NAME="Sorbet" \
      -s MODULARIZE=1 \
      -s 'EXPORTED_FUNCTIONS=["_typecheck"]' \
