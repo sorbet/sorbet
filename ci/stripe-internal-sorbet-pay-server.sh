@@ -113,6 +113,16 @@ if [ "$RECORD_STATS" ]; then
     veneur-emit -hostport veneur-srv.service.consul:8200 -debug -timing "$t_user"s -name ruby_typer.payserver.prod_run.cpu_seconds
 fi
 
+(
+    cd -
+    cp bazelrc-jenkins .bazelrc
+
+    # Ship a version with debug assertions and counters, as well.
+    /usr/local/bin/junit-script-output \
+        release-build \
+        bazel build main:sorbet --config=release --config=forcedebug
+    cp bazel-bin/main/sorbet /build/bin/sorbet.dbg
+)
 
 
 # Run 2: Make sure we don't crash on all of pay-server with ASAN on

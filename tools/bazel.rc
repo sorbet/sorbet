@@ -44,18 +44,19 @@ build:release --config=lto
 build:release --config=more-static
 build:release --stamp
 
-
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
 # intentionally does not reuse --config=debugsymbols because we want to have a sandboxed build
-build:ci --copt=-DFORCE_DEBUG
+build:ci --config forcedebug
 build:ci --copt=-g3
-build:ci --cxxopt=-DFORCE_DEBUG
 build:ci --cxxopt=-g3
 build:ci --config=sanitize
 build:ci --copt=-O2
 build:ci --cxxopt=-O2
 build:ci --config=debugsymbols
 build:ci --config=nopie
+
+build:forcedebug --copt=-DFORCE_DEBUG
+build:forcedebug --cxxopt=-DFORCE_DEBUG
 
 # Used to build --stamp build that contains version and build time.
 build --workspace_status_command=tools/buildstamp/get_workspace_status
@@ -87,9 +88,9 @@ build:sanitize --define unsanitized=false
 # the fact that bazel uses $CC as the linker even for C++.
 build:sanitize --features=force-libubsan
 
-build:tstan --copt=-fsanitize=thread
-build:tstan --cxxopt==-fsanitize=thread
-build:tstan --linkopt=-fsanitize=thread
+build:tsan --copt=-fsanitize=thread
+build:tsan --cxxopt==-fsanitize=thread
+build:tsan --linkopt=-fsanitize=thread
 build:sanitize --define unsanitized=false
 
 # Build optimized for executable size. Can be faster if size of executable code is a bottleneck.
