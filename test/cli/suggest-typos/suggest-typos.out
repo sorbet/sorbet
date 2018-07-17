@@ -1,0 +1,7 @@
+-e:1: Method `to_` does not exist on `Integer` component of `Integer(1)` http://go/e/7003
+     1 |1.to_
+        ^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L541: Did you mean: `to_c`?
+     541 |  def to_c(); end
+            ^^^^^^^^^^
+Errors: 1

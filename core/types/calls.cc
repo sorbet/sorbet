@@ -386,11 +386,12 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
             if (fullType.get() != this) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", fun.data(ctx).toString(ctx),
                             this->show(ctx), fullType->show(ctx));
-                if (this->symbol == Symbols::NilClass()) {
-                    e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before calling the function."));
-                }
             } else {
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
+            }
+            if (fullType.get() != this && this->symbol == Symbols::NilClass()) {
+                e.addErrorSection(core::ErrorSection("You could wrap it in `T.must()` before calling the function."));
+            } else {
                 auto alternatives = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;
