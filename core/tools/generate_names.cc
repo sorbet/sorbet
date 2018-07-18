@@ -236,6 +236,7 @@ NameDef names[] = {
 
     {"is_a_p", "is_a?", Infer | CFG},
     {"kind_of", "kind_of?", Infer},
+    {"lessThan", "<", Infer},
     {"eqeq", "==", Infer},
 
     // methods that are known by tuple and\or shape types

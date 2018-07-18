@@ -467,6 +467,18 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
                 e.setHeader("Hard assert is always false");
             }
         }
+    } else if (send->fun == core::Names::lessThan()) {
+        core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
+        core::TypeAndOrigins argType = getTypeAndOrigin(ctx, send->args[0]);
+        auto *argClass = core::cast_type<core::ClassType>(argType.type.get());
+        if (!argClass || !recvKlass.type->derivesFrom(ctx, core::Symbols::Class()) ||
+            !argClass->symbol.data(ctx).derivesFrom(ctx, core::Symbols::Class())) {
+            return;
+        }
+        auto &whoKnows = getKnowledge(local);
+        whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, argType.type);
+        whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv, argType.type);
+        whoKnows.sanityCheck();
     }
 }
 
