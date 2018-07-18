@@ -7,7 +7,6 @@ class C; end;
 sig(x: T.any(B, C)).void
 def baz(x)
   if x.is_a?(A)
-    d = T.let(x, B)
-    puts d
+    T.assert_type!(x, B)
   end
 end
