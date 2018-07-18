@@ -546,12 +546,16 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
             continue;
         }
         core::TypeAndOrigins tp = getTypeAndOrigin(ctx, typeTested.first);
-        tp.origins.emplace_back(loc);
         if (tp.type->isUntyped()) { // this is actually incorrect, as it may be some more exact type, but this rule
             // makes it easier to migrate code
             tp.type = typeTested.second;
+            tp.origins.emplace_back(loc);
         } else {
-            tp.type = core::Types::all(ctx, tp.type, typeTested.second);
+            auto lubbed = core::Types::all(ctx, tp.type, typeTested.second);
+            if (tp.type != lubbed) {
+                tp.origins.emplace_back(loc);
+                tp.type = lubbed;
+            }
             if (tp.type->isBottom()) {
                 isDead = true;
                 setTypeAndOrigin(typeTested.first, tp);
