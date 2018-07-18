@@ -343,6 +343,11 @@ void Environment::clearKnowledge(core::Context ctx, core::LocalVariable reassign
     knownTruthy[fnd - vars.begin()] = false;
 }
 
+bool isSingleton(core::Context ctx, core::SymbolRef sym) {
+    // TODO: when we have support for enums, we should add them here.
+    return sym == core::Symbols::NilClass() || sym == core::Symbols::FalseClass() || sym == core::Symbols::TrueClass();
+}
+
 void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
                                   KnowledgeFilter &knowledgeFilter) {
     if (send->fun == core::Names::bang()) {
@@ -413,7 +418,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             }
             whoKnows.sanityCheck();
         }
-    } else if (send->fun == core::Names::eqeq()) {
+    } else if (send->fun == core::Names::eqeq() || send->fun == core::Names::neq()) {
         if (!knowledgeFilter.isNeeded(local)) {
             return;
         }
@@ -421,13 +426,30 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         core::TypeAndOrigins tp1 = getTypeAndOrigin(ctx, send->args[0]);
         core::TypeAndOrigins tp2 = getTypeAndOrigin(ctx, send->recv);
 
+        auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy : whoKnows.falsy;
+        auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy : whoKnows.truthy;
+
         ENFORCE(tp1.type.get() != nullptr);
         ENFORCE(tp2.type.get() != nullptr);
         if (!tp1.type->isUntyped()) {
-            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv, tp1.type);
+            truthy.mutate().yesTypeTests.emplace_back(send->recv, tp1.type);
         }
         if (!tp2.type->isUntyped()) {
-            whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0], tp2.type);
+            truthy.mutate().yesTypeTests.emplace_back(send->args[0], tp2.type);
+        }
+        if (auto s = core::cast_type<core::ClassType>(tp1.type.get())) {
+            // check if s is a singleton. in this case we can learn that
+            // a failed comparison means that type test would also fail
+            if (isSingleton(ctx, s->symbol)) {
+                falsy.mutate().noTypeTests.emplace_back(send->recv, tp1.type);
+            }
+        }
+        if (auto s = core::cast_type<core::ClassType>(tp2.type.get())) {
+            // check if s is a singleton. in this case we can learn that
+            // a failed comparison means that type test would also fail
+            if (isSingleton(ctx, s->symbol)) {
+                falsy.mutate().noTypeTests.emplace_back(send->args[0], tp2.type);
+            }
         }
         whoKnows.sanityCheck();
     } else if (send->fun == core::Names::tripleEq()) {

@@ -238,6 +238,7 @@ NameDef names[] = {
     {"kind_of", "kind_of?", Infer},
     {"lessThan", "<", Infer},
     {"eqeq", "==", Infer},
+    {"neq", "!=", Infer},
 
     // methods that are known by tuple and\or shape types
     {"freeze", Core},
