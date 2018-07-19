@@ -168,6 +168,9 @@ class ::<root> < ::Object () @ test/testdata/dsl/prop.rb:2
       argument ::AdvancedODM#type=#arg0<> -> String @ test/testdata/dsl/prop.rb:33
   class ::ForeignClass < ::Object () @ test/testdata/dsl/prop.rb:25
   class ::NotAODM < ::Object () @ test/testdata/dsl/prop.rb:2
+    class ::NotAODM::<Class:Default> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:12
+    class ::NotAODM::<Class:IntegerParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:10
+    class ::NotAODM::<Class:StringParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:11
     class ::NotAODM::Default < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
     class ::NotAODM::IntegerParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:10
     class ::NotAODM::StringParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:11
@@ -175,7 +178,10 @@ class ::<root> < ::Object () @ test/testdata/dsl/prop.rb:2
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/dsl/prop.rb:73
   class ::Opus () @ ???
+    class ::Opus::<Class:Param> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:12
     class ::Opus::Param < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
+      class ::Opus::Param::<Class:CaseParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:12
+      class ::Opus::Param::<Class:ParamSpecsParam> < ::RubyTyper::<Class:StubClass> () @ test/testdata/dsl/prop.rb:12
       class ::Opus::Param::CaseParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
       class ::Opus::Param::ParamSpecsParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
   class ::PropHelpers < ::Object () @ test/testdata/dsl/prop.rb:59

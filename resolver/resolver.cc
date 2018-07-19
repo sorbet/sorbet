@@ -247,6 +247,7 @@ private:
             stub.data(ctx).superClass = core::Symbols::StubClass();
             stub.data(ctx).resultType = core::Types::untyped();
             stub.data(ctx).setIsModule(false);
+            stub.data(ctx).singletonClass(ctx); // force singleton class into existence.
             bool resolved = resolveJob(ctx, job, typeAliases, true);
             return resolved;
         }

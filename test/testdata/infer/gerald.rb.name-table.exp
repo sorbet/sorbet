@@ -1,13 +1,19 @@
 class ::<root> < ::Object () @ test/testdata/infer/gerald.rb:2
   class ::Chalk () @ ???
+    class ::Chalk::<Class:Log> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:18
     class ::Chalk::Log < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:18
   class ::Opus () @ ???
+    class ::Opus::<Class:AutogenLoader> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:3
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/gerald.rb:5
     class ::Opus::AutogenLoader < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:3
     class ::Opus::CIBot () @ test/testdata/infer/gerald.rb:5
+      class ::Opus::CIBot::<Class:Actions> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:147
       class ::Opus::CIBot::<Class:Gerald> < ::Module () @ test/testdata/infer/gerald.rb:5
+      class ::Opus::CIBot::<Class:Model> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:24
       class ::Opus::CIBot::Actions < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+        class ::Opus::CIBot::Actions::<Class:OpenAPI> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:147
         class ::Opus::CIBot::Actions::OpenAPI < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
+          class ::Opus::CIBot::Actions::OpenAPI::<Class:SPEC_PATH> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:147
           class ::Opus::CIBot::Actions::OpenAPI::SPEC_PATH < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:147
       class ::Opus::CIBot::Gerald (<constant:BasicObject>) @ test/testdata/infer/gerald.rb:5
         class ::Opus::CIBot::Gerald::<Class:Diff> < ::<Class:Object> () @ test/testdata/infer/gerald.rb:111
@@ -106,6 +112,7 @@ class ::<root> < ::Object () @ test/testdata/infer/gerald.rb:2
               method ::Opus::CIBot::Gerald::Matcher#match#<block>#<block> () @ test/testdata/infer/gerald.rb:44
           static-field ::Opus::CIBot::Gerald::Matcher#MAX_AFFECTED_FILES -> Integer(100) @ test/testdata/infer/gerald.rb:20
       class ::Opus::CIBot::Model < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
+        class ::Opus::CIBot::Model::<Class:GeraldRule> < ::RubyTyper::<Class:StubClass> () @ test/testdata/infer/gerald.rb:24
         class ::Opus::CIBot::Model::GeraldRule < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/infer/gerald.rb:24
   method #<static-init> () @ test/testdata/infer/gerald.rb:2
 

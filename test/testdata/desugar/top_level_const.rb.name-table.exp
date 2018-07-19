@@ -1,4 +1,5 @@
 class ::<root> < ::Object () @ test/testdata/desugar/top_level_const.rb:2
+  class ::<Class:TopLevelConst> < ::RubyTyper::<Class:StubClass> () @ test/testdata/desugar/top_level_const.rb:2
   class ::TopLevelConst < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/desugar/top_level_const.rb:2
   method #<static-init> () @ test/testdata/desugar/top_level_const.rb:2
 
