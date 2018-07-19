@@ -17,3 +17,6 @@ Read: {"jsonrpc":"2.0","id":7,"method":"textDocument/hover","params":{"textDocum
 Write: {"jsonrpc":"2.0","id":7,"result":{"contents":{"kind":"markdown","value":"```Integer <Class:BigFoo>#bar(num1: Integer, num2: String)```"}}}
 Read: {"jsonrpc":"2.0","id":8,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/commands/foo.rb"},"position":{"line":34,"character":6}}}
 Write: {"jsonrpc":"2.0","id":8,"result":{"contents":{"kind":"markdown","value":"```String String#to_s()``` ```String Integer#to_s()```"}}}
+Read: {"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/AAAAA.rb","version":3},"contentChanges":[{"text":"# typed: true\nclass A\n    def baz()\n        A\n        1\n    end\n\nend"}]}}
+Read: {"jsonrpc":"2.0","id":1,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/AAAAA.rb"},"position":{"line":3,"character":8}}}
+Write: {"jsonrpc":"2.0","id":1,"result":{"contents":{"kind":"markdown","value":"<Class:A>"}}}

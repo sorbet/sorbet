@@ -223,6 +223,9 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
     }
 }
 void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
+    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+        return;
+    }
     for (auto &it : cfg.basicBlocks) {
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
