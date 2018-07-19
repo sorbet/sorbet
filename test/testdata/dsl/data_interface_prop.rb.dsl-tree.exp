@@ -16,9 +16,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    self(<constant:<todo sym>>).sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:Other>))
+    self(<constant:<todo sym>>).sig().returns(::T.nilable(<emptyTree>::<constant:Other>))
 
-    def foo_<<constant:<todo sym>>>(*opts:)
+    def foo_<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
   end

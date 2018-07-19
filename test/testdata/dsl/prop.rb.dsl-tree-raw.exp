@@ -2835,22 +2835,6 @@ ClassDef{
             name = sig
             block = nullptr
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
-                      }
-                      name = untyped
-                      block = nullptr
-                      args = [
-                      ]
-                    }
-                  ]
-                ]
-              }
             ]
           }
           name = returns
@@ -2875,10 +2859,7 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_<<constant:<todo sym>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = opts
-            } } }]
+          args = []
           rhs = Send{
             recv = Ident{
               symbol = <constant:T>
@@ -3027,22 +3008,6 @@ ClassDef{
             name = sig
             block = nullptr
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
-                      }
-                      name = untyped
-                      block = nullptr
-                      args = [
-                      ]
-                    }
-                  ]
-                ]
-              }
             ]
           }
           name = returns
@@ -3067,10 +3032,7 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_lazy_<<constant:<todo sym>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = opts
-            } } }]
+          args = []
           rhs = Send{
             recv = Ident{
               symbol = <constant:T>
@@ -3219,22 +3181,6 @@ ClassDef{
             name = sig
             block = nullptr
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
-                      }
-                      name = untyped
-                      block = nullptr
-                      args = [
-                      ]
-                    }
-                  ]
-                ]
-              }
             ]
           }
           name = returns
@@ -3259,10 +3205,7 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_proc_<<constant:<todo sym>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = opts
-            } } }]
+          args = []
           rhs = Send{
             recv = Ident{
               symbol = <constant:T>
@@ -3411,22 +3354,6 @@ ClassDef{
             name = sig
             block = nullptr
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
-                      }
-                      name = untyped
-                      block = nullptr
-                      args = [
-                      ]
-                    }
-                  ]
-                ]
-              }
             ]
           }
           name = returns
@@ -3447,10 +3374,7 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_invalid_<<constant:<todo sym>>>
-          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
-              kind = Local
-              name = opts
-            } } }]
+          args = []
           rhs = Send{
             recv = Ident{
               symbol = <constant:T>

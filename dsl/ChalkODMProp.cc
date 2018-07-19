@@ -239,13 +239,10 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // def $fk_method(**opts)
         //  T.unsafe(nil)
         // end
-        stats.emplace_back(
-            ast::MK::Sig1(loc, ast::MK::Symbol(loc, core::Names::opts()), ast::MK::Untyped(loc), move(type)));
+        stats.emplace_back(ast::MK::Sig0(loc, move(type)));
 
-        unique_ptr<ast::Expression> arg =
-            ast::MK::RestArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, core::Names::opts())));
-        stats.emplace_back(ast::MK::Method1(loc, fk_method, move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                            ast::MethodDef::DSLSynthesized));
+        stats.emplace_back(
+            ast::MK::Method0(loc, fk_method, ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
     }
 
     return stats;
