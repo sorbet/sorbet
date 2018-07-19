@@ -399,9 +399,10 @@ struct typecheck_thread_result {
 };
 
 vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
-                                            const options::Options &opts, shared_ptr<spdlog::logger> logger) {
+                                            const options::Options &opts, shared_ptr<spdlog::logger> logger,
+                                            bool skipConfigatron) {
     try {
-        {
+        if (!skipConfigatron) {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
             core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
             namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);

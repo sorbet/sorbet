@@ -21,10 +21,9 @@ index(std::unique_ptr<core::GlobalState> &gs, std::vector<std::string> frs, std:
       const options::Options &opts, WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore,
       std::shared_ptr<spdlog::logger> logger);
 
-std::vector<std::unique_ptr<ast::Expression>> resolve(core::GlobalState &gs,
-                                                      std::vector<std::unique_ptr<ast::Expression>> what,
-                                                      const options::Options &opts,
-                                                      std::shared_ptr<spdlog::logger> logger);
+std::vector<std::unique_ptr<ast::Expression>>
+resolve(core::GlobalState &gs, std::vector<std::unique_ptr<ast::Expression>> what, const options::Options &opts,
+        std::shared_ptr<spdlog::logger> logger, bool skipConfigatron = false);
 
 std::vector<std::unique_ptr<ast::Expression>> typecheck(std::unique_ptr<core::GlobalState> &gs,
                                                         std::vector<std::unique_ptr<ast::Expression>> what,

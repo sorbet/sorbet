@@ -912,6 +912,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
         fileq->push(move(copy), 1);
     }
 
+    logger->debug("Computing state hashes for {} files", files.size());
+
     res.resize(files.size());
 
     shared_ptr<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>> resultq =
@@ -942,7 +944,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     vector<unique_ptr<ast::Expression>> single;
                     unique_ptr<KeyValueStore> kvstore;
                     single.emplace_back(pipeline::indexOne(opts, *lgs, fref, kvstore, logger));
-                    pipeline::resolve(*lgs, move(single), opts, logger);
+                    pipeline::resolve(*lgs, move(single), opts, logger, true);
                     threadResult.emplace_back(make_pair(job, lgs->hash()));
                 }
             }
@@ -1102,8 +1104,8 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
             indexed[id] = move(t);
             t = indexed[id]->deepCopy();
         }
-        pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(updatedIndexed), opts, logger), opts, workers,
-                            logger);
+        pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(updatedIndexed), opts, logger, false), opts,
+                            workers, logger);
     } else {
         runSlowPath(changedFiles);
     }
