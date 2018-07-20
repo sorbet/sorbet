@@ -304,7 +304,7 @@ private:
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx).show(ctx), resolved.data(ctx).show(ctx));
             }
-            resolved = core::Symbols::StubClass();
+            return true;
         }
 
         if (job.isSuperclass) {

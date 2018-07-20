@@ -1,6 +1,6 @@
 class ::<root> < ::Object () @ test/testdata/namer/circular_mixin.rb:2
   class ::<Class:A> < ::Module () @ test/testdata/namer/circular_mixin.rb:2
   class ::<Class:B> < ::Module () @ test/testdata/namer/circular_mixin.rb:3
-  class ::A (<constant:BasicObject>, <constant:B>, <constant:StubClass>) @ test/testdata/namer/circular_mixin.rb:11
-  class ::B (<constant:BasicObject>, <constant:StubClass>) @ test/testdata/namer/circular_mixin.rb:7
+  class ::A (<constant:BasicObject>, <constant:B>) @ test/testdata/namer/circular_mixin.rb:11
+  class ::B (<constant:BasicObject>) @ test/testdata/namer/circular_mixin.rb:7
 
