@@ -303,7 +303,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
 
     vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.maxBasicBlockId);
     vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.maxBasicBlockId);
-    vector<unordered_set<core::LocalVariable>> kills_by_block(cfg.maxBasicBlockId);
+    vector<unordered_set<core::LocalVariable>> dead_by_block(cfg.maxBasicBlockId);
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
@@ -330,9 +330,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         }
     }
 
-    for (auto &kills : RnW.kills) {
-        for (BasicBlock *bb : kills.second) {
-            kills_by_block[bb->id].insert(kills.first);
+    for (auto &dead : RnW.dead) {
+        for (BasicBlock *bb : dead.second) {
+            dead_by_block[bb->id].insert(dead.first);
         }
     }
 
@@ -355,13 +355,13 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
             }
             // Any variable that we write and do not read is dead on entry to
             // this block, and we do not require it.
-            for (auto kill : kills_by_block[bb->id]) {
+            for (auto dead : dead_by_block[bb->id]) {
                 // TODO(nelhage) We can't erase for variables inside loops, due
                 // to how our "pinning" type inference works. We can remove this
                 // inner condition when we get a better type inference
                 // algorithm.
-                if (bb->outerLoops <= cfg.minLoops[kill]) {
-                    upper_bounds1[bb->id].erase(kill);
+                if (bb->outerLoops <= cfg.minLoops[dead]) {
+                    upper_bounds1[bb->id].erase(dead);
                 }
             }
 

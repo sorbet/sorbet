@@ -36,16 +36,11 @@ CFG::CFG() {
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
     unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> kills;
+    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> dead;
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
             writes[bind.bind].insert(bb.get());
-            auto fnd = reads.find(bind.bind);
-            if (fnd == reads.end() || fnd->second.count(bb.get()) == 0) {
-                kills[bind.bind].insert(bb.get());
-            }
-
             /*
              * When we write to an alias, we rely on the type information being
              * propagated through block arguments from the point of
@@ -72,12 +67,17 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
                 reads[v->value].insert(bb.get());
             }
+
+            auto fnd = reads.find(bind.bind);
+            if (fnd == reads.end() || fnd->second.count(bb.get()) == 0) {
+                dead[bind.bind].insert(bb.get());
+            }
         }
         if (bb->bexit.cond.exists()) {
             reads[bb->bexit.cond].insert(bb.get());
         }
     }
-    return CFG::ReadsAndWrites{move(reads), move(writes), move(kills)};
+    return CFG::ReadsAndWrites{move(reads), move(writes), move(dead)};
 }
 
 void CFG::sanityCheck(core::Context ctx) {

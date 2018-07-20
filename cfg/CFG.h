@@ -108,7 +108,12 @@ public:
     struct ReadsAndWrites {
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
         std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
-        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> kills;
+
+        // The "dead" set reports, for each block, variables that are *only*
+        // read in that block after being written; they are thus dead on entry,
+        // which we take advantage of when building dataflow information for
+        // inference.
+        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 
