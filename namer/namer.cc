@@ -120,7 +120,7 @@ class NameInserter {
 
         if (send->args.empty()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument");
+                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx).show(ctx));
             }
             return false;
         }
