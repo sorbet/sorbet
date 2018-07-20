@@ -54,7 +54,8 @@ const char *set_str = "Set";
 const char *struct_str = "Struct";
 const char *file_str = "File";
 const char *ruby_typer_str = "RubyTyper";
-const char *stub_str = "StubClass";
+const char *stubClass_str = "StubClass";
+const char *stubModule_str = "StubModule";
 const char *configatron_str = "Configatron";
 const char *store_str = "Store";
 const char *root_store_str = "RootStore";
@@ -160,7 +161,8 @@ void GlobalState::initEmpty() {
     SymbolRef struct_id = synthesizeClass(struct_str);
     SymbolRef file_id = synthesizeClass(file_str);
     SymbolRef ruby_typer_id = synthesizeClass(ruby_typer_str, 0, true);
-    SymbolRef stub_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(stub_str));
+    SymbolRef stubClass_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(stubClass_str));
+    SymbolRef stubModule_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(stubModule_str));
     SymbolRef T_Enumerable_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(enumerable_str));
     SymbolRef T_Range_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(range_str));
     SymbolRef T_Set_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(set_str));
@@ -219,7 +221,8 @@ void GlobalState::initEmpty() {
     ENFORCE(struct_id == Symbols::Struct());
     ENFORCE(file_id == Symbols::File());
     ENFORCE(ruby_typer_id == Symbols::RubyTyper());
-    ENFORCE(stub_id == Symbols::StubClass());
+    ENFORCE(stubClass_id == Symbols::StubClass());
+    ENFORCE(stubModule_id == Symbols::StubModule());
     ENFORCE(T_Enumerable_id == Symbols::T_Enumerable());
     ENFORCE(configatron_id == Symbols::Configatron());
     ENFORCE(configatron_store_id == Symbols::Configatron_Store());
@@ -285,6 +288,9 @@ void GlobalState::initEmpty() {
     arg.data(*this).resultType = Types::Integer();
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::untyped();
+
+    // Mark StubModule is Module.
+    stubModule_id.data(*this).setIsModule(true);
 
     int reservedCount = 0;
 

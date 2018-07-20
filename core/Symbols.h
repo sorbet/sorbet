@@ -757,67 +757,71 @@ public:
         return SymbolRef(nullptr, 37);
     }
 
-    static SymbolRef T_Enumerable() {
+    static SymbolRef StubModule() {
         return SymbolRef(nullptr, 38);
     }
 
-    static SymbolRef T_Range() {
+    static SymbolRef T_Enumerable() {
         return SymbolRef(nullptr, 39);
     }
 
-    static SymbolRef T_Set() {
+    static SymbolRef T_Range() {
         return SymbolRef(nullptr, 40);
     }
 
-    static SymbolRef Configatron() {
+    static SymbolRef T_Set() {
         return SymbolRef(nullptr, 41);
     }
 
-    static SymbolRef Configatron_Store() {
+    static SymbolRef Configatron() {
         return SymbolRef(nullptr, 42);
     }
 
-    static SymbolRef Configatron_RootStore() {
+    static SymbolRef Configatron_Store() {
         return SymbolRef(nullptr, 43);
     }
 
-    static SymbolRef Sinatra() {
+    static SymbolRef Configatron_RootStore() {
         return SymbolRef(nullptr, 44);
     }
 
-    static SymbolRef SinatraBase() {
+    static SymbolRef Sinatra() {
         return SymbolRef(nullptr, 45);
     }
 
-    static SymbolRef void_() {
+    static SymbolRef SinatraBase() {
         return SymbolRef(nullptr, 46);
+    }
+
+    static SymbolRef void_() {
+        return SymbolRef(nullptr, 47);
     }
 
     // Synthetic symbol used by resolver to mark type alias assignments.
     static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 47);
+        return SymbolRef(nullptr, 48);
     }
 
     static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 48);
-    }
-    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 49);
     }
-    static SymbolRef Chalk_Tools_Accessible() {
+    static SymbolRef Chalk_Tools() {
         return SymbolRef(nullptr, 50);
     }
-
-    static SymbolRef T_Generic() {
+    static SymbolRef Chalk_Tools_Accessible() {
         return SymbolRef(nullptr, 51);
     }
 
-    static SymbolRef Tuple() {
+    static SymbolRef T_Generic() {
         return SymbolRef(nullptr, 52);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Tuple() {
         return SymbolRef(nullptr, 53);
+    }
+
+    static SymbolRef Subclasses() {
+        return SymbolRef(nullptr, 54);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
