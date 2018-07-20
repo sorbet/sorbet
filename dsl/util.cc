@@ -17,6 +17,11 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
         if (!dupRecv) {
             return nullptr;
         }
+        if (send->fun == core::Names::enum_()) {
+            // T.enum() is weird, and accepts values instead of types. Just copy
+            // it blindly through.
+            return send->deepCopy();
+        }
         for (auto &arg : send->args) {
             auto dupArg = dupType(arg.get());
             if (!dupArg) {
