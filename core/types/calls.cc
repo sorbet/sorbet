@@ -762,6 +762,20 @@ SymbolRef unwrapSymbol(shared_ptr<Type> type) {
 }
 namespace {
 
+// Duplicated in infer/environment.cc. We should maybe have a better place to
+// share code between these two files.
+shared_ptr<Type> dropConstructor(core::Context ctx, Loc loc, shared_ptr<Type> tp) {
+    if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
+        if (!mt->wrapped->isUntyped()) {
+            if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
+                e.setHeader("Unsupported usage of bare type");
+            }
+        }
+        return core::Types::untyped();
+    }
+    return tp;
+}
+
 class T_untyped : public Symbol::IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
@@ -980,7 +994,7 @@ public:
         }
         vector<shared_ptr<Type>> elems;
         for (auto &elem : args) {
-            elems.push_back(elem.type);
+            elems.push_back(dropConstructor(ctx, elem.origins.front(), elem.type));
         }
         return TupleType::build(ctx, elems);
     }
