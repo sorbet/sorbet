@@ -62,8 +62,8 @@ class Range < Object
   def include?(obj); end
 
   sig(
-      _begin: Integer,
-      _end: Integer,
+      _begin: Elem,
+      _end: Elem,
       exclude_end: T.any(TrueClass, FalseClass),
   )
   .returns(Object)
