@@ -124,13 +124,13 @@ class Hash < Object
   def fetch(arg0, arg1=_, &blk); end
 
   sig(
-      arg0: Elem,
+      arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_key?(arg0); end
 
   sig(
-      arg0: Elem,
+      arg0: V,
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_value?(arg0); end
@@ -160,13 +160,13 @@ class Hash < Object
   def keep_if(&blk); end
 
   sig(
-      arg0: Elem,
+      arg0: V,
   )
   .returns(T.nilable(K))
   def key(arg0); end
 
   sig(
-      arg0: Elem,
+      arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
   def key?(arg0); end
@@ -178,7 +178,7 @@ class Hash < Object
   def length(); end
 
   sig(
-      arg0: Elem,
+      arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
   def member?(arg0); end
@@ -251,7 +251,7 @@ class Hash < Object
   def to_s(); end
 
   sig(
-      arg0: Elem,
+      arg0: V,
   )
   .returns(T.any(TrueClass, FalseClass))
   def value?(arg0); end
