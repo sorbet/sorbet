@@ -1,6 +1,7 @@
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
@@ -11,6 +12,7 @@ test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg
     test/cli/errors/errors.rb:9:
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
+
 test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     16 |    foo("foo")
             ^^^^^^^^^^
@@ -21,6 +23,7 @@ test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argume
     test/cli/errors/errors.rb:16:
     16 |    foo("foo")
                 ^^^^^
+
 test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
     28 |    bar(a)
             ^^^^^^
@@ -42,6 +45,7 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
@@ -52,6 +56,7 @@ test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg
     test/cli/errors/errors.rb:9:
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
+
 test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     16 |    foo("foo")
             ^^^^^^^^^^
@@ -62,6 +67,7 @@ test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argume
     test/cli/errors/errors.rb:16:
     16 |    foo("foo")
                 ^^^^^
+
 test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
     28 |    bar(a)
             ^^^^^^
@@ -83,6 +89,7 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
@@ -93,6 +100,7 @@ test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg
     test/cli/errors/errors.rb:9:
      9 |  sig(arg: Integer).returns(NilClass)
               ^^^^
+
 test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     16 |    foo("foo")
             ^^^^^^^^^^
@@ -103,6 +111,7 @@ test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argume
     test/cli/errors/errors.rb:16:
     16 |    foo("foo")
                 ^^^^^
+
 test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
     28 |    bar(a)
             ^^^^^^

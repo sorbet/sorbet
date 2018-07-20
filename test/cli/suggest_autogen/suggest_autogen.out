@@ -1,9 +1,11 @@
 test/cli/suggest_autogen/suggest_autogen.rb:3: Unable to resolve constant `Foo` http://go/e/5002
      3 |Foo::Bar::SUBCLASSES
         ^^^
+
 test/cli/suggest_autogen/suggest_autogen.rb:3: Unable to resolve constant `Bar` http://go/e/5002
      3 |Foo::Bar::SUBCLASSES
         ^^^^^^^^
+
 test/cli/suggest_autogen/suggest_autogen.rb:3: Unable to resolve constant `SUBCLASSES` http://go/e/5002
      3 |Foo::Bar::SUBCLASSES
         ^^^^^^^^^^^^^^^^^^^^

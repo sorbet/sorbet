@@ -30,6 +30,7 @@ private:
     std::thread::id owner;
     std::unordered_map<core::FileRef, std::vector<ErrorQueueMessage>> collected;
     ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
+    std::atomic<bool> printedAtLeastOneError{false};
 
     void renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
 

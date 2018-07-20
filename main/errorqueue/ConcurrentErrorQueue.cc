@@ -42,6 +42,9 @@ void ConcurrentErrorQueue::renderForFile(core::FileRef whatFile, stringstream &c
     }
     for (auto &error : it->second) {
         auto &out = error.error->isCritical ? critical : nonCritical;
+        if (out.tellp() != 0) {
+            out << '\n';
+        }
         out << error.text;
     }
     collected[whatFile].clear();
@@ -75,10 +78,20 @@ void ConcurrentErrorQueue::flushErrors(bool all) {
     }
 
     if (critical.tellp() != 0) {
-        this->logger.log(spdlog::level::critical, "{}", critical.str());
+        if (!printedAtLeastOneError) {
+            this->logger.log(spdlog::level::critical, "{}", critical.str());
+            printedAtLeastOneError = true;
+        } else {
+            this->logger.log(spdlog::level::err, "\n{}", nonCritical.str());
+        }
     }
     if (nonCritical.tellp() != 0) {
-        this->logger.log(spdlog::level::err, "{}", nonCritical.str());
+        if (!printedAtLeastOneError) {
+            this->logger.log(spdlog::level::err, "{}", nonCritical.str());
+            printedAtLeastOneError = true;
+        } else {
+            this->logger.log(spdlog::level::err, "\n{}", nonCritical.str());
+        }
     }
 }
 

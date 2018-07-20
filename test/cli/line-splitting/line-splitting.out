@@ -10,6 +10,7 @@
     13 |  12 +
     14 |  13 + 
     15 |  14)
+
 -e:17: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
     17 | foo(1 +
     18 |  2 +
@@ -20,6 +21,7 @@
     23 |  7 + 
     24 |  8 +
     25 |  9)
+
 -e:27: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
     27 | foo(1 +
     28 |  2 +
@@ -31,6 +33,7 @@
     34 |  8 +
     35 |  9 +
     36 |  10)
+
 -e:38: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
     38 | foo(1 +
     39 |  2 +

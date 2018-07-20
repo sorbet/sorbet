@@ -2,6 +2,7 @@ test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilC
      4 |foo[0]
         ^^^^^^
   You could wrap it in `T.must()` before calling the function.
+
 test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `String` for argument `arg0` http://go/e/7002
      6 |"hi" + foo
         ^^^^^^^^^^
