@@ -1070,14 +1070,14 @@ void GlobalState::flushErrorCount() {
 }
 
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
-    if (loc.file.exists()) {
-        loc.file.data(*this).hadErrors_ = true;
-    }
     bool report = shouldReportErrorOn(loc, what);
     if (report) {
         histogramAdd("error", what.code, 1);
     }
     report = (what == errors::Internal::InternalError) || (report && !this->silenceErrors);
+    if (report && loc.file.exists()) {
+        loc.file.data(*this).hadErrors_ = true;
+    }
     return ErrorBuilder(*this, report, loc, what);
 }
 
