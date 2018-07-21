@@ -1,6 +1,6 @@
 class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
-  class ::<Class:Foo> < ::<Class:Object> () @ test/testdata/resolver/alias.rb:1
-  class ::Foo < ::Object () @ test/testdata/resolver/alias.rb:1
+  class ::<Class:Foo> < ::<Class:Object> () @ test/testdata/resolver/alias.rb:2
+  class ::Foo < ::Object () @ test/testdata/resolver/alias.rb:2
     method ::Foo#address () -> NilClass | ShapeType {
           Symbol(:"line1") => String | NilClass
           Symbol(:"line2") => String | NilClass
@@ -8,12 +8,12 @@ class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbe
           Symbol(:"state") => String | NilClass
           Symbol(:"postal_code") => String | NilClass
           Symbol(:"country") => String | NilClass
-        } @ test/testdata/resolver/alias.rb:25
-    method ::Foo#any () @ test/testdata/resolver/alias.rb:29
-    method ::Foo#bar (a) -> Integer @ test/testdata/resolver/alias.rb:4
-      argument ::Foo#bar#a<> -> Integer @ test/testdata/resolver/alias.rb:3
-    method ::Foo#react () -> String @ test/testdata/resolver/alias.rb:11
-    static-field ::Foo#A -> T.untyped @ test/testdata/resolver/alias.rb:2
-    static-field ::Foo#ADDRESS_TYPE -> T.untyped @ test/testdata/resolver/alias.rb:15
-    static-field ::Foo#Reactions -> T.untyped @ test/testdata/resolver/alias.rb:8
+        } @ test/testdata/resolver/alias.rb:26
+    method ::Foo#any () @ test/testdata/resolver/alias.rb:30
+    method ::Foo#bar (a) -> Integer @ test/testdata/resolver/alias.rb:5
+      argument ::Foo#bar#a<> -> Integer @ test/testdata/resolver/alias.rb:4
+    method ::Foo#react () -> String @ test/testdata/resolver/alias.rb:12
+    static-field ::Foo#A -> T.untyped @ test/testdata/resolver/alias.rb:3
+    static-field ::Foo#ADDRESS_TYPE -> T.untyped @ test/testdata/resolver/alias.rb:16
+    static-field ::Foo#Reactions -> T.untyped @ test/testdata/resolver/alias.rb:9
 

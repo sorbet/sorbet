@@ -121,9 +121,9 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",         "ast-raw",       "dsl-tree",
-                                     "dsl-tree-raw", "name-table",      "name-tree",   "name-tree-raw", "cfg",
-                                     "cfg-raw",      "infer",           "typed-source"};
+unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",       "ast-raw",       "dsl-tree",
+                                     "dsl-tree-raw", "name-table",      "name-tree", "name-tree-raw", "cfg",
+                                     "cfg-raw",      "typed-source"};
 
 unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
                                                   unique_ptr<sorbet::ast::Expression> expr) {
@@ -144,10 +144,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         if (it == knownPasses.end()) {
             ADD_FAILURE() << "Unknown pass: " << exp.first;
         }
-    }
-    if (test.expectations.empty()) {
-        ADD_FAILURE_AT((test.folder + test.sourceFiles.front()).c_str(), 1)
-            << "No expectations found for: " << test.sourceFiles.front();
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
@@ -171,6 +167,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     map<string, string> got;
 
     for (auto file : files) {
+        if (file.data(ctx).source().find("# typed:") == string::npos) {
+            ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
+        }
+
         unique_ptr<sorbet::parser::Node> nodes;
         {
             sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
@@ -291,7 +291,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             if (file.data(ctx).sigil == sorbet::core::StrictLevel::Stripe) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
-                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp expectations must specify # typed:";
+                    << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
             }
         };
         // CFG
@@ -350,17 +350,12 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
-        expectation = test.expectations.find("infer");
-        if (expectation != test.expectations.end()) {
+        // If there is a tree left with a typed: pragma, run the inferencer
+        if (resolvedTree != nullptr && file.data(ctx).sigil != sorbet::core::StrictLevel::Stripe) {
             checkTree();
-            checkPragma("infer");
             CFG_Collector_and_Typer collector;
             sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
-            auto checker = test.folder + expectation->second;
-            SCOPED_TRACE(checker);
-
-            got["infer"] = "";
             auto newErrors = errorQueue->drainErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

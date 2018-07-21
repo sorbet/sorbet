@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 A, B, C = some_array
 
 class Test

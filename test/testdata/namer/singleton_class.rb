@@ -1,3 +1,4 @@
+# typed: false
 class A::B::C
 end
 

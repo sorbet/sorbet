@@ -22,5 +22,6 @@ class A
   )
   .returns(T2)
   def bad(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
+    T2.new
   end
 end

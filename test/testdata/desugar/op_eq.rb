@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 class OpEq
   def b; end
   def b=(_); end

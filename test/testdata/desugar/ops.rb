@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 def test_ops
   a || b
   c && d

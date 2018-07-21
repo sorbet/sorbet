@@ -1,3 +1,4 @@
+# typed: false
 def foo
     a += a
     a[b][c][d, e] += 3

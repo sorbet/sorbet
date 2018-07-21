@@ -1,7 +1,7 @@
 class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2
-  class ::<Class:C> < ::<Class:Object> () @ test/testdata/todo/block_in_class.rb:1
-    method ::<Class:C>#<block> (x) @ test/testdata/todo/block_in_class.rb:2
-      argument ::<Class:C>#<block>#x<> @ test/testdata/todo/block_in_class.rb:2
-  class ::C < ::Object () @ test/testdata/todo/block_in_class.rb:1
-    static-field ::C#L -> T.untyped @ test/testdata/todo/block_in_class.rb:2
+  class ::<Class:C> < ::<Class:Object> () @ test/testdata/todo/block_in_class.rb:2
+    method ::<Class:C>#<block> (x) @ test/testdata/todo/block_in_class.rb:3
+      argument ::<Class:C>#<block>#x<> @ test/testdata/todo/block_in_class.rb:3
+  class ::C < ::Object () @ test/testdata/todo/block_in_class.rb:2
+    static-field ::C#L -> T.untyped @ test/testdata/todo/block_in_class.rb:3
 

@@ -1,8 +1,8 @@
-class ::<root> < ::Object () @ test/testdata/namer/alias_cross_file__02.rb:1
-  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__02.rb:1
-  class ::<Class:TestSig> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__01.rb:1
-  class ::T1 < ::Object () @ test/testdata/namer/alias_cross_file__02.rb:1
-  class ::TestSig < ::Object () @ test/testdata/namer/alias_cross_file__01.rb:1
-    method ::TestSig#test_resolve () -> T1 @ test/testdata/namer/alias_cross_file__01.rb:3
-  static-field #T2 -> AliasType { symbol = ::T1 } @ test/testdata/namer/alias_cross_file__02.rb:2
+class ::<root> < ::Object () @ test/testdata/namer/alias_cross_file__02.rb:2
+  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__02.rb:2
+  class ::<Class:TestSig> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__01.rb:2
+  class ::T1 < ::Object () @ test/testdata/namer/alias_cross_file__02.rb:2
+  class ::TestSig < ::Object () @ test/testdata/namer/alias_cross_file__01.rb:2
+    method ::TestSig#test_resolve () -> T1 @ test/testdata/namer/alias_cross_file__01.rb:4
+  static-field #T2 -> AliasType { symbol = ::T1 } @ test/testdata/namer/alias_cross_file__02.rb:3
 

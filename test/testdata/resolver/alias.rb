@@ -1,3 +1,4 @@
+# typed: strict
 class Foo
   A = T.type_alias(Integer)
   sig(a: A).returns(Integer)

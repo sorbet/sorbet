@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 # contains miscellaneous syntactic features in order of implementation
 # in our parser.
 

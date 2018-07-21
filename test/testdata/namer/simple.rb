@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 class NormalClass
   def normal_method
   end

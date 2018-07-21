@@ -1,4 +1,4 @@
-# typed: strict
+# typed: false
 class T1; end
 class T2; end
 

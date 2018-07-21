@@ -1,3 +1,4 @@
+# typed: false
 def bar(a)
     a
 end

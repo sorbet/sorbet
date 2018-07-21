@@ -1,6 +1,6 @@
 class <emptyTree><<constant:<root>>> < ()
   self(<constant:<todo sym>>).puts("
 ".concat(begin
-        2
+        3
       end.to_s()).to_s())
 end

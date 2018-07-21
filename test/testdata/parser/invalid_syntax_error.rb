@@ -1,2 +1,2 @@
-# typed: strict
+# typed: false
 1j # error: Parse Error: unexpected token: syntax error

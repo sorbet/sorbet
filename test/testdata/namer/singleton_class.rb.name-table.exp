@@ -1,10 +1,10 @@
-class ::<root> < ::Object () @ test/testdata/namer/singleton_class.rb:1
-  class ::<Class:A> < ::Module () @ test/testdata/namer/singleton_class.rb:1
-  class ::A () @ test/testdata/namer/singleton_class.rb:1
-    class ::A::<Class:B> < ::Module () @ test/testdata/namer/singleton_class.rb:1
-    class ::A::B () @ test/testdata/namer/singleton_class.rb:1
-      class ::A::B::<Class:C> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:1
-      class ::A::B::C < ::Object () @ test/testdata/namer/singleton_class.rb:1
+class ::<root> < ::Object () @ test/testdata/namer/singleton_class.rb:2
+  class ::<Class:A> < ::Module () @ test/testdata/namer/singleton_class.rb:2
+  class ::A () @ test/testdata/namer/singleton_class.rb:2
+    class ::A::<Class:B> < ::Module () @ test/testdata/namer/singleton_class.rb:2
+    class ::A::B () @ test/testdata/namer/singleton_class.rb:2
+      class ::A::B::<Class:C> < ::<Class:Object> () @ test/testdata/namer/singleton_class.rb:2
+      class ::A::B::C < ::Object () @ test/testdata/namer/singleton_class.rb:2
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
-    method ::Object#main () @ test/testdata/namer/singleton_class.rb:4
+    method ::Object#main () @ test/testdata/namer/singleton_class.rb:5
 

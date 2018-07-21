@@ -1,3 +1,4 @@
+# typed: false
 # Not typed; Demonstrating lax `sig`-parsing in untyped code
 
 class A
