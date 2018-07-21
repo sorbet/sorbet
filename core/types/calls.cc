@@ -891,6 +891,13 @@ public:
         auto instanceTy = attachedClass.data(ctx).externalType(ctx);
         auto dispatched =
             instanceTy->dispatchCall(ctx, Names::initialize(), callLoc, args, instanceTy, instanceTy, linkType);
+
+        // This dispatch call will set return type in linkType to result of initialize.
+        // Need to override it
+        if (linkType) {
+            linkType->sendTp = instanceTy;
+        }
+
         // TODO(nelhage): Arguably apply() should also return a DispatchResult
         // and we should pass these errors up to the caller.
         for (auto &comp : dispatched.components) {
