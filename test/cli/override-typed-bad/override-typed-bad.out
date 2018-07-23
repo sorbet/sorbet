@@ -3,7 +3,7 @@
 test/cli/override-typed-bad/override-typed-bad.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` http://go/e/7002
      2 |1 + "s"
         ^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L72: Method `+` has specified `arg0` as `Integer`
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L72: Method `Integer#+` has specified `arg0` as `Integer`
     72 |      arg0: Integer,
               ^^^^^
   Got String("s") originating from:

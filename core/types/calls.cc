@@ -6,6 +6,8 @@
 #include <algorithm> // find_if, sort
 #include <unordered_set>
 
+#include "absl/strings/str_cat.h"
+
 template class std::vector<sorbet::core::SymbolRef>;
 using namespace std;
 
@@ -129,9 +131,10 @@ bool isSetter(Context ctx, NameRef fun) {
     return fun.data(ctx).raw.utf8.back() == '=';
 }
 
-unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, SymbolRef inClass, NameRef fun,
-                                    TypeAndOrigins &argTpe, const Symbol &argSym, shared_ptr<Type> &fullType,
-                                    vector<shared_ptr<Type>> &targs, bool mayBeSetter = false) {
+unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, SymbolRef inClass,
+                                    SymbolRef method, TypeAndOrigins &argTpe, const Symbol &argSym,
+                                    shared_ptr<Type> &fullType, vector<shared_ptr<Type>> &targs,
+                                    bool mayBeSetter = false) {
     shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped();
@@ -145,16 +148,15 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
         return nullptr;
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
-        if (mayBeSetter && isSetter(ctx, fun)) {
+        if (mayBeSetter && isSetter(ctx, method.data(ctx).name)) {
             e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.name.toString(ctx),
                         expectedType->show(ctx));
         } else {
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
                         argSym.name.toString(ctx));
             e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`",
-                                argSym.owner.data(ctx).name.toString(ctx), argSym.name.toString(ctx),
-                                expectedType->show(ctx)),
+                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(ctx).show(ctx),
+                                argSym.name.toString(ctx), expectedType->show(ctx)),
             }));
         }
         e.addErrorSection(
@@ -173,10 +175,10 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
     return nullptr;
 }
 
-unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, NameRef method, SymbolRef arg) {
+unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, SymbolRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
         e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx).name.toString(ctx),
-                    method.toString(ctx));
+                    method.data(ctx).show(ctx));
         return e.build();
     }
     return nullptr;
@@ -463,8 +465,8 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
             break;
         }
 
-        if (auto e =
-                matchArgType(ctx, *constr, callLoc, this->symbol, fun, arg, spec, fullType, targs, args.size() == 1)) {
+        if (auto e = matchArgType(ctx, *constr, callLoc, this->symbol, method, arg, spec, fullType, targs,
+                                  args.size() == 1)) {
             result.components.front().errors.emplace_back(move(e));
         }
 
@@ -478,13 +480,12 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
         if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
               pit->data(ctx).isBlockArgument())) {
             if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`",
-                            fun.toString(ctx),
+                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
                             // TODO(nelhage): report actual counts of required arguments,
                             // and account for keyword arguments
                             data.arguments().size(),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
-                e.addErrorLine(method.data(ctx).loc, "`{}` defined here", fun.toString(ctx));
+                e.addErrorLine(method.data(ctx).loc, "`{}` defined here", data.show(ctx));
                 result.components.front().errors.emplace_back(e.build());
             }
         }
@@ -530,7 +531,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                         tpe.origins = args.back().origins;
                         tpe.type = hash->values[it - hash->keys.begin()];
                         if (auto e =
-                                matchArgType(ctx, *constr, callLoc, this->symbol, fun, tpe, spec, fullType, targs)) {
+                                matchArgType(ctx, *constr, callLoc, this->symbol, method, tpe, spec, fullType, targs)) {
                             result.components.front().errors.emplace_back(move(e));
                         }
                     }
@@ -544,7 +545,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 });
                 if (arg == hash->keys.end()) {
                     if (!spec.isOptional()) {
-                        if (auto e = missingArg(ctx, callLoc, fun, spec.ref(ctx))) {
+                        if (auto e = missingArg(ctx, callLoc, method, spec.ref(ctx))) {
                             result.components.front().errors.emplace_back(move(e));
                         }
                     }
@@ -554,7 +555,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 TypeAndOrigins tpe;
                 tpe.origins = args.back().origins;
                 tpe.type = hash->values[arg - hash->keys.begin()];
-                if (auto e = matchArgType(ctx, *constr, callLoc, this->symbol, fun, tpe, spec, fullType, targs)) {
+                if (auto e = matchArgType(ctx, *constr, callLoc, this->symbol, method, tpe, spec, fullType, targs)) {
                     result.components.front().errors.emplace_back(move(e));
                 }
             }
@@ -567,7 +568,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 
                 if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.toString(ctx),
-                                fun.toString(ctx));
+                                data.show(ctx));
                     result.components.front().errors.emplace_back(e.build());
                 }
             }
@@ -588,7 +589,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
             if (!spec.data(ctx).isKeyword() || spec.data(ctx).isOptional() || spec.data(ctx).isRepeated()) {
                 continue;
             }
-            if (auto e = missingArg(ctx, callLoc, fun, spec)) {
+            if (auto e = missingArg(ctx, callLoc, method, spec)) {
                 result.components.front().errors.emplace_back(move(e));
             }
         }
@@ -596,8 +597,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", fun.toString(ctx),
-
+            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
                         // TODO(nelhage): report actual counts of required arguments,
                         // and account for keyword arguments
                         data.arguments().size(), aend - args.begin());

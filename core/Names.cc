@@ -4,6 +4,8 @@
 #include "core/Names/core.h"
 #include <numeric> // accumulate
 
+#include "absl/strings/str_cat.h"
+
 using namespace std;
 
 namespace sorbet {
@@ -72,7 +74,7 @@ string Name::show(const GlobalState &gs) const {
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
                 return "<Class:" + this->unique.original.data(gs).show(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return this->unique.original.data(gs).toString(gs);
+                return absl::StrCat(this->unique.original.data(gs).toString(gs), " (overload.", this->unique.num, ")");
             }
             return this->unique.original.data(gs).toString(gs);
         case CONSTANT:

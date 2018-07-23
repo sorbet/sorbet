@@ -497,11 +497,15 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     return os.str();
 }
 
+bool isSingleton(const GlobalState &gs, SymbolRef sym) {
+    return sym.data(gs).isClass() && sym.data(gs).name.data(gs).kind == UNIQUE &&
+           sym.data(gs).name.data(gs).unique.uniqueNameKind == UniqueNameKind::Singleton;
+}
+
 string Symbol::show(const GlobalState &gs) const {
     string owner_str;
 
-    if (this->isClass() && this->name.data(gs).kind == UNIQUE &&
-        this->name.data(gs).unique.uniqueNameKind == UniqueNameKind::Singleton) {
+    if (isSingleton(gs, ref(gs))) {
         auto attached = this->attachedClass(gs);
         if (attached.exists()) {
             return "<Class:" + attached.data(gs).show(gs) + ">";
@@ -509,13 +513,18 @@ string Symbol::show(const GlobalState &gs) const {
     }
 
     if (this->owner.exists() && this->owner != Symbols::root()) {
-        owner_str = this->owner.data(gs).show(gs);
-        if (this->isClass()) {
-            if (!owner_str.empty()) {
-                owner_str = owner_str + "::";
-            }
+        if (this->isMethod() && isSingleton(gs, this->owner)) {
+            auto attached = this->owner.data(gs).attachedClass(gs);
+            owner_str = attached.data(gs).show(gs) + ".";
         } else {
-            owner_str = owner_str + "#";
+            owner_str = this->owner.data(gs).show(gs);
+            if (this->isClass()) {
+                if (!owner_str.empty()) {
+                    owner_str = owner_str + "::";
+                }
+            } else {
+                owner_str = owner_str + "#";
+            }
         }
     }
 
