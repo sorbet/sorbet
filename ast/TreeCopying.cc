@@ -40,13 +40,6 @@ unique_ptr<Expression> MethodDef::_deepCopy(const Expression *avoid, bool root) 
                                   rhs->_deepCopy(avoid), flags);
 }
 
-unique_ptr<Expression> ConstDef::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<ConstDef>(this->loc, this->symbol, this->rhs->_deepCopy(avoid));
-}
-
 unique_ptr<Expression> If::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();

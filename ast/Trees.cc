@@ -7,7 +7,6 @@ template class std::unique_ptr<sorbet::ast::Expression>;
 template class std::unique_ptr<sorbet::ast::Reference>;
 template class std::unique_ptr<sorbet::ast::ClassDef>;
 template class std::unique_ptr<sorbet::ast::MethodDef>;
-template class std::unique_ptr<sorbet::ast::ConstDef>;
 template class std::unique_ptr<sorbet::ast::If>;
 template class std::unique_ptr<sorbet::ast::While>;
 template class std::unique_ptr<sorbet::ast::Break>;
@@ -102,12 +101,6 @@ MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, 
 }
 
 Declaration::Declaration(core::Loc loc, core::SymbolRef symbol) : Expression(loc), symbol(symbol) {}
-
-ConstDef::ConstDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> rhs)
-    : Declaration(loc, symbol), rhs(move(rhs)) {
-    core::categoryCounterInc("trees", "constdef");
-    _sanityCheck();
-}
 
 If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : Expression(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {
@@ -311,21 +304,6 @@ template <class T> void printArgs(const core::GlobalState &gs, stringstream &buf
     buf << "(";
     printElems(gs, buf, args, tabs);
     buf << ")";
-}
-
-string ConstDef::toString(const core::GlobalState &gs, int tabs) {
-    return "constdef " + this->symbol.data(gs, true).name.data(gs).toString(gs) + " = " +
-           this->rhs->toString(gs, tabs + 1);
-}
-
-string ConstDef::showRaw(const core::GlobalState &gs, int tabs) {
-    stringstream buf;
-    buf << nodeName() << "{" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "rhs = " << rhs->showRaw(gs, tabs + 1) << '\n';
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
 }
 
 string ClassDef::toString(const core::GlobalState &gs, int tabs) {
@@ -1033,9 +1011,6 @@ string ClassDef::nodeName() {
     return "ClassDef";
 }
 
-string ConstDef::nodeName() {
-    return "ConstDef";
-}
 string MethodDef::nodeName() {
     return "MethodDef";
 }

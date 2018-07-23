@@ -52,10 +52,6 @@ void ClassDef::_sanityCheck() {
     }
 }
 
-void ConstDef::_sanityCheck() {
-    ENFORCE(rhs);
-}
-
 void ConstantLit::_sanityCheck() {
     ENFORCE(scope);
     ENFORCE(cnst.exists());

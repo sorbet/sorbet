@@ -1258,10 +1258,6 @@ public:
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    unique_ptr<ast::Expression> postTransformConstDef(core::MutableContext ctx, unique_ptr<ast::ConstDef> original) {
-        ENFORCE(original->symbol != core::Symbols::todo());
-        return original;
-    }
     unique_ptr<ast::Expression> postTransformIdent(core::MutableContext ctx, unique_ptr<ast::Ident> original) {
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;

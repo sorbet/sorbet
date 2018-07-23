@@ -120,20 +120,6 @@ private:
     virtual void _sanityCheck();
 };
 
-class ConstDef final : public Declaration {
-public:
-    std::unique_ptr<Expression> rhs;
-
-    ConstDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> rhs);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-
 class If final : public Expression {
 public:
     std::unique_ptr<Expression> cond;

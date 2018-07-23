@@ -26,9 +26,6 @@ public:
     unique_ptr<MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original);
     unique_ptr<Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<MethodDef> original);
 
-    unique_ptr<ConstDef> preTransformConstDef(core::MutableContext ctx, unique_ptr<ConstDef> original);
-    unique_ptr<Expression> postTransformConstDef(core::MutableContext ctx, unique_ptr<ConstDef> original);
-
     unique_ptr<If> preTransformIf(core::MutableContext ctx, unique_ptr<If> original);
     unique_ptr<Expression> postTransformIf(core::MutableContext ctx, unique_ptr<If> original);
 
@@ -112,7 +109,6 @@ public:
 GENERATE_HAS_MEMBER(preTransformExpression);
 GENERATE_HAS_MEMBER(preTransformClassDef);
 GENERATE_HAS_MEMBER(preTransformMethodDef);
-GENERATE_HAS_MEMBER(preTransformConstDef);
 GENERATE_HAS_MEMBER(preTransformIf);
 GENERATE_HAS_MEMBER(preTransformWhile);
 GENERATE_HAS_MEMBER(preTransformBreak);
@@ -142,7 +138,6 @@ GENERATE_HAS_MEMBER(preTransformCast);
 
 GENERATE_HAS_MEMBER(postTransformClassDef);
 GENERATE_HAS_MEMBER(postTransformMethodDef);
-GENERATE_HAS_MEMBER(postTransformConstDef);
 GENERATE_HAS_MEMBER(postTransformIf);
 GENERATE_HAS_MEMBER(postTransformWhile);
 GENERATE_HAS_MEMBER(postTransformBreak);
@@ -219,7 +214,6 @@ GENERATE_HAS_MEMBER(postTransformCast);
 GENERATE_POSTPONE_PRECLASS(Expression);
 GENERATE_POSTPONE_PRECLASS(ClassDef);
 GENERATE_POSTPONE_PRECLASS(MethodDef);
-GENERATE_POSTPONE_PRECLASS(ConstDef);
 GENERATE_POSTPONE_PRECLASS(If);
 GENERATE_POSTPONE_PRECLASS(While);
 GENERATE_POSTPONE_PRECLASS(Break);
@@ -241,7 +235,6 @@ GENERATE_POSTPONE_PRECLASS(Cast);
 
 GENERATE_POSTPONE_POSTCLASS(ClassDef);
 GENERATE_POSTPONE_POSTCLASS(MethodDef);
-GENERATE_POSTPONE_POSTCLASS(ConstDef);
 GENERATE_POSTPONE_POSTCLASS(If);
 GENERATE_POSTPONE_POSTCLASS(While);
 GENERATE_POSTPONE_POSTCLASS(Break);
@@ -342,23 +335,6 @@ private:
                 if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
                     return PostPonePostTransform_MethodDef<
                         FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(ctx, move(v), func);
-                }
-
-                return move(v);
-            } else if (ConstDef *u = cast_tree<ConstDef>(what.get())) {
-                unique_ptr<ConstDef> v(u);
-                what.release();
-                if (HAS_MEMBER_preTransformConstDef<FUNC>::value) {
-                    v = PostPonePreTransform_ConstDef<FUNC, CTX, HAS_MEMBER_preTransformConstDef<FUNC>::value>::call(
-                        ctx, move(v), func);
-                }
-                v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol));
-
-                if (HAS_MEMBER_postTransformConstDef<FUNC>::value) {
-                    return PostPonePostTransform_ConstDef<FUNC, CTX,
-                                                          HAS_MEMBER_postTransformConstDef<FUNC>::value>::call(ctx,
-                                                                                                               move(v),
-                                                                                                               func);
                 }
 
                 return move(v);
