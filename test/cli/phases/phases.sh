@@ -2,7 +2,7 @@
 set -eu
 
 # Make sure these options don't change output
-for p in parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw cfg cfg-raw typed-source; do
+for p in parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw file-table-json cfg cfg-raw typed-source; do
     echo "--- $p start ---"
     main/sorbet -p "$p" -e '1'
     echo "--- $p end ---"

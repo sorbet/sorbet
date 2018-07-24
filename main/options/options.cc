@@ -31,6 +31,7 @@ const vector<PrintOptions> print_options({
     {"name-table-full", &Printers::NameTableFull, true},
     {"name-tree", &Printers::NameTree, true},
     {"name-tree-raw", &Printers::NameTreeRaw, true},
+    {"file-table-json", &Printers::FileTableJson, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
     {"typed-source", &Printers::TypedSource, true},

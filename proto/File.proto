@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package com.stripe.rubytyper;
+
+message File {
+    enum StrictLevel {
+        Stripe = 0;
+        Typed = 1;
+        Strict = 2;
+        Strong = 3;
+    }
+    string path = 1;
+    StrictLevel sigil = 2;
+    StrictLevel strict = 3;
+    bool had_errors = 4;
+}
+
+message FileTable {
+    repeated File files = 1;
+}

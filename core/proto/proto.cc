@@ -226,6 +226,36 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
     return metrics;
 }
 
+com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict) {
+    switch (strict) {
+        case core::StrictLevel::Stripe:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Stripe;
+        case core::StrictLevel::Typed:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Typed;
+        case core::StrictLevel::Strict:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Strict;
+        case core::StrictLevel::Strong:
+            return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Strong;
+        default:
+            ENFORCE(false, "bad strict level: ", (int)strict);
+    }
+}
+
+com::stripe::rubytyper::FileTable Proto::filesToProto(const GlobalState &gs) {
+    com::stripe::rubytyper::FileTable files;
+    for (int i = 1; i < gs.filesUsed(); ++i) {
+        core::FileRef file(i);
+        auto *entry = files.add_files();
+        auto path_view = file.data(gs).path();
+        string path(path_view.begin(), path_view.end());
+        entry->set_path(path);
+        entry->set_sigil(strictToProto(file.data(gs).sigil));
+        entry->set_strict(strictToProto(file.data(gs).strict));
+        entry->set_had_errors(file.data(gs).hadErrors());
+    }
+    return files;
+}
+
 string Proto::toJSON(const google::protobuf::Message &message) {
     string json_string;
     google::protobuf::util::JsonPrintOptions options;

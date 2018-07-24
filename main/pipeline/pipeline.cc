@@ -549,6 +549,11 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalS
         if (opts.print.NameTableFull) {
             cout << gs->toString(true) << '\n';
         }
+        if (opts.print.FileTableJson) {
+            auto files = core::Proto::filesToProto(*gs);
+            cout << core::Proto::toJSON(files) << '\n';
+        }
+
         return typecheck_result;
     }
 }

@@ -5,6 +5,7 @@
 
 #include <google/protobuf/util/json_util.h>
 
+#include "proto/File.pb.h"
 #include "proto/Loc.pb.h"
 #include "proto/Name.pb.h"
 #include "proto/Symbol.pb.h"
@@ -20,6 +21,7 @@ public:
     static com::stripe::rubytyper::Name toProto(const GlobalState &gs, NameRef name);
     static com::stripe::rubytyper::Symbol toProto(const GlobalState &gs, SymbolRef sym);
     static com::stripe::rubytyper::Loc toProto(const GlobalState &gs, Loc loc);
+    static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs);
 
     static com::stripe::payserver::events::cibot::SourceMetrics toProto(const CounterState &counters,
                                                                         absl::string_view prefix);

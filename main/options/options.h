@@ -26,6 +26,7 @@ struct Printers {
     bool NameTable = false;
     bool NameTableJson = false;
     bool NameTableFull = false;
+    bool FileTableJson = false;
     bool CFG = false;
     bool CFGRaw = false;
     bool TypedSource = false;
