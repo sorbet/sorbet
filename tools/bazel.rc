@@ -3,8 +3,9 @@
 build --cxxopt=--std=c++14
 
 # Developer laptops run skylake, devboxes run skylake-avx512
-build --copt=-march=skylake
-build --cxxopt=-march=skylake
+# however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
+build --copt=-march=sandybridge
+build --cxxopt=-march=sandybridge
 
 build --copt=-fno-omit-frame-pointer
 build --cxxopt=-fno-omit-frame-pointer
