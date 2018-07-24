@@ -66,6 +66,7 @@ public:
     Type source_type;
 
     bool isPayload() const;
+    bool isRBI() const;
 
     File(std::string &&path_, std::string &&source_, Type source_type);
     File(File &&other) = default;

@@ -160,7 +160,7 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
         }
 
         auto mem = sym.data(gs).findConcreteMethodTransitive(gs, proto.data(gs).name);
-        if (!mem.exists()) {
+        if (!mem.exists() && !sym.data(gs).loc.file.data(gs).isRBI()) {
             if (auto e = gs.beginError(sym.data(gs).loc, core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Missing definition for abstract method `{}`", proto.data(gs).show(gs));
                 e.addErrorLine(proto.data(gs).loc, "defined here");

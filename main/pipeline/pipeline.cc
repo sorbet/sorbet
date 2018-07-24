@@ -368,6 +368,9 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
     if (opts.stopAfterPhase == options::Phase::NAMER) {
         return make_unique<ast::EmptyTree>(core::Loc::none(f));
     }
+    if (f.data(ctx).isRBI()) {
+        return make_unique<ast::EmptyTree>(core::Loc::none(f));
+    }
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {

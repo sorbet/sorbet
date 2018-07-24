@@ -417,9 +417,11 @@ public:
             if (redefinitionOk(ctx, sym)) {
                 sym.data(ctx).loc = method->loc;
             } else {
-                if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
-                    e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
-                    e.addErrorLine(sym.data(ctx).loc, "Previous definition");
+                if (!method->loc.file.data(ctx).isRBI()) {
+                    if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
+                        e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
+                        e.addErrorLine(sym.data(ctx).loc, "Previous definition");
+                    }
                 }
                 // TODO Check that the previous args match the new ones instead of
                 // just moving the original one to the side

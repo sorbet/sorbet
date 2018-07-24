@@ -2,6 +2,8 @@
 #include <regex>
 #include <vector>
 
+#include "absl/strings/match.h"
+
 template class std::vector<std::shared_ptr<sorbet::core::File>>;
 template class std::shared_ptr<sorbet::core::File>;
 using namespace std;
@@ -105,6 +107,10 @@ bool File::hadErrors() const {
 
 bool File::isPayload() const {
     return source_type == Type::PayloadGeneration || source_type == Type::Payload;
+}
+
+bool File::isRBI() const {
+    return absl::EndsWith(path(), ".rbi");
 }
 
 std::vector<int> &File::line_breaks() const {
