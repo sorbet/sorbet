@@ -330,6 +330,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                     logger->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
                         auto file = tree->loc.file;
+                        core::ErrorRegion errs(*gs, file);
                         if (!file.data(*gs).cachedParseTree) {
                             auto subst = ast::Substitute::run(ctx, substitution, move(tree));
                             if (kvstore) {
@@ -418,6 +419,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             int i = 0;
             for (auto &tree : what) {
                 auto file = tree->loc.file;
+                core::ErrorRegion errs(gs, file);
                 try {
                     unique_ptr<ast::Expression> ast;
                     {
@@ -446,7 +448,11 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
         {
             Timer timeit(logger, "Resolving");
             logger->trace("Resolving (global pass)...");
-            core::ErrorRegion errs(gs, sorbet::core::FileRef());
+            vector<core::ErrorRegion> errs;
+            for (auto &tree : what) {
+                auto file = tree->loc.file;
+                errs.emplace_back(gs, file);
+            }
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
