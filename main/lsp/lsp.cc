@@ -950,11 +950,12 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
     shared_ptr<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>>(files.size());
-    const auto &opts = this->opts;
-    workers.multiplexJob([fileq, resultq, &opts, files, logger = this->logger]() {
+    workers.multiplexJob([fileq, resultq, files, logger = this->logger]() {
         vector<std::pair<int, unsigned int>> threadResult;
         int processedByThread = 0;
         int job;
+        options::Options emptyOpts;
+        emptyOpts.runLSP = true;
 
         {
             for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
@@ -975,8 +976,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     auto fref = lgs->enterFile(files[job]);
                     vector<unique_ptr<ast::Expression>> single;
                     unique_ptr<KeyValueStore> kvstore;
-                    single.emplace_back(pipeline::indexOne(opts, *lgs, fref, kvstore, logger));
-                    pipeline::resolve(*lgs, move(single), opts, logger, true);
+                    single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
+                    pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
                     threadResult.emplace_back(make_pair(job, lgs->hash()));
                 }
             }
