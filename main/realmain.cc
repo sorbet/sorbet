@@ -236,6 +236,8 @@ int realmain(int argc, const char *argv[]) {
     }
 
     indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
+
+    gs->errorQueue->flushErrors(true);
     if (!opts.noErrorCount) {
         gs->flushErrorCount();
     }
