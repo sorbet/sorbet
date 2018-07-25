@@ -20,7 +20,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     core::SymbolRef my = inSym.findMember(gs, name);
     if (!my.exists()) {
         if (parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable())) {
-            my = gs.enterTypeMember(inSym.loc, sym, name, parentVariance);
+            my = gs.enterTypeMember(inSym.loc, sym, name, core::Variance::Invariant);
         } else {
             if (auto e = gs.beginError(inSym.loc, core::errors::Resolver::ParentTypeNotDeclared)) {
                 e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.toString(gs),
@@ -51,20 +51,6 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     auto &inSym = sym.data(gs);
     ENFORCE(inSym.isClass());
-    if (inSym.isClassClass()) {
-        for (core::SymbolRef tp : inSym.typeMembers()) {
-            auto myVariance = tp.data(gs).variance();
-            if (myVariance != core::Variance::Invariant) {
-                auto loc = tp.data(gs).loc;
-                if (!loc.file.data(gs).isPayload()) {
-                    if (auto e = gs.beginError(tp.data(gs).loc, core::errors::Resolver::VariantTypeMemberInClass)) {
-                        e.setHeader("Classes can only have invariant type members");
-                    }
-                    return;
-                }
-            }
-        }
-    }
 
     if (inSym.superClass.exists()) {
         auto parent = inSym.superClass;
@@ -100,6 +86,21 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
     for (core::SymbolRef mixin : inSym.mixins()) {
         for (core::SymbolRef tp : mixin.data(gs).typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym);
+        }
+    }
+
+    if (inSym.isClassClass()) {
+        for (core::SymbolRef tp : inSym.typeMembers()) {
+            auto myVariance = tp.data(gs).variance();
+            if (myVariance != core::Variance::Invariant) {
+                auto loc = tp.data(gs).loc;
+                if (!loc.file.data(gs).isPayload()) {
+                    if (auto e = gs.beginError(tp.data(gs).loc, core::errors::Resolver::VariantTypeMemberInClass)) {
+                        e.setHeader("Classes can only have invariant type members");
+                    }
+                    return;
+                }
+            }
         }
     }
 

@@ -630,6 +630,9 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRe
 }
 
 void LSPLoop::sendRaw(rapidjson::Document &raw) {
+    if (raw.FindMember("jsonrpc") == raw.MemberEnd()) {
+        raw.AddMember("jsonrpc", "2.0", alloc);
+    }
     rapidjson::StringBuffer strbuf;
     rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
     raw.Accept(writer);
@@ -1142,7 +1145,11 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
 
 std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
     ENFORCE(startsWith(uri, rootUri));
-    return string(uri.data() + 1 + rootUri.length(), uri.length() - rootUri.length() - 1);
+    const char *start = uri.data() + rootUri.length();
+    if (*start == '/') {
+        ++start;
+    }
+    return string(start, uri.end());
 }
 
 std::string LSPLoop::localName2Remote(const absl::string_view uri) {
