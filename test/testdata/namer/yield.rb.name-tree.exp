@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$72>()
+    def self.<static-init><<static-init>$73>()
       ::Main.new().main()
     end
   end
