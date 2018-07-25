@@ -88,7 +88,7 @@ NameDef names[] = {
     {"include", Namer | Resolver | DSL},
     {"extend", Namer | Resolver},
     {"currentFile", "__FILE__", Desugar},
-    {"merge", Desugar},
+    {"merge", Core | Desugar},
 
     // T keywords
     {"sig", Resolver | DSL},

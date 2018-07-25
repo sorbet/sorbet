@@ -820,8 +820,12 @@ public:
         return SymbolRef(nullptr, 53);
     }
 
-    static SymbolRef Subclasses() {
+    static SymbolRef Shape() {
         return SymbolRef(nullptr, 54);
+    }
+
+    static SymbolRef Subclasses() {
+        return SymbolRef(nullptr, 55);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

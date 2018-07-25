@@ -68,6 +68,7 @@ const char *tools_str = "Tools";
 const char *accessible_str = "Accessible";
 const char *generic_str = "Generic";
 const char *tuple_str = "Tuple";
+const char *shape_str = "Shape";
 const char *subclasses_str = "SUBCLASSES";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
@@ -182,6 +183,7 @@ void GlobalState::initEmpty() {
         enterClassSymbol(Loc::none(), chalk_tools_id, enterNameConstant(accessible_str));
     SymbolRef T_Generic_id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(generic_str));
     SymbolRef tuple_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(tuple_str));
+    SymbolRef shape_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(shape_str));
     SymbolRef SUBCLASSES_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(subclasses_str));
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
@@ -238,6 +240,7 @@ void GlobalState::initEmpty() {
     ENFORCE(chalk_tools_accessible_id == Symbols::Chalk_Tools_Accessible());
     ENFORCE(T_Generic_id == Symbols::T_Generic());
     ENFORCE(tuple_id == Symbols::Tuple());
+    ENFORCE(shape_id == Symbols::Shape());
     ENFORCE(SUBCLASSES_id == Symbols::Subclasses());
 
     // Synthesize untyped = T.untyped

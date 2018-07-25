@@ -104,12 +104,23 @@ DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, ve
                                        shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                        shared_ptr<SendAndBlockLink> block) {
     categoryCounterInc("dispatch_call", "shapetype");
+    auto method = Symbols::Shape().data(ctx).findMember(ctx, fun);
+    if (method.exists() && method.data(ctx).intrinsic != nullptr) {
+        auto result = method.data(ctx).intrinsic->apply(ctx, callLoc, args, selfRef, fullType, block);
+        if (result != nullptr) {
+            DispatchResult::ComponentVec components(1);
+            components.front().receiver = selfRef;
+            components.front().method = method;
+            return DispatchResult{result, move(components)};
+        }
+    }
     return ProxyType::dispatchCall(ctx, fun, callLoc, args, selfRef, fullType, block);
 }
 
 DispatchResult TupleType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, vector<TypeAndOrigins> &args,
                                        shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                                        shared_ptr<SendAndBlockLink> block) {
+    categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(ctx).findMember(ctx, fun);
     if (method.exists() && method.data(ctx).intrinsic != nullptr) {
         auto result = method.data(ctx).intrinsic->apply(ctx, callLoc, args, selfRef, fullType, block);
@@ -1127,6 +1138,37 @@ public:
     }
 } Tuple_minMax;
 
+class Shape_merge : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, vector<TypeAndOrigins> &args, shared_ptr<Type> selfRef,
+                           shared_ptr<Type> fullType, shared_ptr<SendAndBlockLink> linkType) const override {
+        auto *shape = cast_type<ShapeType>(selfRef.get());
+        ENFORCE(shape);
+        ShapeType *rhs = nullptr;
+        if (!args.empty()) {
+            rhs = cast_type<ShapeType>(args.front().type.get());
+        }
+        if (rhs == nullptr || linkType != nullptr || args.size() > 1) {
+            return nullptr;
+        }
+
+        auto keys = shape->keys;
+        auto values = shape->values;
+        for (auto &key : rhs->keys) {
+            auto &value = rhs->values[&key - &rhs->keys.front()];
+            auto fnd = find_if(keys.begin(), keys.end(), [&key](auto &lit) { return key->equals(lit); });
+            if (fnd == keys.end()) {
+                keys.emplace_back(key);
+                values.emplace_back(value);
+            } else {
+                values[fnd - keys.begin()] = value;
+            }
+        }
+
+        return make_shared<ShapeType>(move(keys), move(values));
+    }
+} Shape_merge;
+
 class Array_flatten : public Symbol::IntrinsicMethod {
     static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, shared_ptr<Type> type) {
         shared_ptr<Type> result;
@@ -1219,6 +1261,8 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Tuple(), false, Names::last(), &Tuple_last},
     {Symbols::Tuple(), false, Names::min(), &Tuple_minMax},
     {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
+
+    {Symbols::Shape(), false, Names::merge(), &Shape_merge},
 
     {Symbols::Array(), false, Names::flatten(), &Array_flatten},
     {Symbols::Array(), false, Names::compact(), &Array_compact},

@@ -23,9 +23,10 @@ end
 class RubyTyper::StubClass
 end
 
-# C++ code delegates the implementation of many methods on tuples
-# (arrays of known shape) this class. All the actual methods on this
-# class are implemented in C++.
+# C++ code delegates the implementation of many methods on tuples and
+# shapes (arrays and hashes, respectively, of known shape) to these
+# two classes. All the actual methods on this class are implemented in
+# C++.
 class RubyTyper::Tuple < Array
   extend T::Generic
   Elem = type_member(:out)
@@ -36,6 +37,15 @@ class RubyTyper::Tuple < Array
   def first(*args); end
   def min(*args); end
   def max(*args); end
+end
+
+class RubyTyper::Shape < Hash
+  extend T::Generic
+  K = type_member(:out)
+  V = type_member(:out)
+  Elem = type_member(:out)
+
+  def merge(other); end
 end
 
 class RubyTyper::ENVClass
