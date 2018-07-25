@@ -100,12 +100,12 @@ bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &l
         return false;
     }
 
-    string json(length + 1, '\0');
+    string json(length, '\0');
     cin.read(&json[0], length);
     logger->info("Read: {}", json);
     if (d.Parse(json.c_str()).HasParseError()) {
-        logger->error("json parse error");
-        throw options::EarlyReturnWithCode(2);
+        logger->error("Last LSP request: `{}` is not a valid json object", json);
+        return false;
     }
     return true;
 }
@@ -114,6 +114,10 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
     const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
     ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
+
+    if (!ensureInitialized(method, d)) {
+        return;
+    }
     if (method.isNotification) {
         logger->info("Processing notification {} ", (string)method.name);
         if (method == LSPMethod::DidChangeWatchedFiles()) {
@@ -188,6 +192,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
                 runSlowPath(move(changedFiles));
+                ENFORCE(finalGs);
                 pushErrors();
                 this->globalStateHashes = computeStateHashes(finalGs->getFiles());
             }
@@ -404,9 +409,10 @@ void LSPLoop::runLSP() {
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
         unique_lock<mutex> globalLock(mtx, defer_lock);
-        while (true) {
+        while (!terminate) {
             rapidjson::Document d(&inner_alloc);
             if (!getNewRequest(d, logger)) {
+                terminate = true;
                 break;
             }
             unique_ptr<unique_lock<mutex>> lck = globalLock ? nullptr : make_unique<unique_lock<mutex>>(mtx);
@@ -693,6 +699,23 @@ void LSPLoop::drainErrors() {
             ++iter;
         }
     }
+}
+
+bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
+    if (finalGs) {
+        return true;
+    }
+    if (forMethod == LSPMethod::Initialize() || forMethod == LSPMethod::Initialized() ||
+        forMethod == LSPMethod::Exit() || forMethod == LSPMethod::Shutdown()) {
+        return true;
+    }
+    logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
+    if (!forMethod.isNotification) {
+        sendError(d, (int)LSPErrorCodes::ServerNotInitialized,
+                  "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
+                  "have been completed");
+    }
+    return false;
 }
 
 rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {

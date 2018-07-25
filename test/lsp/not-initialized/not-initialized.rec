@@ -1,0 +1,2 @@
+Read: {"jsonrpc":"2.0","id":2,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/commands/foo.rb"},"position":{"line":12,"character":24}}}
+Write: {"jsonrpc":"2.0","id":2,"error":{"code":-32002,"message":"IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized have been completed"}}

@@ -202,6 +202,7 @@ class LSPLoop {
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
+    bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d);
 
     core::FileRef uri2FileRef(const absl::string_view uri);
     std::string fileRef2Uri(core::FileRef);
