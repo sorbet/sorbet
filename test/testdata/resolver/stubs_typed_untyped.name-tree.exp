@@ -4,7 +4,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$71>()
+    def self.<static-init><<static-init>$72>()
       begin
         ::Bar
         ::Foo::Bar
@@ -16,7 +16,7 @@ begin
   <emptyTree>
 end
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$72>()
+  def self.<static-init><<static-init>$73>()
     begin
       ::Bar
       ::Foo::Bar

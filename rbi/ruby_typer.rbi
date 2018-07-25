@@ -108,3 +108,16 @@ end
 # The magic type that sig.void returns
 module RubyTyper::Void
 end
+
+# Type alias for file-like objects. Many, but not all, file-like
+# types in the Ruby stdlib are descendants of IO. These include
+# pipes and sockets. These descendants are intentionally omitted
+# here.
+::RubyTyper::IOLike = T.type_alias(
+  T.any(
+    File,
+    IO,
+    StringIO,
+    Tempfile
+  )
+)

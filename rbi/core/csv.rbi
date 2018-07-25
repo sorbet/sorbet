@@ -9,7 +9,7 @@ class CSV < Object
   VERSION = T.let(T.unsafe(nil), String)
 
   type_parameters(:U).sig(
-      path: T.any(String, File),
+      path: T.any(String, ::RubyTyper::IOLike),
       options: T::Hash[Symbol, T.type_parameter(:U)],
       blk: T.proc(arg0: T::Array[String]).returns(BasicObject),
   )
@@ -39,7 +39,7 @@ class CSV < Object
   def self.read(path, options=_); end
 
   sig(
-      io: T.any(IO, StringIO, String),
+      io: T.any(::RubyTyper::IOLike, String),
       options: T::Hash[Symbol, T.untyped],
   )
   .returns(NilClass)
@@ -47,7 +47,7 @@ class CSV < Object
 end
 
 sig(
-    io: T.any(IO, StringIO, String),
+    io: T.any(::RubyTyper::IOLike, String),
     options: T::Hash[Symbol, T.untyped],
 )
 .returns(CSV)

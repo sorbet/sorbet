@@ -44,7 +44,7 @@ class ::<root> < ::Object () @ -e:1
 --- name-table end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$71>()
+  def self.<static-init><<static-init>$72>()
     1
   end
 end
@@ -56,7 +56,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <static-init><<static-init>$71>
+      name = <static-init><<static-init>$72>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -418,6 +418,12 @@ ClassDef{
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/symbol.rbi",
    "sigil": "Typed",
    "strict": "Typed",
+   "had_errors": false
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/tempfile.rbi",
+   "sigil": "Strict",
+   "strict": "Strict",
    "had_errors": false
   },
   {

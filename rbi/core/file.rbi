@@ -39,6 +39,9 @@ class File < IO
   TRUNC = T.let(T.unsafe(nil), Integer)
   WRONLY = T.let(T.unsafe(nil), Integer)
 
+  extend T::Generic
+  Elem = type_member(:out, fixed: String)
+
   sig(
       file: String,
       dir: String,
