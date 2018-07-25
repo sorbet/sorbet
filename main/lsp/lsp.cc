@@ -261,6 +261,12 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
     }
 }
 
+void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
+    if (loc.file.exists()) {
+        result.PushBack(loc2Location(loc), alloc);
+    }
+}
+
 void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetArray();
 
@@ -274,18 +280,14 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
         if (!queryResponses.empty()) {
             auto resp = std::move(queryResponses[0]);
 
-            if (resp->kind == core::QueryResponse::Kind::SEND) {
-                for (auto &component : resp->dispatchComponents) {
-                    if (component.method.exists()) {
-                        result.PushBack(loc2Location(component.method.data(*finalGs).loc), alloc);
-                    }
+            if (resp->kind == core::QueryResponse::Kind::IDENT) {
+                for (auto &originLoc : resp->retType.origins) {
+                    addLocIfExists(result, originLoc);
                 }
-            } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
-                result.PushBack(loc2Location(resp->retType.origins[0]), alloc);
             } else {
                 for (auto &component : resp->dispatchComponents) {
                     if (component.method.exists()) {
-                        result.PushBack(loc2Location(component.method.data(*finalGs).loc), alloc);
+                        addLocIfExists(result, component.method.data(*finalGs).loc);
                     }
                 }
             }
@@ -694,6 +696,8 @@ void LSPLoop::drainErrors() {
 }
 
 rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
+    ENFORCE(loc.file.exists());
+
     /**
        {
         start: { line: 5, character: 23 }
@@ -720,6 +724,8 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
 }
 
 rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
+    ENFORCE(loc.file.exists());
+
     //  interface Location {
     //      uri: DocumentUri;
     //      range: Range;
@@ -1095,15 +1101,15 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
     if (good) {
         invalidateErrorsFor(subset);
         logger->info("Taking happy path");
-        // Yaay, reuse existing global state.
-        vector<std::string> empty;
-        auto updatedIndexed = pipeline::index(finalGs, empty, subset, opts, workers, kvstore, logger);
-        ENFORCE(subset.size() == updatedIndexed.size());
-        for (auto &t : updatedIndexed) {
+
+        std::vector<std::unique_ptr<ast::Expression>> updatedIndexed;
+        for (auto &f : subset) {
+            auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
             int id = t->loc.file.id();
             indexed[id] = move(t);
-            t = indexed[id]->deepCopy();
+            updatedIndexed.emplace_back(indexed[id]->deepCopy());
         }
+
         pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(updatedIndexed), opts, logger, false), opts,
                             workers, logger);
     } else {

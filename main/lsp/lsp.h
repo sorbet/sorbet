@@ -184,6 +184,7 @@ class LSPLoop {
     void drainErrors();
     rapidjson::Value loc2Range(core::Loc loc);
     rapidjson::Value loc2Location(core::Loc loc);
+    void addLocIfExists(rapidjson::Value &result, core::Loc loc);
 
     void processRequest(rapidjson::Document &d);
     /** Returns true if there is no need to continue processing this document as it is a reply to
