@@ -18,21 +18,24 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
     auto parentVariance = parentTypeMember.data(gs).variance();
     auto &inSym = sym.data(gs);
     core::SymbolRef my = inSym.findMember(gs, name);
+    bool ok = true;
     if (!my.exists()) {
-        if (parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable())) {
-            my = gs.enterTypeMember(inSym.loc, sym, name, core::Variance::Invariant);
-        } else {
+        if (!(parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable()))) {
             if (auto e = gs.beginError(inSym.loc, core::errors::Resolver::ParentTypeNotDeclared)) {
-                e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.toString(gs),
+                e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.show(gs),
                             parent.data(gs).show(gs));
             }
-            return false;
+            ok = false;
         }
+        my = gs.enterTypeMember(inSym.loc, sym, name, core::Variance::Invariant);
+    }
+    if (!ok) {
+        return false;
     }
     auto &data = my.data(gs);
     if (!data.isTypeMember() && !data.isTypeArgument()) {
         if (auto e = gs.beginError(data.loc, core::errors::Resolver::NotATypeVariable)) {
-            e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.toString(gs));
+            e.setHeader("Type variable `{}` needs to be declared as `= type_member(SOMETHING)`", name.show(gs));
         }
         return false;
     }
