@@ -166,7 +166,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     vector<unique_ptr<sorbet::ast::Expression>> trees;
     map<string, string> got;
 
+    vector<sorbet::core::ErrorRegion> errs;
     for (auto file : files) {
+        errs.emplace_back(gs, file);
         if (file.data(ctx).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
         }

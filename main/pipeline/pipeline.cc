@@ -223,7 +223,6 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                 for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                     if (result.gotItem()) {
                         core::FileRef file = job;
-                        core::ErrorRegion errs(*lgs, file);
                         processedByThread++;
                         auto fileName = file.data(*lgs, true).path();
                         logger->trace("Reading: {}", fileName);
@@ -278,6 +277,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                         auto fnd = opts.strictnessOverrides.find((string)file.data(*lgs).path());
                         if (fnd != opts.strictnessOverrides.end()) {
                             if (fnd->second == file.data(*lgs).sigil) {
+                                core::ErrorRegion errs(*lgs, file);
                                 if (auto e = lgs->beginError(sorbet::core::Loc::none(file),
                                                              core::errors::Parser::ParserError)) {
                                     e.setHeader("Useless override of strictness level for {}", file.data(*lgs).path());
@@ -419,7 +419,6 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             int i = 0;
             for (auto &tree : what) {
                 auto file = tree->loc.file;
-                core::ErrorRegion errs(gs, file);
                 try {
                     unique_ptr<ast::Expression> ast;
                     {
@@ -513,7 +512,6 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalS
                         if (result.gotItem()) {
                             processedByThread++;
                             core::FileRef file = job->loc.file;
-                            core::ErrorRegion errs(ctx, file);
                             try {
                                 threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
                             } catch (SRubyException &) {
