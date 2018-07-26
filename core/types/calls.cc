@@ -403,8 +403,16 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
             }
             if (fullType.get() != this && this->symbol == Symbols::NilClass()) {
-                e.addErrorSection(core::ErrorSection("You could wrap it in `T.must()` before calling the function."));
+                e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before calling the function."));
             } else {
+                if (this->symbol.data(ctx).isClassModule()) {
+                    auto objMeth = core::Symbols::Object().data(ctx).findMemberTransitive(ctx, fun);
+                    if (objMeth.exists()) {
+                        e.addErrorSection(
+                            ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
+                                                             objMeth.data(ctx).owner.data(ctx).name.show(ctx))));
+                    }
+                }
                 auto alternatives = this->symbol.data(ctx).findMemberFuzzyMatch(ctx, fun);
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;

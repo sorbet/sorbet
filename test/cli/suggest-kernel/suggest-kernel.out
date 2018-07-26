@@ -1,0 +1,5 @@
+test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Opus::DB::Model` http://go/e/7003
+     4 |    raise "hi"
+            ^^^^^^^^^^
+  Did you mean to `include Kernel` in this module?
+Errors: 1
