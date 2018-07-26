@@ -201,8 +201,8 @@ private:
     Environment &operator=(const Environment &rhs) = default;
     void setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
                           core::DispatchResult::ComponentVec dispatchComponents,
-                          std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
-                          core::TypeAndOrigins retType);
+                          std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc, core::NameRef name,
+                          core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
 };
 
 } // namespace infer

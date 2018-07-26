@@ -95,6 +95,9 @@ struct LSPMethod {
     static const inline LSPMethod TextDocumentHover() {
         return LSPMethod{"textDocument/hover", false, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod TextDocumentCompletion() {
+        return LSPMethod{"textDocument/completion", false, LSPMethod::Kind::ClientInitiated};
+    };
     static const inline LSPMethod ReadFile() {
         return LSPMethod{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
     };
@@ -214,9 +217,10 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
-    void setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d);
+    bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
+    void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,

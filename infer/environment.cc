@@ -752,13 +752,15 @@ shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<
 void Environment::setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
                                    core::DispatchResult::ComponentVec dispatchComponents,
                                    std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
-                                   core::TypeAndOrigins retType) {
+                                   core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType) {
     auto queryResponse = make_unique<core::QueryResponse>();
     queryResponse->kind = kind;
     queryResponse->dispatchComponents = std::move(dispatchComponents);
     queryResponse->constraint = constraint;
     queryResponse->termLoc = termLoc;
     queryResponse->retType = retType;
+    queryResponse->receiver = receiver;
+    queryResponse->name = name;
 
     ctx.state.errorQueue->pushQueryResponse(std::move(queryResponse));
 }
@@ -845,7 +847,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                     if (lspQueryMatch) {
                         setQueryResponse(ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
-                                         send->link ? send->link->constr : nullptr, bind.loc, tp);
+                                         send->link ? send->link->constr : nullptr, bind.loc, send->fun, recvType, tp);
                     }
                 }
                 tp.origins.push_back(bind.loc);
@@ -856,7 +858,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins = typeAndOrigin.origins;
 
                 if (lspQueryMatch) {
-                    setQueryResponse(ctx, core::QueryResponse::Kind::IDENT, {}, nullptr, bind.loc, tp);
+                    setQueryResponse(ctx, core::QueryResponse::Kind::IDENT, {}, nullptr, bind.loc, i->what._name, tp,
+                                     tp);
                 }
 
                 ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
@@ -890,10 +893,13 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
 
                 if (lspQueryMatch) {
+                    core::TypeAndOrigins dealiasedReceiver;
+                    dealiasedReceiver.type = data.lookupSingletonClass(ctx).data(ctx).externalType(ctx);
+                    dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
                     components.push_back(core::DispatchComponent{tp.type, symbol, {}});
                     setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, std::move(components), nullptr, bind.loc,
-                                     tp);
+                                     symbol.data(ctx).name, dealiasedReceiver, tp);
                 }
                 pinnedTypes[bind.bind] = tp;
             },
@@ -1023,7 +1029,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.push_back(bind.loc);
 
                 if (lspQueryMatch) {
-                    setQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, {}, nullptr, bind.loc, tp);
+                    setQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, {}, nullptr, bind.loc,
+                                     core::NameRef::noName(), tp, tp);
                 }
             },
             [&](cfg::Unanalyzable *i) {

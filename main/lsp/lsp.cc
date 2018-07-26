@@ -23,6 +23,12 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 
+bool hasSimilarName(core::GlobalState &gs, core::NameRef name, const absl::string_view &pattern) {
+    absl::string_view view = name.data(gs).shortName(gs);
+    auto fnd = view.find(pattern);
+    return fnd != absl::string_view::npos;
+}
+
 static bool startsWith(const absl::string_view str, const absl::string_view prefix) {
     return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.data(), prefix.size());
 }
@@ -70,6 +76,9 @@ shared_ptr<core::Type> getResultType(core::GlobalState &gs, core::SymbolRef ofWh
                                      shared_ptr<core::TypeConstraint> constr) {
     core::Context ctx(gs, core::Symbols::root());
     auto resultType = ofWhat.data(gs).resultType;
+    if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
+        receiver = proxy->underlying;
+    }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
         /* instantiate generic classes */
         resultType = core::Types::resultTypeAsSeenFrom(ctx, ofWhat, applied->klass, applied->targs);
@@ -99,13 +108,13 @@ bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &l
         logger->trace("final raw read: {}, length: {}", line, length);
     }
     if (length < 0) {
-        logger->info("eof");
+        logger->debug("eof");
         return false;
     }
 
     string json(length, '\0');
     cin.read(&json[0], length);
-    logger->info("Read: {}", json);
+    logger->debug("Read: {}", json);
     if (d.Parse(json.c_str()).HasParseError()) {
         logger->error("Last LSP request: `{}` is not a valid json object", json);
         return false;
@@ -122,7 +131,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         return;
     }
     if (method.isNotification) {
-        logger->info("Processing notification {} ", (string)method.name);
+        logger->debug("Processing notification {} ", (string)method.name);
         if (method == LSPMethod::DidChangeWatchedFiles()) {
             sendRequest(LSPMethod::ReadFile(), d["params"],
                         [&](rapidjson::Value &edits) -> void {
@@ -204,7 +213,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             return;
         }
     } else {
-        logger->info("Processing request {}", method.name);
+        logger->debug("Processing request {}", method.name);
         // is request
         rapidjson::Value result;
         int errorCode = 0;
@@ -216,9 +225,18 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         } else if (method == LSPMethod::Initialize()) {
             result.SetObject();
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-            string serverCap =
-                "{\"capabilities\": {\"textDocumentSync\": 1, \"documentSymbolProvider\": true, "
-                "\"workspaceSymbolProvider\": true, \"definitionProvider\": true, \"hoverProvider\":true}}";
+            string serverCap = "{\"capabilities\": "
+                               "   {"
+                               "       \"textDocumentSync\": 1, "
+                               "       \"documentSymbolProvider\": true, "
+                               "       \"workspaceSymbolProvider\": true, "
+                               "       \"definitionProvider\": true, "
+                               "       \"hoverProvider\":true,"
+                               "       \"completionProvider\": { "
+                               "           \"triggerCharacters\": [\".\"]"
+                               "       }"
+                               "   }"
+                               "}";
             rapidjson::Document temp;
             auto &r = temp.Parse(serverCap.c_str());
             ENFORCE(!r.HasParseError());
@@ -248,7 +266,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
 
             for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
                 core::SymbolRef ref(finalGs.get(), idx);
-                if (ref.data(*finalGs).name.show(*finalGs).compare(searchString) == 0) {
+                if (hasSimilarName(*finalGs, ref.data(*finalGs).name, searchString)) {
                     auto data = symbolRef2SymbolInformation(ref);
                     if (data) {
                         result.PushBack(move(*data), alloc);
@@ -260,6 +278,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             handleTextDocumentDefinition(result, d);
         } else if (method == LSPMethod::TextDocumentHover()) {
             handleTextDocumentHover(result, d);
+        } else if (method == LSPMethod::TextDocumentCompletion()) {
+            handleTextDocumentCompletion(result, d);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
             errorCode = (int)LSPErrorCodes::MethodNotFound;
@@ -278,49 +298,209 @@ void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
 void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetArray();
 
-    auto uri =
-        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
-    auto fref = uri2FileRef(uri);
-    if (fref.exists()) {
-        setupLSPQueryByLoc(fref, d);
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition())) {
+        return;
+    }
+    auto queryResponses = errorQueue->drainQueryResponses();
+    if (!queryResponses.empty()) {
+        auto resp = std::move(queryResponses[0]);
 
-        auto queryResponses = errorQueue->drainQueryResponses();
-        if (!queryResponses.empty()) {
-            auto resp = std::move(queryResponses[0]);
-
-            if (resp->kind == core::QueryResponse::Kind::IDENT) {
-                for (auto &originLoc : resp->retType.origins) {
-                    addLocIfExists(result, originLoc);
-                }
-            } else {
-                for (auto &component : resp->dispatchComponents) {
-                    if (component.method.exists()) {
-                        addLocIfExists(result, component.method.data(*finalGs).loc);
-                    }
+        if (resp->kind == core::QueryResponse::Kind::IDENT) {
+            for (auto &originLoc : resp->retType.origins) {
+                addLocIfExists(result, originLoc);
+            }
+        } else {
+            for (auto &component : resp->dispatchComponents) {
+                if (component.method.exists()) {
+                    addLocIfExists(result, component.method.data(*finalGs).loc);
                 }
             }
         }
     }
+    sendResult(d, result);
+}
 
+unordered_map<core::NameRef, vector<core::SymbolRef>>
+mergeMaps(unordered_map<core::NameRef, vector<core::SymbolRef>> &&first,
+          unordered_map<core::NameRef, vector<core::SymbolRef>> &&second) {
+    for (auto &other : second) {
+        first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
+                                  make_move_iterator(other.second.end()));
+    }
+    return first;
+};
+
+unordered_map<core::NameRef, vector<core::SymbolRef>>
+findSimilarMethodsIn(core::GlobalState &gs, shared_ptr<core::Type> receiver, absl::string_view name) {
+    unordered_map<core::NameRef, vector<core::SymbolRef>> result;
+    typecase(
+        receiver.get(),
+        [&](core::ClassType *c) {
+            auto &owner = c->symbol.data(gs);
+            for (auto member : owner.members) {
+                auto sym = member.second;
+                if (sym.data(gs).isMethod() && hasSimilarName(gs, sym.data(gs).name, name)) {
+                    result[sym.data(gs).name].emplace_back(sym);
+                }
+            }
+            for (auto mixin : owner.mixins()) {
+                result = mergeMaps(move(result), findSimilarMethodsIn(gs, make_shared<core::ClassType>(mixin), name));
+            }
+            if (owner.superClass.exists()) {
+                result = mergeMaps(move(result),
+                                   findSimilarMethodsIn(gs, make_shared<core::ClassType>(owner.superClass), name));
+            }
+        },
+        [&](core::AndType *c) {
+            result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
+        },
+        [&](core::OrType *c) {
+            auto lhs = findSimilarMethodsIn(gs, c->left, name);
+            auto rhs = findSimilarMethodsIn(gs, c->right, name);
+            for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
+                auto &other = *it;
+                auto fnd = lhs.find(other.first);
+                if (fnd == lhs.end()) {
+                    it = rhs.erase(it);
+                } else {
+                    it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
+                                      make_move_iterator(fnd->second.end()));
+                    ++it;
+                }
+            }
+        },
+        [&](core::AppliedType *c) { result = findSimilarMethodsIn(gs, make_shared<core::ClassType>(c->klass), name); },
+        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying, name); }, [&](core::Type *c) {});
+    return result;
+}
+
+string methodDetail(core::GlobalState &gs, core::SymbolRef method, shared_ptr<core::Type> receiver,
+                    shared_ptr<core::Type> retType, shared_ptr<core::TypeConstraint> constraint) {
+    string ret;
+    if (!retType) {
+        retType = getResultType(gs, method, receiver, constraint);
+    }
+    string methodReturnType = (retType == core::Types::void_()) ? "void" : "returns(" + retType->show(gs) + ")";
+    std::vector<string> typeAndArgNames;
+
+    if (method.data(gs).isMethod()) {
+        for (auto &argSym : method.data(gs).arguments()) {
+            typeAndArgNames.push_back(argSym.data(gs).name.show(gs) + ": " +
+                                      getResultType(gs, argSym, receiver, constraint)->show(gs));
+        }
+    }
+
+    std::stringstream ss;
+    for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
+        if (i != 0) {
+            ss << ", ";
+        }
+        ss << typeAndArgNames[i];
+    }
+    std::string joinedTypeAndArgNames = ss.str();
+
+    return fmt::format("sig({}).{}", joinedTypeAndArgNames, methodReturnType);
+}
+
+string methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
+    string ret;
+
+    auto shortName = method.data(gs).name.data(gs).shortName(gs);
+    std::vector<string> typeAndArgNames;
+
+    int i = 1;
+    if (method.data(gs).isMethod()) {
+        for (auto &argSym : method.data(gs).arguments()) {
+            string s;
+            if (argSym.data(gs).isKeyword()) {
+                s += (string)argSym.data(gs).name.data(gs).shortName(gs) + ": ";
+            }
+            s += "${" + to_string(i++) + "}";
+            typeAndArgNames.push_back(s);
+        }
+    }
+
+    std::stringstream ss;
+    for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
+        if (i != 0) {
+            ss << ", ";
+        }
+        ss << typeAndArgNames[i];
+    }
+
+    return fmt::format("{}({}){}", shortName, ss.str(), "${0}");
+}
+
+void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Value &items,
+                       core::SymbolRef what, const core::QueryResponse &resp) {
+    rapidjson::Value item;
+    item.SetObject();
+    item.AddMember("label", (string)what.data(gs).name.data(gs).shortName(gs), alloc);
+    auto resultType = what.data(gs).resultType;
+    if (!resultType) {
+        resultType = core::Types::untyped();
+    }
+    if (what.data(gs).isMethod()) {
+        item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
+        item.AddMember("insertTextFormat", 2, alloc); // Snippet
+
+        item.AddMember("insertText", methodSnippet(gs, what), alloc);
+    } else if (what.data(gs).isStaticField()) {
+        item.AddMember("detail", resultType->show(gs), alloc);
+    }
+    items.PushBack(move(item), alloc);
+}
+
+void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d) {
+    result.SetObject();
+    result.AddMember("isIncomplete", "false", alloc);
+    rapidjson::Value items;
+    items.SetArray();
+
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion())) {
+        return;
+    }
+    auto queryResponses = errorQueue->drainQueryResponses();
+    if (!queryResponses.empty()) {
+        auto resp = std::move(queryResponses[0]);
+        auto receiverType = resp->receiver.type;
+        if (resp->kind == core::QueryResponse::Kind::SEND) {
+            auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
+            logger->debug("Looking for method similar to {}", pattern);
+            unordered_map<core::NameRef, vector<core::SymbolRef>> methods =
+                findSimilarMethodsIn(*finalGs, receiverType, pattern);
+            for (auto &entry : methods) {
+                addCompletionItem(*finalGs, alloc, items, entry.second[0], *resp);
+            }
+        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
+                   resp->kind == core::QueryResponse::Kind::CONSTANT) {
+            if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
+                auto pattern = c->symbol.data(*finalGs).name.data(*finalGs).shortName(*finalGs);
+                logger->debug("Looking for constant similar to {}", pattern);
+                core::SymbolRef owner = c->symbol.data(*finalGs).owner;
+                for (auto member : owner.data(*finalGs).members) {
+                    auto sym = member.second;
+                    if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
+                        sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT && // hide singletons
+                        hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
+                        !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
+                        addCompletionItem(*finalGs, alloc, items, sym, *resp);
+                    }
+                }
+            }
+        } else {
+        }
+    }
+    result.AddMember("items", move(items), alloc);
     sendResult(d, result);
 }
 
 void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetObject();
-    int errorCode;
-    string errorString;
-    auto uri =
-        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
-    auto fref = uri2FileRef(uri);
 
-    if (!fref.exists()) {
-        errorCode = (int)LSPErrorCodes::InvalidParams;
-        errorString = fmt::format("Did not find file at uri {} in textDocument/hover", uri);
-        sendError(d, errorCode, errorString);
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover())) {
         return;
     }
-
-    setupLSPQueryByLoc(fref, d);
 
     auto queryResponses = errorQueue->drainQueryResponses();
     if (queryResponses.empty()) {
@@ -332,10 +512,9 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
     auto resp = std::move(queryResponses[0]);
     if (resp->kind == core::QueryResponse::Kind::SEND) {
         if (resp->dispatchComponents.empty()) {
-            errorCode = (int)LSPErrorCodes::InvalidParams;
-            errorString = "Did not find any dispatchComponents for a SEND QueryResponse in "
-                          "textDocument/hover";
-            sendError(d, errorCode, errorString);
+            sendError(d, (int)LSPErrorCodes::InvalidParams,
+                      "Did not find any dispatchComponents for a SEND QueryResponse in "
+                      "textDocument/hover");
             return;
         }
         string contents = "";
@@ -345,34 +524,11 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
                 retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
                                                    *resp->constraint);
             }
-            string methodReturnType = retType->show(*finalGs);
-            string methodName = dispatchComponent.method.show(*finalGs);
-            std::vector<string> typeAndArgNames;
-
-            if (dispatchComponent.method.exists()) {
-                if (dispatchComponent.method.data(*finalGs).isMethod()) {
-                    for (auto &argSym : dispatchComponent.method.data(*finalGs).arguments()) {
-                        typeAndArgNames.push_back(
-                            argSym.data(*finalGs).name.show(*finalGs) + ": " +
-                            getResultType(*finalGs, argSym, dispatchComponent.receiver, resp->constraint)
-                                ->show(*finalGs));
-                    }
-                }
-
-                std::stringstream ss;
-                for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
-                    if (i != 0) {
-                        ss << ", ";
-                    }
-                    ss << typeAndArgNames[i];
-                }
-                std::string joinedTypeAndArgNames = ss.str();
-
-                if (contents.size() > 0) {
-                    contents += " ";
-                }
-                contents += fmt::format("```{} {}({})```", methodReturnType, methodName, joinedTypeAndArgNames);
+            if (contents.size() > 0) {
+                contents += " ";
             }
+            contents +=
+                methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType, resp->constraint);
         }
         rapidjson::Value markupContents;
         markupContents.SetObject();
@@ -392,9 +548,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
         result.AddMember("contents", markupContents, alloc);
         sendResult(d, result);
     } else {
-        errorCode = (int)LSPErrorCodes::InvalidParams;
-        errorString = "Unhandled QueryResponse kind in textDocument/hover";
-        sendError(d, errorCode, errorString);
+        sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
     }
 }
 
@@ -507,7 +661,16 @@ void LSPLoop::runLSP() {
     }
 }
 
-void LSPLoop::setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d) {
+bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod) {
+    auto uri =
+        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
+
+    auto fref = uri2FileRef(uri);
+    if (!fref.exists()) {
+        sendError(d, (int)LSPErrorCodes::InvalidParams,
+                  fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
+        return false;
+    }
     core::Loc::Detail reqPos;
     reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
     reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
@@ -521,6 +684,7 @@ void LSPLoop::setupLSPQueryByLoc(core::FileRef fref, rapidjson::Document &d) {
 
     initialGS->lspInfoQueryLoc = core::Loc::none();
     finalGs->lspInfoQueryLoc = core::Loc::none();
+    return true;
 }
 
 /**
@@ -639,8 +803,7 @@ void LSPLoop::sendRaw(rapidjson::Document &raw) {
     rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
     raw.Accept(writer);
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
-    logger->info("Write: {}", strbuf.GetString());
-    logger->info("\n");
+    logger->debug("Write: {}\n", strbuf.GetString());
     std::cout << outResult << std::flush;
 }
 
@@ -1078,7 +1241,7 @@ void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
 void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
 
                               &changedFiles) {
-    logger->info("Taking slow path");
+    logger->debug("Taking slow path");
 
     invalidateAllErrors();
 
@@ -1112,6 +1275,7 @@ const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                     TextDocumentDocumentSymbol(),
                                                     TextDocumentDefinition(),
                                                     TextDocumentHover(),
+                                                    TextDocumentCompletion(),
                                                     ReadFile(),
                                                     WorkspaceSymbolsRequest(),
                                                     CancelRequest(),
@@ -1130,7 +1294,7 @@ const LSPMethod LSPMethod::getByName(const absl::string_view name) {
 void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
 
                               &changedFiles) {
-    logger->info("Trying to see if happy path is available after {} file changes", changedFiles.size());
+    logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
     ENFORCE(changedFiles.size() == hashes.size());
@@ -1144,7 +1308,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
         auto wasFiles = initialGS->filesUsed();
         auto fref = addNewFile(f);
         if (wasFiles != initialGS->filesUsed()) {
-            logger->info("Taking sad path because {} is a new file", changedFiles[i]->path());
+            logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
             good = false;
             if (globalStateHashes.size() <= fref.id()) {
                 globalStateHashes.resize(fref.id() + 1);
@@ -1152,7 +1316,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
             }
         } else {
             if (hashes[i] != globalStateHashes[fref.id()]) {
-                logger->info("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+                logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
                 good = false;
                 globalStateHashes[fref.id()] = hashes[i];
             }
@@ -1166,7 +1330,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
 
     if (good) {
         invalidateErrorsFor(subset);
-        logger->info("Taking happy path");
+        logger->debug("Taking happy path");
 
         std::vector<std::unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {

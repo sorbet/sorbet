@@ -83,6 +83,18 @@ string Name::show(const GlobalState &gs) const {
             Error::notImplemented();
     }
 }
+absl::string_view Name::shortName(const GlobalState &gs) const {
+    switch (this->kind) {
+        case UTF8:
+            return absl::string_view(raw.utf8.begin(), raw.utf8.end() - raw.utf8.begin());
+        case UNIQUE:
+            return this->unique.original.data(gs).shortName(gs);
+        case CONSTANT:
+            return this->cnst.original.data(gs).shortName(gs);
+        default:
+            Error::notImplemented();
+    }
+}
 
 void Name::sanityCheck(const GlobalState &gs) const {
     if (!debug_mode) {

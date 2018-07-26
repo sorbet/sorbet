@@ -159,6 +159,7 @@ public:
 
     std::string toString(const GlobalState &gs) const;
     std::string show(const GlobalState &gs) const;
+    absl::string_view shortName(const GlobalState &gs) const;
     void sanityCheck(const GlobalState &gs) const;
     NameRef ref(const GlobalState &gs) const;
 

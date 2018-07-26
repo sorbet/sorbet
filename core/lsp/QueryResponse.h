@@ -14,6 +14,8 @@ struct QueryResponse {
     std::shared_ptr<TypeConstraint> constraint;
     Loc termLoc; // `termLoc` is the `loc` of the `cfg::Binding` at which this response was generated.
     TypeAndOrigins retType;
+    core::NameRef name;
+    TypeAndOrigins receiver;
 };
 } // namespace core
 } // namespace sorbet
