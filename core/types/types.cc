@@ -130,17 +130,19 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> 
 
     typecase(from.get(),
              [&](OrType *o) {
-                 if (o->left->derivesFrom(ctx, klass)) {
-                     result = Types::dropSubtypesOf(ctx, o->right, klass);
-                 } else if (o->right->derivesFrom(ctx, klass)) {
-                     result = Types::dropSubtypesOf(ctx, o->left, klass);
+                 auto lhs = dropSubtypesOf(ctx, o->left, klass);
+                 auto rhs = dropSubtypesOf(ctx, o->right, klass);
+                 if (lhs != o->left || rhs != o->right) {
+                     result = Types::any(ctx, lhs, rhs);
                  } else {
                      result = from;
                  }
              },
              [&](AndType *a) {
-                 if (a->left->derivesFrom(ctx, klass) || a->right->derivesFrom(ctx, klass)) {
-                     result = Types::bottom();
+                 auto lhs = dropSubtypesOf(ctx, a->left, klass);
+                 auto rhs = dropSubtypesOf(ctx, a->right, klass);
+                 if (lhs != a->left || rhs != a->right) {
+                     result = Types::all(ctx, lhs, rhs);
                  } else {
                      result = from;
                  }
@@ -149,6 +151,20 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> 
                  if (c->isUntyped()) {
                      result = from;
                  } else if (c->symbol == klass || c->derivesFrom(ctx, klass)) {
+                     result = Types::bottom();
+                 } else {
+                     result = from;
+                 }
+             },
+             [&](AppliedType *c) {
+                 if (c->klass == klass || c->derivesFrom(ctx, klass)) {
+                     result = Types::bottom();
+                 } else {
+                     result = from;
+                 }
+             },
+             [&](ProxyType *c) {
+                 if (dropSubtypesOf(ctx, c->underlying, klass)->isBottom()) {
                      result = Types::bottom();
                  } else {
                      result = from;
@@ -183,6 +199,7 @@ shared_ptr<Type> Types::approximateSubtract(Context ctx, const std::shared_ptr<T
                                             const std::shared_ptr<Type> &what) {
     shared_ptr<Type> result;
     typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
+             [&](AppliedType *c) { result = Types::dropSubtypesOf(ctx, from, c->klass); },
              [&](OrType *o) {
                  result = Types::approximateSubtract(ctx, Types::approximateSubtract(ctx, from, o->left), o->right);
              },
