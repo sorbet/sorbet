@@ -324,9 +324,8 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
 
     auto queryResponses = errorQueue->drainQueryResponses();
     if (queryResponses.empty()) {
-        errorCode = (int)LSPErrorCodes::InvalidParams;
-        errorString = "Did not find symbol at hover location in textDocument/hover";
-        sendError(d, errorCode, errorString);
+        rapidjson::Value nullreply;
+        sendResult(d, nullreply);
         return;
     }
 
