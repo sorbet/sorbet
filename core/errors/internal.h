@@ -1,3 +1,5 @@
+#ifndef SORBET_CORE_ERRORS_INTERNAL_H
+#define SORBET_CORE_ERRORS_INTERNAL_H
 #include "core/Errors.h"
 
 namespace sorbet {
@@ -10,3 +12,5 @@ constexpr ErrorClass WrongSigil = {1002, StrictLevel::Stripe};
 } // namespace errors
 } // namespace core
 } // namespace sorbet
+
+#endif

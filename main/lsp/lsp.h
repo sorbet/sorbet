@@ -221,6 +221,8 @@ class LSPLoop {
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
+    void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
+                             std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,

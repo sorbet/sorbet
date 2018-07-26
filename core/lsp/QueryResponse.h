@@ -7,7 +7,7 @@
 namespace sorbet {
 namespace core {
 struct QueryResponse {
-    enum class Kind { SEND, IDENT, LITERAL, CONSTANT };
+    enum class Kind { SEND, IDENT, LITERAL, CONSTANT, DEFINITION };
 
     Kind kind;
     DispatchResult::ComponentVec dispatchComponents;
@@ -16,7 +16,13 @@ struct QueryResponse {
     TypeAndOrigins retType;
     core::NameRef name;
     TypeAndOrigins receiver;
+
+    static void setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
+                                 core::DispatchResult::ComponentVec dispatchComponents,
+                                 std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
+                                 core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
 };
+
 } // namespace core
 } // namespace sorbet
 #endif

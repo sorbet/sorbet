@@ -1,5 +1,6 @@
 #include "lsp.h"
 #include "absl/strings/str_cat.h"
+#include "ast/treemap/treemap.h"
 #include "common/Timer.h"
 #include "core/Errors.h"
 #include "core/Files.h"
@@ -7,6 +8,7 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
+#include "core/lsp/DefLocSaver.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
@@ -309,6 +311,8 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
             for (auto &originLoc : resp->retType.origins) {
                 addLocIfExists(result, originLoc);
             }
+        } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
+            result.PushBack(loc2Location(resp->termLoc), alloc);
         } else {
             for (auto &component : resp->dispatchComponents) {
                 if (component.method.exists()) {
@@ -1259,7 +1263,20 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
     }
 
     finalGs = initialGS->deepCopy(true);
+    tryApplyDefLocSaver(finalGs, indexedCopies);
     pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(indexedCopies), opts, logger), opts, workers, logger);
+}
+
+void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
+                                  vector<unique_ptr<ast::Expression>> &indexedCopies) {
+    if (finalGs->lspInfoQueryLoc == core::Loc::none()) {
+        return;
+    }
+    for (auto &t : indexedCopies) {
+        sorbet::lsp::DefLocSaver defLocSaver;
+        core::Context ctx(*finalGs, core::Symbols::root());
+        t = ast::TreeMap::apply(ctx, defLocSaver, move(t));
+    }
 }
 
 const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
@@ -1340,6 +1357,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
             updatedIndexed.emplace_back(indexed[id]->deepCopy());
         }
 
+        tryApplyDefLocSaver(finalGs, updatedIndexed);
         pipeline::typecheck(finalGs, incrementalResolve(*finalGs, move(updatedIndexed), opts, logger), opts, workers,
                             logger);
     } else {

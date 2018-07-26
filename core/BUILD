@@ -18,6 +18,7 @@ cc_library(
             "*.cc",
             "*.h",
             "types/*.cc",
+            "lsp/*.cc",
         ],
         exclude = [
             # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
