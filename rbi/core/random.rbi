@@ -19,7 +19,7 @@ class Random < Object
   sig(
       seed: Integer,
   )
-  .returns(Object)
+  .void
   def initialize(seed=_); end
 
   sig(

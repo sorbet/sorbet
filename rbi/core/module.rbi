@@ -252,7 +252,7 @@ class Module < Object
   sig(
       blk: T.proc(arg0: Module).returns(BasicObject),
   )
-  .returns(Object)
+  .void
   def initialize(&blk); end
 
   sig(

@@ -66,7 +66,7 @@ class Range < Object
       _end: Elem,
       exclude_end: T.any(TrueClass, FalseClass),
   )
-  .returns(Object)
+  .void
   def initialize(_begin, _end, exclude_end=_); end
 
   sig.returns(String)

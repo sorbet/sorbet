@@ -24,7 +24,7 @@ class Exception < Object
   sig(
       arg0: String,
   )
-  .returns(Object)
+  .void
   def initialize(arg0=_); end
 
   sig.returns(String)

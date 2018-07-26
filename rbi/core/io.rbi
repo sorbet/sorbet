@@ -166,7 +166,7 @@ class IO < Object
       mode: Integer,
       opt: Integer,
   )
-  .returns(Object)
+  .void
   def initialize(fd, mode=_, opt=_); end
 
   sig.returns(String)

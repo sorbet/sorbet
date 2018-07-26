@@ -15,7 +15,6 @@ class Pathname < Object
   .returns(T::Array[Pathname])
   def self.glob(p1, p2=_); end
 
-  sig(p: T.any(String, Pathname)).void
   def initialize(p); end
 
   sig(

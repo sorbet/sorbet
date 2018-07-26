@@ -158,7 +158,7 @@ class Time < Object
       sec: Numeric,
       usec_with_frac: Numeric,
   )
-  .returns(Object)
+  .void
   def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
   sig.returns(String)

@@ -40,7 +40,8 @@ class Date
     month: Integer,
     mday: Integer,
     start: Integer,
-  ).returns(Date)
+  )
+  .void
   def initialize(year=-4712, month=1, mday=1, start=Date::ITALY); end
 
   sig(arg0: T.untyped).returns(T.untyped)

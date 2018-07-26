@@ -318,7 +318,7 @@ class String < Object
   sig(
       str: String,
   )
-  .returns(Object)
+  .void
   def initialize(str=_); end
 
   sig(

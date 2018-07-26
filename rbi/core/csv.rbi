@@ -42,7 +42,7 @@ class CSV < Object
       io: T.any(::RubyTyper::IOLike, String),
       options: T::Hash[Symbol, T.untyped],
   )
-  .returns(NilClass)
+  .void
   def initialize(io=_, options=_); end
 end
 

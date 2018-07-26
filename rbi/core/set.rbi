@@ -93,7 +93,7 @@ class Set < Object
   type_parameters(:U).sig(
       enum: T::Enumerable[T.type_parameter(:U)],
   )
-  .returns(Object)
+  .void
   def initialize(enum=_); end
 
   sig(

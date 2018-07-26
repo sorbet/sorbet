@@ -86,7 +86,7 @@ class WEBrick::BasicLog
     log_file: T.untyped,
     level: T.untyped,
   )
-  .returns(T.untyped)
+  .void
   def initialize(log_file=_, level=_); end
 
   sig.returns(T.untyped)

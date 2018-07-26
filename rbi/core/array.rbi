@@ -289,7 +289,7 @@ class Array < Object
       arg0: Integer,
       arg1: Elem,
   )
-  .returns(Object)
+  .void
   def initialize(arg0=_, arg1=_); end
 
   sig(

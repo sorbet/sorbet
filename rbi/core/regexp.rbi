@@ -64,7 +64,7 @@ class Regexp < Object
   sig(
       arg0: Regexp,
   )
-  .returns(Object)
+  .void
   def initialize(arg0, options=_, kcode=_); end
 
   sig.returns(String)

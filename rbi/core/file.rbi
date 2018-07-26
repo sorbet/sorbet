@@ -443,7 +443,7 @@ class File < IO
       perm: String,
       opt: Integer,
   )
-  .returns(Object)
+  .void
   def initialize(file, mode=_, perm=_, opt=_); end
 
   sig.returns(File::Stat)

@@ -143,7 +143,7 @@ class Hash < Object
   sig(
       blk: T.proc(hash: Hash, key: Object).returns(Object)
   )
-  .returns(Hash)
+  .void
   def initialize(default=_, &blk); end
 
   sig.returns(String)

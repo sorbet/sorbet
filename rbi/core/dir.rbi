@@ -128,7 +128,7 @@ class Dir < Object
       arg0: String,
       arg1: Encoding,
   )
-  .returns(Object)
+  .void
   def initialize(arg0, arg1=_); end
 
   sig.returns(String)

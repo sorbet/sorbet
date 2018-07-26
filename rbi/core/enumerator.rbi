@@ -45,7 +45,7 @@ class Enumerator < Object
       arg0: Proc,
       blk: T.proc(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
   )
-  .returns(Object)
+  .void
   def initialize(arg0=_, &blk); end
 
   sig.returns(String)
