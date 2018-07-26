@@ -172,6 +172,7 @@ void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vect
 }; // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
+    gs.trace("Finalizing ancestor chains");
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -216,6 +217,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
 }
 
 void Resolver::finalizeResolution(core::GlobalState &gs) {
+    gs.trace("Finalizing resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
     // that resolves types and we don't want to introduce additional passes if

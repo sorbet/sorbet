@@ -1279,12 +1279,18 @@ public:
 
 vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
+    finalizeAncestors(ctx.state);
+    trees = resolveSigs(ctx, move(trees));
+    finalizeResolution(ctx.state);
+    sanityCheck(ctx, trees);
+
+    return trees;
+}
+
+std::vector<std::unique_ptr<ast::Expression>>
+Resolver::resolveSigs(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees) {
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
-
-    ctx.trace("Finalizing ancestor chains");
-    finalizeAncestors(ctx.state);
-
     ctx.trace("Resolving sigs and vars");
     for (auto &tree : trees) {
         tree = ast::TreeMap::apply(ctx, sigs, move(tree));
@@ -1298,9 +1304,10 @@ vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vect
     }
     core::prodCounterAdd("types.input.sends.total", sigs.sendCount);
 
-    ctx.trace("Finalizing resolution");
-    finalizeResolution(ctx.state);
+    return trees;
+}
 
+void Resolver::sanityCheck(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> &trees) {
     if (debug_mode) {
         ctx.trace("Sanity checking");
         ResolveSanityCheckWalk sanity;
@@ -1308,9 +1315,16 @@ vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vect
             tree = ast::TreeMap::apply(ctx, sanity, move(tree));
         }
     }
+}
+
+vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext ctx,
+                                                            vector<unique_ptr<ast::Expression>> trees) {
+    trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
+    trees = resolveSigs(ctx, move(trees));
+    sanityCheck(ctx, trees);
 
     return trees;
-} // namespace namer
+}
 
 } // namespace resolver
 } // namespace sorbet

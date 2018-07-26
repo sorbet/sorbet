@@ -4,10 +4,13 @@
 #include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
+#include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/pipeline/pipeline.h"
+#include "namer/namer.h"
+#include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include <condition_variable> // std::condition_variable
 #include <deque>
@@ -936,6 +939,43 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     return fref;
 }
 
+vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
+                                                       const options::Options &opts,
+                                                       shared_ptr<spdlog::logger> logger) {
+    try {
+        int i = 0;
+        for (auto &tree : what) {
+            auto file = tree->loc.file;
+            try {
+                unique_ptr<ast::Expression> ast;
+                core::MutableContext ctx(gs, core::Symbols::root());
+                logger->trace("Naming: {}", file.data(gs).path());
+                core::ErrorRegion errs(gs, file);
+                tree = sorbet::namer::Namer::run(ctx, move(tree));
+                i++;
+            } catch (SRubyException &) {
+                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
+                }
+            }
+        }
+
+        core::MutableContext ctx(gs, core::Symbols::root());
+        {
+            Timer timeit(logger, "Incremental resolving");
+            logger->trace("Resolving (incremental pass)...");
+            core::ErrorRegion errs(gs, sorbet::core::FileRef());
+            what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
+        }
+    } catch (SRubyException &) {
+        if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
+            e.setHeader("Exception resolving (backtrace is above)");
+        }
+    }
+
+    return what;
+}
+
 vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
     std::vector<unsigned int> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
@@ -1137,8 +1177,8 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
             updatedIndexed.emplace_back(indexed[id]->deepCopy());
         }
 
-        pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(updatedIndexed), opts, logger, false), opts,
-                            workers, logger);
+        pipeline::typecheck(finalGs, incrementalResolve(*finalGs, move(updatedIndexed), opts, logger), opts, workers,
+                            logger);
     } else {
         runSlowPath(changedFiles);
     }
