@@ -1,5 +1,6 @@
 #include "Symbols.h"
 #include "Context.h"
+#include "Hashing.h"
 #include "Types.h"
 #include "common/JSON.h"
 #include "core/Names/core.h"
@@ -675,7 +676,7 @@ SymbolRef Symbol::enclosingClass(const GlobalState &gs) const {
 }
 
 unsigned int Symbol::hash(const GlobalState &gs) const {
-    unsigned int result = name._id;
+    unsigned int result = _hash(name.data(gs).shortName(gs));
     result = mix(result, !this->resultType ? 0 : this->resultType->hash(gs));
     result = mix(result, this->flags);
     result = mix(result, this->owner._id);

@@ -1142,16 +1142,14 @@ unsigned int GlobalState::hash() const {
     constexpr bool DEBUG_HASHING_TAIL = false;
     unsigned int result = 0;
     int counter = 0;
-    for (const auto &name : this->names) {
-        counter++;
-        result = mix(result, name.hash(*this));
-        if (DEBUG_HASHING_TAIL && counter > namesUsed() - 15) {
-            errorQueue->logger.info("Hashing names: {}, {}", result, name.show(*this));
-        }
-    }
-    result = result + 1;
     for (const auto &sym : this->symbols) {
-        result = mix(result, sym.hash(*this));
+        counter++;
+        if (!sym.derivesFrom(*this, core::Symbols::StubClass())) {
+            result = mix(result, sym.hash(*this));
+        }
+        if (DEBUG_HASHING_TAIL && counter > symbolsUsed() - 15) {
+            errorQueue->logger.info("Hashing symbols: {}, {}", result, sym.name.show(*this));
+        }
     }
     return result;
 }
