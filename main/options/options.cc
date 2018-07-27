@@ -286,7 +286,7 @@ void readOptions(Options &opts, int argc, const char *argv[],
         if (raw["version"].as<bool>()) {
             cout << "Ruby Typer" << Version::version << Version::codename
                  << (Version::isReleaseBuild ? "" : " (non-release)") << " git " << Version::build_scm_revision
-                 << Version::build_scm_status << " built on " << Version::build_timestamp_string;
+                 << Version::build_scm_status << " built on " << Version::build_timestamp_string << endl;
             throw EarlyReturnWithCode(0);
         }
 
