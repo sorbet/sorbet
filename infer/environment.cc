@@ -978,11 +978,10 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                             "Expected " + expectedType->show(ctx),
                             {
                                 core::ErrorLine::from(ctx.owner.data(ctx).loc, "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx).name.toString(ctx),
-                                                      expectedType->toString(ctx)),
+                                                      ctx.owner.data(ctx).name.toString(ctx), expectedType->show(ctx)),
                             }));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx)));
                     }
                 }
@@ -1000,9 +999,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to block result type");
-                        e.addErrorSection(core::ErrorSection("Expected " + expectedType->toString(ctx)));
+                        e.addErrorSection(core::ErrorSection("Expected " + expectedType->show(ctx)));
                         e.addErrorSection(
-                            core::ErrorSection("Got " + typeAndOrigin.type->toString(ctx) + " originating from:",
+                            core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",
                                                typeAndOrigin.origins2Explanations(ctx)));
                     }
                 }
