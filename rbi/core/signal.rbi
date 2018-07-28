@@ -10,13 +10,14 @@ module Signal
   def self.signame(arg0); end
 
   sig(
-      arg0: T.any(Integer, String, Symbol),
+      signal: T.any(Integer, String, Symbol),
+      command: BasicObject,
   )
   .returns(T.any(String, Proc))
   sig(
-      arg0: T.any(Integer, String, Symbol),
+      signal: T.any(Integer, String, Symbol),
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.any(String, Proc))
-  def self.trap(arg0, &blk); end
+  def self.trap(signal, command=_, &blk); end
 end
