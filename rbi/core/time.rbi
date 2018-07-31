@@ -150,13 +150,13 @@ class Time < Object
   def hour(); end
 
   sig(
-      year: Integer,
+      year: T.any(Integer, String),
       month: T.any(Integer, String),
-      day: Integer,
-      hour: Integer,
-      min: Integer,
-      sec: Numeric,
-      usec_with_frac: Numeric,
+      day: T.any(Integer, String),
+      hour: T.any(Integer, String),
+      min: T.any(Integer, String),
+      sec: T.any(Numeric, String),
+      usec_with_frac: T.any(Numeric, String),
   )
   .void
   def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
