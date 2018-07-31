@@ -445,12 +445,15 @@ void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &
         resultType = core::Types::untyped();
     }
     if (what.data(gs).isMethod()) {
+        item.AddMember("kind", 3, alloc); // Function
         item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
         item.AddMember("insertTextFormat", 2, alloc); // Snippet
-
         item.AddMember("insertText", methodSnippet(gs, what), alloc);
     } else if (what.data(gs).isStaticField()) {
+        item.AddMember("kind", 21, alloc); // Constant
         item.AddMember("detail", resultType->show(gs), alloc);
+    } else if (what.data(gs).isClass()) {
+        item.AddMember("kind", 7, alloc); // Class
     }
     items.PushBack(move(item), alloc);
 }
@@ -481,16 +484,20 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
             if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
                 auto pattern = c->symbol.data(*finalGs).name.data(*finalGs).shortName(*finalGs);
                 logger->debug("Looking for constant similar to {}", pattern);
-                core::SymbolRef owner = c->symbol.data(*finalGs).owner;
-                for (auto member : owner.data(*finalGs).members) {
-                    auto sym = member.second;
-                    if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
-                        sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT && // hide singletons
-                        hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
-                        !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
-                        addCompletionItem(*finalGs, alloc, items, sym, *resp);
+                core::SymbolRef owner = c->symbol;
+                do {
+                    owner = owner.data(*finalGs).owner;
+                    for (auto member : owner.data(*finalGs).members) {
+                        auto sym = member.second;
+                        if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
+                            sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT &&
+                            // hide singletons
+                            hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
+                            !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
+                            addCompletionItem(*finalGs, alloc, items, sym, *resp);
+                        }
                     }
-                }
+                } while (owner != core::Symbols::root());
             }
         } else {
         }
@@ -891,8 +898,6 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
 }
 
 rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
-    ENFORCE(loc.file.exists());
-
     /**
        {
         start: { line: 5, character: 23 }
@@ -905,6 +910,16 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
     start.SetObject();
     rapidjson::Value end;
     end.SetObject();
+    if (!loc.file.exists()) {
+        start.AddMember("line", 1, alloc);
+        start.AddMember("character", 1, alloc);
+        end.AddMember("line", 2, alloc);
+        end.AddMember("character", 0, alloc);
+
+        ret.AddMember("start", start, alloc);
+        ret.AddMember("end", end, alloc);
+        return ret;
+    }
 
     auto pair = loc.position(*finalGs);
     // All LSP numbers are zero-based, ours are 1-based.
@@ -919,38 +934,42 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
 }
 
 rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
-    ENFORCE(loc.file.exists());
-
+    string uri;
     //  interface Location {
     //      uri: DocumentUri;
     //      range: Range;
     //  }
     rapidjson::Value ret;
     ret.SetObject();
-    auto &messageFile = loc.file.data(*finalGs);
-    string uri;
-    if (messageFile.source_type == core::File::Type::Payload) {
-        // This is hacky because VSCode appends #4,3 (or whatever the position is of the
-        // error) to the uri before it shows it in the UI since this is the format that
-        // VSCode uses to denote which location to jump to. However, if you append #L4
-        // to the end of the uri, this will work on github (it will ignore the #4,3)
-        //
-        // As an example, in VSCode, on hover you might see
-        //
-        // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
-        //
-        // When you click on the link, in the browser it appears as
-        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
-        // but shows you the same thing as
-        // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-        uri =
-            fmt::format("{}#L{}", (string)messageFile.path(), std::to_string((int)(loc.position(*finalGs).first.line)));
+
+    if (!loc.file.exists()) {
+        uri = localName2Remote("???");
     } else {
-        uri = fileRef2Uri(loc.file);
+        auto &messageFile = loc.file.data(*finalGs);
+        if (messageFile.source_type == core::File::Type::Payload) {
+            // This is hacky because VSCode appends #4,3 (or whatever the position is of the
+            // error) to the uri before it shows it in the UI since this is the format that
+            // VSCode uses to denote which location to jump to. However, if you append #L4
+            // to the end of the uri, this will work on github (it will ignore the #4,3)
+            //
+            // As an example, in VSCode, on hover you might see
+            //
+            // string.rbi(18,7): Method `+` has specified type of argument `arg0` as `String`
+            //
+            // When you click on the link, in the browser it appears as
+            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
+            // but shows you the same thing as
+            // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
+            uri = fmt::format("{}#L{}", (string)messageFile.path(),
+                              std::to_string((int)(loc.position(*finalGs).first.line)));
+        } else {
+            uri = fileRef2Uri(loc.file);
+        }
     }
 
     ret.AddMember("uri", uri, alloc);
     ret.AddMember("range", loc2Range(loc), alloc);
+
     return ret;
 }
 
