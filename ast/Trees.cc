@@ -31,8 +31,6 @@ template class std::unique_ptr<sorbet::ast::Hash>;
 template class std::unique_ptr<sorbet::ast::Array>;
 template class std::unique_ptr<sorbet::ast::Literal>;
 template class std::unique_ptr<sorbet::ast::ConstantLit>;
-template class std::unique_ptr<sorbet::ast::ArraySplat>;
-template class std::unique_ptr<sorbet::ast::HashSplat>;
 template class std::unique_ptr<sorbet::ast::ZSuperArgs>;
 template class std::unique_ptr<sorbet::ast::Self>;
 template class std::unique_ptr<sorbet::ast::Block>;
@@ -234,16 +232,6 @@ Literal::Literal(core::Loc loc, shared_ptr<core::Type> value) : Expression(loc),
 ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {
     core::categoryCounterInc("trees", "constantlit");
-    _sanityCheck();
-}
-
-ArraySplat::ArraySplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    core::categoryCounterInc("trees", "arraysplat");
-    _sanityCheck();
-}
-
-HashSplat::HashSplat(core::Loc loc, unique_ptr<Expression> arg) : Expression(loc), arg(move(arg)) {
-    core::categoryCounterInc("trees", "hashsplat");
     _sanityCheck();
 }
 
@@ -624,22 +612,6 @@ string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "}";
 
     return buf.str();
-}
-
-string HashSplat::toString(const core::GlobalState &gs, int tabs) {
-    return "**" + this->arg->toString(gs, tabs + 1);
-}
-
-string ArraySplat::toString(const core::GlobalState &gs, int tabs) {
-    return "*" + this->arg->toString(gs, tabs + 1);
-}
-
-string ArraySplat::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
-}
-
-string HashSplat::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ arg = " + this->arg->showRaw(gs, tabs + 1) + " }";
 }
 
 string Return::showRaw(const core::GlobalState &gs, int tabs) {
@@ -1102,14 +1074,6 @@ bool Literal::isFalse(const core::GlobalState &gs) {
 
 string ConstantLit::nodeName() {
     return "ConstantLit";
-}
-
-string ArraySplat::nodeName() {
-    return "ArraySplat";
-}
-
-string HashSplat::nodeName() {
-    return "HashSplat";
 }
 
 string Self::nodeName() {

@@ -113,26 +113,6 @@ public:
     virtual std::string toString(core::Context ctx);
 };
 
-class ArraySplat final : public Instruction {
-public:
-    core::NameRef arg;
-
-    ArraySplat(core::NameRef arg) : arg(arg) {
-        core::categoryCounterInc("cfg", "arraysplat");
-    };
-    virtual std::string toString(core::Context ctx);
-};
-
-class HashSplat final : public Instruction {
-public:
-    core::NameRef arg;
-
-    HashSplat(core::NameRef arg) : arg(arg) {
-        core::categoryCounterInc("cfg", "hashsplat");
-    };
-    virtual std::string toString(core::Context ctx);
-};
-
 class Self final : public Instruction {
 public:
     core::SymbolRef klass;

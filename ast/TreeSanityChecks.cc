@@ -12,10 +12,6 @@ void Array::_sanityCheck() {
     }
 }
 
-void ArraySplat::_sanityCheck() {
-    ENFORCE(arg);
-}
-
 void Assign::_sanityCheck() {
     ENFORCE(lhs);
     ENFORCE(rhs);
@@ -71,10 +67,6 @@ void Hash::_sanityCheck() {
         ENFORCE(node);
     }
     ENFORCE(keys.size() == values.size());
-}
-
-void HashSplat::_sanityCheck() {
-    ENFORCE(arg);
 }
 
 void Ident::_sanityCheck() {

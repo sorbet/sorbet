@@ -97,14 +97,6 @@ string Self::toString(core::Context ctx) {
     return "self";
 }
 
-string HashSplat::toString(core::Context ctx) {
-    Error::notImplemented();
-}
-
-string ArraySplat::toString(core::Context ctx) {
-    Error::notImplemented();
-}
-
 string LoadArg::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_arg(";

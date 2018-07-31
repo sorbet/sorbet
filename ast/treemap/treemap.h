@@ -67,12 +67,6 @@ public:
 
     unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original);
 
-    unique_ptr<ArraySplat> preTransformArraySplat(core::MutableContext ctx, unique_ptr<ArraySplat> original);
-    unique_ptr<Expression> postTransformArraySplat(core::MutableContext ctx, unique_ptr<ArraySplat> original);
-
-    unique_ptr<HashSplat> preTransformHashSplat(core::MutableContext ctx, unique_ptr<HashSplat> original);
-    unique_ptr<Expression> postTransformHashSplat(core::MutableContext ctx, unique_ptr<HashSplat> original);
-
     unique_ptr<Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<Self> original);
 
     unique_ptr<Block> preTransformBlock(core::MutableContext ctx, unique_ptr<Block> original);
@@ -122,8 +116,6 @@ GENERATE_HAS_MEMBER(preTransformAssign);
 GENERATE_HAS_MEMBER(preTransformSend);
 GENERATE_HAS_MEMBER(preTransformHash);
 GENERATE_HAS_MEMBER(preTransformArray);
-GENERATE_HAS_MEMBER(preTransformArraySplat);
-GENERATE_HAS_MEMBER(preTransformHashSplat);
 GENERATE_HAS_MEMBER(preTransformBlock);
 GENERATE_HAS_MEMBER(preTransformInsSeq);
 
@@ -227,8 +219,6 @@ GENERATE_POSTPONE_PRECLASS(Assign);
 GENERATE_POSTPONE_PRECLASS(Send);
 GENERATE_POSTPONE_PRECLASS(Hash);
 GENERATE_POSTPONE_PRECLASS(Array);
-GENERATE_POSTPONE_PRECLASS(ArraySplat);
-GENERATE_POSTPONE_PRECLASS(HashSplat);
 GENERATE_POSTPONE_PRECLASS(Block);
 GENERATE_POSTPONE_PRECLASS(InsSeq);
 GENERATE_POSTPONE_PRECLASS(Cast);
@@ -253,8 +243,6 @@ GENERATE_POSTPONE_POSTCLASS(Array);
 GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(Literal);
 GENERATE_POSTPONE_POSTCLASS(ConstantLit);
-GENERATE_POSTPONE_POSTCLASS(ArraySplat);
-GENERATE_POSTPONE_POSTCLASS(HashSplat);
 GENERATE_POSTPONE_POSTCLASS(Self);
 GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
@@ -607,37 +595,6 @@ private:
                 if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
                     return PostPonePostTransform_ConstantLit<
                         FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(ctx, move(v), func);
-                }
-                return move(v);
-            } else if (ArraySplat *u = cast_tree<ArraySplat>(what.get())) {
-                unique_ptr<ArraySplat> v(u);
-                what.release();
-                if (HAS_MEMBER_preTransformArraySplat<FUNC>::value) {
-                    v = PostPonePreTransform_ArraySplat<FUNC, CTX,
-                                                        HAS_MEMBER_preTransformArraySplat<FUNC>::value>::call(ctx,
-                                                                                                              move(v),
-                                                                                                              func);
-                }
-                v->arg = mapIt(move(v->arg), ctx);
-
-                if (HAS_MEMBER_postTransformArraySplat<FUNC>::value) {
-                    return PostPonePostTransform_ArraySplat<
-                        FUNC, CTX, HAS_MEMBER_postTransformArraySplat<FUNC>::value>::call(ctx, move(v), func);
-                }
-
-                return move(v);
-            } else if (HashSplat *u = cast_tree<HashSplat>(what.get())) {
-                unique_ptr<HashSplat> v(u);
-                what.release();
-                if (HAS_MEMBER_preTransformHashSplat<FUNC>::value) {
-                    v = PostPonePreTransform_HashSplat<FUNC, CTX, HAS_MEMBER_preTransformHashSplat<FUNC>::value>::call(
-                        ctx, move(v), func);
-                }
-                v->arg = mapIt(move(v->arg), ctx);
-
-                if (HAS_MEMBER_postTransformHashSplat<FUNC>::value) {
-                    return PostPonePostTransform_HashSplat<
-                        FUNC, CTX, HAS_MEMBER_postTransformHashSplat<FUNC>::value>::call(ctx, move(v), func);
                 }
                 return move(v);
             } else if (Self *u = cast_tree<Self>(what.get())) {

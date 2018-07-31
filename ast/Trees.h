@@ -533,34 +533,6 @@ private:
     virtual void _sanityCheck();
 };
 
-class ArraySplat final : public Expression {
-public:
-    std::unique_ptr<Expression> arg;
-
-    ArraySplat(core::Loc loc, std::unique_ptr<Expression> arg);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-
-class HashSplat final : public Expression {
-public:
-    std::unique_ptr<Expression> arg;
-
-    HashSplat(core::Loc loc, std::unique_ptr<Expression> arg);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-
 class ZSuperArgs final : public Expression {
 public:
     // null if no block passed

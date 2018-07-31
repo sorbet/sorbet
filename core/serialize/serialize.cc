@@ -820,16 +820,8 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickle(p, file, a->expr);
              },
              [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 31, a); },
-             [&](ast::HashSplat *a) {
-                 pickleAstHeader(p, 32, a);
-                 pickle(p, file, a->arg);
-             },
-             [&](ast::ArraySplat *a) {
-                 pickleAstHeader(p, 33, a);
-                 pickle(p, file, a->arg);
-             },
              [&](ast::UnresolvedIdent *a) {
-                 pickleAstHeader(p, 34, a);
+                 pickleAstHeader(p, 32, a);
                  p.putU1((int)a->kind);
                  p.putU4(a->name._id);
              },
@@ -1061,14 +1053,6 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::ZSuperArgs>(loc);
         }
         case 32: {
-            auto expr = unpickleExpr(p, gs, file);
-            return make_unique<ast::HashSplat>(loc, move(expr));
-        }
-        case 33: {
-            auto expr = unpickleExpr(p, gs, file);
-            return make_unique<ast::ArraySplat>(loc, move(expr));
-        }
-        case 34: {
             auto kind = (ast::UnresolvedIdent::VarKind)p.getU1();
             NameRef name = unpickleNameRef(p, gs);
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);

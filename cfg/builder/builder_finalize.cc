@@ -242,8 +242,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
                 // shorter to list the converse set -- those which *do* have
                 // side effects -- but doing it this way is more robust to us
                 // adding more instruction types in the future.
-                if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<ArraySplat>(bind.value.get()) ||
-                    isa_instruction<HashSplat>(bind.value.get()) || isa_instruction<Literal>(bind.value.get()) ||
+                if (isa_instruction<Ident>(bind.value.get()) || isa_instruction<Literal>(bind.value.get()) ||
                     isa_instruction<Self>(bind.value.get()) || isa_instruction<LoadArg>(bind.value.get()) ||
                     isa_instruction<LoadYieldParams>(bind.value.get())) {
                     expIt = it->exprs.erase(expIt);

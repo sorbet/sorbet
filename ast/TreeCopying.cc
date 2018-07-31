@@ -215,20 +215,6 @@ unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root
     return make_unique<ConstantLit>(loc, scope->_deepCopy(avoid), cnst);
 }
 
-unique_ptr<Expression> ArraySplat::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<ArraySplat>(loc, arg->_deepCopy(avoid));
-}
-
-unique_ptr<Expression> HashSplat::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    return make_unique<HashSplat>(loc, arg->_deepCopy(avoid));
-}
-
 unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
