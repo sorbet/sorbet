@@ -957,6 +957,10 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
 void LSPLoop::pushErrors() {
     drainErrors();
 
+    // Dedup updates
+    sort(updatedErrors.begin(), updatedErrors.end());
+    updatedErrors.erase(unique(updatedErrors.begin(), updatedErrors.end()), updatedErrors.end());
+
     for (auto file : updatedErrors) {
         if (file.exists()) {
             rapidjson::Value publishDiagnosticsParams;
@@ -993,38 +997,40 @@ void LSPLoop::pushErrors() {
                 // diagnostics
                 rapidjson::Value diagnostics;
                 diagnostics.SetArray();
-                for (auto &e : errorsAccumulated[file]) {
-                    rapidjson::Value diagnostic;
-                    diagnostic.SetObject();
+                if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
+                    for (auto &e : errorsAccumulated[file]) {
+                        rapidjson::Value diagnostic;
+                        diagnostic.SetObject();
 
-                    diagnostic.AddMember("range", loc2Range(e->loc), alloc);
-                    diagnostic.AddMember("code", e->what.code, alloc);
-                    diagnostic.AddMember("message", e->formatted, alloc);
+                        diagnostic.AddMember("range", loc2Range(e->loc), alloc);
+                        diagnostic.AddMember("code", e->what.code, alloc);
+                        diagnostic.AddMember("message", e->formatted, alloc);
 
-                    typecase(e.get(), [&](core::ComplexError *ce) {
-                        rapidjson::Value relatedInformation;
-                        relatedInformation.SetArray();
-                        for (auto &section : ce->sections) {
-                            string sectionHeader = section.header;
+                        typecase(e.get(), [&](core::ComplexError *ce) {
+                            rapidjson::Value relatedInformation;
+                            relatedInformation.SetArray();
+                            for (auto &section : ce->sections) {
+                                string sectionHeader = section.header;
 
-                            for (auto &errorLine : section.messages) {
-                                rapidjson::Value relatedInfo;
-                                relatedInfo.SetObject();
-                                relatedInfo.AddMember("location", loc2Location(errorLine.loc), alloc);
+                                for (auto &errorLine : section.messages) {
+                                    rapidjson::Value relatedInfo;
+                                    relatedInfo.SetObject();
+                                    relatedInfo.AddMember("location", loc2Location(errorLine.loc), alloc);
 
-                                string relatedInfoMessage;
-                                if (errorLine.formattedMessage.length() > 0) {
-                                    relatedInfoMessage = errorLine.formattedMessage;
-                                } else {
-                                    relatedInfoMessage = sectionHeader;
+                                    string relatedInfoMessage;
+                                    if (errorLine.formattedMessage.length() > 0) {
+                                        relatedInfoMessage = errorLine.formattedMessage;
+                                    } else {
+                                        relatedInfoMessage = sectionHeader;
+                                    }
+                                    relatedInfo.AddMember("message", relatedInfoMessage, alloc);
+                                    relatedInformation.PushBack(relatedInfo, alloc);
                                 }
-                                relatedInfo.AddMember("message", relatedInfoMessage, alloc);
-                                relatedInformation.PushBack(relatedInfo, alloc);
                             }
-                        }
-                        diagnostic.AddMember("relatedInformation", relatedInformation, alloc);
-                    });
-                    diagnostics.PushBack(diagnostic, alloc);
+                            diagnostic.AddMember("relatedInformation", relatedInformation, alloc);
+                        });
+                        diagnostics.PushBack(diagnostic, alloc);
+                    }
                 }
                 publishDiagnosticsParams.AddMember("diagnostics", diagnostics, alloc);
             }
@@ -1229,8 +1235,11 @@ void LSPLoop::reIndexFromFileSystem() {
 }
 
 void LSPLoop::invalidateAllErrors() {
-    errorsAccumulated.clear();
     updatedErrors.clear();
+    for (auto &e : errorsAccumulated) {
+        updatedErrors.push_back(e.first);
+    }
+    errorsAccumulated.clear();
 }
 
 void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
@@ -1238,6 +1247,7 @@ void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
         auto fnd = errorsAccumulated.find(f);
         if (fnd != errorsAccumulated.end()) {
             errorsAccumulated.erase(fnd);
+            updatedErrors.push_back(f);
         }
     }
 }

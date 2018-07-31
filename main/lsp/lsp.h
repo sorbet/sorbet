@@ -145,7 +145,7 @@ class LSPLoop {
     std::vector<std::unique_ptr<const ast::Expression>> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<unsigned int> globalStateHashes;
-    /** List of errors that have never yet been sent to LSP client */
+    /** List of errors(or error clears) that have never yet been sent to LSP client */
     std::vector<core::FileRef> updatedErrors;
     /** LSP clients do not store errors on their side. We have to resend the entire list of errors
      * every time we send a single new one */
