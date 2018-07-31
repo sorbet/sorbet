@@ -9,8 +9,8 @@ module Kernel
   def self.Array(x); end
 
   sig(
-      x: Numeric,
-      y: Numeric,
+      x: T.any(Numeric, String),
+      y: T.any(Numeric, String),
   )
   .returns(Complex)
   sig(
@@ -20,7 +20,7 @@ module Kernel
   def self.Complex(x, y=_); end
 
   sig(
-      x: Numeric,
+      x: T.any(Numeric, String),
   )
   .returns(Float)
   def self.Float(x); end
@@ -39,8 +39,8 @@ module Kernel
   def self.Integer(arg, base=_); end
 
   sig(
-      x: Numeric,
-      y: Numeric,
+      x: T.any(Numeric, String),
+      y: T.any(Numeric, String)
   )
   .returns(Rational)
   sig(
@@ -563,8 +563,8 @@ module Kernel
   def Array(x); end
 
   sig(
-      x: Numeric,
-      y: Numeric,
+      x: T.any(Numeric, String),
+      y: T.any(Numeric, String),
   )
   .returns(Complex)
   sig(
@@ -574,7 +574,7 @@ module Kernel
   def Complex(x, y=_); end
 
   sig(
-      x: Numeric,
+      x: T.any(Numeric, String),
   )
   .returns(Float)
   def Float(x); end
@@ -593,8 +593,8 @@ module Kernel
   def Integer(arg, base=_); end
 
   sig(
-      x: Numeric,
-      y: Numeric,
+      x: T.any(Numeric, String),
+      y: T.any(Numeric, String),
   )
   .returns(Rational)
   sig(
