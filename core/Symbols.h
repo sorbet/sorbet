@@ -563,7 +563,8 @@ public:
 
     class IntrinsicMethod {
     public:
-        virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, std::vector<TypeAndOrigins> &args,
+        virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc,
+                                            std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
                                             std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
                                             std::shared_ptr<SendAndBlockLink> linkType) const = 0;
     };

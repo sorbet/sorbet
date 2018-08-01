@@ -568,16 +568,18 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, i
     return Types::untyped()->getCallArgumentType(ctx, name, i);
 }
 
-DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                         vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
                                          shared_ptr<Type> selfType, shared_ptr<Type> fullType,
                                          shared_ptr<SendAndBlockLink> block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, vector<TypeAndOrigins> &args,
+DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                           vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
                                            shared_ptr<Type> selfType, shared_ptr<Type> fullType,
                                            shared_ptr<SendAndBlockLink> block) {
-    return Types::untyped()->dispatchCall(ctx, name, callLoc, args, selfType, fullType, block);
+    return Types::untyped()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType, block);
 }
 
 void LambdaParam::_sanityCheck(Context ctx) {}
@@ -662,7 +664,8 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("should never happen");
 }
 
-DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, std::vector<TypeAndOrigins> &args,
+DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                      std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
                                       std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
                                       std::shared_ptr<SendAndBlockLink> link) {
     Error::raise("should never happen");

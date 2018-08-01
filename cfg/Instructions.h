@@ -61,11 +61,13 @@ class Send final : public Instruction {
 public:
     core::LocalVariable recv;
     core::NameRef fun;
+    core::Loc receiverLoc;
     std::vector<core::LocalVariable> args;
+    std::vector<core::Loc> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(core::LocalVariable recv, core::NameRef fun, std::vector<core::LocalVariable> &args,
-         std::shared_ptr<core::SendAndBlockLink> link = nullptr);
+    Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc, std::vector<core::LocalVariable> &args,
+         std::vector<core::Loc> &argLocs, std::shared_ptr<core::SendAndBlockLink> link = nullptr);
 
     virtual std::string toString(core::Context ctx);
 };

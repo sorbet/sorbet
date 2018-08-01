@@ -181,12 +181,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 
                 vector<core::LocalVariable> args;
+                vector<core::Loc> argLocs;
                 for (auto &exp : s->args) {
                     core::LocalVariable temp;
                     temp = cctx.ctx.state.newTemporary(core::Names::statTemp(), cctx.inWhat.symbol);
                     current = walk(cctx.withTarget(temp), exp.get(), current);
 
                     args.push_back(temp);
+                    argLocs.emplace_back(exp->loc);
                 }
 
                 core::SymbolRef blockSym;
@@ -198,7 +200,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     vector<core::LocalVariable> argsCopy = args;
                     core::SymbolRef sym = s->block->symbol;
                     auto link = make_shared<core::SendAndBlockLink>(sym, s->fun);
-                    auto send = make_unique<Send>(recv, s->fun, argsCopy, link);
+                    auto send = make_unique<Send>(recv, s->fun, s->recv->loc, argsCopy, argLocs, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
                     core::LocalVariable sendTemp =
                         cctx.ctx.state.newTemporary(core::Names::blockPreCallTemp(), cctx.inWhat.symbol);
@@ -222,8 +224,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         bodyBlock->exprs.emplace_back(idxTmp, id->loc,
                                                       make_unique<Literal>(make_shared<core::LiteralType>(int64_t(i))));
                         vector<core::LocalVariable> idxVec{idxTmp};
+                        vector<core::Loc> locs{id->loc};
                         bodyBlock->exprs.emplace_back(
-                            argLoc, id->loc, make_unique<Send>(argTemp, core::Names::squareBrackets(), idxVec));
+                            argLoc, id->loc,
+                            make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
                     }
 
                     conditionalJump(headerBlock, core::LocalVariable::blockCall(), bodyBlock, postBlock, cctx.inWhat,
@@ -248,7 +252,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current = postBlock;
                     current->exprs.emplace_back(cctx.target, s->loc, move(solveConstraint));
                 } else {
-                    current->exprs.emplace_back(cctx.target, s->loc, make_unique<Send>(recv, s->fun, args));
+                    current->exprs.emplace_back(cctx.target, s->loc,
+                                                make_unique<Send>(recv, s->fun, s->recv->loc, args, argLocs));
                 }
 
                 ret = current;
@@ -355,10 +360,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         auto isaCheck = cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
                         vector<core::LocalVariable> args;
+                        vector<core::Loc> argLocs = {loc};
                         args.emplace_back(exceptionClass);
 
                         rescueHandlersBlock->exprs.emplace_back(
-                            isaCheck, loc, make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), args));
+                            isaCheck, loc,
+                            make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), loc, args, argLocs));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -389,6 +396,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Hash *h) {
                 vector<core::LocalVariable> vars;
+                vector<core::Loc> locs;
                 for (int i = 0; i < h->keys.size(); i++) {
                     core::LocalVariable keyTmp =
                         cctx.ctx.state.newTemporary(core::Names::hashTemp(), cctx.inWhat.symbol);
@@ -398,23 +406,27 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
                     vars.push_back(keyTmp);
                     vars.push_back(valTmp);
+                    locs.emplace_back(h->keys[i]->loc);
+                    locs.emplace_back(h->values[i]->loc);
                 }
                 core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, h->loc,
-                                            make_unique<Send>(magic, core::Names::buildHash(), vars));
+                                            make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs));
                 ret = current;
             },
 
             [&](ast::Array *a) {
                 vector<core::LocalVariable> vars;
+                vector<core::Loc> locs;
                 for (auto &elem : a->elems) {
                     core::LocalVariable tmp = cctx.ctx.state.newTemporary(core::Names::arrayTemp(), cctx.inWhat.symbol);
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
                     vars.push_back(tmp);
+                    locs.emplace_back(a->loc);
                 }
                 core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, a->loc,
-                                            make_unique<Send>(magic, core::Names::buildArray(), vars));
+                                            make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs));
                 ret = current;
             },
 

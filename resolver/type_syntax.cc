@@ -478,11 +478,13 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             vector<core::TypeAndOrigins> targs;
+            vector<core::Loc> argLocs;
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = make_shared<core::MetaType>(TypeSyntax::getResultType(ctx, arg, sigBeingParsed, false));
                 targs.emplace_back(ty);
+                argLocs.emplace_back(arg->loc);
             }
 
             core::SymbolRef corrected;
@@ -510,8 +512,8 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));
-            auto dispatched =
-                ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, targs, ctype, ctype, nullptr);
+            auto dispatched = ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, recvi->loc, targs,
+                                                  argLocs, ctype, ctype, nullptr);
             for (auto &comp : dispatched.components) {
                 for (auto &err : comp.errors) {
                     ctx.state._error(move(err));

@@ -32,9 +32,9 @@ string BlockReturn::toString(core::Context ctx) {
     return "blockreturn<" + this->link->block.data(ctx).fullName(ctx) + "> " + this->what.toString(ctx);
 }
 
-Send::Send(core::LocalVariable recv, core::NameRef fun, vector<core::LocalVariable> &args,
-           shared_ptr<core::SendAndBlockLink> link)
-    : recv(recv), fun(fun), args(move(args)), link(move(link)) {
+Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc, vector<core::LocalVariable> &args,
+           vector<core::Loc> &argLocs, shared_ptr<core::SendAndBlockLink> link)
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), args(move(args)), argLocs(move(argLocs)), link(move(link)) {
     core::categoryCounterInc("cfg", "send");
     core::histogramInc("cfg.send.args", this->args.size());
 }
