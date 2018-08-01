@@ -1,1 +1,0 @@
-stripe-internal-sorbet-pay-server.sh
