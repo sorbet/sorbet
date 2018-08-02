@@ -51,7 +51,7 @@ if [ ! -f "../ci/stripe-internal-sorbet-pay-server-sha" ]; then
 fi
 PAY_SERVER_SHA="$(cat ../ci/stripe-internal-sorbet-pay-server-sha)"
 git checkout "$PAY_SERVER_SHA"
-SORBET_MASQUERADE_SHA="$(cat lib/ruby-types/sorbet.sha)"
+SORBET_MASQUERADE_SHA="$(cat sorbet/sorbet.sha)"
 (
     cd -
     mkdir -p "${SORBET_CACHE_DIR}/${SORBET_MASQUERADE_SHA}/bin"
