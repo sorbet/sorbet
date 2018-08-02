@@ -82,7 +82,7 @@ void ConcurrentErrorQueue::flushErrors(bool all) {
             this->logger.log(spdlog::level::critical, "{}", critical.str());
             printedAtLeastOneError = true;
         } else {
-            this->logger.log(spdlog::level::err, "\n{}", nonCritical.str());
+            this->logger.log(spdlog::level::critical, "\n{}", critical.str());
         }
     }
     if (nonCritical.tellp() != 0) {
