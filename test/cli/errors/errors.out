@@ -5,8 +5,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L859: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     859 |      arg0: String,
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L873: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     873 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:
@@ -49,8 +49,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L859: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     859 |      arg0: String,
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L873: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     873 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:
@@ -93,8 +93,8 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     12 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L859: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     859 |      arg0: String,
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L873: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     873 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:9:

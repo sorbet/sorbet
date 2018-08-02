@@ -7,6 +7,13 @@ module Kernel
   )
   .returns(T::Array[T.type_parameter(:T)])
   def self.Array(x); end
+  
+  sig(
+      initial: T.any(Integer, Float, Rational, BigDecimal, String),
+      digits: Integer,
+  )
+  .void
+  def self.BigDecimal(initial, digits=0); end
 
   sig(
       x: T.any(Numeric, String),
@@ -561,6 +568,13 @@ module Kernel
   )
   .returns(T::Array[T.type_parameter(:T)])
   def Array(x); end
+
+  sig(
+      initial: T.any(Integer, Float, Rational, BigDecimal, String),
+      digits: Integer,
+  )
+  .void
+  def BigDecimal(initial, digits=0); end
 
   sig(
       x: T.any(Numeric, String),
