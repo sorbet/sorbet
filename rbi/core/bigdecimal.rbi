@@ -515,3 +515,10 @@ class BigDecimal < Numeric
   sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 end
+
+sig(
+    initial: T.any(Integer, Float, Rational, BigDecimal, String),
+    digits: Integer,
+)
+.void
+def BigDecimal(initial, digits=0); end
