@@ -22,3 +22,8 @@ CSV.parse_line("ab,cd", {foo: 'bar'})
 
 CSV.read("path.csv")
 CSV.read("path.csv", {foo: 'bar'})
+
+T.let(
+  T.must(CSV(StringIO.new('a,b,c')).readline),
+  T::Array[T.nilable(String)],
+)
