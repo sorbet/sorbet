@@ -300,7 +300,7 @@ void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
 void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetArray();
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition())) {
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition(), true)) {
         return;
     }
     auto queryResponses = errorQueue->drainQueryResponses();
@@ -464,7 +464,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     rapidjson::Value items;
     items.SetArray();
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion())) {
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
         return;
     }
     auto queryResponses = errorQueue->drainQueryResponses();
@@ -509,7 +509,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
 void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetObject();
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover())) {
+    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
         return;
     }
 
@@ -672,7 +672,7 @@ void LSPLoop::runLSP() {
     }
 }
 
-bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod) {
+bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
     auto uri =
         string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
 
@@ -680,6 +680,13 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
     if (!fref.exists()) {
         sendError(d, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
+        return false;
+    }
+
+    if (errorIfFileIsUntyped && fref.data(*finalGs).sigil == core::StrictLevel::Stripe) {
+        sendError(d, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
+        sendShowMessageNotification(
+            1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
         return false;
     }
     core::Loc::Detail reqPos;
@@ -1058,6 +1065,14 @@ void LSPLoop::pushErrors() {
         }
     }
     updatedErrors.clear();
+}
+
+void LSPLoop::sendShowMessageNotification(int messageType, string message) {
+    rapidjson::Value result;
+    result.SetObject();
+    result.AddMember("type", messageType, alloc);
+    result.AddMember("message", message, alloc);
+    sendNotification(LSPMethod::WindowShowMessage(), result);
 }
 
 void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &result) {

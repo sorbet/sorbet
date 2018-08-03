@@ -104,6 +104,9 @@ struct LSPMethod {
     static const inline LSPMethod WorkspaceSymbolsRequest() {
         return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod WindowShowMessage() {
+        return LSPMethod{"window/showMessage", true, LSPMethod::Kind::ServerInitiated};
+    };
     static const inline LSPMethod Pause() {
         return LSPMethod{"__PAUSE__", true, LSPMethod::Kind::ClientInitiated};
     };
@@ -217,12 +220,13 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
-    bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod);
+    bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
     void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
+    void sendShowMessageNotification(int messageType, std::string message);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
