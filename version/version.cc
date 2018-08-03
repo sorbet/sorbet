@@ -1,5 +1,12 @@
 #include "version/version.h"
 
+/**
+ * This file is *MAGIC*
+ * When we compile if from Bazel, we do magical substitutions to some variables defined in CAPS in this file.
+ * See `version/Build` for up-to-date list of substitutions.
+ *
+ *  This file takes them and packages them to a API that is more pleasant to work with.
+ */
 using namespace std;
 
 namespace sorbet {
