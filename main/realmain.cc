@@ -238,7 +238,15 @@ int realmain(int argc, const char *argv[]) {
     indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
 
     gs->errorQueue->flushErrors(true);
-    if (!opts.noErrorCount) {
+
+    if (opts.print.ErrorFiles) {
+        for (auto &tree : indexed) {
+            auto f = tree->loc.file;
+            if (f.data(*gs).hadErrors()) {
+                cout << f.data(*gs).path() << "\n";
+            }
+        }
+    } else if (!opts.noErrorCount) {
         gs->flushErrorCount();
     }
     logger->trace("sorbet done");
