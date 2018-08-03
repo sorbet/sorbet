@@ -2,8 +2,6 @@
 module Kernel
   sig(uri: T.any(URI::Generic, String)).returns(URI::Generic)
   def URI(uri); end
-
-  module_function :URI
 end
 
 module URI
