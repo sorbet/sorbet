@@ -98,6 +98,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 unconditionalJump(body, headerBlock, cctx.inWhat, a->loc);
 
                 continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
+                continueBlock->exprs.back().value->isSynthetic = true;
                 ret = continueBlock;
             },
             [&](ast::Return *a) {

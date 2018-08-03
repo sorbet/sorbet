@@ -136,5 +136,9 @@ string Cast::toString(core::Context ctx) {
 string DebugEnvironment::toString(core::Context ctx) {
     return str;
 }
+
+DebugEnvironment::DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(pos) {
+    isSynthetic = true;
+}
 } // namespace cfg
 } // namespace sorbet

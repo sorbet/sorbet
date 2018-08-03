@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#initialize" {
     "bb::Foo#initialize_1" [shape = parallelogram];
 
     "bb::Foo#initialize_0" [
-        label = "block[id=0]()\l@ivar$4 = alias @ivar : Integer\l<castTemp$5 = 0 : Integer(0)\l@ivar$4 = cast(<castTemp$5, Integer); : Integer\l<finalReturn> = return @ivar$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@ivar$4 = alias @ivar : Integer\l<castTemp$5 = 0 : Integer(0)\l@ivar$4 = cast(<castTemp$5, Integer); : Integer\l<returnMethodTemp>$2 = @ivar$4 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Foo#initialize_0" -> "bb::Foo#initialize_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#foo" {
     "bb::Foo#foo_1" [shape = parallelogram];
 
     "bb::Foo#foo_0" [
-        label = "block[id=0]()\l@ivar$5 = alias @ivar : Integer\l@ivar$5 = 2 : Integer(2)\l@ivar$5 = \"ss\" : Integer\l<finalReturn> = return @ivar$5 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@ivar$5 = alias @ivar : Integer\l@ivar$5 = 2 : Integer(2)\l@ivar$5 = \"ss\" : Integer\l<returnMethodTemp>$2 = @ivar$5 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Foo#foo_0" -> "bb::Foo#foo_1" [style="bold"];

@@ -42,7 +42,7 @@ subgraph "cluster_::<Class:E>#e=" {
     "bb::<Class:E>#e=_1" [shape = parallelogram];
 
     "bb::<Class:E>#e=_0" [
-        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<selfMethodTemp>$3 = self : <Class:E>\le = load_arg(<selfMethodTemp>$3#e=, 0) : T.untyped\l@e$4 = e : T.untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<selfMethodTemp>$3 = self : <Class:E>\le = load_arg(<selfMethodTemp>$3#e=, 0) : T.untyped\l@e$4 = e : T.untyped\l<returnMethodTemp>$2 = @e$4 : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:E>#e=_0" -> "bb::<Class:E>#e=_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:E>#e" {
     "bb::<Class:E>#e_1" [shape = parallelogram];
 
     "bb::<Class:E>#e_0" [
-        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<finalReturn> = return @e$4 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@e$4 = alias @e : T.untyped\l<returnMethodTemp>$2 = @e$4 : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:E>#e_0" -> "bb::<Class:E>#e_1" [style="bold"];

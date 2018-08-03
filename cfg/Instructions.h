@@ -20,6 +20,7 @@ public:
     virtual ~Instruction() = default;
     virtual std::string toString(core::Context ctx) = 0;
     Instruction() = default;
+    bool isSynthetic = false;
 };
 
 template <class To> To *cast_instruction(Instruction *what) {
@@ -165,7 +166,7 @@ public:
     std::string str;
     core::GlobalState::AnnotationPos pos;
 
-    DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(pos) {}
+    DebugEnvironment(core::GlobalState::AnnotationPos pos);
     virtual std::string toString(core::Context ctx);
 };
 

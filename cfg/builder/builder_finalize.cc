@@ -190,15 +190,19 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 }
             }
             /* dealias */
-            if (auto *v = cast_instruction<Ident>(bind.value.get())) {
-                v->what = maybeDealias(ctx, v->what, current);
-            } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                v->recv = maybeDealias(ctx, v->recv, current);
-                for (auto &arg : v->args) {
-                    arg = maybeDealias(ctx, arg, current);
+            if (!bind.value->isSynthetic) {
+                // we don't allow dealiasing values into synthetic instructions
+                // as otherwise it fools dead code analysis.
+                if (auto *v = cast_instruction<Ident>(bind.value.get())) {
+                    v->what = maybeDealias(ctx, v->what, current);
+                } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
+                    v->recv = maybeDealias(ctx, v->recv, current);
+                    for (auto &arg : v->args) {
+                        arg = maybeDealias(ctx, arg, current);
+                    }
+                } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
+                    v->what = maybeDealias(ctx, v->what, current);
                 }
-            } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                v->what = maybeDealias(ctx, v->what, current);
             }
 
             // record new aliases

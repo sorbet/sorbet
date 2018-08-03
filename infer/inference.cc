@@ -6,30 +6,11 @@ using namespace std;
 namespace sorbet {
 
 bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
-    if (bb->exprs.size() > 3) {
-        return false;
-    }
     core::LocalVariable allowedLocal;
     for (auto &expr : bb->exprs) {
-        if (cfg::isa_instruction<cfg::DebugEnvironment>(expr.value.get())) {
+        if (expr.value->isSynthetic) {
             continue;
         }
-        if (auto lit = cfg::cast_instruction<cfg::Literal>(expr.value.get())) {
-            if (lit->value->derivesFrom(ctx, core::Symbols::NilClass())) {
-                allowedLocal = expr.bind;
-                continue;
-            }
-        }
-
-        if (expr.bind._name == core::Names::finalReturn()) {
-            auto *ret = cfg::cast_instruction<cfg::Return>(expr.value.get());
-            if (ret) {
-                if (ret->what == allowedLocal) {
-                    continue;
-                }
-            }
-        }
-
         return false;
     }
     return true;

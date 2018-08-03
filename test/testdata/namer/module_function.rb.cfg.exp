@@ -6,7 +6,7 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_1" [shape = parallelogram];
 
     "bb::Funcs#f_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\lx = load_arg(<selfMethodTemp>$3#f, 0) : Integer\l<finalReturn> = return x : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\lx = load_arg(<selfMethodTemp>$3#f, 0) : Integer\l<returnMethodTemp>$2 = x : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Funcs#g" {
     "bb::Funcs#g_1" [shape = parallelogram];
 
     "bb::Funcs#g_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#g, 0) : Symbol\l<finalReturn> = return s : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#g, 0) : Symbol\l<returnMethodTemp>$2 = s : Symbol\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Funcs#h" {
     "bb::Funcs#h_1" [shape = parallelogram];
 
     "bb::Funcs#h_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#h, 0) : String\l<finalReturn> = return s : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#h, 0) : String\l<returnMethodTemp>$2 = s : String\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];

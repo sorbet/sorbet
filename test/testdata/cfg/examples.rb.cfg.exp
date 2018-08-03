@@ -212,7 +212,7 @@ subgraph "cluster_::Examples#variables_and_loop" {
     "bb::Examples#variables_and_loop_5" -> "bb::Examples#variables_and_loop_6" [style="tapered"];
 
     "bb::Examples#variables_and_loop_6" [
-        label = "block[id=6](b)\l<finalReturn> = return b\l<unconditional>\l"
+        label = "block[id=6](b)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_and_loop_6" -> "bb::Examples#variables_and_loop_1" [style="bold"];
@@ -259,7 +259,7 @@ subgraph "cluster_::Examples#variables_loop_if" {
     "bb::Examples#variables_loop_if_2" -> "bb::Examples#variables_loop_if_3" [style="tapered"];
 
     "bb::Examples#variables_loop_if_3" [
-        label = "block[id=3](b)\l<finalReturn> = return b\l<unconditional>\l"
+        label = "block[id=3](b)\l<returnMethodTemp>$2 = b\l<finalReturn> = return <returnMethodTemp>$2\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_loop_if_3" -> "bb::Examples#variables_loop_if_1" [style="bold"];

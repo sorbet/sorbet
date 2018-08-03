@@ -143,7 +143,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
 
     "bb::ControlFlow#orZero2_3" -> "bb::ControlFlow#orZero2_4" [style="bold"];
     "bb::ControlFlow#orZero2_4" [
-        label = "block[id=4](a)\l<finalReturn> = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=4](a)\l<returnMethodTemp>$2 = a : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_4" -> "bb::ControlFlow#orZero2_1" [style="bold"];

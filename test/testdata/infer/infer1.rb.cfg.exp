@@ -6,7 +6,7 @@ subgraph "cluster_::Object#baz1" {
     "bb::Object#baz1_1" [shape = parallelogram];
 
     "bb::Object#baz1_0" [
-        label = "block[id=0]()\la = \"foo\" : String(\"foo\")\lb = a.getbyte(a) : Integer | NilClass\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\la = \"foo\" : String(\"foo\")\lb = a.getbyte(a) : Integer | NilClass\l<returnMethodTemp>$2 = b : Integer | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz1_0" -> "bb::Object#baz1_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Object#baz2" {
     "bb::Object#baz2_1" [shape = parallelogram];
 
     "bb::Object#baz2_0" [
-        label = "block[id=0]()\la = \"foo\" : String(\"foo\")\l<statTemp>$6 = \"foo\" : String(\"foo\")\lb = a.getbyte(<statTemp>$6) : Integer | NilClass\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\la = \"foo\" : String(\"foo\")\l<statTemp>$6 = \"foo\" : String(\"foo\")\lb = a.getbyte(<statTemp>$6) : Integer | NilClass\l<returnMethodTemp>$2 = b : Integer | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz2_0" -> "bb::Object#baz2_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Object#baz3" {
     "bb::Object#baz3_1" [shape = parallelogram];
 
     "bb::Object#baz3_0" [
-        label = "block[id=0]()\l<statTemp>$4 = \"foo\" : String(\"foo\")\l<statTemp>$5 = \"foo\" : String(\"foo\")\lb = <statTemp>$4.getbyte(<statTemp>$5) : Integer | NilClass\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4 = \"foo\" : String(\"foo\")\l<statTemp>$5 = \"foo\" : String(\"foo\")\lb = <statTemp>$4.getbyte(<statTemp>$5) : Integer | NilClass\l<returnMethodTemp>$2 = b : Integer | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz3_0" -> "bb::Object#baz3_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Object#baz4" {
     "bb::Object#baz4_1" [shape = parallelogram];
 
     "bb::Object#baz4_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : Object\l<statTemp>$4 = <statTemp>$5.a() : T.untyped\l<statTemp>$6 = \"foo\" : String(\"foo\")\lb = <statTemp>$4.getbyte(<statTemp>$6) : T.untyped\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5 = self : Object\l<statTemp>$4 = <statTemp>$5.a() : T.untyped\l<statTemp>$6 = \"foo\" : String(\"foo\")\lb = <statTemp>$4.getbyte(<statTemp>$6) : T.untyped\l<returnMethodTemp>$2 = b : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz4_0" -> "bb::Object#baz4_1" [style="bold"];
@@ -100,7 +100,7 @@ subgraph "cluster_::Object#baz5" {
 
     "bb::Object#baz5_3" -> "bb::Object#baz5_4" [style="bold"];
     "bb::Object#baz5_4" [
-        label = "block[id=4](b)\l<statTemp>$6 = b : Integer | String\l<statTemp>$7 = 1 : Integer(1)\lb = <statTemp>$6.getbyte(<statTemp>$7) : T.untyped\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=4](b)\l<statTemp>$6 = b : Integer | String\l<statTemp>$7 = 1 : Integer(1)\lb = <statTemp>$6.getbyte(<statTemp>$7) : T.untyped\l<returnMethodTemp>$2 = b : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz5_4" -> "bb::Object#baz5_1" [style="bold"];
@@ -135,7 +135,7 @@ subgraph "cluster_::Object#baz6" {
 
     "bb::Object#baz6_3" -> "bb::Object#baz6_4" [style="bold"];
     "bb::Object#baz6_4" [
-        label = "block[id=4](b)\l<statTemp>$6 = \"foo\" : String(\"foo\")\l<statTemp>$7 = b : Integer | String\lb = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=4](b)\l<statTemp>$6 = \"foo\" : String(\"foo\")\l<statTemp>$7 = b : Integer | String\lb = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass\l<returnMethodTemp>$2 = b : Integer | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz6_4" -> "bb::Object#baz6_1" [style="bold"];
@@ -165,7 +165,7 @@ subgraph "cluster_::Object#baz7" {
 
     "bb::Object#baz7_2" -> "bb::Object#baz7_4" [style="bold"];
     "bb::Object#baz7_4" [
-        label = "block[id=4](b)\l<statTemp>$6 = \"foo\" : String(\"foo\")\l<statTemp>$7 = b : NilClass | Integer\lb = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass\l<finalReturn> = return b : <impossible>\l<unconditional>\l"
+        label = "block[id=4](b)\l<statTemp>$6 = \"foo\" : String(\"foo\")\l<statTemp>$7 = b : NilClass | Integer\lb = <statTemp>$6.getbyte(<statTemp>$7) : Integer | NilClass\l<returnMethodTemp>$2 = b : Integer | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#baz7_4" -> "bb::Object#baz7_1" [style="bold"];
