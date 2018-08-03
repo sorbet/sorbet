@@ -87,8 +87,8 @@ struct CDiagnostic {
     level: Level,
     class: Error,
     data: *const c_char,
-    begin_pos: size_t,
-    end_pos: size_t,
+    beginPos: size_t,
+    endPos: size_t,
 }
 
 include!(concat!(env!("OUT_DIR"), "/ffi_builder.rs"));
@@ -184,8 +184,8 @@ impl Driver {
             level: level,
             class: err,
             data: data,
-            begin_pos: loc.begin_pos,
-            end_pos: loc.end_pos,
+            beginPos: loc.beginPos,
+            endPos: loc.endPos,
         };
 
         unsafe {
@@ -226,7 +226,7 @@ impl Driver {
                 diag
             };
 
-            let loc = Loc::new(self.current_file.clone(), cdiag.begin_pos, cdiag.end_pos);
+            let loc = Loc::new(self.current_file.clone(), cdiag.beginPos, cdiag.endPos);
             let cstr = unsafe { CStr::from_ptr(cdiag.data) }.to_str();
             let data = match cstr {
                 Ok(msg) => if msg.len() > 0 { Some(msg.to_owned()) } else { None },

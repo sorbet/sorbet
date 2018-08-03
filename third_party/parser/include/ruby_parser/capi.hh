@@ -12,8 +12,8 @@ struct cdiagnostic {
 	ruby_parser::dlevel level;
 	ruby_parser::dclass type;
 	const char *data;
-	size_t begin_pos;
-	size_t end_pos;
+	size_t beginPos;
+	size_t endPos;
 };
 
 ruby_parser::typedruby24*

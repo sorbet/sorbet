@@ -50,7 +50,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
     auto body = node2TreeImpl(ctx, move(bodynode), uniqueCounter);
     if (!destructures.empty()) {
         core::Loc bodyLoc = body->loc;
-        if (bodyLoc.is_none()) {
+        if (!bodyLoc.exists()) {
             bodyLoc = loc;
         }
         body = MK::InsSeq(loc, move(destructures), move(body));
@@ -217,9 +217,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             return MK::EmptyTree(core::Loc::none());
         }
         auto loc = what->loc;
-        if (loc.is_none()) {
-            ENFORCE("parse-tree node has no location: ", what->toString(ctx));
-        }
+        ENFORCE(loc.exists(), "parse-tree node has no location: " + what->toString(ctx));
         unique_ptr<Expression> result;
         typecase(
             what.get(),

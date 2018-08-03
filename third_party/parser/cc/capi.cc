@@ -84,8 +84,8 @@ rbdriver_diag_get(const ruby_parser::base_driver* driver, size_t index, struct c
 	diag->level = cppdiag.level();
 	diag->type = cppdiag.error_class();
 	diag->data = cppdiag.data().c_str();
-	diag->begin_pos = cppdiag.location().begin_pos;
-	diag->end_pos = cppdiag.location().end_pos;
+	diag->beginPos = cppdiag.location().beginPos;
+	diag->endPos = cppdiag.location().endPos;
 }
 
 void
@@ -94,8 +94,8 @@ rbdriver_diag_report(ruby_parser::base_driver* driver, const struct cdiagnostic 
 	driver->external_diagnostic(
 		diag->level,
 		diag->type,
-		diag->begin_pos,
-		diag->end_pos,
+		diag->beginPos,
+		diag->endPos,
 		diag->data ? std::string(diag->data) : ""
 	);
 }

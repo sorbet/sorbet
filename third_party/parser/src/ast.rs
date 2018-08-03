@@ -30,15 +30,15 @@ impl Hash for SourceFile {
 
 pub struct SourceLine {
     pub number: usize,
-    pub begin_pos: usize,
-    pub end_pos: usize,
+    pub beginPos: usize,
+    pub endPos: usize,
 }
 
 #[derive(Clone,Eq,PartialEq,Hash)]
 pub struct Loc {
     file: Rc<SourceFile>,
-    pub begin_pos: usize,
-    pub end_pos: usize,
+    pub beginPos: usize,
+    pub endPos: usize,
 }
 
 #[derive(Clone)]
@@ -90,8 +90,8 @@ impl Loc {
         let max = file.source.len();
         Loc {
             file: file,
-            begin_pos: min(max, begin),
-            end_pos: min(max, end),
+            beginPos: min(max, begin),
+            endPos: min(max, end),
         }
     }
 
@@ -102,8 +102,8 @@ impl Loc {
 
         Loc {
             file: self.file.clone(),
-            begin_pos: min(self.begin_pos, other.begin_pos),
-            end_pos: max(self.end_pos, other.end_pos),
+            beginPos: min(self.beginPos, other.beginPos),
+            endPos: max(self.endPos, other.endPos),
         }
     }
 
@@ -111,7 +111,7 @@ impl Loc {
         let line = self.file.line_for_pos(pos);
         Coords {
             line: line.number,
-            col: pos - line.begin_pos + 1, // col is 1-indexed
+            col: pos - line.beginPos + 1, // col is 1-indexed
         }
     }
 
@@ -120,22 +120,22 @@ impl Loc {
     }
 
     pub fn begin(&self) -> Coords {
-        self.coords_for_pos(self.begin_pos)
+        self.coords_for_pos(self.beginPos)
     }
 
     pub fn end(&self) -> Coords {
-        // self.end_pos is exclusive, but Coords should be inclusive
-        self.coords_for_pos(self.end_pos - 1)
+        // self.endPos is exclusive, but Coords should be inclusive
+        self.coords_for_pos(self.endPos - 1)
     }
 
-    pub fn with_begin(&self, begin_pos: usize) -> Loc {
-        let pos = min(begin_pos, self.file.source.len());
-        Loc { begin_pos: pos, ..self.clone() }
+    pub fn with_begin(&self, beginPos: usize) -> Loc {
+        let pos = min(beginPos, self.file.source.len());
+        Loc { beginPos: pos, ..self.clone() }
     }
 
-    pub fn with_end(&self, end_pos: usize) -> Loc {
-        let pos = min(end_pos, self.file.source.len());
-        Loc { end_pos: pos, ..self.clone() }
+    pub fn with_end(&self, endPos: usize) -> Loc {
+        let pos = min(endPos, self.file.source.len());
+        Loc { endPos: pos, ..self.clone() }
     }
 }
 
@@ -480,9 +480,9 @@ impl SourceFile {
             Err(idx) => idx - 1,
         };
 
-        let begin_pos = self.line_map[idx];
+        let beginPos = self.line_map[idx];
 
-        let end_pos = if idx + 1 == self.line_map.len() {
+        let endPos = if idx + 1 == self.line_map.len() {
             self.source.len()
         } else {
             self.line_map[idx + 1]
@@ -490,8 +490,8 @@ impl SourceFile {
 
         SourceLine {
             number: idx + 1,
-            begin_pos,
-            end_pos,
+            beginPos,
+            endPos,
         }
     }
 

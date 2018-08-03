@@ -13,11 +13,11 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
         if (left.file != right.file) {
             return left.file.id() < right.file.id();
         }
-        if (left.begin_pos != right.begin_pos) {
-            return left.begin_pos < right.begin_pos;
+        if (left.beginPos != right.beginPos) {
+            return left.beginPos < right.beginPos;
         }
-        if (left.end_pos != right.end_pos) {
-            return left.end_pos < right.end_pos;
+        if (left.endPos != right.endPos) {
+            return left.endPos < right.endPos;
         }
         return false;
     };

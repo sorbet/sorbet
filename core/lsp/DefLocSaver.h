@@ -12,7 +12,7 @@ public:
         // an empty shared_ptr and tp.origins an empty vector
         core::TypeAndOrigins tp;
 
-        bool lspQueryMatch = !ctx.state.lspInfoQueryLoc.is_none() && methodDef->loc.contains(ctx.state.lspInfoQueryLoc);
+        bool lspQueryMatch = ctx.state.lspInfoQueryLoc.exists() && methodDef->loc.contains(ctx.state.lspInfoQueryLoc);
 
         if (lspQueryMatch) {
             core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::DEFINITION, {}, nullptr,

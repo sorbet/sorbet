@@ -976,8 +976,8 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
             return left.loc.file.id() > right.loc.file.id();
         }
 
-        auto a = left.pos == GlobalState::AnnotationPos::BEFORE ? left.loc.begin_pos : left.loc.end_pos;
-        auto b = right.pos == GlobalState::AnnotationPos::BEFORE ? right.loc.begin_pos : right.loc.end_pos;
+        auto a = left.pos == GlobalState::AnnotationPos::BEFORE ? left.loc.beginPos : left.loc.endPos;
+        auto b = right.pos == GlobalState::AnnotationPos::BEFORE ? right.loc.beginPos : right.loc.endPos;
 
         if (a != b) {
             return a > b;
@@ -1029,14 +1029,14 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         size_t start_of_line;
         switch (annotation.pos) {
             case GlobalState::AnnotationPos::BEFORE:
-                start_of_line = annotation.loc.begin_pos;
+                start_of_line = annotation.loc.beginPos;
                 start_of_line = outline.find_last_of('\n', start_of_line);
                 if (start_of_line == string::npos) {
                     start_of_line = 0;
                 }
                 break;
             case GlobalState::AnnotationPos::AFTER:
-                start_of_line = annotation.loc.end_pos;
+                start_of_line = annotation.loc.endPos;
                 start_of_line = outline.find_first_of('\n', start_of_line);
                 if (start_of_line == string::npos) {
                     start_of_line = outline.end() - outline.begin();

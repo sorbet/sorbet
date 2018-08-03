@@ -10,20 +10,20 @@ namespace core {
 
 using namespace std;
 
-Loc::Loc(FileRef file, u4 begin, u4 end) : file(file), begin_pos(begin), end_pos(end) {
-    ENFORCE(begin_pos <= end_pos);
+Loc::Loc(FileRef file, u4 begin, u4 end) : file(file), beginPos(begin), endPos(end) {
+    ENFORCE(beginPos <= endPos);
 }
 
 Loc Loc::join(Loc other) {
-    if (this->is_none()) {
+    if (!this->exists()) {
         return other;
     }
-    if (other.is_none()) {
+    if (!other.exists()) {
         return *this;
     }
     ENFORCE(this->file == other.file, "joining locations from different files");
 
-    return Loc{this->file, min(this->begin_pos, other.begin_pos), max(this->end_pos, other.end_pos)};
+    return Loc{this->file, min(this->beginPos, other.beginPos), max(this->endPos, other.endPos)};
 }
 
 Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
@@ -56,8 +56,8 @@ u4 Loc::pos2Offset(FileRef source, Loc::Detail pos, const GlobalState &gs) {
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
-    Loc::Detail begin(offset2Pos(this->file, begin_pos, gs));
-    Loc::Detail end(offset2Pos(this->file, end_pos, gs));
+    Loc::Detail begin(offset2Pos(this->file, beginPos, gs));
+    Loc::Detail end(offset2Pos(this->file, endPos, gs));
     return make_pair(begin, end);
 }
 namespace {
@@ -141,7 +141,7 @@ string Loc::toString(const GlobalState &gs, int tabs) const {
 
 string Loc::filePosToString(const GlobalState &gs) const {
     stringstream buf;
-    if (is_none()) {
+    if (!exists()) {
         buf << "???";
     } else {
         auto pos = position(gs);
@@ -159,11 +159,11 @@ string Loc::filePosToString(const GlobalState &gs) const {
 }
 
 bool Loc::contains(const Loc &other) const {
-    return file == other.file && other.begin_pos >= begin_pos && other.end_pos <= end_pos;
+    return file == other.file && other.beginPos >= beginPos && other.endPos <= endPos;
 }
 
 bool Loc::operator==(const Loc &rhs) const {
-    return file == rhs.file && begin_pos == rhs.begin_pos && end_pos == rhs.end_pos;
+    return file == rhs.file && beginPos == rhs.beginPos && endPos == rhs.endPos;
 }
 
 bool Loc::operator!=(const Loc &rhs) const {

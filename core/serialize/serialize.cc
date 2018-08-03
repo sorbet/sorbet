@@ -422,8 +422,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
 
     pickle(p, what.resultType.get());
     p.putU4(what.loc.file.id());
-    p.putU4(what.loc.begin_pos);
-    p.putU4(what.loc.end_pos);
+    p.putU4(what.loc.beginPos);
+    p.putU4(what.loc.endPos);
 }
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
@@ -455,8 +455,8 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     result.resultType = unpickleType(p, gs);
 
     result.loc.file = FileRef(p.getU4());
-    result.loc.begin_pos = p.getU4();
-    result.loc.end_pos = p.getU4();
+    result.loc.beginPos = p.getU4();
+    result.loc.endPos = p.getU4();
     return result;
 }
 
@@ -621,8 +621,8 @@ template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, uni
 
 void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree) {
     p.putU1(tag);
-    p.putU4(tree->loc.begin_pos);
-    p.putU4(tree->loc.end_pos);
+    p.putU4(tree->loc.beginPos);
+    p.putU4(tree->loc.endPos);
 }
 
 void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what) {
@@ -630,7 +630,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         p.putU1(1);
         return;
     }
-    ENFORCE(what->loc.is_none() || file == what->loc.file, "Pickling a tree from file ", what->loc.file.id(),
+    ENFORCE(!what->loc.exists() || file == what->loc.file, "Pickling a tree from file ", what->loc.file.id(),
             " inside a tree from ", file.id());
 
     typecase(what.get(),
@@ -836,8 +836,8 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
     }
     Loc loc;
     loc.file = file;
-    loc.begin_pos = p.getU4();
-    loc.end_pos = p.getU4();
+    loc.beginPos = p.getU4();
+    loc.endPos = p.getU4();
 
     switch (kind) {
         case 2: {

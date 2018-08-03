@@ -22,12 +22,12 @@ enum class dlevel {
 class diagnostic {
 public:
 	struct range {
-		const size_t begin_pos;
-		const size_t end_pos;
+		const size_t beginPos;
+		const size_t endPos;
 
-		range(size_t begin_pos, size_t end_pos)
-			: begin_pos(begin_pos)
-			  , end_pos(end_pos)
+		range(size_t beginPos, size_t endPos)
+			: beginPos(beginPos)
+			  , endPos(endPos)
 		{}
 	};
 

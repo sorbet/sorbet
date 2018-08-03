@@ -463,10 +463,10 @@ public:
         if (lhs.file != rhs.file) {
             return lhs.file < rhs.file;
         }
-        if (lhs.begin_pos != rhs.begin_pos) {
-            return lhs.begin_pos < rhs.begin_pos;
+        if (lhs.beginPos != rhs.beginPos) {
+            return lhs.beginPos < rhs.beginPos;
         }
-        return lhs.end_pos < rhs.end_pos;
+        return lhs.endPos < rhs.endPos;
     }
 
     static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,

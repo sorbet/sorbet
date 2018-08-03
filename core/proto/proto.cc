@@ -134,7 +134,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
     auto start = position->mutable_start();
     auto end = position->mutable_end();
 
-    if (loc.is_none()) {
+    if (!loc.exists()) {
         protoLoc.set_path("???");
     } else {
         auto path = loc.file.data(gs).path();

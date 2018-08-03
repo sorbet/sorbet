@@ -127,7 +127,7 @@ public:
     }
 
     void error(ruby_parser::dclass err, Loc loc) {
-        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.begin_pos, loc.end_pos, "");
+        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos, loc.endPos, "");
     }
 
     /* Begin callback methods */
@@ -627,7 +627,7 @@ public:
                                    const token *rparen) {
         Loc loc = tok_loc(keyword);
         Loc argloc = collection_loc(lparen, args, rparen);
-        if (!argloc.is_none()) {
+        if (argloc.exists()) {
             loc = loc.join(argloc);
         }
         return make_unique<Super>(loc, move(args));

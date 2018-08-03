@@ -10,19 +10,19 @@ class GlobalState;
 class Loc final {
 public:
     FileRef file;
-    u4 begin_pos, end_pos;
+    u4 beginPos, endPos;
 
     static Loc none(FileRef file = FileRef()) {
         return Loc{file, (u4)-1, (u4)-1};
     }
 
-    bool is_none() const {
-        return begin_pos == (u4)-1 && end_pos == (u4)-1;
+    bool exists() const {
+        return beginPos != (u4)-1 || endPos != (u4)-1;
     }
 
     Loc join(Loc other);
 
-    Loc() : file(), begin_pos(-1), end_pos(-1){};
+    Loc() : file(), beginPos(-1), endPos(-1){};
     Loc(FileRef file, u4 begin, u4 end);
 
     Loc &operator=(const Loc &rhs) = default;

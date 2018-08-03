@@ -11,7 +11,7 @@ namespace sorbet {
 namespace cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
-    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+    if (ctx.state.lspInfoQueryLoc.exists()) {
         return;
     }
 
@@ -143,7 +143,7 @@ core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
  * because `a.foo(a = "2", if (...) a = true; else a = null; end)`
  */
 void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
-    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+    if (ctx.state.lspInfoQueryLoc.exists()) {
         return;
     }
 
@@ -223,7 +223,7 @@ void CFGBuilder::markLoopHeaders(core::Context ctx, CFG &cfg) {
     }
 }
 void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
-    if (!ctx.state.lspInfoQueryLoc.is_none()) {
+    if (ctx.state.lspInfoQueryLoc.exists()) {
         return;
     }
     for (auto &it : cfg.basicBlocks) {

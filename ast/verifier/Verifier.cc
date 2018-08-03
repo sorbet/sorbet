@@ -9,7 +9,7 @@ class VerifierWalker {
 public:
     unique_ptr<Expression> preTransformExpression(core::MutableContext ctx, unique_ptr<Expression> original) {
         if (!isa_tree<EmptyTree>(original.get())) {
-            ENFORCE(!original->loc.is_none(), "location is unset");
+            ENFORCE(original->loc.exists(), "location is unset");
         }
 
         original->_sanityCheck();

@@ -794,7 +794,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             cfg::isa_instruction<cfg::Alias>(bind.value.get()) || cfg::isa_instruction<cfg::LoadArg>(bind.value.get());
 
         bool checkFullyDefined = true;
-        bool lspQueryMatch = !ctx.state.lspInfoQueryLoc.is_none() && bind.loc.contains(ctx.state.lspInfoQueryLoc);
+        bool lspQueryMatch = ctx.state.lspInfoQueryLoc.exists() && bind.loc.contains(ctx.state.lspInfoQueryLoc);
 
         typecase(
             bind.value.get(),

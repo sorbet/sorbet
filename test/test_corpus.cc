@@ -426,7 +426,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
         auto filePath = error->loc.file.data(gs).path();
-        if (error->loc.is_none()) {
+        if (!error->loc.exists()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
             // first when reporting mismatched errors.

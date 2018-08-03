@@ -48,8 +48,8 @@ public:
             }
             string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
-            Loc loc(file, translatePos(diag.location().begin_pos, max_off),
-                    translatePos(diag.location().end_pos, max_off));
+            Loc loc(file, translatePos(diag.location().beginPos, max_off),
+                    translatePos(diag.location().endPos, max_off));
             if (auto e = gs.beginError(loc, core::errors::Parser::ParserError)) {
                 e.setHeader(msg, level, diag.data());
             }
