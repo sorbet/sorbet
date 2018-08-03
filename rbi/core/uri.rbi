@@ -1,4 +1,11 @@
 # typed: true
+module Kernel
+  sig(uri: T.any(URI::Generic, String)).returns(URI::Generic)
+  def URI(uri); end
+
+  module_function :URI
+end
+
 module URI
   ABS_PATH = T.let(T.unsafe(nil), Regexp)
   ABS_URI = T.let(T.unsafe(nil), Regexp)
