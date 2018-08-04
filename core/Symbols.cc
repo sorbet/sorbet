@@ -125,10 +125,18 @@ string SymbolRef::show(const GlobalState &gs) const {
 }
 
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
+    auto ret = findMemberNoDealias(gs, name);
+    if (ret.exists()) {
+        return ret.data(gs).dealias(gs);
+    }
+    return ret;
+}
+
+SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
     histogramInc("find_member_scope_size", members.size());
     for (auto &member : members) {
         if (member.first == name) {
-            return member.second.data(gs).dealias(gs);
+            return member.second;
         }
     }
     return Symbols::noSymbol();

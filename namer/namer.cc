@@ -527,7 +527,7 @@ public:
     unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, unique_ptr<ast::Assign> asgn) {
         // TODO(nelhage): forbid dynamic constant definition
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
-        auto sym = scope.data(ctx).findMember(ctx, lhs->cnst);
+        auto sym = scope.data(ctx).findMemberNoDealias(ctx, lhs->cnst);
         if (sym.exists() && !sym.data(ctx).isStaticField()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
                 e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx).show(ctx));

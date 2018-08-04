@@ -437,6 +437,7 @@ string methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
 
 void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Value &items,
                        core::SymbolRef what, const core::QueryResponse &resp) {
+    ENFORCE(what.exists());
     rapidjson::Value item;
     item.SetObject();
     item.AddMember("label", (string)what.data(gs).name.data(gs).shortName(gs), alloc);
