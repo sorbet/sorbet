@@ -601,7 +601,7 @@ int lexer::pop_literal() {
     auto& old_literal = literal_stack.top();
 
     was_regexp = old_literal.regexp();
-    dedent_level_ = old_literal.dedent_level();
+    dedentLevel_ = old_literal.dedentLevel();
   }
 
   literal_stack.pop();
@@ -2613,10 +2613,10 @@ bool lexer::is_declared(const std::string& identifier) const {
   return env.find(identifier) != env.end();
 }
 
-optional_size lexer::dedent_level() {
-  // We erase @dedent_level as a precaution to avoid accidentally
+optional_size lexer::dedentLevel() {
+  // We erase @dedentLevel as a precaution to avoid accidentally
   // using a stale value.
-  auto ret = dedent_level_;
-  dedent_level_ = std::nullopt;
+  auto ret = dedentLevel_;
+  dedentLevel_ = std::nullopt;
   return ret;
 }

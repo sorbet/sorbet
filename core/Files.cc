@@ -75,20 +75,20 @@ StrictLevel fileSigil(absl::string_view source) {
     }
 }
 
-File::File(string &&path_, string &&source_, Type source_type)
-    : source_type(source_type), path_(path_), source_(source_), sigil(fileSigil(this->source_)), strict(sigil) {}
+File::File(string &&path_, string &&source_, Type sourceType)
+    : sourceType(sourceType), path_(path_), source_(source_), sigil(fileSigil(this->source_)), strict(sigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {}
 
 const File &FileRef::data(const GlobalState &gs, bool allowTombStones) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(allowTombStones || gs.files[_id]->source_type != File::TombStone);
+    ENFORCE(allowTombStones || gs.files[_id]->sourceType != File::TombStone);
     return *(gs.files[_id]);
 }
 
 File &FileRef::data(GlobalState &gs, bool allowTombStones) const {
     ENFORCE(_id < gs.filesUsed());
-    ENFORCE(allowTombStones || gs.files[_id]->source_type != File::TombStone);
+    ENFORCE(allowTombStones || gs.files[_id]->sourceType != File::TombStone);
     return *(gs.files[_id]);
 }
 
@@ -97,7 +97,7 @@ absl::string_view File::path() const {
 }
 
 absl::string_view File::source() const {
-    ENFORCE(this->source_type != Type::TombStone);
+    ENFORCE(this->sourceType != Type::TombStone);
     return this->source_;
 }
 
@@ -106,7 +106,7 @@ bool File::hadErrors() const {
 }
 
 bool File::isPayload() const {
-    return source_type == Type::PayloadGeneration || source_type == Type::Payload;
+    return sourceType == Type::PayloadGeneration || sourceType == Type::Payload;
 }
 
 bool File::isRBI() const {
@@ -114,7 +114,7 @@ bool File::isRBI() const {
 }
 
 std::vector<int> &File::line_breaks() const {
-    ENFORCE(this->source_type != Type::TombStone);
+    ENFORCE(this->sourceType != Type::TombStone);
     auto ptr = atomic_load(&line_breaks_);
     if (ptr) {
         return *ptr;

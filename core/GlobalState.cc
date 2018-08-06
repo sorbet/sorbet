@@ -787,7 +787,7 @@ FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source)
 }
 
 FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, FileRef id) {
-    if (this->files[id.id()] && this->files[id.id()]->source_type != File::Type::TombStone) {
+    if (this->files[id.id()] && this->files[id.id()]->sourceType != File::Type::TombStone) {
         Error::raise("should never happen");
     }
 
@@ -801,7 +801,7 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
 FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
     ENFORCE(!fileTableFrozen);
     ENFORCE(id.id() < this->files.size());
-    ENFORCE(this->files[id.id()]->source_type == File::Type::TombStone);
+    ENFORCE(this->files[id.id()]->sourceType == File::Type::TombStone);
     ENFORCE(this->files[id.id()]->path() == file->path());
 
     // was a tombstone before.
@@ -1112,7 +1112,7 @@ void GlobalState::markAsPayload() {
             seenEmpty = true;
             continue;
         }
-        f->source_type = File::Type::Payload;
+        f->sourceType = File::Type::Payload;
     }
 }
 
@@ -1134,7 +1134,7 @@ FileRef GlobalState::findFileByPath(absl::string_view path) {
 
 std::unique_ptr<GlobalState> GlobalState::markFileAsTombStone(std::unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE(fref.id() < what->filesUsed());
-    what->files[fref.id()]->source_type = File::Type::TombStone;
+    what->files[fref.id()]->sourceType = File::Type::TombStone;
     return what;
 }
 

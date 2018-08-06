@@ -49,7 +49,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
-                if (fref.data(*gs, true).source_type == core::File::Type::Normal) {
+                if (fref.data(*gs, true).sourceType == core::File::Type::Normal) {
                     gs = core::GlobalState::markFileAsTombStone(move(gs), fref);
                 }
             }
@@ -71,7 +71,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
             core::UnfreezeFileTable fileTableAccess(*gs);
             for (auto &p : rbi::all()) {
                 auto file = gs->enterFile(p.first, p.second);
-                file.data(*gs).source_type = core::File::PayloadGeneration;
+                file.data(*gs).sourceType = core::File::PayloadGeneration;
                 payloadFiles.push_back(move(file));
             }
         }

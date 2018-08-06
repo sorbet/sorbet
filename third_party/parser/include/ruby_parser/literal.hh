@@ -43,7 +43,7 @@ namespace ruby_parser {
     bool indent;
     bool dedent_body;
     bool label_allowed;
-    optional_size _dedent_level;
+    optional_size _dedentLevel;
     size_t _interp_braces;
     bool space_emitted;
     bool monolithic;
@@ -71,7 +71,7 @@ namespace ruby_parser {
 
     token_type start_token_type() const;
 
-    optional_size dedent_level() const;
+    optional_size dedentLevel() const;
 
     bool munge_escape(char c) const;
 

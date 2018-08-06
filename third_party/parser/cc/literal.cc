@@ -123,8 +123,8 @@ token_type literal::start_token_type() const {
   }
 }
 
-optional_size literal::dedent_level() const {
-  return _dedent_level;
+optional_size literal::dedentLevel() const {
+  return _dedentLevel;
 }
 
 bool literal::munge_escape(char c) const {
@@ -156,8 +156,8 @@ void literal::infer_indent_level(std::string& line) {
       continue;
     }
 
-    if (!_dedent_level || *_dedent_level > indent_level) {
-      _dedent_level = indent_level;
+    if (!_dedentLevel || *_dedentLevel > indent_level) {
+      _dedentLevel = indent_level;
     }
     break;
   }

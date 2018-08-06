@@ -180,7 +180,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &data = core::SymbolRef(&gs, i).data(gs);
-        if (data.loc.file.exists() && data.loc.file.data(gs).source_type == core::File::Type::Normal) {
+        if (data.loc.file.exists() && data.loc.file.data(gs).sourceType == core::File::Type::Normal) {
             if (data.isMethod()) {
                 methodCount++;
             } else if (data.isClass()) {

@@ -291,7 +291,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                         file.data(*lgs).strict = max(min(file.data(*lgs).strict, maxStrict), minStrict);
 
                         if (!opts.storeState.empty()) {
-                            file.data(*lgs).source_type = core::File::PayloadGeneration;
+                            file.data(*lgs).sourceType = core::File::PayloadGeneration;
                         }
 
                         threadResult.trees.emplace_back(indexOne(opts, *lgs, file, kvstore, logger));

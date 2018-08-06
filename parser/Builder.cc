@@ -27,17 +27,17 @@ namespace parser {
 string Dedenter::dedent(const string &str) {
     string out;
     for (auto ch : str) {
-        if (spaces_to_remove > 0) {
+        if (spacesToRemove > 0) {
             switch (ch) {
                 case ' ':
-                    spaces_to_remove--;
+                    spacesToRemove--;
                     break;
                 case '\n':
-                    spaces_to_remove = dedent_level;
+                    spacesToRemove = dedentLevel;
                     break;
                 case '\t': {
-                    int indent = dedent_level - spaces_to_remove;
-                    spaces_to_remove -= (8 - indent % 8);
+                    int indent = dedentLevel - spacesToRemove;
+                    spacesToRemove -= (8 - indent % 8);
                     break;
                 }
                 default:
@@ -48,7 +48,7 @@ string Dedenter::dedent(const string &str) {
         }
     }
     if (!out.empty() && out.back() == '\n') {
-        spaces_to_remove = dedent_level;
+        spacesToRemove = dedentLevel;
     }
     return out;
 }
@@ -477,12 +477,12 @@ public:
         return make_unique<CVar>(tok_loc(tok), gs_.enterNameUTF8(tok->string()));
     }
 
-    unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedent_level) {
-        if (dedent_level == 0) {
+    unique_ptr<Node> dedent_string(unique_ptr<Node> node, size_t dedentLevel) {
+        if (dedentLevel == 0) {
             return node;
         }
 
-        Dedenter dedenter(dedent_level);
+        Dedenter dedenter(dedentLevel);
         unique_ptr<Node> result;
 
         typecase(node.get(),
@@ -1304,9 +1304,9 @@ foreign_ptr cvar(self_ptr builder, const token *tok) {
     return build->to_foreign(build->cvar(tok));
 }
 
-foreign_ptr dedent_string(self_ptr builder, foreign_ptr node, size_t dedent_level) {
+foreign_ptr dedent_string(self_ptr builder, foreign_ptr node, size_t dedentLevel) {
     auto build = cast_builder(builder);
-    return build->to_foreign(build->dedent_string(build->cast_node(node), dedent_level));
+    return build->to_foreign(build->dedent_string(build->cast_node(node), dedentLevel));
 }
 
 foreign_ptr def_class(self_ptr builder, const token *class_, foreign_ptr name, const token *lt_, foreign_ptr superclass,

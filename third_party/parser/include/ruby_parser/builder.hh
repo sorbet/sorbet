@@ -42,7 +42,7 @@ struct builder {
 	foreign_ptr(*const_global)(self_ptr builder, const token* colon, const token* name);
 	foreign_ptr(*const_op_assignable)(self_ptr builder, foreign_ptr node);
 	foreign_ptr(*cvar)(self_ptr builder, const token* tok);
-	foreign_ptr(*dedent_string)(self_ptr builder, foreign_ptr node, size_t dedent_level);
+	foreign_ptr(*dedent_string)(self_ptr builder, foreign_ptr node, size_t dedentLevel);
 	foreign_ptr(*def_class)(self_ptr builder, const token* class_, foreign_ptr name, const token* lt_, foreign_ptr superclass, foreign_ptr body, const token* end_);
 	foreign_ptr(*def_method)(self_ptr builder, const token* def, const token* name, foreign_ptr args, foreign_ptr body, const token* end);
 	foreign_ptr(*def_module)(self_ptr builder, const token* module, foreign_ptr name, foreign_ptr body, const token* end_);

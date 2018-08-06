@@ -82,15 +82,15 @@ fn check_static_cpath(node: &Node) -> bool {
 }
 
 struct Dedenter {
-    dedent_level: usize,
+    dedentLevel: usize,
     at_line_begin: bool,
     indent_level: usize,
 }
 
 impl Dedenter {
-    fn new(dedent_level: usize) -> Dedenter {
+    fn new(dedentLevel: usize) -> Dedenter {
         Dedenter {
-            dedent_level: dedent_level,
+            dedentLevel: dedentLevel,
             at_line_begin: true,
             indent_level: 0,
         }
@@ -107,7 +107,7 @@ impl Dedenter {
         while index < bytes.len() {
             let c = bytes[index];
             if self.at_line_begin {
-                if c == 10 /* \n */ || self.indent_level >= self.dedent_level {
+                if c == 10 /* \n */ || self.indent_level >= self.dedentLevel {
                     result_bytes.drain(space_begin..space_end);
                     offset += space_end - space_begin;
                     self.at_line_begin = false;
@@ -772,10 +772,10 @@ impl<'a> Builder<'a> {
         Node::Cvar(loc, String::from(id.string().unwrap()))
     }
 
-    pub fn dedent_string(&self, node: Option<Rc<Node>>, dedent_level: usize) -> Rc<Node> {
+    pub fn dedent_string(&self, node: Option<Rc<Node>>, dedentLevel: usize) -> Rc<Node> {
         let node = node.unwrap();
-        if dedent_level != 0 {
-            let mut dedenter = Dedenter::new(dedent_level);
+        if dedentLevel != 0 {
+            let mut dedenter = Dedenter::new(dedentLevel);
             match *node {
                 Node::String(ref loc, ref val) =>
                     Rc::new(Node::String(loc.clone(), dedenter.dedent(val.as_bytes()))),

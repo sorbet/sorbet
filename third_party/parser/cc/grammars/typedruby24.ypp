@@ -2224,12 +2224,12 @@ opt_block_args_tail:
          string1: tSTRING_BEG string_contents tSTRING_END
                     {
                       auto str = driver.build.string_compose(self, $1, $2, $3);
-                      $$ = driver.build.dedent_string(self, str, driver.lex.dedent_level().value_or(0));
+                      $$ = driver.build.dedent_string(self, str, driver.lex.dedentLevel().value_or(0));
                     }
                 | tSTRING
                     {
                       auto str = driver.build.string(self, $1);
-                      $$ = driver.build.dedent_string(self, str, driver.lex.dedent_level().value_or(0));
+                      $$ = driver.build.dedent_string(self, str, driver.lex.dedentLevel().value_or(0));
                     }
                 | tCHARACTER
                     {
@@ -2239,7 +2239,7 @@ opt_block_args_tail:
          xstring: tXSTRING_BEG xstring_contents tSTRING_END
                     {
                       auto xstr = driver.build.xstring_compose(self, $1, $2, $3);
-                      $$ = driver.build.dedent_string(self, xstr, driver.lex.dedent_level().value_or(0));
+                      $$ = driver.build.dedent_string(self, xstr, driver.lex.dedentLevel().value_or(0));
                     }
 
           regexp: tREGEXP_BEG regexp_contents tSTRING_END tREGEXP_OPT

@@ -216,7 +216,7 @@ int64_t UnPickler::getS8() {
 }
 
 void SerializerImpl::pickle(Pickler &p, const File &what) {
-    p.putU1((u1)what.source_type);
+    p.putU1((u1)what.sourceType);
     p.putStr(what.path());
     p.putStr(what.source());
 }
@@ -466,9 +466,9 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
 
     absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
-        auto lastPayload = find_if(gs.files.begin() + 1, gs.files.end(),
-                                   [](auto &file) { return file->source_type != File::Payload; });
-        ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->source_type == File::Payload; }));
+        auto lastPayload =
+            find_if(gs.files.begin() + 1, gs.files.end(), [](auto &file) { return file->sourceType != File::Payload; });
+        ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Payload; }));
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
     } else {
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), gs.files.size());

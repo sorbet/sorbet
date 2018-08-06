@@ -94,7 +94,7 @@ namespace ruby_parser {
     // from the AST because escape sequences such as `\ ` or `\t` are
     // expanded inside the lexer, but count as non-whitespace for
     // indentation purposes.
-    optional_size dedent_level_;
+    optional_size dedentLevel_;
 
     void check_stack_capacity();
     int stack_pop();
@@ -147,7 +147,7 @@ namespace ruby_parser {
     void declare(const std::string& name);
     bool is_declared(const std::string& identifier) const;
 
-    optional_size dedent_level();
+    optional_size dedentLevel();
   };
 }
 

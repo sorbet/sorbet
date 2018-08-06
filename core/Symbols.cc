@@ -372,7 +372,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     if (ref(gs).isSynthetic()) {
         return true;
     }
-    return loc.file.id() < 0 || loc.file.data(gs).source_type == File::Payload;
+    return loc.file.id() < 0 || loc.file.data(gs).sourceType == File::Payload;
 }
 
 string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {

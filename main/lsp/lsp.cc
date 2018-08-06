@@ -880,7 +880,7 @@ void LSPLoop::drainErrors() {
     }
     auto iter = errorsAccumulated.begin();
     for (; iter != errorsAccumulated.end();) {
-        if (iter->first.data(*initialGS).source_type == core::File::TombStone) {
+        if (iter->first.data(*initialGS).sourceType == core::File::TombStone) {
             errorsAccumulated.erase(iter++);
         } else {
             ++iter;
@@ -954,7 +954,7 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
         uri = localName2Remote("???");
     } else {
         auto &messageFile = loc.file.data(*finalGs);
-        if (messageFile.source_type == core::File::Type::Payload) {
+        if (messageFile.sourceType == core::File::Type::Payload) {
             // This is hacky because VSCode appends #4,3 (or whatever the position is of the
             // error) to the uri before it shows it in the UI since this is the format that
             // VSCode uses to denote which location to jump to. However, if you append #L4
@@ -1012,7 +1012,7 @@ void LSPLoop::pushErrors() {
             publishDiagnosticsParams.SetObject();
             { // uri
                 string uriStr;
-                if (file.data(*finalGs).source_type == core::File::Type::Payload) {
+                if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
                     uriStr = (string)file.data(*finalGs).path();
                 } else {
                     uriStr = fmt::format("{}/{}", rootUri, file.data(*finalGs).path());
@@ -1254,7 +1254,7 @@ void LSPLoop::reIndexFromFileSystem() {
     unordered_set<string> fileNamesDedup(opts.inputFileNames.begin(), opts.inputFileNames.end());
     for (int i = 1; i < initialGS->filesUsed(); i++) {
         core::FileRef f(i);
-        if (f.data(*initialGS, true).source_type == core::File::Type::Normal) {
+        if (f.data(*initialGS, true).sourceType == core::File::Type::Normal) {
             fileNamesDedup.insert((string)f.data(*initialGS, true).path());
         }
     }
@@ -1433,7 +1433,7 @@ core::FileRef LSPLoop::uri2FileRef(const absl::string_view uri) {
 }
 
 std::string LSPLoop::fileRef2Uri(core::FileRef file) {
-    if (file.data(*finalGs).source_type == core::File::Type::Payload) {
+    if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
         return (string)file.data(*finalGs).path();
     } else {
         return localName2Remote((string)file.data(*finalGs).path());

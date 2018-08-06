@@ -63,12 +63,12 @@ public:
 
     absl::string_view path() const;
     absl::string_view source() const;
-    Type source_type;
+    Type sourceType;
 
     bool isPayload() const;
     bool isRBI() const;
 
-    File(std::string &&path_, std::string &&source_, Type source_type);
+    File(std::string &&path_, std::string &&source_, Type sourceType);
     File(File &&other) = default;
     File(const File &other) = delete;
     File() = delete;
