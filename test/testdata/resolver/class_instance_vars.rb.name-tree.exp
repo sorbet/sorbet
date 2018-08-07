@@ -6,19 +6,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$73>()
-      begin
-        begin
-          ::RubyTyper.keep_for_ide(::Parent)
-          <emptyTree>
-        end
-        begin
-          ::RubyTyper.keep_for_ide(::Parent)
-          <emptyTree>
-        end
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>)
     <emptyTree>
@@ -73,7 +61,6 @@ begin
         ::Parent#@@class_var
         ::Mixin#@@mixin_cvar
         ::Child#@@undefined_cvar
-        ::RubyTyper.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end

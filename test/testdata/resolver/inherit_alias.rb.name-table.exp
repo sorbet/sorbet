@@ -5,6 +5,5 @@ class ::<root> < ::Object () @ https://git.corp.stripe.com/stripe-internal/sorbe
     class ::NS::<Class:Dest> < ::<Class:Object> () @ test/testdata/resolver/inherit_alias.rb:6
     class ::NS::C1 < ::NS::Dest () @ test/testdata/resolver/inherit_alias.rb:3
     class ::NS::Dest < ::Object () @ test/testdata/resolver/inherit_alias.rb:6
-    method ::NS#<static-init> () @ test/testdata/resolver/inherit_alias.rb:3
     static-field ::NS#Alias -> AliasType { symbol = ::NS::Dest } @ test/testdata/resolver/inherit_alias.rb:9
 

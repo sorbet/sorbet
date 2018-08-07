@@ -20,13 +20,11 @@ class ::<root> < ::Object () @ test/testdata/resolver/resolution_order.rb:8
   class ::D (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:60
     static-field ::D#DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:61
   class ::E (<constant:BasicObject>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:54
-    method ::E#<static-init> () @ ???
     static-field ::E#EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:56
     static-field ::E#EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:57
   class ::F (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_order.rb:45
-    method ::F#<static-init> () @ test/testdata/resolver/resolution_order.rb:45
+    method ::F#<static-init> () @ test/testdata/resolver/resolution_order.rb:51
   class ::HasError < ::Object (<constant:DOES_NOT_EXIST>) @ test/testdata/resolver/resolution_order.rb:10
-    method ::HasError#<static-init> () @ ???
   class ::IsGood < ::Object () @ test/testdata/resolver/resolution_order.rb:14
     method ::IsGood#foo1 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:16
       argument ::IsGood#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:15

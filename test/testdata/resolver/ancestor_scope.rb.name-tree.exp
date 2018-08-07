@@ -4,12 +4,10 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def self.<static-init><<static-init>$73>()
       begin
-        begin
-          ::RubyTyper.keep_for_ide(::Other)
-          <emptyTree>
-        end
         T.assert_type!(::Test.new(), Test::Mixin)
         T.assert_type!(::Test.new(), Test::Other)
         T.assert_type!(::Test.new(), Other)
@@ -22,16 +20,6 @@ begin
     <emptyTree>
 
     <emptyTree>
-
-    <emptyTree>
-
-    def self.<static-init><<static-init>>()
-      begin
-        ::RubyTyper.keep_for_ide(::Test::Mixin)
-        ::RubyTyper.keep_for_ide(::Test::Other)
-        <emptyTree>
-      end
-    end
   end
   module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
   module <emptyTree>::<constant:Other><<constant:Other>> < ()  end

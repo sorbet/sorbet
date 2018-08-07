@@ -89,23 +89,5 @@ subgraph "cluster_::C#test_calls" {
     "bb::C#test_calls_1" -> "bb::C#test_calls_1" [style="bold"];
 }
 
-subgraph "cluster_::C#<static-init>" {
-    label = "::C#<static-init>";
-    color = blue;
-    "bb::C#<static-init>_0" [shape = invhouse];
-    "bb::C#<static-init>_1" [shape = parallelogram];
-
-    "bb::C#<static-init>_0" [
-        label = "block[id=0]()\l<constant:RubyTyper>$5 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:Funcs>$7 = alias <constant:Funcs> : <Class:Funcs>\l<returnMethodTemp>$2 = <constant:RubyTyper>$5.keep_for_ide(<constant:Funcs>$7) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
-    ];
-
-    "bb::C#<static-init>_0" -> "bb::C#<static-init>_1" [style="bold"];
-    "bb::C#<static-init>_1" [
-        label = "block[id=1]()\l<unconditional>\l"
-    ];
-
-    "bb::C#<static-init>_1" -> "bb::C#<static-init>_1" [style="bold"];
-}
-
 }
 

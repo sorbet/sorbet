@@ -10,11 +10,6 @@ class Struct
   def self.new(arg0, *arg1); end
 end
 
-module RubyTyper
-  def self.keep_for_ide(expr)
-  end
-end
-
 class RubyTyper::DynamicStruct < Struct
   Elem = type_member(:out, fixed: T.untyped)
 
