@@ -13,6 +13,13 @@ begin
     <emptyTree>
 
     <emptyTree>
+
+    def self.<static-init><<static-init>>()
+      begin
+        ::RubyTyper.keep_for_ide(::Outer2::Inner1::Inner2)
+        <emptyTree>
+      end
+    end
   end
   class <emptyTree>::<constant:C><<constant:C>> < (::<todo sym>)  end
   class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<todo sym>)

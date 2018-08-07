@@ -3,4 +3,5 @@ class ::<root> < ::Object () @ test/testdata/namer/superclass_redefinition.rb:2
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/namer/superclass_redefinition.rb:4
   class ::A < ::Object () @ test/testdata/namer/superclass_redefinition.rb:7
   class ::B < ::Object () @ test/testdata/namer/superclass_redefinition.rb:4
+  method #<static-init> () @ test/testdata/namer/superclass_redefinition.rb:2
 

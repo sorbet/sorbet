@@ -2,5 +2,7 @@ class ::<root> < ::Object () @ test/testdata/namer/circular_mixin.rb:2
   class ::<Class:A> < ::Module () @ test/testdata/namer/circular_mixin.rb:2
   class ::<Class:B> < ::Module () @ test/testdata/namer/circular_mixin.rb:3
   class ::A (<constant:BasicObject>, <constant:B>, <constant:StubModule>) @ test/testdata/namer/circular_mixin.rb:11
+    method ::A#<static-init> () @ ???
   class ::B (<constant:BasicObject>, <constant:StubModule>) @ test/testdata/namer/circular_mixin.rb:7
+    method ::B#<static-init> () @ ???
 
