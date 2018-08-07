@@ -380,6 +380,12 @@ findSimilarMethodsIn(core::GlobalState &gs, shared_ptr<core::Type> receiver, abs
 
 string methodDetail(core::GlobalState &gs, core::SymbolRef method, shared_ptr<core::Type> receiver,
                     shared_ptr<core::Type> retType, shared_ptr<core::TypeConstraint> constraint) {
+    ENFORCE(method.exists());
+    // handle this case anyways so that we don't crash in prod when this method is mis-used
+    if (!method.exists()) {
+        return "";
+    }
+
     string ret;
     if (!retType) {
         retType = getResultType(gs, method, receiver, constraint);
@@ -447,7 +453,9 @@ void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &
     }
     if (what.data(gs).isMethod()) {
         item.AddMember("kind", 3, alloc); // Function
-        item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
+        if (what.exists()) {
+            item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
+        }
         item.AddMember("insertTextFormat", 2, alloc); // Snippet
         item.AddMember("insertText", methodSnippet(gs, what), alloc);
     } else if (what.data(gs).isStaticField()) {
@@ -536,11 +544,13 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
                 retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
                                                    *resp->constraint);
             }
-            if (contents.size() > 0) {
-                contents += " ";
+            if (dispatchComponent.method.exists()) {
+                if (contents.size() > 0) {
+                    contents += " ";
+                }
+                contents += methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType,
+                                         resp->constraint);
             }
-            contents +=
-                methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType, resp->constraint);
         }
         rapidjson::Value markupContents;
         markupContents.SetObject();
