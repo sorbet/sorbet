@@ -551,6 +551,8 @@ public:
 
     SymbolRef dealias(const GlobalState &gs) const;
 
+    bool ignoreInHashing(const GlobalState &gs) const;
+
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
     std::vector<std::pair<NameRef, SymbolRef>>

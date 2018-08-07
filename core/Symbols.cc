@@ -691,21 +691,36 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     result = mix(result, this->superClass._id);
     // argumentsOrMixins, typeParams, typeAliases
     for (const auto &e : members) {
-        result = mix(result, e.first._id);
-        result = mix(result, e.second._id);
+        if (e.second.exists() && !e.second.data(gs).ignoreInHashing(gs)) {
+            result = mix(result, _hash(e.first.data(gs).shortName(gs)));
+        }
     }
     for (const auto &e : argumentsOrMixins) {
-        result = mix(result, e._id);
+        if (e.exists() && !e.data(gs).ignoreInHashing(gs)) {
+            result = mix(result, _hash(e.data(gs).name.data(gs).shortName(gs)));
+        }
     }
     for (const auto &e : typeParams) {
-        result = mix(result, e._id);
+        if (e.exists() && !e.data(gs).ignoreInHashing(gs)) {
+            result = mix(result, _hash(e.data(gs).name.data(gs).shortName(gs)));
+        }
     }
     for (const auto &e : typeAliases) {
-        result = mix(result, e.first._id);
-        result = mix(result, e.second._id);
+        if (e.first.exists() && !e.first.data(gs).ignoreInHashing(gs)) {
+            result = mix(result, _hash(e.first.data(gs).name.data(gs).shortName(gs)));
+        }
     }
 
     return result;
+}
+
+bool Symbol::ignoreInHashing(const GlobalState &gs) const {
+    if (isClass()) {
+        return derivesFrom(gs, core::Symbols::StubClass());
+    } else if (isMethod()) {
+        return name.data(gs).kind == NameKind::UNIQUE && name.data(gs).unique.original == core::Names::staticInit();
+    }
+    return false;
 }
 
 LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}

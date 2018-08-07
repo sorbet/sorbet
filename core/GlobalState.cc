@@ -1144,7 +1144,7 @@ unsigned int GlobalState::hash() const {
     int counter = 0;
     for (const auto &sym : this->symbols) {
         counter++;
-        if (!sym.derivesFrom(*this, core::Symbols::StubClass())) {
+        if (!sym.ignoreInHashing(*this)) {
             result = mix(result, sym.hash(*this));
         }
         if (DEBUG_HASHING_TAIL && counter > symbolsUsed() - 15) {
