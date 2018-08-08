@@ -25,7 +25,11 @@ shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast
 bool isTProc(core::MutableContext ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
-            if (auto *rcv = ast::cast_tree<ast::Ident>(send->recv.get())) {
+            auto recv = send->recv.get();
+            if (auto *rcv = ast::cast_tree<ast::ResolvedConstantLit>(recv)) {
+                recv = rcv->resolved.get();
+            }
+            if (auto *rcv = ast::cast_tree<ast::Ident>(recv)) {
                 if (rcv->symbol == core::Symbols::T()) {
                     return true;
                 }
@@ -305,7 +309,14 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::untyped();
             }
-            auto *obj = ast::cast_tree<ast::Ident>(send->args[0].get());
+
+            auto arg = send->args[0].get();
+
+            if (auto *argc = ast::cast_tree<ast::ResolvedConstantLit>(send->args[0].get())) {
+                arg = argc->resolved.get();
+            }
+
+            auto *obj = ast::cast_tree<ast::Ident>(arg);
             if (!obj) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of needs a Class as its argument");
@@ -439,8 +450,13 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = make_shared<core::AppliedType>(sym, targs);
                 return;
             }
+            auto recv = s->recv.get();
 
-            auto *recvi = ast::cast_tree<ast::Ident>(s->recv.get());
+            if (auto *recvc = ast::cast_tree<ast::ResolvedConstantLit>(recv)) {
+                recv = recvc->resolved.get();
+            }
+
+            auto *recvi = ast::cast_tree<ast::Ident>(recv);
             if (recvi == nullptr) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
@@ -538,6 +554,9 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
         [&](ast::Self *slf) {
             core::SymbolRef klass = ctx.owner.data(ctx).enclosingClass(ctx);
             result = klass.data(ctx).selfType(ctx);
+        },
+        [&](ast::ResolvedConstantLit *cnst) {
+            result = getResultType(ctx, cnst->resolved, sigBeingParsed, allowSelfType);
         },
         [&](ast::Expression *expr) {
             if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {

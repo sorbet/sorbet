@@ -18,3 +18,5 @@ end
 class D
   U = T.type_alias([U, U]) # error: Type alias expands to to an infinite type
 end
+
+E = T.type_alias(E) # error: Type alias expands to to an infinite type

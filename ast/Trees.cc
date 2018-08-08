@@ -36,7 +36,6 @@ template class std::unique_ptr<sorbet::ast::Self>;
 template class std::unique_ptr<sorbet::ast::Block>;
 template class std::unique_ptr<sorbet::ast::InsSeq>;
 template class std::unique_ptr<sorbet::ast::EmptyTree>;
-template class std::unique_ptr<sorbet::ast::TreeRef>;
 
 using namespace std;
 
@@ -232,6 +231,12 @@ Literal::Literal(core::Loc loc, shared_ptr<core::Type> value) : Expression(loc),
 ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {
     core::categoryCounterInc("trees", "constantlit");
+    _sanityCheck();
+}
+
+ResolvedConstantLit::ResolvedConstantLit(unique_ptr<ConstantLit> original, unique_ptr<Expression> resolved)
+    : Expression(original->loc), original(move(original)), resolved(move(resolved)) {
+    core::categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
 
@@ -545,6 +550,23 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     buf << "scope = " << this->scope->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
     buf << "cnst = " << this->cnst.data(gs).toString(gs) << '\n';
+    printTabs(buf, tabs);
+    buf << "}";
+    return buf.str();
+}
+
+string ResolvedConstantLit::toString(const core::GlobalState &gs, int tabs) {
+    return this->resolved->toString(gs, tabs);
+}
+
+string ResolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
+    stringstream buf;
+
+    buf << "ResolvedConstantLit{" << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "orig = " << this->original->showRaw(gs, tabs + 1) << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "resolved = " << this->original->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
@@ -1076,6 +1098,10 @@ string ConstantLit::nodeName() {
     return "ConstantLit";
 }
 
+string ResolvedConstantLit::nodeName() {
+    return "ResolvedConstantLit";
+}
+
 string Self::nodeName() {
     return "Self";
 }
@@ -1139,21 +1165,5 @@ string BlockArg::nodeName() {
     return "BlockArg";
 }
 
-string TreeRef::nodeName() {
-    return "TreeRef";
-}
-
-string TreeRef::toString(const core::GlobalState &gs, int tabs) {
-    return tree ? this->tree->toString(gs, tabs) : "TreeRef(nullptr)";
-}
-
-string TreeRef::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ underlying = " + (tree ? tree->showRaw(gs, tabs) : "nullptr") + " }";
-}
-
-TreeRef::TreeRef(core::Loc loc, unique_ptr<Expression> tree) : Expression(loc), tree(move(tree)) {}
-void TreeRef::_sanityCheck() {
-    tree->_sanityCheck();
-}
 } // namespace ast
 } // namespace sorbet

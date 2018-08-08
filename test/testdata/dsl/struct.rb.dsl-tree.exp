@@ -14,7 +14,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   class <emptyTree>::<constant:RealStruct><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
       def foo<<constant:<todo sym>>>()
         <emptyTree>
       end
@@ -66,7 +66,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   class <emptyTree>::<constant:TwoStructs><<constant:<todo sym>>> < (::<todo sym>)
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
       def foo<<constant:<todo sym>>>()
         <emptyTree>
       end
@@ -82,7 +82,7 @@ class <emptyTree><<constant:<root>>> < ()
       end
     end
 
-    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::Struct)
+    class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
       def foo<<constant:<todo sym>>>()
         <emptyTree>
       end
@@ -104,7 +104,7 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>
     end
 
-    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::Struct)
+    class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<root>::<constant:Struct>)
       def foo<<constant:<todo sym>>>()
         <emptyTree>
       end

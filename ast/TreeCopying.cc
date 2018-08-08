@@ -215,6 +215,15 @@ unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root
     return make_unique<ConstantLit>(loc, scope->_deepCopy(avoid), cnst);
 }
 
+unique_ptr<Expression> ResolvedConstantLit::_deepCopy(const Expression *avoid, bool root) const {
+    if (!root && this == avoid) {
+        throw DeepCopyError();
+    }
+    auto orig = original->_deepCopy(avoid);
+    return make_unique<ResolvedConstantLit>(unique_ptr<ConstantLit>(cast_tree<ConstantLit>(orig.release())),
+                                            resolved->_deepCopy(avoid));
+}
+
 unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
@@ -250,18 +259,6 @@ unique_ptr<Expression> EmptyTree::_deepCopy(const Expression *avoid, bool root) 
         throw DeepCopyError();
     }
     return make_unique<EmptyTree>(loc);
-}
-unique_ptr<Expression> TreeRef::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
-    }
-    if (tree.get() == avoid) {
-        throw DeepCopyError();
-    }
-    if (!tree) {
-        throw DeepCopyError();
-    }
-    return tree->_deepCopy(avoid);
 }
 } // namespace ast
 } // namespace sorbet

@@ -427,21 +427,6 @@ private:
     virtual void _sanityCheck();
 };
 
-// Used inside resolver to insert trees that were copied with DeepCopy
-// Should only exist inside resolver.
-class TreeRef final : public Expression {
-public:
-    std::unique_ptr<Expression> tree;
-    TreeRef(core::Loc loc, std::unique_ptr<Expression> tree);
-    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
-    virtual std::string nodeName();
-    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
-
-private:
-    virtual void _sanityCheck();
-};
-
 class Cast final : public Expression {
 public:
     std::shared_ptr<core::Type> type;
@@ -524,6 +509,22 @@ public:
     std::unique_ptr<Expression> scope;
 
     ConstantLit(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
+    virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
+    virtual std::string nodeName();
+    virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const;
+
+private:
+    virtual void _sanityCheck();
+};
+
+class ResolvedConstantLit final : public Expression {
+public:
+    std::unique_ptr<ConstantLit> original;
+    std::unique_ptr<Expression> resolved; // In a world without type aliases, this could have been a `SymbolRef` instead
+                                          // type aliases may expand to arbitrary expressions
+
+    ResolvedConstantLit(std::unique_ptr<ConstantLit> original, std::unique_ptr<Expression> resolved);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

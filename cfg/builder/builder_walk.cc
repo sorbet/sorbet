@@ -137,6 +137,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
+            [&](ast::ResolvedConstantLit *a) { ret = walk(cctx, a->resolved.get(), current); },
             [&](ast::Ident *a) {
                 current->exprs.emplace_back(
                     cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));

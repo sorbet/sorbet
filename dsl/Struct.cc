@@ -77,7 +77,8 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     ast::ClassDef::ANCESTORS_store ancestors;
-    ancestors.emplace_back(ast::MK::Ident(loc, core::Symbols::Struct()));
+    ancestors.emplace_back(ast::MK::Constant(loc, ast::MK::Ident(loc, core::Symbols::root()),
+                                             ctx.state.enterNameConstant(core::Names::Struct())));
 
     vector<unique_ptr<ast::Expression>> stats;
     stats.emplace_back(make_unique<ast::ClassDef>(loc, core::Symbols::todo(), move(asgn->lhs), move(ancestors),

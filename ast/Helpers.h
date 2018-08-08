@@ -163,7 +163,7 @@ public:
         return std::make_unique<ast::Literal>(loc, core::Types::falseClass());
     }
 
-    static std::unique_ptr<Expression> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
+    static std::unique_ptr<ConstantLit> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
         return std::make_unique<ast::ConstantLit>(loc, move(scope), name);
     }
 

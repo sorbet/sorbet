@@ -53,6 +53,10 @@ void ConstantLit::_sanityCheck() {
     ENFORCE(cnst.exists());
 }
 
+void ResolvedConstantLit::_sanityCheck() {
+    ENFORCE(original);
+}
+
 void EmptyTree::_sanityCheck() {}
 
 void Literal::_sanityCheck() {
