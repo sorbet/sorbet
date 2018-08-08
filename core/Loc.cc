@@ -158,6 +158,11 @@ string Loc::filePosToString(const GlobalState &gs) const {
     return buf.str();
 }
 
+string Loc::source(const GlobalState &gs) const {
+    auto source = this->file.data(gs).source();
+    return string(source.substr(beginPos, endPos - beginPos));
+}
+
 bool Loc::contains(const Loc &other) const {
     return file == other.file && other.beginPos >= beginPos && other.endPos <= endPos;
 }

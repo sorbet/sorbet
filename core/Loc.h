@@ -38,6 +38,7 @@ public:
     std::pair<Detail, Detail> position(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs, int tabs = 0) const;
     std::string filePosToString(const GlobalState &gs) const;
+    std::string source(const GlobalState &gs) const;
 
     bool operator==(const Loc &rhs) const;
 
@@ -47,5 +48,11 @@ public:
 };
 } // namespace core
 } // namespace sorbet
+
+template <> struct std::hash<sorbet::core::Loc> {
+    std::size_t operator()(const sorbet::core::Loc loc) const {
+        return 3 * std::hash<sorbet::core::FileRef>{}(loc.file) + 5 * loc.beginPos + 7 * loc.endPos;
+    }
+};
 
 #endif // SORBET_AST_LOC_H

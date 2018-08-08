@@ -1,7 +1,10 @@
 test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilClass` component of `T.nilable(String)` http://go/e/7003
      4 |foo[0]
         ^^^^^^
-  You could wrap it in `T.must()` before calling the function.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest_t_must/suggest_t_must.rb:4: Replace with `T.must(foo)`
+     4 |foo[0]
+        ^^^
 
 test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `String` for argument `arg0` http://go/e/7002
      6 |"hi" + foo
@@ -13,5 +16,8 @@ test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `
     test/cli/suggest_t_must/suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  You could wrap it in `T.must()` before passing the argument.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest_t_must/suggest_t_must.rb:6: Replace with `T.must(foo)`
+     6 |"hi" + foo
+               ^^^
 Errors: 2

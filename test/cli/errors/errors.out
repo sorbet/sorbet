@@ -40,7 +40,10 @@ test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-  You could wrap it in `T.must()` before passing the argument.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
+    28 |    bar(a)
+                ^
 Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
@@ -84,7 +87,10 @@ test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-  You could wrap it in `T.must()` before passing the argument.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
+    28 |    bar(a)
+                ^
 Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
@@ -128,5 +134,8 @@ test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:26:
     26 |          2
                   ^
-  You could wrap it in `T.must()` before passing the argument.
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
+    28 |    bar(a)
+                ^
 Errors: 4

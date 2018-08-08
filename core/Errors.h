@@ -1,6 +1,7 @@
 #ifndef SORBET_REPORTER_H
 #define SORBET_REPORTER_H
 
+#include "AutocorrectSuggestion.h"
 #include "Loc.h"
 #include "StrictLevel.h"
 #include "spdlog/fmt/fmt.h"
@@ -49,6 +50,7 @@ struct BasicError {
     ErrorClass what;
     std::string formatted;
     bool isCritical;
+    std::vector<AutocorrectSuggestion> autocorrects;
 
     BasicError(Loc loc, ErrorClass what, std::string formatted);
 
@@ -136,6 +138,7 @@ class ErrorBuilder {
     ErrorClass what;
     std::string header;
     std::vector<ErrorSection> sections;
+    std::vector<AutocorrectSuggestion> autocorrects;
     void _setHeader(std::string &&header);
 
 public:
@@ -156,6 +159,12 @@ public:
     template <typename... Args> void setHeader(const std::string &msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         _setHeader(move(formatted));
+    }
+
+    void addAutocorrect(AutocorrectSuggestion &&autocorrect);
+    template <typename... Args> void replaceWith(Loc loc, const std::string &msg, const Args &... args) {
+        std::string formatted = fmt::format(msg, args...);
+        addAutocorrect(AutocorrectSuggestion(loc, move(formatted)));
     }
 
     // build() builds and returns the reported Error. Only valid if state ==
@@ -181,6 +190,7 @@ public:
     virtual void flushFile(FileRef file) = 0;
     virtual void flushErrors(bool all = false) = 0;
     virtual void flushErrorCount() = 0;
+    virtual void flushAutocorrects(const core::GlobalState &gs) = 0;
 };
 
 } // namespace core

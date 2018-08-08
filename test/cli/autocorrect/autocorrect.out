@@ -1,0 +1,14 @@
+4c4
+< foo[0]
+---
+> T.must(foo)[0]
+6c6
+< "hi" + foo
+---
+> "hi" + T.must(foo)
+8,9c8,9
+< foo.bar ||= "a"
+< foo.bar &&= "a"
+---
+> T.must(foo.bar) ||= "a"
+> T.must(foo.bar) &&= "a"

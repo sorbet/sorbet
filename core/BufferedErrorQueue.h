@@ -24,6 +24,7 @@ public:
     virtual void flushFile(FileRef file) override;
     virtual void flushErrors(bool all = false) override;
     virtual void flushErrorCount() override;
+    virtual void flushAutocorrects(const core::GlobalState &gs) override;
 
     std::vector<std::unique_ptr<QueryResponse>> drainQueryResponses();
     std::vector<std::unique_ptr<BasicError>> drainErrors();

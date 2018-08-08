@@ -124,6 +124,20 @@ void ErrorBuilder::addErrorSection(ErrorSection &&section) {
     this->sections.emplace_back(move(section));
 }
 
+void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
+    ENFORCE(state == State::WillBuild);
+    if (gs.autocorrect) {
+        addErrorSection(ErrorSection(
+            "Autocorrect: Done", {ErrorLine::from(autocorrect.loc, "Replaced with `{}`", autocorrect.replacement)}));
+    } else {
+        addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect",
+                                     {ErrorLine::from(autocorrect.loc, "Replace with `{}`", autocorrect.replacement)}));
+    }
+    this->autocorrects.emplace_back(move(autocorrect));
+}
+
+// This will sometimes be bypassed in lieue of just calling build() so put your
+// logic in build() instead.
 ErrorBuilder::~ErrorBuilder() {
     if (state != State::WillBuild) {
         return;
@@ -137,6 +151,7 @@ unique_ptr<BasicError> ErrorBuilder::build() {
 
     unique_ptr<ComplexError> err =
         make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
+    err->autocorrects = move(this->autocorrects);
     if (this->what == errors::Internal::InternalError) {
         err->isCritical = true;
     }

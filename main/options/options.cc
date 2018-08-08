@@ -142,7 +142,7 @@ cxxopts::Options buildOptions() {
                                     "Preallocate the specified amount of memory for symbol+name tables",
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
-
+    options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     // Developer options
@@ -266,6 +266,7 @@ void readOptions(Options &opts, int argc, const char *argv[],
         }
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
+        opts.autocorrect = raw["autocorrect"].as<bool>();
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
             logger->info("lsp mode does not yet support caching.");
@@ -297,7 +298,7 @@ void readOptions(Options &opts, int argc, const char *argv[],
             opts.forceMinStrict = opts.forceMaxStrict = text2StrictLevel(typed, logger);
         }
 
-        opts.showProgress = raw.count("P") != 0;
+        opts.showProgress = raw["P"].as<bool>();
         if (raw.count("configatron-dir") > 0) {
             opts.configatronDirs = raw["configatron-dir"].as<vector<string>>();
         }
@@ -305,9 +306,9 @@ void readOptions(Options &opts, int argc, const char *argv[],
             opts.configatronFiles = raw["configatron-file"].as<vector<string>>();
         }
         opts.storeState = raw["store-state"].as<string>();
-        opts.suggestTyped = raw.count("suggest-typed") != 0;
-        opts.silenceErrors = raw.count("q") != 0;
-        opts.enableCounters = raw.count("counters") != 0;
+        opts.suggestTyped = raw["suggest-typed"].as<bool>();
+        opts.silenceErrors = raw["q"].as<bool>();
+        opts.enableCounters = raw["counters"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();
@@ -355,7 +356,7 @@ void readOptions(Options &opts, int argc, const char *argv[],
         }
 
         opts.inlineInput = raw["e"].as<string>();
-        opts.supressNonCriticalErrors = raw.count("suppress-non-critical") > 0;
+        opts.supressNonCriticalErrors = raw["suppress-non-critical"].as<bool>();
         if (!raw["typed-override"].as<string>().empty()) {
             opts.strictnessOverrides = extractStricnessOverrides(raw["typed-override"].as<string>(), logger);
         }

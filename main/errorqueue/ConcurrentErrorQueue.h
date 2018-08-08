@@ -29,10 +29,14 @@ class ConcurrentErrorQueue : public core::ErrorQueue {
 private:
     std::thread::id owner;
     std::unordered_map<core::FileRef, std::vector<ErrorQueueMessage>> collected;
+    std::vector<core::AutocorrectSuggestion> autocorrects;
     ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
     std::atomic<bool> printedAtLeastOneError{false};
 
     void renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
+
+    void drainQueue();
+    std::vector<ErrorQueueMessage> drainKind(ErrorQueueMessage::Kind kind);
 
 public:
     ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer);
@@ -43,6 +47,7 @@ public:
     virtual void flushFile(core::FileRef file) override;
     virtual void flushErrors(bool all = false) override;
     virtual void flushErrorCount() override;
+    virtual void flushAutocorrects(const core::GlobalState &gs) override;
 
     std::vector<std::unique_ptr<core::QueryResponse>> drainQueryResponses();
     std::vector<std::unique_ptr<core::BasicError>> drainErrors();

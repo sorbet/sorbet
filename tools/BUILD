@@ -15,6 +15,7 @@ compilation_database(
         "//test:error-check-test",
         "//test:backtrace-test-raise",
         "//test:backtrace-test-error",
+        "//test:autocorrect-test",
         "//rbi:generate_procs",
         "//payload/text:generate_payload",
         "//payload/binary:gen_state_payload",

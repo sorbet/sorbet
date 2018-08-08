@@ -4,33 +4,51 @@ using namespace std;
 
 namespace sorbet {
 namespace realmain {
-vector<unique_ptr<core::QueryResponse>> ConcurrentErrorQueue::drainQueryResponses() {
+
+void ConcurrentErrorQueue::drainQueue() {
     ENFORCE(owner == this_thread::get_id());
-    vector<unique_ptr<core::QueryResponse>> res;
 
     ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        if (msg.kind == ErrorQueueMessage::Kind::QueryResponse) {
-            res.emplace_back(move(msg.queryResponse));
+        collected[msg.whatFile].emplace_back(move(msg));
+    }
+}
+
+vector<ErrorQueueMessage> ConcurrentErrorQueue::drainKind(ErrorQueueMessage::Kind kind) {
+    drainQueue();
+
+    vector<ErrorQueueMessage> res;
+    for (auto &kv : collected) {
+        for (auto it = kv.second.begin(); it != kv.second.end();) {
+            if (it->kind == kind) {
+                res.emplace_back(move(*it));
+                it = kv.second.erase(it);
+            } else {
+                ++it;
+            }
         }
     }
     return res;
 }
 
-vector<unique_ptr<core::BasicError>> ConcurrentErrorQueue::drainErrors() {
-    ENFORCE(owner == this_thread::get_id());
-    vector<unique_ptr<core::BasicError>> res;
-    for (auto &alreadyCollected : collected) {
-        for (auto &entry : alreadyCollected.second) {
-            res.emplace_back(move(entry.error));
-        }
+vector<unique_ptr<core::QueryResponse>> ConcurrentErrorQueue::drainQueryResponses() {
+    vector<unique_ptr<core::QueryResponse>> res;
+    for (auto &msg : drainKind(ErrorQueueMessage::Kind::QueryResponse)) {
+        res.emplace_back(move(msg.queryResponse));
     }
-    collected.clear();
-    ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        if (msg.kind == ErrorQueueMessage::Kind::Error) {
-            res.emplace_back(move(msg.error));
-        }
+
+    // TODO: The LSP runner expects calling this method to also clear the errors
+    // off the queue.
+    for (auto &msg : drainKind(ErrorQueueMessage::Kind::Error)) {
+        (void)msg;
+    }
+    return res;
+}
+
+vector<unique_ptr<core::BasicError>> ConcurrentErrorQueue::drainErrors() {
+    vector<unique_ptr<core::BasicError>> res;
+    for (auto &msg : drainKind(ErrorQueueMessage::Kind::Error)) {
+        res.emplace_back(move(msg.error));
     }
     return res;
 }
@@ -46,6 +64,10 @@ void ConcurrentErrorQueue::renderForFile(core::FileRef whatFile, stringstream &c
             out << '\n';
         }
         out << error.text;
+
+        for (auto &autocorrect : error.error->autocorrects) {
+            autocorrects.emplace_back(move(autocorrect));
+        }
     }
     collected[whatFile].clear();
 };
@@ -56,15 +78,13 @@ void ConcurrentErrorQueue::flushErrors(bool all) {
     stringstream critical;
     stringstream nonCritical;
 
-    ErrorQueueMessage msg;
-    for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {
-        if (msg.kind == ErrorQueueMessage::Kind::Error) {
-            this->errorCount.fetch_add(1);
-            collected[msg.whatFile].emplace_back(move(msg));
-        } else if (msg.kind == ErrorQueueMessage::Kind::Flush) {
-            renderForFile(msg.whatFile, critical, nonCritical);
-            renderForFile(core::FileRef(), critical, nonCritical);
-        }
+    for (auto &msg : drainKind(ErrorQueueMessage::Kind::Error)) {
+        this->errorCount.fetch_add(1);
+        collected[msg.whatFile].emplace_back(move(msg));
+    }
+    for (auto &msg : drainKind(ErrorQueueMessage::Kind::Flush)) {
+        renderForFile(msg.whatFile, critical, nonCritical);
+        renderForFile(core::FileRef(), critical, nonCritical);
     }
 
     if (all) {
@@ -101,6 +121,22 @@ void ConcurrentErrorQueue::flushErrorCount() {
     } else {
         this->logger.log(spdlog::level::err, "Errors: {}\n", this->errorCount);
     }
+}
+
+void ConcurrentErrorQueue::flushAutocorrects(const core::GlobalState &gs) {
+    map<core::FileRef, string> sources;
+    for (auto &autocorrect : autocorrects) {
+        auto &file = autocorrect.loc.file;
+        if (!sources.count(file)) {
+            sources[file] = FileOps::read(file.data(gs).path());
+        }
+    }
+
+    auto toWrite = core::AutocorrectSuggestion::apply(autocorrects, sources);
+    for (auto &entry : toWrite) {
+        FileOps::write(entry.first.data(gs).path(), entry.second);
+    }
+    autocorrects.clear();
 }
 
 void ConcurrentErrorQueue::flushFile(core::FileRef file) {

@@ -193,6 +193,9 @@ int realmain(int argc, const char *argv[]) {
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }
+    if (opts.autocorrect) {
+        gs->autocorrect = true;
+    }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
     }
@@ -248,6 +251,9 @@ int realmain(int argc, const char *argv[]) {
         }
     } else if (!opts.noErrorCount) {
         gs->flushErrorCount();
+    }
+    if (opts.autocorrect) {
+        gs->errorQueue->flushAutocorrects(*gs);
     }
     logger->trace("sorbet done");
 

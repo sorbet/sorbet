@@ -333,27 +333,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     InsSeq::STATS_store stats;
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempRecv, move(s->recv)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
                     for (auto &arg : s->args) {
-                        core::Loc loc = arg->loc;
+                        core::Loc argLoc = arg->loc;
                         core::NameRef name =
                             ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                        stats.emplace_back(MK::Assign(loc, name, move(arg)));
-                        readArgs.emplace_back(MK::Local(loc, name));
-                        assgnArgs.emplace_back(MK::Local(loc, name));
+                        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+                        readArgs.emplace_back(MK::Local(argLoc, name));
+                        assgnArgs.emplace_back(MK::Local(argLoc, name));
                     }
                     assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempResult, move(cond)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
                     auto body =
-                        MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
-                    auto elsep = MK::Local(loc, tempResult);
-                    auto iff = MK::If(loc, MK::Local(loc, tempResult), move(body), move(elsep));
+                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto elsep = MK::Local(sendLoc, tempResult);
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
@@ -374,27 +374,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     InsSeq::STATS_store stats;
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempRecv, move(s->recv)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
                     for (auto &arg : s->args) {
-                        core::Loc loc = arg->loc;
+                        core::Loc argLoc = arg->loc;
                         core::NameRef name =
                             ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                        stats.emplace_back(MK::Assign(loc, name, move(arg)));
-                        readArgs.emplace_back(MK::Local(loc, name));
-                        assgnArgs.emplace_back(MK::Local(loc, name));
+                        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+                        readArgs.emplace_back(MK::Local(argLoc, name));
+                        assgnArgs.emplace_back(MK::Local(argLoc, name));
                     }
                     assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun, move(readArgs), s->flags);
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempResult, move(cond)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
 
                     auto elsep =
-                        MK::Send(sendLoc, MK::Local(loc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
-                    auto body = MK::Local(loc, tempResult);
-                    auto iff = MK::If(loc, MK::Local(loc, tempResult), move(body), move(elsep));
+                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto body = MK::Local(sendLoc, tempResult);
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
                     auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {

@@ -185,7 +185,7 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
             auto *rt = cast_type<ClassType>(ot->right.get());
             if ((lt != nullptr && lt->symbol == Symbols::NilClass()) ||
                 (rt != nullptr && rt->symbol == Symbols::NilClass())) {
-                e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before passing the argument."));
+                e.replaceWith(loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
@@ -411,7 +411,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 e.setHeader("Method `{}` does not exist on `{}`", fun.data(ctx).toString(ctx), this->show(ctx));
             }
             if (fullType.get() != this && this->symbol == Symbols::NilClass()) {
-                e.addErrorSection(ErrorSection("You could wrap it in `T.must()` before calling the function."));
+                e.replaceWith(receiverLoc, "T.must({})", receiverLoc.source(ctx));
             } else {
                 if (this->symbol.data(ctx).isClassModule()) {
                     auto objMeth = core::Symbols::Object().data(ctx).findMemberTransitive(ctx, fun);
