@@ -11,3 +11,5 @@ int(a: foo)
 
 foo.bar ||= "a"
 foo.bar &&= "a"
+foo.bar |= "a"
+foo.bar &= "a"

@@ -6,9 +6,13 @@
 < "hi" + foo
 ---
 > "hi" + T.must(foo)
-12,13c12,13
+12,15c12,15
 < foo.bar ||= "a"
 < foo.bar &&= "a"
+< foo.bar |= "a"
+< foo.bar &= "a"
 ---
 > T.must(foo.bar) ||= "a"
 > T.must(foo.bar) &&= "a"
+> T.must(foo.bar) |= "a"
+> T.must(foo.bar) &= "a"
