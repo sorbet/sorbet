@@ -227,6 +227,7 @@ class LSPLoop {
     void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
     void sendShowMessageNotification(int messageType, std::string message);
+    bool isTestFile(const std::shared_ptr<core::File> &file);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,

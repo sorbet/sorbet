@@ -1135,6 +1135,16 @@ bool LSPLoop::handleReplies(rapidjson::Document &d) {
     return false;
 }
 
+bool LSPLoop::isTestFile(const shared_ptr<core::File> &file) {
+    if (file->path().find("/test/") != file->path().npos) {
+        return true;
+    } else if (file->path().find_first_of("test/") == 0) {
+        return true;
+    } else {
+        return false;
+    }
+}
+
 core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     core::FileRef fref;
     if (!file)
@@ -1307,7 +1317,9 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
     std::vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
     for (auto &t : changedFiles) {
-        addNewFile(t);
+        if (!isTestFile(t)) {
+            addNewFile(t);
+        }
     }
 
     vector<unique_ptr<ast::Expression>> indexedCopies;
@@ -1374,7 +1386,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
     int i = -1;
     for (auto &f : changedFiles) {
         ++i;
-        if (!f) {
+        if (!f || isTestFile(f)) {
             continue;
         }
         auto wasFiles = initialGS->filesUsed();
