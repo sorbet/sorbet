@@ -96,11 +96,11 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
     return symRef;
 }
 
-int globalStateIdCounter = 1;
+atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
 GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
-    : globalStateId(globalStateIdCounter++), errorQueue(move(errorQueue)) {
+    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(move(errorQueue)) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int max_name_count = 8192;
@@ -829,15 +829,6 @@ void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNam
             break;
         }
     }
-}
-
-LocalVariable GlobalState::newTemporary(NameRef name, SymbolRef owner) const {
-    const Symbol &data = owner.data(*this);
-    ENFORCE(data.isMethod(), "entering temporary outside of a method");
-    int id = ++(data.uniqueCounter);
-
-    LocalVariable ret(name, id);
-    return ret;
 }
 
 unsigned int GlobalState::symbolsUsed() const {

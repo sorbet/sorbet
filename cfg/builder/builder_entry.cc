@@ -18,8 +18,12 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         res->basicBlocks.clear();
         return res;
     }
-    core::LocalVariable retSym = ctx.state.newTemporary(core::Names::returnMethodTemp(), md.symbol);
-    core::LocalVariable selfSym = ctx.state.newTemporary(core::Names::selfMethodTemp(), md.symbol);
+    u4 temporaryCounter = 1;
+    unordered_map<core::SymbolRef, core::LocalVariable> aliases;
+    CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases, temporaryCounter);
+
+    core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());
+    core::LocalVariable selfSym = cctx.newTemporary(core::Names::selfMethodTemp());
 
     BasicBlock *entry = res->entry();
 
@@ -27,7 +31,6 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.data(ctx).name;
 
     int i = -1;
-    unordered_map<core::SymbolRef, core::LocalVariable> aliases;
     for (core::SymbolRef argSym : md.symbol.data(ctx).arguments()) {
         i++;
         core::LocalVariable arg(argSym.data(ctx).name, 0);
@@ -35,7 +38,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         entry->exprs.back().value->isSynthetic = true;
         aliases[argSym] = arg;
     }
-    auto cont = walk(CFGContext(ctx, *res.get(), retSym, 0, nullptr, nullptr, nullptr, aliases), md.rhs.get(), entry);
+    auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn(), 0);
 
     auto rvLoc = cont->exprs.empty() ? md.rhs->loc : cont->exprs.back().loc;
@@ -140,7 +143,7 @@ unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CF
         if (bb->exprs.empty()) {
             continue;
         }
-        core::LocalVariable bind = ctx.state.newTemporary(core::Names::debugEnvironmentTemp(), cfg->symbol);
+        core::LocalVariable bind(core::Names::debugEnvironmentTemp(), 0);
         auto &firstExpr = bb->exprs[0];
         bb->exprs.emplace(bb->exprs.begin(), bind, firstExpr.loc,
                           make_unique<cfg::DebugEnvironment>(core::GlobalState::AnnotationPos::BEFORE));

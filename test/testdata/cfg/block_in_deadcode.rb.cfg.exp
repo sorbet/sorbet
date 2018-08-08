@@ -6,12 +6,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : Object\l<block-pre-call-temp>$6 = <statTemp>$5.outer() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4 = self : Object\l<block-pre-call-temp>$5 = <statTemp>$4.outer() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_1" [
-        label = "block[id=1]()\l<statTemp>$12 = self\l<block-pre-call-temp>$13 = <statTemp>$12.inner()\l<unconditional>\l"
+        label = "block[id=1]()\l<statTemp>$11 = self\l<block-pre-call-temp>$12 = <statTemp>$11.inner()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
@@ -23,12 +23,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Object#foo#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10 = return <returnTemp>$11 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9 = return <returnTemp>$10 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];

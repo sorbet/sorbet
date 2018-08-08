@@ -90,7 +90,7 @@ build:sanitize --define unsanitized=false
 build:sanitize --features=force-libubsan
 
 build:tsan --copt=-fsanitize=thread
-build:tsan --cxxopt==-fsanitize=thread
+build:tsan --cxxopt=-fsanitize=thread
 build:tsan --linkopt=-fsanitize=thread
 build:sanitize --define unsanitized=false
 

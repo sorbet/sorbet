@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : Foo\l<block-pre-call-temp>$6 = <statTemp>$5.bar() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4 = self : Foo\l<block-pre-call-temp>$5 = <statTemp>$4.bar() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];
@@ -41,12 +41,12 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_2" -> "bb::Foo#baz_3" [style="tapered"];
 
     "bb::Foo#baz_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Foo#baz#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Foo#baz#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_3" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$7 = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$8 = 0 : Integer(0)\lr$3 = <blk>$7.[](<blk>$8) : T.untyped\l<statTemp>$10 = self : Foo\l<blockReturnTemp>$9 = <statTemp>$10.puts(r$3) : NilClass\l<blockReturnTemp>$12 = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$6 = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$7 = 0 : Integer(0)\lr$3 = <blk>$6.[](<blk>$7) : T.untyped\l<statTemp>$9 = self : Foo\l<blockReturnTemp>$8 = <statTemp>$9.puts(r$3) : NilClass\l<blockReturnTemp>$11 = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$8 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_4" -> "bb::Foo#baz_2" [style="bold"];

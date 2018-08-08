@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$8 = alias <constant:<Magic>> : <Magic>\l<arrayTemp>$6 = 1 : Integer(1)\l<arrayTemp>$7 = 2 : Integer(2)\l<statTemp>$5 = <constant:<Magic>>$8.<build-array>(<arrayTemp>$6, <arrayTemp>$7) : TupleType {\l  0 = Integer(1)\l  1 = Integer(2)\l}\l<block-pre-call-temp>$9 = <statTemp>$5.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:<Magic>>$7 = alias <constant:<Magic>> : <Magic>\l<arrayTemp>$5 = 1 : Integer(1)\l<arrayTemp>$6 = 2 : Integer(2)\l<statTemp>$4 = <constant:<Magic>>$7.<build-array>(<arrayTemp>$5, <arrayTemp>$6) : TupleType {\l  0 = Integer(1)\l  1 = Integer(2)\l}\l<block-pre-call-temp>$8 = <statTemp>$4.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -23,12 +23,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Object#foo#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = <impossible>\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Object#foo#<block>> : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = <impossible>\l  ]\l}\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$10 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = Integer\l}\l<blk>$11 = 0 : Integer(0)\lx$2 = <blk>$10.[](<blk>$11) : Integer\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$9 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = Integer\l}\l<blk>$10 = 0 : Integer(0)\lx$2 = <blk>$9.[](<blk>$10) : Integer\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];

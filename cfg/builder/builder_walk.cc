@@ -55,12 +55,12 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
     }
 }
 
-core::LocalVariable global2Local(core::Context ctx, core::SymbolRef what, CFG &inWhat,
+core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inWhat,
                                  unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
-        const core::Symbol &data = what.data(ctx);
-        alias = ctx.state.newTemporary(data.name, inWhat.symbol);
+        const core::Symbol &data = what.data(cctx.ctx);
+        alias = cctx.newTemporary(data.name);
     }
     return alias;
 }
@@ -85,13 +85,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto continueBlock = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(current, headerBlock, cctx.inWhat, a->loc);
 
-                core::LocalVariable condSym = cctx.ctx.state.newTemporary(core::Names::whileTemp(), cctx.inWhat.symbol);
+                core::LocalVariable condSym = cctx.newTemporary(core::Names::whileTemp());
                 auto headerEnd = walk(cctx.withTarget(condSym).withLoopScope(headerBlock, continueBlock), a->cond.get(),
                                       headerBlock);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                 conditionalJump(headerEnd, condSym, bodyBlock, continueBlock, cctx.inWhat, a->cond->loc);
                 // finishHeader
-                core::LocalVariable bodySym = cctx.ctx.state.newTemporary(core::Names::statTemp(), cctx.inWhat.symbol);
+                core::LocalVariable bodySym = cctx.newTemporary(core::Names::statTemp());
 
                 auto body =
                     walk(cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock), a->body.get(), bodyBlock);
@@ -102,14 +102,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = continueBlock;
             },
             [&](ast::Return *a) {
-                core::LocalVariable retSym = cctx.ctx.state.newTemporary(core::Names::returnTemp(), cctx.inWhat.symbol);
+                core::LocalVariable retSym = cctx.newTemporary(core::Names::returnTemp());
                 auto cont = walk(cctx.withTarget(retSym), a->expr.get(), current);
                 cont->exprs.emplace_back(cctx.target, a->loc, make_unique<Return>(retSym)); // dead assign.
                 jumpToDead(cont, cctx.inWhat, a->loc);
                 ret = cctx.inWhat.deadBlock();
             },
             [&](ast::If *a) {
-                core::LocalVariable ifSym = cctx.ctx.state.newTemporary(core::Names::ifTemp(), cctx.inWhat.symbol);
+                core::LocalVariable ifSym = cctx.newTemporary(core::Names::ifTemp());
                 ENFORCE(ifSym.exists(), "ifSym does not exist");
                 auto cont = walk(cctx.withTarget(ifSym), a->cond.get(), current);
                 auto thenBlock = cctx.inWhat.freshBlock(cctx.loops);
@@ -139,8 +139,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
             [&](ast::Ident *a) {
                 current->exprs.emplace_back(
-                    cctx.target, a->loc,
-                    make_unique<Ident>(global2Local(cctx.ctx, a->symbol, cctx.inWhat, cctx.aliases)));
+                    cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
                 ret = current;
             },
             [&](ast::Local *a) {
@@ -155,7 +154,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto lhsIdent = ast::cast_tree<ast::Ident>(a->lhs.get());
                 core::LocalVariable lhs;
                 if (lhsIdent != nullptr) {
-                    lhs = global2Local(cctx.ctx, lhsIdent->symbol, cctx.inWhat, cctx.aliases);
+                    lhs = global2Local(cctx, lhsIdent->symbol, cctx.inWhat, cctx.aliases);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
                     lhs = lhsLocal->localVariable;
                 } else {
@@ -170,7 +169,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
             [&](ast::InsSeq *a) {
                 for (auto &exp : a->stats) {
-                    core::LocalVariable temp = cctx.ctx.state.newTemporary(core::Names::statTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp.get(), current);
                 }
                 ret = walk(cctx, a->expr.get(), current);
@@ -178,14 +177,14 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Send *s) {
                 core::LocalVariable recv;
 
-                recv = cctx.ctx.state.newTemporary(core::Names::statTemp(), cctx.inWhat.symbol);
+                recv = cctx.newTemporary(core::Names::statTemp());
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 
                 vector<core::LocalVariable> args;
                 vector<core::Loc> argLocs;
                 for (auto &exp : s->args) {
                     core::LocalVariable temp;
-                    temp = cctx.ctx.state.newTemporary(core::Names::statTemp(), cctx.inWhat.symbol);
+                    temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp.get(), current);
 
                     args.push_back(temp);
@@ -203,8 +202,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto link = make_shared<core::SendAndBlockLink>(sym, s->fun);
                     auto send = make_unique<Send>(recv, s->fun, s->recv->loc, argsCopy, argLocs, link);
                     auto solveConstraint = make_unique<SolveConstraint>(link);
-                    core::LocalVariable sendTemp =
-                        cctx.ctx.state.newTemporary(core::Names::blockPreCallTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable sendTemp = cctx.newTemporary(core::Names::blockPreCallTemp());
                     current->exprs.emplace_back(sendTemp, s->loc, move(send));
                     auto headerBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
@@ -212,9 +210,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     const core::Symbol &data = sym.data(cctx.ctx);
 
-                    core::LocalVariable argTemp =
-                        cctx.ctx.state.newTemporary(core::Names::blkArg(), cctx.inWhat.symbol);
-                    core::LocalVariable idxTmp = cctx.ctx.state.newTemporary(core::Names::blkArg(), cctx.inWhat.symbol);
+                    core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
+                    core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
                     bodyBlock->exprs.emplace_back(argTemp, data.loc, make_unique<LoadYieldParams>(link, sym));
 
                     for (int i = 0; i < data.arguments().size(); ++i) {
@@ -236,15 +233,13 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     unconditionalJump(current, headerBlock, cctx.inWhat, s->loc);
 
-                    core::LocalVariable blockrv =
-                        cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable blockrv = cctx.newTemporary(core::Names::blockReturnTemp());
                     auto blockLast = walk(cctx.withTarget(blockrv)
                                               .withLoopScope(headerBlock, postBlock, s->block->symbol)
                                               .withSendAndBlockLink(link),
                                           s->block->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
-                        core::LocalVariable dead =
-                            cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
+                        core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
                         blockLast->exprs.emplace_back(dead, s->block->loc, make_unique<BlockReturn>(link, blockrv));
                     }
 
@@ -263,12 +258,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); },
 
             [&](ast::Next *a) {
-                core::LocalVariable exprSym =
-                    cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
+                core::LocalVariable exprSym = cctx.newTemporary(core::Names::blockReturnTemp());
                 auto afterNext = walk(cctx.withTarget(exprSym), a->expr.get(), current);
                 if (afterNext != cctx.inWhat.deadBlock() && cctx.rubyBlock.exists()) {
-                    core::LocalVariable dead =
-                        cctx.ctx.state.newTemporary(core::Names::blockReturnTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
                     ENFORCE(cctx.link.get() != nullptr);
                     afterNext->exprs.emplace_back(dead, a->loc, make_unique<BlockReturn>(cctx.link, exprSym));
                 }
@@ -287,8 +280,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             },
 
             [&](ast::Break *a) {
-                core::LocalVariable exprSym =
-                    cctx.ctx.state.newTemporary(core::Names::returnTemp(), cctx.inWhat.symbol);
+                core::LocalVariable exprSym = cctx.newTemporary(core::Names::returnTemp());
                 auto afterBreak = walk(cctx.withTarget(exprSym), a->expr.get(), current);
 
                 if (cctx.breakScope == nullptr) {
@@ -318,7 +310,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Rescue *a) {
                 auto rescueStartBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto unanalyzableCondition = cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
+                auto unanalyzableCondition = cctx.newTemporary(core::Names::rescueTemp());
                 rescueStartBlock->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<Unanalyzable>());
                 unconditionalJump(current, rescueStartBlock, cctx.inWhat, a->loc);
                 cctx.rescueScope = rescueStartBlock;
@@ -338,7 +330,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
 
-                auto throwAway = cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
+                auto throwAway = cctx.newTemporary(core::Names::rescueTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
                 ret = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(ensureBody, ret, cctx.inWhat, a->loc);
@@ -355,11 +347,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                     for (auto &ex : exceptions) {
                         auto loc = ex->loc;
-                        auto exceptionClass =
-                            cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
+                        auto exceptionClass = cctx.newTemporary(core::Names::rescueTemp());
                         rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex.get(), rescueHandlersBlock);
 
-                        auto isaCheck = cctx.ctx.state.newTemporary(core::Names::rescueTemp(), cctx.inWhat.symbol);
+                        auto isaCheck = cctx.newTemporary(core::Names::rescueTemp());
                         vector<core::LocalVariable> args;
                         vector<core::Loc> argLocs = {loc};
                         args.emplace_back(exceptionClass);
@@ -399,10 +390,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 vector<core::LocalVariable> vars;
                 vector<core::Loc> locs;
                 for (int i = 0; i < h->keys.size(); i++) {
-                    core::LocalVariable keyTmp =
-                        cctx.ctx.state.newTemporary(core::Names::hashTemp(), cctx.inWhat.symbol);
-                    core::LocalVariable valTmp =
-                        cctx.ctx.state.newTemporary(core::Names::hashTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable keyTmp = cctx.newTemporary(core::Names::hashTemp());
+                    core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
                     current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
                     current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
                     vars.push_back(keyTmp);
@@ -410,7 +399,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(h->keys[i]->loc);
                     locs.emplace_back(h->values[i]->loc);
                 }
-                core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = global2Local(cctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, h->loc,
                                             make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs));
                 ret = current;
@@ -420,19 +409,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 vector<core::LocalVariable> vars;
                 vector<core::Loc> locs;
                 for (auto &elem : a->elems) {
-                    core::LocalVariable tmp = cctx.ctx.state.newTemporary(core::Names::arrayTemp(), cctx.inWhat.symbol);
+                    core::LocalVariable tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
                     vars.push_back(tmp);
                     locs.emplace_back(a->loc);
                 }
-                core::LocalVariable magic = global2Local(cctx.ctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = global2Local(cctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
                 current->exprs.emplace_back(cctx.target, a->loc,
                                             make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs));
                 ret = current;
             },
 
             [&](ast::Cast *c) {
-                core::LocalVariable tmp = cctx.ctx.state.newTemporary(core::Names::castTemp(), cctx.inWhat.symbol);
+                core::LocalVariable tmp = cctx.newTemporary(core::Names::castTemp());
                 current = walk(cctx.withTarget(tmp), c->arg.get(), current);
                 current->exprs.emplace_back(cctx.target, c->loc, make_unique<Cast>(tmp, c->type, c->cast));
                 if (c->cast == core::Names::let()) {
@@ -459,6 +448,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
         }
         throw;
     }
+}
+
+core::LocalVariable CFGContext::newTemporary(core::NameRef name) {
+    return core::LocalVariable{name, ++temporaryCounter};
 }
 
 } // namespace cfg

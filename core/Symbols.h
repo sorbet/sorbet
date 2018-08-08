@@ -162,8 +162,7 @@ public:
 
     SymbolRef owner;
     Loc loc;
-    mutable u4 uniqueCounter =
-        1; // used as a counter for local variables inside CFG. not shared by design TODO: check that is actually isn't
+    u4 uniqueCounter = 1; // used as a counter inside the namer
     u4 flags = Flags::NONE;
 
     /** Type aliases are introduced by resolver and SHOULD NOT be serialized */

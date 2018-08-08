@@ -24,7 +24,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$4 = self : Bar\lb = load_arg(<selfMethodTemp>$4#baz, 0) : T.untyped\l<statTemp>$5 = self : Bar\l<block-pre-call-temp>$7 = <statTemp>$5.super(b) : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Bar\lb = load_arg(<selfMethodTemp>$3#baz, 0) : T.untyped\l<statTemp>$4 = self : Bar\l<block-pre-call-temp>$6 = <statTemp>$4.super(b) : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_2" [style="bold"];
@@ -41,12 +41,12 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_2" -> "bb::Bar#baz_3" [style="tapered"];
 
     "bb::Bar#baz_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$3 = Solve<::Bar#baz#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$3 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Bar#baz#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_3" -> "bb::Bar#baz_1" [style="bold"];
     "bb::Bar#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$8 = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$9 = 0 : Integer(0)\la$2 = <blk>$8.[](<blk>$9) : T.untyped\l<statTemp>$11 = self : Bar\l<blockReturnTemp>$10 = <statTemp>$11.puts(a$2) : NilClass\l<blockReturnTemp>$13 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$7 = load_yield_params(::Bar#baz#<block>, Bar#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$8 = 0 : Integer(0)\la$2 = <blk>$7.[](<blk>$8) : T.untyped\l<statTemp>$10 = self : Bar\l<blockReturnTemp>$9 = <statTemp>$10.puts(a$2) : NilClass\l<blockReturnTemp>$12 = blockreturn<::Bar#baz#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_4" -> "bb::Bar#baz_2" [style="bold"];
