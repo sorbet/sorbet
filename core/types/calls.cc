@@ -363,6 +363,29 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, shared_ptr<Type> tp) {
     return tp;
 }
 
+string prettyArity(Context ctx, SymbolRef method) {
+    int required = 0, optional = 0;
+    bool repeated = false;
+    for (auto arg : method.data(ctx).arguments()) {
+        if (arg.data(ctx).isKeyword() || arg.data(ctx).isBlockArgument()) {
+            // ignore
+        } else if (arg.data(ctx).isOptional()) {
+            ++optional;
+        } else if (arg.data(ctx).isRepeated()) {
+            repeated = true;
+        } else {
+            ++required;
+        }
+    }
+    if (repeated) {
+        return absl::StrCat(required, "+");
+    } else if (optional > 0) {
+        return absl::StrCat(required, "..", required + optional);
+    } else {
+        return to_string(required);
+    }
+}
+
 // This implements Ruby's argument matching logic (assigning values passed to a
 // method call to formal parameters of the method).
 //
@@ -509,9 +532,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
               pit->data(ctx).isBlockArgument())) {
             if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                 e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
-                            // TODO(nelhage): report actual counts of required arguments,
-                            // and account for keyword arguments
-                            data.arguments().size(),
+                            prettyArity(ctx, method),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
                 e.addErrorLine(method.data(ctx).loc, "`{}` defined here", data.show(ctx));
                 result.components.front().errors.emplace_back(e.build());
@@ -629,9 +650,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
             e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
-                        // TODO(nelhage): report actual counts of required arguments,
-                        // and account for keyword arguments
-                        data.arguments().size(), aend - args.begin());
+                        prettyArity(ctx, method), aend - args.begin());
             e.addErrorLine(method.data(ctx).loc, "`{}` defined here", fun.toString(ctx));
             result.components.front().errors.emplace_back(e.build());
         }
