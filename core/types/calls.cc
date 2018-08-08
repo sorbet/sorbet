@@ -185,7 +185,9 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
             auto *rt = cast_type<ClassType>(ot->right.get());
             if ((lt != nullptr && lt->symbol == Symbols::NilClass()) ||
                 (rt != nullptr && rt->symbol == Symbols::NilClass())) {
-                e.replaceWith(loc, "T.must({})", loc.source(ctx));
+                if (loc.exists()) {
+                    e.replaceWith(loc, "T.must({})", loc.source(ctx));
+                }
             }
         }
         return e.build();
@@ -581,7 +583,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
                         if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, tpe, spec,
-                                                  fullType, targs, argLocs[argLocs.size() - 1])) {
+                                                  fullType, targs, Loc::none())) {
                             result.components.front().errors.emplace_back(move(e));
                         }
                     }
@@ -607,7 +609,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 auto offset = arg - hash->keys.begin();
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, tpe, spec, fullType,
-                                          targs, argLocs[argLocs.size() - 1])) {
+                                          targs, Loc::none())) {
                     result.components.front().errors.emplace_back(move(e));
                 }
             }
