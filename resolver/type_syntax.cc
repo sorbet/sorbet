@@ -406,7 +406,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             } else if (sym.data(ctx).isStaticField()) {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", i->symbol.show(ctx));
-                    e.addErrorLine(sym.data(ctx).loc,
+                    e.addErrorLine(sym.data(ctx).loc(),
                                    "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
                 }

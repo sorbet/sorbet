@@ -372,7 +372,15 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
     if (ref(gs).isSynthetic()) {
         return true;
     }
-    return loc.file.id() < 0 || loc.file.data(gs).sourceType == File::Payload;
+    if (locs_.empty()) {
+        return true;
+    }
+    for (auto loc : locs_) {
+        if (loc.file.data(gs).sourceType == File::Payload) {
+            return true;
+        }
+    }
+    return false;
 }
 
 string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {
@@ -496,7 +504,24 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     if (this->resultType) {
         os << " -> " << this->resultType->toString(gs, tabs);
     }
-    os << " @ " << this->loc.filePosToString(gs);
+    if (!locs_.empty()) {
+        os << " @ ";
+        bool first = true;
+        if (locs_.size() > 1) {
+            os << "(";
+        }
+        for (auto &loc : locs_) {
+            if (!first) {
+                os << ", ";
+            }
+            os << loc.filePosToString(gs);
+            first = false;
+        }
+        if (locs_.size() > 1) {
+            os << ")";
+        }
+    }
+
     os << '\n';
 
     sort(children.begin(), children.end());
@@ -548,7 +573,7 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     SymbolRef selfRef = this->ref(gs);
 
     NameRef singletonName = gs.freshNameUnique(UniqueNameKind::Singleton, this->name, 1);
-    singleton = gs.enterClassSymbol(this->loc, this->owner, singletonName);
+    singleton = gs.enterClassSymbol(this->loc(), this->owner, singletonName);
     Symbol &singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
@@ -626,7 +651,7 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.argumentsOrMixins = this->argumentsOrMixins;
     result.resultType = this->resultType;
     result.name = NameRef(to, this->name.id());
-    result.loc = this->loc;
+    result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
     result.typeAliases = this->typeAliases;
 
@@ -657,7 +682,8 @@ void Symbol::sanityCheck(const GlobalState &gs) const {
     }
     SymbolRef current = this->ref(gs);
     if (current != Symbols::root()) {
-        SymbolRef current2 = const_cast<GlobalState &>(gs).enterSymbol(this->loc, this->owner, this->name, this->flags);
+        SymbolRef current2 =
+            const_cast<GlobalState &>(gs).enterSymbol(this->loc(), this->owner, this->name, this->flags);
         ENFORCE(current == current2);
     }
 }
@@ -721,6 +747,34 @@ bool Symbol::ignoreInHashing(const GlobalState &gs) const {
         return name.data(gs).kind == NameKind::UNIQUE && name.data(gs).unique.original == core::Names::staticInit();
     }
     return false;
+}
+Loc Symbol::loc() const {
+    if (!locs_.empty()) {
+        return locs_[0];
+    }
+    return Loc::none();
+}
+
+InlinedVector<Loc, 1> Symbol::locs() const {
+    return locs_;
+}
+
+void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
+    if (!loc.file.exists()) {
+        return;
+    }
+    for (auto &existing : locs_) {
+        if (existing.file == loc.file) {
+            existing = loc;
+            return;
+        }
+    }
+
+    if (loc.file.data(gs).sourceType == core::File::Type::Normal) {
+        locs_.insert(locs_.begin(), loc);
+    } else {
+        locs_.push_back(loc);
+    }
 }
 
 LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}

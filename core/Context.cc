@@ -30,9 +30,14 @@ bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
-    auto &file = owner.data(*this).loc.file.data(*this);
-    constexpr char const *whitelistedTest = "overloads_test.rb";
-    return file.isPayload() || FileOps::getFileName(file.path()) == whitelistedTest;
+    for (auto loc : owner.data(*this).locs()) {
+        auto &file = loc.file.data(*this);
+        constexpr char const *whitelistedTest = "overloads_test.rb";
+        if (file.isPayload() || FileOps::getFileName(file.path()) == whitelistedTest) {
+            return true;
+        }
+    }
+    return false;
 }
 
 bool MutableContext::permitOverloadDefinitions() const {

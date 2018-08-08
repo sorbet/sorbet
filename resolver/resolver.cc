@@ -159,7 +159,7 @@ private:
                             }
                         }
                         if (lastRun) {
-                            if (auto e = ctx.state.beginError(result.data(ctx).loc,
+                            if (auto e = ctx.state.beginError(result.data(ctx).loc(),
                                                               core::errors::Resolver::RecursiveTypeAlias)) {
                                 e.setHeader("Type alias expands to to an infinite type");
                             }
@@ -255,7 +255,7 @@ private:
                         if (!suggested.empty()) {
                             vector<core::ErrorLine> lines;
                             for (auto suggestion : suggested) {
-                                lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).loc,
+                                lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).loc(),
                                                                          "Did you mean: `{}`?",
                                                                          suggestion.symbol.data(ctx).fullName(ctx)));
                             }
@@ -454,7 +454,7 @@ public:
             if (enclosingTypeMember.exists()) {
                 if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
                     e.setHeader("Type aliases are not allowed in generic classes");
-                    e.addErrorLine(enclosingTypeMember.data(ctx).loc, "Here is enclosing generic member");
+                    e.addErrorLine(enclosingTypeMember.data(ctx).loc(), "Here is enclosing generic member");
                 }
             } else {
                 typeAliases[id->symbol] = send->args[0].get();
@@ -643,7 +643,7 @@ private:
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx).resultType = spec->type;
-                arg.data(ctx).loc = spec->loc;
+                arg.data(ctx).addLoc(ctx, spec->loc);
                 sig.argTypes.erase(spec);
                 ++it;
             } else if (isOverloaded) {
@@ -655,7 +655,7 @@ private:
                 if (sig.seen.args || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
                     if (auto e =
-                            ctx.state.beginError(arg.data(ctx).loc, core::errors::Resolver::InvalidMethodSignature)) {
+                            ctx.state.beginError(arg.data(ctx).loc(), core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
                                     arg.data(ctx).name.toString(ctx));
                     }
@@ -664,7 +664,8 @@ private:
             }
 
             if (isOverloaded && arg.data(ctx).isKeyword()) {
-                if (auto e = ctx.state.beginError(arg.data(ctx).loc, core::errors::Resolver::InvalidMethodSignature)) {
+                if (auto e =
+                        ctx.state.beginError(arg.data(ctx).loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
                                 arg.data(ctx).name.toString(ctx));
                 }
@@ -932,7 +933,7 @@ private:
         if (prior.exists()) {
             if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
                 e.setHeader("Illegal variable redeclaration");
-                e.addErrorLine(prior.data(ctx).loc, "Previous declaration is here:");
+                e.addErrorLine(prior.data(ctx).loc(), "Previous declaration is here:");
             }
             return false;
         }

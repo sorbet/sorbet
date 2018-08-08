@@ -254,10 +254,13 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             auto fref = uri2FileRef(uri);
             for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
                 core::SymbolRef ref(finalGs.get(), idx);
-                if (ref.data(*finalGs).loc.file == fref) {
-                    auto data = symbolRef2SymbolInformation(ref);
-                    if (data) {
-                        result.PushBack(move(*data), alloc);
+                for (auto definitionLocation : ref.data(*finalGs).locs()) {
+                    if (definitionLocation.file == fref) {
+                        auto data = symbolRef2SymbolInformation(ref);
+                        if (data) {
+                            result.PushBack(move(*data), alloc);
+                            break;
+                        }
                     }
                 }
             }
@@ -316,7 +319,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
         } else {
             for (auto &component : resp->dispatchComponents) {
                 if (component.method.exists()) {
-                    addLocIfExists(result, component.method.data(*finalGs).loc);
+                    addLocIfExists(result, component.method.data(*finalGs).loc());
                 }
             }
         }
@@ -753,13 +756,13 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
     auto &sym = symRef.data(*finalGs);
-    if (!sym.loc.file.exists()) {
+    if (!sym.loc().file.exists()) {
         return nullptr;
     }
     rapidjson::Value result;
     result.SetObject();
     result.AddMember("name", sym.name.show(*finalGs), alloc);
-    result.AddMember("location", loc2Location(sym.loc), alloc);
+    result.AddMember("location", loc2Location(sym.loc()), alloc);
     result.AddMember("containerName", sym.owner.data(*finalGs).fullName(*finalGs), alloc);
 
     /**

@@ -161,8 +161,11 @@ public:
     };
 
     SymbolRef owner;
-    Loc loc;
     u4 uniqueCounter = 1; // used as a counter inside the namer
+    Loc loc() const;
+    InlinedVector<Loc, 1> locs() const;
+    void addLoc(const core::GlobalState &gs, core::Loc loc);
+
     u4 flags = Flags::NONE;
 
     /** Type aliases are introduced by resolver and SHOULD NOT be serialized */
@@ -597,6 +600,7 @@ private:
      * for method - ordered type generic type arguments of the class
      */
     std::vector<SymbolRef> typeParams;
+    InlinedVector<Loc, 1> locs_;
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
                                            int maxDepth = 100) const;

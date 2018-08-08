@@ -173,7 +173,7 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
                         argSym.name.toString(ctx));
             e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.loc, "Method `{}` has specified `{}` as `{}`", method.data(ctx).show(ctx),
+                ErrorLine::from(argSym.loc(), "Method `{}` has specified `{}` as `{}`", method.data(ctx).show(ctx),
                                 argSym.name.toString(ctx), expectedType->show(ctx)),
             }));
         }
@@ -450,7 +450,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;
                     for (auto alternative : alternatives) {
-                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc, "Did you mean: `{}`?",
+                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc(), "Did you mean: `{}`?",
                                                            alternative.name.toString(ctx)));
                     }
                     e.addErrorSection(ErrorSection(lines));
@@ -536,7 +536,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
                             prettyArity(ctx, method),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
-                e.addErrorLine(method.data(ctx).loc, "`{}` defined here", data.show(ctx));
+                e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", data.show(ctx));
                 result.components.front().errors.emplace_back(e.build());
             }
         }
@@ -651,9 +651,9 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
-                        prettyArity(ctx, method), aend - args.begin());
-            e.addErrorLine(method.data(ctx).loc, "`{}` defined here", fun.toString(ctx));
+            e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
+                        prettyArity(ctx, method), args.size());
+            e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", fun.toString(ctx));
             result.components.front().errors.emplace_back(e.build());
         }
     }

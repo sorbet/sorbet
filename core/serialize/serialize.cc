@@ -1,4 +1,5 @@
 #include "core/serialize/serialize.h"
+#include "../Symbols.h"
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
@@ -421,9 +422,12 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     }
 
     pickle(p, what.resultType.get());
-    p.putU4(what.loc.file.id());
-    p.putU4(what.loc.beginPos);
-    p.putU4(what.loc.endPos);
+    p.putU4(what.locs().size());
+    for (auto &loc : what.locs()) {
+        p.putU4(loc.file.id());
+        p.putU4(loc.beginPos);
+        p.putU4(loc.endPos);
+    }
 }
 
 Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
@@ -453,10 +457,14 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
         result.members.emplace_back(name, sym);
     }
     result.resultType = unpickleType(p, gs);
-
-    result.loc.file = FileRef(p.getU4());
-    result.loc.beginPos = p.getU4();
-    result.loc.endPos = p.getU4();
+    auto locCount = p.getU4();
+    for (int i = 0; i < locCount; i++) {
+        core::Loc loc;
+        loc.file = FileRef(p.getU4());
+        loc.beginPos = p.getU4();
+        loc.endPos = p.getU4();
+        result.locs_.push_back(loc);
+    }
     return result;
 }
 

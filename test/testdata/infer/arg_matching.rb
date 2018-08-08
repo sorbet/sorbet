@@ -11,7 +11,7 @@ class TestArgs
   def call_required
     required(1) # error: Not enough arguments
     required(1, 2)
-    required(1, 2, 3) # error: Too many arguments
+    required(1, 2, 3) # error: Expected: `2`, got: `3`
   end
 
   def optional(a, b=1)
@@ -20,7 +20,7 @@ class TestArgs
   def call_optional
     optional(1)
     optional(1, 2)
-    optional(1, 2, 3) # error: Too many arguments
+    optional(1, 2, 3) # error: Expected: `1..2`, got: `3`
   end
 
   sig(

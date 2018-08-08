@@ -29,7 +29,7 @@ class Main
         double_wild(a: 1, b: 2)
         one_required(a: 1)
         one_required(1, a: 1)
-        one_required(1, 2, a: 1) # error: Too many arguments provided for method
+        one_required(1, 2, a: 1) # error: Expected: `1`, got: `3`
         one_kwarg(foo: 1)
         one_kwarg(foo: 1, a: "a")
 

@@ -213,7 +213,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                     core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
                     core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
-                    bodyBlock->exprs.emplace_back(argTemp, data.loc, make_unique<LoadYieldParams>(link, sym));
+                    bodyBlock->exprs.emplace_back(argTemp, data.loc(), make_unique<LoadYieldParams>(link, sym));
 
                     for (int i = 0; i < data.arguments().size(); ++i) {
                         auto &arg = s->block->args[i];

@@ -104,7 +104,10 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     if (data.resultType) {
         symbolProto.set_resulttype(data.resultType->show(gs));
     }
-    *symbolProto.mutable_loc() = toProto(gs, data.loc);
+
+    for (auto loc : data.locs()) {
+        *symbolProto.add_locs() = toProto(gs, loc);
+    }
 
     vector<pair<string, com::stripe::rubytyper::Symbol>> children;
     for (auto pair : data.members) {

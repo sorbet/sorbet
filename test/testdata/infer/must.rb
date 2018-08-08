@@ -6,6 +6,6 @@ def test_must
 
   T.must(x, "hi")
   T.must()  # error: Not enough arguments
-  T.must(x, "hi", 0)  # error: Too many arguments
+  T.must(x, "hi", 0)  # error: Expected: `1..2`, got: `3`
   T.must(x, :foo)  # error: `Symbol(:"foo")` doesn't match `String` for argument `error`
 end
