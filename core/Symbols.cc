@@ -716,7 +716,7 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
 
 bool Symbol::ignoreInHashing(const GlobalState &gs) const {
     if (isClass()) {
-        return derivesFrom(gs, core::Symbols::StubClass());
+        return superClass == core::Symbols::StubClass();
     } else if (isMethod()) {
         return name.data(gs).kind == NameKind::UNIQUE && name.data(gs).unique.original == core::Names::staticInit();
     }
