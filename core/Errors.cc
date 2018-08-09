@@ -139,19 +139,21 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
 // This will sometimes be bypassed in lieue of just calling build() so put your
 // logic in build() instead.
 ErrorBuilder::~ErrorBuilder() {
-    if (state != State::WillBuild) {
+    if (state == State::DidBuild) {
         return;
     }
     this->gs._error(build());
 }
 
 unique_ptr<BasicError> ErrorBuilder::build() {
-    ENFORCE(state == State::WillBuild);
+    ENFORCE(state != State::DidBuild);
+    bool silence = state == State::Unreported;
     state = State::DidBuild;
 
     unique_ptr<ComplexError> err =
         make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
     err->autocorrects = move(this->autocorrects);
+    err->isSilenced = silence;
     if (this->what == errors::Internal::InternalError) {
         err->isCritical = true;
     }

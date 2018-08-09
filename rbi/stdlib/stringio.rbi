@@ -1,7 +1,7 @@
+# typed: strict
 class StringIO
   include Enumerable
   extend T::Generic
-  Elem = type_member(:out, fixed: String)
 
   sig(
     string: String,

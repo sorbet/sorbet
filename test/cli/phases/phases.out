@@ -470,8 +470,8 @@ ClassDef{
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/stringio.rbi",
-   "sigil": "Stripe",
-   "strict": "Stripe",
+   "sigil": "Strict",
+   "strict": "Strict",
    "had_errors": false
   },
   {

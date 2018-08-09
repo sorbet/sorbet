@@ -50,6 +50,7 @@ struct BasicError {
     ErrorClass what;
     std::string formatted;
     bool isCritical;
+    bool isSilenced = false;
     std::vector<AutocorrectSuggestion> autocorrects;
 
     BasicError(Loc loc, ErrorClass what, std::string formatted);
@@ -113,9 +114,9 @@ private:
 class ErrorBuilder {
     // An ErrorBuilder can be in three states:
     //
-    //  - Unreported: This error is silenced and no error will be generated or
-    //    reported. No method is valid on an Unreported ErrorBuilder other than
-    //    `operator bool()`.
+    //  - Unreported: This error is silenced, only basic information about the error will be generated.
+    //    No method is valid on an Unreported ErrorBuilder other than
+    //    `operator bool()` and `build()`
     //
     //  - WillBuild: This error builder is live and in the process of
     //    constructing an error. This is the only state in which mutation
@@ -124,7 +125,7 @@ class ErrorBuilder {
     //  - DidBuild: This error builder has built an error. No further method
     //    calls on this object are valid.
     //
-    //  build() converts a WillBuild state into a DidBuild state, and is used by
+    //  build() converts into a DidBuild state, and is used by
     //  callers who need finer-grained control over error reporting than the
     //  default behavior of reporting on destruction.
     enum class State {

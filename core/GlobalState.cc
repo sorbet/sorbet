@@ -1056,11 +1056,16 @@ int GlobalState::totalErrors() const {
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
-    ENFORCE(shouldReportErrorOn(error->loc, error->what));
     if (error->isCritical) {
         errorQueue->hadCritical = true;
     }
-    errorQueue->pushError(*this, move(error));
+    auto loc = error->loc;
+    if (loc.file.exists()) {
+        loc.file.data(*this).hadErrors_ = true;
+    }
+    if (!error->isSilenced) {
+        errorQueue->pushError(*this, move(error));
+    }
 }
 
 bool GlobalState::hadCriticalError() const {
@@ -1079,9 +1084,6 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     bool reportForFile = shouldReportErrorOn(loc, what);
     if (reportForFile) {
         histogramAdd("error", what.code, 1);
-    }
-    if (reportForFile && loc.file.exists()) {
-        loc.file.data(*this).hadErrors_ = true;
     }
     bool report = (what == errors::Internal::InternalError) || (reportForFile && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
