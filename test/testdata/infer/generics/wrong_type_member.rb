@@ -8,8 +8,8 @@ end
 class T2
   extend T::Generic
 
-  sig(x: T1::Ty).returns(T1::Ty) # error: Expression does not have a fully-defined type
-  def f(x)
+  sig(x: T1::Ty).returns(T1::Ty)
+  def f(x) # error: Expression does not have a fully-defined type
     x
   end
 end

@@ -4,8 +4,8 @@ class Identity
 
   Ty = type_member
 
-  sig(x: Ty).returns(Ty) # error: Expression does not have a fully-defined type
-  def self.call(x)
+  sig(x: Ty).returns(Ty)
+  def self.call(x) # error: Expression does not have a fully-defined type
     x
   end
 end

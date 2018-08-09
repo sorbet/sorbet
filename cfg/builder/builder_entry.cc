@@ -33,12 +33,13 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     auto methodName = md.symbol.data(ctx).name;
 
     int i = -1;
-    for (core::SymbolRef argSym : md.symbol.data(ctx).arguments()) {
+    for (auto &argExpr : md.args) {
         i++;
-        core::LocalVariable arg(argSym.data(ctx).name, 0);
-        entry->exprs.emplace_back(arg, argSym.data(ctx).loc(), make_unique<LoadArg>(selfSym, methodName, i));
+        auto *a = ast::cast_tree<ast::Local>(argExpr.get());
+        ENFORCE(a, "Namer did not do replace arguments with locals");
+        entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, methodName, i));
         entry->exprs.back().value->isSynthetic = true;
-        aliases[argSym] = arg;
+        aliases[md.symbol.data(ctx).arguments()[i]] = a->localVariable;
     }
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn(), 0);

@@ -9,8 +9,8 @@ class Foo
     arg
   end
 
-  sig(arg: Not_A_Self_Type).returns(Not_A_Self_Type) # error: Expression does not have a fully-defined type
-  def self.invalid(arg)
+  sig(arg: Not_A_Self_Type).returns(Not_A_Self_Type)
+  def self.invalid(arg) # error: Expression does not have a fully-defined type
     arg
   end
 end

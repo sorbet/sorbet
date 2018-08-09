@@ -48,12 +48,17 @@ class NameInserter {
         return sym;
     }
 
-    core::SymbolRef arg2Symbol(core::MutableContext ctx, ast::Expression *arg) {
+    pair<core::SymbolRef, core::NameRef> arg2Symbol(core::MutableContext ctx, ast::Expression *arg, int pos) {
         auto loc = arg->loc;
         bool optional = false, keyword = false, block = false, repeated = false;
 
         while (true) {
             if (auto *nm = ast::cast_tree<ast::UnresolvedIdent>(arg)) {
+                if (pos < ctx.owner.data(ctx).arguments().size()) {
+                    core::SymbolRef sym = ctx.owner.data(ctx).arguments()[pos];
+                    // TODO: check that flags match;
+                    return make_pair(sym, nm->name);
+                }
                 core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
                 core::Symbol &data = sym.data(ctx);
                 if (optional) {
@@ -68,7 +73,7 @@ class NameInserter {
                 if (repeated) {
                     data.setRepeated();
                 }
-                return sym;
+                return make_pair(sym, nm->name);
             }
             typecase(arg,
                      [&](ast::RestArg *rest) {
@@ -277,25 +282,37 @@ public:
     void fillInArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &args) {
         bool inShadows = false;
 
+        int i = -1;
         for (auto &arg : args) {
+            i++;
             core::NameRef name;
+            core::LocalVariable localVariable;
 
             if (auto *sarg = ast::cast_tree<ast::ShadowArg>(arg.get())) {
                 auto id = ast::cast_tree<ast::UnresolvedIdent>(sarg->expr.get());
                 ENFORCE(id != nullptr);
                 name = id->name;
+                localVariable = enterLocal(ctx, name);
                 inShadows = true;
+            } else if (auto *local = ast::cast_tree<ast::Local>(arg.get())) {
+                name = local->localVariable._name;
+                localVariable = local->localVariable;
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
-                core::SymbolRef sym = arg2Symbol(ctx, arg.get());
-                ctx.owner.data(ctx).arguments().push_back(sym);
-                name = sym.data(ctx).name;
+                auto pair = arg2Symbol(ctx, arg.get(), i);
+                core::SymbolRef sym = pair.first;
+                name = pair.second;
+                localVariable = enterLocal(ctx, name);
+                if (i < ctx.owner.data(ctx).arguments().size()) {
+                    ENFORCE(ctx.owner.data(ctx).arguments()[i] == sym);
+                } else {
+                    ctx.owner.data(ctx).arguments().push_back(sym);
+                }
             }
 
-            core::LocalVariable local = enterLocal(ctx, name);
-            scopeStack.back().locals[name] = local;
+            scopeStack.back().locals[name] = localVariable;
 
-            unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, local);
+            unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
             arg.swap(localExpr);
         }
     }
@@ -432,6 +449,7 @@ public:
             if (method->loc == sym.data(ctx).loc()) {
                 // Reparsing the same file
                 method->symbol = sym;
+                fillInArgs(ctx.withOwner(method->symbol), method->args);
                 pushEnclosingArgs(move(method->args));
                 return method;
             }
@@ -470,8 +488,8 @@ public:
         }
         ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size(), method->name.toString(ctx), ": ",
                 method->args.size(), " != ", method->symbol.data(ctx).arguments().size());
-        // All this info is now in the symbol, lets not keep detritus to aide confusion.
-        method->args.clear();
+        // Not all information is unfortunately available in the symbol. Original argument names aren't.
+        // method->args.clear();
         return method;
     }
 

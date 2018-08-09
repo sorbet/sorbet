@@ -9,9 +9,9 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:11:
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    test/cli/errors/errors.rb:12:
+    12 |  def foo(arg)
+                  ^^^
 
 test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     18 |    foo("foo")
@@ -56,9 +56,9 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:11:
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    test/cli/errors/errors.rb:12:
+    12 |  def foo(arg)
+                  ^^^
 
 test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     18 |    foo("foo")
@@ -103,9 +103,9 @@ test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:11:
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    test/cli/errors/errors.rb:12:
+    12 |  def foo(arg)
+                  ^^^
 
 test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
     18 |    foo("foo")
