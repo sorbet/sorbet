@@ -331,11 +331,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
 
-                auto throwAway = cctx.newTemporary(core::Names::rescueTemp());
-                ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
-                ret = cctx.inWhat.freshBlock(cctx.loops);
-                unconditionalJump(ensureBody, ret, cctx.inWhat, a->loc);
-
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
                     auto &exceptions = rescueCase->exceptions;
@@ -382,6 +377,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                     unconditionalJump(caseBody, ensureBody, cctx.inWhat, a->loc);
                 }
+
+                auto throwAway = cctx.newTemporary(core::Names::rescueTemp());
+                ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
+                ret = cctx.inWhat.freshBlock(cctx.loops);
+                unconditionalJump(ensureBody, ret, cctx.inWhat, a->loc);
 
                 // None of the handlers were taken
                 jumpToDead(rescueHandlersBlock, cctx.inWhat, a->loc);

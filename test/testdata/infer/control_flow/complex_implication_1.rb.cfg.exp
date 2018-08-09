@@ -6,11 +6,11 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : T.untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : T.untyped\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=0]()\l<constant:StandardError>$7 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : T.untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : T.untyped\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
-    "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_7" [style="tapered"];
+    "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_9" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_1" [
         label = "block[id=1]()\l<unconditional>\l"
@@ -18,24 +18,24 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3](<rescueTemp$5, <constant:StandardError>$8, final_attempt, foo)\l<rescueTemp$9 = <rescueTemp$5.is_a?(<constant:StandardError>$8) : T.untyped\l<rescueTemp$9\l"
+        label = "block[id=3](<rescueTemp$5, <constant:StandardError>$7, final_attempt, foo)\l<rescueTemp$8 = <rescueTemp$5.is_a?(<constant:StandardError>$7) : T.untyped\l<rescueTemp$8\l"
     ];
 
-    "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_8" [style="bold"];
+    "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_7" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_1" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_7" [
-        label = "block[id=7](err, final_attempt, foo)\lis_successful = err.nil?() : TrueClass | FalseClass\lis_successful\l"
+        label = "block[id=7](<rescueTemp$5, final_attempt, foo)\le = <rescueTemp$5 : StandardError\lerr = e : StandardError\l<unconditional>\l"
     ];
 
-    "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_10" [style="bold"];
-    "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_11" [style="tapered"];
-
-    "bb::ModuleMethods#instrumented_request_8" [
-        label = "block[id=8](<rescueTemp$5, final_attempt, foo)\le = <rescueTemp$5 : StandardError\lerr = e : StandardError\l<unconditional>\l"
+    "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_9" [style="bold"];
+    "bb::ModuleMethods#instrumented_request_9" [
+        label = "block[id=9](err, final_attempt, foo)\lis_successful = err.nil?() : TrueClass | FalseClass\lis_successful\l"
     ];
 
-    "bb::ModuleMethods#instrumented_request_8" -> "bb::ModuleMethods#instrumented_request_7" [style="bold"];
+    "bb::ModuleMethods#instrumented_request_9" -> "bb::ModuleMethods#instrumented_request_10" [style="bold"];
+    "bb::ModuleMethods#instrumented_request_9" -> "bb::ModuleMethods#instrumented_request_11" [style="tapered"];
+
     "bb::ModuleMethods#instrumented_request_10" [
         label = "block[id=10](err, foo, is_successful)\l||$2 = is_successful : TrueClass\l||$2\l"
     ];

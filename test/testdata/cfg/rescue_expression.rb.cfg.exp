@@ -18,27 +18,27 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<rescueTemp$4, <constant:MyException>$8)\l<statTemp>$11 = <constant:MyException>$8.new() : MyException\l<rescueTemp$10 = <statTemp>$11.class() : <Class:MyException>\l<rescueTemp$13 = <rescueTemp$4.is_a?(<rescueTemp$10) : T.untyped\l<rescueTemp$13\l"
+        label = "block[id=3](<rescueTemp$4, <constant:MyException>$8)\l<statTemp>$10 = <constant:MyException>$8.new() : MyException\l<rescueTemp$9 = <statTemp>$10.class() : <Class:MyException>\l<rescueTemp$12 = <rescueTemp$4.is_a?(<rescueTemp$9) : T.untyped\l<rescueTemp$12\l"
     ];
 
-    "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
+    "bb::Object#foo_3" -> "bb::Object#foo_7" [style="bold"];
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="tapered"];
 
     "bb::Object#foo_4" [
         label = "block[id=4](<constant:MyException>$8)\l<statTemp>$5 = self : Object\l<statTemp>$6 = <constant:MyException>$8.new() : MyException\l<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : <impossible>\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_4" -> "bb::Object#foo_7" [style="bold"];
+    "bb::Object#foo_4" -> "bb::Object#foo_9" [style="bold"];
     "bb::Object#foo_7" [
-        label = "block[id=7](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=7](<rescueTemp$4)\l<returnMethodTemp>$2 = 3 : Integer(3)\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];
-    "bb::Object#foo_8" [
-        label = "block[id=8](<rescueTemp$4)\l<returnMethodTemp>$2 = 3 : Integer(3)\l<unconditional>\l"
+    "bb::Object#foo_7" -> "bb::Object#foo_9" [style="bold"];
+    "bb::Object#foo_9" [
+        label = "block[id=9](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
-    "bb::Object#foo_8" -> "bb::Object#foo_7" [style="bold"];
+    "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
 }
 
 subgraph "cluster_#<static-init>" {
