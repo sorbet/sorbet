@@ -20,5 +20,6 @@ class ::<root> < ::Object () @ (test/testdata/resolver/class_instance_vars.rb:2,
     method ::Parent#hi () @ test/testdata/resolver/class_instance_vars.rb:9
     method ::Parent#initialize () @ test/testdata/resolver/class_instance_vars.rb:3
     static-field ::Parent#@@class_var -> String @ test/testdata/resolver/class_instance_vars.rb:7
+  method #<static-init> () @ test/testdata/resolver/class_instance_vars.rb:2
   static-field #Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/class_instance_vars.rb:35
 

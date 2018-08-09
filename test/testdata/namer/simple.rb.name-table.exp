@@ -23,4 +23,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/simple.rb:2, https://git.cor
     method ::NormalClass#normal_method () @ test/testdata/namer/simple.rb:3
   class ::OtherMixin (<constant:BasicObject>) @ test/testdata/namer/simple.rb:24
   class ::Parent < ::Object () @ test/testdata/namer/simple.rb:20
+  method #<static-init> () @ test/testdata/namer/simple.rb:26
 

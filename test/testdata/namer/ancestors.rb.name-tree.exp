@@ -9,11 +9,34 @@ begin
     <emptyTree>
 
     <emptyTree>
+
+    def self.<static-init><<static-init>$73>()
+      begin
+        ::RubyTyper.keep_for_ide(::Parent)
+        <emptyTree>
+      end
+    end
   end
   module <emptyTree>::<constant:Mixin1><<constant:Mixin1>> < ()  end
   module <emptyTree>::<constant:Mixin2><<constant:Mixin2>> < ()  end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>, ::Mixin1)  end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin2)  end
-  class <emptyTree>::<constant:MultipleInclude><<constant:MultipleInclude>> < (::<todo sym>, ::Mixin1, ::Mixin2)  end
+  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>, ::Mixin1)
+    def self.<static-init><<static-init>>()
+      ::RubyTyper.keep_for_ide(::Mixin1)
+    end
+  end
+  class <emptyTree>::<constant:MultipleInclude><<constant:MultipleInclude>> < (::<todo sym>, ::Mixin1, ::Mixin2)
+    def self.<static-init><<static-init>>()
+      begin
+        ::RubyTyper.keep_for_ide(::Mixin1)
+        ::RubyTyper.keep_for_ide(::Mixin2)
+        <emptyTree>
+      end
+    end
+  end
+  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin2)
+    def self.<static-init><<static-init>>()
+      ::RubyTyper.keep_for_ide(::Mixin2)
+    end
+  end
   <emptyTree>
 end

@@ -270,6 +270,11 @@ public:
     static std::unique_ptr<Expression> Nilable(core::Loc loc, std::unique_ptr<Expression> arg) {
         return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::nilable(), move(arg));
     }
+
+    static std::unique_ptr<Expression> KeepForIDE(std::unique_ptr<Expression> arg) {
+        auto loc = core::Loc::none(arg->loc.file);
+        return Send1(loc, Ident(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), move(arg));
+    }
 };
 
 } // namespace ast

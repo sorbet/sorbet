@@ -13,6 +13,13 @@ begin
     <emptyTree>
 
     <emptyTree>
+
+    def self.<static-init><<static-init>$73>()
+      begin
+        ::RubyTyper.keep_for_ide(::Parent)
+        <emptyTree>
+      end
+    end
   end
   class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<todo sym>)
     <emptyTree>
@@ -49,6 +56,7 @@ begin
           <emptyTree>
         end
         self(<singleton class:<constant:Child>>).whatever().include(::OtherMixin)
+        ::RubyTyper.keep_for_ide(::Mixin)
         <emptyTree>
       end
     end

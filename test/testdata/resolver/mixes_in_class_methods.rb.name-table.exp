@@ -25,5 +25,6 @@ class ::<root> < ::Object () @ (test/testdata/resolver/mixes_in_class_methods.rb
       method ::Mixin::ClassMethods#mixin_class_method () @ test/testdata/resolver/mixes_in_class_methods.rb:6
     method ::Mixin#mixin_method () @ test/testdata/resolver/mixes_in_class_methods.rb:12
   class ::Test < ::Object (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+    method ::Test#<static-init> () @ ???
   method #<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:2
 

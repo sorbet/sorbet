@@ -1,4 +1,22 @@
 digraph "transitive.rb" {
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
+    color = blue;
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
+
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<constant:RubyTyper>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:A>$8 = alias <constant:A> : <Class:A>\l<statTemp>$4 = <constant:RubyTyper>$6.keep_for_ide(<constant:A>$8) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::A#foo" {
     label = "::A#foo";
     color = blue;

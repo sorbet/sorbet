@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -230,6 +231,13 @@ public:
         return true;
     }
 
+    // This decides if we need to keep a node around incase the current LSP query needs type information for it
+    bool shouldLeaveAncestorForIDE(const unique_ptr<ast::Expression> &anc) {
+        // used in Desugar <-> resolver to signal classes that did not have explicit superclass
+        return !ast::isa_tree<ast::EmptyTree>(anc.get()) && !ast::isa_tree<ast::Self>(anc.get()) &&
+               !ast::isa_tree<ast::Ident>(anc.get());
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         scopeStack.pop_back();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
@@ -243,6 +251,19 @@ public:
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
         klass->rhs.erase(toRemove, klass->rhs.end());
+
+        if (!klass->ancestors.empty()) {
+            /* Superclass is resolved in parent scope, mixins are resolved in inner scope */
+            for (auto &anc : klass->ancestors) {
+                if (shouldLeaveAncestorForIDE(anc) && (klass->kind == ast::Module || anc != klass->ancestors.front())) {
+                    klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
+                }
+            }
+            if (klass->kind == ast::Class && shouldLeaveAncestorForIDE(klass->ancestors.front())) {
+                return ast::MK::InsSeq1(klass->loc, ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()),
+                                        move(klass));
+            }
+        }
         return klass;
     }
 

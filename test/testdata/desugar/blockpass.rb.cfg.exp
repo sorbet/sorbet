@@ -345,7 +345,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4 = self : <Class:<root>>\l<block-pre-call-temp>$5 = <statTemp>$4.foo() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:RubyTyper>$7 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:CallsWithObject>$9 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<statTemp>$5 = <constant:RubyTyper>$7.keep_for_ide(<constant:CallsWithObject>$9) : T.untyped\l<statTemp>$11 = self : <Class:<root>>\l<block-pre-call-temp>$12 = <statTemp>$11.foo() : T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
@@ -362,12 +362,12 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
 
     "bb#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Object#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$10 = Solve<::Object#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$6 = load_yield_params(::Object#<block>, Object#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$7 = 0 : Integer(0)\lx$17 = <blk>$6.[](<blk>$7) : T.untyped\l<blockReturnTemp>$8 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$9 = blockreturn<::Object#<block>> <blockReturnTemp>$8 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$13 = load_yield_params(::Object#<block>, Object#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$14 = 0 : Integer(0)\lx$17 = <blk>$13.[](<blk>$14) : T.untyped\l<blockReturnTemp>$15 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$16 = blockreturn<::Object#<block>> <blockReturnTemp>$15 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];

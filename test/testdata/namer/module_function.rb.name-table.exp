@@ -5,6 +5,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/module_function.rb:2, https:
     method ::<Class:Funcs>#g () -> AliasType { symbol = ::Funcs#g } @ test/testdata/namer/module_function.rb:11
     method ::<Class:Funcs>#h () -> AliasType { symbol = ::Funcs#h } @ test/testdata/namer/module_function.rb:16
   class ::C < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:19
+    method ::C#<static-init> () @ ???
     method ::C#test_calls () @ test/testdata/namer/module_function.rb:22
   class ::Funcs (<constant:BasicObject>) @ test/testdata/namer/module_function.rb:2
     method ::Funcs#<static-init> () @ test/testdata/namer/module_function.rb:2

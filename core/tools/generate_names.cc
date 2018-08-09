@@ -235,6 +235,7 @@ NameDef names[] = {
     {"arg2", Core},
     {"opts", DSL},
     {"Struct", DSL},
+    {"keepForIde", "keep_for_ide", Core},
 
     {"is_a_p", "is_a?", Infer | CFG},
     {"kind_of", "kind_of?", Infer},
