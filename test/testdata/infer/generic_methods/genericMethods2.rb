@@ -1,10 +1,12 @@
 # typed: strict
 class Foo
+  extend T::Helpers
+
   type_parameters(:A).sig(
       blk: T.proc(arg0: Integer).returns(T.type_parameter(:A)),
   )
   .returns(T::Array[T.type_parameter(:A)])
-  def map(&blk); 
+  def map(&blk);
     [blk.call(1)]
   end
 end

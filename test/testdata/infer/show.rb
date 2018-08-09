@@ -11,6 +11,8 @@ module B
 end
 
 class Main
+    extend T::Helpers
+
     sig(a: Integer).returns(NilClass)
     def int(a)
         nil

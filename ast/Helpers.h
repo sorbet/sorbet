@@ -231,12 +231,12 @@ public:
 
     static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
                                            std::unique_ptr<Expression> ret) {
-        auto sig = Send1(loc, Self(loc), core::Names::sig(), move(hash));
+        auto sig = Send1(loc, Self(loc), core::Names::dslSig(), move(hash));
         return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
-        auto sig = Send0(loc, Self(loc), core::Names::sig());
+        auto sig = Send0(loc, Self(loc), core::Names::dslSig());
         return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 

@@ -1,6 +1,8 @@
 # typed: strict
 
 class TestSelf
+  extend T::Helpers
+
   sig(s: self)
   .returns(self)
   def good1(s)

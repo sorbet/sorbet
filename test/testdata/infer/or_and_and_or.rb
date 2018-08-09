@@ -2,6 +2,7 @@
 module Fake
 end
 class Test
+  extend T::Helpers
 
   sig.returns(T.untyped)
   def untyped

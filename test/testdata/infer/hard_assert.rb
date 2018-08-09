@@ -1,6 +1,8 @@
 # typed: strict
 
 class Main
+    extend T::Helpers
+
     sig(a: T.any(Integer, String)).returns(NilClass)
     def basic(a)
         hard_assert(a.is_a?(String))

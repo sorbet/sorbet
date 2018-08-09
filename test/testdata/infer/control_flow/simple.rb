@@ -1,5 +1,6 @@
 # typed: strict
 class ControlFlow
+  extend T::Helpers
 
   sig(a: T.any(Integer, NilClass)).returns(Integer)
   def orZero0(a)

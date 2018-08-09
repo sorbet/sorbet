@@ -1,6 +1,8 @@
 # typed: strict
 
 class A
+    extend T::Helpers
+
     abstract!
     sig.abstract.void
     def abstract

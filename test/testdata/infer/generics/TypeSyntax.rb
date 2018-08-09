@@ -1,6 +1,8 @@
 # typed: strict
 
 class Generics
+ extend T::Helpers
+
  sig(arr: T::Array[String]).returns(T.nilable(String))
  def read(arr)
    T.assert_type!(arr[0], T.nilable(String))

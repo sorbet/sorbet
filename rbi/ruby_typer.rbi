@@ -6,7 +6,7 @@ class Struct
       arg0: T.any(Symbol, String),
       arg1: T.any(Symbol, String),
   )
-  .returns(RubyTyper::DynamicStruct.singleton_class)
+  .returns(T.class_of(RubyTyper::DynamicStruct))
   def self.new(arg0, *arg1); end
 end
 

@@ -1,10 +1,12 @@
 # typed: true
+extend T::Helpers
+
 sig(
   source: T.any(Integer, String, NilClass)
 )
 .returns(T.nilable(String))
 def m1(source:)
-  if source.is_a?(Integer)         
+  if source.is_a?(Integer)
     nil
   else
     source
@@ -17,7 +19,7 @@ sig(
 )
 .returns(T.nilable(String))
 def m2(source:)
-  if source.is_a?(Enumerable)         
+  if source.is_a?(Enumerable)
     nil
   else
     source
@@ -29,7 +31,7 @@ sig(
 )
 .returns(T.nilable(String))
 def m3(source:)
- if source.is_a?(Enumerable)         
+ if source.is_a?(Enumerable)
    nil
  else
    source

@@ -15,19 +15,17 @@ class A
     g: T::Hash[T1, T2],
     h: T.enum([false, 1, 3.14, "foo", :bar]),
     i: A1,
-    j: T1.singleton_class,
-    k: A1.singleton_class,
-    l: T.class_of(T1),
-    m: T.class_of(A1),
-    n: T.class_of(M1),
-    o: {
+    j: T.class_of(T1),
+    k: T.class_of(A1),
+    l: T.class_of(M1),
+    m: {
       foo: String,
       bar: T.nilable(Integer),
     },
-    p: {},
-    q: {"hi" => String, :bye => String},
+    n: {},
+    o: {"hi" => String, :bye => String},
   )
   .returns(T2)
-  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q)
+  def good(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)
   end
 end

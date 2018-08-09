@@ -1,5 +1,34 @@
 class A
+  extend T::Helpers
+
   sig(x: T.any(String, Integer), y: Integer).returns(Integer)
+  # dead=1
+  # <constant:Integer>$14: <Class:Integer>
+  #
+  # <constant:String>$12: <Class:String>
+  #
+  # <constant:T>$10: <Class:T>
+  #
+  # <constant:<Magic>>$17: <Magic>
+  #
+  # <statTemp>$5: <Class:A>
+  #
+  # <hashTemp>$7: Symbol(:"x")
+  #
+  # <hashTemp>$8: MetaType
+  #
+  # <hashTemp>$15: Symbol(:"y")
+  #
+  # <statTemp>$6: ShapeType {
+  #   Symbol(:"x") => MetaType
+  #   Symbol(:"y") => <Class:Integer>
+  # }
+  #
+  # <statTemp>$4: T.untyped
+  #
+  # <returnMethodTemp>$2: T.untyped
+  #
+  # <finalReturn>: <impossible>
   def a_method(x, y)
     if x.is_a?(String)
        # <constant:String>$8: <Class:String>

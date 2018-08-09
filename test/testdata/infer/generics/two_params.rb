@@ -15,6 +15,8 @@ class MyProc1
 end
 
 class UseProc1
+  extend T::Helpers
+
   sig.returns(NilClass)
   def callit
     p = MyProc1[String, Integer].new

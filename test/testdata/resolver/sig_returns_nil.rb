@@ -1,5 +1,7 @@
 # typed: strict
 class Main
+    extend T::Helpers
+
     sig.returns(nil) # error: You probably meant .returns(NilClass)
     def returns_nil; end
 

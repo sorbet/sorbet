@@ -1,5 +1,7 @@
 # typed: strict
 class Test
+  extend T::Helpers
+
   sig(failures: T::Array[T::Hash[String, String]])
   .returns(T.nilable(String))
   def message(failures)

@@ -1,5 +1,7 @@
 # typed: strict
 module Mod
+  extend T::Generic
+
   A = type_member
    sig(
       blk: T.proc(a: A).returns(A),
@@ -10,6 +12,7 @@ module Mod
 end
 
 class Baz
+  extend T::Generic
   include Mod
   B = type_member
   C = type_member

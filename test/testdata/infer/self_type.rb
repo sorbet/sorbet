@@ -1,5 +1,7 @@
 # typed: true
 class Parent
+  extend T::Helpers
+
   sig.returns(T.self_type)
   def returns_self
     self

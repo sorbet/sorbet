@@ -1,5 +1,7 @@
 # typed: strict
 module Funcs
+  extend T::Helpers
+
   sig(x: Integer).returns(Integer)
   def f(x); x; end
 

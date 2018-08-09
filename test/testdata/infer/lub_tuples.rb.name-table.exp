@@ -10,6 +10,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
                 0 = TrueClass | FalseClass
                 1 = String | NilClass
               } @ test/testdata/infer/lub_tuples.rb:6
+          method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#<static-init> () @ test/testdata/infer/lub_tuples.rb:12
           method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#cond () @ test/testdata/infer/lub_tuples.rb:10
           method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#determined_build_group_status_and_which : private () -> TupleType {
             0 = TrueClass | FalseClass

@@ -14,3 +14,15 @@ module B; end
 T.reveal_type(T::Array[T.all(A, B)].new) # error: type: `T::Array[T.all(A, B)]`
 
 T.reveal_type(T::Array[T.untyped].new) # error: type: `T::Array[T.untyped]`
+
+T.assert_type!(
+  T::Array[[T::Array[Integer], T::Array[Integer]]].new,
+  T::Array[[T::Array[Integer], T::Array[Integer]]])
+
+class C; end
+
+extend T::Helpers
+sig.returns(T::Array[T.class_of(C)])
+def f
+  [C]
+end

@@ -1,5 +1,7 @@
 # typed: strict
 class TestNext
+  extend T::Helpers
+
   def _; end
   def done?; end
 

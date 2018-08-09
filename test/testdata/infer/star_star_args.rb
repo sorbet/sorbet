@@ -1,6 +1,8 @@
 # typed: strict
 
 class Main
+    extend T::Helpers
+
     def wild(*args)
     end
 

@@ -1,5 +1,7 @@
 # typed: strict
 class A
+  extend T::Helpers
+
   sig(s: T.nilable(String)).returns(NilClass)
   def test_return(s)
     if s.nil?

@@ -1,6 +1,14 @@
 class <emptyTree>::<constant:TestSig><<constant:TestSig>> < (::<todo sym>)
+  <emptyTree>
+
+  <emptyTree>
+
   def test_resolve<test_resolve>()
     <emptyTree>
+  end
+
+  def self.<static-init><<static-init>>()
+    self(<singleton class:<constant:TestSig>>).sig().returns(#T2)
   end
 end
 begin

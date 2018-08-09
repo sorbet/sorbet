@@ -14,6 +14,8 @@ class NotAODM
 end
 
 class SomeODM
+    extend T::Helpers
+
     prop :foo, String
 
     sig.returns(T.nilable(String))

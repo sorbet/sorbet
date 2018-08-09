@@ -1,6 +1,7 @@
 # typed: strict
 
 class Test
+  extend T::Helpers
 
   # Simplest test case: We can remember that an `Object` variable is
   # known to be truthy

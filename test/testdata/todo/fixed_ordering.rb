@@ -1,6 +1,8 @@
 # typed: strict
 
 class C
+  extend T::Helpers
+
   sig(f: Fixed).returns(NilClass)
   def test_it(f)
     # TODO(RUBYPLAT-520): This should pass, but because Fixed is

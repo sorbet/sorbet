@@ -3,22 +3,27 @@ class T1; end
 class T2; end
 
 class A
+  extend T::Helpers
+
+  def self.unsupported; end
+
   sig(
     a: unsupported, # error: Unknown type syntax
-    b: T.enum, # error: enum only takes a single argument
+    b: T.enum, # error: Not enough arguments provided for method `T.enum`. Expected: `1`, got: `0`
     c: T.enum(1),
     d: T.enum([]), # error: enum([]) is invalid
-    e: T.enum([meth]), # error: Unsupported type literal
+    e: T.enum([unsupported]), # error: Unsupported type literal
     f: 0, # error: Unsupported type syntax
     g: T.any(*[1,2]), # error: Splats are unsupported by the static checker
-    h: T.junk, # error: Unsupported method `T.junk`
-    i: T.class_of(T1, T2), # error: class_of only takes a single argument
+    h: T.junk, # error: MULTI
+               # ^ "method does not exist", and "unsupported syntax"
+    i: T.class_of(T1, T2), # error: Too many arguments provided for method `T.class_of`
     j: T.class_of(T.nilable(Integer)), # error: T.class_of needs a Class as its argument
     k: T.class_of(1), # error: T.class_of needs a Class as its argument
     l: {[] => String}, # error: Shape keys must be literals
     m: {foo: 0}, # error: Unsupported type syntax
-    n: T.all, # error: needs one or more type arguments
-    o: T.any, # error: needs one or more type arguments
+    n: T.all, # error: Not enough arguments provided for method
+    o: T.any, # error: Not enough arguments provided for method
   )
   .returns(T2)
   def bad(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o)

@@ -1,4 +1,5 @@
 # typed: strict
+extend T::Helpers
 
 sig(foo: T::Hash[Symbol, Integer]).void
 def test_enumeration(foo)

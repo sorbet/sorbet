@@ -5,6 +5,8 @@ end
 class A < S
 end
 
+extend T::Helpers
+
 sig(a: Class).void
 def simple(a)
   if a < A

@@ -1,5 +1,7 @@
 # typed: strict
 class TestAttr
+  extend T::Helpers
+
   def initialize
     @v1 = T.let(0, Integer)
     @v2 = T.let("", String)

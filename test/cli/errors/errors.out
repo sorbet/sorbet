@@ -2,140 +2,140 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
-    12 |    raise arg # raise is defined by stdlib
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+    14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:9:
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11:
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
 
-test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
-    16 |    foo("foo")
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+    18 |    foo("foo")
             ^^^^^^^^^^
-    test/cli/errors/errors.rb:9: Method `ComplexError#foo` has specified `arg` as `Integer`
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
   Got String("foo") originating from:
-    test/cli/errors/errors.rb:16:
-    16 |    foo("foo")
+    test/cli/errors/errors.rb:18:
+    18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
-    28 |    bar(a)
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+    32 |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:31: Method `ErrorLines#bar` has specified `a` as `Integer`
-    31 |  sig(a: Integer).returns(Integer)
+    test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
+    35 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:21:
-    21 |  def main(foo)
+    test/cli/errors/errors.rb:25:
+    25 |  def main(foo)
           ^^^^^^^^^^^^^
-    test/cli/errors/errors.rb:24:
-    24 |          nil
+    test/cli/errors/errors.rb:28:
+    28 |          nil
                   ^^^
-    test/cli/errors/errors.rb:26:
-    26 |          2
+    test/cli/errors/errors.rb:30:
+    30 |          2
                   ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
-    28 |    bar(a)
+    test/cli/errors/errors.rb:32: Replace with `T.must(a)`
+    32 |    bar(a)
                 ^
 Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
-    12 |    raise arg # raise is defined by stdlib
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+    14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:9:
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11:
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
 
-test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
-    16 |    foo("foo")
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+    18 |    foo("foo")
             ^^^^^^^^^^
-    test/cli/errors/errors.rb:9: Method `ComplexError#foo` has specified `arg` as `Integer`
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
   Got String("foo") originating from:
-    test/cli/errors/errors.rb:16:
-    16 |    foo("foo")
+    test/cli/errors/errors.rb:18:
+    18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
-    28 |    bar(a)
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+    32 |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:31: Method `ErrorLines#bar` has specified `a` as `Integer`
-    31 |  sig(a: Integer).returns(Integer)
+    test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
+    35 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:21:
-    21 |  def main(foo)
+    test/cli/errors/errors.rb:25:
+    25 |  def main(foo)
           ^^^^^^^^^^^^^
-    test/cli/errors/errors.rb:24:
-    24 |          nil
+    test/cli/errors/errors.rb:28:
+    28 |          nil
                   ^^^
-    test/cli/errors/errors.rb:26:
-    26 |          2
+    test/cli/errors/errors.rb:30:
+    30 |          2
                   ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
-    28 |    bar(a)
+    test/cli/errors/errors.rb:32: Replace with `T.must(a)`
+    32 |    bar(a)
                 ^
 Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
 
-test/cli/errors/errors.rb:12: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
-    12 |    raise arg # raise is defined by stdlib
+test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
+    14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
      579 |      arg0: String,
                 ^^^^^
   Got Integer originating from:
-    test/cli/errors/errors.rb:9:
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11:
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
 
-test/cli/errors/errors.rb:16: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
-    16 |    foo("foo")
+test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argument `arg` http://go/e/7002
+    18 |    foo("foo")
             ^^^^^^^^^^
-    test/cli/errors/errors.rb:9: Method `ComplexError#foo` has specified `arg` as `Integer`
-     9 |  sig(arg: Integer).returns(NilClass)
+    test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
+    11 |  sig(arg: Integer).returns(NilClass)
               ^^^^
   Got String("foo") originating from:
-    test/cli/errors/errors.rb:16:
-    16 |    foo("foo")
+    test/cli/errors/errors.rb:18:
+    18 |    foo("foo")
                 ^^^^^
 
-test/cli/errors/errors.rb:28: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
-    28 |    bar(a)
+test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for argument `a` http://go/e/7002
+    32 |    bar(a)
             ^^^^^^
-    test/cli/errors/errors.rb:31: Method `ErrorLines#bar` has specified `a` as `Integer`
-    31 |  sig(a: Integer).returns(Integer)
+    test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
+    35 |  sig(a: Integer).returns(Integer)
               ^^
   Got T.nilable(Integer) originating from:
-    test/cli/errors/errors.rb:21:
-    21 |  def main(foo)
+    test/cli/errors/errors.rb:25:
+    25 |  def main(foo)
           ^^^^^^^^^^^^^
-    test/cli/errors/errors.rb:24:
-    24 |          nil
+    test/cli/errors/errors.rb:28:
+    28 |          nil
                   ^^^
-    test/cli/errors/errors.rb:26:
-    26 |          2
+    test/cli/errors/errors.rb:30:
+    30 |          2
                   ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/errors/errors.rb:28: Replace with `T.must(a)`
-    28 |    bar(a)
+    test/cli/errors/errors.rb:32: Replace with `T.must(a)`
+    32 |    bar(a)
                 ^
 Errors: 4

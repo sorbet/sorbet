@@ -17,5 +17,23 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
+subgraph "cluster_::A#<static-init>" {
+    label = "::A#<static-init>";
+    color = blue;
+    "bb::A#<static-init>_0" [shape = invhouse];
+    "bb::A#<static-init>_1" [shape = parallelogram];
+
+    "bb::A#<static-init>_0" [
+        label = "block[id=0]()\l<constant:<Magic>>$10 = alias <constant:<Magic>> : <Magic>\l<constant:Time>$9 = alias <constant:Time> : <Class:Time>\l<statTemp>$5 = self : <Class:A>\l<hashTemp>$7 = :\"t\" : Symbol(:\"t\")\l<statTemp>$6 = <constant:<Magic>>$10.<build-hash>(<hashTemp>$7, <constant:Time>$9) : ShapeType {\l  Symbol(:\"t\") => <Class:Time>\l}\l<statTemp>$4 = <statTemp>$5.sig(<statTemp>$6) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$4.returns(<constant:Time>$9) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_0" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_1" -> "bb::A#<static-init>_1" [style="bold"];
+}
+
 }
 

@@ -24,6 +24,8 @@ class Box
 end
 
 class BoxChild < Box
+  extend T::Generic
+
   A = type_member
 
   sig(v: A).returns(A)
@@ -34,6 +36,8 @@ class BoxChild < Box
 end
 
 class Generics0
+   extend T::Helpers
+
    sig().returns(NilClass)
    def create()
      s = Box[String].new

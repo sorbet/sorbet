@@ -1,51 +1,52 @@
 class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::<Class:TestProc> < ::<Class:Object> () @ test/testdata/resolver/proc.rb:3
+  class ::<Class:TestProc> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/proc.rb:3
   class ::TestProc < ::Object () @ test/testdata/resolver/proc.rb:3
-    method ::TestProc#bad (x, y, z, w) -> NilClass @ test/testdata/resolver/proc.rb:22
+    method ::TestProc#<static-init> () @ test/testdata/resolver/proc.rb:3
+    method ::TestProc#bad (x, y, z, w) -> NilClass @ test/testdata/resolver/proc.rb:24
       argument ::TestProc#bad#w<> -> AppliedType {
         klass = ::Proc1
         targs = [
           <constant:Return> = T.untyped
           <constant:Arg0> = T.untyped
         ]
-      } @ test/testdata/resolver/proc.rb:20
+      } @ test/testdata/resolver/proc.rb:22
       argument ::TestProc#bad#x<> -> AppliedType {
         klass = ::Proc0
         targs = [
           <constant:Return> = T.untyped
         ]
-      } @ test/testdata/resolver/proc.rb:17
+      } @ test/testdata/resolver/proc.rb:19
       argument ::TestProc#bad#y<> -> AppliedType {
         klass = ::Proc0
         targs = [
           <constant:Return> = Integer
         ]
-      } @ test/testdata/resolver/proc.rb:18
+      } @ test/testdata/resolver/proc.rb:20
       argument ::TestProc#bad#z<> -> AppliedType {
         klass = ::Proc1
         targs = [
           <constant:Return> = T.untyped
           <constant:Arg0> = Integer
         ]
-      } @ test/testdata/resolver/proc.rb:19
-    method ::TestProc#foo () -> Integer @ test/testdata/resolver/proc.rb:26
-    method ::TestProc#foo1 (x) -> Integer @ test/testdata/resolver/proc.rb:31
+      } @ test/testdata/resolver/proc.rb:21
+    method ::TestProc#foo () -> Integer @ test/testdata/resolver/proc.rb:28
+    method ::TestProc#foo1 (x) -> Integer @ test/testdata/resolver/proc.rb:33
       argument ::TestProc#foo1#x<> -> AppliedType {
         klass = ::Proc1
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
         ]
-      } @ test/testdata/resolver/proc.rb:29
-    method ::TestProc#good1 (blk) -> Integer @ test/testdata/resolver/proc.rb:6
+      } @ test/testdata/resolver/proc.rb:31
+    method ::TestProc#good1 (blk) -> Integer @ test/testdata/resolver/proc.rb:8
       argument ::TestProc#good1#blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
           <constant:Return> = Integer
           <constant:Arg0> = Integer
         ]
-      } @ test/testdata/resolver/proc.rb:4
-    method ::TestProc#good2 (blk) -> Integer @ test/testdata/resolver/proc.rb:12
+      } @ test/testdata/resolver/proc.rb:6
+    method ::TestProc#good2 (blk) -> Integer @ test/testdata/resolver/proc.rb:14
       argument ::TestProc#good2#blk<block> -> AppliedType {
         klass = ::Proc1
         targs = [
@@ -62,5 +63,5 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
               ]
             }
         ]
-      } @ test/testdata/resolver/proc.rb:10
+      } @ test/testdata/resolver/proc.rb:12
 

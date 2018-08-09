@@ -2,10 +2,14 @@
 require_relative '../../t'
 
 class PreChild < Parent
+  extend T::Generic
+
   Elem = type_member(fixed: String)
 end
 
 class Parent
+  extend T::Generic
+
   Elem = type_member
 
   sig(a: Elem).returns(Elem)
@@ -15,6 +19,7 @@ class Parent
 end
 
 class Child < Parent
+  extend T::Generic
   Elem = type_member(fixed: String)
 
   def use_foo
@@ -23,6 +28,7 @@ class Child < Parent
 end
 
 module Mixin
+  extend T::Generic
   Elem = type_member
 
   sig(a: Elem).returns(Elem)
@@ -32,6 +38,7 @@ module Mixin
 end
 
 class WithMixin
+  extend T::Generic
   include Mixin
   Elem = type_member(fixed: String)
 end
@@ -54,16 +61,19 @@ class ParentWithMultiple
 end
 
 class HalfChild < ParentWithMultiple
+  extend T::Generic
   K = type_member(fixed: Integer)
   V = type_member
 end
 
 class HalfChildOther < ParentWithMultiple
+  extend T::Generic
   K = type_member
   V = type_member(fixed: Integer)
 end
 
 class FullChild < HalfChild
+  extend T::Generic
   K = type_member(fixed: Integer)
   V = type_member(fixed: String)
 
@@ -81,6 +91,7 @@ class ParentEnumerable
 end
 
 class ChildEnumerable < ParentEnumerable
+  extend T::Generic
   K = type_member(fixed: String)
   V = type_member
   Elem = type_member

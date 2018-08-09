@@ -43,9 +43,10 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
 bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
     bool sawSig = false;
     while (send != nullptr) {
-        sawSig = sawSig || send->fun == core::Names::sig();
-        if ((send->fun == core::Names::sig() || send->fun == core::Names::typeParameters()) && sawSig &&
-            ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
+        sawSig = sawSig || send->fun == core::Names::sig() || send->fun == core::Names::dslSig();
+        if ((send->fun == core::Names::sig() || send->fun == core::Names::typeParameters() ||
+             send->fun == core::Names::dslSig()) &&
+            sawSig && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
             return true;
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
@@ -104,6 +105,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
     while (send != nullptr) {
         switch (send->fun._id) {
             case core::Names::sig()._id:
+            case core::Names::dslSig()._id:
             case core::Names::proc()._id: {
                 if (sig.seen.sig || sig.seen.proc) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -111,7 +113,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                     }
                     sig.argTypes.clear();
                 }
-                if (send->fun == core::Names::sig()) {
+                if (send->fun == core::Names::sig() || send->fun == core::Names::dslSig()) {
                     sig.seen.sig = true;
                 } else {
                     sig.seen.proc = true;
@@ -130,10 +132,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 }
                 auto *hash = ast::cast_tree<ast::Hash>(send->args[0].get());
                 if (hash == nullptr) {
-                    if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`; Expected a hash of arguments => types", send->fun.toString(ctx),
-                                    send->args.size());
-                    }
+                    // Error will be reported in infer
                     break;
                 }
 
@@ -217,9 +216,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                                     core::Types::nilClass());
         case core::Names::all()._id: {
             if (send->args.empty()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.all() needs one or more type arguments");
-                }
+                // Error will be reported in infer
                 return core::Types::untyped();
             }
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType);
@@ -233,11 +230,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::any()._id: {
             if (send->args.empty()) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.all() needs one or more type arguments");
-                    e.addErrorSection(
-                        core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
-                }
+                // Error will be reported in infer
                 return core::Types::untyped();
             }
             auto result = TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType);
@@ -251,9 +244,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::typeParameter()._id: {
             if (send->args.size() != 1) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("type_parameter only takes a single argument");
-                }
+                // Error will be reported in infer
                 return core::Types::untyped();
             }
             auto arr = ast::cast_tree<ast::Literal>(send->args[0].get());
@@ -274,9 +265,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::enum_()._id: {
             if (send->args.size() != 1) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("enum only takes a single argument");
-                }
+                // Error will be reported in infer
                 return core::Types::untyped();
             }
             auto arr = ast::cast_tree<ast::Array>(send->args[0].get());
@@ -304,9 +293,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
         }
         case core::Names::classOf()._id: {
             if (send->args.size() != 1) {
-                if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("T.class_of only takes a single argument");
-                }
+                // Error will be reported in infer
                 return core::Types::untyped();
             }
 
@@ -476,15 +463,6 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
                 result = core::Types::untyped();
                 return;
-            }
-
-            if (s->fun == core::Names::singletonClass()) {
-                auto sym = recvi->symbol.data(ctx).dealias(ctx);
-                auto singleton = sym.data(ctx).singletonClass(ctx);
-                if (singleton.exists()) {
-                    result = make_shared<core::ClassType>(singleton);
-                    return;
-                }
             }
 
             if (s->fun != core::Names::squareBrackets()) {

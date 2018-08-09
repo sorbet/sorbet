@@ -1,6 +1,8 @@
 # typed: strict
 
 class TestProc
+  extend T::Helpers
+
   sig(blk: T.proc(i: Integer).returns(Integer))
   .returns(Integer)
   def good1(&blk)
@@ -15,7 +17,7 @@ class TestProc
 
   sig(
     x: T.proc, # error: Malformed T.proc: You must specify a return type
-    y: T.proc(0).returns(Integer), # error: Malformed `proc`
+    y: T.proc(0).returns(Integer), # error: Too many arguments provided for method `T.proc`. Expected: `0`, got: `1`
     z: T.proc({x: Integer}).returns(0), # error: Unsupported type syntax
     w: T.proc(x: :f).returns(0), # error: Unsupported type syntax
   ).returns(NilClass)

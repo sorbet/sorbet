@@ -91,7 +91,8 @@ NameDef names[] = {
     {"merge", Core | Desugar},
 
     // T keywords
-    {"sig", Resolver | DSL},
+    {"sig", Resolver},
+    {"dslSig", "<dslSig>", Resolver | DSL | Core},
     {"typeParameters", "type_parameters", Resolver | DSL},
     {"typeParameter", "type_parameter", Resolver | DSL},
     {"abstract", Resolver},

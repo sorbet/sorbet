@@ -1,5 +1,7 @@
 # typed: true
 class A
+  extend T::Helpers
+
   sig.returns(Integer)
   def initialize()
     yield

@@ -537,6 +537,11 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                             prettyArity(ctx, method),
                             args.size()); // TODO: should use position and print the source tree, not the cfg one.
                 e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", data.show(ctx));
+                if (fun == core::Names::any() && symbol == core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
+                    e.addErrorSection(
+                        core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
+                }
+
                 result.components.front().errors.emplace_back(e.build());
             }
         }
@@ -651,7 +656,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
+            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
                         prettyArity(ctx, method), args.size());
             e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", fun.toString(ctx));
             result.components.front().errors.emplace_back(e.build());
@@ -817,20 +822,6 @@ SymbolRef unwrapSymbol(shared_ptr<Type> type) {
     return result;
 }
 namespace {
-
-// Duplicated in infer/environment.cc. We should maybe have a better place to
-// share code between these two files.
-shared_ptr<Type> dropConstructor(core::Context ctx, Loc loc, shared_ptr<Type> tp) {
-    if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
-        if (!mt->wrapped->isUntyped()) {
-            if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unsupported usage of bare type");
-            }
-        }
-        return core::Types::untyped();
-    }
-    return tp;
-}
 
 class T_untyped : public Symbol::IntrinsicMethod {
 public:
@@ -1066,10 +1057,23 @@ public:
             return Types::arrayOfUntyped();
         }
         vector<shared_ptr<Type>> elems;
+        bool isType = any_of(args.begin(), args.end(), [ctx](auto ty) { return isa_type<MetaType>(ty.type.get()); });
+        int i = -1;
         for (auto &elem : args) {
-            elems.push_back(dropConstructor(ctx, elem.origins.front(), elem.type));
+            ++i;
+            if (isType) {
+                elems.push_back(unwrapType(ctx, argLocs[i], elem.type));
+            } else {
+                elems.push_back(elem.type);
+            }
         }
-        return TupleType::build(ctx, elems);
+
+        auto tuple = TupleType::build(ctx, elems);
+        if (isType) {
+            return make_shared<MetaType>(tuple);
+        } else {
+            return tuple;
+        }
     }
 } Magic_buildArray;
 

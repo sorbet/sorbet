@@ -1,5 +1,7 @@
 # typed: true
-class Opus::Command; end
+class Opus::Command
+  extend T::Helpers
+end
 
 class MyCommand < Opus::Command
   sig(x: Integer).returns(String)
@@ -20,6 +22,8 @@ end
 T.assert_type!(OtherCommand.call("8"), Integer)
 
 class NotACommand < Llamas::Opus::Command # error: Unable to resolve constant
+  extend T::Helpers
+
   sig(x: String).returns(Integer)
   def call(x)
     Integer(x)

@@ -14,6 +14,8 @@
  end
 
  module Foo
+    extend T::Helpers
+
     sig(a: Integer).returns(Integer)
     def bar(a)
        s = Child[Integer].new

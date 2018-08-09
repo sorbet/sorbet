@@ -12,6 +12,6 @@ T::Array[{foo: 3}].new # error: Unsupported usage of literal type
 # Make sure we don't mutate the types when unwrapping
 t = [Integer]
 T::Array[t].new
-T.assert_type!(t, [Integer.singleton_class])
+T.assert_type!(t, [T.class_of(Integer)])
 T::Hash[t, t].new
-T.assert_type!(t, [Integer.singleton_class])
+T.assert_type!(t, [T.class_of(Integer)])

@@ -1,5 +1,7 @@
 # typed: strict
 class A
+  extend T::Helpers
+
   def _; end
 
   sig(blk: T.proc(a: Integer, b: Float).returns(String)).returns(String)
@@ -45,6 +47,8 @@ class A
   end
 
   class ConstructorBlock
+    extend T::Helpers
+
     sig(blk: T.proc(s: Symbol).returns(String)).returns(NilClass)
     def initialize(&blk)
     end

@@ -1,6 +1,8 @@
 # typed: strict
 # MutableContext::permitOverloadDefinitions is aware of this file name. Don't rename this file.
 class HasOverloads
+  extend T::Helpers
+
   sig
   .returns(T.untyped())
   def make_untyped

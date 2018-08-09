@@ -1,9 +1,12 @@
 # typed: strict
 class Foo
+  extend T::Generic
   A = type_member
 end
 
 module Test
+    extend T::Helpers
+
     sig(a: Foo) # error: Generic class without type arguments
     .returns(Foo) # error: Generic class without type arguments
     def run(a)

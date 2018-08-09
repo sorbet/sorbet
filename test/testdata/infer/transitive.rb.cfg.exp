@@ -17,6 +17,24 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" -> "bb::A#foo_1" [style="bold"];
 }
 
+subgraph "cluster_::A#<static-init>" {
+    label = "::A#<static-init>";
+    color = blue;
+    "bb::A#<static-init>_0" [shape = invhouse];
+    "bb::A#<static-init>_1" [shape = parallelogram];
+
+    "bb::A#<static-init>_0" [
+        label = "block[id=0]()\l<constant:Integer>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$5 = self : <Class:A>\l<statTemp>$4 = <statTemp>$5.sig() : T.untyped\l<returnMethodTemp>$2 = <statTemp>$4.returns(<constant:Integer>$7) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_0" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_1" -> "bb::A#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::Bar#baz" {
     label = "::Bar#baz";
     color = blue;
@@ -33,6 +51,24 @@ subgraph "cluster_::Bar#baz" {
     ];
 
     "bb::Bar#baz_1" -> "bb::Bar#baz_1" [style="bold"];
+}
+
+subgraph "cluster_::Bar#<static-init>" {
+    label = "::Bar#<static-init>";
+    color = blue;
+    "bb::Bar#<static-init>_0" [shape = invhouse];
+    "bb::Bar#<static-init>_1" [shape = parallelogram];
+
+    "bb::Bar#<static-init>_0" [
+        label = "block[id=0]()\l<constant:Integer>$9 = alias <constant:Integer> : <Class:Integer>\l<constant:<Magic>>$10 = alias <constant:<Magic>> : <Magic>\l<statTemp>$5 = self : <Class:Bar>\l<hashTemp>$7 = :\"arg\" : Symbol(:\"arg\")\l<statTemp>$6 = <constant:<Magic>>$10.<build-hash>(<hashTemp>$7, <constant:Integer>$9) : ShapeType {\l  Symbol(:\"arg\") => <Class:Integer>\l}\l<statTemp>$4 = <statTemp>$5.sig(<statTemp>$6) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$4.returns(<constant:Integer>$9) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::Bar#<static-init>_0" -> "bb::Bar#<static-init>_1" [style="bold"];
+    "bb::Bar#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::Bar#<static-init>_1" -> "bb::Bar#<static-init>_1" [style="bold"];
 }
 
 }

@@ -1,5 +1,7 @@
 # typed: strict
 module A
+  extend T::Helpers
+
   class C1; end
   C2 = C1
 

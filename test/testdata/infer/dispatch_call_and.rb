@@ -4,6 +4,8 @@ module T2; end
 module T3; end
 
 module A
+  extend T::Helpers
+
   sig.returns(T1)
   def only_a; T.unsafe(nil); end
 
@@ -15,6 +17,8 @@ module A
 end
 
 module B
+  extend T::Helpers
+
   sig.returns(T3)
   def only_b; T.unsafe(nil); end
 
@@ -26,9 +30,13 @@ module B
 end
 
 module OtherA
+  extend T::Helpers
+
   sig.returns(T1)
   def only_a; T.unsafe(nil); end
 end
+
+extend T::Helpers
 
 sig(ab: T.all(A, B)).returns(T.untyped)
 def test_one(ab)

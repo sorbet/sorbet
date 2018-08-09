@@ -1,4 +1,5 @@
 # typed: true
+extend T::Helpers
 
 sig(a: T.nilable(Integer)).void
 def foo1(a)

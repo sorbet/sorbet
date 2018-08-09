@@ -28,4 +28,4 @@ empty << 4
 # Arrays of literals decay
 ["foo"] + ["bar"]
 
-[T::Array[Integer], 0] # error: Unsupported usage of bare type
+[T::Array[Integer], 0] # error: Unsupported usage of literal type

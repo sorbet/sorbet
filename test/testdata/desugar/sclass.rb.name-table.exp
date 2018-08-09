@@ -4,9 +4,9 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
   class ::<Class:<Class:D>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:28
     method ::<Class:<Class:D>>#d () @ test/testdata/desugar/sclass.rb:29
   class ::<Class:<Class:E>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:37
-  class ::<Class:<Class:F>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:47
-  class ::<Class:<Class:G>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:60
-  class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:73
+  class ::<Class:<Class:F>> < ::<Class:<Class:Object>> (<constant:Helpers>) @ test/testdata/desugar/sclass.rb:47
+  class ::<Class:<Class:G>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:62
+  class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:75
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:2
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:12
     method ::<Class:B>#b () @ test/testdata/desugar/sclass.rb:13
@@ -16,27 +16,28 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
     method ::<Class:E>#wrapper () @ test/testdata/desugar/sclass.rb:38
   class ::<Class:F> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:48
     field ::<Class:F>#@f -> Integer @ test/testdata/desugar/sclass.rb:50
-    method ::<Class:F>#f= (f) -> Integer @ test/testdata/desugar/sclass.rb:54
-      argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:53
+    method ::<Class:F>#<static-init> () @ test/testdata/desugar/sclass.rb:55
+    method ::<Class:F>#f= (f) -> Integer @ test/testdata/desugar/sclass.rb:56
+      argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:55
     method ::<Class:F>#initialize () @ test/testdata/desugar/sclass.rb:49
-  class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:60
-    method ::<Class:G>#g () @ test/testdata/desugar/sclass.rb:67
-    method ::<Class:G>#inner () @ test/testdata/desugar/sclass.rb:61
-  class ::<Class:H> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:73
-    class ::<Class:H>::<Class:H2> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:74
-      method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:75
-    class ::<Class:H>::H2 < ::Object () @ test/testdata/desugar/sclass.rb:74
+  class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:62
+    method ::<Class:G>#g () @ test/testdata/desugar/sclass.rb:69
+    method ::<Class:G>#inner () @ test/testdata/desugar/sclass.rb:63
+  class ::<Class:H> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:75
+    class ::<Class:H>::<Class:H2> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:76
+      method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:77
+    class ::<Class:H>::H2 < ::Object () @ test/testdata/desugar/sclass.rb:76
   class ::A < ::Object () @ test/testdata/desugar/sclass.rb:2
   class ::B < ::Object () @ test/testdata/desugar/sclass.rb:11
   class ::D < ::Object () @ test/testdata/desugar/sclass.rb:26
   class ::E < ::Object () @ test/testdata/desugar/sclass.rb:36
     method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:44
   class ::F < ::Object () @ test/testdata/desugar/sclass.rb:47
-  class ::G < ::Object () @ test/testdata/desugar/sclass.rb:58
-    method ::G#wrapper () @ test/testdata/desugar/sclass.rb:59
-  class ::H < ::Object () @ test/testdata/desugar/sclass.rb:72
+  class ::G < ::Object () @ test/testdata/desugar/sclass.rb:60
+    method ::G#wrapper () @ test/testdata/desugar/sclass.rb:61
+  class ::H < ::Object () @ test/testdata/desugar/sclass.rb:74
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
-    method ::Object#main () @ test/testdata/desugar/sclass.rb:82
+    method ::Object#main () @ test/testdata/desugar/sclass.rb:84
   field #$c @ test/testdata/desugar/sclass.rb:19
   method #<static-init> () @ test/testdata/desugar/sclass.rb:2
 

@@ -1,5 +1,15 @@
 # typed: strict
+module T::Helpers
+  # We could provide a more-complete signature, but these are already
+  # parsed in C++, so there's no need to emit errors twice.
+
+  def type_parameters(*params); end
+  def sig(**params); end
+end
+
 module T
+  extend T::Helpers
+
   sig(x: T.untyped).returns(T.untyped)
   def self.unsafe(x); end
 
@@ -28,6 +38,8 @@ module T
   def self.any(arg0, *types); end
   def self.all(arg0, *types); end
   def self.reveal_type(value); end
+  def self.type_parameter(var); end
+  def self.self_type; end
 
   sig(arg: T.untyped, error: String).returns(T.untyped)
   def self.must(arg, error=""); end
@@ -35,8 +47,6 @@ module T
   def self.coerce(type); end
 end
 
-module T::Helpers
-end
 module T::Generic
   include T::Helpers
 

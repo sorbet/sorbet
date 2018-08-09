@@ -6,6 +6,8 @@ class Foo
 end
 
 class Main
+    extend T::Helpers
+
     sig(a: T.class_of(Mixin)).returns(T.class_of(Mixin))
     def bar(a)
         a

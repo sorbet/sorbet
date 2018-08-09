@@ -730,7 +730,7 @@ private:
     }
 
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
-        InlinedVector<unique_ptr<ast::Expression>, 1> lastSig;
+        InlinedVector<ast::Expression *, 1> lastSig;
         for (auto &stat : klass->rhs) {
             typecase(
                 stat.get(),
@@ -746,7 +746,7 @@ private:
                                 }
                             }
                         }
-                        lastSig.emplace_back(move(stat));
+                        lastSig.emplace_back(stat.get());
                         return;
                     }
 
@@ -800,8 +800,7 @@ private:
 
                             while (i < lastSig.size()) {
                                 auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
-                                fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i].get()),
-                                                  isOverloaded);
+                                fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded);
                                 if (i + 1 < lastSig.size()) {
                                     overload.data(ctx).setOverloaded();
                                 }
@@ -809,7 +808,7 @@ private:
                             }
                         }
 
-                        fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0].get()), isOverloaded);
+                        fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded);
 
                         // OVERLOAD
                         lastSig.clear();

@@ -1,5 +1,7 @@
 # typed: strict
 class Main
+    extend T::Helpers
+
     sig(a: Integer).returns(Integer)
     def foo(a)
         a

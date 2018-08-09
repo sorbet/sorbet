@@ -1,5 +1,7 @@
 # typed: strict
 class TestArgs
+  extend T::Helpers
+
   def any; end
 
   sig.returns(T::Hash[Integer, Integer])

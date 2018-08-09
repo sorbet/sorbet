@@ -1,6 +1,8 @@
 # typed: strict
 
 class Generics
+  extend T::Helpers
+
   sig(
     cond: T.untyped,
     arr1: T::Array[String],

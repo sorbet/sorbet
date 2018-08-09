@@ -1,5 +1,7 @@
 # typed: strict
 class TestArray
+  extend T::Helpers
+
   sig.returns(Integer)
   def an_int; 0; end
 

@@ -1,6 +1,7 @@
 # typed: strict
 
 class HasAbstract
+  extend T::Helpers
   abstract!
 
   sig(x: Integer).abstract.returns(String)
@@ -19,15 +20,21 @@ class HasAbstract
 end
 
 class InterfaceClass
+  extend T::Helpers
+
   interface! # error: Classes can't be interfaces
 end
 
 class AbstractMethodNotClass
+  extend T::Helpers
+
   sig.returns(T.untyped).abstract
   def f; end # error: you must mark your class/module as abstract
 end
 
 module InterfaceModule
+  extend T::Helpers
+
   interface!
 
   def f # error: must be declared abstract

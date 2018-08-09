@@ -1,90 +1,90 @@
 class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:TestDSLBuilder><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).sig({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    self(<constant:<todo sym>>).<dslSig>({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
 
     def self.opt_string<<constant:<todo sym>>>(opt_string)
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def self.get_opt_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def opt_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
+    self(<constant:<todo sym>>).<dslSig>({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
 
     def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted)
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:Integer>)
 
     def self.get_opt_int_defaulted<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:Integer>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:Integer>)
 
     def opt_int_defaulted<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    self(<constant:<todo sym>>).<dslSig>({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
 
     def self.req_string<<constant:<todo sym>>>(req_string)
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def self.get_req_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def req_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    self(<constant:<todo sym>>).<dslSig>({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
 
     def self.implied_string<<constant:<todo sym>>>(implied_string = ::T.untyped())
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def self.get_implied_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+    self(<constant:<todo sym>>).<dslSig>().returns(<emptyTree>::<constant:String>)
 
     def implied_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
+    self(<constant:<todo sym>>).<dslSig>({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
 
     def self.root_const<<constant:<todo sym>>>(root_const)
       <emptyTree>
     end
 
-    self(<constant:<todo sym>>).sig().returns(::<root>::<constant:Integer>)
+    self(<constant:<todo sym>>).<dslSig>().returns(::<root>::<constant:Integer>)
 
     def self.get_root_const<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    self(<constant:<todo sym>>).sig().returns(::<root>::<constant:Integer>)
+    self(<constant:<todo sym>>).<dslSig>().returns(::<root>::<constant:Integer>)
 
     def root_const<<constant:<todo sym>>>()
       ::T.unsafe(nil)

@@ -1,5 +1,7 @@
 # typed: strict
 class A
+  extend T::Helpers
+
   sig
   .returns(Integer)
   def foo # error: does not conform to method result type
@@ -7,6 +9,8 @@ class A
 end
 
 class Bar < A
+  extend T::Helpers
+
   sig(
     arg: Integer
   )

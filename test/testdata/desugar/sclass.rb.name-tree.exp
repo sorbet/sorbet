@@ -87,12 +87,18 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
     def initialize<initialize>()
       ::<Class:F>#@f = T.let(0, Integer)
     end
 
     def f=<f=>(f)
       ::<Class:F>#@f = f
+    end
+
+    def self.<static-init><<static-init>>()
+      self(<singleton class:<singleton class:<constant:F>>>).sig({:"f" => ::Integer}).returns(::Integer)
     end
   end
   class <emptyTree>::<constant:G><<constant:G>> < (::<todo sym>)

@@ -1,5 +1,7 @@
 # typed: strict
 class Test
+  extend T::Helpers
+
   sig(b: T.nilable(Integer)).returns(T.untyped)
   def bad(b)
     T.unsafe(nil) && b && b < 0

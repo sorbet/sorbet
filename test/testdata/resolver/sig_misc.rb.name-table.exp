@@ -5,6 +5,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
   class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_misc.rb:2
   class ::<Class:T2> < ::<Class:Object> () @ test/testdata/resolver/sig_misc.rb:3
   class ::A < ::Object () @ test/testdata/resolver/sig_misc.rb:5
+    method ::A#<static-init> () @ test/testdata/resolver/sig_misc.rb:5
     method ::A#f1 (x) -> T1 @ test/testdata/resolver/sig_misc.rb:20
       argument ::A#f1#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:20
     method ::A#f2 (x) -> T2 @ test/testdata/resolver/sig_misc.rb:24

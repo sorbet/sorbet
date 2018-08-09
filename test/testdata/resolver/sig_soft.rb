@@ -1,6 +1,8 @@
 # typed: strict
 
 class Main
+    extend T::Helpers
+
     sig.returns(NilClass).soft(notify: 'pt')
     def soft
     end

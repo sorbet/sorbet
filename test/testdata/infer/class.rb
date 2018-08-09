@@ -11,7 +11,7 @@ class TestCase
     self.class.allocate
 
     T.assert_type!(self.class.new, TestCase)
-    T.assert_type!(self.class, TestCase.singleton_class)
+    T.assert_type!(self.class, T.class_of(TestCase))
     T.assert_type!(self.class, Class)
     T.assert_type!(self.class.class, Class)
   end

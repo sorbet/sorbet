@@ -1,6 +1,8 @@
 # typed: strict
 
 class Main
+    extend T::Helpers
+
     sig(val: T::Array[String]).returns(T.nilable(String))
     def array(val)
         val[0]

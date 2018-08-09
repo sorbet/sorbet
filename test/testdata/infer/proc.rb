@@ -1,5 +1,7 @@
 # typed: strict
 class TestProcType
+  extend T::Helpers
+
   sig(
     blk: T.proc(i: Integer).returns(String),
   ).returns(String)

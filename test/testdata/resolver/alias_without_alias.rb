@@ -1,4 +1,5 @@
 # typed: true
+extend T::Helpers
 
 A = T.any(Integer, String)
 

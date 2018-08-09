@@ -1,6 +1,8 @@
 # typed: strict
 
 class NilClass
+  extend T::Helpers
+
   sig.returns(FalseClass)
   def present?
     false
@@ -14,6 +16,8 @@ class Object
 end
 
 class A
+  extend T::Helpers
+
   sig(s: T.nilable(String)).returns(NilClass)
   def test_return(s)
     if s.present?

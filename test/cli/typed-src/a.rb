@@ -1,4 +1,6 @@
 class A
+  extend T::Helpers
+
   sig(x: T.any(String, Integer), y: Integer).returns(Integer)
   def a_method(x, y)
     if x.is_a?(String)

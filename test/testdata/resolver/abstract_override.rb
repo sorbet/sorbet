@@ -1,6 +1,8 @@
 # typed: strict
 
 module Interface
+  extend T::Helpers
+
   interface!
 
   sig.abstract.returns(T.untyped)
@@ -12,6 +14,8 @@ module InterfaceBadChild # error: Missing definition for abstract method `Interf
 end
 
 module InterfaceChild
+  extend T::Helpers
+
   interface!
   include Interface
 end
@@ -23,6 +27,8 @@ module ConcreteMixin
 end
 
 class Abstract
+  extend T::Helpers
+
   abstract!
   include InterfaceChild
 end
@@ -31,6 +37,8 @@ class AbstractBadChild < Abstract # error: Missing definition for abstract metho
 end
 
 class AbstractChild < Abstract
+  extend T::Helpers
+
   abstract!
 end
 
@@ -48,6 +56,8 @@ class IndirectConcrete
 end
 
 class AbstractSingleton
+  extend T::Helpers
+
   abstract!
 
   sig.abstract

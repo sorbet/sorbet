@@ -1,5 +1,7 @@
 # typed: strict
 class Foo
+  extend T::Helpers
+
   A = T.type_alias(Integer)
   sig(a: A).returns(Integer)
   def bar(a)

@@ -292,6 +292,18 @@ void GlobalState::initEmpty() {
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::untyped();
 
+    // Synthesize Kernel#<dslSig>(arg0: *T.untyped) => T.untyped
+    //
+    // <dslSig> is exactly like sig, except that it is defined on Kernel, not
+    // T::Helpers, and so can be used by DSL passes to annotate methods on
+    // arbitrary objects that don't necessarily extend T::Helpers
+    method = enterMethodSymbol(Loc::none(), Symbols::Kernel(), Names::dslSig());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this).setRepeated();
+    arg.data(*this).resultType = Types::untyped();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = Types::untyped();
+
     // Mark StubModule is Module.
     stubModule_id.data(*this).setIsModule(true);
 

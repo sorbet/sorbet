@@ -4,7 +4,8 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
   class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:2
   class ::<Class:T2> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:3
   class ::A < ::Object () @ test/testdata/resolver/sig_good.rb:7
-    method ::A#good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q) -> T2 @ test/testdata/resolver/sig_good.rb:31
+    method ::A#<static-init> () @ test/testdata/resolver/sig_good.rb:8
+    method ::A#good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_good.rb:29
       argument ::A#good#a<> -> TupleType {
         0 = T1
         1 = T2
@@ -34,19 +35,17 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
       argument ::A#good#i<> -> T1 @ test/testdata/resolver/sig_good.rb:17
       argument ::A#good#j<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:18
       argument ::A#good#k<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:19
-      argument ::A#good#l<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:20
-      argument ::A#good#m<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:21
-      argument ::A#good#n<> -> <Class:M1> @ test/testdata/resolver/sig_good.rb:22
-      argument ::A#good#o<> -> ShapeType {
+      argument ::A#good#l<> -> <Class:M1> @ test/testdata/resolver/sig_good.rb:20
+      argument ::A#good#m<> -> ShapeType {
         Symbol(:"foo") => String
         Symbol(:"bar") => Integer | NilClass
-      } @ test/testdata/resolver/sig_good.rb:23
-      argument ::A#good#p<> -> ShapeType {
-      } @ test/testdata/resolver/sig_good.rb:27
-      argument ::A#good#q<> -> ShapeType {
+      } @ test/testdata/resolver/sig_good.rb:21
+      argument ::A#good#n<> -> ShapeType {
+      } @ test/testdata/resolver/sig_good.rb:25
+      argument ::A#good#o<> -> ShapeType {
         String("hi") => String
         Symbol(:"bye") => String
-      } @ test/testdata/resolver/sig_good.rb:28
+      } @ test/testdata/resolver/sig_good.rb:26
   class ::M1 (<constant:BasicObject>) @ test/testdata/resolver/sig_good.rb:4
   class ::T1 < ::Object () @ test/testdata/resolver/sig_good.rb:2
   class ::T2 < ::Object () @ test/testdata/resolver/sig_good.rb:3

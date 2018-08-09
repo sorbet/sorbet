@@ -1,6 +1,8 @@
 # typed: true
 
 class Yielder
+  extend T::Helpers
+
   sig(blk: T.proc(x: Integer, y: Integer).returns(T.untyped)).void
   def yield_two_ints(&blk); end
 

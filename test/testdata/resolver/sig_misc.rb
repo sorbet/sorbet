@@ -16,7 +16,7 @@ class A
   def test_kwargs(returns)
   end
 
-  sig(types).returns(T1) # error: Expected a hash of arguments
+  sig(types).returns(T1)
   def f1(x) # error: Type not specified for argument
   end
 

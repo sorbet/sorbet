@@ -88,5 +88,23 @@ subgraph "cluster_::Main#with_storytime" {
     "bb::Main#with_storytime_1" -> "bb::Main#with_storytime_1" [style="bold"];
 }
 
+subgraph "cluster_::Main#<static-init>" {
+    label = "::Main#<static-init>";
+    color = blue;
+    "bb::Main#<static-init>_0" [shape = invhouse];
+    "bb::Main#<static-init>_1" [shape = parallelogram];
+
+    "bb::Main#<static-init>_0" [
+        label = "block[id=0]()\l<constant:Integer>$13 = alias <constant:Integer> : <Class:Integer>\l<constant:String>$15 = alias <constant:String> : <Class:String>\l<constant:NilClass>$18 = alias <constant:NilClass> : <Class:NilClass>\l<constant:T>$11 = alias <constant:T> : <Class:T>\l<constant:<Magic>>$16 = alias <constant:<Magic>> : <Magic>\l<statTemp>$6 = self : <Class:Main>\l<hashTemp>$8 = :\"a\" : Symbol(:\"a\")\l<hashTemp>$9 = <constant:T>$11.any(<constant:Integer>$13, <constant:String>$15) : MetaType\l<statTemp>$7 = <constant:<Magic>>$16.<build-hash>(<hashTemp>$8, <hashTemp>$9) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$5 = <statTemp>$6.sig(<statTemp>$7) : T.untyped\l<statTemp>$4 = <statTemp>$5.returns(<constant:NilClass>$18) : T.untyped\l<statTemp>$21 = self : <Class:Main>\l<hashTemp>$23 = :\"a\" : Symbol(:\"a\")\l<hashTemp>$24 = <constant:T>$11.any(<constant:String>$15, <constant:NilClass>$18) : MetaType\l<statTemp>$22 = <constant:<Magic>>$16.<build-hash>(<hashTemp>$23, <hashTemp>$24) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$20 = <statTemp>$21.sig(<statTemp>$22) : T.untyped\l<statTemp>$19 = <statTemp>$20.returns(<constant:NilClass>$18) : T.untyped\l<statTemp>$31 = self : <Class:Main>\l<hashTemp>$33 = :\"a\" : Symbol(:\"a\")\l<hashTemp>$34 = <constant:T>$11.any(<constant:String>$15, <constant:NilClass>$18) : MetaType\l<statTemp>$32 = <constant:<Magic>>$16.<build-hash>(<hashTemp>$33, <hashTemp>$34) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$30 = <statTemp>$31.sig(<statTemp>$32) : T.untyped\l<statTemp>$29 = <statTemp>$30.returns(<constant:NilClass>$18) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::Main#<static-init>_0" -> "bb::Main#<static-init>_1" [style="bold"];
+    "bb::Main#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::Main#<static-init>_1" -> "bb::Main#<static-init>_1" [style="bold"];
+}
+
 }
 
