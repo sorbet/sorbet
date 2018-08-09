@@ -4,6 +4,7 @@
 #include "common/Timer.h"
 #include "core/Errors.h"
 #include "core/Files.h"
+#include "core/Names/resolver.h"
 #include "core/Unfreeze.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
@@ -122,6 +123,31 @@ bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &l
         return false;
     }
     return true;
+}
+
+bool hideSymbol(core::GlobalState &gs, core::SymbolRef sym) {
+    if (!sym.exists()) {
+        return true;
+    }
+    auto &data = sym.data(gs);
+    if (data.isClass() && data.attachedClass(gs).exists()) {
+        return true;
+    }
+    if (data.isClass() && data.superClass == core::Symbols::StubClass()) {
+        return true;
+    }
+    if (data.isMethodArgument() && data.isBlockArgument()) {
+        return true;
+    }
+    if (data.name.data(gs).kind == core::NameKind::UNIQUE &&
+        data.name.data(gs).unique.original == core::Names::staticInit()) {
+        return true;
+    }
+    if (data.name.data(gs).kind == core::NameKind::UNIQUE &&
+        data.name.data(gs).unique.original == core::Names::blockTemp()) {
+        return true;
+    }
+    return false;
 }
 
 void LSPLoop::processRequest(rapidjson::Document &d) {
@@ -254,12 +280,14 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             auto fref = uri2FileRef(uri);
             for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
                 core::SymbolRef ref(finalGs.get(), idx);
-                for (auto definitionLocation : ref.data(*finalGs).locs()) {
-                    if (definitionLocation.file == fref) {
-                        auto data = symbolRef2SymbolInformation(ref);
-                        if (data) {
-                            result.PushBack(move(*data), alloc);
-                            break;
+                if (!hideSymbol(*finalGs, ref) && ref.data(*finalGs).owner.data(*finalGs).loc().file != fref) {
+                    for (auto definitionLocation : ref.data(*finalGs).locs()) {
+                        if (definitionLocation.file == fref) {
+                            auto data = symbolRef2DocumentSymbol(ref);
+                            if (data) {
+                                result.PushBack(move(*data), alloc);
+                                break;
+                            }
                         }
                     }
                 }
@@ -756,7 +784,7 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
     auto &sym = symRef.data(*finalGs);
-    if (!sym.loc().file.exists()) {
+    if (!sym.loc().file.exists() || hideSymbol(*finalGs, symRef)) {
         return nullptr;
     }
     rapidjson::Value result;
@@ -764,7 +792,13 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRe
     result.AddMember("name", sym.name.show(*finalGs), alloc);
     result.AddMember("location", loc2Location(sym.loc()), alloc);
     result.AddMember("containerName", sym.owner.data(*finalGs).fullName(*finalGs), alloc);
+    result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
 
+    return make_unique<rapidjson::Value>(move(result));
+}
+
+int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
+    auto &sym = symbol.data(*finalGs);
     /**
      * A symbol kind.
      *
@@ -799,30 +833,115 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRe
      **/
     if (sym.isClass()) {
         if (sym.isClassModule()) {
-            result.AddMember("kind", 2, alloc);
+            return 2;
         }
         if (sym.isClassClass()) {
-            result.AddMember("kind", 5, alloc);
+            return 5;
         }
     } else if (sym.isMethod()) {
         if (sym.name == core::Names::initialize()) {
-            result.AddMember("kind", 9, alloc);
+            return 9;
         } else {
-            result.AddMember("kind", 6, alloc);
+            return 6;
         }
     } else if (sym.isField()) {
-        result.AddMember("kind", 8, alloc);
+        return 8;
     } else if (sym.isStaticField()) {
-        result.AddMember("kind", 14, alloc);
+        return 14;
     } else if (sym.isMethodArgument()) {
-        result.AddMember("kind", 13, alloc);
+        return 13;
     } else if (sym.isTypeMember()) {
-        result.AddMember("kind", 26, alloc);
+        return 26;
     } else if (sym.isTypeArgument()) {
-        result.AddMember("kind", 26, alloc);
-    } else {
+        return 26;
+    }
+    return 0;
+}
+
+/**
+ *
+ * Represents programming constructs like variables, classes, interfaces etc. that appear in a document. Document
+ * symbols can be hierarchical and they have two ranges: one that encloses its definition and one that points to its
+ * most interesting range, e.g. the range of an identifier.
+ *
+ *  export class DocumentSymbol {
+ *
+ *       // The name of this symbol.
+ *      name: string;
+ *
+ *       // More detail for this symbol, e.g the signature of a function. If not provided the
+ *       // name is used.
+ *      detail?: string;
+ *
+ *       // The kind of this symbol.
+ *      kind: SymbolKind;
+ *
+ *       // Indicates if this symbol is deprecated.
+ *      deprecated?: boolean;
+ *
+ *      //  The range enclosing this symbol not including leading/trailing whitespace but everything else
+ *      //  like comments. This information is typically used to determine if the the clients cursor is
+ *      //  inside the symbol to reveal in the symbol in the UI.
+ *      range: Range;
+ *
+ *      //  The range that should be selected and revealed when this symbol is being picked, e.g the name of a function.
+ *      //  Must be contained by the the `range`.
+ *      selectionRange: Range;
+ *
+ *      //  Children of this symbol, e.g. properties of a class.
+ *      children?: DocumentSymbol[];
+ *  }
+ */
+
+unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef symRef) {
+    if (!symRef.exists()) {
         return nullptr;
     }
+    auto &sym = symRef.data(*finalGs);
+    if (!sym.loc().file.exists() || hideSymbol(*finalGs, symRef)) {
+        return nullptr;
+    }
+    rapidjson::Value result;
+    result.SetObject();
+    string prefix = "";
+    if (sym.owner.exists() && sym.owner.data(*finalGs).isClass() &&
+        sym.owner.data(*finalGs).attachedClass(*finalGs).exists()) {
+        prefix = "self.";
+    }
+    result.AddMember("name", prefix + sym.name.show(*finalGs), alloc);
+    if (sym.isMethod()) {
+        result.AddMember("detail", methodDetail(*finalGs, symRef, nullptr, nullptr, nullptr), alloc);
+    } else {
+        // Currently released version of VSCode has a bug that requires this non-optional field to be present
+        result.AddMember("detail", "", alloc);
+    }
+    result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
+    result.AddMember("range", loc2Range(sym.loc()), alloc); // TODO: this range should cover body. Currently it doesn't.
+    result.AddMember("selectionRange", loc2Range(sym.loc()), alloc);
+    rapidjson::Value children;
+    children.SetArray();
+    for (auto mem : sym.members) {
+        if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
+            auto inner = LSPLoop::symbolRef2DocumentSymbol(mem.second);
+            if (inner) {
+                children.PushBack(*inner, alloc);
+            }
+        }
+    }
+    if (sym.isClass()) {
+        auto singleton = sym.lookupSingletonClass(*finalGs);
+        if (singleton.exists()) {
+            for (auto mem : singleton.data(*finalGs).members) {
+                if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
+                    auto inner = LSPLoop::symbolRef2DocumentSymbol(mem.second);
+                    if (inner) {
+                        children.PushBack(*inner, alloc);
+                    }
+                }
+            }
+        }
+    }
+    result.AddMember("children", children, alloc);
 
     return make_unique<rapidjson::Value>(move(result));
 }

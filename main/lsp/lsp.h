@@ -220,6 +220,8 @@ class LSPLoop {
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
     std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
+    std::unique_ptr<rapidjson::Value> symbolRef2DocumentSymbol(core::SymbolRef);
+    int symbolRef2SymbolKind(core::SymbolRef);
     bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
