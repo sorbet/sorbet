@@ -161,7 +161,6 @@ public:
     };
 
     SymbolRef owner;
-    u4 uniqueCounter = 1; // used as a counter inside the namer
     Loc loc() const;
     InlinedVector<Loc, 1> locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);

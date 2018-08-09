@@ -406,7 +406,6 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     p.putU4(what.name._id);
     p.putU4(what.superClass._id);
     p.putU4(what.flags);
-    p.putU4(what.uniqueCounter);
     p.putU4(what.argumentsOrMixins.size());
     for (SymbolRef s : what.argumentsOrMixins) {
         p.putU4(s._id);
@@ -436,7 +435,6 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     result.name = NameRef(*gs, p.getU4());
     result.superClass = SymbolRef(gs, p.getU4());
     result.flags = p.getU4();
-    result.uniqueCounter = p.getU4();
     int argumentsOrMixinsSize = p.getU4();
     result.argumentsOrMixins.reserve(argumentsOrMixinsSize);
     for (int i = 0; i < argumentsOrMixinsSize; i++) {

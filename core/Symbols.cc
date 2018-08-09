@@ -660,7 +660,6 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
         result.members.emplace_back(NameRef(to, mem.first.id()), mem.second);
     }
     result.superClass = this->superClass;
-    result.uniqueCounter = this->uniqueCounter;
     result.intrinsic = this->intrinsic;
     return result;
 }
