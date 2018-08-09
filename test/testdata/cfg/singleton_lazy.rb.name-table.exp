@@ -3,5 +3,5 @@ class ::<root> < ::Object () @ (test/testdata/cfg/singleton_lazy.rb:2, https://g
   class ::A < ::Object () @ test/testdata/cfg/singleton_lazy.rb:2
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/cfg/singleton_lazy.rb:4
-  method #<static-init> () @ test/testdata/cfg/singleton_lazy.rb:7
+  method #<static-init> () @ ???
 

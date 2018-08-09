@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (test/testdata/desugar/multi_assign.rb:2, https:/
   class ::Test < ::Object () @ test/testdata/desugar/multi_assign.rb:4
     method ::Test#some_method (array) @ test/testdata/desugar/multi_assign.rb:5
       argument ::Test#some_method#array<> @ test/testdata/desugar/multi_assign.rb:5
-  method #<static-init> () @ test/testdata/desugar/multi_assign.rb:2
+  method #<static-init> () @ ???
   static-field #A -> T.untyped @ test/testdata/desugar/multi_assign.rb:2
   static-field #B -> T.untyped @ test/testdata/desugar/multi_assign.rb:2
   static-field #C -> T.untyped @ test/testdata/desugar/multi_assign.rb:2

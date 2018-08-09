@@ -22,5 +22,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/yield.rb:2, https://git.corp
       argument ::Main#mixed#blk<block> @ test/testdata/namer/yield.rb:11
     method ::Main#yielder (<blk>) @ test/testdata/namer/yield.rb:3
       argument ::Main#yielder#<blk><block> -> T.untyped @ test/testdata/namer/yield.rb:4
-  method #<static-init> () @ test/testdata/namer/yield.rb:27
+  method #<static-init> () @ ???
 

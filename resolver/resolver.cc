@@ -1094,18 +1094,17 @@ public:
             return classDef;
         }
 
-        auto nm = core::Names::staticInit();
+        core::SymbolRef sym;
         if (classDef->symbol == core::Symbols::root()) {
             // Every file may have its own top-level code, so uniqify the names.
             //
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            nm = ctx.state.freshNameUnique(core::UniqueNameKind::Namer, nm, classDef->loc.file.id());
+            sym = ctx.state.staticInitForFile(classDef->loc.file);
+        } else {
+            sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, core::Names::staticInit());
         }
-
-        auto sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, nm);
-
         auto init = make_unique<ast::MethodDef>(inits->loc, sym, core::Names::staticInit(),
                                                 ast::MethodDef::ARGS_store(), move(inits), true);
         classDef->rhs.emplace_back(move(init));

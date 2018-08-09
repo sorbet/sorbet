@@ -362,12 +362,12 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
 
     "bb#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$10 = Solve<::Object#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$10 = Solve<#<static-init>#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$13 = load_yield_params(::Object#<block>, Object#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$14 = 0 : Integer(0)\lx$17 = <blk>$13.[](<blk>$14) : T.untyped\l<blockReturnTemp>$15 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$16 = blockreturn<::Object#<block>> <blockReturnTemp>$15 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$13 = load_yield_params(#<static-init>#<block>, <static-init>#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$14 = 0 : Integer(0)\lx$17 = <blk>$13.[](<blk>$14) : T.untyped\l<blockReturnTemp>$15 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$16 = blockreturn<#<static-init>#<block>> <blockReturnTemp>$15 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];

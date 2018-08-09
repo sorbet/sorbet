@@ -7,5 +7,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/extend.rb:2, https://git.cor
     method ::Mixin1#say_hello () @ test/testdata/namer/extend.rb:3
   class ::Mixin2 (<constant:BasicObject>) @ test/testdata/namer/extend.rb:7
     method ::Mixin2#say_goodbye () @ test/testdata/namer/extend.rb:8
-  method #<static-init> () @ test/testdata/namer/extend.rb:2
+  method #<static-init> () @ ???
 

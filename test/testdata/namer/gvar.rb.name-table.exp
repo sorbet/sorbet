@@ -6,5 +6,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/gvar.rb:2, https://git.corp.
   field #$a @ test/testdata/namer/gvar.rb:2
   field #$b @ test/testdata/namer/gvar.rb:5
   field #$c @ test/testdata/namer/gvar.rb:8
-  method #<static-init> () @ test/testdata/namer/gvar.rb:2
+  method #<static-init> () @ ???
 

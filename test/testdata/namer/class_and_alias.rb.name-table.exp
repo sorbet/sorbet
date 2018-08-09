@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/class_and_alias.rb:2, https:
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/namer/class_and_alias.rb:6
   class ::<constant:B> < ::Object () @ test/testdata/namer/class_and_alias.rb:6
   class ::A < ::Object () @ test/testdata/namer/class_and_alias.rb:3
-  method #<static-init> () @ test/testdata/namer/class_and_alias.rb:2
+  method #<static-init> () @ ???
   static-field #<constant:A> -> Integer(91) @ test/testdata/namer/class_and_alias.rb:2
   static-field #B -> Integer(91) @ test/testdata/namer/class_and_alias.rb:8
 

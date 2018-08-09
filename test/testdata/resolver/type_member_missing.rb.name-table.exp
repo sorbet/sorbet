@@ -5,5 +5,5 @@ class ::<root> < ::Object () @ (test/testdata/resolver/type_member_missing.rb:2,
     type-member(=) ::Base#Elem @ test/testdata/resolver/type_member_missing.rb:5
   class ::Child[<constant:Elem>] < ::Base () @ test/testdata/resolver/type_member_missing.rb:8
     type-member(=) ::Child#Elem @ test/testdata/resolver/type_member_missing.rb:8
-  method #<static-init> () @ test/testdata/resolver/type_member_missing.rb:8
+  method #<static-init> () @ ???
 

@@ -478,8 +478,9 @@ public:
     unique_ptr<ast::Block> preTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
         core::SymbolRef owner = ctx.owner;
         if (owner == core::Symbols::noSymbol() || owner == core::Symbols::root()) {
-            // Root methods end up going on object
-            owner = core::Symbols::Object();
+            // Introduce intermediate host for block.
+            ENFORCE(blk->loc.exists());
+            owner = ctx.state.staticInitForFile(blk->loc.file);
         } else if (owner.data(ctx).isClass()) {
             // If we're at class scope, we're actually in the context of the
             // singleton class.

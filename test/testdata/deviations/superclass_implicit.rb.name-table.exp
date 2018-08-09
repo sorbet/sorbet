@@ -3,5 +3,5 @@ class ::<root> < ::Object () @ (test/testdata/deviations/superclass_implicit.rb:
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/deviations/superclass_implicit.rb:8
   class ::A < ::B () @ test/testdata/deviations/superclass_implicit.rb:14
   class ::B < ::Object () @ test/testdata/deviations/superclass_implicit.rb:8
-  method #<static-init> () @ test/testdata/deviations/superclass_implicit.rb:14
+  method #<static-init> () @ ???
 

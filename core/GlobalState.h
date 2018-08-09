@@ -64,6 +64,7 @@ public:
     SymbolRef enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
+    SymbolRef staticInitForFile(FileRef file);
 
     NameRef enterNameUTF8(absl::string_view nm);
 

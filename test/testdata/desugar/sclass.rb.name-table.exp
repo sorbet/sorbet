@@ -39,5 +39,5 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/desugar/sclass.rb:84
   field #$c @ test/testdata/desugar/sclass.rb:19
-  method #<static-init> () @ test/testdata/desugar/sclass.rb:2
+  method #<static-init> () @ ???
 

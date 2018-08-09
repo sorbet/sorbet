@@ -12,5 +12,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/ancestors.rb:2, https://git.
     method ::MultipleInclude#<static-init> () @ test/testdata/namer/ancestors.rb:13
   class ::Parent < ::Object (<constant:Mixin1>) @ test/testdata/namer/ancestors.rb:5
     method ::Parent#<static-init> () @ ???
-  method #<static-init> () @ test/testdata/namer/ancestors.rb:9
+  method #<static-init> () @ ???
 

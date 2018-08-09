@@ -3,5 +3,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/multiple_stubs.rb:2, https:/
   class ::Foo < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
     class ::Foo::<Class:Bar> < ::RubyTyper::<Class:StubClass> () @ test/testdata/namer/multiple_stubs.rb:2
     class ::Foo::Bar < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/namer/multiple_stubs.rb:2
-  method #<static-init> () @ test/testdata/namer/multiple_stubs.rb:2
+  method #<static-init> () @ ???
 

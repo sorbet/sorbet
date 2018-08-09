@@ -3,5 +3,5 @@ class ::<root> < ::Object () @ (test/testdata/resolver/cbase.rb:2, https://git.c
   class ::<Class:B> < ::Module () @ test/testdata/resolver/cbase.rb:3
   class ::A (<constant:BasicObject>) @ test/testdata/resolver/cbase.rb:2
   class ::B (<constant:BasicObject>) @ test/testdata/resolver/cbase.rb:3
-  method #<static-init> () @ test/testdata/resolver/cbase.rb:8
+  method #<static-init> () @ ???
 
