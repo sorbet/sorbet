@@ -566,7 +566,7 @@ string ResolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "orig = " << this->original->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
-    buf << "resolved = " << this->original->showRaw(gs, tabs + 1) << '\n';
+    buf << "resolved = " << this->resolved->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
