@@ -34,15 +34,15 @@ def externals():
     # This statement defines the @com_google_protobuf repo.
     native.http_archive(
         name = "com_google_protobuf",
-        sha256 = "1f8b9b202e9a4e467ff0b0f25facb1642727cdf5e69092038f15b37c75b99e45",
-        strip_prefix = "protobuf-3.5.1",
-        urls = ["https://github.com/google/protobuf/archive/v3.5.1.zip"],
+        sha256 = "d7a221b3d4fb4f05b7473795ccea9e05dab3b8721f6286a95fffbffc2d926f8b",
+        strip_prefix = "protobuf-3.6.1",
+        urls = ["https://github.com/google/protobuf/archive/v3.6.1.zip"],
     )
 
     new_git_repository(
         name="lmdb",
         remote="https://github.com/LMDB/lmdb.git",
-        commit="86a90cad721cbdc0bb0a9c3bf15396f5c946ae95",
+        commit="26c7df88e44e31623d0802a564f24781acdefde3",
         build_file = "//third_party:lmdb.BUILD",
     )
 
@@ -50,7 +50,7 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="b32cd9421c5e3cbe183a99b6537ce11441e50656",
+        commit="73063f5002612c6bf64fe24f851cd5cc0d83eef9",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
@@ -78,7 +78,7 @@ def externals():
     new_git_repository(
         name="concurrentqueue",
         remote="https://github.com/cameron314/concurrentqueue.git",
-        commit="8f7e861dd9411a0bf77a6b9de83a47b3424fafba",
+        commit="8f65a8734d77c3cc00d74c0532efca872931d3ce",
         build_file = "//third_party:concurrentqueue.BUILD",
     )
 
@@ -91,10 +91,10 @@ def externals():
 
     native.new_http_archive(
         name="cxxopts",
-        url="https://github.com/jarro2783/cxxopts/archive/v2.1.0.zip",
-        sha256="9cd036f58b147d21d43b27144c811b06f32dfa63a4bba89e8dace4699428a8b1",
+        url="https://github.com/jarro2783/cxxopts/archive/v2.1.1.zip",
+        sha256="b07a9fbe277247e8e7a9cbfc50af7f56775773efe5082986c215df798c93ee5d",
         build_file = "//third_party:cxxopts.BUILD",
-        strip_prefix = "cxxopts-2.1.0",
+        strip_prefix = "cxxopts-2.1.1",
     )
 
     native.new_http_archive(
@@ -108,7 +108,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="8f612ebb152fb7e05643a2bcf78cb89a8c0641ad"
+        commit="29ff6d4860070bf8fcbd39c8805d0c32d56628a3"
     )
 
     new_git_repository(
@@ -160,7 +160,7 @@ package(default_visibility = ["//visibility:public"])
 
     new_git_repository(
         name = "com_github_blake2_libb2",
-        commit = "9b1cc685934c78967a186851e3fdfde9f53a7858",
+        commit = "7feb2bb35dfe89750fba62bcd909409e995af754",
         remote ="https://github.com/BLAKE2/libb2",
         build_file = "//third_party:libb2.BUILD",
     )

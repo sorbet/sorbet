@@ -248,7 +248,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger
     return Phase::INIT;
 }
 
-void readOptions(Options &opts, int argc, const char *argv[],
+void readOptions(Options &opts, int argc, char *argv[],
                  std::shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode) {
     FileFlatMapper flatMapper(argc, argv, logger);
 

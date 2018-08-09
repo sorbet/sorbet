@@ -6,7 +6,7 @@
 
 namespace sorbet {
 namespace realmain {
-int realmain(int argc, const char *argv[]);
+int realmain(int argc, char *argv[]);
 
 extern std::shared_ptr<spdlog::logger> logger;
 } // namespace realmain

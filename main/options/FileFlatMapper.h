@@ -11,13 +11,13 @@ namespace options {
  * */
 class FileFlatMapper {
     int origArgc;
-    const char **origArgv;
+    char **origArgv;
     int &argc;
-    const char **&argv;
-    std::vector<const char *> args;
+    char **&argv;
+    std::vector<char *> args;
 
 public:
-    FileFlatMapper(int &argc, const char **&argv, std::shared_ptr<spdlog::logger> logger);
+    FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);
 
     ~FileFlatMapper();
 };

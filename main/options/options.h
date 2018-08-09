@@ -100,8 +100,7 @@ struct Options {
     const Options &operator=(Options &&) = delete;
 };
 
-void readOptions(Options &, int argc, const char *argv[],
-                 std::shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode);
+void readOptions(Options &, int argc, char *argv[], std::shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode);
 } // namespace options
 } // namespace realmain
 } // namespace sorbet

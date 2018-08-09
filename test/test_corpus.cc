@@ -647,7 +647,7 @@ vector<Expectations> getInputs(string singleTest) {
     return result;
 }
 
-int main(int argc, const char *argv[]) {
+int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
     options.add_options()("single_test", "run over single test.", cxxopts::value<string>()->default_value(""),
                           "testpath");

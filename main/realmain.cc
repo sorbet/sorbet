@@ -115,7 +115,7 @@ void startHUPMonitor() {
     monitor.detach();
 }
 
-int realmain(int argc, const char *argv[]) {
+int realmain(int argc, char *argv[]) {
     returnCode = 0;
     logger = spd::details::registry::instance().create("console", stderr_color_sink);
     logger->set_level(spd::level::trace); // pass through everything, let the sinks decide

@@ -16,7 +16,7 @@ vector<string> split(const string &s, char delimiter) {
     return tokens;
 }
 
-FileFlatMapper::FileFlatMapper(int &argc, const char **&argv, std::shared_ptr<spdlog::logger> logger)
+FileFlatMapper::FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger)
     : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
     for (int i = 0; i < argc; i++) {
         if (argv[i][0] == '@') {
