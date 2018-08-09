@@ -26,6 +26,10 @@ class CFG_Collector_and_Typer {
 public:
     unique_ptr<sorbet::ast::MethodDef> preTransformMethodDef(sorbet::core::Context ctx,
                                                              unique_ptr<sorbet::ast::MethodDef> m) {
+        if (m->symbol.data(ctx).isOverloaded()) {
+            return m;
+        }
+
         auto cfg = sorbet::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         sorbet::infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         return m;

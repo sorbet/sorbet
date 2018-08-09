@@ -47,7 +47,7 @@ public:
     CFG_Collector_and_Typer(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file.data(ctx).strict == core::StrictLevel::Stripe) {
+        if (m->loc.file.data(ctx).strict == core::StrictLevel::Stripe || m->symbol.data(ctx).isOverloaded()) {
             return m;
         }
         auto &print = opts.print;

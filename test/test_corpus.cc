@@ -100,6 +100,9 @@ public:
     vector<string> cfgs;
     unique_ptr<sorbet::ast::MethodDef> preTransformMethodDef(sorbet::core::Context ctx,
                                                              unique_ptr<sorbet::ast::MethodDef> m) {
+        if (m->symbol.data(ctx).isOverloaded()) {
+            return m;
+        }
         auto cfg = sorbet::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (raw || typedSource) {
             cfg = sorbet::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
