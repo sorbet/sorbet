@@ -238,6 +238,7 @@ public:
 
     void invalidateAllErrors();
 };
+std::unique_ptr<std::string> findDocumentation(absl::string_view sourceCode, int beginIndex);
 } // namespace lsp
 
 } // namespace realmain

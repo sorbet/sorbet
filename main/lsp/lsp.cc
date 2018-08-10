@@ -472,6 +472,38 @@ string methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, ss.str(), "${0}");
 }
 
+unique_ptr<string> findDocumentation(absl::string_view sourceCode, int beginIndex) {
+    // everything in the file before the method definition.
+    auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
+
+    int last_newline_loc = preDefinition.rfind('\n');
+    // if there is no '\n' in preDefinition, we're at the top of the file.
+    if (last_newline_loc == preDefinition.npos) {
+        return nullptr;
+    }
+    auto prevLine = preDefinition.substr(last_newline_loc, preDefinition.size() - last_newline_loc);
+    if (prevLine.find('#') == prevLine.npos) {
+        return nullptr;
+    }
+
+    std::string documentation = "";
+    // keep looking for previous newline locations, searching for lines with # in them.
+    while (prevLine.find('#') != prevLine.npos) {
+        documentation = (string)prevLine.substr(prevLine.find('#') + 1, prevLine.size()) + "\n" + documentation;
+        int prev_newline_loc = preDefinition.rfind('\n', last_newline_loc - 1);
+        // if there is no '\n', we're at the top of the file, so just return documentation.
+        if (prev_newline_loc == preDefinition.npos) {
+            break;
+        }
+        prevLine = preDefinition.substr(prev_newline_loc, last_newline_loc - prev_newline_loc);
+        last_newline_loc = prev_newline_loc;
+    }
+    if (documentation.empty()) {
+        return nullptr;
+    }
+    return make_unique<string>(documentation);
+}
+
 void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Value &items,
                        core::SymbolRef what, const core::QueryResponse &resp) {
     ENFORCE(what.exists());
@@ -489,6 +521,18 @@ void addCompletionItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &
         }
         item.AddMember("insertTextFormat", 2, alloc); // Snippet
         item.AddMember("insertText", methodSnippet(gs, what), alloc);
+
+        unique_ptr<string> documentation = nullptr;
+        if (what.data(gs).loc().file.exists()) {
+            documentation = findDocumentation(what.data(gs).loc().file.data(gs).source(), what.data(gs).loc().beginPos);
+        }
+        if (documentation) {
+            if (documentation->find("@deprecated") != documentation->npos) {
+                item.AddMember("deprecated", true, alloc);
+            }
+            item.AddMember("documentation", move(*documentation), alloc);
+        }
+
     } else if (what.data(gs).isStaticField()) {
         item.AddMember("kind", 21, alloc); // Constant
         item.AddMember("detail", resultType->show(gs), alloc);
@@ -510,6 +554,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     auto queryResponses = errorQueue->drainQueryResponses();
     if (!queryResponses.empty()) {
         auto resp = std::move(queryResponses[0]);
+
         auto receiverType = resp->receiver.type;
         if (resp->kind == core::QueryResponse::Kind::SEND) {
             auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
@@ -517,7 +562,9 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
             unordered_map<core::NameRef, vector<core::SymbolRef>> methods =
                 findSimilarMethodsIn(*finalGs, receiverType, pattern);
             for (auto &entry : methods) {
-                addCompletionItem(*finalGs, alloc, items, entry.second[0], *resp);
+                if (entry.second[0].exists()) {
+                    addCompletionItem(*finalGs, alloc, items, entry.second[0], *resp);
+                }
             }
         } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
                    resp->kind == core::QueryResponse::Kind::CONSTANT) {

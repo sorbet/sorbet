@@ -21,3 +21,18 @@ cc_library(
         "@rapidjson",
     ],
 )
+
+cc_test(
+    name = "lsp_test",
+    size = "small",
+    srcs = glob([
+        "test/*.cc",
+    ]),
+    copts = ["-Iexternal/gtest/include"],
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "lsp",
+        "@gtest",
+        "@gtest//:gtest_main",
+    ],
+)
