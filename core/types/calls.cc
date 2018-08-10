@@ -179,15 +179,10 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
         }
         e.addErrorSection(
             ErrorSection("Got " + argTpe.type->show(ctx) + " originating from:", argTpe.origins2Explanations(ctx)));
-        auto *ot = cast_type<OrType>(argTpe.type.get());
-        if (ot) {
-            auto *lt = cast_type<ClassType>(ot->left.get());
-            auto *rt = cast_type<ClassType>(ot->right.get());
-            if ((lt != nullptr && lt->symbol == Symbols::NilClass()) ||
-                (rt != nullptr && rt->symbol == Symbols::NilClass())) {
-                if (loc.exists()) {
-                    e.replaceWith(loc, "T.must({})", loc.source(ctx));
-                }
+        auto withoutNil = Types::approximateSubtract(ctx, argTpe.type, Types::nilClass());
+        if (Types::isSubTypeUnderConstraint(ctx, constr, withoutNil, expectedType)) {
+            if (loc.exists()) {
+                e.replaceWith(loc, "T.must({})", loc.source(ctx));
             }
         }
         return e.build();
