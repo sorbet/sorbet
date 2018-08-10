@@ -24,7 +24,10 @@ class MyTest
         T.assert_type!(@foo, Integer)
     end
 
-    random_method do # error: Method `random_method` does not exist on
+    def self.random_method
+    end
+
+    random_method do
         @random_method_ivar = T.let(3, Integer) # error: Instance variables must be declared inside `initialize
     end
 

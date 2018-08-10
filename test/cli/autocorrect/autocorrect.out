@@ -16,3 +16,7 @@
 > T.must(foo.bar) &&= "a"
 > T.must(foo.bar) |= "a"
 > T.must(foo.bar) &= "a"
+17c17
+< [1].max_by {|l,r| 1}[2]
+---
+> T.must([1].max_by {|l,r| 1})[2]

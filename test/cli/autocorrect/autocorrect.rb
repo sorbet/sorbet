@@ -13,3 +13,5 @@ foo.bar ||= "a"
 foo.bar &&= "a"
 foo.bar |= "a"
 foo.bar &= "a"
+
+[1].max_by {|l,r| 1}[2]
