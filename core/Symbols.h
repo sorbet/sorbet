@@ -57,8 +57,6 @@ public:
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     std::string show(const GlobalState &gs) const;
 
-    SymbolRef dealiasAt(GlobalState &gs, SymbolRef klass) const;
-
     u4 _id;
 
 private:
@@ -167,8 +165,6 @@ public:
 
     u4 flags = Flags::NONE;
 
-    /** Type aliases are introduced by resolver and SHOULD NOT be serialized */
-    std::vector<std::pair<SymbolRef, SymbolRef>> typeAliases;
     SymbolRef superClass;
     std::shared_ptr<Type> resultType;
 

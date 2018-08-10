@@ -619,31 +619,6 @@ bool Symbol::isBlockSymbol(const GlobalState &gs) const {
     return nm.kind == NameKind::UNIQUE && nm.unique.original == Names::blockTemp();
 }
 
-SymbolRef SymbolRef::dealiasAt(GlobalState &gs, SymbolRef klass) const {
-    ENFORCE(data(gs).isTypeMember());
-    if (data(gs).owner == klass) {
-        return *this;
-    } else {
-        SymbolRef cursor;
-        if (data(gs).owner.data(gs).derivesFrom(gs, klass)) {
-            cursor = data(gs).owner;
-        } else if (klass.data(gs).derivesFrom(gs, data(gs).owner)) {
-            cursor = klass;
-        }
-        while (true) {
-            if (!cursor.exists()) {
-                return cursor;
-            }
-            for (auto aliasPair : cursor.data(gs).typeAliases) {
-                if (aliasPair.first == *this) {
-                    return aliasPair.second.dealiasAt(gs, klass);
-                }
-            }
-            cursor = cursor.data(gs).superClass;
-        }
-    }
-}
-
 Symbol Symbol::deepCopy(const GlobalState &to) const {
     Symbol result;
     result.owner = this->owner;
@@ -653,7 +628,6 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
     result.name = NameRef(to, this->name.id());
     result.locs_ = this->locs_;
     result.typeParams = this->typeParams;
-    result.typeAliases = this->typeAliases;
 
     result.members.reserve(this->members.size());
     for (auto &mem : this->members) {
@@ -728,11 +702,6 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     for (const auto &e : typeParams) {
         if (e.exists() && !e.data(gs).ignoreInHashing(gs)) {
             result = mix(result, _hash(e.data(gs).name.data(gs).shortName(gs)));
-        }
-    }
-    for (const auto &e : typeAliases) {
-        if (e.first.exists() && !e.first.data(gs).ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.first.data(gs).name.data(gs).shortName(gs)));
         }
     }
 

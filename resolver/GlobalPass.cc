@@ -12,8 +12,34 @@ namespace sorbet {
 namespace resolver {
 
 namespace {
+core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::SymbolRef klass,
+                          const vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
+    ENFORCE(tparam.data(gs).isTypeMember());
+    if (tparam.data(gs).owner == klass) {
+        return tparam;
+    } else {
+        core::SymbolRef cursor;
+        if (tparam.data(gs).owner.data(gs).derivesFrom(gs, klass)) {
+            cursor = tparam.data(gs).owner;
+        } else if (klass.data(gs).derivesFrom(gs, tparam.data(gs).owner)) {
+            cursor = klass;
+        }
+        while (true) {
+            if (!cursor.exists()) {
+                return cursor;
+            }
+            for (auto aliasPair : typeAliases[cursor._id]) {
+                if (aliasPair.first == tparam) {
+                    return dealiasAt(gs, aliasPair.second, klass, typeAliases);
+                }
+            }
+            cursor = cursor.data(gs).superClass;
+        }
+    }
+}
+
 bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::SymbolRef parentTypeMember,
-                       core::SymbolRef sym) {
+                       core::SymbolRef sym, vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs).name;
     auto parentVariance = parentTypeMember.data(gs).variance();
     auto &inSym = sym.data(gs);
@@ -47,11 +73,12 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         }
         return true;
     }
-    inSym.typeAliases.emplace_back(parentTypeMember, my);
+    typeAliases[sym._id].emplace_back(parentTypeMember, my);
     return true;
 }
 
-void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
+void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
+                        vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     auto &inSym = sym.data(gs);
     ENFORCE(inSym.isClass());
 
@@ -60,14 +87,14 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
         auto tps = parent.data(gs).typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
-            bool foundThis = resolveTypeMember(gs, parent, tp, sym);
+            bool foundThis = resolveTypeMember(gs, parent, tp, sym, typeAliases);
             foundAll = foundAll && foundThis;
         }
         if (foundAll) {
             int i = 0;
             // check that type params are in the same order.
             for (core::SymbolRef tp : tps) {
-                core::SymbolRef my = tp.dealiasAt(gs, sym);
+                core::SymbolRef my = dealiasAt(gs, tp, sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
                 if (inSym.typeMembers()[i] != my) {
                     if (auto e = gs.beginError(my.data(gs).loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
@@ -88,7 +115,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym) {
 
     for (core::SymbolRef mixin : inSym.mixins()) {
         for (core::SymbolRef tp : mixin.data(gs).typeMembers()) {
-            resolveTypeMember(gs, mixin, tp, sym);
+            resolveTypeMember(gs, mixin, tp, sym, typeAliases);
         }
     }
 
@@ -247,10 +274,13 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 
+    vector<vector<pair<core::SymbolRef, core::SymbolRef>>> typeAliases;
+    typeAliases.resize(gs.symbolsUsed());
+
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs).isClass()) {
-            resolveTypeMembers(gs, sym);
+            resolveTypeMembers(gs, sym, typeAliases);
         }
     }
 
