@@ -236,6 +236,8 @@ private:
             core::SymbolRef scope;
             if (auto *id = ast::cast_tree<ast::Ident>(inner->resolved.get())) {
                 scope = id->symbol.data(ctx).dealias(ctx);
+            } else if (auto *id = ast::cast_tree<ast::Ident>(inner->original->scope.get())) {
+                scope = id->symbol.data(ctx).dealias(ctx);
             } else {
                 scope = job.scope->scope;
             }
