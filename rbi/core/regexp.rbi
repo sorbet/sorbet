@@ -71,7 +71,7 @@ class Regexp < Object
   def inspect(); end
 
   sig(
-      arg0: String,
+      arg0: T.nilable(String),
       arg1: Integer,
   )
   .returns(T.nilable(MatchData))
