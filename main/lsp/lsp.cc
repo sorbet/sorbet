@@ -126,7 +126,7 @@ bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &l
 }
 
 bool hideSymbol(core::GlobalState &gs, core::SymbolRef sym) {
-    if (!sym.exists()) {
+    if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
     }
     auto &data = sym.data(gs);
@@ -965,6 +965,7 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef s
     result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
     result.AddMember("range", loc2Range(sym.loc()), alloc); // TODO: this range should cover body. Currently it doesn't.
     result.AddMember("selectionRange", loc2Range(sym.loc()), alloc);
+
     rapidjson::Value children;
     children.SetArray();
     for (auto mem : sym.members) {
