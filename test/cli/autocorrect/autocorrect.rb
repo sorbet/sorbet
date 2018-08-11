@@ -21,3 +21,6 @@ def foo(a:)
 end
 a = T.let(nil, T.nilable(Numeric))
 foo(a: a)
+
+a = T.let({a: 2}, T::Hash[Symbol, Integer])
+a[:a] = nil
