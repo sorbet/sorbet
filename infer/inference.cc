@@ -57,14 +57,18 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
-            Environment tempEnv;
-            auto &envAsSeenFromBranch =
-                Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
-            current.populateFrom(ctx, envAsSeenFromBranch);
+            if (!outEnvironments[parent->id].isDead) {
+                Environment tempEnv;
+                auto &envAsSeenFromBranch =
+                    Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
+                current.populateFrom(ctx, envAsSeenFromBranch);
+            } else {
+                current.isDead = true;
+            }
         } else {
             current.isDead = (bb != cfg->entry());
             for (cfg::BasicBlock *parent : bb->backEdges) {
-                if (!visited[parent->id]) {
+                if (!visited[parent->id] || outEnvironments[parent->id].isDead) {
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
