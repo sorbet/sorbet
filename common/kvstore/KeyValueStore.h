@@ -18,7 +18,7 @@ class KeyValueStore {
     MDB_txn *txn;
     const std::string path;
     const std::thread::id writerId;
-    std::unordered_map<std::thread::id, MDB_txn *> readers;
+    UnorderedMap<std::thread::id, MDB_txn *> readers;
     std::mutex readersLock;
     bool commited = false;
 

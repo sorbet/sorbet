@@ -355,9 +355,9 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
     sendResult(d, result);
 }
 
-unordered_map<core::NameRef, vector<core::SymbolRef>>
-mergeMaps(unordered_map<core::NameRef, vector<core::SymbolRef>> &&first,
-          unordered_map<core::NameRef, vector<core::SymbolRef>> &&second) {
+UnorderedMap<core::NameRef, vector<core::SymbolRef>>
+mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
+          UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&second) {
     for (auto &other : second) {
         first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
                                   make_move_iterator(other.second.end()));
@@ -365,9 +365,9 @@ mergeMaps(unordered_map<core::NameRef, vector<core::SymbolRef>> &&first,
     return first;
 };
 
-unordered_map<core::NameRef, vector<core::SymbolRef>>
+UnorderedMap<core::NameRef, vector<core::SymbolRef>>
 findSimilarMethodsIn(core::GlobalState &gs, shared_ptr<core::Type> receiver, absl::string_view name) {
-    unordered_map<core::NameRef, vector<core::SymbolRef>> result;
+    UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
     typecase(
         receiver.get(),
         [&](core::ClassType *c) {
@@ -559,7 +559,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
         if (resp->kind == core::QueryResponse::Kind::SEND) {
             auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
             logger->debug("Looking for method similar to {}", pattern);
-            unordered_map<core::NameRef, vector<core::SymbolRef>> methods =
+            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
                 findSimilarMethodsIn(*finalGs, receiverType, pattern);
             for (auto &entry : methods) {
                 if (entry.second[0].exists()) {

@@ -137,9 +137,9 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
     // TODO: this will be the right moment to implement checks for correct locations of co&contra variant types.
 }
 
-const vector<core::SymbolRef> &
-getAbstractMethods(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
-                   core::SymbolRef klass) {
+const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
+                                                  UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+                                                  core::SymbolRef klass) {
     vector<core::SymbolRef> abstract;
     auto ent = abstractCache.find(klass);
     if (ent != abstractCache.end()) {
@@ -174,7 +174,7 @@ getAbstractMethods(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<
     return entry;
 }
 
-void validateAbstract(core::GlobalState &gs, unordered_map<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
+void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
                       core::SymbolRef sym) {
     if (sym.data(gs).isClassAbstract()) {
         return;
@@ -284,7 +284,7 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 
-    unordered_map<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
+    UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto sym = core::SymbolRef(&gs, i);

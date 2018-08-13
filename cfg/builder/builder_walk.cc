@@ -3,8 +3,6 @@
 #include "core/errors/cfg.h"
 #include "core/errors/internal.h"
 
-#include <unordered_map>
-
 using namespace std;
 
 namespace sorbet {
@@ -56,7 +54,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
 }
 
 core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inWhat,
-                                 unordered_map<core::SymbolRef, core::LocalVariable> &aliases) {
+                                 UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases) {
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
         const core::Symbol &data = what.data(cctx.ctx);

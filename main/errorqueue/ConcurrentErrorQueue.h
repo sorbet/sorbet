@@ -28,7 +28,7 @@ struct ErrorQueueMessage {
 class ConcurrentErrorQueue : public core::ErrorQueue {
 private:
     std::thread::id owner;
-    std::unordered_map<core::FileRef, std::vector<ErrorQueueMessage>> collected;
+    UnorderedMap<core::FileRef, std::vector<ErrorQueueMessage>> collected;
     std::vector<core::AutocorrectSuggestion> autocorrects;
     ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
     std::atomic<bool> printedAtLeastOneError{false};

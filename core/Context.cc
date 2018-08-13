@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <sstream>
 #include <string>
-#include <unordered_map>
 
 template class std::vector<sorbet::core::NameRef>;
 template class std::vector<sorbet::core::FileRef>;

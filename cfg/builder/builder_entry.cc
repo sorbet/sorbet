@@ -2,7 +2,6 @@
 #include "core/Names/cfg.h"
 
 #include <algorithm> // sort
-#include <unordered_map>
 
 using namespace std;
 
@@ -21,7 +20,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         return res;
     }
     u4 temporaryCounter = 1;
-    unordered_map<core::SymbolRef, core::LocalVariable> aliases;
+    UnorderedMap<core::SymbolRef, core::LocalVariable> aliases;
     CFGContext cctx(ctx, *res.get(), core::LocalVariable(), 0, nullptr, nullptr, nullptr, aliases, temporaryCounter);
 
     core::LocalVariable retSym = cctx.newTemporary(core::Names::returnMethodTemp());

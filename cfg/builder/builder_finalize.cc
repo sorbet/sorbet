@@ -3,7 +3,6 @@
 
 #include <algorithm> // sort, remove, unique
 #include <climits>   // INT_MAX
-#include <unordered_map>
 #include <unordered_set>
 using namespace std;
 
@@ -125,7 +124,7 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
 }
 
 core::LocalVariable maybeDealias(core::Context ctx, core::LocalVariable what,
-                                 unordered_map<core::LocalVariable, core::LocalVariable> &aliases) {
+                                 UnorderedMap<core::LocalVariable, core::LocalVariable> &aliases) {
     if (what.isSyntheticTemporary(ctx)) {
         auto fnd = aliases.find(what);
         if (fnd != aliases.end()) {
@@ -147,7 +146,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
         return;
     }
 
-    vector<unordered_map<core::LocalVariable, core::LocalVariable>> outAliases;
+    vector<UnorderedMap<core::LocalVariable, core::LocalVariable>> outAliases;
 
     outAliases.resize(cfg.maxBasicBlockId);
     for (auto it = cfg.forwardsTopoSort.rbegin(); it != cfg.forwardsTopoSort.rend(); ++it) {
@@ -155,13 +154,13 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
         if (bb == cfg.deadBlock()) {
             continue;
         }
-        unordered_map<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
+        UnorderedMap<core::LocalVariable, core::LocalVariable> &current = outAliases[bb->id];
         if (!bb->backEdges.empty()) {
             current = outAliases[bb->backEdges[0]->id];
         }
 
         for (BasicBlock *parent : bb->backEdges) {
-            unordered_map<core::LocalVariable, core::LocalVariable> other = outAliases[parent->id];
+            UnorderedMap<core::LocalVariable, core::LocalVariable> other = outAliases[parent->id];
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
                 auto &el = *it;
                 auto fnd = other.find(el.first);

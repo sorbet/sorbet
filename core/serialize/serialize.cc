@@ -580,7 +580,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         names_by_hash.emplace_back(make_pair(hash, value));
     }
 
-    std::unordered_map<std::string, FileRef> fileRefByPath;
+    UnorderedMap<std::string, FileRef> fileRefByPath;
     result.trace("moving");
     int i = 0;
     for (auto f : files) {

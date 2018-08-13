@@ -35,7 +35,7 @@ public:
     BasicBlock *breakScope;
     BasicBlock *rescueScope;
     std::shared_ptr<core::SendAndBlockLink> link;
-    std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases;
+    UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases;
     u4 &temporaryCounter;
 
     CFGContext withTarget(core::LocalVariable target);
@@ -49,7 +49,7 @@ private:
     friend std::unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md);
     CFGContext(core::Context ctx, CFG &inWhat, core::LocalVariable target, int loops, BasicBlock *nextScope,
                BasicBlock *breakScope, BasicBlock *rescueScope,
-               std::unordered_map<core::SymbolRef, core::LocalVariable> &aliases, u4 &temporaryCounter)
+               UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases, u4 &temporaryCounter)
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), nextScope(nextScope), breakScope(breakScope),
           rescueScope(rescueScope), aliases(aliases), temporaryCounter(temporaryCounter){};
 };

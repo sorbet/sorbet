@@ -51,11 +51,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         }
         Environment &current = outEnvironments[bb->id];
         current.vars.reserve(bb->args.size());
-        current.types.resize(bb->args.size());
-        current.knowledge.resize(bb->args.size());
-        current.knownTruthy.resize(bb->args.size());
         for (core::LocalVariable arg : bb->args) {
-            current.vars.push_back(arg);
+            current.vars[arg].typeAndOrigins.type = nullptr;
         }
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
@@ -84,13 +81,13 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
 
         int i = -1;
-        for (auto &uninitialized : current.types) {
+        for (auto &uninitialized : current.vars) {
             i++;
-            if (uninitialized.type.get() == nullptr) {
-                uninitialized.type = core::Types::nilClass();
-                uninitialized.origins.push_back(ctx.owner.data(ctx).loc());
+            if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
+                uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
+                uninitialized.second.typeAndOrigins.origins.push_back(ctx.owner.data(ctx).loc());
             } else {
-                uninitialized.type->sanityCheck(ctx);
+                uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
             }
         }
 
@@ -125,7 +122,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             current.ensureGoodCondition(ctx, bb->bexit.cond);
         }
         core::histogramInc("infer.environment.size", current.vars.size());
-        for (auto &k : current.knowledge) {
+        for (auto &pair : current.vars) {
+            auto &k = pair.second.knowledge;
             core::histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
             core::histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
             core::histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());

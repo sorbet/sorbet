@@ -34,9 +34,9 @@ CFG::CFG() {
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> reads;
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> writes;
-    unordered_map<core::LocalVariable, unordered_set<BasicBlock *>> dead;
+    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> reads;
+    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> writes;
+    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> dead;
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {

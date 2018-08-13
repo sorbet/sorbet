@@ -63,9 +63,9 @@ core::StrictLevel text2StrictLevel(absl::string_view key, std::shared_ptr<spdlog
     }
 }
 
-std::unordered_map<std::string, core::StrictLevel> extractStricnessOverrides(string fileName,
-                                                                             std::shared_ptr<spdlog::logger> logger) {
-    std::unordered_map<std::string, core::StrictLevel> result;
+UnorderedMap<std::string, core::StrictLevel> extractStricnessOverrides(string fileName,
+                                                                       std::shared_ptr<spdlog::logger> logger) {
+    UnorderedMap<std::string, core::StrictLevel> result;
     YAML::Node config = YAML::LoadFile(fileName);
     switch (config.Type()) {
         case YAML::NodeType::Map:

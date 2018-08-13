@@ -108,7 +108,7 @@ private:
     vector<ResolutionItem> todo_;
     vector<AncestorResolutionItem> todo_ancestors_;
     vector<ClassAliasResolutionItem> todo_aliases_;
-    using TypeAliasMap = unordered_map<core::SymbolRef, const ast::Expression *>;
+    using TypeAliasMap = UnorderedMap<core::SymbolRef, const ast::Expression *>;
     TypeAliasMap typeAliases;
 
     static core::SymbolRef resolveLhs(core::MutableContext ctx, shared_ptr<Nesting> nesting, core::NameRef name) {

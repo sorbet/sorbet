@@ -2,7 +2,6 @@
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 #include <algorithm> // find_if
-#include <unordered_map>
 #include <utility>
 
 namespace sorbet {

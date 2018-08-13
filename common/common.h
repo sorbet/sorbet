@@ -10,6 +10,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 
 #include "absl/container/inlined_vector.h"
 #include "absl/strings/string_view.h"
+#include "unordered_map.hpp"
 #include <cstring>
 #include <functional>
 #include <ostream>
@@ -29,6 +30,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 namespace sorbet {
 
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
+template <class K, class V> using UnorderedMap = ska::unordered_map<K, V>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 

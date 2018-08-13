@@ -152,7 +152,7 @@ class LSPLoop {
     std::vector<core::FileRef> updatedErrors;
     /** LSP clients do not store errors on their side. We have to resend the entire list of errors
      * every time we send a single new one */
-    std::unordered_map<core::FileRef, std::vector<std::unique_ptr<core::BasicError>>> errorsAccumulated;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::BasicError>>> errorsAccumulated;
     /** Root of LSP client workspace */
     std::string rootUri;
 

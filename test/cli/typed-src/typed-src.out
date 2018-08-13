@@ -3,15 +3,16 @@ class A
 
   sig(x: T.any(String, Integer), y: Integer).returns(Integer)
   # dead=1
-  # <constant:Integer>$14: <Class:Integer>
-  #
-  # <constant:String>$12: <Class:String>
-  #
-  # <constant:T>$10: <Class:T>
-  #
-  # <constant:<Magic>>$17: <Magic>
+  # <statTemp>$4: T.untyped
   #
   # <statTemp>$5: <Class:A>
+  #
+  # <statTemp>$6: ShapeType {
+  #   Symbol(:"x") => MetaType
+  #   Symbol(:"y") => <Class:Integer>
+  # }
+  #
+  # <returnMethodTemp>$2: T.untyped
   #
   # <hashTemp>$7: Symbol(:"x")
   #
@@ -19,26 +20,17 @@ class A
   #
   # <hashTemp>$15: Symbol(:"y")
   #
-  # <statTemp>$6: ShapeType {
-  #   Symbol(:"x") => MetaType
-  #   Symbol(:"y") => <Class:Integer>
-  # }
-  #
-  # <statTemp>$4: T.untyped
-  #
-  # <returnMethodTemp>$2: T.untyped
-  #
   # <finalReturn>: <impossible>
+  #
+  # <constant:Integer>$14: <Class:Integer>
+  #
+  # <constant:String>$12: <Class:String>
+  #
+  # <constant:T>$10: <Class:T>
+  #
+  # <constant:<Magic>>$17: <Magic>
   def a_method(x, y)
     if x.is_a?(String)
-       # <constant:String>$8: <Class:String>
-       #
-       # <selfMethodTemp>$3: A
-       #
-       # x: String | Integer
-       #
-       # y: Integer
-       #
        # <ifTemp>$5: TrueClass | FalseClass
        #   Being truthy entails:
        #     x to be String
@@ -46,27 +38,35 @@ class A
        #   Being falsy entails:
        #     x NOT to be String
        #     x NOT to be String
+       #
+       # <selfMethodTemp>$3: A
+       #
+       # <constant:String>$8: <Class:String>
+       #
+       # x: String | Integer
+       #
+       # y: Integer
           # x: String
           #
           # y: Integer
       x = x.to_i
+          # <statTemp>$9: String
+          #
           # x: Integer
           #
           # y: Integer
-          #
-          # <statTemp>$9: String
     end
     # x: Integer
     #
     # y: Integer
     x + y
     # dead=1
-    # x: Integer
-    #
-    # y: Integer
-    #
     # <returnMethodTemp>$2: Integer
     #
     # <finalReturn>: <impossible>
+    #
+    # x: Integer
+    #
+    # y: Integer
   end
 end

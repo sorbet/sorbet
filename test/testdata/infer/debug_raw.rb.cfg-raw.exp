@@ -18,7 +18,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2]()\la = 2 : Integer(2)\l<returnMethodTemp>$2 = a : Integer(2)\la: Integer(2)\l\l<returnMethodTemp>$2: Integer(2)\l\l<unconditional>\l"
+        label = "block[id=2]()\la = 2 : Integer(2)\l<returnMethodTemp>$2 = a : Integer(2)\l<returnMethodTemp>$2: Integer(2)\l\la: Integer(2)\l\l<unconditional>\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_4" [style="bold"];

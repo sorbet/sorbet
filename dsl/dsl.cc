@@ -21,7 +21,7 @@ public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         Command::patchDSL(ctx, classDef.get());
 
-        unordered_map<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
+        UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
                      [&](ast::Assign *assign) {

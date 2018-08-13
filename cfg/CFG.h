@@ -100,20 +100,20 @@ public:
     static constexpr int MIN_LOOP_GLOBAL = -2;
     static constexpr int MIN_LOOP_LET = -3;
 
-    std::unordered_map<core::LocalVariable, int> minLoops;
-    std::unordered_map<core::LocalVariable, int> maxLoopWrite;
+    UnorderedMap<core::LocalVariable, int> minLoops;
+    UnorderedMap<core::LocalVariable, int> maxLoopWrite;
 
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
-        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
+        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
+        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        std::unordered_map<core::LocalVariable, std::unordered_set<BasicBlock *>> dead;
+        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 

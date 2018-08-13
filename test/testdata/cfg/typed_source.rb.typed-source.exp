@@ -53,16 +53,16 @@ class Examples
 
           # a: Integer(1)
       if (false)
-          # a: Integer(1)
-          #
           # <ifTemp>$7: FalseClass
+          #
+          # a: Integer(1)
         b = 1 # error: This code is unreachable
       else
             # a: Integer(1)
         b = 2
-            # a: Integer(1)
-            #
             # b: Integer(2)
+            #
+            # a: Integer(1)
       end
 
       # b: Integer(2)
@@ -70,28 +70,28 @@ class Examples
       # a: Integer(1)
       a + b
       # dead=1
-      # b: Integer(2)
-      #
-      # a: Integer(1)
-      #
       # <returnMethodTemp>$2: Integer
       #
       # <finalReturn>: <impossible>
+      #
+      # b: Integer(2)
+      #
+      # a: Integer(1)
     end
 
 
     def variables_and_loop(cond)
       if (true)
+          # <ifTemp>$5: TrueClass
+          #
           # <selfMethodTemp>$3: Examples
           #
           # cond: T.untyped
-          #
-          # <ifTemp>$5: TrueClass
             # cond: T.untyped
         a = 1
-            # cond: T.untyped
-            #
             # a: Integer(1)
+            #
+            # cond: T.untyped
       else
         a = 2 # error: This code is unreachable
       end
@@ -100,12 +100,14 @@ class Examples
             #
             # cond: T.untyped
             #   Being truthy entails:
-            #     <debugEnvironmentTemp> to be NilClass
             #     a to be Integer(1)
+            #     <debugEnvironmentTemp> to be NilClass
             #   Being falsy entails:
-            #     <debugEnvironmentTemp> to be NilClass
             #     a to be Integer(1)
+            #     <debugEnvironmentTemp> to be NilClass
       while true
+            # <whileTemp>$7: TrueClass
+            #
             # b: NilClass
             #
             # cond: T.untyped
@@ -113,8 +115,6 @@ class Examples
             #     a to be Integer(1)
             #   Being falsy entails:
             #     a to be Integer(1)
-            #
-            # <whileTemp>$7: TrueClass
         if (cond)
               # b: NilClass
               #
@@ -170,6 +170,8 @@ class Examples
             #     <debugEnvironmentTemp> to be NilClass
             #     <selfMethodTemp>$3 to be Examples
       while true
+            # <whileTemp>$5: TrueClass
+            #
             # b: NilClass
             #
             # cond: T.untyped
@@ -177,8 +179,6 @@ class Examples
             #     <selfMethodTemp>$3 to be Examples
             #   Being falsy entails:
             #     <selfMethodTemp>$3 to be Examples
-            #
-            # <whileTemp>$5: TrueClass
         if (cond)
               # b: NilClass
               #
@@ -222,18 +222,18 @@ class Examples
     def take_arguments(i)
       # <returnMethodTemp>$2: T.untyped
       if(false)
+         # <ifTemp>$4: FalseClass
+         #
          # <selfMethodTemp>$3: Examples
          #
          # i: T.untyped
-         #
-         # <ifTemp>$4: FalseClass
        2 # error: This code is unreachable
       else
        # i: T.untyped
        i
-       # i: T.untyped
-       #
        # <returnMethodTemp>$2: T.untyped
+       #
+       # i: T.untyped
       end
       # dead=1
       # <returnMethodTemp>$2: T.untyped

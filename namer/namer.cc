@@ -9,8 +9,6 @@
 #include "core/core.h"
 #include "core/errors/namer.h"
 
-#include <unordered_map>
-
 using namespace std;
 
 namespace sorbet {
@@ -97,7 +95,7 @@ class NameInserter {
     }
 
     struct LocalFrame {
-        unordered_map<core::NameRef, core::LocalVariable> locals;
+        UnorderedMap<core::NameRef, core::LocalVariable> locals;
         bool moduleFunctionActive;
         int uniqueCounter = 0;
     };

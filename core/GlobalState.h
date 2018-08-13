@@ -140,7 +140,7 @@ private:
     absl::string_view enterString(absl::string_view nm);
     u2 strings_last_page_used = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
-    std::unordered_map<std::string, FileRef> fileRefByPath;
+    UnorderedMap<std::string, FileRef> fileRefByPath;
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;

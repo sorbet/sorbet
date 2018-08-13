@@ -1,6 +1,7 @@
 #ifndef SORBET_ENVIRONMENT_H
 #define SORBET_ENVIRONMENT_H
 
+#include "../common/common.h"
 #include "cfg/CFG.h"
 #include "core/Context.h"
 #include "core/Errors.h"
@@ -121,13 +122,16 @@ public:
      * inferencer. There's no need for the inverse "known falsy" bit because a
      * simple subtyping check suffices to represent that one.
      */
-    std::vector<core::LocalVariable> vars;
-    std::vector<core::TypeAndOrigins> types;
-    std::vector<TestedKnowledge> knowledge;
-    std::vector<bool> knownTruthy;
 
-    std::unordered_map<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
-    std::unordered_map<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
+    struct VariableState {
+        core::TypeAndOrigins typeAndOrigins;
+        TestedKnowledge knowledge;
+        bool knownTruthy;
+    };
+    UnorderedMap<core::LocalVariable, VariableState> vars;
+
+    UnorderedMap<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
+    UnorderedMap<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
     std::string toString(core::Context ctx) const;
 
@@ -169,10 +173,10 @@ public:
      * then discard it, so the mixed lifetimes are not a problem in practice.
      */
     static const Environment &withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
-                                       const std::vector<core::LocalVariable> &filter);
+                                       const UnorderedMap<core::LocalVariable, VariableState> &filter);
 
     void assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVariable cond, core::Loc loc,
-                         const std::vector<core::LocalVariable> &filter);
+                         const UnorderedMap<core::LocalVariable, VariableState> &filter);
 
     core::TypeAndOrigins getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
                                                       const Environment &other);

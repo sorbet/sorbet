@@ -26,7 +26,6 @@
 #include <sstream>
 #include <string>
 #include <sys/types.h>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 namespace spd = spdlog;
@@ -37,7 +36,7 @@ struct Expectations {
     string basename;
     string testName;
     vector<string> sourceFiles;
-    unordered_map<string, string> expectations;
+    sorbet::UnorderedMap<string, string> expectations;
 };
 
 string singleTest;
