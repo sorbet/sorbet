@@ -770,7 +770,7 @@ private:
                     if (debug_mode) {
                         bool hasSig = !lastSig.empty();
                         bool DSL = mdef->isDSLSynthesized();
-                        bool isRBI = FileOps::getExtension(mdef->loc.file.data(ctx).path()) == "rbi";
+                        bool isRBI = mdef->loc.file.data(ctx).isRBI();
                         if (hasSig) {
                             core::categoryCounterInc("method.sig", "true");
                         } else {
