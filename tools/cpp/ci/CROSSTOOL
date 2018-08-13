@@ -7,11 +7,6 @@ default_toolchain {
   toolchain_identifier: "local_linux"
 }
 
-default_setting {
-  name: "force-libubsan"
-  default_value: false
-}
-
 toolchain {
   abi_version: "local"
   abi_libc_version: "local"
@@ -152,9 +147,4 @@ toolchain {
 
   linker_flag: "-l:libc++.a"
   linker_flag: "-l:libc++abi.a"
-
-  optional_linker_flag {
-    default_setting_name: "force-libubsan"
-    flag: "-lubsan"
-  }
 }

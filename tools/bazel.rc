@@ -47,7 +47,7 @@ build:release --stamp
 
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
 # intentionally does not reuse --config=debugsymbols because we want to have a sandboxed build
-build:ci --config forcedebug
+build:ci --config=forcedebug
 build:ci --copt=-g3
 build:ci --cxxopt=-g3
 build:ci --config=sanitize
@@ -81,13 +81,8 @@ build:sanitize --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-aft
 build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
+build:sanitize --linkopt=-lubsan
 build:sanitize --define unsanitized=false
-
-# For some reason, on our Linux builds, -fsanitize=undefined fails
-# with link errors without an explicit link of -lubsan. Per
-# https://github.com/google/oss-fuzz/issues/713 it might be related to
-# the fact that bazel uses $CC as the linker even for C++.
-build:sanitize --features=force-libubsan
 
 build:tsan --copt=-fsanitize=thread
 build:tsan --cxxopt=-fsanitize=thread
@@ -118,6 +113,5 @@ build:nopie --cxxopt=-fno-pie
 build --strip=never
 
 # Enable nice UIs. Taken from bazel.rc of Bazel itself.
-build --experimental_skyframe_target_pattern_evaluator
 common --experimental_ui --experimental_ui_actions_shown 8
 common --show_progress_rate_limit=0.25
