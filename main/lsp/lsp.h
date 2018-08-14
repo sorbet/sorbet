@@ -98,6 +98,9 @@ struct LSPMethod {
     static const inline LSPMethod TextDocumentCompletion() {
         return LSPMethod{"textDocument/completion", false, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod TextDocumentSignatureHelp() {
+        return LSPMethod{"textDocument/signatureHelp", false, LSPMethod::Kind::ClientInitiated};
+    };
     static const inline LSPMethod ReadFile() {
         return LSPMethod{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
     };
@@ -216,6 +219,8 @@ class LSPLoop {
     std::string remoteName2Local(const absl::string_view uri);
     std::string localName2Remote(const absl::string_view uri);
 
+    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
+
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
@@ -230,6 +235,7 @@ class LSPLoop {
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
     void sendShowMessageNotification(int messageType, std::string message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
+    void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,

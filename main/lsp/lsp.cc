@@ -260,6 +260,9 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                                "       \"workspaceSymbolProvider\": true, "
                                "       \"definitionProvider\": true, "
                                "       \"hoverProvider\":true,"
+                               "       \"signatureHelpProvider\": { "
+                               "           \"triggerCharacters\": [\"(\", \",\"]"
+                               "       },"
                                "       \"completionProvider\": { "
                                "           \"triggerCharacters\": [\".\"]"
                                "       }"
@@ -313,6 +316,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             handleTextDocumentHover(result, d);
         } else if (method == LSPMethod::TextDocumentCompletion()) {
             handleTextDocumentCompletion(result, d);
+        } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
+            handleTextSignatureHelp(result, d);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
             errorCode = (int)LSPErrorCodes::MethodNotFound;
@@ -320,6 +325,110 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             sendError(d, errorCode, errorString);
         }
     }
+}
+
+void addSignatureHelpItem(core::GlobalState &gs, rapidjson::MemoryPoolAllocator<> &alloc, rapidjson::Value &signatures,
+                          core::SymbolRef method, const core::QueryResponse &resp, int activeParameter) {
+    // signature helps only exist for methods.
+    if (!method.exists() || !method.data(gs).isMethod() || hideSymbol(gs, method)) {
+        return;
+    }
+    rapidjson::Value sig;
+    sig.SetObject();
+    // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting
+    // wtih respect to activeParameter here.
+    sig.AddMember("label", (string)method.data(gs).show(gs), alloc);
+    rapidjson::Value parameters;
+    parameters.SetArray();
+    // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
+    string methodDocumentation = "(";
+    auto args = method.data(gs).arguments();
+    int i = 0;
+    for (auto arg : args) {
+        rapidjson::Value parameter;
+        parameter.SetObject();
+        // label field is populated with the name of the variable.
+        // Not sure why VSCode does not display this for now.
+        parameter.AddMember("label", (string)arg.data(gs).name.show(gs), alloc);
+        if (i == activeParameter) {
+            // this bolds the active parameter in markdown
+            methodDocumentation += "**_" + (string)arg.data(gs).name.show(gs) + "_**";
+        } else {
+            methodDocumentation += (string)arg.data(gs).name.show(gs);
+        }
+        if (i != args.size() - 1) {
+            methodDocumentation += ", ";
+        }
+        parameter.AddMember("documentation",
+                            (string)getResultType(gs, arg, resp.receiver.type, resp.constraint)->show(gs), alloc);
+        parameters.PushBack(move(parameter), alloc);
+        i += 1;
+    }
+    methodDocumentation += ")";
+    rapidjson::Value markupContents;
+    markupContents.SetObject();
+    markupContents.AddMember("kind", "markdown", alloc);
+    markupContents.AddMember("value", methodDocumentation, alloc);
+    sig.AddMember("documentation", markupContents, alloc);
+
+    sig.AddMember("parameters", move(parameters), alloc);
+    signatures.PushBack(move(sig), alloc);
+}
+
+void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d) {
+    result.SetObject();
+    rapidjson::Value signatures;
+    signatures.SetArray();
+
+    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentSignatureHelp(), false)) {
+        auto queryResponses = errorQueue->drainQueryResponses();
+        if (!queryResponses.empty()) {
+            auto resp = std::move(queryResponses[0]);
+            auto receiverType = resp->receiver.type;
+            // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
+            if (resp->kind == core::QueryResponse::Kind::SEND) {
+                auto sendLocIndex = resp->termLoc.beginPos;
+
+                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
+                                  d["params"]["textDocument"]["uri"].GetStringLength());
+                auto fref = uri2FileRef(uri);
+                if (!fref.exists()) {
+                    return;
+                }
+                auto src = fref.data(*finalGs).source();
+                auto loc = lspPos2Loc(fref, d, *finalGs);
+                if (!loc) {
+                    return;
+                }
+                string call_str = (string)src.substr(sendLocIndex, loc->endPos - sendLocIndex);
+                int numberCommas = count(call_str.begin(), call_str.end(), ',');
+                // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
+                // 2nd arg)
+                result.AddMember("activeParameter", numberCommas, alloc);
+
+                auto firstDispatchComponentMethod = resp->dispatchComponents.front().method;
+                addSignatureHelpItem(*finalGs, alloc, signatures, firstDispatchComponentMethod, *resp, numberCommas);
+            }
+        }
+    }
+
+    result.AddMember("signatures", move(signatures), alloc);
+    sendResult(d, result);
+}
+
+unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, rapidjson::Document &d, const core::GlobalState &gs) {
+    if (!d.HasMember("params") || !d["params"].HasMember("position") ||
+        !d["params"]["position"].HasMember("character") || !d["params"]["position"].HasMember("line")) {
+        sendError(d, (int)LSPErrorCodes::InvalidRequest,
+                  "Request must have a \"params\" field that has a nested \"position\", with nested \"line\" and "
+                  "\"character\"");
+        return nullptr;
+    }
+    core::Loc::Detail reqPos;
+    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
+    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
+    auto offset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
+    return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 
 void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
@@ -330,24 +439,22 @@ void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
 
 void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetArray();
+    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition(), true)) {
+        auto queryResponses = errorQueue->drainQueryResponses();
+        if (!queryResponses.empty()) {
+            auto resp = std::move(queryResponses[0]);
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition(), true)) {
-        return;
-    }
-    auto queryResponses = errorQueue->drainQueryResponses();
-    if (!queryResponses.empty()) {
-        auto resp = std::move(queryResponses[0]);
-
-        if (resp->kind == core::QueryResponse::Kind::IDENT) {
-            for (auto &originLoc : resp->retType.origins) {
-                addLocIfExists(result, originLoc);
-            }
-        } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
-            result.PushBack(loc2Location(resp->termLoc), alloc);
-        } else {
-            for (auto &component : resp->dispatchComponents) {
-                if (component.method.exists()) {
-                    addLocIfExists(result, component.method.data(*finalGs).loc());
+            if (resp->kind == core::QueryResponse::Kind::IDENT) {
+                for (auto &originLoc : resp->retType.origins) {
+                    addLocIfExists(result, originLoc);
+                }
+            } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
+                result.PushBack(loc2Location(resp->termLoc), alloc);
+            } else {
+                for (auto &component : resp->dispatchComponents) {
+                    if (component.method.exists()) {
+                        addLocIfExists(result, component.method.data(*finalGs).loc());
+                    }
                 }
             }
         }
@@ -548,107 +655,105 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     rapidjson::Value items;
     items.SetArray();
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
-        return;
-    }
-    auto queryResponses = errorQueue->drainQueryResponses();
-    if (!queryResponses.empty()) {
-        auto resp = std::move(queryResponses[0]);
+    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
+        auto queryResponses = errorQueue->drainQueryResponses();
+        if (!queryResponses.empty()) {
+            auto resp = std::move(queryResponses[0]);
 
-        auto receiverType = resp->receiver.type;
-        if (resp->kind == core::QueryResponse::Kind::SEND) {
-            auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
-            logger->debug("Looking for method similar to {}", pattern);
-            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                findSimilarMethodsIn(*finalGs, receiverType, pattern);
-            for (auto &entry : methods) {
-                if (entry.second[0].exists()) {
-                    addCompletionItem(*finalGs, alloc, items, entry.second[0], *resp);
-                }
-            }
-        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
-                   resp->kind == core::QueryResponse::Kind::CONSTANT) {
-            if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
-                auto pattern = c->symbol.data(*finalGs).name.data(*finalGs).shortName(*finalGs);
-                logger->debug("Looking for constant similar to {}", pattern);
-                core::SymbolRef owner = c->symbol;
-                do {
-                    owner = owner.data(*finalGs).owner;
-                    for (auto member : owner.data(*finalGs).members) {
-                        auto sym = member.second;
-                        if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
-                            sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT &&
-                            // hide singletons
-                            hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
-                            !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
-                            addCompletionItem(*finalGs, alloc, items, sym, *resp);
-                        }
+            auto receiverType = resp->receiver.type;
+            if (resp->kind == core::QueryResponse::Kind::SEND) {
+                auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
+                logger->debug("Looking for method similar to {}", pattern);
+                UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
+                    findSimilarMethodsIn(*finalGs, receiverType, pattern);
+                for (auto &entry : methods) {
+                    if (entry.second[0].exists()) {
+                        addCompletionItem(*finalGs, alloc, items, entry.second[0], *resp);
                     }
-                } while (owner != core::Symbols::root());
+                }
+            } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
+                       resp->kind == core::QueryResponse::Kind::CONSTANT) {
+                if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
+                    auto pattern = c->symbol.data(*finalGs).name.data(*finalGs).shortName(*finalGs);
+                    logger->debug("Looking for constant similar to {}", pattern);
+                    core::SymbolRef owner = c->symbol;
+                    do {
+                        owner = owner.data(*finalGs).owner;
+                        for (auto member : owner.data(*finalGs).members) {
+                            auto sym = member.second;
+                            if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
+                                sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT &&
+                                // hide singletons
+                                hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
+                                !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
+                                addCompletionItem(*finalGs, alloc, items, sym, *resp);
+                            }
+                        }
+                    } while (owner != core::Symbols::root());
+                }
+            } else {
             }
-        } else {
         }
+        result.AddMember("items", move(items), alloc);
     }
-    result.AddMember("items", move(items), alloc);
     sendResult(d, result);
 }
 
 void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
     result.SetObject();
 
-    if (!setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
-        return;
-    }
-
-    auto queryResponses = errorQueue->drainQueryResponses();
-    if (queryResponses.empty()) {
-        rapidjson::Value nullreply;
-        sendResult(d, nullreply);
-        return;
-    }
-
-    auto resp = std::move(queryResponses[0]);
-    if (resp->kind == core::QueryResponse::Kind::SEND) {
-        if (resp->dispatchComponents.empty()) {
-            sendError(d, (int)LSPErrorCodes::InvalidParams,
-                      "Did not find any dispatchComponents for a SEND QueryResponse in "
-                      "textDocument/hover");
+    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
+        auto queryResponses = errorQueue->drainQueryResponses();
+        if (queryResponses.empty()) {
+            rapidjson::Value nullreply;
+            sendResult(d, nullreply);
             return;
         }
-        string contents = "";
-        for (auto &dispatchComponent : resp->dispatchComponents) {
-            auto retType = resp->retType.type;
-            if (resp->constraint) {
-                retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
-                                                   *resp->constraint);
+
+        auto resp = std::move(queryResponses[0]);
+        if (resp->kind == core::QueryResponse::Kind::SEND) {
+            if (resp->dispatchComponents.empty()) {
+                sendError(d, (int)LSPErrorCodes::InvalidParams,
+                          "Did not find any dispatchComponents for a SEND QueryResponse in "
+                          "textDocument/hover");
+                return;
             }
-            if (dispatchComponent.method.exists()) {
-                if (contents.size() > 0) {
-                    contents += " ";
+            string contents = "";
+            for (auto &dispatchComponent : resp->dispatchComponents) {
+                auto retType = resp->retType.type;
+                if (resp->constraint) {
+                    retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
+                                                       *resp->constraint);
                 }
-                contents += methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType,
-                                         resp->constraint);
+                if (dispatchComponent.method.exists()) {
+                    if (contents.size() > 0) {
+                        contents += " ";
+                    }
+                    contents += methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType,
+                                             resp->constraint);
+                }
             }
+            rapidjson::Value markupContents;
+            markupContents.SetObject();
+            // We use markdown here because if we just use a string, VSCode tries to interpret
+            // things like <Class:Foo> as html tags and make them clickable (but the click takes
+            // you somewhere nonsensical)
+            markupContents.AddMember("kind", "markdown", alloc);
+            markupContents.AddMember("value", contents, alloc);
+            result.AddMember("contents", markupContents, alloc);
+            sendResult(d, result);
+        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
+                   resp->kind == core::QueryResponse::Kind::CONSTANT ||
+                   resp->kind == core::QueryResponse::Kind::LITERAL) {
+            rapidjson::Value markupContents;
+            markupContents.SetObject();
+            markupContents.AddMember("kind", "markdown", alloc);
+            markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
+            result.AddMember("contents", markupContents, alloc);
+            sendResult(d, result);
+        } else {
+            sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
         }
-        rapidjson::Value markupContents;
-        markupContents.SetObject();
-        // We use markdown here because if we just use a string, VSCode tries to interpret
-        // things like <Class:Foo> as html tags and make them clickable (but the click takes
-        // you somewhere nonsensical)
-        markupContents.AddMember("kind", "markdown", alloc);
-        markupContents.AddMember("value", contents, alloc);
-        result.AddMember("contents", markupContents, alloc);
-        sendResult(d, result);
-    } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
-               resp->kind == core::QueryResponse::Kind::LITERAL) {
-        rapidjson::Value markupContents;
-        markupContents.SetObject();
-        markupContents.AddMember("kind", "markdown", alloc);
-        markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
-        result.AddMember("contents", markupContents, alloc);
-        sendResult(d, result);
-    } else {
-        sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
     }
 }
 
@@ -778,13 +883,9 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
             1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
         return false;
     }
-    core::Loc::Detail reqPos;
-    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
-    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
-    auto reqPosOffset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
 
-    initialGS->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
-    finalGs->lspInfoQueryLoc = core::Loc(fref, reqPosOffset, reqPosOffset);
+    initialGS->lspInfoQueryLoc = *lspPos2Loc(fref, d, *finalGs);
+    finalGs->lspInfoQueryLoc = *lspPos2Loc(fref, d, *finalGs);
     vector<shared_ptr<core::File>> files;
     files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
     tryFastPath(files);
@@ -1530,6 +1631,7 @@ const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                     TextDocumentDefinition(),
                                                     TextDocumentHover(),
                                                     TextDocumentCompletion(),
+                                                    TextDocumentSignatureHelp(),
                                                     ReadFile(),
                                                     WorkspaceSymbolsRequest(),
                                                     CancelRequest(),
