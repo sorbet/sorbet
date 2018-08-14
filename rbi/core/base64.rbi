@@ -1,36 +1,36 @@
 # typed: true
 module Base64
-  sig(
+  Sorbet.sig(
       str: String,
   )
   .returns(String)
   def self.decode64(str); end
 
-  sig(
+  Sorbet.sig(
       bin: String,
   )
   .returns(String)
   def self.encode64(bin); end
 
-  sig(
+  Sorbet.sig(
       str: String,
   )
   .returns(String)
   def self.strict_decode64(str); end
 
-  sig(
+  Sorbet.sig(
       bin: String,
   )
   .returns(String)
   def self.strict_encode64(bin); end
 
-  sig(
+  Sorbet.sig(
       str: String,
   )
   .returns(String)
   def self.urlsafe_decode64(str); end
 
-  sig(
+  Sorbet.sig(
       bin: String,
   )
   .returns(String)

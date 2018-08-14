@@ -5,18 +5,18 @@ class Time < Object
   RFC2822_DAY_NAME = T.let(T.unsafe(nil), Array)
   RFC2822_MONTH_NAME = T.let(T.unsafe(nil), Array)
 
-  sig(
+  Sorbet.sig(
       seconds: T.any(Time, Numeric)
   )
   .returns(Time)
-  sig(
+  Sorbet.sig(
       seconds: Numeric,
       microseconds_with_frac: Numeric,
   )
   .returns(Time)
   def self.at(seconds, microseconds_with_frac=_); end
 
-  sig(
+  Sorbet.sig(
       year: Integer,
       month: T.any(Integer, String),
       day: Integer,
@@ -28,7 +28,7 @@ class Time < Object
   .returns(Time)
   def self.gm(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig(
+  Sorbet.sig(
       year: Integer,
       month: T.any(Integer, String),
       day: Integer,
@@ -40,10 +40,10 @@ class Time < Object
   .returns(Time)
   def self.local(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig.returns(Time)
+  Sorbet.sig.returns(Time)
   def self.now(); end
 
-  sig(
+  Sorbet.sig(
       year: Integer,
       month: T.any(Integer, String),
       day: Integer,
@@ -55,101 +55,101 @@ class Time < Object
   .returns(Time)
   def self.utc(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: Numeric,
   )
   .returns(Time)
   def +(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Time,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Numeric,
   )
   .returns(Time)
   def -(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Time,
   )
   .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Time,
   )
   .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  sig(
+  Sorbet.sig(
       other: Time,
   )
   .returns(T.nilable(Integer))
   def <=>(other); end
 
-  sig(
+  Sorbet.sig(
       arg0: Time,
   )
   .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Time,
   )
   .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def asctime(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def ctime(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def day(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def dst?(); end
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def friday?(); end
 
-  sig.returns(Time)
+  Sorbet.sig.returns(Time)
   def getgm(); end
 
-  sig(
+  Sorbet.sig(
       utc_offset: Integer,
   )
   .returns(Time)
   def getlocal(utc_offset=_); end
 
-  sig.returns(Time)
+  Sorbet.sig.returns(Time)
   def getutc(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def gmt?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def gmt_offset(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def gmtime(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def hash(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def hour(); end
 
-  sig(
+  Sorbet.sig(
       year: T.any(Integer, String),
       month: T.any(Integer, String),
       day: T.any(Integer, String),
@@ -161,118 +161,118 @@ class Time < Object
   .void
   def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def isdst(); end
 
-  sig(
+  Sorbet.sig(
       utc_offset: String,
   )
   .returns(T.self_type)
   def localtime(utc_offset=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def mday(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def min(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def mon(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def monday?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def nsec(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Time)
   def round(arg0); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def saturday?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def sec(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(String)
   def strftime(arg0); end
 
-  sig.returns(Numeric)
+  Sorbet.sig.returns(Numeric)
   def subsec(); end
 
-  sig.returns(Time)
+  Sorbet.sig.returns(Time)
   def succ(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def sunday?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def thursday?(); end
 
-  sig.returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])
+  Sorbet.sig.returns([Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer, T.any(TrueClass, FalseClass), String])
   def to_a(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def to_f(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def to_i(); end
 
-  sig.returns(Rational)
+  Sorbet.sig.returns(Rational)
   def to_r(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def tuesday?(); end
 
-  sig.returns(Numeric)
+  Sorbet.sig.returns(Numeric)
   def tv_nsec(); end
 
-  sig.returns(Numeric)
+  Sorbet.sig.returns(Numeric)
   def tv_sec(); end
 
-  sig.returns(Numeric)
+  Sorbet.sig.returns(Numeric)
   def tv_usec(); end
 
-  sig.returns(Numeric)
+  Sorbet.sig.returns(Numeric)
   def usec(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def utc(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def utc?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def utc_offset(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def wday(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def wednesday?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def yday(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def year(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def zone(); end
 
-  sig(
+  Sorbet.sig(
       year: Integer,
       month: T.any(Integer, String),
       day: Integer,
@@ -284,9 +284,9 @@ class Time < Object
   .returns(Time)
   def self.mktime(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def gmtoff(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def month(); end
 end

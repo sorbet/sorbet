@@ -31,7 +31,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>$73>()
+    def self.<static-init><<static-init>$74>()
       begin
         #$c = ::Object.new()
         self(<singleton class:<constant:<root>>>).main()

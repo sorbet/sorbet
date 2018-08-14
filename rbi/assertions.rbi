@@ -1,6 +1,6 @@
 # typed: strict
 module Kernel
-  sig(
+  Sorbet.sig(
     predicate: BasicObject,
     msg: T.nilable(String),
     opts: T.untyped,

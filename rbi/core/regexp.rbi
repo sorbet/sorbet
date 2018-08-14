@@ -6,114 +6,114 @@ class Regexp < Object
   MULTILINE = T.let(T.unsafe(nil), Integer)
   NOENCODING = T.let(T.unsafe(nil), Integer)
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Symbol),
   )
   .returns(String)
   def self.escape(arg0); end
 
-  sig.returns(MatchData)
-  sig(
+  Sorbet.sig.returns(MatchData)
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(String)
   def self.last_match(arg0=_); end
 
-  sig(
+  Sorbet.sig(
       obj: BasicObject,
   )
   .returns(T.nilable(Regexp))
   def self.try_convert(obj); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ===(other); end
 
-  sig(
+  Sorbet.sig(
       str: String,
   )
   .returns(T.nilable(Integer))
   def =~(str); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def casefold?(); end
 
-  sig.returns(Encoding)
+  Sorbet.sig.returns(Encoding)
   def encoding(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def fixed_encoding?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def hash(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       options: BasicObject,
       kcode: String,
   )
   .returns(Object)
-  sig(
+  Sorbet.sig(
       arg0: Regexp,
   )
   .void
   def initialize(arg0, options=_, kcode=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.nilable(String),
       arg1: Integer,
   )
   .returns(T.nilable(MatchData))
   def match(arg0, arg1=_); end
 
-  sig.returns(T::Hash[String, T::Array[Integer]])
+  Sorbet.sig.returns(T::Hash[String, T::Array[Integer]])
   def named_captures(); end
 
-  sig.returns(T::Array[String])
+  Sorbet.sig.returns(T::Array[String])
   def names(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def options(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def source(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def ~(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       options: BasicObject,
       kcode: String,
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       arg0: Regexp,
   )
   .returns(T.self_type)
   def self.compile(arg0, options=_, kcode=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Symbol),
   )
   .returns(String)
   def self.quote(arg0); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))

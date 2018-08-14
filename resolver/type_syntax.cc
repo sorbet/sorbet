@@ -43,12 +43,29 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
 bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
     bool sawSig = false;
     while (send != nullptr) {
-        sawSig = sawSig || send->fun == core::Names::sig() || send->fun == core::Names::dslSig();
-        if ((send->fun == core::Names::sig() || send->fun == core::Names::typeParameters() ||
-             send->fun == core::Names::dslSig()) &&
-            sawSig && ast::cast_tree<ast::Self>(send->recv.get()) != nullptr) {
+        if (send->fun == core::Names::sig()) {
+            sawSig = true;
+
+            // self.sig
+            if (ast::isa_tree<ast::Self>(send->recv.get())) {
+                return true;
+            }
+
+            // Sorbet.sig
+            auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
+            if (!recv) {
+                auto resolvedConstant = ast::cast_tree<ast::ResolvedConstantLit>(send->recv.get());
+                if (resolvedConstant) {
+                    recv = ast::cast_tree<ast::Ident>(resolvedConstant->resolved.get());
+                }
+            }
+            if (recv && recv->symbol == core::Symbols::Sorbet()) {
+                return true;
+            }
+        } else if (send->fun == core::Names::typeParameters() && sawSig && ast::isa_tree<ast::Self>(send->recv.get())) {
             return true;
         }
+
         send = ast::cast_tree<ast::Send>(send->recv.get());
     }
     return false;
@@ -105,7 +122,6 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
     while (send != nullptr) {
         switch (send->fun._id) {
             case core::Names::sig()._id:
-            case core::Names::dslSig()._id:
             case core::Names::proc()._id: {
                 if (sig.seen.sig || sig.seen.proc) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -113,7 +129,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                     }
                     sig.argTypes.clear();
                 }
-                if (send->fun == core::Names::sig() || send->fun == core::Names::dslSig()) {
+                if (send->fun == core::Names::sig()) {
                     sig.seen.sig = true;
                 } else {
                     sig.seen.proc = true;

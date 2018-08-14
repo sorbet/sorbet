@@ -1,20 +1,20 @@
 # typed: true
 module Signal
-  sig.returns(T::Hash[String, Integer])
+  Sorbet.sig.returns(T::Hash[String, Integer])
   def self.list(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.nilable(String))
   def self.signame(arg0); end
 
-  sig(
+  Sorbet.sig(
       signal: T.any(Integer, String, Symbol),
       command: BasicObject,
   )
   .returns(T.any(String, Proc))
-  sig(
+  Sorbet.sig(
       signal: T.any(Integer, String, Symbol),
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )

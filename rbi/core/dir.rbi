@@ -5,7 +5,7 @@ class Dir < Object
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Pathname),
   )
   .returns(Integer)
@@ -16,53 +16,53 @@ class Dir < Object
   .returns(T.type_parameter(:U))
   def self.chdir(arg0=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def self.chroot(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def self.delete(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Encoding,
   )
   .returns(T::Array[String])
   def self.entries(arg0, arg1=_); end
 
-  sig(
+  Sorbet.sig(
       file: String,
   )
   .returns(T.any(TrueClass, FalseClass))
   def self.exist?(file); end
 
-  sig(
+  Sorbet.sig(
       dir: String,
       arg0: Encoding,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(NilClass)
-  sig(
+  Sorbet.sig(
       dir: String,
       arg0: Encoding,
   )
   .returns(Enumerator[String])
   def self.foreach(dir, arg0=_, &blk); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def self.getwd(); end
 
-  sig(
+  Sorbet.sig(
       pattern: T.any(String, T::Array[String]),
       flags: Integer,
   )
   .returns(T::Array[String])
-  sig(
+  Sorbet.sig(
       pattern: T.any(String, T::Array[String]),
       flags: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
@@ -70,20 +70,20 @@ class Dir < Object
   .returns(NilClass)
   def self.glob(pattern, flags=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(String)
   def self.home(arg0=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(Integer)
   def self.mkdir(arg0, arg1=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Encoding,
   )
@@ -96,80 +96,80 @@ class Dir < Object
   .returns(T.type_parameter(:U))
   def self.open(arg0, arg1=_, &blk); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def self.pwd(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def self.rmdir(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def self.unlink(arg0); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def close(); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[String])
+  Sorbet.sig.returns(Enumerator[String])
   def each(&blk); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def fileno(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Encoding,
   )
   .void
   def initialize(arg0, arg1=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def path(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def pos(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def pos=(arg0); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def read(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def rewind(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.self_type)
   def seek(arg0); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def tell(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def to_path(); end
 
-  sig(
+  Sorbet.sig(
       pattern: T.any(String, T::Array[String]),
       flags: Integer,
   )
   .returns(T::Array[String])
-  sig(
+  Sorbet.sig(
       pattern: T.any(String, T::Array[String]),
       flags: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),

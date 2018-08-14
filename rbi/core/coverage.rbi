@@ -1,8 +1,8 @@
 # typed: true
 module Coverage
-  sig.returns(T::Hash[String, T::Array[T.nilable(Integer)]])
+  Sorbet.sig.returns(T::Hash[String, T::Array[T.nilable(Integer)]])
   def self.result(); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def self.start(); end
 end

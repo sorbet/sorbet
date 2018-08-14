@@ -70,6 +70,7 @@ const char *generic_str = "Generic";
 const char *tuple_str = "Tuple";
 const char *shape_str = "Shape";
 const char *subclasses_str = "SUBCLASSES";
+const char *sorbet_str = "Sorbet";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
@@ -185,6 +186,7 @@ void GlobalState::initEmpty() {
     SymbolRef tuple_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(tuple_str));
     SymbolRef shape_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(shape_str));
     SymbolRef SUBCLASSES_id = enterClassSymbol(Loc::none(), ruby_typer_id, enterNameConstant(subclasses_str));
+    SymbolRef sorbet_id = synthesizeClass(sorbet_str);
 
     ENFORCE(no_symbol_id == Symbols::noSymbol());
     ENFORCE(top_id == Symbols::top());
@@ -242,6 +244,7 @@ void GlobalState::initEmpty() {
     ENFORCE(tuple_id == Symbols::Tuple());
     ENFORCE(shape_id == Symbols::Shape());
     ENFORCE(SUBCLASSES_id == Symbols::Subclasses());
+    ENFORCE(sorbet_id == Symbols::Sorbet());
 
     // Synthesize untyped = T.untyped
     Symbols::untyped().data(*this).resultType = Types::untyped();
@@ -289,18 +292,6 @@ void GlobalState::initEmpty() {
     method.data(*this).arguments().push_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
     arg.data(*this).resultType = Types::Integer();
-    method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = Types::untyped();
-
-    // Synthesize Kernel#<dslSig>(arg0: *T.untyped) => T.untyped
-    //
-    // <dslSig> is exactly like sig, except that it is defined on Kernel, not
-    // T::Helpers, and so can be used by DSL passes to annotate methods on
-    // arbitrary objects that don't necessarily extend T::Helpers
-    method = enterMethodSymbol(Loc::none(), Symbols::Kernel(), Names::dslSig());
-    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.data(*this).setRepeated();
-    arg.data(*this).resultType = Types::untyped();
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::untyped();
 

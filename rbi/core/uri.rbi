@@ -1,6 +1,6 @@
 # typed: true
 module Kernel
-  sig(uri: T.any(URI::Generic, String)).returns(URI::Generic)
+  Sorbet.sig(uri: T.any(URI::Generic, String)).returns(URI::Generic)
   def URI(uri); end
 end
 
@@ -31,26 +31,26 @@ module URI
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
 
-  sig(
+  Sorbet.sig(
       str: String,
       enc: Encoding,
   )
   .returns(T::Array[[String, String]])
   def self.decode_www_form_component(str, enc=_); end
 
-  sig(
+  Sorbet.sig(
       arg: String,
       arg0: Regexp,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       arg: String,
       arg0: String,
   )
   .returns(String)
   def self.escape(arg, *arg0); end
 
-  sig(
+  Sorbet.sig(
       str: String,
       schemes: Array,
       blk: BasicObject,
@@ -58,52 +58,52 @@ module URI
   .returns(T::Array[String])
   def self.extract(str, schemes=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       str: String,
   )
   .returns(URI::HTTP)
   def self.join(*str); end
 
-  sig(
+  Sorbet.sig(
       uri: String,
   )
   .returns(URI::HTTP)
   def self.parse(uri); end
 
-  sig(
+  Sorbet.sig(
       schemes: Array,
   )
   .returns(T::Array[String])
   def self.regexp(schemes=_); end
 
-  sig.returns(T::Hash[String, Class])
+  Sorbet.sig.returns(T::Hash[String, Class])
   def self.scheme_list(); end
 
-  sig(
+  Sorbet.sig(
       uri: String,
   )
   .returns(T::Array[T.nilable(String)])
   def self.split(uri); end
 
-  sig(
+  Sorbet.sig(
       arg: String,
   )
   .returns(String)
   def self.unescape(*arg); end
 
-  sig(
+  Sorbet.sig(
       arg: String,
       arg0: Regexp,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       arg: String,
       arg0: String,
   )
   .returns(String)
   def self.encode(arg, *arg0); end
 
-  sig(
+  Sorbet.sig(
       arg: String,
   )
   .returns(String)

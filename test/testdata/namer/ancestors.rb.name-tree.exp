@@ -10,7 +10,7 @@ begin
 
     <emptyTree>
 
-    def self.<static-init><<static-init>$73>()
+    def self.<static-init><<static-init>$74>()
       begin
         ::RubyTyper.keep_for_ide(::Parent)
         <emptyTree>

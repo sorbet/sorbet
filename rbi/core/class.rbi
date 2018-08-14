@@ -1,27 +1,27 @@
 # typed: true
 class Class < Module
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def allocate(); end
 
-  sig(args: T.untyped).returns(T.untyped)
+  Sorbet.sig(args: T.untyped).returns(T.untyped)
   def new(*args); end
 
-  sig(
+  Sorbet.sig(
       arg0: Class,
   )
   .returns(T.untyped)
   def inherited(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def instance_methods(arg0=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def name(); end
 
-  sig.returns(T.nilable(Class))
-  sig.returns(Class)
+  Sorbet.sig.returns(T.nilable(Class))
+  Sorbet.sig.returns(Class)
   def superclass(); end
 end

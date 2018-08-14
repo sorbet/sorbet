@@ -1,5 +1,5 @@
 # typed: true
 class Method < Object
-  sig.returns(Proc)
+  Sorbet.sig.returns(Proc)
   def to_proc; end
 end

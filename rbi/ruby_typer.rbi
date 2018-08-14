@@ -2,7 +2,7 @@
 # typed: strict
 
 class Struct
-  sig(
+  Sorbet.sig(
       arg0: T.any(Symbol, String),
       arg1: T.any(Symbol, String),
   )
@@ -18,7 +18,7 @@ end
 class RubyTyper::DynamicStruct < Struct
   Elem = type_member(:out, fixed: T.untyped)
 
-  sig(
+  Sorbet.sig(
       args: BasicObject,
   )
   .returns(RubyTyper::DynamicStruct)
@@ -58,60 +58,60 @@ class RubyTyper::ENVClass
   include Enumerable
   Elem = type_member(:out, fixed: [String, T.nilable(String)])
 
-  sig(
+  Sorbet.sig(
       key: String,
   )
   .returns(T.nilable(String))
   def [](key); end
 
-  sig(
+  Sorbet.sig(
       key: String,
       value: T.nilable(String),
   )
   .returns(T.nilable(String))
   def []=(key, value); end
 
-  sig.returns(RubyTyper::ENVClass)
+  Sorbet.sig.returns(RubyTyper::ENVClass)
   def clear(); end
 
-  sig(
+  Sorbet.sig(
       key: String,
   )
   .returns(T.nilable(String))
-  sig(
+  Sorbet.sig(
       key: String,
       blk: T.proc(key: String).returns(T.untyped)
   )
   .returns(T.nilable(String))
   def delete(key, &blk); end
 
-  sig(
+  Sorbet.sig(
       key: String,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       key: String,
       value: T.nilable(String),
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       key: String,
       blk: T.proc(key: String).returns(String),
   )
   .returns(String)
   def fetch(key, value=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       key: String
   )
   .returns(T.any(TrueClass, FalseClass))
   def key?(key); end
 
-  sig(
+  Sorbet.sig(
       key: T::Hash[String, T.nilable(String)],
   )
   .returns(RubyTyper::ENVClass)
-  sig(
+  Sorbet.sig(
       key: T::Hash[String, String],
       blk: T.proc(key: String, old_value: T.nilable(String), new_value: T.nilable(String)).returns(T.nilable(String)),
   )

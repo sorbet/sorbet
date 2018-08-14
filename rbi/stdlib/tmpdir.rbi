@@ -1,6 +1,6 @@
 # typed: strict
 class Dir
-  sig(
+  Sorbet.sig(
     prefix_suffix: T.any(String, T::Array[String]),
     rest: String,
   ).returns(String)

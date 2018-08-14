@@ -14,454 +14,454 @@ class Float < Numeric
   RADIX = T.let(T.unsafe(nil), Integer)
   ROUNDS = T.let(T.unsafe(nil), Integer)
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
   def %(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def *(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def **(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def +(arg0); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def +@(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def -(arg0); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def -@(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def /(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(T.any(TrueClass, FalseClass))
   def <(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(T.any(TrueClass, FalseClass))
   def <=(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(Integer)
   def <=>(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Object,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Object,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ===(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(T.any(TrueClass, FalseClass))
   def >(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(T.any(TrueClass, FalseClass))
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(T.any(TrueClass, FalseClass))
   def >=(arg0); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def abs(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def abs2(); end
 
-  sig.returns(T.any(Integer, Float))
+  Sorbet.sig.returns(T.any(Integer, Float))
   def angle(); end
 
-  sig.returns(T.any(Integer, Float))
+  Sorbet.sig.returns(T.any(Integer, Float))
   def arg(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def ceil(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
   .returns([Float, Float])
-  sig(
+  Sorbet.sig(
       arg0: Numeric,
   )
   .returns([Float, Float])
   def coerce(arg0); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def conj(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def conjugate(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def denominator(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(Integer)
   def div(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Integer, Float, Rational, BigDecimal),
   )
   .returns([T.any(Integer, Float, Rational, BigDecimal), T.any(Integer, Float, Rational, BigDecimal)])
   def divmod(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Object,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Object,
   )
   .returns(T.any(TrueClass, FalseClass))
   def equal?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def fdiv(arg0); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def finite?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def floor(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def hash(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def imag(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def imaginary(); end
 
-  sig.returns(Object)
+  Sorbet.sig.returns(Object)
   def infinite?(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def magnitude(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
   def modulo(arg0); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def nan?(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def next_float(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def numerator(); end
 
-  sig.returns(T.any(Integer, Float))
+  Sorbet.sig.returns(T.any(Integer, Float))
   def phase(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def prev_float(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Float,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: Rational,
   )
   .returns(Float)
-  sig(
+  Sorbet.sig(
       arg0: BigDecimal,
   )
   .returns(BigDecimal)
-  sig(
+  Sorbet.sig(
       arg0: Complex,
   )
   .returns(Complex)
   def quo(arg0); end
 
-  sig.returns(Rational)
-  sig(
+  Sorbet.sig.returns(Rational)
+  Sorbet.sig(
       arg0: Numeric,
   )
   .returns(Rational)
   def rationalize(arg0=_); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def real(); end
 
-  sig.returns(TrueClass)
+  Sorbet.sig.returns(TrueClass)
   def real?(); end
 
-  sig.returns(Integer)
-  sig(
+  Sorbet.sig.returns(Integer)
+  Sorbet.sig(
       arg0: Numeric,
   )
   .returns(T.any(Integer, Float))
   def round(arg0=_); end
 
-  sig.returns(Complex)
+  Sorbet.sig.returns(Complex)
   def to_c(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def to_f(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def to_i(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def to_int(); end
 
-  sig.returns(Rational)
+  Sorbet.sig.returns(Rational)
   def to_r(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def truncate(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end
 end

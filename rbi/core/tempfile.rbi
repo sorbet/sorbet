@@ -35,28 +35,28 @@ class Tempfile < File
   .void
   def initialize(basename='', tmpdir=nil, mode='o', options={}); end
 
-  sig(unlink_now: T.any(TrueClass, FalseClass)).void
+  Sorbet.sig(unlink_now: T.any(TrueClass, FalseClass)).void
   def close(unlink_now=false); end
 
-  sig.void
+  Sorbet.sig.void
   def close!; end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def delete; end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def length; end
 
-  sig.returns(Tempfile)
+  Sorbet.sig.returns(Tempfile)
   def open; end
 
   # path returns nil of the Tempfile has been unlinked.
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def path; end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def size; end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def unlink; end
 end

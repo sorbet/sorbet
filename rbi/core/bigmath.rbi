@@ -1,53 +1,53 @@
 # typed: true
 module BigMath
-  sig(
+  Sorbet.sig(
       arg0: Integer,
       arg1: Integer,
   )
   .returns(BigDecimal)
   def self.exp(arg0, arg1); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
       arg1: Integer,
   )
   .returns(BigDecimal)
   def self.log(arg0, arg1); end
 
-  sig(
+  Sorbet.sig(
       prec: Integer,
   )
   .returns(BigDecimal)
   def E(prec); end
 
-  sig(
+  Sorbet.sig(
       prec: Integer,
   )
   .returns(BigDecimal)
   def PI(prec); end
 
-  sig(
+  Sorbet.sig(
       x: Integer,
       prec: Integer,
   )
   .returns(BigDecimal)
   def atan(x, prec); end
 
-  sig(
+  Sorbet.sig(
       x: Integer,
       prec: Integer,
   )
   .returns(BigDecimal)
   def cos(x, prec); end
 
-  sig(
+  Sorbet.sig(
       x: Integer,
       prec: Integer,
   )
   .returns(BigDecimal)
   def sin(x, prec); end
 
-  sig(
+  Sorbet.sig(
       x: Integer,
       prec: Integer,
   )

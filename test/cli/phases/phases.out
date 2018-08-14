@@ -44,7 +44,7 @@ class ::<root> < ::Object () @ (-e:1, https://git.corp.stripe.com/stripe-interna
 --- name-table end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$73>()
+  def self.<static-init><<static-init>$74>()
     1
   end
 end
@@ -56,7 +56,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <static-init><<static-init>$73>
+      name = <static-init><<static-init>$74>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -448,6 +448,12 @@ ClassDef{
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi",
    "sigil": "Strict",
    "strict": "Strict",
+   "had_errors": false
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi",
+   "sigil": "Stripe",
+   "strict": "Stripe",
    "had_errors": false
   },
   {

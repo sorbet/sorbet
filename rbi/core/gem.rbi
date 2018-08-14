@@ -13,7 +13,7 @@ module Gem
   WIN_PATTERNS = T.let(T.unsafe(nil), Array)
   WRITE_BINARY_ERRORS = T.let(T.unsafe(nil), Array)
 
-  sig(
+  Sorbet.sig(
       name: String,
       args: String,
       requirements: Gem::Requirement,
@@ -21,61 +21,61 @@ module Gem
   .returns(String)
   def self.bin_path(name, args=_, *requirements); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def self.binary_mode(); end
 
-  sig(
+  Sorbet.sig(
       install_dir: String,
   )
   .returns(String)
   def self.bindir(install_dir=_); end
 
-  sig.returns(Hash)
+  Sorbet.sig.returns(Hash)
   def self.clear_default_specs(); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def self.clear_paths(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def self.config_file(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.configuration(); end
 
-  sig(
+  Sorbet.sig(
       config: BasicObject,
   )
   .returns(T.untyped)
   def self.configuration=(config); end
 
-  sig(
+  Sorbet.sig(
       gem_name: String,
   )
   .returns(T.nilable(String))
   def self.datadir(gem_name); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_bindir(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_cert_path(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_dir(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_exec_format(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_key_path(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def self.default_path(); end
 
-  sig.returns(T.nilable(T::Array[String]))
+  Sorbet.sig.returns(T.nilable(T::Array[String]))
   def self.default_rubygems_dirs(); end
 
-  sig.returns(T.nilable(T::Array[String]))
+  Sorbet.sig.returns(T.nilable(T::Array[String]))
   def self.default_sources(); end
 end
 

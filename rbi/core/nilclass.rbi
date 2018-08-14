@@ -1,36 +1,36 @@
 # typed: true
 class NilClass < Object
-  sig(
+  Sorbet.sig(
       obj: BasicObject,
   )
   .returns(FalseClass)
   def &(obj); end
 
-  sig(
+  Sorbet.sig(
       obj: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ^(obj); end
 
-  sig.returns(Rational)
+  Sorbet.sig.returns(Rational)
   def rationalize(); end
 
-  sig.returns([])
+  Sorbet.sig.returns([])
   def to_a(); end
 
-  sig.returns(Complex)
+  Sorbet.sig.returns(Complex)
   def to_c(); end
 
-  sig.returns(Float)
+  Sorbet.sig.returns(Float)
   def to_f(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_h(); end
 
-  sig.returns(Rational)
+  Sorbet.sig.returns(Rational)
   def to_r(); end
 
-  sig(
+  Sorbet.sig(
       obj: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))

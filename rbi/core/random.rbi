@@ -4,47 +4,47 @@ class Random < Object
 
   DEFAULT = T.let(T.unsafe(nil), Random)
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(arg0); end
 
-  sig(
+  Sorbet.sig(
       size: Integer,
   )
   .returns(String)
   def bytes(size); end
 
-  sig(
+  Sorbet.sig(
       seed: Integer,
   )
   .void
   def initialize(seed=_); end
 
-  sig(
+  Sorbet.sig(
       max: T.any(Integer, T::Range[Integer]),
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       max: T.any(Float, T::Range[Float]),
   )
   .returns(Float)
   def rand(max=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def seed(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.new_seed(); end
 
-  sig(
+  Sorbet.sig(
       max: Integer,
   )
   .returns(Numeric)
   def self.rand(max=_); end
 
-  sig(
+  Sorbet.sig(
       number: Integer,
   )
   .returns(Numeric)

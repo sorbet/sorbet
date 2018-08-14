@@ -13,52 +13,52 @@ class Hash < Object
   .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:U)])
   def self.[](*arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.nilable(V))
   def [](arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
       arg1: V,
   )
   .returns(V)
   def []=(arg0, arg1); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T::Array[T.any(K, V)])
   def assoc(arg0); end
 
-  sig.returns(T::Hash[K, V])
+  Sorbet.sig.returns(T::Hash[K, V])
   def clear(); end
 
-  sig.returns(T::Hash[K, V])
+  Sorbet.sig.returns(T::Hash[K, V])
   def compare_by_identity(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def compare_by_identity?(); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.nilable(V))
-  sig(
+  Sorbet.sig(
       arg0: K,
       blk: T.proc(arg0: K).returns(V),
   )
   .returns(T.nilable(V))
   def default(arg0=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: V,
   )
   .returns(V)
   def default=(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.nilable(V))
@@ -69,115 +69,115 @@ class Hash < Object
   .returns(T.any(T.type_parameter(:U), V))
   def delete(arg0, &blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def delete_if(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: [K, V]).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def each(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def each_key(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def each_pair(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def each_value(&blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(V)
-  sig(
+  Sorbet.sig(
       arg0: K,
       arg1: V,
   )
   .returns(V)
-  sig(
+  Sorbet.sig(
       arg0: K,
       blk: T.proc(arg0: K).returns(V),
   )
   .returns(V)
   def fetch(arg0, arg1=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_key?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: V,
   )
   .returns(T.any(TrueClass, FalseClass))
   def has_value?(arg0); end
 
-  sig.returns(Hash)
-  sig(
+  Sorbet.sig.returns(Hash)
+  Sorbet.sig(
       default: Object,
   )
   .returns(Hash)
-  sig(
+  Sorbet.sig(
       blk: T.proc(hash: Hash, key: Object).returns(Object)
   )
   .void
   def initialize(default=_, &blk); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(T::Hash[V, K])
+  Sorbet.sig.returns(T::Hash[V, K])
   def invert(); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
-  sig.returns(Enumerator[[K, V]])
+  Sorbet.sig.returns(Enumerator[[K, V]])
   def keep_if(&blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: V,
   )
   .returns(T.nilable(K))
   def key(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
   def key?(arg0); end
 
-  sig.returns(T::Array[K])
+  Sorbet.sig.returns(T::Array[K])
   def keys(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def length(); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T.any(TrueClass, FalseClass))
@@ -194,72 +194,72 @@ class Hash < Object
   .returns(T::Hash[T.any(T.type_parameter(:A), K), T.any(T.type_parameter(:B), V)])
   def merge(arg0, &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T::Array[T.any(K, V)])
   def rassoc(arg0); end
 
-  sig.returns(T::Hash[K, V])
+  Sorbet.sig.returns(T::Hash[K, V])
   def rehash(); end
 
-  sig.returns(Enumerator[[K, V]])
-  sig(
+  Sorbet.sig.returns(Enumerator[[K, V]])
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def reject(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def reject!(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def select(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: K, arg1: V).returns(BasicObject),
   )
   .returns(T::Hash[K, V])
   def select!(&blk); end
 
-  sig.returns(T::Array[T.any(K, V)])
+  Sorbet.sig.returns(T::Array[T.any(K, V)])
   def shift(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def size(); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
       arg1: V,
   )
   .returns(V)
   def store(arg0, arg1); end
 
-  sig.returns(T::Array[T::Array[T.any(K, V)]])
+  Sorbet.sig.returns(T::Array[T::Array[T.any(K, V)]])
   def to_a(); end
 
-  sig.returns(T::Hash[K, V])
+  Sorbet.sig.returns(T::Hash[K, V])
   def to_hash(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 
-  sig(
+  Sorbet.sig(
       arg0: V,
   )
   .returns(T.any(TrueClass, FalseClass))
   def value?(arg0); end
 
-  sig.returns(T::Array[V])
+  Sorbet.sig.returns(T::Array[V])
   def values(); end
 
-  sig(
+  Sorbet.sig(
       arg0: K,
   )
   .returns(T::Array[V])

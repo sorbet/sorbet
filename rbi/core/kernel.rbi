@@ -12,29 +12,29 @@ module Kernel
   # module_function and just define these methods as instance methods,
   # for clarity and simplicity.
 
-  sig(
+  Sorbet.sig(
       start_or_range: Integer,
       length: Integer,
   )
   .returns(T.nilable(T::Array[String]))
-  sig(
+  Sorbet.sig(
       start_or_range: T::Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
   def caller(start_or_range=_, length=_); end
 
-  sig(
+  Sorbet.sig(
       start_or_range: Integer,
       length: Integer,
   )
   .returns(T.nilable(T::Array[String]))
-  sig(
+  Sorbet.sig(
       start_or_range: T::Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
   def caller_locations(start_or_range=_, length=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Binding,
       filename: String,
@@ -43,60 +43,60 @@ module Kernel
   .returns(T.untyped)
   def eval(arg0, arg1=_, filename=_, lineno=_); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def iterator?(); end
 
-  sig.returns(T::Array[Symbol])
+  Sorbet.sig.returns(T::Array[Symbol])
   def local_variables(); end
 
-  sig(
+  Sorbet.sig(
       number: Numeric,
   )
   .returns(Numeric)
   def srand(number); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def !~(other); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.nilable(Integer))
   def <=>(other); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ===(other); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(NilClass)
   def =~(other); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def clone(); end
 
-  sig(
+  Sorbet.sig(
       port: IO,
   )
   .returns(NilClass)
   def display(port); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def dup(); end
 
-  sig(
+  Sorbet.sig(
       method: Symbol,
       args: BasicObject,
   )
   .returns(Enumerator[T.untyped])
-  sig(
+  Sorbet.sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
@@ -104,128 +104,128 @@ module Kernel
   .returns(Enumerator[T.untyped])
   def enum_for(method=_, *args, &blk); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def eql?(other); end
 
-  sig(
+  Sorbet.sig(
       mod: Module,
   )
   .returns(NilClass)
   def extend(mod); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def freeze(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def frozen?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def hash(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Class,
   )
   .returns(T.any(TrueClass, FalseClass))
   def instance_of?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Symbol, String),
   )
   .returns(T.any(TrueClass, FalseClass))
   def instance_variable_defined?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Symbol, String),
   )
   .returns(T.untyped)
   def instance_variable_get(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Symbol, String),
       arg1: BasicObject,
   )
   .returns(T.untyped)
   def instance_variable_set(arg0, arg1); end
 
-  sig.returns(T::Array[Symbol])
+  Sorbet.sig.returns(T::Array[Symbol])
   def instance_variables(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Class, Module),
   )
   .returns(T.any(TrueClass, FalseClass))
   def is_a?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Class,
   )
   .returns(T.any(TrueClass, FalseClass))
   def kind_of?(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: Symbol,
   )
   .returns(Method)
   def method(arg0); end
 
-  sig(
+  Sorbet.sig(
       regular: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def methods(regular=_); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def nil?(); end
 
-  sig(
+  Sorbet.sig(
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def private_methods(all=_); end
 
-  sig(
+  Sorbet.sig(
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def protected_methods(all=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: Symbol,
   )
   .returns(Method)
   def public_method(arg0); end
 
-  sig(
+  Sorbet.sig(
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def public_methods(all=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Symbol, String),
       args: BasicObject,
   )
   .returns(T.untyped)
   def public_send(arg0, *args); end
 
-  sig(
+  Sorbet.sig(
       arg0: Symbol,
   )
   .returns(T.untyped)
   def remove_instance_variable(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Symbol),
       arg1: BasicObject,
   )
   .returns(T.untyped)
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Symbol),
       arg1: BasicObject,
       blk: BasicObject,
@@ -233,33 +233,33 @@ module Kernel
   .returns(T.untyped)
   def send(arg0, *arg1, &blk); end
 
-  sig.returns(Class)
+  Sorbet.sig.returns(Class)
   def singleton_class(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Symbol,
   )
   .returns(Method)
   def singleton_method(arg0); end
 
-  sig(
+  Sorbet.sig(
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
   def singleton_methods(all=_); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def taint(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def tainted?(); end
 
-  sig(
+  Sorbet.sig(
       method: Symbol,
       args: BasicObject,
   )
   .returns(Enumerator[T.untyped])
-  sig(
+  Sorbet.sig(
       method: Symbol,
       args: BasicObject,
       blk: BasicObject,
@@ -267,19 +267,19 @@ module Kernel
   .returns(Enumerator[T.untyped])
   def to_enum(method=_, *args, &blk); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def trust(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def untaint(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def untrust(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def untrusted?(); end
 
   type_parameters(:T).sig(
@@ -288,25 +288,25 @@ module Kernel
   .returns(T::Array[T.type_parameter(:T)])
   def Array(x); end
 
-  sig(
+  Sorbet.sig(
       initial: T.any(Integer, Float, Rational, BigDecimal, String),
       digits: Integer,
   )
   .void
   def BigDecimal(initial, digits=0); end
 
-  sig(
+  Sorbet.sig(
       x: T.any(Numeric, String),
       y: T.any(Numeric, String),
   )
   .returns(Complex)
-  sig(
+  Sorbet.sig(
       x: String,
   )
   .returns(Complex)
   def Complex(x, y=_); end
 
-  sig(
+  Sorbet.sig(
       x: T.any(Numeric, String),
   )
   .returns(Float)
@@ -318,100 +318,100 @@ module Kernel
   .returns(T::Hash[T.type_parameter(:K), T.type_parameter(:V)])
   def Hash(x); end
 
-  sig(
+  Sorbet.sig(
       arg: T.any(Numeric, String),
       base: Integer,
   )
   .returns(Integer)
   def Integer(arg, base=_); end
 
-  sig(
+  Sorbet.sig(
       x: T.any(Numeric, String),
       y: T.any(Numeric, String),
   )
   .returns(Rational)
-  sig(
+  Sorbet.sig(
       x: Object,
   )
   .returns(Rational)
   def Rational(x, y=_); end
 
-  sig(
+  Sorbet.sig(
       x: Object,
   )
   .returns(String)
   def String(x); end
 
-  sig.returns(T.nilable(Symbol))
+  Sorbet.sig.returns(T.nilable(Symbol))
   def __callee__(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def __dir__(); end
 
-  sig.returns(T.nilable(Symbol))
+  Sorbet.sig.returns(T.nilable(Symbol))
   def __method__(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(String)
   def `(arg0); end
 
-  sig(
+  Sorbet.sig(
       msg: String,
   )
   .returns(T.noreturn)
   def abort(msg=_); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc().returns(BasicObject),
   )
   .returns(Proc)
   def at_exit(&blk); end
 
-  sig(
+  Sorbet.sig(
       _module: T.any(String, Symbol),
       filename: String,
   )
   .returns(NilClass)
   def autoload(_module, filename); end
 
-  sig(
+  Sorbet.sig(
       name: T.any(Symbol, String),
   )
   .returns(T.nilable(String))
   def autoload?(name); end
 
-  sig.returns(Binding)
+  Sorbet.sig.returns(Binding)
   def binding(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def block_given?(); end
 
-  sig.returns(T.noreturn)
-  sig(
+  Sorbet.sig.returns(T.noreturn)
+  Sorbet.sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
   .returns(T.noreturn)
   def exit(status=_); end
 
-  sig(
+  Sorbet.sig(
       status: T.any(Integer, TrueClass, FalseClass),
   )
   .returns(T.noreturn)
   def exit!(status); end
 
-  sig.returns(T.noreturn)
-  sig(
+  Sorbet.sig.returns(T.noreturn)
+  Sorbet.sig(
       arg0: String,
   )
   .returns(T.noreturn)
-  sig(
+  Sorbet.sig(
       arg0: Class,
       arg1: T::Array[String],
   )
   .returns(T.noreturn)
-  sig(
+  Sorbet.sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
@@ -419,38 +419,38 @@ module Kernel
   .returns(T.noreturn)
   def fail(arg0=_, arg1=_, arg2=_); end
 
-  sig(
+  Sorbet.sig(
       format: String,
       args: BasicObject,
   )
   .returns(String)
   def format(format, *args); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(String)
   def gets(arg0=_, arg1=_); end
 
-  sig.returns(T::Array[Symbol])
+  Sorbet.sig.returns(T::Array[Symbol])
   def global_variables(); end
 
-  sig(
+  Sorbet.sig(
       filename: String,
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T.any(TrueClass, FalseClass))
   def load(filename, arg0=_); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc().returns(T.untyped)
   )
   .returns(NilClass)
-  sig.returns(Enumerator[T.untyped])
+  Sorbet.sig.returns(Enumerator[T.untyped])
   def loop(&blk); end
 
-  sig(
+  Sorbet.sig(
       name: String,
       rest: T.any(String, Integer),
       block: String,
@@ -458,7 +458,7 @@ module Kernel
   .returns(T.nilable(IO))
   def open(name, rest=_, block=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: IO,
       arg1: String,
       arg2: BasicObject,
@@ -466,72 +466,72 @@ module Kernel
   .returns(NilClass)
   def printf(arg0=_, arg1=_, *arg2); end
 
-  sig(
+  Sorbet.sig(
       blk: BasicObject,
   )
   .returns(Proc)
   def proc(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: BasicObject,
   )
   .returns(Proc)
   def lambda(&blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def putc(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(NilClass)
   def puts(*arg0); end
 
-  sig.returns(Float)
-  sig(
+  Sorbet.sig.returns(Float)
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: T::Range[Integer],
   )
   .returns(Integer)
-  sig(
+  Sorbet.sig(
       arg0: T::Range[Float],
   )
   .returns(Float)
   def rand(arg0=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(String)
   def readline(arg0=_, arg1=_); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(T::Array[String])
   def readlines(arg0=_, arg1=_); end
 
-  sig(
+  Sorbet.sig(
       path: String,
   )
   .returns(T.any(TrueClass, FalseClass))
   def require(path); end
 
-  sig(
+  Sorbet.sig(
       feature: String,
   )
   .returns(T.any(TrueClass, FalseClass))
   def require_relative(feature); end
 
-  sig(
+  Sorbet.sig(
       read: T::Array[IO],
       write: T::Array[IO],
       error: T::Array[IO],
@@ -540,27 +540,27 @@ module Kernel
   .returns(T::Array[String])
   def select(read, write=_, error=_, timeout=_); end
 
-  sig(
+  Sorbet.sig(
       duration: Numeric,
   )
   .returns(Integer)
   def sleep(duration); end
 
-  sig(
+  Sorbet.sig(
       format: String,
       args: BasicObject,
   )
   .returns(String)
   def sprintf(format, *args); end
 
-  sig(
+  Sorbet.sig(
       num: Integer,
       args: BasicObject,
   )
   .returns(T.untyped)
   def syscall(num, *args); end
 
-  sig(
+  Sorbet.sig(
       cmd: String,
       file1: String,
       file2: String,
@@ -568,24 +568,24 @@ module Kernel
   .returns(T.any(TrueClass, FalseClass, Time))
   def test(cmd, file1, file2=_); end
 
-  sig(
+  Sorbet.sig(
       msg: String,
   )
   .returns(NilClass)
   def warn(*msg); end
 
-  sig.returns(T.noreturn)
-  sig(
+  Sorbet.sig.returns(T.noreturn)
+  Sorbet.sig(
       arg0: String,
   )
   .returns(T.noreturn)
-  sig(
+  Sorbet.sig(
       arg0: Class,
       arg1: String,
       arg2: T::Array[String],
   )
   .returns(T.noreturn)
-  sig(
+  Sorbet.sig(
       arg0: Exception,
       arg1: String,
       arg2: T::Array[String],

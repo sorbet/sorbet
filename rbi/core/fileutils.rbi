@@ -4,7 +4,7 @@ module FileUtils
   METHODS = T.let(T.unsafe(nil), Array)
   OPT_TABLE = T.let(T.unsafe(nil), Hash)
 
-  sig(
+  Sorbet.sig(
       src: T.any(String, Pathname),
       dest: T.any(String, Pathname),
       preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
@@ -12,7 +12,7 @@ module FileUtils
   .returns(T::Array[String])
   def self.cp_r(src, dest, preserve=_); end
 
-  sig(
+  Sorbet.sig(
       list: T.any(String, Pathname),
       mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
   )

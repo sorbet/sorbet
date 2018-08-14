@@ -209,76 +209,76 @@ class Encoding < Object
   Windows_31J = T.let(T.unsafe(nil), Encoding)
   Windows_874 = T.let(T.unsafe(nil), Encoding)
 
-  sig.returns(T::Hash[String, String])
+  Sorbet.sig.returns(T::Hash[String, String])
   def self.aliases(); end
 
-  sig(
+  Sorbet.sig(
       obj1: BasicObject,
       obj2: BasicObject,
   )
   .returns(T.nilable(Encoding))
   def self.compatible?(obj1, obj2); end
 
-  sig.returns(Encoding)
+  Sorbet.sig.returns(Encoding)
   def self.default_external(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       arg0: Encoding,
   )
   .returns(Encoding)
   def self.default_external=(arg0); end
 
-  sig.returns(Encoding)
+  Sorbet.sig.returns(Encoding)
   def self.default_internal(); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(T.nilable(String))
-  sig(
+  Sorbet.sig(
       arg0: Encoding,
   )
   .returns(T.nilable(Encoding))
   def self.default_internal=(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Encoding),
   )
   .returns(Encoding)
   def self.find(arg0); end
 
-  sig.returns(T::Array[Encoding])
+  Sorbet.sig.returns(T::Array[Encoding])
   def self.list(); end
 
-  sig.returns(T::Array[String])
+  Sorbet.sig.returns(T::Array[String])
   def self.name_list(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def ascii_compatible?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def dummy?(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def name(); end
 
-  sig.returns(T::Array[String])
+  Sorbet.sig.returns(T::Array[String])
   def names(); end
 
-  sig(
+  Sorbet.sig(
       name: String,
   )
   .returns(Encoding)
   def replicate(name); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 end
 

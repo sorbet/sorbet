@@ -1,6 +1,6 @@
 # typed: true
 module Abbrev
-  sig(
+  Sorbet.sig(
       words: T::Array[String],
   )
   .returns(T::Hash[String, String])

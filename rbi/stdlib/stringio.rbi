@@ -3,7 +3,7 @@ class StringIO
   include Enumerable
   extend T::Generic
 
-  sig(
+  Sorbet.sig(
     string: String,
     mode: T.nilable(String)
   ).void
@@ -16,334 +16,334 @@ class StringIO
   ).returns(T.type_variable(:U))
   def self.open(string="", mode="rw", &blk); end
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(T.self_type)
   def <<(arg0); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def binmode(); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def close(); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def close_read(); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def close_write(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def closed?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def closed_read?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def closed_write?(); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(Enumerator[String])
   def each(sep=_, limit=_, &blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[Integer])
+  Sorbet.sig.returns(Enumerator[Integer])
   def each_byte(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[String])
+  Sorbet.sig.returns(Enumerator[String])
   def each_char(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[Integer])
+  Sorbet.sig.returns(Enumerator[Integer])
   def each_codepoint(&blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def eof(); end
 
-  sig(
+  Sorbet.sig(
       integer_cmd: Integer,
       arg: T.any(String, Integer),
   )
   .returns(Integer)
   def fcntl(integer_cmd, arg); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def fileno(); end
 
-  sig.returns(T.self_type)
+  Sorbet.sig.returns(T.self_type)
   def flush(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def fsync(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def getbyte(); end
 
-  sig.returns(T.nilable(String))
+  Sorbet.sig.returns(T.nilable(String))
   def getc(); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(T.nilable(String))
   def gets(sep=_, limit=_); end
 
-  sig.returns(Encoding)
+  Sorbet.sig.returns(Encoding)
   def internal_encoding(); end
 
-  sig.returns(Encoding)
+  Sorbet.sig.returns(Encoding)
   def external_encoding(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def isatty(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def lineno(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def lineno=(arg0); end
 
-  sig.returns(NilClass)
+  Sorbet.sig.returns(NilClass)
   def pid(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def pos(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def pos=(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(NilClass)
   def print(*arg0); end
 
-  sig(
+  Sorbet.sig(
       format_string: String,
       arg0: BasicObject,
   )
   .returns(NilClass)
   def printf(format_string, *arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(Numeric, String),
   )
   .returns(T.untyped)
   def putc(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: BasicObject,
   )
   .returns(NilClass)
   def puts(*arg0); end
 
-  sig(
+  Sorbet.sig(
       length: Integer,
       outbuf: String,
   )
   .returns(T.nilable(String))
   def read(length=_, outbuf=_); end
 
-  sig(
+  Sorbet.sig(
       len: Integer,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       len: Integer,
       buf: String,
   )
   .returns(String)
   def read_nonblock(len, buf=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def readbyte(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def readchar(); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(String)
   def readline(sep=_, limit=_); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(T::Array[String])
   def readlines(sep=_, limit=_); end
 
-  sig(
+  Sorbet.sig(
       maxlen: Integer,
   )
   .returns(String)
-  sig(
+  Sorbet.sig(
       maxlen: Integer,
       outbuf: String,
   )
   .returns(String)
   def readpartial(maxlen, outbuf=_); end
 
-  sig(
+  Sorbet.sig(
       other: StringIO,
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       other: String,
       mode_str: String,
   )
   .returns(T.self_type)
   def reopen(other, mode_str=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def rewind(); end
 
-  sig(
+  Sorbet.sig(
       amount: Integer,
       whence: Integer,
   )
   .returns(Integer)
   def seek(amount, whence=_); end
 
-  sig(
+  Sorbet.sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
       int_enc: T.any(String, Encoding),
   )
   .returns(T.self_type)
   def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def string(); end
 
-  sig(str: String).returns(String)
+  Sorbet.sig(str: String).returns(String)
   def string=(str); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def size(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def sync(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T.any(TrueClass, FalseClass))
   def sync=(arg0); end
 
-  sig(
+  Sorbet.sig(
       maxlen: Integer,
       outbuf: String,
   )
   .returns(String)
   def sysread(maxlen, outbuf); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def syswrite(arg0); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def tell(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def tty?(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T.any(String, Integer),
   )
   .returns(NilClass)
   def ungetbyte(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(NilClass)
   def ungetc(arg0); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(Integer)
   def write(arg0); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[Integer])
+  Sorbet.sig.returns(Enumerator[Integer])
   def bytes(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[String])
+  Sorbet.sig.returns(Enumerator[String])
   def chars(&blk); end
 
-  sig(
+  Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig.returns(Enumerator[Integer])
+  Sorbet.sig.returns(Enumerator[Integer])
   def codepoints(&blk); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(Enumerator[String])
   def each_line(sep=_, limit=_, &blk); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def eof?(); end
 
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(T.self_type)
-  sig(
+  Sorbet.sig(
       sep: String,
       limit: Integer,
   )

@@ -10,11 +10,11 @@ end
 module T
   extend T::Helpers
 
-  sig(x: T.untyped).returns(T.untyped)
+  Sorbet.sig(x: T.untyped).returns(T.untyped)
   def self.unsafe(x); end
 
   # Once we get generic methods, it should return T.nilable(<type>)
-  sig(
+  Sorbet.sig(
     obj: T.untyped,
     type: Class
   ).returns(T.untyped)
@@ -41,7 +41,7 @@ module T
   def self.type_parameter(var); end
   def self.self_type; end
 
-  sig(arg: T.untyped, error: String).returns(T.untyped)
+  Sorbet.sig(arg: T.untyped, error: String).returns(T.untyped)
   def self.must(arg, error=""); end
 
   def self.coerce(type); end

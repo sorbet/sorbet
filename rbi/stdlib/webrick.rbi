@@ -8,20 +8,20 @@ module WEBrick::AccessLog
   COMMON_LOG_FORMAT = _
   REFERER_LOG_FORMAT = _
 
-  sig(
+  Sorbet.sig(
     data: T.untyped,
   )
   .returns(T.untyped)
   def self.escape(data); end
 
-  sig(
+  Sorbet.sig(
     format_string: T.untyped,
     params: T.untyped,
   )
   .returns(T.untyped)
   def self.format(format_string, params); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     req: T.untyped,
     res: T.untyped,
@@ -37,183 +37,183 @@ class WEBrick::BasicLog
   INFO = _
   WARN = _
 
-  sig(
+  Sorbet.sig(
     obj: T.untyped,
   )
   .returns(T.untyped)
   def <<(obj); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def close(); end
 
-  sig(
+  Sorbet.sig(
     msg: T.untyped,
   )
   .returns(T.untyped)
   def debug(msg); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def debug?(); end
 
-  sig(
+  Sorbet.sig(
     msg: T.untyped,
   )
   .returns(T.untyped)
   def error(msg); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def error?(); end
 
-  sig(
+  Sorbet.sig(
     msg: T.untyped,
   )
   .returns(T.untyped)
   def fatal(msg); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def fatal?(); end
 
-  sig(
+  Sorbet.sig(
     msg: T.untyped,
   )
   .returns(T.untyped)
   def info(msg); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def info?(); end
 
-  sig(
+  Sorbet.sig(
     log_file: T.untyped,
     level: T.untyped,
   )
   .void
   def initialize(log_file=_, level=_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def level(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def level=(_); end
 
-  sig(
+  Sorbet.sig(
     level: T.untyped,
     data: T.untyped,
   )
   .returns(T.untyped)
   def log(level, data); end
 
-  sig(
+  Sorbet.sig(
     msg: T.untyped,
   )
   .returns(T.untyped)
   def warn(msg); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def warn?(); end
 end
 
 class WEBrick::Cookie
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def comment(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def comment=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def domain(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def domain=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def expires(); end
 
-  sig(
+  Sorbet.sig(
     t: T.untyped,
   )
   .returns(T.untyped)
   def expires=(t); end
 
-  sig(
+  Sorbet.sig(
     name: T.untyped,
     value: T.untyped,
   )
   .returns(T.untyped)
   def initialize(name, value); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def max_age(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def max_age=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def name(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def path(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def path=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def secure(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def secure=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_s(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def value(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def value=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def version(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def version=(_); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.parse(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_set_cookie(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
@@ -221,66 +221,66 @@ class WEBrick::Cookie
 end
 
 class WEBrick::Daemon
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.start(); end
 end
 
 class WEBrick::GenericServer
-  sig(
+  Sorbet.sig(
     key: T.untyped,
   )
   .returns(T.untyped)
   def [](key); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def config(); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     default: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config=_, default=_); end
 
-  sig(
+  Sorbet.sig(
     address: T.untyped,
     port: T.untyped,
   )
   .returns(T.untyped)
   def listen(address, port); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def listeners(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def logger(); end
 
-  sig(
+  Sorbet.sig(
     sock: T.untyped,
   )
   .returns(T.untyped)
   def run(sock); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def shutdown(); end
 
-  sig(
+  Sorbet.sig(
   )
   .returns(T.untyped)
   def start(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def status(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def stop(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def tokens(); end
 end
 
 module WEBrick::HTMLUtils
-  sig(
+  Sorbet.sig(
     string: T.untyped,
   )
   .returns(T.untyped)
@@ -288,7 +288,7 @@ module WEBrick::HTMLUtils
 end
 
 module WEBrick::HTTPAuth
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     realm: T.untyped,
@@ -300,7 +300,7 @@ module WEBrick::HTTPAuth
   .returns(T.untyped)
   def self._basic_auth(req, res, realm, req_field, res_field, err_type, block); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     realm: T.untyped,
@@ -308,7 +308,7 @@ module WEBrick::HTTPAuth
   .returns(T.untyped)
   def self.basic_auth(req, res, realm); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     realm: T.untyped,
@@ -323,13 +323,13 @@ module WEBrick::HTTPAuth::Authenticator
   ResponseField = _
   ResponseInfoField = _
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def logger(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def realm(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def userdb(); end
 end
 
@@ -337,37 +337,37 @@ class WEBrick::HTTPAuth::BasicAuth
   include WEBrick::HTTPAuth::Authenticator
   AuthScheme = _
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def authenticate(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def challenge(req, res); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     default: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config, default=_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def logger(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def realm(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def userdb(); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -382,17 +382,17 @@ class WEBrick::HTTPAuth::DigestAuth
   MustParams = _
   MustParamsAuth = _
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def algorithm(); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def authenticate(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     stale: T.untyped,
@@ -400,17 +400,17 @@ class WEBrick::HTTPAuth::DigestAuth
   .returns(T.untyped)
   def challenge(req, res, stale=_); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     default: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config, default=_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def qop(); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -420,43 +420,43 @@ class WEBrick::HTTPAuth::DigestAuth
 end
 
 class WEBrick::HTTPAuth::DigestAuth::OpaqueInfo < Struct
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def nc(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def nc=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def nonce(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def nonce=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def time(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def time=(_); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def self.[](*_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.members(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
@@ -465,23 +465,23 @@ end
 
 class WEBrick::HTTPAuth::Htdigest
   include WEBrick::HTTPAuth::UserDB
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
   )
   .returns(T.untyped)
   def delete_passwd(realm, user); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def each(); end
 
-  sig(
+  Sorbet.sig(
     output: T.untyped,
   )
   .returns(T.untyped)
   def flush(output=_); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     reload_db: T.untyped,
@@ -489,16 +489,16 @@ class WEBrick::HTTPAuth::Htdigest
   .returns(T.untyped)
   def get_passwd(realm, user, reload_db); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
   def initialize(path); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def reload(); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -508,54 +508,54 @@ class WEBrick::HTTPAuth::Htdigest
 end
 
 class WEBrick::HTTPAuth::Htgroup
-  sig(
+  Sorbet.sig(
     group: T.untyped,
     members: T.untyped,
   )
   .returns(T.untyped)
   def add(group, members); end
 
-  sig(
+  Sorbet.sig(
     output: T.untyped,
   )
   .returns(T.untyped)
   def flush(output=_); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
   def initialize(path); end
 
-  sig(
+  Sorbet.sig(
     group: T.untyped,
   )
   .returns(T.untyped)
   def members(group); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def reload(); end
 end
 
 class WEBrick::HTTPAuth::Htpasswd
   include WEBrick::HTTPAuth::UserDB
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
   )
   .returns(T.untyped)
   def delete_passwd(realm, user); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def each(); end
 
-  sig(
+  Sorbet.sig(
     output: T.untyped,
   )
   .returns(T.untyped)
   def flush(output=_); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     reload_db: T.untyped,
@@ -563,16 +563,16 @@ class WEBrick::HTTPAuth::Htpasswd
   .returns(T.untyped)
   def get_passwd(realm, user, reload_db); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
   def initialize(path); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def reload(); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -597,16 +597,16 @@ class WEBrick::HTTPAuth::ProxyDigestAuth < WEBrick::HTTPAuth::DigestAuth
 end
 
 module WEBrick::HTTPAuth::UserDB
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def auth_type(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def auth_type=(_); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     reload_db: T.untyped,
@@ -614,7 +614,7 @@ module WEBrick::HTTPAuth::UserDB
   .returns(T.untyped)
   def get_passwd(realm, user, reload_db=_); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -622,7 +622,7 @@ module WEBrick::HTTPAuth::UserDB
   .returns(T.untyped)
   def make_passwd(realm, user, pass); end
 
-  sig(
+  Sorbet.sig(
     realm: T.untyped,
     user: T.untyped,
     pass: T.untyped,
@@ -636,156 +636,156 @@ class WEBrick::HTTPRequest
   MAX_URI_LENGTH = _
   PrivateNetworkRegexp = _
 
-  sig(
+  Sorbet.sig(
     header_name: T.untyped,
   )
   .returns(T.untyped)
   def [](header_name); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def accept(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def accept_charset(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def accept_encoding(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def accept_language(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def addr(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def attributes(); end
 
-  sig(
+  Sorbet.sig(
   )
   .returns(T.untyped)
   def body(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def content_length(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def content_type(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def continue(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def cookies(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def each(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def fixup(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def header(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def host(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def http_version(); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def keep_alive(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def keep_alive?(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def meta_vars(); end
 
-  sig(
+  Sorbet.sig(
     socket: T.untyped,
   )
   .returns(T.untyped)
   def parse(socket=_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def path(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def path_info(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def path_info=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def peeraddr(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def port(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def query(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def query_string(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def query_string=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def raw_header(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def remote_ip(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_line(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_method(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_time(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_uri(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def script_name(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def script_name=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def server_name(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def ssl?(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_s(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def unparsed_uri(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def user(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
@@ -793,189 +793,189 @@ class WEBrick::HTTPRequest
 end
 
 class WEBrick::HTTPResponse
-  sig(
+  Sorbet.sig(
     field: T.untyped,
   )
   .returns(T.untyped)
   def [](field); end
 
-  sig(
+  Sorbet.sig(
     field: T.untyped,
     value: T.untyped,
   )
   .returns(T.untyped)
   def []=(field, value); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def body(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def body=(_); end
 
-  sig(
+  Sorbet.sig(
     val: T.untyped,
   )
   .returns(T.untyped)
   def chunked=(val); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def chunked?(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def config(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def content_length(); end
 
-  sig(
+  Sorbet.sig(
     len: T.untyped,
   )
   .returns(T.untyped)
   def content_length=(len); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def content_type(); end
 
-  sig(
+  Sorbet.sig(
     type: T.untyped,
   )
   .returns(T.untyped)
   def content_type=(type); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def cookies(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def each(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def filename(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def filename=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def header(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def http_version(); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def keep_alive(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def keep_alive=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def keep_alive?(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def reason_phrase(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def reason_phrase=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_http_version(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def request_http_version=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_method(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def request_method=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def request_uri(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def request_uri=(_); end
 
-  sig(
+  Sorbet.sig(
     socket: T.untyped,
   )
   .returns(T.untyped)
   def send_body(socket); end
 
-  sig(
+  Sorbet.sig(
     socket: T.untyped,
   )
   .returns(T.untyped)
   def send_header(socket); end
 
-  sig(
+  Sorbet.sig(
     socket: T.untyped,
   )
   .returns(T.untyped)
   def send_response(socket); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def sent_size(); end
 
-  sig(
+  Sorbet.sig(
     ex: T.untyped,
     backtrace: T.untyped,
   )
   .returns(T.untyped)
   def set_error(ex, backtrace=_); end
 
-  sig(
+  Sorbet.sig(
     status: T.untyped,
     url: T.untyped,
   )
   .returns(T.untyped)
   def set_redirect(status, url); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def setup_header(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def status(); end
 
-  sig(
+  Sorbet.sig(
     status: T.untyped,
   )
   .returns(T.untyped)
   def status=(status); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def status_line(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_s(); end
 end
 
 class WEBrick::HTTPServer < WEBrick::GenericServer
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     req: T.untyped,
     res: T.untyped,
@@ -983,27 +983,27 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   .returns(T.untyped)
   def access_log(config, req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_OPTIONS(req, res); end
 
-  sig(
+  Sorbet.sig(
     config: T.untyped,
     default: T.untyped,
   )
   .returns(T.untyped)
   def initialize(config=_, default=_); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
   )
   .returns(T.untyped)
   def lookup_server(req); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
     servlet: T.untyped,
     options: T.untyped,
@@ -1011,45 +1011,45 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
   .returns(T.untyped)
   def mount(dir, servlet, *options); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
     proc: T.untyped,
   )
   .returns(T.untyped)
   def mount_proc(dir, proc=_); end
 
-  sig(
+  Sorbet.sig(
     sock: T.untyped,
   )
   .returns(T.untyped)
   def run(sock); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
   def search_servlet(path); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def service(req, res); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
   )
   .returns(T.untyped)
   def umount(dir); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
   )
   .returns(T.untyped)
   def unmount(dir); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
   )
   .returns(T.untyped)
@@ -1057,29 +1057,29 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
 end
 
 class WEBrick::HTTPServer::MountTable
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
   )
   .returns(T.untyped)
   def [](dir); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
     val: T.untyped,
   )
   .returns(T.untyped)
   def []=(dir, val); end
 
-  sig(
+  Sorbet.sig(
     dir: T.untyped,
   )
   .returns(T.untyped)
   def delete(dir); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def initialize(); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
@@ -1087,42 +1087,42 @@ class WEBrick::HTTPServer::MountTable
 end
 
 class WEBrick::HTTPServlet::AbstractServlet
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_HEAD(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_OPTIONS(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     options: T.untyped,
   )
   .returns(T.untyped)
   def initialize(server, *options); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def service(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     options: T.untyped,
   )
@@ -1134,21 +1134,21 @@ class WEBrick::HTTPServlet::CGIHandler < WEBrick::HTTPServlet::AbstractServlet
   CGIRunner = _
   Ruby = _
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_POST(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     name: T.untyped,
   )
@@ -1157,21 +1157,21 @@ class WEBrick::HTTPServlet::CGIHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractServlet
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     local_path: T.untyped,
   )
   .returns(T.untyped)
   def initialize(server, local_path); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     filename: T.untyped,
@@ -1180,7 +1180,7 @@ class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractS
   .returns(T.untyped)
   def make_partial_content(req, res, filename, filesize); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
     mtime: T.untyped,
@@ -1189,7 +1189,7 @@ class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractS
   .returns(T.untyped)
   def not_modified?(req, res, mtime, etag); end
 
-  sig(
+  Sorbet.sig(
     range: T.untyped,
     filesize: T.untyped,
   )
@@ -1198,21 +1198,21 @@ class WEBrick::HTTPServlet::DefaultFileHandler < WEBrick::HTTPServlet::AbstractS
 end
 
 class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_POST(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     name: T.untyped,
   )
@@ -1223,28 +1223,28 @@ end
 class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
   HandlerTable = _
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_OPTIONS(req, res); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def do_POST(req, res); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     root: T.untyped,
     options: T.untyped,
@@ -1253,21 +1253,21 @@ class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
   .returns(T.untyped)
   def initialize(server, root, options=_, default=_); end
 
-  sig(
+  Sorbet.sig(
     req: T.untyped,
     res: T.untyped,
   )
   .returns(T.untyped)
   def service(req, res); end
 
-  sig(
+  Sorbet.sig(
     suffix: T.untyped,
     handler: T.untyped,
   )
   .returns(T.untyped)
   def self.add_handler(suffix, handler); end
 
-  sig(
+  Sorbet.sig(
     suffix: T.untyped,
   )
   .returns(T.untyped)
@@ -1275,28 +1275,28 @@ class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::ProcHandler < WEBrick::HTTPServlet::AbstractServlet
-  sig(
+  Sorbet.sig(
     request: T.untyped,
     response: T.untyped,
   )
   .returns(T.untyped)
   def do_GET(request, response); end
 
-  sig(
+  Sorbet.sig(
     request: T.untyped,
     response: T.untyped,
   )
   .returns(T.untyped)
   def do_POST(request, response); end
 
-  sig(
+  Sorbet.sig(
     server: T.untyped,
     options: T.untyped,
   )
   .returns(T.untyped)
   def get_instance(server, *options); end
 
-  sig(
+  Sorbet.sig(
     proc: T.untyped,
   )
   .returns(T.untyped)
@@ -1358,49 +1358,49 @@ module WEBrick::HTTPStatus
   RC_USE_PROXY = _
   StatusMessage = _
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.[](code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.client_error?(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.error?(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.info?(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.reason_phrase(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.redirect?(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
   def self.server_error?(code); end
 
-  sig(
+  Sorbet.sig(
     code: T.untyped,
   )
   .returns(T.untyped)
@@ -1549,19 +1549,19 @@ class WEBrick::HTTPStatus::ServiceUnavailable < WEBrick::HTTPStatus::ServerError
 end
 
 class WEBrick::HTTPStatus::Status < StandardError
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def code(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def reason_phrase(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_i(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.code(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.reason_phrase(); end
 end
 
@@ -1603,131 +1603,131 @@ module WEBrick::HTTPUtils
   UNESCAPED_FORM = _
   UNESCAPED_PCHAR = _
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
     regex: T.untyped,
   )
   .returns(T.untyped)
   def self._escape(str, regex); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self._make_regex(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self._make_regex!(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
     regex: T.untyped,
   )
   .returns(T.untyped)
   def self._unescape(str, regex); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.dequote(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.escape(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.escape8bit(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.escape_form(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.escape_path(str); end
 
-  sig(
+  Sorbet.sig(
     file: T.untyped,
   )
   .returns(T.untyped)
   def self.load_mime_types(file); end
 
-  sig(
+  Sorbet.sig(
     filename: T.untyped,
     mime_tab: T.untyped,
   )
   .returns(T.untyped)
   def self.mime_type(filename, mime_tab); end
 
-  sig(
+  Sorbet.sig(
     path: T.untyped,
   )
   .returns(T.untyped)
   def self.normalize_path(path); end
 
-  sig(
+  Sorbet.sig(
     io: T.untyped,
     boundary: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_form_data(io, boundary); end
 
-  sig(
+  Sorbet.sig(
     raw: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_header(raw); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_query(str); end
 
-  sig(
+  Sorbet.sig(
     value: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_qvalues(value); end
 
-  sig(
+  Sorbet.sig(
     ranges_specifier: T.untyped,
   )
   .returns(T.untyped)
   def self.parse_range_header(ranges_specifier); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.quote(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.split_header_value(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def self.unescape(str); end
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
@@ -1738,106 +1738,106 @@ class WEBrick::HTTPUtils::FormData < String
   EmptyHeader = _
   EmptyRawHeader = _
 
-  sig(
+  Sorbet.sig(
     str: T.untyped,
   )
   .returns(T.untyped)
   def <<(str); end
 
-  sig(
+  Sorbet.sig(
     key: T.untyped,
   )
   .returns(T.untyped)
   def [](*key); end
 
-  sig(
+  Sorbet.sig(
     data: T.untyped,
   )
   .returns(T.untyped)
   def append_data(data); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def each_data(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def filename(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def filename=(_); end
 
-  sig(
+  Sorbet.sig(
     args: T.untyped,
   )
   .returns(T.untyped)
   def initialize(*args); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def list(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def name(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def name=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def next_data(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def next_data=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_ary(); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_s(); end
 end
 
 class WEBrick::HTTPVersion
   include Comparable
-  sig(
+  Sorbet.sig(
     other: T.untyped,
   )
   .returns(T.untyped)
   def <=>(other); end
 
-  sig(
+  Sorbet.sig(
     version: T.untyped,
   )
   .returns(T.untyped)
   def initialize(version); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def major(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def major=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def minor(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
   def minor=(_); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def to_s(); end
 
-  sig(
+  Sorbet.sig(
     version: T.untyped,
   )
   .returns(T.untyped)
@@ -1845,24 +1845,24 @@ class WEBrick::HTTPVersion
 end
 
 class WEBrick::Log < WEBrick::BasicLog
-  sig(
+  Sorbet.sig(
     log_file: T.untyped,
     level: T.untyped,
   )
   .returns(T.untyped)
   def initialize(log_file=_, level=_); end
 
-  sig(
+  Sorbet.sig(
     level: T.untyped,
     data: T.untyped,
   )
   .returns(T.untyped)
   def log(level, data); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def time_format(); end
 
-  sig(
+  Sorbet.sig(
     _: T.untyped,
   )
   .returns(T.untyped)
@@ -1870,48 +1870,48 @@ class WEBrick::Log < WEBrick::BasicLog
 end
 
 class WEBrick::SimpleServer
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.start(); end
 end
 
 module WEBrick::Utils
   RAND_CHARS = _
 
-  sig(
+  Sorbet.sig(
     address: T.untyped,
     port: T.untyped,
   )
   .returns(T.untyped)
   def self.create_listeners(address, port); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.getservername(); end
 
-  sig(
+  Sorbet.sig(
     len: T.untyped,
   )
   .returns(T.untyped)
   def self.random_string(len); end
 
-  sig(
+  Sorbet.sig(
     io: T.untyped,
   )
   .returns(T.untyped)
   def self.set_close_on_exec(io); end
 
-  sig(
+  Sorbet.sig(
     io: T.untyped,
   )
   .returns(T.untyped)
   def self.set_non_blocking(io); end
 
-  sig(
+  Sorbet.sig(
     user: T.untyped,
   )
   .returns(T.untyped)
   def self.su(user); end
 
-  sig(
+  Sorbet.sig(
     seconds: T.untyped,
     exception: T.untyped,
   )
@@ -1924,17 +1924,17 @@ class WEBrick::Utils::TimeoutHandler
   extend Singleton::SingletonClassMethods
   TimeoutMutex = _
 
-  sig(
+  Sorbet.sig(
     thread: T.untyped,
     id: T.untyped,
   )
   .returns(T.untyped)
   def cancel(thread, id); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def initialize(); end
 
-  sig(
+  Sorbet.sig(
     thread: T.untyped,
     id: T.untyped,
     exception: T.untyped,
@@ -1942,7 +1942,7 @@ class WEBrick::Utils::TimeoutHandler
   .returns(T.untyped)
   def interrupt(thread, id, exception); end
 
-  sig(
+  Sorbet.sig(
     thread: T.untyped,
     time: T.untyped,
     exception: T.untyped,
@@ -1950,25 +1950,25 @@ class WEBrick::Utils::TimeoutHandler
   .returns(T.untyped)
   def register(thread, time, exception); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def terminate(); end
 
-  sig(
+  Sorbet.sig(
     id: T.untyped,
   )
   .returns(T.untyped)
   def self.cancel(id); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.instance(); end
 
-  sig(
+  Sorbet.sig(
     seconds: T.untyped,
     exception: T.untyped,
   )
   .returns(T.untyped)
   def self.register(seconds, exception); end
 
-  sig.returns(T.untyped)
+  Sorbet.sig.returns(T.untyped)
   def self.terminate(); end
 end

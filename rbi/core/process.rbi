@@ -34,162 +34,162 @@ module Process
   WNOHANG = T.let(T.unsafe(nil), Integer)
   WUNTRACED = T.let(T.unsafe(nil), Integer)
 
-  sig(
+  Sorbet.sig(
       msg: String,
   )
   .returns(T.untyped)
   def self.abort(msg=_); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def self.argv0(); end
 
-  sig(
+  Sorbet.sig(
       clock_id: T.any(Symbol, Integer),
       unit: Symbol,
   )
   .returns(T.any(Float, Integer))
   def self.clock_getres(clock_id, unit=_); end
 
-  sig(
+  Sorbet.sig(
       clock_id: T.any(Symbol, Integer),
       unit: Symbol,
   )
   .returns(T.any(Float, Integer))
   def self.clock_gettime(clock_id, unit=_); end
 
-  sig(
+  Sorbet.sig(
       nochdir: BasicObject,
       noclose: BasicObject,
   )
   .returns(Integer)
   def self.daemon(nochdir=_, noclose=_); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
   )
   .returns(Thread)
   def self.detach(pid); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.egid(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def self.egid=(arg0); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.euid(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def self.euid=(arg0); end
 
-  sig(
+  Sorbet.sig(
       status: Integer,
   )
   .returns(T.untyped)
   def self.exit(status=_); end
 
-  sig(
+  Sorbet.sig(
       status: Integer,
   )
   .returns(T.untyped)
   def self.exit!(status=_); end
 
-  sig.returns(T.nilable(Integer))
-  sig(
+  Sorbet.sig.returns(T.nilable(Integer))
+  Sorbet.sig(
       blk: T.proc().returns(BasicObject),
   )
   .returns(T.nilable(Integer))
   def self.fork(&blk); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
   )
   .returns(Integer)
   def self.getpgid(pid); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.getpgrp(); end
 
-  sig(
+  Sorbet.sig(
       kind: Integer,
       arg0: Integer,
   )
   .returns(Integer)
   def self.getpriority(kind, arg0); end
 
-  sig(
+  Sorbet.sig(
       resource: T.any(Symbol, String, Integer),
   )
   .returns([Integer, Integer])
   def self.getrlimit(resource); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
   )
   .returns(Integer)
   def self.getsid(pid=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.gid(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def self.gid=(arg0); end
 
-  sig.returns(T::Array[Integer])
+  Sorbet.sig.returns(T::Array[Integer])
   def self.groups(); end
 
-  sig(
+  Sorbet.sig(
       arg0: T::Array[Integer],
   )
   .returns(T::Array[Integer])
   def self.groups=(arg0); end
 
-  sig(
+  Sorbet.sig(
       username: String,
       gid: Integer,
   )
   .returns(T::Array[Integer])
   def self.initgroups(username, gid); end
 
-  sig(
+  Sorbet.sig(
       signal: T.any(Integer, Symbol, String),
       pids: Integer,
   )
   .returns(Integer)
   def self.kill(signal, *pids); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.maxgroups(); end
 
-  sig(
+  Sorbet.sig(
       arg0: Integer,
   )
   .returns(Integer)
   def self.maxgroups=(arg0); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.pid(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.ppid(); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
       arg0: Integer,
   )
   .returns(Integer)
   def self.setpgid(pid, arg0); end
 
-  sig(
+  Sorbet.sig(
       kind: Integer,
       arg0: Integer,
       priority: Integer,
@@ -197,13 +197,13 @@ module Process
   .returns(Integer)
   def self.setpriority(kind, arg0, priority); end
 
-  sig(
+  Sorbet.sig(
       arg0: String,
   )
   .returns(String)
   def self.setproctitle(arg0); end
 
-  sig(
+  Sorbet.sig(
       resource: T.any(Symbol, String, Integer),
       cur_limit: Integer,
       max_limit: Integer,
@@ -211,46 +211,46 @@ module Process
   .returns(NilClass)
   def self.setrlimit(resource, cur_limit, max_limit=_); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.setsid(); end
 
-  sig.returns(Process::Tms)
+  Sorbet.sig.returns(Process::Tms)
   def self.times(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.uid(); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(Integer)
   def self.uid=(user); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
   .returns(Integer)
   def self.wait(pid=_, flags=_); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
   .returns([Integer, Integer])
   def self.wait2(pid=_, flags=_); end
 
-  sig.returns(T::Array[[Integer, Integer]])
+  Sorbet.sig.returns(T::Array[[Integer, Integer]])
   def self.waitall(); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
   .returns(Integer)
   def self.waitpid(pid=_, flags=_); end
 
-  sig(
+  Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
@@ -259,47 +259,47 @@ module Process
 end
 
 module Process::GID
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(Integer)
   def self.change_privilege(group); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.eid(); end
 
-  sig(
+  Sorbet.sig(
       name: String,
   )
   .returns(Integer)
   def self.from_name(name); end
 
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(Integer)
   def self.grant_privilege(group); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.re_exchange(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def self.re_exchangeable?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.rid(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def self.sid_available?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   type_parameters(:T).sig(
       blk: T.proc().returns(T.type_parameter(:T)),
   )
   .returns(T.type_parameter(:T))
   def self.switch(&blk); end
 
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(Integer)
@@ -307,100 +307,100 @@ module Process::GID
 end
 
 class Process::Status < Object
-  sig(
+  Sorbet.sig(
       num: Integer,
   )
   .returns(Integer)
   def &(num); end
 
-  sig(
+  Sorbet.sig(
       other: BasicObject,
   )
   .returns(T.any(TrueClass, FalseClass))
   def ==(other); end
 
-  sig(
+  Sorbet.sig(
       num: Integer,
   )
   .returns(Integer)
   def >>(num); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def coredump?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def exited?(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def exitstatus(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def inspect(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def pid(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def signaled?(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def stopped?(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def stopsig(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def success?(); end
 
-  sig.returns(T.nilable(Integer))
+  Sorbet.sig.returns(T.nilable(Integer))
   def termsig(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def to_i(); end
 
-  sig.returns(String)
+  Sorbet.sig.returns(String)
   def to_s(); end
 end
 
 module Process::Sys
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.geteuid(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.getgid(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.getuid(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def self.issetugid(); end
 
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(NilClass)
   def self.setegid(group); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(NilClass)
   def self.seteuid(user); end
 
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(NilClass)
   def self.setgid(group); end
 
-  sig(
+  Sorbet.sig(
       rid: Integer,
       eid: Integer,
   )
   .returns(NilClass)
   def self.setregid(rid, eid); end
 
-  sig(
+  Sorbet.sig(
       rid: Integer,
       eid: Integer,
       sid: Integer,
@@ -408,7 +408,7 @@ module Process::Sys
   .returns(NilClass)
   def self.setresgid(rid, eid, sid); end
 
-  sig(
+  Sorbet.sig(
       rid: Integer,
       eid: Integer,
       sid: Integer,
@@ -416,26 +416,26 @@ module Process::Sys
   .returns(NilClass)
   def self.setresuid(rid, eid, sid); end
 
-  sig(
+  Sorbet.sig(
       rid: Integer,
       eid: Integer,
   )
   .returns(NilClass)
   def self.setreuid(rid, eid); end
 
-  sig(
+  Sorbet.sig(
       group: Integer,
   )
   .returns(NilClass)
   def self.setrgid(group); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(NilClass)
   def self.setruid(user); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(NilClass)
@@ -443,47 +443,47 @@ module Process::Sys
 end
 
 module Process::UID
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(Integer)
   def self.change_privilege(user); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.eid(); end
 
-  sig(
+  Sorbet.sig(
       name: String,
   )
   .returns(Integer)
   def self.from_name(name); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(Integer)
   def self.grant_privilege(user); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.re_exchange(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def self.re_exchangeable?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def self.rid(); end
 
-  sig.returns(T.any(TrueClass, FalseClass))
+  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def self.sid_available?(); end
 
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   type_parameters(:T).sig(
       blk: T.proc().returns(T.type_parameter(:T)),
   )
   .returns(T.type_parameter(:T))
   def self.switch(&blk); end
 
-  sig(
+  Sorbet.sig(
       user: Integer,
   )
   .returns(Integer)
@@ -491,6 +491,6 @@ module Process::UID
 end
 
 class Process::Waiter < Thread
-  sig.returns(Integer)
+  Sorbet.sig.returns(Integer)
   def pid(); end
 end

@@ -247,8 +247,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -316,8 +318,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -523,8 +527,10 @@ ClassDef{
       rhs = [
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -592,8 +598,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -653,8 +661,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -704,8 +714,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -765,8 +777,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -834,8 +848,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -895,8 +911,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -946,8 +964,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1007,8 +1027,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1074,8 +1096,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1132,8 +1156,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1183,8 +1209,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1244,8 +1272,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1313,8 +1343,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1401,8 +1433,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1452,8 +1486,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1513,8 +1549,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1590,8 +1628,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1690,8 +1730,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1775,8 +1817,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1887,8 +1931,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -1956,8 +2002,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2044,8 +2092,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2113,8 +2163,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2174,8 +2226,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2225,8 +2279,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2313,8 +2369,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2384,8 +2442,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2502,8 +2562,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2553,8 +2615,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2604,8 +2668,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2673,8 +2739,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2716,8 +2784,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2785,8 +2855,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2846,8 +2918,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
             ]
@@ -2889,8 +2963,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -2958,8 +3034,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3019,8 +3097,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
             ]
@@ -3062,8 +3142,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3131,8 +3213,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3192,8 +3276,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
             ]
@@ -3235,8 +3321,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3304,8 +3392,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3365,8 +3455,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
             ]
@@ -3415,8 +3507,10 @@ ClassDef{
       rhs = [
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3464,8 +3558,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3522,8 +3618,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3571,8 +3669,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3640,8 +3740,10 @@ ClassDef{
       rhs = [
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3689,8 +3791,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3747,8 +3851,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{
@@ -3807,8 +3913,10 @@ ClassDef{
       rhs = [
         Send{
           recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            name = <dslSig>
+            recv = Ident{
+              symbol = <constant:Sorbet>
+            }
+            name = sig
             block = nullptr
             args = [
               Hash{

@@ -13,7 +13,7 @@ void emit_proc(std::ofstream &out, int arity) {
 
     out << '\n';
 
-    out << "  sig(" << '\n';
+    out << "  Sorbet.sig(" << '\n';
     for (int i = 0; i < arity; ++i) {
         out << "    arg" << i << ": "
             << "Arg" << i << "," << '\n';
