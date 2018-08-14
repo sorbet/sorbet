@@ -283,10 +283,11 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             auto fref = uri2FileRef(uri);
             for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
                 core::SymbolRef ref(finalGs.get(), idx);
-                if (!hideSymbol(*finalGs, ref) && ref.data(*finalGs).owner.data(*finalGs).loc().file != fref) {
+                if (!hideSymbol(*finalGs, ref) && (ref.data(*finalGs).owner.data(*finalGs).loc().file != fref ||
+                                                   ref.data(*finalGs).owner == core::Symbols::root())) {
                     for (auto definitionLocation : ref.data(*finalGs).locs()) {
                         if (definitionLocation.file == fref) {
-                            auto data = symbolRef2DocumentSymbol(ref);
+                            auto data = symbolRef2DocumentSymbol(ref, fref);
                             if (data) {
                                 result.PushBack(move(*data), alloc);
                                 break;
@@ -1006,6 +1007,24 @@ int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
     return 0;
 }
 
+void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out) {
+    for (auto mem : sym.data(*finalGs).members) {
+        if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
+            bool foundThisFile = false;
+            for (auto loc : mem.second.data(*finalGs).locs()) {
+                foundThisFile = foundThisFile || loc.file == filter;
+            }
+            if (!foundThisFile) {
+                continue;
+            }
+            auto inner = LSPLoop::symbolRef2DocumentSymbol(mem.second, filter);
+            if (inner) {
+                out.PushBack(*inner, alloc);
+            }
+        }
+    }
+}
+
 /**
  *
  * Represents programming constructs like variables, classes, interfaces etc. that appear in a document. Document
@@ -1041,7 +1060,7 @@ int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
  *  }
  */
 
-unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef symRef) {
+unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef symRef, core::FileRef filter) {
     if (!symRef.exists()) {
         return nullptr;
     }
@@ -1069,25 +1088,11 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef s
 
     rapidjson::Value children;
     children.SetArray();
-    for (auto mem : sym.members) {
-        if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
-            auto inner = LSPLoop::symbolRef2DocumentSymbol(mem.second);
-            if (inner) {
-                children.PushBack(*inner, alloc);
-            }
-        }
-    }
+    symbolRef2DocumentSymbolWalkMembers(symRef, filter, children);
     if (sym.isClass()) {
         auto singleton = sym.lookupSingletonClass(*finalGs);
         if (singleton.exists()) {
-            for (auto mem : singleton.data(*finalGs).members) {
-                if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
-                    auto inner = LSPLoop::symbolRef2DocumentSymbol(mem.second);
-                    if (inner) {
-                        children.PushBack(*inner, alloc);
-                    }
-                }
-            }
+            symbolRef2DocumentSymbolWalkMembers(singleton, filter, children);
         }
     }
     result.AddMember("children", children, alloc);
