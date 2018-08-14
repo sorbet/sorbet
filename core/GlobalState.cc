@@ -92,7 +92,7 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
     data.setIsModule(isModule);
 
     if (symRef._id > Symbols::root()._id) {
-        Symbols::root().data(*this, true).members.emplace_back(nameId, symRef);
+        Symbols::root().data(*this, true).members[nameId] = symRef;
     }
     return symRef;
 }
@@ -124,9 +124,9 @@ void GlobalState::initEmpty() {
     SymbolRef top_id = synthesizeClass(top_str, 0);
     SymbolRef bottom_id = synthesizeClass(bottom_str, 0);
     SymbolRef root_id = synthesizeClass(root_str, 0);
-    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(no_symbol_str), no_symbol_id);
-    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(top_str), top_id);
-    Symbols::root().data(*this, true).members.emplace_back(enterNameConstant(bottom_str), bottom_id);
+    Symbols::root().data(*this, true).members[enterNameConstant(no_symbol_str)] = no_symbol_id;
+    Symbols::root().data(*this, true).members[enterNameConstant(top_str)] = top_id;
+    Symbols::root().data(*this, true).members[enterNameConstant(bottom_str)] = bottom_id;
     SymbolRef todo_id = synthesizeClass(todo_str, 0);
     SymbolRef object_id = synthesizeClass(object_str, Symbols::BasicObject()._id);
     SymbolRef integer_id = synthesizeClass(integer_str);
@@ -390,24 +390,19 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
     ENFORCE(owner.exists(), "entering symbol in to non-existing owner");
     ENFORCE(name.exists(), "entering symbol with non-existing name");
     Symbol &ownerScope = owner.data(*this, true);
-    auto from = ownerScope.members.begin();
-    auto to = ownerScope.members.end();
     histogramInc("symbol_enter_by_name", ownerScope.members.size());
 
-    while (from != to) {
-        auto &el = *from;
-        if (el.first == name) {
-            ENFORCE((from->second.data(*this).flags & flags) == flags, "existing symbol has wrong flags");
-            counterInc("symbols.hit");
-            return from->second;
-        }
-        from++;
+    auto &store = ownerScope.members[name];
+    if (store.exists()) {
+        ENFORCE((store.data(*this).flags & flags) == flags, "existing symbol has wrong flags");
+        counterInc("symbols.hit");
+        return store;
     }
+
     ENFORCE(!symbolTableFrozen);
 
-    bool reallocate = symbols.size() == symbols.capacity();
-
     SymbolRef ret = SymbolRef(this, symbols.size());
+    store = ret; // DO NOT MOVE this assignment down. emplace_back on symbol invalidates `store`
     symbols.emplace_back();
     Symbol &data = ret.data(*this, true);
     data.name = name;
@@ -428,11 +423,6 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
         categoryCounterInc("symbols", "argument");
     }
 
-    if (!reallocate) {
-        ownerScope.members.emplace_back(name, ret);
-    } else {
-        owner.data(*this, true).members.emplace_back(name, ret);
-    }
     wasModified_ = true;
     return ret;
 }
@@ -820,18 +810,17 @@ FileRef GlobalState::reserveFileRef(std::string path) {
 void GlobalState::mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind) {
     auto &owner = what.data(*this).owner;
     auto &members = owner.data(*this).members;
-    for (auto &mem : members) {
-        if (mem.first == origName) {
-            int collisionCount = 1;
-            NameRef name;
-            do {
-                name = freshNameUnique(kind, origName, collisionCount++);
-            } while (owner.data(*this).findMember(*this, name).exists());
-            mem.first = name;
-            mem.second.data(*this).name = mem.first;
-            break;
-        }
-    }
+    auto fnd = members.find(origName);
+    ENFORCE(fnd != members.end());
+    auto oldSym = fnd->second;
+    u2 collisionCount = 1;
+    NameRef name;
+    do {
+        name = freshNameUnique(kind, origName, collisionCount++);
+    } while (owner.data(*this).findMember(*this, name).exists());
+    members.erase(fnd);
+    members[name] = oldSym;
+    oldSym.data(*this).name = name;
 }
 
 unsigned int GlobalState::symbolsUsed() const {

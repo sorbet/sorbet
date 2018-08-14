@@ -452,7 +452,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     for (int i = 0; i < membersSize; i++) {
         auto name = NameRef(*gs, p.getU4());
         auto sym = SymbolRef(gs, p.getU4());
-        result.members.emplace_back(name, sym);
+        result.members[name] = sym;
     }
     result.resultType = unpickleType(p, gs);
     auto locCount = p.getU4();

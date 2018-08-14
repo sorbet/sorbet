@@ -690,7 +690,7 @@ private:
             }
             return;
         }
-        ctx.owner.data(ctx).members.emplace_back(core::Names::classMethods(), id->symbol);
+        ctx.owner.data(ctx).members[core::Names::classMethods()] = id->symbol;
     }
 
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {

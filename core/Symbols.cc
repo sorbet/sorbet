@@ -134,12 +134,11 @@ SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
 
 SymbolRef Symbol::findMemberNoDealias(const GlobalState &gs, NameRef name) const {
     histogramInc("find_member_scope_size", members.size());
-    for (auto &member : members) {
-        if (member.first == name) {
-            return member.second;
-        }
+    auto fnd = members.find(name);
+    if (fnd == members.end()) {
+        return Symbols::noSymbol();
     }
-    return Symbols::noSymbol();
+    return fnd->second;
 }
 
 SymbolRef Symbol::findMemberTransitive(const GlobalState &gs, NameRef name) const {
@@ -401,6 +400,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
             children.push_back(str);
         }
     }
+    sort(children.begin(), children.end());
 
     if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
         return "";
@@ -577,11 +577,11 @@ SymbolRef Symbol::singletonClass(GlobalState &gs) {
     Symbol &singletonInfo = singleton.data(gs);
 
     counterInc("singleton_classes");
-    singletonInfo.members.emplace_back(Names::attached(), selfRef);
+    singletonInfo.members[Names::attached()] = selfRef;
     singletonInfo.superClass = Symbols::todo();
     singletonInfo.setIsModule(false);
 
-    selfRef.data(gs).members.emplace_back(Names::singleton(), singleton);
+    selfRef.data(gs).members[Names::singleton()] = singleton;
     return singleton;
 }
 
@@ -631,7 +631,7 @@ Symbol Symbol::deepCopy(const GlobalState &to) const {
 
     result.members.reserve(this->members.size());
     for (auto &mem : this->members) {
-        result.members.emplace_back(NameRef(to, mem.first.id()), mem.second);
+        result.members[NameRef(to, mem.first.id())] = mem.second;
     }
     result.superClass = this->superClass;
     result.intrinsic = this->intrinsic;
@@ -689,10 +689,17 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     result = mix(result, this->owner._id);
     result = mix(result, this->superClass._id);
     // argumentsOrMixins, typeParams, typeAliases
+    vector<core::SymbolRef> membersOrdered;
     for (const auto &e : members) {
         if (e.second.exists() && !e.second.data(gs).ignoreInHashing(gs)) {
-            result = mix(result, _hash(e.first.data(gs).shortName(gs)));
+            membersOrdered.emplace_back(e.second);
         }
+    }
+    sort(membersOrdered.begin(), membersOrdered.end(), [&](auto lhs, auto rhs) -> bool {
+        return lhs.data(gs).name.data(gs).shortName(gs) < rhs.data(gs).name.data(gs).shortName(gs);
+    });
+    for (auto e : membersOrdered) {
+        result = mix(result, _hash(e.data(gs).name.data(gs).shortName(gs)));
     }
     for (const auto &e : argumentsOrMixins) {
         if (e.exists() && !e.data(gs).ignoreInHashing(gs)) {

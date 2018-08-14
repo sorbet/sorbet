@@ -552,7 +552,7 @@ public:
 
     NameRef name; // todo: move out? it should not matter but it's important for
     // name resolution
-    std::vector<std::pair<NameRef, SymbolRef>>
+    UnorderedMap<NameRef, SymbolRef>
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
 

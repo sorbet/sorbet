@@ -65,9 +65,8 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
     ASSERT_EQ(core::Symbols::root(), objectScope.owner);
 
     ASSERT_EQ(4, objectScope.members.size());
-    auto methodPair = objectScope.members[3];
-    ASSERT_EQ("hello_world", methodPair.first.data(ctx).toString(ctx));
-    auto &symbol = methodPair.second.data(ctx);
+    auto methodSym = objectScope.members[ctx.state.enterNameUTF8("hello_world")];
+    auto &symbol = methodSym.data(ctx);
     ASSERT_EQ(core::Symbols::Object(), symbol.owner);
     ASSERT_EQ(0, symbol.arguments().size());
 }
@@ -105,9 +104,8 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
         core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
-    auto fooPair = rootScope.members[1];
-    ASSERT_EQ("<constant:Foo>", fooPair.first.data(ctx).toString(ctx));
-    auto &fooInfo = fooPair.second.data(ctx);
+    auto fooSym = rootScope.members[ctx.state.enterNameConstant("Foo")];
+    auto &fooInfo = fooSym.data(ctx);
     ASSERT_EQ(1, fooInfo.members.size());
 }
 
@@ -123,13 +121,12 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
         core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
     ASSERT_EQ(3, rootScope.members.size());
-    auto fooSym = rootScope.members[1].second;
+    auto fooSym = rootScope.members[ctx.state.enterNameConstant("Foo")];
     auto &fooInfo = fooSym.data(ctx);
     ASSERT_EQ(2, fooInfo.members.size());
 
-    auto barPair = fooInfo.members[1];
-    ASSERT_EQ("bar", barPair.first.data(ctx).toString(ctx));
-    ASSERT_EQ(fooSym, barPair.second.data(ctx).owner);
+    auto barSym = fooInfo.members[ctx.state.enterNameUTF8("bar")];
+    ASSERT_EQ(fooSym, barSym.data(ctx).owner);
 }
 
 } // namespace test
