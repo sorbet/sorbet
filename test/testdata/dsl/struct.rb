@@ -36,7 +36,7 @@ class AccidentallyStruct
     class Struct
     end
 
-    # We do this in the dsl pass before we've resolved the constants
+    # We do this in the dsl pass before we've typeAlias the constants
     A = Struct.new(:foo, :bar)
 end
 

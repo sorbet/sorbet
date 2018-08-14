@@ -2,9 +2,11 @@ ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
   rhs = [
-    ConstantLit{
-      scope = Ident{
-        symbol = <constant:<root>>
+    UnresolvedConstantLit{
+      scope = ConstantLit{
+        orig = nullptr
+        symbol = ::<root>
+        typeAlias = nullptr
       }
       cnst = <constant:TopLevelConst>
     }

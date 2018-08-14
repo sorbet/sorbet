@@ -22,7 +22,7 @@ unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<
 }
 
 unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression> type) {
-    return ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::nilable(), move(type));
+    return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
 unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node) {
@@ -68,18 +68,18 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         case core::Names::timestamped_token_prop()._id:
             isNilable = false;
             name = core::Names::token();
-            type = ast::MK::Ident(send->loc, core::Symbols::String());
+            type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
         case core::Names::created_prop()._id:
             isNilable = false;
             name = core::Names::created();
-            type = ast::MK::Ident(send->loc, core::Symbols::Float());
+            type = ast::MK::Constant(send->loc, core::Symbols::Float());
             break;
         case core::Names::merchant_prop()._id:
             isNilable = false;
             isImmutable = true;
             name = core::Names::merchant();
-            type = ast::MK::Ident(send->loc, core::Symbols::String());
+            type = ast::MK::Constant(send->loc, core::Symbols::String());
             break;
 
         default:
@@ -101,7 +101,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
     if (type == nullptr) {
         if (send->args.size() == 1) {
-            type = ast::MK::Ident(loc, core::Symbols::Object());
+            type = ast::MK::Constant(send->loc, core::Symbols::Object());
         } else {
             type = ASTUtil::dupType(send->args[1].get());
         }
@@ -135,7 +135,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         if (ASTUtil::getHashValue(ctx, rules, core::Names::enum_()) != nullptr) {
             // Handle enum: by setting the type to untyped, so that we'll parse
             // the declaration. Don't allow assigning it from typed code by deleting setter
-            type = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
+            type = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
             isNilable = false;
             isImmutable = true;
         }
@@ -144,8 +144,8 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (type == nullptr) {
         auto arrayType = ASTUtil::getHashValue(ctx, rules, core::Names::array());
         if (arrayType) {
-            type = ast::MK::Send1(loc, ast::MK::Ident(loc, core::Symbols::T_Array()), core::Names::squareBrackets(),
-                                  move(arrayType));
+            type = ast::MK::Send1(loc, ast::MK::Constant(send->loc, core::Symbols::T_Array()),
+                                  core::Names::squareBrackets(), move(arrayType));
         }
     }
 
@@ -164,7 +164,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     if (auto send = ast::cast_tree<ast::Send>(type.get())) {
         // A heuristic for detecting the API Param Spec
         if (isOptional && send->fun != core::Names::squareBrackets()) {
-            auto cnst = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+            auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
             if (cnst->cnst != core::Symbols::T().data(ctx).name) {
                 return empty;
             }

@@ -13,7 +13,7 @@ namespace sorbet {
 namespace dsl {
 
 unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) {
-    return ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
+    return ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
 }
 
 core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {

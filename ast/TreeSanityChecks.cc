@@ -48,13 +48,18 @@ void ClassDef::_sanityCheck() {
     }
 }
 
-void ConstantLit::_sanityCheck() {
+void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(scope);
     ENFORCE(cnst.exists());
 }
 
-void ResolvedConstantLit::_sanityCheck() {
-    ENFORCE(original);
+void ConstantLit::_sanityCheck() {
+    if (symbol.exists()) {
+        ENFORCE(!typeAlias);
+    }
+    if (typeAlias) {
+        ENFORCE(!symbol.exists());
+    }
 }
 
 void EmptyTree::_sanityCheck() {}
@@ -73,7 +78,7 @@ void Hash::_sanityCheck() {
     ENFORCE(keys.size() == values.size());
 }
 
-void Ident::_sanityCheck() {
+void Field::_sanityCheck() {
     ENFORCE(symbol.exists());
 }
 

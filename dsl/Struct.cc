@@ -18,17 +18,17 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     if (empty) {
         return ast::MK::EmptyTree(node->loc);
     }
-    auto cnst = ast::cast_tree<ast::ConstantLit>(node);
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(node);
     ENFORCE(cnst);
     auto newScope = dupName(cnst->scope.get());
     ENFORCE(newScope);
-    return ast::MK::Constant(node->loc, move(newScope), cnst->cnst);
+    return ast::MK::UnresolvedConstant(node->loc, move(newScope), cnst->cnst);
 }
 
 vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
     vector<unique_ptr<ast::Expression>> empty;
 
-    auto lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+    auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
     if (lhs == nullptr) {
         return empty;
     }
@@ -38,7 +38,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         return empty;
     }
 
-    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+    auto recv = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
     if (recv == nullptr) {
         return empty;
     }
@@ -63,7 +63,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         core::NameRef name = sym->asSymbol(ctx);
 
         sigKeys.emplace_back(ast::MK::Symbol(loc, name));
-        sigValues.emplace_back(ast::MK::Ident(loc, core::Symbols::BasicObject()));
+        sigValues.emplace_back(ast::MK::Constant(loc, core::Symbols::BasicObject()));
         newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, name), ast::MK::Nil(loc)));
 
         body.emplace_back(ast::MK::Method0(loc, name, ast::MK::EmptyTree(loc), ast::MethodDef::DSLSynthesized));
@@ -77,8 +77,8 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     ast::ClassDef::ANCESTORS_store ancestors;
-    ancestors.emplace_back(ast::MK::Constant(loc, ast::MK::Ident(loc, core::Symbols::root()),
-                                             ctx.state.enterNameConstant(core::Names::Struct())));
+    ancestors.emplace_back(ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
+                                                       ctx.state.enterNameConstant(core::Names::Struct())));
 
     vector<unique_ptr<ast::Expression>> stats;
     stats.emplace_back(make_unique<ast::ClassDef>(loc, core::Symbols::todo(), move(asgn->lhs), move(ancestors),

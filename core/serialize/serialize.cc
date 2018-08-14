@@ -680,12 +680,12 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickle(p, file, a->elsep);
              },
 
-             [&](ast::ConstantLit *a) {
+             [&](ast::UnresolvedConstantLit *a) {
                  pickleAstHeader(p, 8, a);
                  p.putU4(a->cnst._id);
                  pickle(p, file, a->scope);
              },
-             [&](ast::Ident *a) {
+             [&](ast::Field *a) {
                  pickleAstHeader(p, 9, a);
                  p.putU4(a->symbol._id);
              },
@@ -831,10 +831,11 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  p.putU1((int)a->kind);
                  p.putU4(a->name._id);
              },
-             [&](ast::ResolvedConstantLit *a) {
+             [&](ast::ConstantLit *a) {
                  pickleAstHeader(p, 33, a);
+                 p.putU4(a->symbol._id);
                  pickleTree(p, file, a->original);
-                 pickleTree(p, file, a->resolved);
+                 pickleTree(p, file, a->typeAlias);
              },
 
              [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
@@ -899,11 +900,11 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
         case 8: {
             NameRef cnst = unpickleNameRef(p, gs);
             auto scope = unpickleExpr(p, gs, file);
-            return ast::MK::Constant(loc, move(scope), cnst);
+            return ast::MK::UnresolvedConstant(loc, move(scope), cnst);
         }
         case 9: {
             SymbolRef sym(gs, p.getU4());
-            return ast::MK::Ident(loc, sym);
+            return make_unique<ast::Field>(loc, sym);
         }
         case 10: {
             NameRef nm = unpickleNameRef(p, gs);
@@ -1069,10 +1070,11 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::UnresolvedIdent>(loc, kind, name);
         }
         case 33: {
+            SymbolRef sym(gs, p.getU4());
             auto origTmp = unpickleExpr(p, gs, file);
-            unique_ptr<ast::ConstantLit> orig(static_cast<ast::ConstantLit *>(origTmp.release()));
+            unique_ptr<ast::UnresolvedConstantLit> orig(static_cast<ast::UnresolvedConstantLit *>(origTmp.release()));
             auto resolved = unpickleExpr(p, gs, file);
-            return make_unique<ast::ResolvedConstantLit>(move(orig), move(resolved));
+            return make_unique<ast::ConstantLit>(loc, sym, move(orig), move(resolved));
         }
     }
     Error::raise("Not handled {}", kind);

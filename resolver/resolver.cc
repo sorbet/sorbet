@@ -26,7 +26,7 @@ namespace {
 /*
  * Ruby supports resolving constants via your ancestors -- superclasses and
  * mixins. Since superclass and mixins are themselves constant references, we
- * thus may not be able to resolve certain constants until after we've resolved
+ * thus may not be able to resolve certain constants until after we've typeAlias
  * others.
  *
  * To solve this, we collect any failed resolutions into a pair of TODO lists,
@@ -34,13 +34,12 @@ namespace {
  * practice this loop terminates after 3 or fewer passes on most real codebases.
  * We also tack defined type aliases in a separate map.
  *
- * This walk replaces ast::ConstantLit nodes with either ast::Ident nodes,
- * or expands type aliases in place.
+ * This walk replaces ast::UnresolvedConstantLit nodes with either ast::ConstantLit nodes.
  * Successful resolutions are removed from the `todo_` lists.
  *
  * There are 4 items maintained by this fixed point computations:
- *  - list of constants to be resolved
- *  - list of ancestors to be filled that require constants to be resolved
+ *  - list of constants to be typeAlias
+ *  - list of ancestors to be filled that require constants to be typeAlias
  *  - map of class aliases
  *  - map of type aliases to their respective trees
  *
@@ -69,8 +68,8 @@ private:
 
     struct ResolutionItem {
         shared_ptr<Nesting> scope;
-        // setting out->resolved to non-nullptr indicates that the tree was already resolved.
-        ast::ResolvedConstantLit *out;
+        // setting out->typeAlias to non-nullptr indicates that the tree was already typeAlias.
+        ast::ConstantLit *out;
 
         ResolutionItem() = default;
         ResolutionItem(ResolutionItem &&rhs) = default;
@@ -80,7 +79,7 @@ private:
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
     };
     struct AncestorResolutionItem {
-        ast::ResolvedConstantLit *ancestor;
+        ast::ConstantLit *ancestor;
         core::SymbolRef klass;
 
         bool isSuperclass; // true if superclass, false for mixin
@@ -95,7 +94,7 @@ private:
 
     struct ClassAliasResolutionItem {
         core::SymbolRef lhs;
-        ast::ResolvedConstantLit *rhs;
+        ast::ConstantLit *rhs;
 
         ClassAliasResolutionItem() = default;
         ClassAliasResolutionItem(ClassAliasResolutionItem &&) = default;
@@ -127,9 +126,9 @@ private:
     public:
         bool seenUnresolved = false;
 
-        unique_ptr<ast::ResolvedConstantLit>
-        postTransformResolvedConstantLit(core::MutableContext ctx, unique_ptr<ast::ResolvedConstantLit> original) {
-            seenUnresolved = seenUnresolved || original->resolved == nullptr;
+        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
+                                                              unique_ptr<ast::ConstantLit> original) {
+            seenUnresolved = seenUnresolved || (original->typeAlias == nullptr && !original->symbol.exists());
             return original;
         };
     };
@@ -143,78 +142,33 @@ private:
         return !checker.seenUnresolved;
     }
 
-    static unique_ptr<ast::Expression> resolveConstant(core::MutableContext ctx, shared_ptr<Nesting> nesting,
-                                                       const unique_ptr<ast::ConstantLit> &c,
-                                                       const TypeAliasMap &typeAliases, bool lastRun) {
+    static core::SymbolRef resolveConstant(core::MutableContext ctx, shared_ptr<Nesting> nesting,
+                                           const unique_ptr<ast::UnresolvedConstantLit> &c,
+                                           const TypeAliasMap &typeAliases, bool lastRun) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst);
-            if (result.exists()) {
-                if (result.data(ctx).isStaticField() && result.data(ctx).isStaticTypeAlias()) {
-                    auto fnd = typeAliases.find(result);
-                    if (fnd != typeAliases.end()) {
-                        if (isFullyResolved(ctx, fnd->second)) {
-                            auto ret = fnd->second->deepCopy();
-                            if (ret) {
-                                return ret;
-                            }
-                        }
-                        if (lastRun) {
-                            if (auto e = ctx.state.beginError(result.data(ctx).loc(),
-                                                              core::errors::Resolver::RecursiveTypeAlias)) {
-                                e.setHeader("Type alias expands to to an infinite type");
-                            }
-                            return ast::MK::Ident(c->loc, core::Symbols::untyped());
-                        }
-                    }
-                    return nullptr;
-                }
-
-                return ast::MK::Ident(c->loc, result);
-            }
-            return nullptr;
+            return result;
         }
         ast::Expression *resolvedScope = c->scope.get();
-        if (auto *scope = ast::cast_tree<ast::ResolvedConstantLit>(c->scope.get())) {
-            if (!scope->resolved) {
-                auto resolved = resolveConstant(ctx, nesting, scope->original, typeAliases, lastRun);
-                if (!resolved) {
-                    return resolved;
-                }
-                scope->resolved = move(resolved);
+        if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
+            if (!id->symbol.exists()) {
+                // TODO: try to resolve if not resolved.
+                return core::Symbols::noSymbol();
             }
-            resolvedScope = scope->resolved.get();
-        }
-
-        if (auto *id = ast::cast_tree<ast::Ident>(resolvedScope)) {
             core::SymbolRef resolved = id->symbol.data(ctx).dealias(ctx);
             core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
-            if (result.exists()) {
-                if (result.data(ctx).isStaticField() && result.data(ctx).isStaticTypeAlias()) {
-                    if (!lastRun) {
-                        return nullptr; // Let other substitutions run as they won't be able to see our deep copy/
-                    }
-                    auto fnd = typeAliases.find(result);
-                    if (fnd != typeAliases.end()) {
-                        return fnd->second->deepCopy();
-                    }
-                }
-
-                return ast::MK::Ident(c->loc, result);
-            }
-
-            return nullptr;
+            return result;
         } else {
             if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
                 e.setHeader("Dynamic constant references are unsupported `{}`", c->toString(ctx));
             }
-            c->scope = make_unique<ast::Ident>(c->loc, core::Symbols::untyped());
-            return ast::MK::Ident(c->loc, core::Symbols::untyped());
+            return core::Symbols::untyped();
         }
     }
 
     static bool resolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases,
                            bool lastRun) {
-        if (job.out->resolved) {
+        if (job.out->typeAlias || job.out->symbol.exists()) {
             return true;
         }
         auto resolved =
@@ -224,19 +178,21 @@ private:
                 return false;
             }
 
-            ast::ResolvedConstantLit *inner = job.out;
-            ast::ResolvedConstantLit *missingConstant = job.out;
-            while (auto *scope = ast::cast_tree<ast::ResolvedConstantLit>(inner->original->scope.get())) {
-                if (inner->resolved) {
+            ast::ConstantLit *inner = job.out;
+            ast::ConstantLit *missingConstant = job.out;
+            ast::ConstantLit *scopeRec;
+            while (inner->original &&
+                   (scopeRec = ast::cast_tree<ast::ConstantLit>(inner->original->scope.get())) != nullptr) {
+                if (inner->typeAlias || inner->symbol.exists()) {
                     break;
                 }
                 missingConstant = inner;
-                inner = scope;
+                inner = scopeRec;
             }
             core::SymbolRef scope;
-            if (auto *id = ast::cast_tree<ast::Ident>(inner->resolved.get())) {
-                scope = id->symbol.data(ctx).dealias(ctx);
-            } else if (auto *id = ast::cast_tree<ast::Ident>(inner->original->scope.get())) {
+            if (inner->symbol.exists()) {
+                scope = inner->symbol.data(ctx).dealias(ctx);
+            } else if (auto *id = ast::cast_tree<ast::ConstantLit>(inner->original->scope.get())) {
                 scope = id->symbol.data(ctx).dealias(ctx);
             } else {
                 scope = job.scope->scope;
@@ -275,14 +231,35 @@ private:
             bool resolved = resolveJob(ctx, job, typeAliases, true);
             return resolved;
         }
-        job.out->resolved = move(resolved);
+        if (resolved.data(ctx).isStaticField() && resolved.data(ctx).isStaticTypeAlias()) {
+            auto fnd = typeAliases.find(resolved);
+            if (fnd != typeAliases.end()) {
+                if (isFullyResolved(ctx, fnd->second)) {
+                    auto ret = fnd->second->deepCopy();
+                    if (ret) {
+                        job.out->typeAlias = move(ret);
+                        return true;
+                    }
+                }
+                if (lastRun) {
+                    if (auto e = ctx.state.beginError(resolved.data(ctx).loc(),
+                                                      core::errors::Resolver::RecursiveTypeAlias)) {
+                        e.setHeader("Type alias expands to to an infinite type");
+                    }
+                    job.out->typeAlias = ast::MK::Constant(job.out->loc, core::Symbols::untyped());
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        job.out->symbol = resolved;
         return true;
     }
 
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
-        auto refId = ast::cast_tree<ast::Ident>(it.rhs->resolved.get());
-        if (refId && refId->symbol != core::Symbols::todo()) {
-            it.lhs.data(ctx).resultType = make_unique<core::AliasType>(refId->symbol);
+        if (it.rhs->symbol.exists()) {
+            it.lhs.data(ctx).resultType = make_unique<core::AliasType>(it.rhs->symbol);
             return true;
         }
         return false;
@@ -290,27 +267,18 @@ private:
 
     static bool resolveAncestorJob(core::MutableContext ctx, AncestorResolutionItem &job,
                                    const TypeAliasMap &typeAliases, bool lastRun) {
-        if (job.ancestor->resolved == nullptr) {
+        if (!job.ancestor->symbol.exists()) {
             return false;
         }
 
-        auto *id = ast::cast_tree<ast::Ident>(job.ancestor->resolved.get());
-        core::SymbolRef resolved;
-        if (id) {
-            resolved = id->symbol.data(ctx).dealias(ctx);
-        } else {
-            if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically resolved to classes");
-            }
-            resolved = core::Symbols::StubClass();
-        }
+        core::SymbolRef resolved = job.ancestor->symbol.data(ctx).dealias(ctx);
 
         if (!resolved.data(ctx).isClass()) {
             if (!lastRun) {
                 return false;
             }
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically resolved to classes");
+                e.setHeader("Superclasses and mixins must be statically typeAlias to classes");
             }
             resolved = core::Symbols::StubClass();
         }
@@ -345,41 +313,36 @@ private:
 
     void transformAncestor(core::MutableContext ctx, core::SymbolRef klass, unique_ptr<ast::Expression> &ancestor,
                            bool isSuperclass = false) {
-        if (auto *constScope = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
-            unique_ptr<ast::ConstantLit> inner(constScope);
+        if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(ancestor.get())) {
+            unique_ptr<ast::UnresolvedConstantLit> inner(constScope);
             ancestor.release();
             auto scopeTmp = nesting_;
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
             }
-            ancestor = postTransformConstantLit(ctx, move(inner));
+            ancestor = postTransformUnresolvedConstantLit(ctx, move(inner));
             nesting_ = scopeTmp;
         }
         AncestorResolutionItem job;
         job.klass = klass;
         job.isSuperclass = isSuperclass;
 
-        if (auto *cnst = ast::cast_tree<ast::ResolvedConstantLit>(ancestor.get())) {
-            ENFORCE(ast::isa_tree<ast::ResolvedConstantLit>(cnst->original->scope.get()) ||
-                    ast::isa_tree<ast::EmptyTree>(cnst->original->scope.get()) ||
-                    ast::isa_tree<ast::Ident>(cnst->original->scope.get()));
+        if (auto *cnst = ast::cast_tree<ast::ConstantLit>(ancestor.get())) {
+            ENFORCE(cnst->symbol.exists() || ast::isa_tree<ast::ConstantLit>(cnst->original->scope.get()) ||
+                    ast::isa_tree<ast::EmptyTree>(cnst->original->scope.get()));
+            if (isSuperclass && cnst->symbol == core::Symbols::todo()) {
+                return;
+            }
             job.ancestor = cnst;
         } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             auto loc = ancestor->loc;
-            auto nw = make_unique<ast::ConstantLit>(loc, move(ancestor), ctx.contextClass().data(ctx).name);
-            auto out =
-                make_unique<ast::ResolvedConstantLit>(move(nw), make_unique<ast::Ident>(loc, ctx.contextClass()));
+            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, move(ancestor), ctx.contextClass().data(ctx).name);
+            auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), move(nw), nullptr);
             job.ancestor = out.get();
             ancestor = move(out);
-        } else if (auto *id = ast::cast_tree<ast::Ident>(ancestor.get())) {
-            if (isSuperclass && id->symbol == core::Symbols::todo()) {
-                return;
-            }
-            Error::notImplemented();
-            //            job.resolve.out->tree = move(ancestor);
         } else {
             if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically resolved");
+                e.setHeader("Superclasses and mixins must be statically typeAlias");
             }
             return;
         }
@@ -398,6 +361,25 @@ public:
         nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
         return original;
     }
+
+    unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
+                                                                   unique_ptr<ast::UnresolvedConstantLit> c) {
+        if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(c->scope.get())) {
+            unique_ptr<ast::UnresolvedConstantLit> inner(constScope);
+            c->scope.release();
+            c->scope = postTransformUnresolvedConstantLit(ctx, move(inner));
+        }
+        auto loc = c->loc;
+        auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), move(c), nullptr);
+        ResolutionItem job{nesting_, out.get()};
+        if (resolveJob(ctx, job, typeAliases, false)) {
+            core::categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+        } else {
+            todo_.emplace_back(move(job));
+        }
+        return out;
+    }
+
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         core::SymbolRef klass = original->symbol;
         if (original->kind == ast::Module && klass.data(ctx).mixins().empty()) {
@@ -406,7 +388,6 @@ public:
 
         for (auto &ancst : original->ancestors) {
             bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front());
-
             transformAncestor(ctx, klass, ancst, isSuperclass);
         }
 
@@ -419,25 +400,9 @@ public:
         return original;
     }
 
-    unique_ptr<ast::Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ast::ConstantLit> c) {
-        if (auto *constScope = ast::cast_tree<ast::ConstantLit>(c->scope.get())) {
-            unique_ptr<ast::ConstantLit> inner(constScope);
-            c->scope.release();
-            c->scope = postTransformConstantLit(ctx, move(inner));
-        }
-        auto out = make_unique<ast::ResolvedConstantLit>(move(c), nullptr);
-        ResolutionItem job{nesting_, out.get()};
-        if (resolveJob(ctx, job, typeAliases, false)) {
-            core::categoryCounterInc("resolve.constants.nonancestor", "firstpass");
-        } else {
-            todo_.emplace_back(move(job));
-        }
-        return out;
-    }
-
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr || !id->symbol.data(ctx).isStaticField()) {
+        auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.data(ctx, true).isStaticField()) {
             return asgn;
         }
 
@@ -464,15 +429,12 @@ public:
             return asgn;
         }
 
-        auto *rhs = ast::cast_tree<ast::ResolvedConstantLit>(asgn->rhs.get());
+        auto *rhs = ast::cast_tree<ast::ConstantLit>(asgn->rhs.get());
         if (rhs == nullptr) {
             return asgn;
         }
 
-        auto ret = unique_ptr<ast::ResolvedConstantLit>(rhs);
-        asgn->rhs.release();
-        auto item = ClassAliasResolutionItem{id->symbol, ret.get()};
-        asgn->rhs = move(ret);
+        auto item = ClassAliasResolutionItem{id->symbol, rhs};
 
         if (resolveAliasJob(ctx, item)) {
             core::categoryCounterInc("resolve.constants.aliases", "firstpass");
@@ -592,7 +554,10 @@ public:
 
         for (auto &job : todo_ancestors) {
             auto resolved = resolveAncestorJob(ctx, job, typeAliases, true);
-            ENFORCE(resolved);
+            if (!resolved) {
+                resolved = resolveAncestorJob(ctx, job, typeAliases, true);
+                ENFORCE(resolved);
+            }
         }
 
         return trees;
@@ -697,11 +662,8 @@ private:
             return;
         }
         auto *front = send->args.front().get();
-        if (auto *cnst = ast::cast_tree<ast::ResolvedConstantLit>(front)) {
-            front = cnst->resolved.get();
-        }
-        auto *id = ast::cast_tree<ast::Ident>(front);
-        if (id == nullptr || !id->symbol.data(ctx).isClass()) {
+        auto *id = ast::cast_tree<ast::ConstantLit>(front);
+        if (id == nullptr || !id->symbol.exists() || !id->symbol.data(ctx).isClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Argument to `{}` must be statically resolvable to a module",
                             send->fun.data(ctx).show(ctx));
@@ -844,8 +806,8 @@ private:
                 },
 
                 [&](ast::Assign *assgn) {
-                    if (auto *id = ast::cast_tree<ast::Ident>(assgn->lhs.get())) {
-                        if (id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
+                    if (auto *id = ast::cast_tree<ast::ConstantLit>(assgn->lhs.get())) {
+                        if (id->symbol.exists() && id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
                             stat.reset(nullptr);
                         }
                     }
@@ -958,8 +920,8 @@ public:
             return asgn;
         }
 
-        auto *id = ast::cast_tree<ast::Ident>(asgn->lhs.get());
-        if (id == nullptr) {
+        auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        if (id == nullptr || !id->symbol.exists()) {
             return asgn;
         }
 
@@ -1008,10 +970,7 @@ public:
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
         auto *recv = send->recv.get();
-        if (auto *recvc = ast::cast_tree<ast::ResolvedConstantLit>(recv)) {
-            recv = recvc->resolved.get();
-        }
-        auto *id = ast::cast_tree<ast::Ident>(recv);
+        auto *id = ast::cast_tree<ast::ConstantLit>(recv);
         if (id == nullptr) {
             sendCount++;
             return send;
@@ -1050,7 +1009,7 @@ private:
         }
 
         if (auto asgn = ast::cast_tree<ast::Assign>(what.get())) {
-            return ast::isa_tree<ast::ConstantLit>(asgn->lhs.get());
+            return ast::isa_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         }
         return false;
     }
@@ -1289,7 +1248,7 @@ public:
             sym.data(ctx).resultType = core::Types::untyped();
         }
 
-        return make_unique<ast::Ident>(id->loc, sym);
+        return make_unique<ast::Field>(id->loc, sym);
     };
 };
 
@@ -1303,8 +1262,9 @@ public:
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    unique_ptr<ast::Expression> postTransformIdent(core::MutableContext ctx, unique_ptr<ast::Ident> original) {
-        ENFORCE(original->symbol != core::Symbols::todo());
+    unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
+                                                                   unique_ptr<ast::UnresolvedConstantLit> original) {
+        ENFORCE(false, "should have been removed");
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
@@ -1319,9 +1279,9 @@ public:
         ENFORCE(original->symbol != core::Symbols::todo());
         return original;
     }
-    unique_ptr<ast::ResolvedConstantLit>
-    postTransformResolvedConstantLit(core::MutableContext ctx, unique_ptr<ast::ResolvedConstantLit> original) {
-        ENFORCE(original->resolved.get() != nullptr);
+    unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
+                                                          unique_ptr<ast::ConstantLit> original) {
+        ENFORCE(original->typeAlias.get() != nullptr || original->symbol.exists());
         return original;
     }
 };

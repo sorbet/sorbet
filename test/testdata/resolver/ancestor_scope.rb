@@ -3,8 +3,8 @@
 class Other
 end
 
-# Test scoping when resolving ancestors. The superclass is resolved in
-# the outer scope and should bind to ::Outer. Mixins are resolved
+# Test scoping when resolving ancestors. The superclass is typeAlias in
+# the outer scope and should bind to ::Outer. Mixins are typeAlias
 # inside the class, and should bind to the two inner modules.
 
 class Test < Other

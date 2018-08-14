@@ -1,3 +1,4 @@
+#include "ast/Helpers.h"
 #include "builder.h"
 #include "core/Names/cfg.h"
 #include "core/errors/cfg.h"
@@ -134,12 +135,21 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(a->value));
                 ret = current;
             },
-            [&](ast::ConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
-            [&](ast::ResolvedConstantLit *a) { ret = walk(cctx, a->resolved.get(), current); },
-            [&](ast::Ident *a) {
+            [&](ast::UnresolvedConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
+            [&](ast::Field *a) {
                 current->exprs.emplace_back(
                     cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
                 ret = current;
+            },
+            [&](ast::ConstantLit *a) {
+                if (a->symbol.exists()) {
+                    current->exprs.emplace_back(
+                        cctx.target, a->loc,
+                        make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
+                    ret = current;
+                } else {
+                    ret = walk(cctx, a->typeAlias.get(), current);
+                }
             },
             [&](ast::Local *a) {
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(a->localVariable));
@@ -150,10 +160,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::Assign *a) {
-                auto lhsIdent = ast::cast_tree<ast::Ident>(a->lhs.get());
                 core::LocalVariable lhs;
-                if (lhsIdent != nullptr) {
+                if (auto lhsIdent = ast::cast_tree<ast::ConstantLit>(a->lhs.get())) {
                     lhs = global2Local(cctx, lhsIdent->symbol, cctx.inWhat, cctx.aliases);
+                } else if (auto field = ast::cast_tree<ast::Field>(a->lhs.get())) {
+                    lhs = global2Local(cctx, field->symbol, cctx.inWhat, cctx.aliases);
                 } else if (auto lhsLocal = ast::cast_tree<ast::Local>(a->lhs.get())) {
                     lhs = lhsLocal->localVariable;
                 } else {
@@ -336,7 +347,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
-                            make_unique<ast::Ident>(rescueCase->var->loc, core::Symbols::StandardError()));
+                            ast::MK::Constant(rescueCase->var->loc, core::Symbols::StandardError()));
                         added = true;
                     }
                     for (auto &ex : exceptions) {

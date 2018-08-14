@@ -162,7 +162,7 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
                     exclusive = MK::False(lh->loc);
                 }
                 auto lhloc = lh->loc;
-                auto index = MK::Send3(lhloc, make_unique<Ident>(lhloc, core::Symbols::Range()), core::Names::new_(),
+                auto index = MK::Send3(lhloc, MK::Constant(lhloc, core::Symbols::Range()), core::Names::new_(),
                                        MK::Int(lhloc, left), MK::Int(lhloc, -right), move(exclusive));
                 stats.emplace_back(MK::Assign(
                     lhloc, move(lh), MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), move(index))));
@@ -188,7 +188,7 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
         }
     }
 
-    auto expanded = MK::Send3(loc, MK::Ident(loc, core::Symbols::Magic()), core::Names::expandSplat(), move(rhs),
+    auto expanded = MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(), move(rhs),
                               MK::Int(loc, before), MK::Int(loc, after));
     stats.insert(stats.begin(), MK::Assign(loc, tempName, move(expanded)));
 
@@ -250,7 +250,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::Const *const_) {
                 auto scope = node2TreeImpl(ctx, move(const_->scope), uniqueCounter);
-                unique_ptr<Expression> res = MK::Constant(loc, move(scope), const_->name);
+                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, move(scope), const_->name);
                 result.swap(res);
             },
             [&](parser::String *string) {
@@ -507,11 +507,11 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::ConstLhs *constLhs) {
                 auto scope = node2TreeImpl(ctx, move(constLhs->scope), uniqueCounter);
-                unique_ptr<Expression> res = MK::Constant(loc, move(scope), constLhs->name);
+                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
                 result.swap(res);
             },
             [&](parser::Cbase *cbase) {
-                unique_ptr<Expression> res = MK::Ident(loc, core::Symbols::root());
+                unique_ptr<Expression> res = MK::Constant(loc, core::Symbols::root());
                 result.swap(res);
             },
             [&](parser::Kwbegin *kwbegin) {
@@ -545,7 +545,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 ClassDef::RHS_store body = scopeNodeToBody(ctx, move(claz->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (claz->superclass == nullptr) {
-                    ancestors.emplace_back(make_unique<Ident>(loc, core::Symbols::todo()));
+                    ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
                 } else {
                     ancestors.emplace_back(node2TreeImpl(ctx, move(claz->superclass), uniqueCounter));
                 }
@@ -822,14 +822,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Complex *complex) {
-                auto kernel = MK::Ident(loc, core::Symbols::Kernel());
+                auto kernel = MK::Constant(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Complex().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
                 auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
-                auto kernel = MK::Ident(loc, core::Symbols::Kernel());
+                auto kernel = MK::Constant(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Rational().data(ctx).name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
                 auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
@@ -951,14 +951,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::IRange *ret) {
                 core::NameRef range_name = core::Symbols::Range().data(ctx).name;
-                unique_ptr<Expression> range = MK::Constant(loc, MK::EmptyTree(loc), range_name);
+                unique_ptr<Expression> range = MK::UnresolvedConstant(loc, MK::EmptyTree(loc), range_name);
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
                 auto send = MK::Send2(loc, move(range), core::Names::new_(), move(from), move(to));
                 result.swap(send);
             },
             [&](parser::ERange *ret) {
-                unique_ptr<Expression> range = MK::Ident(loc, core::Symbols::Range());
+                unique_ptr<Expression> range = MK::Constant(loc, core::Symbols::Range());
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
                 auto true_ = MK::True(loc);
@@ -966,7 +966,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(send);
             },
             [&](parser::Regexp *regexpNode) {
-                unique_ptr<Expression> regexp = MK::Ident(loc, core::Symbols::Regexp());
+                unique_ptr<Expression> regexp = MK::Constant(loc, core::Symbols::Regexp());
                 auto regex = desugarDString(ctx, loc, move(regexpNode->regex), uniqueCounter);
                 auto opts = node2TreeImpl(ctx, move(regexpNode->opts), uniqueCounter);
                 auto send = MK::Send2(loc, move(regexp), core::Names::new_(), move(regex), move(opts));
@@ -1233,7 +1233,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
-                auto res = MK::Send1(loc, MK::Ident(loc, core::Symbols::Magic()), core::Names::defined_p(),
+                auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
                                      node2TreeImpl(ctx, move(defined->value), uniqueCounter));
                 result.swap(res);
             },

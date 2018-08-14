@@ -21,10 +21,10 @@ namespace namer {
 class NameInserter {
     friend class Namer;
     core::SymbolRef squashNames(core::MutableContext ctx, core::SymbolRef owner, unique_ptr<ast::Expression> &node) {
-        auto constLit = ast::cast_tree<ast::ConstantLit>(node.get());
+        auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get());
         if (constLit == nullptr) {
-            if (auto *id = ast::cast_tree<ast::Ident>(node.get())) {
-                return id->symbol;
+            if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
+                return id->symbol.data(ctx).dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
                 // emitted via `class << self` blocks
@@ -96,6 +96,7 @@ class NameInserter {
 
     struct LocalFrame {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
+        vector<core::LocalVariable> args;
         bool moduleFunctionActive;
         int uniqueCounter = 0;
     };
@@ -138,7 +139,7 @@ class NameInserter {
         }
 
         for (auto &arg : send->args) {
-            auto constLit = ast::cast_tree<ast::ConstantLit>(arg.get());
+            auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
             if (constLit == nullptr) {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::IncludeNotConstant)) {
                     e.setHeader("`{}` must be passed a constant literal", send->fun.data(ctx).show(ctx));
@@ -176,7 +177,7 @@ public:
             klass->symbol = squashNames(ctx, ctx.owner, klass->name);
         } else {
             // Desugar populates a top-level root() ClassDef. Nothing else
-            // should have been resolved by now.
+            // should have been typeAlias by now.
             ENFORCE(klass->symbol == core::Symbols::root());
         }
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
@@ -238,8 +239,14 @@ public:
     // This decides if we need to keep a node around incase the current LSP query needs type information for it
     bool shouldLeaveAncestorForIDE(const unique_ptr<ast::Expression> &anc) {
         // used in Desugar <-> resolver to signal classes that did not have explicit superclass
-        return !ast::isa_tree<ast::EmptyTree>(anc.get()) && !ast::isa_tree<ast::Self>(anc.get()) &&
-               !ast::isa_tree<ast::Ident>(anc.get());
+        if (ast::isa_tree<ast::EmptyTree>(anc.get()) || ast::isa_tree<ast::Self>(anc.get())) {
+            return false;
+        }
+        auto rcl = ast::cast_tree<ast::ConstantLit>(anc.get());
+        if (rcl && rcl->symbol == core::Symbols::todo()) {
+            return false;
+        }
+        return true;
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
@@ -257,7 +264,7 @@ public:
         klass->rhs.erase(toRemove, klass->rhs.end());
 
         if (!klass->ancestors.empty()) {
-            /* Superclass is resolved in parent scope, mixins are resolved in inner scope */
+            /* Superclass is typeAlias in parent scope, mixins are typeAlias in inner scope */
             for (auto &anc : klass->ancestors) {
                 if (shouldLeaveAncestorForIDE(anc) && (klass->kind == ast::Module || anc != klass->ancestors.front())) {
                     klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
@@ -310,6 +317,7 @@ public:
             }
 
             scopeStack.back().locals[name] = localVariable;
+            scopeStack.back().args.emplace_back(localVariable);
 
             unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
             arg.swap(localExpr);
@@ -321,8 +329,8 @@ public:
             original->args.clear();
             core::SymbolRef method = ctx.owner.data(ctx).enclosingMethod(ctx);
             if (method.data(ctx).isMethod()) {
-                for (auto arg : method.data(ctx).arguments()) {
-                    original->args.emplace_back(make_unique<ast::Ident>(original->loc, arg));
+                for (auto arg : scopeStack.back().args) {
+                    original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
                 }
             } else {
                 if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::SelfOutsideClass)) {
@@ -508,7 +516,9 @@ public:
                                         ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
                                                                   ++(scopeStack.back().uniqueCounter)));
 
+        auto outerArgs = scopeStack.back().args;
         scopeStack.emplace_back();
+        scopeStack.back().args = move(outerArgs);
         ++scopeId;
         auto &parent = *(scopeStack.end() - 2);
         auto &frame = scopeStack.back();
@@ -551,7 +561,7 @@ public:
                 if (!sym.exists()) {
                     sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
                 }
-                return make_unique<ast::Ident>(nm->loc, sym);
+                return make_unique<ast::Field>(nm->loc, sym);
             }
             default:
                 return nm;
@@ -563,8 +573,10 @@ public:
         return self;
     }
 
-    unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, ast::ConstantLit *lhs, unique_ptr<ast::Assign> asgn) {
+    unique_ptr<ast::Assign> fillAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         // TODO(nelhage): forbid dynamic constant definition
+        auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
+        ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
         auto sym = scope.data(ctx).findMemberNoDealias(ctx, lhs->cnst);
         if (sym.exists() && !sym.data(ctx).isStaticField()) {
@@ -576,13 +588,16 @@ public:
         }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         auto loc = lhs->loc;
-        asgn->lhs = make_unique<ast::Ident>(loc, cnst);
+        unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
+        asgn->lhs.release();
+        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, move(lhsU), nullptr);
         return asgn;
     }
 
     unique_ptr<ast::Expression> handleTypeMemberDefinition(core::MutableContext ctx, bool makeAlias,
                                                            core::SymbolRef onSymbol, ast::Send *send,
-                                                           unique_ptr<ast::Assign> asgn, ast::ConstantLit *typeName) {
+                                                           unique_ptr<ast::Assign> asgn,
+                                                           ast::UnresolvedConstantLit *typeName) {
         core::Variance variance = core::Variance::Invariant;
 
         if (!send->args.empty()) {
@@ -651,7 +666,7 @@ public:
                         // dependency in the resolver. See RUBYPLAT-520
                         sym.data(ctx).resultType = core::Types::untyped();
 
-                        asgn->lhs = make_unique<ast::Ident>(asgn->lhs->loc, sym);
+                        asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
                         return asgn;
                     }
                 }
@@ -664,21 +679,21 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
-        auto *lhs = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        auto *lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         if (lhs == nullptr) {
             return asgn;
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send == nullptr) {
-            return fillAssign(ctx, lhs, move(asgn));
+            return fillAssign(ctx, move(asgn));
         }
         auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
         if (shouldBeSelf == nullptr) {
-            auto ret = fillAssign(ctx, lhs, move(asgn));
+            auto ret = fillAssign(ctx, move(asgn));
             if (send->fun == core::Names::typeAlias()) {
                 core::SymbolRef sym;
-                if (auto id = ast::cast_tree<ast::Ident>(ret->lhs.get())) {
+                if (auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get())) {
                     sym = id->symbol;
                 }
                 if (sym.exists() && sym.data(ctx).isStaticField()) {
@@ -688,9 +703,9 @@ public:
             return ret;
         }
 
-        auto *typeName = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
+        auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         if (typeName == nullptr) {
-            return fillAssign(ctx, lhs, move(asgn));
+            return fillAssign(ctx, move(asgn));
         }
 
         switch (send->fun._id) {
@@ -702,7 +717,7 @@ public:
                 return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx).enclosingClass(ctx), send, move(asgn),
                                                   typeName);
             default:
-                return fillAssign(ctx, lhs, move(asgn));
+                return fillAssign(ctx, move(asgn));
         }
     }
 

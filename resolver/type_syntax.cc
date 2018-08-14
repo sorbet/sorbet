@@ -26,13 +26,8 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
     while (send != nullptr) {
         if (send->fun == core::Names::proc()) {
             auto recv = send->recv.get();
-            if (auto *rcv = ast::cast_tree<ast::ResolvedConstantLit>(recv)) {
-                recv = rcv->resolved.get();
-            }
-            if (auto *rcv = ast::cast_tree<ast::Ident>(recv)) {
-                if (rcv->symbol == core::Symbols::T()) {
-                    return true;
-                }
+            if (auto *rcv = ast::cast_tree<ast::ConstantLit>(recv)) {
+                return rcv->symbol == core::Symbols::T();
             }
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
@@ -52,13 +47,7 @@ bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
             }
 
             // Sorbet.sig
-            auto recv = ast::cast_tree<ast::Ident>(send->recv.get());
-            if (!recv) {
-                auto resolvedConstant = ast::cast_tree<ast::ResolvedConstantLit>(send->recv.get());
-                if (resolvedConstant) {
-                    recv = ast::cast_tree<ast::Ident>(resolvedConstant->resolved.get());
-                }
-            }
+            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
             if (recv && recv->symbol == core::Symbols::Sorbet()) {
                 return true;
             }
@@ -315,11 +304,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
 
             auto arg = send->args[0].get();
 
-            if (auto *argc = ast::cast_tree<ast::ResolvedConstantLit>(send->args[0].get())) {
-                arg = argc->resolved.get();
-            }
-
-            auto *obj = ast::cast_tree<ast::Ident>(arg);
+            auto *obj = ast::cast_tree<ast::ConstantLit>(arg);
             if (!obj) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("T.class_of needs a Class as its argument");
@@ -390,7 +375,11 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
             result = make_shared<core::ShapeType>(keys, values);
         },
-        [&](ast::Ident *i) {
+        [&](ast::ConstantLit *i) {
+            if (i->typeAlias) {
+                result = getResultType(ctx, i->typeAlias, sigBeingParsed, allowSelfType);
+                return;
+            }
             bool silenceGenericError = i->symbol == core::Symbols::Hash() || i->symbol == core::Symbols::Array() ||
                                        i->symbol == core::Symbols::Set() || i->symbol == core::Symbols::Struct() ||
                                        i->symbol == core::Symbols::File();
@@ -455,11 +444,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
             auto recv = s->recv.get();
 
-            if (auto *recvc = ast::cast_tree<ast::ResolvedConstantLit>(recv)) {
-                recv = recvc->resolved.get();
-            }
-
-            auto *recvi = ast::cast_tree<ast::Ident>(recv);
+            auto *recvi = ast::cast_tree<ast::ConstantLit>(recv);
             if (recvi == nullptr) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Malformed type declaration. Unknown type syntax. Expected a ClassName or T.<func>");
@@ -548,9 +533,6 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
         [&](ast::Self *slf) {
             core::SymbolRef klass = ctx.owner.data(ctx).enclosingClass(ctx);
             result = klass.data(ctx).selfType(ctx);
-        },
-        [&](ast::ResolvedConstantLit *cnst) {
-            result = getResultType(ctx, cnst->resolved, sigBeingParsed, allowSelfType);
         },
         [&](ast::Expression *expr) {
             if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {

@@ -33,31 +33,42 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
         return ast::MK::Send(send->loc, move(dupRecv), send->fun, move(args));
     }
 
-    auto ident = ast::cast_tree<ast::Ident>(orig);
+    auto ident = ast::cast_tree<ast::ConstantLit>(orig);
     if (ident) {
-        return ast::MK::Ident(ident->loc, ident->symbol);
+        auto orig = dupType(ident->original.get());
+        if (ident->original && !orig) {
+            return nullptr;
+        }
+        auto ptr = ast::cast_tree<ast::UnresolvedConstantLit>(orig.get());
+        orig.release();
+        auto typeAlias = dupType(ident->typeAlias.get());
+        if (ident->typeAlias && !typeAlias) {
+            return nullptr;
+        }
+        return make_unique<ast::ConstantLit>(ident->loc, ident->symbol, unique_ptr<ast::UnresolvedConstantLit>(ptr),
+                                             move(typeAlias));
     }
 
-    auto cons = ast::cast_tree<ast::ConstantLit>(orig);
+    auto cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
     if (!cons) {
         return nullptr;
     }
 
-    auto scopeCnst = ast::cast_tree<ast::ConstantLit>(cons->scope.get());
+    auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope.get());
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope.get())) {
-            return ast::MK::Constant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
+            return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
         }
-        auto *id = ast::cast_tree<ast::Ident>(cons->scope.get());
+        auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope.get());
         ENFORCE(id != nullptr);
         ENFORCE(id->symbol == core::Symbols::root());
-        return ast::MK::Constant(cons->loc, dupType(cons->scope.get()), cons->cnst);
+        return ast::MK::UnresolvedConstant(cons->loc, dupType(cons->scope.get()), cons->cnst);
     }
     auto scope = dupType(scopeCnst);
     if (scope == nullptr) {
         return nullptr;
     }
-    return ast::MK::Constant(cons->loc, move(scope), cons->cnst);
+    return ast::MK::UnresolvedConstant(cons->loc, move(scope), cons->cnst);
 }
 
 unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {

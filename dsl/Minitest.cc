@@ -37,7 +37,7 @@ string to_s(core::Context ctx, unique_ptr<ast::Expression> &arg) {
             return argLit->asSymbol(ctx).toString(ctx);
         }
     }
-    auto argConstant = ast::cast_tree<ast::ConstantLit>(arg.get());
+    auto argConstant = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
     if (argConstant != nullptr) {
         return argConstant->cnst.toString(ctx);
     }
@@ -71,8 +71,8 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         ancestors.emplace_back(ast::MK::Self(arg->loc));
         ast::ClassDef::RHS_store rhs;
         rhs.emplace_back(prepareBody(ctx, move(send->block->body)));
-        auto name = ast::MK::Constant(arg->loc, ast::MK::EmptyTree(arg->loc),
-                                      ctx.state.enterNameConstant("<class_" + argString + ">"));
+        auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(arg->loc),
+                                                ctx.state.enterNameConstant("<class_" + argString + ">"));
         return ast::MK::Class(send->loc, move(name), move(ancestors), move(rhs), ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");

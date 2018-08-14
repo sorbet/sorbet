@@ -15,14 +15,14 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {
         return false;
     }
-    auto *cnst = ast::cast_tree<ast::ConstantLit>(klass->ancestors.front().get());
+    auto *cnst = ast::cast_tree<ast::UnresolvedConstantLit>(klass->ancestors.front().get());
     if (cnst == nullptr) {
         return false;
     }
     if (cnst->cnst != ctx.state.enterNameConstant(core::Names::Command())) {
         return false;
     }
-    auto *scope = ast::cast_tree<ast::ConstantLit>(cnst->scope.get());
+    auto *scope = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
     if (scope == nullptr) {
         return false;
     }
@@ -32,7 +32,7 @@ bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (ast::isa_tree<ast::EmptyTree>(scope->scope.get())) {
         return true;
     }
-    auto *id = ast::cast_tree<ast::Ident>(scope->scope.get());
+    auto *id = ast::cast_tree<ast::ConstantLit>(scope->scope.get());
     if (id == nullptr) {
         return false;
     }

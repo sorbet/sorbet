@@ -17,7 +17,7 @@ unique_ptr<ast::Expression> InterfaceWrapper::replaceDSL(core::MutableContext ct
         return send;
     }
 
-    if (!ast::isa_tree<ast::ConstantLit>(send->recv.get())) {
+    if (!ast::isa_tree<ast::UnresolvedConstantLit>(send->recv.get())) {
         if (auto e = ctx.state.beginError(send->recv->loc, core::errors::DSL::BadWrapInstance)) {
             e.setHeader("Unsupported wrap_instance() on a non-constant-literal");
         }

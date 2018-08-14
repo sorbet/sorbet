@@ -16,7 +16,7 @@ template class std::unique_ptr<sorbet::ast::Return>;
 template class std::unique_ptr<sorbet::ast::Yield>;
 template class std::unique_ptr<sorbet::ast::RescueCase>;
 template class std::unique_ptr<sorbet::ast::Rescue>;
-template class std::unique_ptr<sorbet::ast::Ident>;
+template class std::unique_ptr<sorbet::ast::Field>;
 template class std::unique_ptr<sorbet::ast::Local>;
 template class std::unique_ptr<sorbet::ast::UnresolvedIdent>;
 template class std::unique_ptr<sorbet::ast::RestArg>;
@@ -30,12 +30,13 @@ template class std::unique_ptr<sorbet::ast::Cast>;
 template class std::unique_ptr<sorbet::ast::Hash>;
 template class std::unique_ptr<sorbet::ast::Array>;
 template class std::unique_ptr<sorbet::ast::Literal>;
-template class std::unique_ptr<sorbet::ast::ConstantLit>;
+template class std::unique_ptr<sorbet::ast::UnresolvedConstantLit>;
 template class std::unique_ptr<sorbet::ast::ZSuperArgs>;
 template class std::unique_ptr<sorbet::ast::Self>;
 template class std::unique_ptr<sorbet::ast::Block>;
 template class std::unique_ptr<sorbet::ast::InsSeq>;
 template class std::unique_ptr<sorbet::ast::EmptyTree>;
+template class std::unique_ptr<sorbet::ast::ConstantLit>;
 
 using namespace std;
 
@@ -152,8 +153,8 @@ Rescue::Rescue(core::Loc loc, unique_ptr<Expression> body, RESCUE_CASE_store res
     _sanityCheck();
 }
 
-Ident::Ident(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
-    core::categoryCounterInc("trees", "ident");
+Field::Field(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(symbol) {
+    core::categoryCounterInc("trees", "field");
     _sanityCheck();
 }
 
@@ -228,14 +229,15 @@ Literal::Literal(core::Loc loc, shared_ptr<core::Type> value) : Expression(loc),
     _sanityCheck();
 }
 
-ConstantLit::ConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
+UnresolvedConstantLit::UnresolvedConstantLit(core::Loc loc, unique_ptr<Expression> scope, core::NameRef cnst)
     : Expression(loc), cnst(cnst), scope(move(scope)) {
     core::categoryCounterInc("trees", "constantlit");
     _sanityCheck();
 }
 
-ResolvedConstantLit::ResolvedConstantLit(unique_ptr<ConstantLit> original, unique_ptr<Expression> resolved)
-    : Expression(original->loc), original(move(original)), resolved(move(resolved)) {
+ConstantLit::ConstantLit(core::Loc loc, core::SymbolRef symbol, unique_ptr<UnresolvedConstantLit> original,
+                         unique_ptr<Expression> resolved)
+    : Expression(loc), symbol(symbol), original(move(original)), typeAlias(move(resolved)) {
     core::categoryCounterInc("trees", "resolvedconstantlit");
     _sanityCheck();
 }
@@ -538,14 +540,14 @@ string EmptyTree::toString(const core::GlobalState &gs, int tabs) {
     return "<emptyTree>";
 }
 
-string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
+string UnresolvedConstantLit::toString(const core::GlobalState &gs, int tabs) {
     return this->scope->toString(gs, tabs) + "::" + this->cnst.data(gs).toString(gs);
 }
 
-string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
+string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "ConstantLit{" << '\n';
+    buf << "UnresolvedConstantLit{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "scope = " << this->scope->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
@@ -555,24 +557,29 @@ string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     return buf.str();
 }
 
-string ResolvedConstantLit::toString(const core::GlobalState &gs, int tabs) {
-    return this->resolved->toString(gs, tabs);
+string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
+    if (symbol.exists()) {
+        return this->symbol.data(gs, true).fullName(gs);
+    }
+    return this->typeAlias->toString(gs, tabs);
 }
 
-string ResolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
+string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "ResolvedConstantLit{" << '\n';
+    buf << "ConstantLit{" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "orig = " << this->original->showRaw(gs, tabs + 1) << '\n';
+    buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
-    buf << "resolved = " << this->resolved->showRaw(gs, tabs + 1) << '\n';
+    buf << "symbol = " << this->symbol.data(gs, true).fullName(gs) << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "typeAlias = " << (this->typeAlias ? this->typeAlias->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs);
     buf << "}";
     return buf.str();
 }
 
-string Ident::toString(const core::GlobalState &gs, int tabs) {
+string Field::toString(const core::GlobalState &gs, int tabs) {
     return this->symbol.data(gs, true).fullName(gs);
 }
 
@@ -584,7 +591,7 @@ string Local::nodeName() {
     return "Local";
 }
 
-string Ident::showRaw(const core::GlobalState &gs, int tabs) {
+string Field::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << "Ident{" << '\n';
     printTabs(buf, tabs + 1);
@@ -1014,8 +1021,8 @@ string If::nodeName() {
 string While::nodeName() {
     return "While";
 }
-string Ident::nodeName() {
-    return "Ident";
+string Field::nodeName() {
+    return "Field";
 }
 string UnresolvedIdent::nodeName() {
     return "UnresolvedIdent";
@@ -1094,12 +1101,12 @@ bool Literal::isFalse(const core::GlobalState &gs) {
     return value->derivesFrom(gs, core::Symbols::FalseClass());
 }
 
-string ConstantLit::nodeName() {
-    return "ConstantLit";
+string UnresolvedConstantLit::nodeName() {
+    return "UnresolvedConstantLit";
 }
 
-string ResolvedConstantLit::nodeName() {
-    return "ResolvedConstantLit";
+string ConstantLit::nodeName() {
+    return "ConstantLit";
 }
 
 string Self::nodeName() {

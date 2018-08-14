@@ -50,7 +50,7 @@ public:
     unique_ptr<Rescue> preTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original);
     unique_ptr<Expression> postTransformRescue(core::MutableContext ctx, unique_ptr<Rescue> original);
 
-    unique_ptr<Expression> postTransformIdent(core::MutableContext ctx, unique_ptr<Ident> original);
+    unique_ptr<Expression> postTransformField(core::MutableContext ctx, unique_ptr<Field> original);
     unique_ptr<Expression> postTransformUnresolvedIdent(core::MutableContext ctx, unique_ptr<UnresolvedIdent> original);
 
     unique_ptr<Assign> preTransformAssign(core::MutableContext ctx, unique_ptr<Assign> original);
@@ -65,7 +65,8 @@ public:
     unique_ptr<Array> preTransformArray(core::MutableContext ctx, unique_ptr<Array> original);
     unique_ptr<Expression> postransformArray(core::MutableContext ctx, unique_ptr<Array> original);
 
-    unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original);
+    unique_ptr<Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
+                                                              unique_ptr<UnresolvedConstantLit> original);
 
     unique_ptr<Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<Self> original);
 
@@ -120,11 +121,11 @@ GENERATE_HAS_MEMBER(preTransformBlock);
 GENERATE_HAS_MEMBER(preTransformInsSeq);
 
 // used to check for ABSENCE of method
-GENERATE_HAS_MEMBER(preTransformIdent);
+GENERATE_HAS_MEMBER(preTransformField);
 GENERATE_HAS_MEMBER(preTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(preTransformLocal);
+GENERATE_HAS_MEMBER(preTransformUnresolvedConstantLit);
 GENERATE_HAS_MEMBER(preTransformConstantLit);
-GENERATE_HAS_MEMBER(preTransformResolvedConstantLit);
 GENERATE_HAS_MEMBER(preTransformLiteral);
 GENERATE_HAS_MEMBER(preTransformSelf);
 GENERATE_HAS_MEMBER(preTransformCast);
@@ -140,7 +141,7 @@ GENERATE_HAS_MEMBER(postTransformReturn);
 GENERATE_HAS_MEMBER(postTransformYield);
 GENERATE_HAS_MEMBER(postTransformRescueCase);
 GENERATE_HAS_MEMBER(postTransformRescue);
-GENERATE_HAS_MEMBER(postTransformIdent);
+GENERATE_HAS_MEMBER(postTransformField);
 GENERATE_HAS_MEMBER(postTransformUnresolvedIdent);
 GENERATE_HAS_MEMBER(postTransformAssign);
 GENERATE_HAS_MEMBER(postTransformSend);
@@ -148,8 +149,8 @@ GENERATE_HAS_MEMBER(postTransformHash);
 GENERATE_HAS_MEMBER(postTransformLocal);
 GENERATE_HAS_MEMBER(postTransformArray);
 GENERATE_HAS_MEMBER(postTransformLiteral);
+GENERATE_HAS_MEMBER(postTransformUnresolvedConstantLit);
 GENERATE_HAS_MEMBER(postTransformConstantLit);
-GENERATE_HAS_MEMBER(postTransformResolvedConstantLit);
 GENERATE_HAS_MEMBER(postTransformArraySplat);
 GENERATE_HAS_MEMBER(postTransformHashSplat);
 GENERATE_HAS_MEMBER(postTransformSelf);
@@ -236,7 +237,7 @@ GENERATE_POSTPONE_POSTCLASS(Return);
 GENERATE_POSTPONE_POSTCLASS(Yield);
 GENERATE_POSTPONE_POSTCLASS(RescueCase);
 GENERATE_POSTPONE_POSTCLASS(Rescue);
-GENERATE_POSTPONE_POSTCLASS(Ident);
+GENERATE_POSTPONE_POSTCLASS(Field);
 GENERATE_POSTPONE_POSTCLASS(UnresolvedIdent);
 GENERATE_POSTPONE_POSTCLASS(Assign);
 GENERATE_POSTPONE_POSTCLASS(Send);
@@ -244,8 +245,8 @@ GENERATE_POSTPONE_POSTCLASS(Hash);
 GENERATE_POSTPONE_POSTCLASS(Array);
 GENERATE_POSTPONE_POSTCLASS(Local);
 GENERATE_POSTPONE_POSTCLASS(Literal);
+GENERATE_POSTPONE_POSTCLASS(UnresolvedConstantLit);
 GENERATE_POSTPONE_POSTCLASS(ConstantLit);
-GENERATE_POSTPONE_POSTCLASS(ResolvedConstantLit);
 GENERATE_POSTPONE_POSTCLASS(Self);
 GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
@@ -264,11 +265,11 @@ private:
     FUNC &func;
     bool locReported = false;
 
-    static_assert(!HAS_MEMBER_preTransformIdent<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformField<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLiteral<FUNC>::value, "use post*Transform instead");
+    static_assert(!HAS_MEMBER_preTransformUnresolvedConstantLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformConstantLit<FUNC>::value, "use post*Transform instead");
-    static_assert(!HAS_MEMBER_preTransformResolvedConstantLit<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformSelf<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformLocal<FUNC>::value, "use post*Transform instead");
 
@@ -487,11 +488,11 @@ private:
                 }
 
                 return move(v);
-            } else if (Ident *u = cast_tree<Ident>(what.get())) {
-                unique_ptr<Ident> v(u);
+            } else if (Field *u = cast_tree<Field>(what.get())) {
+                unique_ptr<Field> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformIdent<FUNC>::value) {
-                    return PostPonePostTransform_Ident<FUNC, CTX, HAS_MEMBER_postTransformIdent<FUNC>::value>::call(
+                if (HAS_MEMBER_postTransformField<FUNC>::value) {
+                    return PostPonePostTransform_Field<FUNC, CTX, HAS_MEMBER_postTransformField<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
                 return move(v);
@@ -589,28 +590,24 @@ private:
                         ctx, move(v), func);
                 }
                 return move(v);
+            } else if (UnresolvedConstantLit *u = cast_tree<UnresolvedConstantLit>(what.get())) {
+                unique_ptr<UnresolvedConstantLit> v(u);
+                what.release();
+                if (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
+                    return PostPonePostTransform_UnresolvedConstantLit<
+                        FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value>::call(ctx, move(v),
+                                                                                                     func);
+                }
+                return move(v);
             } else if (ConstantLit *u = cast_tree<ConstantLit>(what.get())) {
                 unique_ptr<ConstantLit> v(u);
                 what.release();
+                if (v->typeAlias) {
+                    v->typeAlias = mapIt(move(v->typeAlias), ctx);
+                }
                 if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
                     return PostPonePostTransform_ConstantLit<
                         FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(ctx, move(v), func);
-                }
-                return move(v);
-            } else if (ResolvedConstantLit *u = cast_tree<ResolvedConstantLit>(what.get())) {
-                unique_ptr<ResolvedConstantLit> v(u);
-                what.release();
-                auto mappedOriginal = mapIt(move(v->original), ctx);
-                if (auto *cnst = cast_tree<ConstantLit>(mappedOriginal.get())) {
-                    v->original.reset(cnst);
-                    mappedOriginal.release();
-                } else {
-                    Error::raise("ResolvedConstant original mapped to non-constant");
-                }
-                v->resolved = mapIt(move(v->resolved), ctx);
-                if (HAS_MEMBER_postTransformResolvedConstantLit<FUNC>::value) {
-                    return PostPonePostTransform_ResolvedConstantLit<
-                        FUNC, CTX, HAS_MEMBER_postTransformResolvedConstantLit<FUNC>::value>::call(ctx, move(v), func);
                 }
                 return move(v);
             } else if (Self *u = cast_tree<Self>(what.get())) {

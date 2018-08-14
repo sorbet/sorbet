@@ -10,12 +10,17 @@ namespace ast {
 
 class MK {
 public:
+    static std::unique_ptr<Expression> EmptyTree(core::Loc loc) {
+        return std::make_unique<ast::EmptyTree>(loc);
+    }
+
     static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, core::SymbolRef symbol,
                                         MethodDef::ARGS_store args) {
         auto blk = std::make_unique<ast::Block>(loc, move(args), move(body));
         blk->symbol = symbol;
         return blk;
     }
+
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
                                             Send::ARGS_store args, u4 flags = 0,
                                             std::unique_ptr<ast::Block> blk = nullptr) {
@@ -32,12 +37,15 @@ public:
     static std::unique_ptr<Expression> Return(core::Loc loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Return>(loc, move(expr));
     }
+
     static std::unique_ptr<Expression> Next(core::Loc loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Next>(loc, move(expr));
     }
+
     static std::unique_ptr<Expression> Yield(core::Loc loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Yield>(loc, move(expr));
     }
+
     static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {
         return std::make_unique<ast::Break>(loc, move(expr));
     }
@@ -76,8 +84,9 @@ public:
         return std::make_unique<ast::Literal>(loc, core::Types::nilClass());
     }
 
-    static std::unique_ptr<Expression> Ident(core::Loc loc, core::SymbolRef symbol) {
-        return std::make_unique<ast::Ident>(loc, symbol);
+    static std::unique_ptr<Expression> Constant(core::Loc loc, core::SymbolRef symbol) {
+        ENFORCE(symbol.exists());
+        return std::make_unique<ast::ConstantLit>(loc, symbol, nullptr, nullptr);
     }
 
     static std::unique_ptr<Reference> Local(core::Loc loc, core::NameRef name) {
@@ -99,9 +108,6 @@ public:
     static std::unique_ptr<Expression> cpRef(Reference &name) {
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
             return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
-        }
-        if (auto *id = cast_tree<ast::Ident>(&name)) {
-            return Ident(name.loc, id->symbol);
         }
         Error::notImplemented();
     }
@@ -130,10 +136,6 @@ public:
         return std::make_unique<ast::While>(loc, move(cond), move(body));
     }
 
-    static std::unique_ptr<Expression> EmptyTree(core::Loc loc) {
-        return std::make_unique<ast::EmptyTree>(loc);
-    }
-
     static std::unique_ptr<Expression> Self(core::Loc loc) {
         return std::make_unique<ast::Self>(loc, core::Symbols::todo());
     }
@@ -145,7 +147,7 @@ public:
 
     static std::unique_ptr<Expression> Splat(core::Loc loc, std::unique_ptr<Expression> arg) {
         auto to_a = Send0(loc, move(arg), core::Names::to_a());
-        return Send1(loc, Ident(loc, core::Symbols::Magic()), core::Names::splat(), move(to_a));
+        return Send1(loc, Constant(loc, core::Symbols::Magic()), core::Names::splat(), move(to_a));
     }
 
     static std::unique_ptr<Expression> InsSeq1(core::Loc loc, std::unique_ptr<Expression> stat,
@@ -163,8 +165,9 @@ public:
         return std::make_unique<ast::Literal>(loc, core::Types::falseClass());
     }
 
-    static std::unique_ptr<ConstantLit> Constant(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef name) {
-        return std::make_unique<ast::ConstantLit>(loc, move(scope), name);
+    static std::unique_ptr<UnresolvedConstantLit> UnresolvedConstant(core::Loc loc, std::unique_ptr<Expression> scope,
+                                                                     core::NameRef name) {
+        return std::make_unique<ast::UnresolvedConstantLit>(loc, move(scope), name);
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
@@ -231,12 +234,12 @@ public:
 
     static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
                                            std::unique_ptr<Expression> ret) {
-        auto sig = Send1(loc, Ident(loc, core::Symbols::Sorbet()), core::Names::sig(), move(hash));
+        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig(), move(hash));
         return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
-        auto sig = Send0(loc, Ident(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
         return Send1(loc, move(sig), core::Names::returns(), move(ret));
     }
 
@@ -251,29 +254,33 @@ public:
                 return Unsafe(loc, Nil(loc));
             }
         }
-        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::cast(), Unsafe(loc, Nil(loc)), move(type));
+        return Send2(loc, Constant(loc, core::Symbols::T()), core::Names::cast(), Unsafe(loc, Nil(loc)), move(type));
+    }
+
+    static std::unique_ptr<Expression> T(core::Loc loc) {
+        return Constant(loc, core::Symbols::T());
     }
 
     static std::unique_ptr<Expression> Let(core::Loc loc, std::unique_ptr<Expression> value,
                                            std::unique_ptr<Expression> type) {
-        return Send2(loc, Ident(loc, core::Symbols::T()), core::Names::let(), move(value), move(type));
+        return Send2(loc, T(loc), core::Names::let(), move(value), move(type));
     }
 
     static std::unique_ptr<Expression> Unsafe(core::Loc loc, std::unique_ptr<Expression> inner) {
-        return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::unsafe(), move(inner));
+        return Send1(loc, T(loc), core::Names::unsafe(), move(inner));
     }
 
     static std::unique_ptr<Expression> Untyped(core::Loc loc) {
-        return Send0(loc, Ident(loc, core::Symbols::T()), core::Names::untyped());
+        return Send0(loc, T(loc), core::Names::untyped());
     }
 
     static std::unique_ptr<Expression> Nilable(core::Loc loc, std::unique_ptr<Expression> arg) {
-        return Send1(loc, Ident(loc, core::Symbols::T()), core::Names::nilable(), move(arg));
+        return Send1(loc, T(loc), core::Names::nilable(), move(arg));
     }
 
     static std::unique_ptr<Expression> KeepForIDE(std::unique_ptr<Expression> arg) {
         auto loc = core::Loc::none(arg->loc.file);
-        return Send1(loc, Ident(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), move(arg));
+        return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), move(arg));
     }
 };
 

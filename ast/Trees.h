@@ -63,7 +63,7 @@ public:
 
     RHS_store rhs;
     std::unique_ptr<Expression> name;
-    // For unresolved names. Once they are resolved to Symbols they go into the
+    // For unresolved names. Once they are typeAlias to Symbols they go into the
     // Symbol
 
     static constexpr int EXPECTED_ANCESTORS_COUNT = 2;
@@ -264,11 +264,11 @@ private:
     virtual void _sanityCheck();
 };
 
-class Ident final : public Reference {
+class Field final : public Reference {
 public:
     core::SymbolRef symbol;
 
-    Ident(core::Loc loc, core::SymbolRef symbol);
+    Field(core::Loc loc, core::SymbolRef symbol);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -503,12 +503,12 @@ private:
     virtual void _sanityCheck();
 };
 
-class ConstantLit final : public Expression {
+class UnresolvedConstantLit final : public Expression {
 public:
     core::NameRef cnst;
     std::unique_ptr<Expression> scope;
 
-    ConstantLit(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
+    UnresolvedConstantLit(core::Loc loc, std::unique_ptr<Expression> scope, core::NameRef cnst);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -518,13 +518,14 @@ private:
     virtual void _sanityCheck();
 };
 
-class ResolvedConstantLit final : public Expression {
+class ConstantLit final : public Expression {
 public:
-    std::unique_ptr<ConstantLit> original;
-    std::unique_ptr<Expression> resolved; // In a world without type aliases, this could have been a `SymbolRef` instead
-                                          // type aliases may expand to arbitrary expressions
+    core::SymbolRef symbol; // If this is a normal constant. This symbol may be already dealiased.
+    std::unique_ptr<UnresolvedConstantLit> original;
+    std::unique_ptr<Expression> typeAlias; // if this constant used to point to type alias
 
-    ResolvedConstantLit(std::unique_ptr<ConstantLit> original, std::unique_ptr<Expression> resolved);
+    ConstantLit(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<UnresolvedConstantLit> original,
+                std::unique_ptr<Expression> resolved);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

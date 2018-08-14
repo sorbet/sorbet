@@ -79,7 +79,8 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
             return original;
         }
 
-        unique_ptr<ast::Ident> postTransformIdent(core::MutableContext ctx, unique_ptr<ast::Ident> original) {
+        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
+                                                              unique_ptr<ast::ConstantLit> original) {
             count++;
             return original;
         }
@@ -109,8 +110,8 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
             return original;
         }
 
-        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
-                                                              unique_ptr<ast::ConstantLit> original) {
+        unique_ptr<ast::UnresolvedConstantLit>
+        postTransformUnresolvedConstantLit(core::MutableContext ctx, unique_ptr<ast::UnresolvedConstantLit> original) {
             count++;
             return original;
         }
@@ -159,7 +160,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     unique_ptr<ast::Expression> methodDef =
         make_unique<ast::MethodDef>(loc, methodSym, name, move(args), move(rhs), false);
     unique_ptr<ast::Expression> emptyTree = make_unique<ast::EmptyTree>(loc);
-    unique_ptr<ast::Expression> cnst = make_unique<ast::ConstantLit>(loc, move(emptyTree), name);
+    unique_ptr<ast::Expression> cnst = make_unique<ast::UnresolvedConstantLit>(loc, move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
     classrhs.emplace_back(move(methodDef));

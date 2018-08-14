@@ -107,11 +107,11 @@ unique_ptr<Expression> Rescue::_deepCopy(const Expression *avoid, bool root) con
                                else_->_deepCopy(avoid), ensure->_deepCopy(avoid));
 }
 
-unique_ptr<Expression> Ident::_deepCopy(const Expression *avoid, bool root) const {
+unique_ptr<Expression> Field::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<Ident>(loc, symbol);
+    return make_unique<Field>(loc, symbol);
 }
 
 unique_ptr<Expression> Local::_deepCopy(const Expression *avoid, bool root) const {
@@ -208,20 +208,26 @@ unique_ptr<Expression> Literal::_deepCopy(const Expression *avoid, bool root) co
     return make_unique<Literal>(loc, value);
 }
 
+unique_ptr<Expression> UnresolvedConstantLit::_deepCopy(const Expression *avoid, bool root) const {
+    if (!root && this == avoid) {
+        throw DeepCopyError();
+    }
+    return make_unique<UnresolvedConstantLit>(loc, scope->_deepCopy(avoid), cnst);
+}
+
 unique_ptr<Expression> ConstantLit::_deepCopy(const Expression *avoid, bool root) const {
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<ConstantLit>(loc, scope->_deepCopy(avoid), cnst);
-}
-
-unique_ptr<Expression> ResolvedConstantLit::_deepCopy(const Expression *avoid, bool root) const {
-    if (!root && this == avoid) {
-        throw DeepCopyError();
+    unique_ptr<UnresolvedConstantLit> originalC;
+    if (original) {
+        originalC = unique_ptr<UnresolvedConstantLit>(cast_tree<UnresolvedConstantLit>(original->deepCopy().release()));
     }
-    auto orig = original->_deepCopy(avoid);
-    return make_unique<ResolvedConstantLit>(unique_ptr<ConstantLit>(cast_tree<ConstantLit>(orig.release())),
-                                            resolved->_deepCopy(avoid));
+    unique_ptr<Expression> typeAliasC;
+    if (this->typeAlias) {
+        typeAliasC = typeAlias->_deepCopy(avoid);
+    }
+    return make_unique<ConstantLit>(this->loc, this->symbol, move(originalC), move(typeAliasC));
 }
 
 unique_ptr<Expression> ZSuperArgs::_deepCopy(const Expression *avoid, bool root) const {

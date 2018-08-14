@@ -3,12 +3,14 @@ ClassDef{
   ancestors = []
   rhs = [
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:NotAODM>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         MethodDef{
@@ -45,7 +47,7 @@ ClassDef{
           block = nullptr
           args = [
             Literal{ value = "not_a_symbol" }
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -58,7 +60,7 @@ ClassDef{
           block = nullptr
           args = [
             Literal{ value = :"foo" }
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -72,7 +74,7 @@ ClassDef{
           block = nullptr
           args = [
             Literal{ value = "too" }
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -90,7 +92,7 @@ ClassDef{
           block = nullptr
           args = [
             Literal{ value = :"company_name" }
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -105,7 +107,7 @@ ClassDef{
           args = [
             Literal{ value = :"day" }
             Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:IntegerParam>
               }
@@ -136,7 +138,7 @@ ClassDef{
           args = [
             Literal{ value = :"name" }
             Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:StringParam>
               }
@@ -155,9 +157,9 @@ ClassDef{
           args = [
             Literal{ value = :"how_many" }
             Send{
-              recv = ConstantLit{
-                scope = ConstantLit{
-                  scope = ConstantLit{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Opus>
                   }
@@ -176,9 +178,9 @@ ClassDef{
                   ]
                 }
                 Send{
-                  recv = ConstantLit{
-                    scope = ConstantLit{
-                      scope = ConstantLit{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
                         scope = EmptyTree
                         cnst = <constant:Opus>
                       }
@@ -189,7 +191,7 @@ ClassDef{
                   name = new
                   block = nullptr
                   args = [
-                    ConstantLit{
+                    UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:Default>
                     }
@@ -207,7 +209,7 @@ ClassDef{
           args = [
             Literal{ value = :"optional_param" }
             Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:IntegerParam>
               }
@@ -222,12 +224,14 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:SomeODM>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         Send{
@@ -235,8 +239,8 @@ ClassDef{
           name = extend
           block = nullptr
           args = [
-            ConstantLit{
-              scope = ConstantLit{
+            UnresolvedConstantLit{
+              scope = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
@@ -247,8 +251,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -263,13 +269,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -283,15 +291,19 @@ ClassDef{
           name = foo<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -300,13 +312,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -318,8 +332,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -328,7 +344,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -340,7 +356,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -355,15 +371,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -371,7 +391,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -391,14 +411,14 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -412,7 +432,7 @@ ClassDef{
           name = foo2<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -420,7 +440,7 @@ ClassDef{
             block = nullptr
             args = [
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -431,14 +451,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -458,7 +478,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -470,7 +490,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -485,7 +505,7 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -493,7 +513,7 @@ ClassDef{
             block = nullptr
             args = [
               Literal{ value = nil }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -504,12 +524,14 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:ForeignClass>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         EmptyTree
@@ -517,18 +539,22 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:AdvancedODM>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -543,13 +569,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -563,15 +591,19 @@ ClassDef{
           name = default_without_optional_false<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -580,13 +612,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -598,8 +632,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -608,7 +644,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -620,7 +656,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -635,15 +671,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -651,7 +691,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -661,8 +701,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -676,7 +718,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -688,15 +730,19 @@ ClassDef{
           name = optional_false<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -704,7 +750,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -714,8 +760,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -724,7 +772,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -736,7 +784,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -751,15 +799,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -767,7 +819,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -777,8 +829,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -793,13 +847,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -813,15 +869,19 @@ ClassDef{
           name = nodefault<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -830,13 +890,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -848,8 +910,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -858,7 +922,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -870,7 +934,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -885,15 +949,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -901,7 +969,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -911,8 +979,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -926,7 +996,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -938,15 +1008,19 @@ ClassDef{
           name = type<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -954,7 +1028,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -964,8 +1038,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -974,7 +1050,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -986,7 +1062,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -1001,15 +1077,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1017,7 +1097,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -1027,8 +1107,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1043,14 +1125,18 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                Ident{
-                  symbol = <constant:Object>
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Object
+                  typeAlias = nullptr
                 }
               ]
             }
@@ -1062,15 +1148,19 @@ ClassDef{
           name = object<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1079,14 +1169,18 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  Ident{
-                    symbol = <constant:Object>
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = ::Object
+                    typeAlias = nullptr
                   }
                 ]
               }
@@ -1096,8 +1190,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1106,8 +1202,10 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = Ident{
-                      symbol = <constant:Object>
+                    value = ConstantLit{
+                      orig = nullptr
+                      symbol = ::Object
+                      typeAlias = nullptr
                     }
                   ]
                 ]
@@ -1117,8 +1215,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:Object>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::Object
+              typeAlias = nullptr
             }
           ]
         }
@@ -1131,15 +1231,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1147,8 +1251,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:Object>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::Object
+                typeAlias = nullptr
               }
             ]
           }
@@ -1156,8 +1262,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1171,7 +1279,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:Array>
             }
@@ -1183,15 +1291,19 @@ ClassDef{
           name = array<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1199,7 +1311,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
               }
@@ -1209,8 +1321,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1219,7 +1333,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:Array>
                     }
@@ -1231,7 +1345,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:Array>
             }
@@ -1246,15 +1360,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1262,7 +1380,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
               }
@@ -1272,8 +1390,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1288,13 +1408,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:Array>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T::Array
+                typeAlias = nullptr
               }
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1308,15 +1430,19 @@ ClassDef{
           name = array_of<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1325,13 +1451,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:Array>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T::Array
+                  typeAlias = nullptr
                 }
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1343,8 +1471,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1354,13 +1484,15 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = Ident{
-                        symbol = <constant:Array>
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T::Array
+                        typeAlias = nullptr
                       }
                       name = []
                       block = nullptr
                       args = [
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
                         }
@@ -1375,13 +1507,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:Array>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T::Array
+                typeAlias = nullptr
               }
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1398,15 +1532,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1415,13 +1553,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:Array>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T::Array
+                  typeAlias = nullptr
                 }
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1433,8 +1573,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1448,7 +1590,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:Array>
             }
@@ -1460,15 +1602,19 @@ ClassDef{
           name = array_of_explicit<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1476,7 +1622,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
               }
@@ -1486,8 +1632,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1496,7 +1644,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:Array>
                     }
@@ -1508,7 +1656,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:Array>
             }
@@ -1523,15 +1671,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1539,7 +1691,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
               }
@@ -1549,8 +1701,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1565,8 +1719,8 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
-                scope = ConstantLit{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -1575,7 +1729,7 @@ ClassDef{
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1589,15 +1743,19 @@ ClassDef{
           name = t_array<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1606,8 +1764,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -1616,7 +1774,7 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1628,8 +1786,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1639,8 +1799,8 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = ConstantLit{
-                        scope = ConstantLit{
+                      recv = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:T>
                         }
@@ -1649,7 +1809,7 @@ ClassDef{
                       name = []
                       block = nullptr
                       args = [
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
                         }
@@ -1664,8 +1824,8 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
-                scope = ConstantLit{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -1674,7 +1834,7 @@ ClassDef{
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1691,15 +1851,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1708,8 +1872,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -1718,7 +1882,7 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1730,8 +1894,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1746,8 +1912,8 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
-                scope = ConstantLit{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -1756,11 +1922,11 @@ ClassDef{
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:Symbol>
                 }
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1774,15 +1940,19 @@ ClassDef{
           name = hash_of<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1791,8 +1961,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -1801,11 +1971,11 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Symbol>
                   }
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1817,8 +1987,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1828,8 +2000,8 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = ConstantLit{
-                        scope = ConstantLit{
+                      recv = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:T>
                         }
@@ -1838,11 +2010,11 @@ ClassDef{
                       name = []
                       block = nullptr
                       args = [
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:Symbol>
                         }
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
                         }
@@ -1857,8 +2029,8 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
-                scope = ConstantLit{
+              recv = UnresolvedConstantLit{
+                scope = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -1867,11 +2039,11 @@ ClassDef{
               name = []
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:Symbol>
                 }
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1888,15 +2060,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1905,8 +2081,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -1915,11 +2091,11 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Symbol>
                   }
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -1931,8 +2107,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -1947,13 +2125,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -1967,15 +2147,19 @@ ClassDef{
           name = optional_explicit<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -1984,13 +2168,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2002,8 +2188,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2013,13 +2201,15 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
                       }
                       name = nilable
                       block = nullptr
                       args = [
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
                         }
@@ -2034,13 +2224,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2057,15 +2249,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2074,13 +2270,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2092,8 +2290,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2108,13 +2308,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2128,15 +2330,19 @@ ClassDef{
           name = optional_existing<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2145,13 +2351,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2163,8 +2371,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2173,7 +2383,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -2185,7 +2395,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -2200,15 +2410,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2216,7 +2430,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -2226,8 +2440,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2241,7 +2457,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -2253,15 +2469,19 @@ ClassDef{
           name = optional<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2269,7 +2489,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -2279,8 +2499,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2290,13 +2512,15 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
                       }
                       name = nilable
                       block = nullptr
                       args = [
-                        ConstantLit{
+                        UnresolvedConstantLit{
                           scope = EmptyTree
                           cnst = <constant:String>
                         }
@@ -2311,13 +2535,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2334,15 +2560,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2351,13 +2581,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2369,8 +2601,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2385,14 +2619,14 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2406,15 +2640,19 @@ ClassDef{
           name = optional_nilable<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2423,14 +2661,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2442,8 +2680,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2453,21 +2693,23 @@ ClassDef{
                   [
                     key = Literal{ value = :"arg0" }
                     value = Send{
-                      recv = Ident{
-                        symbol = <constant:T>
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
                       }
                       name = nilable
                       block = nullptr
                       args = [
                         Send{
-                          recv = ConstantLit{
+                          recv = UnresolvedConstantLit{
                             scope = EmptyTree
                             cnst = <constant:T>
                           }
                           name = nilable
                           block = nullptr
                           args = [
-                            ConstantLit{
+                            UnresolvedConstantLit{
                               scope = EmptyTree
                               cnst = <constant:String>
                             }
@@ -2484,21 +2726,23 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
                 Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
                   name = nilable
                   block = nullptr
                   args = [
-                    ConstantLit{
+                    UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -2517,15 +2761,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2534,21 +2782,23 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
                   Send{
-                    recv = ConstantLit{
+                    recv = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:T>
                     }
                     name = nilable
                     block = nullptr
                     args = [
-                      ConstantLit{
+                      UnresolvedConstantLit{
                         scope = EmptyTree
                         cnst = <constant:String>
                       }
@@ -2562,8 +2812,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2577,7 +2829,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -2589,15 +2841,19 @@ ClassDef{
           name = const_explicit<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2605,7 +2861,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -2615,8 +2871,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2630,7 +2888,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -2642,15 +2900,19 @@ ClassDef{
           name = const<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2658,7 +2920,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -2668,8 +2930,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2684,13 +2948,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:Array>
                 }
@@ -2704,15 +2970,19 @@ ClassDef{
           name = no_class_arg<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2721,13 +2991,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Array>
                   }
@@ -2739,8 +3011,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2755,8 +3029,10 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = untyped
               block = nullptr
@@ -2771,8 +3047,10 @@ ClassDef{
           name = enum_prop<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = unsafe
             block = nullptr
@@ -2784,8 +3062,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2800,13 +3080,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2820,15 +3102,19 @@ ClassDef{
           name = foreign<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2837,13 +3123,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -2855,8 +3143,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2865,7 +3155,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -2877,7 +3167,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -2892,15 +3182,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -2908,7 +3202,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -2918,8 +3212,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2930,13 +3226,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:ForeignClass>
                 }
@@ -2950,8 +3248,10 @@ ClassDef{
           name = foreign_<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = unsafe
             block = nullptr
@@ -2963,8 +3263,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -2979,13 +3281,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -2999,15 +3303,19 @@ ClassDef{
           name = foreign_lazy<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3016,13 +3324,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -3034,8 +3344,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3044,7 +3356,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -3056,7 +3368,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -3071,15 +3383,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3087,7 +3403,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -3097,8 +3413,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3109,13 +3427,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:ForeignClass>
                 }
@@ -3129,8 +3449,10 @@ ClassDef{
           name = foreign_lazy_<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = unsafe
             block = nullptr
@@ -3142,8 +3464,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3158,13 +3482,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -3178,15 +3504,19 @@ ClassDef{
           name = foreign_proc<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3195,13 +3525,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -3213,8 +3545,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3223,7 +3557,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -3235,7 +3569,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -3250,15 +3584,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3266,7 +3604,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -3276,8 +3614,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3288,13 +3628,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:ForeignClass>
                 }
@@ -3308,8 +3650,10 @@ ClassDef{
           name = foreign_proc_<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = unsafe
             block = nullptr
@@ -3321,8 +3665,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3337,13 +3683,15 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = nilable
               block = nullptr
               args = [
-                ConstantLit{
+                UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:String>
                 }
@@ -3357,15 +3705,19 @@ ClassDef{
           name = foreign_invalid<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3374,13 +3726,15 @@ ClassDef{
                 ]
               }
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -3392,8 +3746,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3402,7 +3758,7 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
+                    value = UnresolvedConstantLit{
                       scope = EmptyTree
                       cnst = <constant:String>
                     }
@@ -3414,7 +3770,7 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            ConstantLit{
+            UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:String>
             }
@@ -3429,15 +3785,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3445,7 +3805,7 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -3455,8 +3815,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3467,8 +3829,10 @@ ClassDef{
           block = nullptr
           args = [
             Send{
-              recv = Ident{
-                symbol = <constant:T>
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::T
+                typeAlias = nullptr
               }
               name = untyped
               block = nullptr
@@ -3483,8 +3847,10 @@ ClassDef{
           name = foreign_invalid_<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = unsafe
             block = nullptr
@@ -3497,18 +3863,22 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:PropHelpers>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3522,8 +3892,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:String>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::String
+              typeAlias = nullptr
             }
           ]
         }
@@ -3533,15 +3905,19 @@ ClassDef{
           name = token<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3549,8 +3925,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:String>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::String
+                typeAlias = nullptr
               }
             ]
           }
@@ -3558,8 +3936,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3568,8 +3948,10 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = Ident{
-                      symbol = <constant:String>
+                    value = ConstantLit{
+                      orig = nullptr
+                      symbol = ::String
+                      typeAlias = nullptr
                     }
                   ]
                 ]
@@ -3579,8 +3961,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:String>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::String
+              typeAlias = nullptr
             }
           ]
         }
@@ -3593,15 +3977,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3609,8 +3997,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:String>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::String
+                typeAlias = nullptr
               }
             ]
           }
@@ -3618,8 +4008,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3633,8 +4025,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:Float>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::Float
+              typeAlias = nullptr
             }
           ]
         }
@@ -3644,15 +4038,19 @@ ClassDef{
           name = created<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3660,8 +4058,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:Float>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::Float
+                typeAlias = nullptr
               }
             ]
           }
@@ -3669,8 +4069,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3679,8 +4081,10 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = Ident{
-                      symbol = <constant:Float>
+                    value = ConstantLit{
+                      orig = nullptr
+                      symbol = ::Float
+                      typeAlias = nullptr
                     }
                   ]
                 ]
@@ -3690,8 +4094,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:Float>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::Float
+              typeAlias = nullptr
             }
           ]
         }
@@ -3704,15 +4110,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3720,8 +4130,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:Float>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::Float
+                typeAlias = nullptr
               }
             ]
           }
@@ -3730,18 +4142,22 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:PropHelpers2>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3755,8 +4171,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:String>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::String
+              typeAlias = nullptr
             }
           ]
         }
@@ -3766,15 +4184,19 @@ ClassDef{
           name = token<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3782,8 +4204,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:String>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::String
+                typeAlias = nullptr
               }
             ]
           }
@@ -3791,8 +4215,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3801,8 +4227,10 @@ ClassDef{
                 pairs = [
                   [
                     key = Literal{ value = :"arg0" }
-                    value = Ident{
-                      symbol = <constant:String>
+                    value = ConstantLit{
+                      orig = nullptr
+                      symbol = ::String
+                      typeAlias = nullptr
                     }
                   ]
                 ]
@@ -3812,8 +4240,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:String>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::String
+              typeAlias = nullptr
             }
           ]
         }
@@ -3826,15 +4256,19 @@ ClassDef{
               name = arg0
             }]
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3842,8 +4276,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:String>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::String
+                typeAlias = nullptr
               }
             ]
           }
@@ -3851,8 +4287,10 @@ ClassDef{
 
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3866,8 +4304,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:Float>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::Float
+              typeAlias = nullptr
             }
           ]
         }
@@ -3877,15 +4317,19 @@ ClassDef{
           name = created<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3893,8 +4337,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:Float>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::Float
+                typeAlias = nullptr
               }
             ]
           }
@@ -3903,18 +4349,22 @@ ClassDef{
     }
 
     ClassDef{
-      name = ConstantLit{
+      name = UnresolvedConstantLit{
         scope = EmptyTree
         cnst = <constant:ShardingProp>
       }<<constant:<todo sym>>>
-      ancestors = [Ident{
-          symbol = <constant:<todo sym>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
         }]
       rhs = [
         Send{
           recv = Send{
-            recv = Ident{
-              symbol = <constant:Sorbet>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::Sorbet
+              typeAlias = nullptr
             }
             name = sig
             block = nullptr
@@ -3928,8 +4378,10 @@ ClassDef{
           name = returns
           block = nullptr
           args = [
-            Ident{
-              symbol = <constant:String>
+            ConstantLit{
+              orig = nullptr
+              symbol = ::String
+              typeAlias = nullptr
             }
           ]
         }
@@ -3939,15 +4391,19 @@ ClassDef{
           name = merchant<<constant:<todo sym>>>
           args = []
           rhs = Send{
-            recv = Ident{
-              symbol = <constant:T>
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
             }
             name = cast
             block = nullptr
             args = [
               Send{
-                recv = Ident{
-                  symbol = <constant:T>
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
                 }
                 name = unsafe
                 block = nullptr
@@ -3955,8 +4411,10 @@ ClassDef{
                   Literal{ value = nil }
                 ]
               }
-              Ident{
-                symbol = <constant:String>
+              ConstantLit{
+                orig = nullptr
+                symbol = ::String
+                typeAlias = nullptr
               }
             ]
           }
@@ -3971,7 +4429,7 @@ ClassDef{
       rhs = InsSeq{
         stats = [
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -3980,7 +4438,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -3995,14 +4453,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4011,7 +4469,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4020,7 +4478,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -4034,14 +4492,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4050,7 +4508,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -4065,14 +4523,14 @@ ClassDef{
                   Literal{ value = "b" }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4081,7 +4539,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -4096,14 +4554,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4112,7 +4570,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4121,7 +4579,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -4135,14 +4593,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4151,7 +4609,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
@@ -4166,14 +4624,14 @@ ClassDef{
                   Literal{ value = "b" }
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4182,7 +4640,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4197,14 +4655,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4213,7 +4671,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4222,7 +4680,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4236,14 +4694,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4252,7 +4710,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4267,14 +4725,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4283,7 +4741,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4292,7 +4750,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4306,14 +4764,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4322,7 +4780,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4336,14 +4794,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4352,7 +4810,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4367,14 +4825,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Object>
                   }
@@ -4383,7 +4841,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4392,7 +4850,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4406,14 +4864,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Array>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4422,7 +4880,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4437,8 +4895,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -4447,7 +4905,7 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4456,7 +4914,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4465,7 +4923,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4480,8 +4938,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -4490,7 +4948,7 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4499,7 +4957,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4508,7 +4966,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4523,8 +4981,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -4533,7 +4991,7 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4542,7 +5000,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4551,7 +5009,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4566,8 +5024,8 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
-                  scope = ConstantLit{
+                recv = UnresolvedConstantLit{
+                  scope = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
@@ -4576,11 +5034,11 @@ ClassDef{
                 name = []
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:Symbol>
                   }
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4589,7 +5047,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4598,7 +5056,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4613,14 +5071,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4629,7 +5087,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4638,7 +5096,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4653,14 +5111,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4670,7 +5128,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4687,7 +5145,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4703,7 +5161,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4712,7 +5170,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4727,14 +5185,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4743,7 +5201,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4752,7 +5210,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4767,14 +5225,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4784,7 +5242,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4801,7 +5259,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4817,7 +5275,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4826,7 +5284,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4841,14 +5299,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:String>
                   }
@@ -4857,7 +5315,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4866,7 +5324,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4880,7 +5338,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -4888,7 +5346,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4904,7 +5362,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4913,7 +5371,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4927,7 +5385,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -4935,7 +5393,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -4951,7 +5409,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -4960,7 +5418,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -4975,7 +5433,7 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
@@ -4983,8 +5441,8 @@ ClassDef{
                 block = nullptr
                 args = [
                   Send{
-                    recv = ConstantLit{
-                      scope = ConstantLit{
+                    recv = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
                         scope = EmptyTree
                         cnst = <constant:T>
                       }
@@ -4993,7 +5451,7 @@ ClassDef{
                     name = []
                     block = nullptr
                     args = [
-                      ConstantLit{
+                      UnresolvedConstantLit{
                         scope = EmptyTree
                         cnst = <constant:String>
                       }
@@ -5005,7 +5463,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -5026,7 +5484,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -5042,7 +5500,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5051,7 +5509,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -5066,14 +5524,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:ForeignClass>
                   }
@@ -5082,7 +5540,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5091,7 +5549,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -5105,14 +5563,14 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:ForeignClass>
               }
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5121,7 +5579,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
@@ -5136,14 +5594,14 @@ ClassDef{
                 ]
               }
               Send{
-                recv = ConstantLit{
+                recv = UnresolvedConstantLit{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
                 name = nilable
                 block = nullptr
                 args = [
-                  ConstantLit{
+                  UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:ForeignClass>
                   }
@@ -5153,7 +5611,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
@@ -5168,7 +5626,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5177,7 +5635,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers>
                   }
@@ -5191,7 +5649,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -5199,7 +5657,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
@@ -5216,7 +5674,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
@@ -5232,7 +5690,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5241,7 +5699,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers>
                   }
@@ -5255,7 +5713,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Float>
               }
@@ -5263,7 +5721,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
@@ -5280,7 +5738,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
@@ -5296,7 +5754,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5305,7 +5763,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers2>
                   }
@@ -5319,7 +5777,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -5327,7 +5785,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
@@ -5344,7 +5802,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
@@ -5360,7 +5818,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5369,7 +5827,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers2>
                   }
@@ -5383,7 +5841,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:Float>
               }
@@ -5391,7 +5849,7 @@ ClassDef{
           }
           Send{
             recv = Send{
-              recv = ConstantLit{
+              recv = UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
@@ -5407,7 +5865,7 @@ ClassDef{
             ]
           }
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:T>
             }
@@ -5416,7 +5874,7 @@ ClassDef{
             args = [
               Send{
                 recv = Send{
-                  recv = ConstantLit{
+                  recv = UnresolvedConstantLit{
                     scope = EmptyTree
                     cnst = <constant:ShardingProp>
                   }
@@ -5430,7 +5888,7 @@ ClassDef{
                 args = [
                 ]
               }
-              ConstantLit{
+              UnresolvedConstantLit{
                 scope = EmptyTree
                 cnst = <constant:String>
               }
@@ -5439,7 +5897,7 @@ ClassDef{
         ],
         expr = Send{
           recv = Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:ShardingProp>
             }

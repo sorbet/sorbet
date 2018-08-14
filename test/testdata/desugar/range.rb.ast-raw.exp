@@ -9,7 +9,19 @@ ClassDef{
       rhs = InsSeq{
         stats = [
           Send{
-            recv = ConstantLit{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <constant:Range>
+            }
+            name = new
+            block = nullptr
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = 2 }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
               scope = EmptyTree
               cnst = <constant:Range>
             }
@@ -22,19 +34,9 @@ ClassDef{
           }
           Send{
             recv = ConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Range>
-            }
-            name = new
-            block = nullptr
-            args = [
-              Literal{ value = 1 }
-              Literal{ value = 2 }
-            ]
-          }
-          Send{
-            recv = Ident{
-              symbol = <constant:Range>
+              orig = nullptr
+              symbol = ::Range
+              typeAlias = nullptr
             }
             name = new
             block = nullptr
@@ -46,7 +48,7 @@ ClassDef{
           }
         ],
         expr = Send{
-          recv = ConstantLit{
+          recv = UnresolvedConstantLit{
             scope = EmptyTree
             cnst = <constant:Range>
           }

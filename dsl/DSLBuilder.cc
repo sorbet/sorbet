@@ -35,7 +35,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     }
     name = sym->asSymbol(ctx);
 
-    auto *klass = ast::cast_tree<ast::ConstantLit>(send->args[1].get());
+    auto *klass = ast::cast_tree<ast::UnresolvedConstantLit>(send->args[1].get());
     if (klass == nullptr) {
         return empty;
     }
@@ -60,10 +60,10 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
 
     // def self.<prop>
     stats.emplace_back(ast::MK::Sig1(loc, ast::MK::Symbol(loc, name), ASTUtil::dupType(type.get()),
-                                     ast::MK::Ident(loc, core::Symbols::NilClass())));
+                                     ast::MK::Constant(loc, core::Symbols::NilClass())));
     unique_ptr<ast::Reference> arg = ast::MK::Local(loc, name);
     if (implied) {
-        auto default_ = ast::MK::Send0(loc, ast::MK::Ident(loc, core::Symbols::T()), core::Names::untyped());
+        auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
         arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));
     }
     stats.emplace_back(ast::MK::Method1(loc, name, move(arg), ast::MK::EmptyTree(loc),

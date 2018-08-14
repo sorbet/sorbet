@@ -11,7 +11,7 @@ private:
     const core::GlobalSubstitution &subst;
 
     unique_ptr<Expression> substClassName(core::MutableContext ctx, unique_ptr<Expression> node) {
-        auto constLit = cast_tree<ConstantLit>(node.get());
+        auto constLit = cast_tree<UnresolvedConstantLit>(node.get());
         if (constLit == nullptr) { // uncommon case. something is strange
             if (isa_tree<EmptyTree>(node.get())) {
                 return node;
@@ -22,7 +22,7 @@ private:
         auto scope = substClassName(ctx, move(constLit->scope));
         auto cnst = subst.substitute(constLit->cnst);
 
-        return make_unique<ConstantLit>(constLit->loc, move(scope), cnst);
+        return make_unique<UnresolvedConstantLit>(constLit->loc, move(scope), cnst);
     }
 
     unique_ptr<Expression> substArg(core::MutableContext ctx, unique_ptr<Expression> argp) {
@@ -99,7 +99,8 @@ public:
         return original;
     }
 
-    unique_ptr<Expression> postTransformConstantLit(core::MutableContext ctx, unique_ptr<ConstantLit> original) {
+    unique_ptr<Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
+                                                              unique_ptr<UnresolvedConstantLit> original) {
         original->cnst = subst.substitute(original->cnst);
         original->scope = substClassName(ctx, move(original->scope));
         return original;
