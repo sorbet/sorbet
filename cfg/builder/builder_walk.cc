@@ -268,10 +268,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
             [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); },
 
             [&](ast::Next *a) {
-                core::LocalVariable exprSym = cctx.newTemporary(core::Names::blockReturnTemp());
+                core::LocalVariable exprSym = cctx.newTemporary(core::Names::nextTemp());
                 auto afterNext = walk(cctx.withTarget(exprSym), a->expr.get(), current);
                 if (afterNext != cctx.inWhat.deadBlock() && cctx.rubyBlock.exists()) {
-                    core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
+                    core::LocalVariable dead = cctx.newTemporary(core::Names::nextTemp());
                     ENFORCE(cctx.link.get() != nullptr);
                     afterNext->exprs.emplace_back(dead, a->loc, make_unique<BlockReturn>(cctx.link, exprSym));
                 }

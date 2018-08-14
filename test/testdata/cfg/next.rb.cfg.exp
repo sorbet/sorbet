@@ -28,7 +28,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$8 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = Integer\l}\l<blk>$9 = 0 : Integer(0)\lx$2 = <blk>$8.[](<blk>$9) : Integer\l<statTemp>$12 = self : Object\l<statTemp>$11 = <statTemp>$12.good() : T.untyped\l<blockReturnTemp>$14 = x$2 : Integer\l<blockReturnTemp>$15 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$14 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$8 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = Integer\l}\l<blk>$9 = 0 : Integer(0)\lx$2 = <blk>$8.[](<blk>$9) : Integer\l<statTemp>$12 = self : Object\l<statTemp>$11 = <statTemp>$12.good() : T.untyped\l<nextTemp>$14 = x$2 : Integer\l<nextTemp>$15 = blockreturn<::Object#foo#<block>> <nextTemp>$14 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];

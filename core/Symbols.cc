@@ -767,9 +767,9 @@ bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
     }
     return _name == Names::whileTemp() || _name == Names::ifTemp() || _name == Names::returnTemp() ||
            _name == Names::statTemp() || _name == Names::assignTemp() || _name == Names::returnMethodTemp() ||
-           _name == Names::blockReturnTemp() || _name == Names::selfMethodTemp() || _name == Names::hashTemp() ||
-           _name == Names::arrayTemp() || _name == Names::rescueTemp() || _name == Names::castTemp() ||
-           _name == Names::finalReturn();
+           _name == Names::blockReturnTemp() || _name == Names::nextTemp() || _name == Names::selfMethodTemp() ||
+           _name == Names::hashTemp() || _name == Names::arrayTemp() || _name == Names::rescueTemp() ||
+           _name == Names::castTemp() || _name == Names::finalReturn();
 }
 
 bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {

@@ -76,6 +76,7 @@ NameDef names[] = {
     {"returnMethodTemp", "<returnMethodTemp>", CFG | Core},
     {"debugEnvironmentTemp", "<debugEnvironmentTemp>", CFG | Infer | Core},
     {"blockReturnTemp", "<blockReturnTemp>", CFG | Core},
+    {"nextTemp", "<nextTemp>", CFG | Core},
     {"selfMethodTemp", "<selfMethodTemp>", CFG | Core},
     {"hashTemp", "<hashTemp>", CFG | Core},
     {"arrayTemp", "<arrayTemp>", CFG | Core},
