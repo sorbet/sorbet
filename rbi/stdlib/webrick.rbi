@@ -1,12 +1,12 @@
 # typed: strict
 
 module WEBrick::AccessLog
-  AGENT_LOG_FORMAT = _
-  CLF = _
-  CLF_TIME_FORMAT = _
-  COMBINED_LOG_FORMAT = _
-  COMMON_LOG_FORMAT = _
-  REFERER_LOG_FORMAT = _
+  AGENT_LOG_FORMAT = T.let(_, T.untyped)
+  CLF = T.let(_, T.untyped)
+  CLF_TIME_FORMAT = T.let(_, T.untyped)
+  COMBINED_LOG_FORMAT = T.let(_, T.untyped)
+  COMMON_LOG_FORMAT = T.let(_, T.untyped)
+  REFERER_LOG_FORMAT = T.let(_, T.untyped)
 
   Sorbet.sig(
     data: T.untyped,
@@ -31,11 +31,11 @@ module WEBrick::AccessLog
 end
 
 class WEBrick::BasicLog
-  DEBUG = _
-  ERROR = _
-  FATAL = _
-  INFO = _
-  WARN = _
+  DEBUG = T.let(_, T.untyped)
+  ERROR = T.let(_, T.untyped)
+  FATAL = T.let(_, T.untyped)
+  INFO = T.let(_, T.untyped)
+  WARN = T.let(_, T.untyped)
 
   Sorbet.sig(
     obj: T.untyped,
@@ -318,10 +318,10 @@ module WEBrick::HTTPAuth
 end
 
 module WEBrick::HTTPAuth::Authenticator
-  AuthScheme = _
-  RequestField = _
-  ResponseField = _
-  ResponseInfoField = _
+  AuthScheme = T.let(_, T.untyped)
+  RequestField = T.let(_, T.untyped)
+  ResponseField = T.let(_, T.untyped)
+  ResponseInfoField = T.let(_, T.untyped)
 
   Sorbet.sig.returns(T.untyped)
   def logger(); end
@@ -335,7 +335,7 @@ end
 
 class WEBrick::HTTPAuth::BasicAuth
   include WEBrick::HTTPAuth::Authenticator
-  AuthScheme = _
+  AuthScheme = T.let(_, T.untyped)
 
   Sorbet.sig(
     req: T.untyped,
@@ -378,9 +378,9 @@ end
 
 class WEBrick::HTTPAuth::DigestAuth
   include WEBrick::HTTPAuth::Authenticator
-  AuthScheme = _
-  MustParams = _
-  MustParamsAuth = _
+  AuthScheme = T.let(_, T.untyped)
+  MustParams = T.let(_, T.untyped)
+  MustParamsAuth = T.let(_, T.untyped)
 
   Sorbet.sig.returns(T.untyped)
   def algorithm(); end
@@ -582,9 +582,9 @@ class WEBrick::HTTPAuth::Htpasswd
 end
 
 module WEBrick::HTTPAuth::ProxyAuthenticator
-  InfoField = _
-  RequestField = _
-  ResponseField = _
+  InfoField = T.let(_, T.untyped)
+  RequestField = T.let(_, T.untyped)
+  ResponseField = T.let(_, T.untyped)
 
 end
 
@@ -632,9 +632,9 @@ module WEBrick::HTTPAuth::UserDB
 end
 
 class WEBrick::HTTPRequest
-  BODY_CONTAINABLE_METHODS = _
-  MAX_URI_LENGTH = _
-  PrivateNetworkRegexp = _
+  BODY_CONTAINABLE_METHODS = T.let(_, T.untyped)
+  MAX_URI_LENGTH = T.let(_, T.untyped)
+  PrivateNetworkRegexp = T.let(_, T.untyped)
 
   Sorbet.sig(
     header_name: T.untyped,
@@ -1131,8 +1131,8 @@ class WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::CGIHandler < WEBrick::HTTPServlet::AbstractServlet
-  CGIRunner = _
-  Ruby = _
+  CGIRunner = T.let(_, T.untyped)
+  Ruby = T.let(_, T.untyped)
 
   Sorbet.sig(
     req: T.untyped,
@@ -1221,7 +1221,7 @@ class WEBrick::HTTPServlet::ERBHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
-  HandlerTable = _
+  HandlerTable = T.let(_, T.untyped)
 
   Sorbet.sig(
     req: T.untyped,
@@ -1304,59 +1304,59 @@ class WEBrick::HTTPServlet::ProcHandler < WEBrick::HTTPServlet::AbstractServlet
 end
 
 module WEBrick::HTTPStatus
-  CodeToError = _
-  RC_ACCEPTED = _
-  RC_BAD_GATEWAY = _
-  RC_BAD_REQUEST = _
-  RC_CONFLICT = _
-  RC_CONTINUE = _
-  RC_CREATED = _
-  RC_EXPECTATION_FAILED = _
-  RC_FAILED_DEPENDENCY = _
-  RC_FORBIDDEN = _
-  RC_FOUND = _
-  RC_GATEWAY_TIMEOUT = _
-  RC_GONE = _
-  RC_HTTP_VERSION_NOT_SUPPORTED = _
-  RC_INSUFFICIENT_STORAGE = _
-  RC_INTERNAL_SERVER_ERROR = _
-  RC_LENGTH_REQUIRED = _
-  RC_LOCKED = _
-  RC_METHOD_NOT_ALLOWED = _
-  RC_MOVED_PERMANENTLY = _
-  RC_MULTIPLE_CHOICES = _
-  RC_MULTI_STATUS = _
-  RC_NETWORK_AUTHENTICATION_REQUIRED = _
-  RC_NON_AUTHORITATIVE_INFORMATION = _
-  RC_NOT_ACCEPTABLE = _
-  RC_NOT_FOUND = _
-  RC_NOT_IMPLEMENTED = _
-  RC_NOT_MODIFIED = _
-  RC_NO_CONTENT = _
-  RC_OK = _
-  RC_PARTIAL_CONTENT = _
-  RC_PAYMENT_REQUIRED = _
-  RC_PRECONDITION_FAILED = _
-  RC_PRECONDITION_REQUIRED = _
-  RC_PROXY_AUTHENTICATION_REQUIRED = _
-  RC_REQUEST_ENTITY_TOO_LARGE = _
-  RC_REQUEST_HEADER_FIELDS_TOO_LARGE = _
-  RC_REQUEST_RANGE_NOT_SATISFIABLE = _
-  RC_REQUEST_TIMEOUT = _
-  RC_REQUEST_URI_TOO_LARGE = _
-  RC_RESET_CONTENT = _
-  RC_SEE_OTHER = _
-  RC_SERVICE_UNAVAILABLE = _
-  RC_SWITCHING_PROTOCOLS = _
-  RC_TEMPORARY_REDIRECT = _
-  RC_TOO_MANY_REQUESTS = _
-  RC_UNAUTHORIZED = _
-  RC_UNAVAILABLE_FOR_LEGAL_REASONS = _
-  RC_UNPROCESSABLE_ENTITY = _
-  RC_UNSUPPORTED_MEDIA_TYPE = _
-  RC_UPGRADE_REQUIRED = _
-  RC_USE_PROXY = _
-  StatusMessage = _
+  CodeToError = T.let(_, T.untyped)
+  RC_ACCEPTED = T.let(_, T.untyped)
+  RC_BAD_GATEWAY = T.let(_, T.untyped)
+  RC_BAD_REQUEST = T.let(_, T.untyped)
+  RC_CONFLICT = T.let(_, T.untyped)
+  RC_CONTINUE = T.let(_, T.untyped)
+  RC_CREATED = T.let(_, T.untyped)
+  RC_EXPECTATION_FAILED = T.let(_, T.untyped)
+  RC_FAILED_DEPENDENCY = T.let(_, T.untyped)
+  RC_FORBIDDEN = T.let(_, T.untyped)
+  RC_FOUND = T.let(_, T.untyped)
+  RC_GATEWAY_TIMEOUT = T.let(_, T.untyped)
+  RC_GONE = T.let(_, T.untyped)
+  RC_HTTP_VERSION_NOT_SUPPORTED = T.let(_, T.untyped)
+  RC_INSUFFICIENT_STORAGE = T.let(_, T.untyped)
+  RC_INTERNAL_SERVER_ERROR = T.let(_, T.untyped)
+  RC_LENGTH_REQUIRED = T.let(_, T.untyped)
+  RC_LOCKED = T.let(_, T.untyped)
+  RC_METHOD_NOT_ALLOWED = T.let(_, T.untyped)
+  RC_MOVED_PERMANENTLY = T.let(_, T.untyped)
+  RC_MULTIPLE_CHOICES = T.let(_, T.untyped)
+  RC_MULTI_STATUS = T.let(_, T.untyped)
+  RC_NETWORK_AUTHENTICATION_REQUIRED = T.let(_, T.untyped)
+  RC_NON_AUTHORITATIVE_INFORMATION = T.let(_, T.untyped)
+  RC_NOT_ACCEPTABLE = T.let(_, T.untyped)
+  RC_NOT_FOUND = T.let(_, T.untyped)
+  RC_NOT_IMPLEMENTED = T.let(_, T.untyped)
+  RC_NOT_MODIFIED = T.let(_, T.untyped)
+  RC_NO_CONTENT = T.let(_, T.untyped)
+  RC_OK = T.let(_, T.untyped)
+  RC_PARTIAL_CONTENT = T.let(_, T.untyped)
+  RC_PAYMENT_REQUIRED = T.let(_, T.untyped)
+  RC_PRECONDITION_FAILED = T.let(_, T.untyped)
+  RC_PRECONDITION_REQUIRED = T.let(_, T.untyped)
+  RC_PROXY_AUTHENTICATION_REQUIRED = T.let(_, T.untyped)
+  RC_REQUEST_ENTITY_TOO_LARGE = T.let(_, T.untyped)
+  RC_REQUEST_HEADER_FIELDS_TOO_LARGE = T.let(_, T.untyped)
+  RC_REQUEST_RANGE_NOT_SATISFIABLE = T.let(_, T.untyped)
+  RC_REQUEST_TIMEOUT = T.let(_, T.untyped)
+  RC_REQUEST_URI_TOO_LARGE = T.let(_, T.untyped)
+  RC_RESET_CONTENT = T.let(_, T.untyped)
+  RC_SEE_OTHER = T.let(_, T.untyped)
+  RC_SERVICE_UNAVAILABLE = T.let(_, T.untyped)
+  RC_SWITCHING_PROTOCOLS = T.let(_, T.untyped)
+  RC_TEMPORARY_REDIRECT = T.let(_, T.untyped)
+  RC_TOO_MANY_REQUESTS = T.let(_, T.untyped)
+  RC_UNAUTHORIZED = T.let(_, T.untyped)
+  RC_UNAVAILABLE_FOR_LEGAL_REASONS = T.let(_, T.untyped)
+  RC_UNPROCESSABLE_ENTITY = T.let(_, T.untyped)
+  RC_UNSUPPORTED_MEDIA_TYPE = T.let(_, T.untyped)
+  RC_UPGRADE_REQUIRED = T.let(_, T.untyped)
+  RC_USE_PROXY = T.let(_, T.untyped)
+  StatusMessage = T.let(_, T.untyped)
 
   Sorbet.sig(
     code: T.untyped,
@@ -1596,12 +1596,12 @@ class WEBrick::HTTPStatus::UseProxy < WEBrick::HTTPStatus::Redirect
 end
 
 module WEBrick::HTTPUtils
-  DefaultMimeTypes = _
-  ESCAPED = _
-  NONASCII = _
-  UNESCAPED = _
-  UNESCAPED_FORM = _
-  UNESCAPED_PCHAR = _
+  DefaultMimeTypes = T.let(_, T.untyped)
+  ESCAPED = T.let(_, T.untyped)
+  NONASCII = T.let(_, T.untyped)
+  UNESCAPED = T.let(_, T.untyped)
+  UNESCAPED_FORM = T.let(_, T.untyped)
+  UNESCAPED_PCHAR = T.let(_, T.untyped)
 
   Sorbet.sig(
     str: T.untyped,
@@ -1735,8 +1735,8 @@ module WEBrick::HTTPUtils
 end
 
 class WEBrick::HTTPUtils::FormData < String
-  EmptyHeader = _
-  EmptyRawHeader = _
+  EmptyHeader = T.let(_, T.untyped)
+  EmptyRawHeader = T.let(_, T.untyped)
 
   Sorbet.sig(
     str: T.untyped,
@@ -1875,7 +1875,7 @@ class WEBrick::SimpleServer
 end
 
 module WEBrick::Utils
-  RAND_CHARS = _
+  RAND_CHARS = T.let(_, T.untyped)
 
   Sorbet.sig(
     address: T.untyped,
@@ -1922,7 +1922,7 @@ end
 class WEBrick::Utils::TimeoutHandler
   include Singleton
   extend Singleton::SingletonClassMethods
-  TimeoutMutex = _
+  TimeoutMutex = T.let(_, T.untyped)
 
   Sorbet.sig(
     thread: T.untyped,

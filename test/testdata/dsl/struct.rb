@@ -7,7 +7,7 @@ module Foo
 end
 
 class NotStruct
-    B = Foo::Struct.new
+    B = T.let(Foo::Struct.new, Foo::Struct)
     var = Struct.new(:foo)
 end
 

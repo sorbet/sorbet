@@ -1,4 +1,4 @@
 # typed: strict
 class C
-  L = lambda { |x| x*x }
+  L = T.let(lambda { |x| x*x }, T.proc(x: Integer).returns(Integer))
 end

@@ -35,6 +35,7 @@ constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::Stripe};
 
 // This is for type signatures that we permit at Stripe but ban in Typed code
 constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::Typed};
+constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
 } // namespace Resolver
 } // namespace errors
 } // namespace core

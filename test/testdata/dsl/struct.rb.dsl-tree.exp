@@ -8,7 +8,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   class <emptyTree>::<constant:NotStruct><<constant:<todo sym>>> < (::<todo sym>)
-    <emptyTree>::<constant:B> = <emptyTree>::<constant:Foo>::<constant:Struct>.new()
+    <emptyTree>::<constant:B> = <emptyTree>::<constant:T>.let(<emptyTree>::<constant:Foo>::<constant:Struct>.new(), <emptyTree>::<constant:Foo>::<constant:Struct>)
 
     var = <emptyTree>::<constant:Struct>.new(:"foo")
   end

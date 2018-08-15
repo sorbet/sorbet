@@ -1,12 +1,12 @@
-#include "core/errors/resolver.h"
+#include "core/Names/resolver.h"
 #include "ast/Helpers.h"
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/Errors.h"
-#include "core/Names/resolver.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
+#include "core/errors/resolver.h"
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
@@ -837,16 +837,28 @@ private:
     // type (once we have generics) will be nontrivial.
     shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
         shared_ptr<core::Type> result;
-        typecase(expr.get(), [&](ast::Literal *a) { result = a->value; },
-                 [&](ast::Cast *cast) {
-                     if (cast->cast != core::Names::let()) {
-                         if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
-                             e.setHeader("Use T.let() to specify the type of constants");
-                         }
-                     }
-                     result = cast->type;
-                 },
-                 [&](ast::Expression *) { result = core::Types::untyped(); });
+        typecase(
+            expr.get(), [&](ast::Literal *a) { result = a->value; },
+            [&](ast::Cast *cast) {
+                if (cast->cast != core::Names::let()) {
+                    if (auto e = ctx.state.beginError(cast->loc, core::errors::Resolver::ConstantAssertType)) {
+                        e.setHeader("Use T.let() to specify the type of constants");
+                    }
+                }
+                result = cast->type;
+            },
+            [&](ast::Expression *expr) {
+                result = core::Types::untyped();
+                if (auto *send = ast::cast_tree<ast::Send>(expr)) {
+                    if (send->fun == core::Names::typeAlias()) {
+                        // short circuit if this is a type alias
+                        return;
+                    }
+                }
+                if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::ConstantMissingTypeAnnotation)) {
+                    e.setHeader("Constants must have type annotations with T.let() when specifying '# typed: strict'");
+                }
+            });
         return result;
     }
 
