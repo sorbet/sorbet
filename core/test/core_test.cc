@@ -57,7 +57,7 @@ TEST(ASTTest, Errors) { // NOLINT
         e.setHeader("Use of metavariable: `{}`", "foo");
     }
     ASSERT_TRUE(gs.hadCriticalError());
-    auto errors = errorQueue->drainErrors();
+    auto errors = errorQueue->drainAllErrors();
     ASSERT_EQ(1, errors.size());
 }
 

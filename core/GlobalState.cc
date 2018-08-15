@@ -1052,14 +1052,6 @@ bool GlobalState::hadCriticalError() const {
     return errorQueue->hadCritical;
 }
 
-void GlobalState::flushErrors() {
-    this->errorQueue->flushErrors();
-}
-
-void GlobalState::flushErrorCount() {
-    this->errorQueue->flushErrorCount();
-}
-
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     bool reportForFile = shouldReportErrorOn(loc, what);
     if (reportForFile) {

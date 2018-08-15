@@ -38,7 +38,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
     } catch (SRubyException &) {
     }
 
-    EXPECT_EQ(0, errorQueue->drainErrors().size());
+    EXPECT_EQ(0, errorQueue->drainAllErrors().size());
 }
 
 } // namespace sorbet

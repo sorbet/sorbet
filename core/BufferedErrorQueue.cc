@@ -10,28 +10,48 @@ BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer)
 BufferedErrorQueue::~BufferedErrorQueue() = default;
 
 void BufferedErrorQueue::pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) {
-    errors.push_back(move(error));
+    this->errorCount.fetch_add(1);
+    auto msg = make_unique<ErrorQueueMessage>();
+    msg->text = error->toString(gs);
+    msg->error = move(error);
+    msg->kind = ErrorQueueMessage::Kind::Error;
+    errors.push_back(move(msg));
 }
 
 void BufferedErrorQueue::pushQueryResponse(std::unique_ptr<QueryResponse> response) {
-    queryResponses.push_back(move(response));
+    auto msg = make_unique<ErrorQueueMessage>();
+    msg->queryResponse = move(response);
+    msg->kind = ErrorQueueMessage::Kind::QueryResponse;
+    errors.push_back(move(msg));
 }
 
-void BufferedErrorQueue::flushFile(FileRef file) {}
-void BufferedErrorQueue::flushErrors(bool all) {}
-void BufferedErrorQueue::flushErrorCount() {}
-void BufferedErrorQueue::flushAutocorrects(const core::GlobalState &gs) {}
-
-vector<unique_ptr<QueryResponse>> BufferedErrorQueue::drainQueryResponses() {
-    vector<unique_ptr<QueryResponse>> out;
-    swap(out, queryResponses);
+std::vector<std::unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainFlushed() {
+    std::vector<std::unique_ptr<ErrorQueueMessage>> out;
+    swap(out, flushedErrors);
     return out;
 }
 
-vector<unique_ptr<BasicError>> BufferedErrorQueue::drainErrors() {
-    vector<unique_ptr<BasicError>> out;
-    swap(out, errors);
+vector<unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainAll() {
+    std::vector<std::unique_ptr<ErrorQueueMessage>> out;
+    swap(out, flushedErrors);
+    for (auto &msg : errors) {
+        out.emplace_back(move(msg));
+    }
+    errors.clear();
     return out;
+}
+
+void BufferedErrorQueue::checkOwned() {}
+
+void BufferedErrorQueue::markFileForFlushing(FileRef file) {
+    this->errors.erase(remove_if(this->errors.begin(), this->errors.end(),
+                                 [file, &flushedErrors = this->flushedErrors](auto &msg) -> bool {
+                                     if (msg->kind != ErrorQueueMessage::Kind::Error || msg->error->loc.file != file) {
+                                         return false;
+                                     }
+                                     flushedErrors.emplace_back(move(msg));
+                                     return true;
+                                 }));
 }
 
 } // namespace core

@@ -1,6 +1,8 @@
 #include "core/errors/errors.h"
 #include "Context.h"
+#include "ErrorQueue.h"
 #include "Errors.h"
+#include "core/lsp/QueryResponse.h"
 #include "rang.hpp"
 #include "spdlog/fmt/ostr.h"
 #include <algorithm>
@@ -108,7 +110,7 @@ string ComplexError::toString(const GlobalState &gs) {
 }
 
 ErrorRegion::~ErrorRegion() {
-    gs.errorQueue->flushFile(this->f);
+    gs.errorQueue->markFileForFlushing(this->f);
 }
 
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
@@ -173,10 +175,6 @@ void ErrorColors::disableColors() {
     coloredPatternReplace = coloredPatternSigil;
     rang::setControlMode(rang::control::Off);
 }
-
-ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer) : logger(logger), tracer(tracer) {}
-
-ErrorQueue::~ErrorQueue() {}
 
 } // namespace core
 } // namespace sorbet

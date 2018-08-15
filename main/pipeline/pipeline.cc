@@ -344,9 +344,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                     }
                     logger->trace("Tree substitution done");
                 }
-                if (!opts.runLSP) {
-                    gs->flushErrors();
-                }
+                gs->errorQueue->flushErrors();
                 indexingProgress.reportProgress(fileq->doneEstimate());
             }
             logger->trace("Done collecting results from indexing threads");
@@ -429,9 +427,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
                         core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
                         tree = namer::Namer::run(ctx, move(tree));
                     }
-                    if (!opts.runLSP) {
-                        gs.flushErrors();
-                    }
+                    gs.errorQueue->flushErrors();
                     namingProgress.reportProgress(i);
                     i++;
                 } catch (SRubyException &) {
@@ -461,9 +457,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             e.setHeader("Exception resolving (backtrace is above)");
         }
     }
-    if (!opts.runLSP) {
-        gs.flushErrors();
-    }
+    gs.errorQueue->flushErrors();
 
     for (auto &resolved : what) {
         if (opts.print.NameTree) {
@@ -536,9 +530,7 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalS
                                                 make_move_iterator(threadResult.trees.end()));
                     }
                     cfgInferProgress.reportProgress(fileq->doneEstimate());
-                    if (!opts.runLSP) {
-                        gs->flushErrors();
-                    }
+                    gs->errorQueue->flushErrors();
                 }
             }
         }

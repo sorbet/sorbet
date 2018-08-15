@@ -68,7 +68,7 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
         resolvedTree.reset();
     }
 
-    for (auto &err : errorQueue->drainErrors()) {
+    for (auto &err : errorQueue->drainAllErrors()) {
         logger->log(spdlog::level::err, "{}", err->toString(gs));
     }
 }

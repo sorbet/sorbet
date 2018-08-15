@@ -1,5 +1,6 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
+#include "ErrorQueue.h"
 #include "Errors.h"
 #include "Files.h"
 #include "Hashing.h"
@@ -111,8 +112,6 @@ public:
     void _error(std::unique_ptr<BasicError> error) const;
 
     int totalErrors() const;
-    void flushErrors();
-    void flushErrorCount();
     bool wasModified() const;
 
     int globalStateId;

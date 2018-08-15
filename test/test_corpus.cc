@@ -182,21 +182,21 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             nodes = sorbet::parser::Parser::run(gs, file);
         }
         {
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         auto expectation = test.expectations.find("parse-tree");
         if (expectation != test.expectations.end()) {
             got["parse-tree"].append(nodes->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("parse-tree-json");
         if (expectation != test.expectations.end()) {
             got["parse-tree-json"].append(nodes->toJSON(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -211,14 +211,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
             got["ast"].append(desugared->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("ast-raw");
         if (expectation != test.expectations.end()) {
             got["ast-raw"].append(desugared->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -233,14 +233,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("dsl-tree");
         if (expectation != test.expectations.end()) {
             got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("dsl-tree-raw");
         if (expectation != test.expectations.end()) {
             got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -263,7 +263,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
         got["name-table"] = gs.toString() + "\n";
-        auto newErrors = errorQueue->drainErrors();
+        auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
@@ -271,14 +271,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         expectation = test.expectations.find("name-tree");
         if (expectation != test.expectations.end()) {
             got["name-tree"].append(resolvedTree->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("name-tree-raw");
         if (expectation != test.expectations.end()) {
             got["name-tree-raw"].append(resolvedTree->showRaw(gs));
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
@@ -316,7 +316,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             dot << "}" << '\n' << '\n';
             got["cfg"].append(dot.str());
 
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -336,7 +336,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             dot << "}" << '\n' << '\n';
             got["cfg-raw"].append(dot.str());
 
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -350,7 +350,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
@@ -360,7 +360,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             CFG_Collector_and_Typer collector;
             sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
-            auto newErrors = errorQueue->drainErrors();
+            auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
@@ -496,7 +496,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     // Allow later phases to have errors that we didn't test for
-    errorQueue->drainErrors();
+    errorQueue->drainAllErrors();
 
     TEST_COUT << "errors OK" << '\n';
 }

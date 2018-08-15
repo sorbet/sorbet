@@ -1,7 +1,8 @@
 #ifndef SORBET_CONCURRENT_ERRORQUEUE_H
 #define SORBET_CONCURRENT_ERRORQUEUE_H
 #include "common/concurrency/ConcurrentQueue.h"
-#include "core/Errors.h"
+#include "core/ErrorQueue.h"
+#include "core/ErrorQueueMessage.h"
 #include "core/lsp/QueryResponse.h"
 #include "spdlog/spdlog.h"
 #include <atomic>
@@ -16,27 +17,19 @@ namespace realmain {
 //  - ConcurrentBoundedQueue on mac includes some OS headers that "#define TRUE 1"
 //
 
-struct ErrorQueueMessage {
-    enum class Kind { Error, Flush, QueryResponse };
-    Kind kind;
-    core::FileRef whatFile;
-    std::string text;
-    std::unique_ptr<core::BasicError> error;
-    std::unique_ptr<core::QueryResponse> queryResponse;
-};
-
 class ConcurrentErrorQueue : public core::ErrorQueue {
 private:
+    virtual void checkOwned() override;
     std::thread::id owner;
-    UnorderedMap<core::FileRef, std::vector<ErrorQueueMessage>> collected;
-    std::vector<core::AutocorrectSuggestion> autocorrects;
-    ConcurrentUnBoundedQueue<ErrorQueueMessage> queue;
-    std::atomic<bool> printedAtLeastOneError{false};
+    UnorderedMap<core::FileRef, std::vector<core::ErrorQueueMessage>> collected;
+    ConcurrentUnBoundedQueue<core::ErrorQueueMessage> queue;
 
-    void renderForFile(core::FileRef whatFile, std::stringstream &critical, std::stringstream &nonCritical);
+    void collectForFile(core::FileRef whatFile, std::vector<std::unique_ptr<core::ErrorQueueMessage>> &out);
+    virtual std::vector<std::unique_ptr<core::ErrorQueueMessage>> drainFlushed() override;
+    virtual std::vector<std::unique_ptr<core::ErrorQueueMessage>> drainAll() override;
 
     void drainQueue();
-    std::vector<ErrorQueueMessage> drainKind(ErrorQueueMessage::Kind kind);
+    std::vector<core::ErrorQueueMessage> drainKind(core::ErrorQueueMessage::Kind kind);
 
 public:
     ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer);
@@ -44,13 +37,7 @@ public:
 
     virtual void pushError(const core::GlobalState &gs, std::unique_ptr<core::BasicError> error) override;
     virtual void pushQueryResponse(std::unique_ptr<core::QueryResponse> error) override;
-    virtual void flushFile(core::FileRef file) override;
-    virtual void flushErrors(bool all = false) override;
-    virtual void flushErrorCount() override;
-    virtual void flushAutocorrects(const core::GlobalState &gs) override;
-
-    std::vector<std::unique_ptr<core::QueryResponse>> drainQueryResponses();
-    std::vector<std::unique_ptr<core::BasicError>> drainErrors();
+    virtual void markFileForFlushing(core::FileRef file) override;
 };
 } // namespace realmain
 } // namespace sorbet

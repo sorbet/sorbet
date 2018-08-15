@@ -1,5 +1,7 @@
 #ifndef SORBET_BUFFERED_ERRORQUEUE_H
 #define SORBET_BUFFERED_ERRORQUEUE_H
+#include "ErrorQueue.h"
+#include "ErrorQueueMessage.h"
 #include "Errors.h"
 #include "spdlog/spdlog.h"
 
@@ -12,8 +14,12 @@ namespace core {
 // all errors in memory for later retrieval.
 class BufferedErrorQueue : public ErrorQueue {
 private:
-    std::vector<std::unique_ptr<QueryResponse>> queryResponses;
-    std::vector<std::unique_ptr<BasicError>> errors;
+    std::vector<std::unique_ptr<ErrorQueueMessage>> errors;
+    std::vector<std::unique_ptr<ErrorQueueMessage>> flushedErrors;
+    virtual void checkOwned() override;
+
+    virtual std::vector<std::unique_ptr<ErrorQueueMessage>> drainFlushed() override;
+    virtual std::vector<std::unique_ptr<ErrorQueueMessage>> drainAll() override;
 
 public:
     BufferedErrorQueue(spd::logger &logger, spd::logger &tracer);
@@ -21,13 +27,7 @@ public:
 
     virtual void pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) override;
     virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) override;
-    virtual void flushFile(FileRef file) override;
-    virtual void flushErrors(bool all = false) override;
-    virtual void flushErrorCount() override;
-    virtual void flushAutocorrects(const core::GlobalState &gs) override;
-
-    std::vector<std::unique_ptr<QueryResponse>> drainQueryResponses();
-    std::vector<std::unique_ptr<BasicError>> drainErrors();
+    virtual void markFileForFlushing(FileRef file) override;
 };
 } // namespace core
 } // namespace sorbet

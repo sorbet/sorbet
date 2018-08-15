@@ -175,25 +175,6 @@ public:
     std::unique_ptr<BasicError> build();
 };
 
-class ErrorQueue {
-private:
-public:
-    spdlog::logger &logger;
-    spdlog::logger &tracer;
-    std::atomic<bool> hadCritical{false};
-    std::atomic<int> errorCount{0};
-
-    ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);
-    virtual ~ErrorQueue();
-
-    virtual void pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) = 0;
-    virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) = 0;
-    virtual void flushFile(FileRef file) = 0;
-    virtual void flushErrors(bool all = false) = 0;
-    virtual void flushErrorCount() = 0;
-    virtual void flushAutocorrects(const core::GlobalState &gs) = 0;
-};
-
 } // namespace core
 } // namespace sorbet
 

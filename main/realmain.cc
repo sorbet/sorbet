@@ -202,6 +202,7 @@ int realmain(int argc, char *argv[]) {
     logger->trace("done building initial global state");
 
     if (opts.runLSP) {
+        gs->errorQueue->ignoreFlushes = true;
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
         loop.runLSP();
         return 0;
@@ -240,7 +241,7 @@ int realmain(int argc, char *argv[]) {
 
     indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
 
-    gs->errorQueue->flushErrors(true);
+    gs->errorQueue->flushErrors();
 
     if (opts.print.ErrorFiles) {
         for (auto &tree : indexed) {
@@ -250,7 +251,7 @@ int realmain(int argc, char *argv[]) {
             }
         }
     } else if (!opts.noErrorCount) {
-        gs->flushErrorCount();
+        gs->errorQueue->flushErrorCount();
     }
     if (opts.autocorrect) {
         gs->errorQueue->flushAutocorrects(*gs);

@@ -1,11 +1,11 @@
 #ifndef SORBET_LSP_QUERYRESPONSE
 #define SORBET_LSP_QUERYRESPONSE
 #include "core/Loc.h"
-#include "core/TypeConstraint.h"
 #include "core/Types.h"
 
 namespace sorbet {
 namespace core {
+class TypeConstraint;
 struct QueryResponse {
     enum class Kind { SEND, IDENT, LITERAL, CONSTANT, DEFINITION };
 
