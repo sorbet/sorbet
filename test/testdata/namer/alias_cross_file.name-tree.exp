@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:TestSig><<constant:TestSig>> < (::<todo sym>)
+class ::TestSig<<constant:TestSig>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>
@@ -15,6 +15,6 @@ begin
   class <emptyTree><<constant:<root>>> < ()
     <emptyTree>
   end
-  class <emptyTree>::<constant:T1><<constant:T1>> < (::<todo sym>)  end
+  class ::T1<<constant:T1>> < (::<todo sym>)  end
   <emptyTree>
 end

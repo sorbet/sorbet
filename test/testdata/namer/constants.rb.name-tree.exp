@@ -13,7 +13,7 @@ begin
       end
     end
   end
-  module <emptyTree>::<constant:A><<constant:A>> < ()
+  module ::A<<constant:A>> < ()
     <emptyTree>
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()

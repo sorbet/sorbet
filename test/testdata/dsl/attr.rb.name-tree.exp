@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:TestAttr><<constant:TestAttr>> < (::<todo sym>)
+class ::TestAttr<<constant:TestAttr>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>

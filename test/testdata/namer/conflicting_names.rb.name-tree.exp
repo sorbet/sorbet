@@ -1,5 +1,5 @@
 begin
-  module <emptyTree>::<constant:A><<constant:A>> < ()
+  module ::A<<constant:A>> < ()
     <emptyTree>
 
     <emptyTree>
@@ -8,6 +8,6 @@ begin
       <emptyTree>
     end
   end
-  class <emptyTree>::<constant:Foo><<constant:Foo>> < (::<todo sym>)  end
+  class ::A::Foo<<constant:Foo>> < (::<todo sym>)  end
   <emptyTree>
 end

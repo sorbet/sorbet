@@ -17,8 +17,8 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Other><<constant:Other>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:Test><<constant:Test>> < (::Other, ::Test::Mixin, ::Test::Other)
+  class ::Other<<constant:Other>> < (::<todo sym>)  end
+  class ::Test<<constant:Test>> < (::Other, ::Test::Mixin, ::Test::Other)
     <emptyTree>
 
     <emptyTree>
@@ -33,7 +33,7 @@ begin
       end
     end
   end
-  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
-  module <emptyTree>::<constant:Other><<constant:Other>> < ()  end
+  module ::Test::Mixin<<constant:Mixin>> < ()  end
+  module ::Test::Other<<constant:Other>> < ()  end
   <emptyTree>
 end

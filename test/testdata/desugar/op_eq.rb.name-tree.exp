@@ -1,4 +1,4 @@
-class <emptyTree>::<constant:OpEq><<constant:OpEq>> < (::<todo sym>)
+class ::OpEq<<constant:OpEq>> < (::<todo sym>)
   <emptyTree>
 
   <emptyTree>

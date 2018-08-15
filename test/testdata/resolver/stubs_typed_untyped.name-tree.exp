@@ -12,7 +12,7 @@ begin
       end
     end
   end
-  module <emptyTree>::<constant:Foo><<constant:Foo>> < ()  end
+  module ::Foo<<constant:Foo>> < ()  end
   <emptyTree>
 end
 class <emptyTree><<constant:<root>>> < ()

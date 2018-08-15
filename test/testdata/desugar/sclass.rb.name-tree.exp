@@ -39,8 +39,8 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:A><<constant:A>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:B><<constant:B>> < (::<todo sym>)
+  class ::A<<constant:A>> < (::<todo sym>)  end
+  class ::B<<constant:B>> < (::<todo sym>)
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:B>>> < ()
@@ -48,7 +48,7 @@ begin
       "b"
     end
   end
-  class <emptyTree>::<constant:D><<constant:D>> < (::<todo sym>)
+  class ::D<<constant:D>> < (::<todo sym>)
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:D>>> < ()
@@ -59,7 +59,7 @@ begin
       "d"
     end
   end
-  class <emptyTree>::<constant:E><<constant:E>> < (::<todo sym>)
+  class ::E<<constant:E>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -79,7 +79,7 @@ begin
       "e"
     end
   end
-  class <emptyTree>::<constant:F><<constant:F>> < (::<todo sym>)
+  class ::F<<constant:F>> < (::<todo sym>)
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:F>>> < ()
@@ -101,7 +101,7 @@ begin
       self(<singleton class:<singleton class:<constant:F>>>).sig({:"f" => ::Integer}).returns(::Integer)
     end
   end
-  class <emptyTree>::<constant:G><<constant:G>> < (::<todo sym>)
+  class ::G<<constant:G>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -122,13 +122,13 @@ begin
       ::T.reveal_type(self(<singleton class:<constant:G>>))
     end
   end
-  class <emptyTree>::<constant:H><<constant:H>> < (::<todo sym>)
+  class ::H<<constant:H>> < (::<todo sym>)
     <emptyTree>
   end
   class <singleton class><<singleton class:<constant:H>>> < ()
     <emptyTree>
   end
-  class <emptyTree>::<constant:H2><<constant:H2>> < (::<todo sym>)
+  class ::<Class:H>::H2<<constant:H2>> < (::<todo sym>)
     def self.h<h>()
       "h"
     end

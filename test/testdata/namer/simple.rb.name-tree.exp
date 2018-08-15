@@ -21,7 +21,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:NormalClass><<constant:NormalClass>> < (::<todo sym>)
+  class ::NormalClass<<constant:NormalClass>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -38,17 +38,17 @@ begin
       <emptyTree>
     end
   end
-  class <emptyTree>::<constant:InnerClass><<constant:InnerClass>> < (::<todo sym>)  end
-  module <emptyTree>::<constant:InnerModule><<constant:InnerModule>> < ()  end
-  module <emptyTree>::<constant:ANamespace><<constant:ANamespace>> < ()
+  class ::NormalClass::InnerClass<<constant:InnerClass>> < (::<todo sym>)  end
+  module ::NormalClass::InnerModule<<constant:InnerModule>> < ()  end
+  module ::ANamespace<<constant:ANamespace>> < ()
     <emptyTree>
   end
-  class <emptyTree>::<constant:ObviousChild><<constant:ObviousChild>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:ANamespace>::<constant:ClassInNamespace><<constant:ClassInNamespace>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>)  end
-  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()  end
-  module <emptyTree>::<constant:OtherMixin><<constant:OtherMixin>> < ()  end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin)
+  class ::ANamespace::ObviousChild<<constant:ObviousChild>> < (::<todo sym>)  end
+  class ::ANamespace::ClassInNamespace<<constant:ClassInNamespace>> < (::<todo sym>)  end
+  class ::Parent<<constant:Parent>> < (::<todo sym>)  end
+  module ::Mixin<<constant:Mixin>> < ()  end
+  module ::OtherMixin<<constant:OtherMixin>> < ()  end
+  class ::Child<<constant:Child>> < (::Parent, ::Mixin)
     def self.<static-init><<static-init>>()
       begin
         self(<singleton class:<constant:Child>>).include(3)

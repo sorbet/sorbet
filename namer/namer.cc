@@ -33,6 +33,7 @@ class NameInserter {
             } else {
                 ENFORCE(ast::isa_tree<ast::EmptyTree>(node.get()), "scope is a ", node->nodeName());
             }
+            node = ast::MK::EmptyTree(node->loc);
             return owner;
         }
 
@@ -43,6 +44,9 @@ class NameInserter {
         }
         auto sym = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
         sym.data(ctx).singletonClass(ctx); // force singleton class into existance
+        node.release();
+        unique_ptr<ast::UnresolvedConstantLit> constTmp(constLit);
+        node = make_unique<ast::ConstantLit>(constLit->loc, sym, move(constTmp), nullptr);
         return sym;
     }
 
@@ -173,18 +177,19 @@ class NameInserter {
 
 public:
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        if (klass->symbol == core::Symbols::todo()) {
-            klass->symbol = squashNames(ctx, ctx.owner, klass->name);
-        } else {
-            // Desugar populates a top-level root() ClassDef. Nothing else
-            // should have been typeAlias by now.
-            ENFORCE(klass->symbol == core::Symbols::root());
-        }
         auto *ident = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
+
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
             klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
         } else {
+            if (klass->symbol == core::Symbols::todo()) {
+                klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+            } else {
+                // Desugar populates a top-level root() ClassDef. Nothing else
+                // should have been typeAlias by now.
+                ENFORCE(klass->symbol == core::Symbols::root());
+            }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
             if (!klass->symbol.data(ctx).isClass()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {

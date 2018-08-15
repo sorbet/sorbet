@@ -8,7 +8,7 @@ begin
       ::Main.new().main()
     end
   end
-  class <emptyTree>::<constant:Main><<constant:Main>> < (::<todo sym>)
+  class ::Main<<constant:Main>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>

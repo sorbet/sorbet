@@ -8,6 +8,6 @@ begin
       ::Opus::DB::Model::MyModel
     end
   end
-  class <emptyTree>::<constant:M>::<constant:MyModel><<constant:MyModel>> < (::<todo sym>)  end
+  class ::Opus::DB::Model::MyModel<<constant:MyModel>> < (::<todo sym>)  end
   <emptyTree>
 end

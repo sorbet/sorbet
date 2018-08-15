@@ -10,7 +10,7 @@ begin
       #<constant:A> = 91
     end
   end
-  class <emptyTree>::<constant:A><<constant:A>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:B><<constant:B>$1> < (::<todo sym>)  end
+  class ::A<<constant:A>> < (::<todo sym>)  end
+  class ::<constant:B><<constant:B>$1> < (::<todo sym>)  end
   <emptyTree>
 end

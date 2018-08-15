@@ -20,7 +20,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Parent><<constant:Parent>> < (::<todo sym>)
+  class ::Parent<<constant:Parent>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -45,7 +45,7 @@ begin
       ::Parent#@@class_var = T.let("hi", String)
     end
   end
-  module <emptyTree>::<constant:Mixin><<constant:Mixin>> < ()
+  module ::Mixin<<constant:Mixin>> < ()
     def self.<static-init><<static-init>>()
       begin
         ::Mixin#@@mixin_cvar = T.let(3, Integer)
@@ -54,7 +54,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Child><<constant:Child>> < (::Parent, ::Mixin)
+  class ::Child<<constant:Child>> < (::Parent, ::Mixin)
     <emptyTree>
 
     <emptyTree>
@@ -78,7 +78,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Child1><<constant:Child1>> < (::Parent)
+  class ::Child1<<constant:Child1>> < (::Parent)
     def self.<static-init><<static-init>>()
       ::Parent#@@class_var
     end

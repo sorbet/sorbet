@@ -4,8 +4,8 @@ begin
 
     <emptyTree>
   end
-  class <emptyTree>::<constant:Outer1><<constant:Outer1>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:Outer2><<constant:Outer2>> < (::<todo sym>)
+  class ::Outer1<<constant:Outer1>> < (::<todo sym>)  end
+  class ::Outer2<<constant:Outer2>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
@@ -21,14 +21,14 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:C><<constant:C>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:Inner1><<constant:Inner1>> < (::<todo sym>)
+  class ::Outer2::C<<constant:C>> < (::<todo sym>)  end
+  class ::Outer2::Inner1<<constant:Inner1>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
   end
-  class <emptyTree>::<constant:A><<constant:A>> < (::<todo sym>)  end
-  class <emptyTree>::<constant:Inner2><<constant:Inner2>> < (::<todo sym>)
+  class ::Outer2::Inner1::A<<constant:A>> < (::<todo sym>)  end
+  class ::Outer2::Inner1::Inner2<<constant:Inner2>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
       begin
         ::Outer2::Inner1::A
@@ -48,6 +48,6 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Other><<constant:Other>> < (::Outer2::Inner1::Inner2)  end
+  class ::Outer2::Other<<constant:Other>> < (::Outer2::Inner1::Inner2)  end
   <emptyTree>
 end

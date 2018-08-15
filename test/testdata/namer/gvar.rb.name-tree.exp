@@ -8,7 +8,7 @@ begin
       #$a = 1
     end
   end
-  class <emptyTree>::<constant:A><<constant:A>> < (::<todo sym>)
+  class ::A<<constant:A>> < (::<todo sym>)
     <emptyTree>
 
     <emptyTree>
