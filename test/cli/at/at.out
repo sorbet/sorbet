@@ -9,3 +9,4 @@ test/cli/at/at.rb:2: `String("s")` doesn't match `Integer` for argument `arg0` h
      2 |1 + "s"
             ^^^
 Errors: 1
+File Not Found: @does_not_exist

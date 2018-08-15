@@ -29,8 +29,7 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::
                 }
             } catch (FileNotFoundException e) {
                 logger->error("File Not Found: {}", argv[i]);
-                throw new EarlyReturnWithCode(11);
-                continue;
+                throw EarlyReturnWithCode(11);
             }
         } else {
             int length = strlen(argv[i]);
