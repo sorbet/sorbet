@@ -9,6 +9,14 @@
 
 using namespace std;
 
+//
+// This file models the behavior of chalk-framework-builder's dsl_builder.rb:
+//
+//     http://go/git/stripe-internal/chalk-framework-builder/blob/master/lib/chalk-framework-builder/dsl_builder.rb
+//
+// You might want to cross-reference that file when trying to understand or update this code.
+//
+
 namespace sorbet {
 namespace dsl {
 vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
@@ -16,6 +24,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
 
     bool nilable = false;
     bool implied = false;
+    bool skipGetter = false;
     unique_ptr<ast::Expression> type;
     core::NameRef name = core::NameRef::noName();
 
@@ -52,6 +61,9 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         if (ASTUtil::getHashValue(ctx, opts, core::Names::implied())) {
             implied = true;
         }
+        if (ASTUtil::getHashValue(ctx, opts, core::Names::skipGetter())) {
+            skipGetter = true;
+        }
     }
 
     auto loc = send->loc;
@@ -69,17 +81,19 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
     stats.emplace_back(ast::MK::Method1(loc, name, move(arg), ast::MK::EmptyTree(loc),
                                         ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
-    // def self.get_<prop>
-    core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx).toString(ctx));
-    stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-    stats.emplace_back(ast::MK::Method(loc, getName, ast::MethodDef::ARGS_store(),
-                                       ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
+    if (!skipGetter) {
+        // def self.get_<prop>
+        core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx).toString(ctx));
+        stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
+        stats.emplace_back(ast::MK::Method(loc, getName, ast::MethodDef::ARGS_store(),
+                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+                                           ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
-    // def <prop>()
-    stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-    stats.emplace_back(ast::MK::Method(loc, name, ast::MethodDef::ARGS_store(), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
-                                       ast::MethodDef::DSLSynthesized));
+        // def <prop>()
+        stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
+        stats.emplace_back(ast::MK::Method(loc, name, ast::MethodDef::ARGS_store(),
+                                           ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
+    }
 
     return stats;
 }
