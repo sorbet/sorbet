@@ -1,8 +1,9 @@
 cc_library(
     name = "lsp",
-    srcs = [
-        "lsp.cc",
-    ],
+    srcs = glob([
+        "*.cc",
+        "requests/*.cc",
+    ]),
     hdrs = ["lsp.h"],
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],

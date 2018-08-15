@@ -104,7 +104,7 @@ struct LSPMethod {
     static const inline LSPMethod ReadFile() {
         return LSPMethod{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
     };
-    static const inline LSPMethod WorkspaceSymbolsRequest() {
+    static const inline LSPMethod WorkspaceSymbols() {
         return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};
     };
     static const inline LSPMethod WindowShowMessage() {
@@ -131,7 +131,7 @@ enum class LSPErrorCodes {
     InternalError = -32603,
     ServerErrorStart = -32099,
     ServerErrorEnd = -32000,
-    ServerNotInitialized = -32002, // todo: can be found by finalGS = nullptr
+    ServerNotInitialized = -32002, // todo: can be found by finalGs = nullptr
     UnknownErrorCode = -32001,
 
     // Defined by the LSP
@@ -215,11 +215,17 @@ class LSPLoop {
 
     core::FileRef uri2FileRef(const absl::string_view uri);
     std::string fileRef2Uri(core::FileRef);
-
     std::string remoteName2Local(const absl::string_view uri);
     std::string localName2Remote(const absl::string_view uri);
-
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
+    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, const absl::string_view &pattern);
+    bool hideSymbol(core::SymbolRef sym);
+
+    std::string methodDetail(core::SymbolRef method, std::shared_ptr<core::Type> receiver,
+                             std::shared_ptr<core::Type> retType, std::shared_ptr<core::TypeConstraint> constraint);
+    std::shared_ptr<core::Type> getResultType(core::SymbolRef ofWhat, std::shared_ptr<core::Type> receiver,
+                                              std::shared_ptr<core::TypeConstraint> constr);
+    std::string methodSnippet(core::GlobalState &gs, core::SymbolRef method);
 
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
@@ -230,13 +236,20 @@ class LSPLoop {
     int symbolRef2SymbolKind(core::SymbolRef);
     bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
+    void handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d);
+    void handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
+    UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(std::shared_ptr<core::Type> receiver,
+                                                                                   absl::string_view name);
+    void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
     void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
     void sendShowMessageNotification(int messageType, std::string message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);
+    void addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method, const core::QueryResponse &resp,
+                              int activeParameter);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
