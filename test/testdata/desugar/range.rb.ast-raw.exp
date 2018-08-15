@@ -13,7 +13,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:Range>
             }
-            name = new
+            fun = new
             block = nullptr
             args = [
               Literal{ value = 1 }
@@ -25,7 +25,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:Range>
             }
-            name = new
+            fun = new
             block = nullptr
             args = [
               Literal{ value = 1 }
@@ -38,7 +38,7 @@ ClassDef{
               symbol = ::Range
               typeAlias = nullptr
             }
-            name = new
+            fun = new
             block = nullptr
             args = [
               Literal{ value = 1 }
@@ -52,7 +52,7 @@ ClassDef{
             scope = EmptyTree
             cnst = <constant:Range>
           }
-          name = new
+          fun = new
           block = nullptr
           args = [
             Literal{ value = 1 }

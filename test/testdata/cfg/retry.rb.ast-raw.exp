@@ -26,7 +26,7 @@ ClassDef{
                   kind = Local
                   name = try
                 }
-                name = <
+                fun = <
                 block = nullptr
                 args = [
                   Literal{ value = 3 }
@@ -44,7 +44,7 @@ ClassDef{
                         kind = Local
                         name = try
                       }
-                      name = +
+                      fun = +
                       block = nullptr
                       args = [
                         Literal{ value = 1 }
@@ -54,7 +54,7 @@ ClassDef{
                 ],
                 expr = Send{
                   recv = Self{ claz = ::<todo sym> }
-                  name = raise
+                  fun = raise
                   block = nullptr
                   args = [
                     Literal{ value = "e" }
@@ -75,7 +75,7 @@ ClassDef{
                   stats = [
                     Send{
                       recv = Self{ claz = ::<todo sym> }
-                      name = puts
+                      fun = puts
                       block = nullptr
                       args = [
                         Literal{ value = "rescue" }
@@ -96,7 +96,7 @@ ClassDef{
 
     Send{
       recv = Self{ claz = ::<todo sym> }
-      name = main
+      fun = main
       block = nullptr
       args = [
       ]

@@ -821,7 +821,7 @@ string Send::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "recv = " << this->recv->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
-    buf << "name = " << this->fun.data(gs).toString(gs) << '\n';
+    buf << "fun = " << this->fun.data(gs).toString(gs) << '\n';
     printTabs(buf, tabs + 1);
     buf << "block = ";
     if (this->block) {

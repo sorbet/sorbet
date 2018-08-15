@@ -25,7 +25,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = prop
+          fun = prop
           block = nullptr
           args = [
           ]
@@ -33,7 +33,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = prop
+          fun = prop
           block = nullptr
           args = [
             Literal{ value = :"foo" }
@@ -43,7 +43,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = prop
+          fun = prop
           block = nullptr
           args = [
             Literal{ value = "not_a_symbol" }
@@ -56,7 +56,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = prop
+          fun = prop
           block = nullptr
           args = [
             Literal{ value = :"foo" }
@@ -70,7 +70,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = prop
+          fun = prop
           block = nullptr
           args = [
             Literal{ value = "too" }
@@ -88,7 +88,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = optional
+          fun = optional
           block = nullptr
           args = [
             Literal{ value = :"company_name" }
@@ -102,7 +102,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = optional
+          fun = optional
           block = nullptr
           args = [
             Literal{ value = :"day" }
@@ -111,7 +111,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:IntegerParam>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
                 Hash{
@@ -133,7 +133,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = optional
+          fun = optional
           block = nullptr
           args = [
             Literal{ value = :"name" }
@@ -142,7 +142,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:StringParam>
               }
-              name = alphanumeric
+              fun = alphanumeric
               block = nullptr
               args = [
               ]
@@ -152,7 +152,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = optional
+          fun = optional
           block = nullptr
           args = [
             Literal{ value = :"how_many" }
@@ -167,12 +167,12 @@ ClassDef{
                 }
                 cnst = <constant:CaseParam>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
                 Send{
                   recv = Self{ claz = ::<todo sym> }
-                  name = how_many_cases
+                  fun = how_many_cases
                   block = nullptr
                   args = [
                   ]
@@ -188,7 +188,7 @@ ClassDef{
                     }
                     cnst = <constant:ParamSpecsParam>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                     UnresolvedConstantLit{
@@ -204,7 +204,7 @@ ClassDef{
 
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = optional
+          fun = optional
           block = nullptr
           args = [
             Literal{ value = :"optional_param" }
@@ -213,7 +213,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:IntegerParam>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
@@ -236,7 +236,7 @@ ClassDef{
       rhs = [
         Send{
           recv = Self{ claz = ::<todo sym> }
-          name = extend
+          fun = extend
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -256,7 +256,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -265,7 +265,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -274,7 +274,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -296,7 +296,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -305,7 +305,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -317,7 +317,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -337,7 +337,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -353,7 +353,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -376,7 +376,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -385,7 +385,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -402,12 +402,12 @@ ClassDef{
         Send{
           recv = Send{
             recv = Self{ claz = ::<todo sym> }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -415,7 +415,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -436,7 +436,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -444,7 +444,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -455,7 +455,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -471,7 +471,7 @@ ClassDef{
         Send{
           recv = Send{
             recv = Self{ claz = ::<todo sym> }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -487,7 +487,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -509,7 +509,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -556,7 +556,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -565,7 +565,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -574,7 +574,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -596,7 +596,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -605,7 +605,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -617,7 +617,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -637,7 +637,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -653,7 +653,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -676,7 +676,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -685,7 +685,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -706,7 +706,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -715,7 +715,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -735,7 +735,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -744,7 +744,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -765,7 +765,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -781,7 +781,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -804,7 +804,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -813,7 +813,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -834,7 +834,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -843,7 +843,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -852,7 +852,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -874,7 +874,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -883,7 +883,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -895,7 +895,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -915,7 +915,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -931,7 +931,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -954,7 +954,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -963,7 +963,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -984,7 +984,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -993,7 +993,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1013,7 +1013,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1022,7 +1022,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1043,7 +1043,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1059,7 +1059,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1082,7 +1082,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1091,7 +1091,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1112,7 +1112,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1121,7 +1121,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1130,7 +1130,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 ConstantLit{
@@ -1153,7 +1153,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1162,7 +1162,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1174,7 +1174,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   ConstantLit{
@@ -1195,7 +1195,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1212,7 +1212,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -1236,7 +1236,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1245,7 +1245,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1267,7 +1267,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1276,7 +1276,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1296,7 +1296,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1305,7 +1305,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1326,7 +1326,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1342,7 +1342,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1365,7 +1365,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1374,7 +1374,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1395,7 +1395,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1404,7 +1404,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1413,7 +1413,7 @@ ClassDef{
                 symbol = ::T::Array
                 typeAlias = nullptr
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -1435,7 +1435,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1444,7 +1444,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1456,7 +1456,7 @@ ClassDef{
                   symbol = ::T::Array
                   typeAlias = nullptr
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -1476,7 +1476,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1489,7 +1489,7 @@ ClassDef{
                         symbol = ::T::Array
                         typeAlias = nullptr
                       }
-                      name = []
+                      fun = []
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
@@ -1503,7 +1503,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1512,7 +1512,7 @@ ClassDef{
                 symbol = ::T::Array
                 typeAlias = nullptr
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -1537,7 +1537,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1546,7 +1546,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1558,7 +1558,7 @@ ClassDef{
                   symbol = ::T::Array
                   typeAlias = nullptr
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -1578,7 +1578,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1587,7 +1587,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1607,7 +1607,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1616,7 +1616,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1637,7 +1637,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1653,7 +1653,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -1676,7 +1676,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1685,7 +1685,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1706,7 +1706,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1715,7 +1715,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1726,7 +1726,7 @@ ClassDef{
                 }
                 cnst = <constant:Array>
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -1748,7 +1748,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1757,7 +1757,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1771,7 +1771,7 @@ ClassDef{
                   }
                   cnst = <constant:Array>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -1791,7 +1791,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1806,7 +1806,7 @@ ClassDef{
                         }
                         cnst = <constant:Array>
                       }
-                      name = []
+                      fun = []
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
@@ -1820,7 +1820,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1831,7 +1831,7 @@ ClassDef{
                 }
                 cnst = <constant:Array>
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -1856,7 +1856,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1865,7 +1865,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1879,7 +1879,7 @@ ClassDef{
                   }
                   cnst = <constant:Array>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -1899,7 +1899,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -1908,7 +1908,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -1919,7 +1919,7 @@ ClassDef{
                 }
                 cnst = <constant:Hash>
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -1945,7 +1945,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -1954,7 +1954,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -1968,7 +1968,7 @@ ClassDef{
                   }
                   cnst = <constant:Hash>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -1992,7 +1992,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2007,7 +2007,7 @@ ClassDef{
                         }
                         cnst = <constant:Hash>
                       }
-                      name = []
+                      fun = []
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
@@ -2025,7 +2025,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2036,7 +2036,7 @@ ClassDef{
                 }
                 cnst = <constant:Hash>
               }
-              name = []
+              fun = []
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2065,7 +2065,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2074,7 +2074,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2088,7 +2088,7 @@ ClassDef{
                   }
                   cnst = <constant:Hash>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2112,7 +2112,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2121,7 +2121,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2130,7 +2130,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2152,7 +2152,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2161,7 +2161,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2173,7 +2173,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2193,7 +2193,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2206,7 +2206,7 @@ ClassDef{
                         symbol = ::T
                         typeAlias = nullptr
                       }
-                      name = nilable
+                      fun = nilable
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
@@ -2220,7 +2220,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2229,7 +2229,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2254,7 +2254,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2263,7 +2263,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2275,7 +2275,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2295,7 +2295,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2304,7 +2304,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2313,7 +2313,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2335,7 +2335,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2344,7 +2344,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2356,7 +2356,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2376,7 +2376,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2392,7 +2392,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -2415,7 +2415,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2424,7 +2424,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2445,7 +2445,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2454,7 +2454,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -2474,7 +2474,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2483,7 +2483,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2504,7 +2504,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2517,7 +2517,7 @@ ClassDef{
                         symbol = ::T
                         typeAlias = nullptr
                       }
-                      name = nilable
+                      fun = nilable
                       block = nullptr
                       args = [
                         UnresolvedConstantLit{
@@ -2531,7 +2531,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2540,7 +2540,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2565,7 +2565,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2574,7 +2574,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2586,7 +2586,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2606,7 +2606,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2615,7 +2615,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2623,7 +2623,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2645,7 +2645,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2654,7 +2654,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2665,7 +2665,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -2685,7 +2685,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2698,7 +2698,7 @@ ClassDef{
                         symbol = ::T
                         typeAlias = nullptr
                       }
-                      name = nilable
+                      fun = nilable
                       block = nullptr
                       args = [
                         Send{
@@ -2706,7 +2706,7 @@ ClassDef{
                             scope = EmptyTree
                             cnst = <constant:T>
                           }
-                          name = nilable
+                          fun = nilable
                           block = nullptr
                           args = [
                             UnresolvedConstantLit{
@@ -2722,7 +2722,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2731,7 +2731,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 Send{
@@ -2739,7 +2739,7 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:T>
                   }
-                  name = nilable
+                  fun = nilable
                   block = nullptr
                   args = [
                     UnresolvedConstantLit{
@@ -2766,7 +2766,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2775,7 +2775,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2787,7 +2787,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   Send{
@@ -2795,7 +2795,7 @@ ClassDef{
                       scope = EmptyTree
                       cnst = <constant:T>
                     }
-                    name = nilable
+                    fun = nilable
                     block = nullptr
                     args = [
                       UnresolvedConstantLit{
@@ -2817,7 +2817,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2826,7 +2826,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -2846,7 +2846,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2855,7 +2855,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2876,7 +2876,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2885,7 +2885,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -2905,7 +2905,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2914,7 +2914,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2935,7 +2935,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -2944,7 +2944,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -2953,7 +2953,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -2975,7 +2975,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -2984,7 +2984,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -2996,7 +2996,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -3016,7 +3016,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3025,7 +3025,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3034,7 +3034,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = untyped
+              fun = untyped
               block = nullptr
               args = [
               ]
@@ -3052,7 +3052,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = unsafe
+            fun = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -3067,7 +3067,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3076,7 +3076,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3085,7 +3085,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3107,7 +3107,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3116,7 +3116,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3128,7 +3128,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -3148,7 +3148,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3164,7 +3164,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -3187,7 +3187,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3196,7 +3196,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3217,12 +3217,12 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3231,7 +3231,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3253,7 +3253,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = unsafe
+            fun = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -3268,7 +3268,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3277,7 +3277,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3286,7 +3286,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3308,7 +3308,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3317,7 +3317,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3329,7 +3329,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -3349,7 +3349,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3365,7 +3365,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -3388,7 +3388,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3397,7 +3397,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3418,12 +3418,12 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3432,7 +3432,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3454,7 +3454,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = unsafe
+            fun = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -3469,7 +3469,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3478,7 +3478,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3487,7 +3487,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3509,7 +3509,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3518,7 +3518,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3530,7 +3530,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -3550,7 +3550,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3566,7 +3566,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -3589,7 +3589,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3598,7 +3598,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3619,12 +3619,12 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3633,7 +3633,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3655,7 +3655,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = unsafe
+            fun = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -3670,7 +3670,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3679,7 +3679,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3688,7 +3688,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = nilable
+              fun = nilable
               block = nullptr
               args = [
                 UnresolvedConstantLit{
@@ -3710,7 +3710,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3719,7 +3719,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3731,7 +3731,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -3751,7 +3751,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3767,7 +3767,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             UnresolvedConstantLit{
@@ -3790,7 +3790,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3799,7 +3799,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3820,12 +3820,12 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             Send{
@@ -3834,7 +3834,7 @@ ClassDef{
                 symbol = ::T
                 typeAlias = nullptr
               }
-              name = untyped
+              fun = untyped
               block = nullptr
               args = [
               ]
@@ -3852,7 +3852,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = unsafe
+            fun = unsafe
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -3880,7 +3880,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3889,7 +3889,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -3910,7 +3910,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3919,7 +3919,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -3941,7 +3941,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -3958,7 +3958,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -3982,7 +3982,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -3991,7 +3991,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4013,7 +4013,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4022,7 +4022,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4043,7 +4043,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4052,7 +4052,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4074,7 +4074,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4091,7 +4091,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4115,7 +4115,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4124,7 +4124,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4159,7 +4159,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4168,7 +4168,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4189,7 +4189,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4198,7 +4198,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4220,7 +4220,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4237,7 +4237,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4261,7 +4261,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4270,7 +4270,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4292,7 +4292,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4301,7 +4301,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4322,7 +4322,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4331,7 +4331,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4366,7 +4366,7 @@ ClassDef{
               symbol = ::Sorbet
               typeAlias = nullptr
             }
-            name = sig
+            fun = sig
             block = nullptr
             args = [
               Hash{
@@ -4375,7 +4375,7 @@ ClassDef{
               }
             ]
           }
-          name = returns
+          fun = returns
           block = nullptr
           args = [
             ConstantLit{
@@ -4396,7 +4396,7 @@ ClassDef{
               symbol = ::T
               typeAlias = nullptr
             }
-            name = cast
+            fun = cast
             block = nullptr
             args = [
               Send{
@@ -4405,7 +4405,7 @@ ClassDef{
                   symbol = ::T
                   typeAlias = nullptr
                 }
-                name = unsafe
+                fun = unsafe
                 block = nullptr
                 args = [
                   Literal{ value = nil }
@@ -4433,7 +4433,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4442,12 +4442,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo
+                fun = foo
                 block = nullptr
                 args = [
                 ]
@@ -4457,7 +4457,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4473,7 +4473,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4482,12 +4482,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo
+                fun = foo
                 block = nullptr
                 args = [
                 ]
@@ -4503,7 +4503,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4512,12 +4512,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo=
+                fun = foo=
                 block = nullptr
                 args = [
                   Literal{ value = "b" }
@@ -4534,7 +4534,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4543,12 +4543,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo2
+                fun = foo2
                 block = nullptr
                 args = [
                 ]
@@ -4558,7 +4558,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4574,7 +4574,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4583,12 +4583,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo2
+                fun = foo2
                 block = nullptr
                 args = [
                 ]
@@ -4604,7 +4604,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4613,12 +4613,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:SomeODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foo2=
+                fun = foo2=
                 block = nullptr
                 args = [
                   Literal{ value = "b" }
@@ -4635,7 +4635,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4644,12 +4644,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = default_without_optional_false
+                fun = default_without_optional_false
                 block = nullptr
                 args = [
                 ]
@@ -4659,7 +4659,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4675,7 +4675,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4684,12 +4684,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional_false
+                fun = optional_false
                 block = nullptr
                 args = [
                 ]
@@ -4705,7 +4705,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4714,12 +4714,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = nodefault
+                fun = nodefault
                 block = nullptr
                 args = [
                 ]
@@ -4729,7 +4729,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4745,7 +4745,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4754,12 +4754,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = nodefault
+                fun = nodefault
                 block = nullptr
                 args = [
                 ]
@@ -4775,7 +4775,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4784,12 +4784,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = type
+                fun = type
                 block = nullptr
                 args = [
                 ]
@@ -4805,7 +4805,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4814,12 +4814,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = object
+                fun = object
                 block = nullptr
                 args = [
                 ]
@@ -4829,7 +4829,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4845,7 +4845,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4854,12 +4854,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = array
+                fun = array
                 block = nullptr
                 args = [
                 ]
@@ -4875,7 +4875,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4884,12 +4884,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = array_of
+                fun = array_of
                 block = nullptr
                 args = [
                 ]
@@ -4902,7 +4902,7 @@ ClassDef{
                   }
                   cnst = <constant:Array>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4918,7 +4918,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4927,12 +4927,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = array_of_explicit
+                fun = array_of_explicit
                 block = nullptr
                 args = [
                 ]
@@ -4945,7 +4945,7 @@ ClassDef{
                   }
                   cnst = <constant:Array>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -4961,7 +4961,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -4970,12 +4970,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = t_array
+                fun = t_array
                 block = nullptr
                 args = [
                 ]
@@ -4988,7 +4988,7 @@ ClassDef{
                   }
                   cnst = <constant:Array>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5004,7 +5004,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5013,12 +5013,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = hash_of
+                fun = hash_of
                 block = nullptr
                 args = [
                 ]
@@ -5031,7 +5031,7 @@ ClassDef{
                   }
                   cnst = <constant:Hash>
                 }
-                name = []
+                fun = []
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5051,7 +5051,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5060,12 +5060,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional_explicit
+                fun = optional_explicit
                 block = nullptr
                 args = [
                 ]
@@ -5075,7 +5075,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5091,7 +5091,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5100,12 +5100,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional_existing
+                fun = optional_existing
                 block = nullptr
                 args = [
                 ]
@@ -5115,7 +5115,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5132,12 +5132,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = optional_existing=
+            fun = optional_existing=
             block = nullptr
             args = [
               Literal{ value = "b" }
@@ -5149,12 +5149,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = optional_existing=
+            fun = optional_existing=
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -5165,7 +5165,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5174,12 +5174,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional_false
+                fun = optional_false
                 block = nullptr
                 args = [
                 ]
@@ -5189,7 +5189,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5205,7 +5205,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5214,12 +5214,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional
+                fun = optional
                 block = nullptr
                 args = [
                 ]
@@ -5229,7 +5229,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5246,12 +5246,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = optional=
+            fun = optional=
             block = nullptr
             args = [
               Literal{ value = "b" }
@@ -5263,12 +5263,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = optional=
+            fun = optional=
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -5279,7 +5279,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5288,12 +5288,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = optional_nilable
+                fun = optional_nilable
                 block = nullptr
                 args = [
                 ]
@@ -5303,7 +5303,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5319,7 +5319,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5328,12 +5328,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = const_explicit
+                fun = const_explicit
                 block = nullptr
                 args = [
                 ]
@@ -5350,12 +5350,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = const_explicit=
+            fun = const_explicit=
             block = nullptr
             args = [
               Literal{ value = "b" }
@@ -5366,7 +5366,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5375,12 +5375,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = const
+                fun = const
                 block = nullptr
                 args = [
                 ]
@@ -5397,12 +5397,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = const=
+            fun = const=
             block = nullptr
             args = [
               Literal{ value = "b" }
@@ -5413,7 +5413,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5422,12 +5422,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = no_class_arg
+                fun = no_class_arg
                 block = nullptr
                 args = [
                 ]
@@ -5437,7 +5437,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   Send{
@@ -5448,7 +5448,7 @@ ClassDef{
                       }
                       cnst = <constant:Array>
                     }
-                    name = []
+                    fun = []
                     block = nullptr
                     args = [
                       UnresolvedConstantLit{
@@ -5467,12 +5467,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = no_class_arg=
+            fun = no_class_arg=
             block = nullptr
             args = [
               Array{
@@ -5488,12 +5488,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = enum_prop=
+            fun = enum_prop=
             block = nullptr
             args = [
               Literal{ value = "hello" }
@@ -5504,7 +5504,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5513,12 +5513,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foreign_
+                fun = foreign_
                 block = nullptr
                 args = [
                 ]
@@ -5528,7 +5528,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5544,7 +5544,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5553,12 +5553,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foreign_
+                fun = foreign_
                 block = nullptr
                 args = [
                 ]
@@ -5574,7 +5574,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5583,12 +5583,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:AdvancedODM>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = foreign_lazy_
+                fun = foreign_lazy_
                 block = nullptr
                 args = [
                 ]
@@ -5598,7 +5598,7 @@ ClassDef{
                   scope = EmptyTree
                   cnst = <constant:T>
                 }
-                name = nilable
+                fun = nilable
                 block = nullptr
                 args = [
                   UnresolvedConstantLit{
@@ -5615,12 +5615,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:AdvancedODM>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = foreign_invalid_
+            fun = foreign_invalid_
             block = nullptr
             args = [
             ]
@@ -5630,7 +5630,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5639,12 +5639,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = token
+                fun = token
                 block = nullptr
                 args = [
                 ]
@@ -5661,12 +5661,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = token=
+            fun = token=
             block = nullptr
             args = [
               Literal{ value = "tok_token" }
@@ -5678,12 +5678,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = token=
+            fun = token=
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -5694,7 +5694,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5703,12 +5703,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = created
+                fun = created
                 block = nullptr
                 args = [
                 ]
@@ -5725,12 +5725,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = created=
+            fun = created=
             block = nullptr
             args = [
               Literal{ value = 0.000000 }
@@ -5742,12 +5742,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = created=
+            fun = created=
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -5758,7 +5758,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5767,12 +5767,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers2>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = token
+                fun = token
                 block = nullptr
                 args = [
                 ]
@@ -5789,12 +5789,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = token=
+            fun = token=
             block = nullptr
             args = [
               Literal{ value = "tok_token" }
@@ -5806,12 +5806,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = token=
+            fun = token=
             block = nullptr
             args = [
               Literal{ value = nil }
@@ -5822,7 +5822,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5831,12 +5831,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:PropHelpers2>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = created
+                fun = created
                 block = nullptr
                 args = [
                 ]
@@ -5853,12 +5853,12 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:PropHelpers2>
               }
-              name = new
+              fun = new
               block = nullptr
               args = [
               ]
             }
-            name = created=
+            fun = created=
             block = nullptr
             args = [
               Literal{ value = 0.000000 }
@@ -5869,7 +5869,7 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:T>
             }
-            name = assert_type!
+            fun = assert_type!
             block = nullptr
             args = [
               Send{
@@ -5878,12 +5878,12 @@ ClassDef{
                     scope = EmptyTree
                     cnst = <constant:ShardingProp>
                   }
-                  name = new
+                  fun = new
                   block = nullptr
                   args = [
                   ]
                 }
-                name = merchant
+                fun = merchant
                 block = nullptr
                 args = [
                 ]
@@ -5901,12 +5901,12 @@ ClassDef{
               scope = EmptyTree
               cnst = <constant:ShardingProp>
             }
-            name = new
+            fun = new
             block = nullptr
             args = [
             ]
           }
-          name = merchant=
+          fun = merchant=
           block = nullptr
           args = [
             Literal{ value = "hi" }
