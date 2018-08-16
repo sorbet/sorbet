@@ -118,7 +118,7 @@ struct DispatchComponent {
 };
 
 struct DispatchResult {
-    using ComponentVec = absl::InlinedVector<DispatchComponent, 1>;
+    using ComponentVec = InlinedVector<DispatchComponent, 1>;
 
     std::shared_ptr<Type> returnType;
     ComponentVec components;
