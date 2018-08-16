@@ -27,4 +27,5 @@ class ::<root> < ::Object () @ (test/testdata/resolver/self.rb:3, https://git.co
       ]
     } @ test/testdata/resolver/self.rb:32
     type-member(=) ::TestSelfGeneric#Elem @ test/testdata/resolver/self.rb:23
+  method #<static-init> () @ ???
 

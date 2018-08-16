@@ -1,29 +1,41 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     def self.<static-init><<static-init>$74>()
       begin
-        ::RubyTyper.keep_for_ide(::Parent)
+        begin
+          ::RubyTyper.keep_for_ide(::NormalClass)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::ANamespace)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::ANamespace::ClassInNamespace)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Mixin)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::OtherMixin)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Child)
+          ::RubyTyper.keep_for_ide(::Parent)
+          <emptyTree>
+        end
         <emptyTree>
       end
     end
   end
   class ::NormalClass<<constant:NormalClass>> < (::<todo sym>)
-    <emptyTree>
-
     <emptyTree>
 
     <emptyTree>
@@ -37,11 +49,30 @@ begin
     def self.normal_static_method<normal_static_method>()
       <emptyTree>
     end
+
+    def self.<static-init><<static-init>>()
+      begin
+        begin
+          ::RubyTyper.keep_for_ide(::NormalClass::InnerClass)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::NormalClass::InnerModule)
+          <emptyTree>
+        end
+        <emptyTree>
+      end
+    end
   end
   class ::NormalClass::InnerClass<<constant:InnerClass>> < (::<todo sym>)  end
   module ::NormalClass::InnerModule<<constant:InnerModule>> < ()  end
   module ::ANamespace<<constant:ANamespace>> < ()
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        ::RubyTyper.keep_for_ide(::ANamespace::ObviousChild)
+        <emptyTree>
+      end
+    end
   end
   class ::ANamespace::ObviousChild<<constant:ObviousChild>> < (::<todo sym>)  end
   class ::ANamespace::ClassInNamespace<<constant:ClassInNamespace>> < (::<todo sym>)  end

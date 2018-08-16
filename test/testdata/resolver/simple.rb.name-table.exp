@@ -15,6 +15,8 @@ class ::<root> < ::Object () @ (test/testdata/resolver/simple.rb:2, https://git.
         class ::Outer2::Inner1::Inner2::<Class:A> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/simple.rb:23
         class ::Outer2::Inner1::Inner2::A < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/simple.rb:23
         method ::Outer2::Inner1::Inner2#<static-init> () @ test/testdata/resolver/simple.rb:13
+      method ::Outer2::Inner1#<static-init> () @ test/testdata/resolver/simple.rb:9
     class ::Outer2::Other < ::Outer2::Inner1::Inner2 () @ test/testdata/resolver/simple.rb:26
-    method ::Outer2#<static-init> () @ test/testdata/resolver/simple.rb:26
+    method ::Outer2#<static-init> () @ test/testdata/resolver/simple.rb:5
+  method #<static-init> () @ ???
 

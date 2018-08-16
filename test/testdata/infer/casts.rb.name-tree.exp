@@ -1,28 +1,32 @@
-class ::TestCasts<<constant:TestCasts>> < (::<todo sym>)
-  <emptyTree>
-
-  <emptyTree>
-
-  def untyped<untyped>()
+begin
+  ::RubyTyper.keep_for_ide(::TestCasts)
+  class ::TestCasts<<constant:TestCasts>> < (::<todo sym>)
     <emptyTree>
-  end
 
-  def test_casts<test_casts>()
-    begin
-      t = T.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
-      t.+(4)
-      t1 = T.assert_type!("hi", Integer)
-      t1.+(1)
-      s = T.cast(self(<constant:TestCasts>).untyped(), String)
-      s.+("hi")
-      s = T.cast(6, String)
-      s.+("hi")
-      s.+(3)
-      s = T.cast(6, Integer)
-      s = T.cast(6, T.untyped)
-      s = T.cast(6, T.untyped)
-      s.+("hi")
-      s.+(3)
+    <emptyTree>
+
+    def untyped<untyped>()
+      <emptyTree>
+    end
+
+    def test_casts<test_casts>()
+      begin
+        t = T.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
+        t.+(4)
+        t1 = T.assert_type!("hi", Integer)
+        t1.+(1)
+        s = T.cast(self(<constant:TestCasts>).untyped(), String)
+        s.+("hi")
+        s = T.cast(6, String)
+        s.+("hi")
+        s.+(3)
+        s = T.cast(6, Integer)
+        s = T.cast(6, T.untyped)
+        s = T.cast(6, T.untyped)
+        s.+("hi")
+        s.+(3)
+      end
     end
   end
+  <emptyTree>
 end

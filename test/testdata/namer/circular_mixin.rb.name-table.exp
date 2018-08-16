@@ -5,4 +5,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/circular_mixin.rb:2, https:/
     method ::A#<static-init> () @ ???
   class ::B (<constant:BasicObject>, <constant:StubModule>) @ test/testdata/namer/circular_mixin.rb:7
     method ::B#<static-init> () @ ???
+  method #<static-init> () @ ???
 

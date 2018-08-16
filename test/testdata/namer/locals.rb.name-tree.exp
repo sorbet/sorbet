@@ -1,21 +1,25 @@
-class ::TestLocals<<constant:TestLocals>> < (::<todo sym>)
-  def method<method>()
-    begin
-      a = 1
-      c = 4
-      self(<constant:TestLocals>).proc() do ||
-        begin
-          b$2 = 2
-          a.+(b$2)
-          self(<constant:TestLocals>).proc() do ||
-            b$2.+(c)
+begin
+  ::RubyTyper.keep_for_ide(::TestLocals)
+  class ::TestLocals<<constant:TestLocals>> < (::<todo sym>)
+    def method<method>()
+      begin
+        a = 1
+        c = 4
+        self(<constant:TestLocals>).proc() do ||
+          begin
+            b$2 = 2
+            a.+(b$2)
+            self(<constant:TestLocals>).proc() do ||
+              b$2.+(c)
+            end
           end
         end
-      end
-      b = 3
-      self(<constant:TestLocals>).proc() do |a$4, b$4|
-        a$4.+(b$4)
+        b = 3
+        self(<constant:TestLocals>).proc() do |a$4, b$4|
+          a$4.+(b$4)
+        end
       end
     end
   end
+  <emptyTree>
 end

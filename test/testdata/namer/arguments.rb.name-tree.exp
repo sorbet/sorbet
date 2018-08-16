@@ -1,11 +1,15 @@
-class ::A<<constant:A>> < (::<todo sym>)
-  def take_arguments<take_arguments>(a, b, c, d, e, f, g)
-    begin
-      [a, b, c, d, e, f, g]
-      h = 1
-      self(<constant:A>).proc() do |a$2, b$2, c$2, d$2, e$2, f$2, g$2, h$2|
-        [a$2, b$2, c$2, d$2, e$2, f$2, g$2, h$2]
+begin
+  ::RubyTyper.keep_for_ide(::A)
+  class ::A<<constant:A>> < (::<todo sym>)
+    def take_arguments<take_arguments>(a, b, c, d, e, f, g)
+      begin
+        [a, b, c, d, e, f, g]
+        h = 1
+        self(<constant:A>).proc() do |a$2, b$2, c$2, d$2, e$2, f$2, g$2, h$2|
+          [a$2, b$2, c$2, d$2, e$2, f$2, g$2, h$2]
+        end
       end
     end
   end
+  <emptyTree>
 end

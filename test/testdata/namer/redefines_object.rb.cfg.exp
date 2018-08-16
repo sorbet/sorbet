@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<constant:RubyTyper>$7 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:Foo>$14 = alias <constant:Foo> : <Class:Foo>\l<constant:Bar>$9 = alias <constant:Bar> : <Class:Bar>\l<statTemp>$5 = <constant:RubyTyper>$7.keep_for_ide(<constant:Bar>$9) : T.untyped\l<statTemp>$11 = <constant:RubyTyper>$7.keep_for_ide(<constant:Foo>$14) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<constant:RubyTyper>$8 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:Trigger>$10 = alias <constant:Trigger> : <Class:Trigger>\l<constant:Foo>$15 = alias <constant:Foo> : <Class:Foo>\l<constant:Bar>$19 = alias <constant:Bar> : <Class:Bar>\l<statTemp>$6 = <constant:RubyTyper>$8.keep_for_ide(<constant:Trigger>$10) : T.untyped\l<statTemp>$12 = <constant:RubyTyper>$8.keep_for_ide(<constant:Foo>$15) : T.untyped\l<statTemp>$16 = <constant:RubyTyper>$8.keep_for_ide(<constant:Bar>$19) : T.untyped\l<statTemp>$21 = <constant:RubyTyper>$8.keep_for_ide(<constant:Bar>$19) : T.untyped\l<statTemp>$24 = <constant:RubyTyper>$8.keep_for_ide(<constant:Foo>$15) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

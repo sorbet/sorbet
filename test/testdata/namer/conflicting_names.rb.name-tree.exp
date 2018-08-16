@@ -1,4 +1,5 @@
 begin
+  ::RubyTyper.keep_for_ide(::A)
   module ::A<<constant:A>> < ()
     <emptyTree>
 
@@ -6,6 +7,13 @@ begin
 
     def Foo<Foo>()
       <emptyTree>
+    end
+
+    def self.<static-init><<static-init>>()
+      begin
+        ::RubyTyper.keep_for_ide(::A::Foo)
+        <emptyTree>
+      end
     end
   end
   class ::A::Foo<<constant:Foo>> < (::<todo sym>)  end

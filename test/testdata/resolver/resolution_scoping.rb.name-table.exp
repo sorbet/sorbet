@@ -12,6 +12,6 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_scoping.rb:2, 
   class ::D (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_scoping.rb:11
     class ::D::<Class:E> < ::Module () @ test/testdata/resolver/resolution_scoping.rb:13
     class ::D::E (<constant:BasicObject>) @ test/testdata/resolver/resolution_scoping.rb:13
-    method ::D#<static-init> () @ ???
+    method ::D#<static-init> () @ test/testdata/resolver/resolution_scoping.rb:11
   method #<static-init> () @ ???
 

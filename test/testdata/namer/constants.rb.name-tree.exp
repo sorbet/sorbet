@@ -1,11 +1,11 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
     def self.<static-init><<static-init>$74>()
       begin
+        begin
+          ::RubyTyper.keep_for_ide(::A)
+          <emptyTree>
+        end
         ::A::B#C
         ::A::B#D
         ::A
@@ -14,7 +14,11 @@ begin
     end
   end
   module ::A<<constant:A>> < ()
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()
     def self.<static-init><<static-init>>()

@@ -1,4 +1,22 @@
 digraph "huge_unions.rb" {
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
+    color = blue;
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
+
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<constant:RubyTyper>$7 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:C1>$9 = alias <constant:C1> : <Class:C1>\l<constant:C2>$14 = alias <constant:C2> : <Class:C2>\l<constant:C3>$19 = alias <constant:C3> : <Class:C3>\l<constant:C4>$24 = alias <constant:C4> : <Class:C4>\l<constant:C5>$29 = alias <constant:C5> : <Class:C5>\l<constant:C6>$34 = alias <constant:C6> : <Class:C6>\l<constant:C7>$39 = alias <constant:C7> : <Class:C7>\l<constant:C8>$44 = alias <constant:C8> : <Class:C8>\l<constant:C9>$49 = alias <constant:C9> : <Class:C9>\l<constant:C10>$54 = alias <constant:C10> : <Class:C10>\l<constant:C11>$59 = alias <constant:C11> : <Class:C11>\l<constant:C12>$64 = alias <constant:C12> : <Class:C12>\l<constant:C13>$69 = alias <constant:C13> : <Class:C13>\l<constant:C14>$80 = alias <constant:C14> : <Class:C14>\l<constant:C15>$85 = alias <constant:C15> : <Class:C15>\l<constant:C16>$90 = alias <constant:C16> : <Class:C16>\l<constant:C17>$95 = alias <constant:C17> : <Class:C17>\l<constant:C18>$100 = alias <constant:C18> : <Class:C18>\l<constant:C19>$105 = alias <constant:C19> : <Class:C19>\l<constant:C20>$110 = alias <constant:C20> : <Class:C20>\l<constant:A>$115 = alias <constant:A> : <Class:A>\l<statTemp>$5 = <constant:RubyTyper>$7.keep_for_ide(<constant:C1>$9) : T.untyped\l<statTemp>$11 = <constant:RubyTyper>$7.keep_for_ide(<constant:C2>$14) : T.untyped\l<statTemp>$16 = <constant:RubyTyper>$7.keep_for_ide(<constant:C3>$19) : T.untyped\l<statTemp>$21 = <constant:RubyTyper>$7.keep_for_ide(<constant:C4>$24) : T.untyped\l<statTemp>$26 = <constant:RubyTyper>$7.keep_for_ide(<constant:C5>$29) : T.untyped\l<statTemp>$31 = <constant:RubyTyper>$7.keep_for_ide(<constant:C6>$34) : T.untyped\l<statTemp>$36 = <constant:RubyTyper>$7.keep_for_ide(<constant:C7>$39) : T.untyped\l<statTemp>$41 = <constant:RubyTyper>$7.keep_for_ide(<constant:C8>$44) : T.untyped\l<statTemp>$46 = <constant:RubyTyper>$7.keep_for_ide(<constant:C9>$49) : T.untyped\l<statTemp>$51 = <constant:RubyTyper>$7.keep_for_ide(<constant:C10>$54) : T.untyped\l<statTemp>$56 = <constant:RubyTyper>$7.keep_for_ide(<constant:C11>$59) : T.untyped\l<statTemp>$61 = <constant:RubyTyper>$7.keep_for_ide(<constant:C12>$64) : T.untyped\l<statTemp>$66 = <constant:RubyTyper>$7.keep_for_ide(<constant:C13>$69) : T.untyped\l<statTemp>$77 = <constant:RubyTyper>$7.keep_for_ide(<constant:C14>$80) : T.untyped\l<statTemp>$82 = <constant:RubyTyper>$7.keep_for_ide(<constant:C15>$85) : T.untyped\l<statTemp>$87 = <constant:RubyTyper>$7.keep_for_ide(<constant:C16>$90) : T.untyped\l<statTemp>$92 = <constant:RubyTyper>$7.keep_for_ide(<constant:C17>$95) : T.untyped\l<statTemp>$97 = <constant:RubyTyper>$7.keep_for_ide(<constant:C18>$100) : T.untyped\l<statTemp>$102 = <constant:RubyTyper>$7.keep_for_ide(<constant:C19>$105) : T.untyped\l<statTemp>$107 = <constant:RubyTyper>$7.keep_for_ide(<constant:C20>$110) : T.untyped\l<statTemp>$112 = <constant:RubyTyper>$7.keep_for_ide(<constant:A>$115) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+}
+
 subgraph "cluster_::<Class:A>#send_beta_invitation" {
     label = "::<Class:A>#send_beta_invitation";
     color = blue;

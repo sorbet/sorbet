@@ -6,5 +6,6 @@ class ::<root> < ::Object () @ (test/testdata/namer/constants.rb:2, https://git.
       method ::A::B#<static-init> () @ test/testdata/namer/constants.rb:6
       static-field ::A::B#C -> Integer(1) @ test/testdata/namer/constants.rb:3
       static-field ::A::B#D -> Integer(1) @ test/testdata/namer/constants.rb:8
+    method ::A#<static-init> () @ test/testdata/namer/constants.rb:5
   method #<static-init> () @ ???
 

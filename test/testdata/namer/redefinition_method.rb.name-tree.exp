@@ -1,25 +1,29 @@
-class ::Main<<constant:Main>> < (::<todo sym>)
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  <emptyTree>
-
-  def foo<foo$1>(a)
-    a
-  end
-
-  def foo<foo$2>(a, b)
+begin
+  ::RubyTyper.keep_for_ide(::Main)
+  class ::Main<<constant:Main>> < (::<todo sym>)
     <emptyTree>
-  end
 
-  def foo<foo>(a, b, c)
     <emptyTree>
-  end
 
-  def self.<static-init><<static-init>>()
-    self(<singleton class:<constant:Main>>).sig({:"a" => ::Integer}).returns(::Integer)
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo<foo$1>(a)
+      a
+    end
+
+    def foo<foo$2>(a, b)
+      <emptyTree>
+    end
+
+    def foo<foo>(a, b, c)
+      <emptyTree>
+    end
+
+    def self.<static-init><<static-init>>()
+      self(<singleton class:<constant:Main>>).sig({:"a" => ::Integer}).returns(::Integer)
+    end
   end
+  <emptyTree>
 end

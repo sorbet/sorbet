@@ -1,18 +1,22 @@
-class ::Test<<constant:Test>> < (::<todo sym>)
-  def test_next_break<test_next_break>()
-    self(<constant:Test>).each() do ||
-      begin
-        if self(<constant:Test>).rand()
-          next(::Test::Foo)
-        else
-          <emptyTree>
-        end
-        if self(<constant:Test>).rand()
-          break(::Test::Bar)
-        else
-          <emptyTree>
+begin
+  ::RubyTyper.keep_for_ide(::Test)
+  class ::Test<<constant:Test>> < (::<todo sym>)
+    def test_next_break<test_next_break>()
+      self(<constant:Test>).each() do ||
+        begin
+          if self(<constant:Test>).rand()
+            next(::Test::Foo)
+          else
+            <emptyTree>
+          end
+          if self(<constant:Test>).rand()
+            break(::Test::Bar)
+          else
+            <emptyTree>
+          end
         end
       end
     end
   end
+  <emptyTree>
 end

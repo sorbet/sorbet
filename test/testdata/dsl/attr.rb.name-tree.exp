@@ -1,64 +1,68 @@
-class ::TestAttr<<constant:TestAttr>> < (::<todo sym>)
-  <emptyTree>
+begin
+  ::RubyTyper.keep_for_ide(::TestAttr)
+  class ::TestAttr<<constant:TestAttr>> < (::<todo sym>)
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  def initialize<initialize>()
-    begin
-      ::TestAttr#@v1 = T.let(0, Integer)
-      ::TestAttr#@v2 = T.let("", String)
+    def initialize<initialize>()
+      begin
+        ::TestAttr#@v1 = T.let(0, Integer)
+        ::TestAttr#@v2 = T.let("", String)
+      end
+    end
+
+    def v1<v1>()
+      ::TestAttr#@v1
+    end
+
+    def v1=<v1=>(v1)
+      ::TestAttr#@v1 = v1
+    end
+
+    def v2<v2>()
+      ::TestAttr#@v2
+    end
+
+    def v2=<v2=>(v2)
+      ::TestAttr#@v2 = v2
+    end
+
+    def v3<v3>()
+      ::TestAttr#@v3
+    end
+
+    def v4=<v4=>(v4)
+      ::TestAttr#@v4 = v4
+    end
+
+    def v5=<v5=>(v5)
+      ::TestAttr#@v5 = v5
+    end
+
+    def self.<static-init><<static-init>>()
+      begin
+        self(<singleton class:<constant:TestAttr>>).sig().returns(::Integer)
+        self(<singleton class:<constant:TestAttr>>).sig({:"v1" => ::Integer}).returns(::Integer)
+        self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
+        self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
+        <emptyTree>
+      end
     end
   end
-
-  def v1<v1>()
-    ::TestAttr#@v1
-  end
-
-  def v1=<v1=>(v1)
-    ::TestAttr#@v1 = v1
-  end
-
-  def v2<v2>()
-    ::TestAttr#@v2
-  end
-
-  def v2=<v2=>(v2)
-    ::TestAttr#@v2 = v2
-  end
-
-  def v3<v3>()
-    ::TestAttr#@v3
-  end
-
-  def v4=<v4=>(v4)
-    ::TestAttr#@v4 = v4
-  end
-
-  def v5=<v5=>(v5)
-    ::TestAttr#@v5 = v5
-  end
-
-  def self.<static-init><<static-init>>()
-    begin
-      self(<singleton class:<constant:TestAttr>>).sig().returns(::Integer)
-      self(<singleton class:<constant:TestAttr>>).sig({:"v1" => ::Integer}).returns(::Integer)
-      self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
-      self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
-      <emptyTree>
-    end
-  end
+  <emptyTree>
 end

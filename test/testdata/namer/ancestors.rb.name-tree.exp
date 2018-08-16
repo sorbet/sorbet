@@ -1,18 +1,28 @@
 begin
   class <emptyTree><<constant:<root>>> < ()
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     def self.<static-init><<static-init>$74>()
       begin
-        ::RubyTyper.keep_for_ide(::Parent)
+        begin
+          ::RubyTyper.keep_for_ide(::Mixin1)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Mixin2)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::Child)
+          ::RubyTyper.keep_for_ide(::Parent)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::MultipleInclude)
+          <emptyTree>
+        end
         <emptyTree>
       end
     end
@@ -24,6 +34,11 @@ begin
       ::RubyTyper.keep_for_ide(::Mixin1)
     end
   end
+  class ::Child<<constant:Child>> < (::Parent, ::Mixin2)
+    def self.<static-init><<static-init>>()
+      ::RubyTyper.keep_for_ide(::Mixin2)
+    end
+  end
   class ::MultipleInclude<<constant:MultipleInclude>> < (::<todo sym>, ::Mixin1, ::Mixin2)
     def self.<static-init><<static-init>>()
       begin
@@ -31,11 +46,6 @@ begin
         ::RubyTyper.keep_for_ide(::Mixin2)
         <emptyTree>
       end
-    end
-  end
-  class ::Child<<constant:Child>> < (::Parent, ::Mixin2)
-    def self.<static-init><<static-init>>()
-      ::RubyTyper.keep_for_ide(::Mixin2)
     end
   end
   <emptyTree>

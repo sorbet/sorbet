@@ -1,122 +1,126 @@
-class ::Examples<<constant:Examples>> < (::<todo sym>)
-  <emptyTree>
+begin
+  ::RubyTyper.keep_for_ide(::Examples)
+  class ::Examples<<constant:Examples>> < (::<todo sym>)
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  <emptyTree>
+    <emptyTree>
 
-  def i_like_ifs<i_like_ifs>()
-    if true
-      return 1
-    else
-      return 2
-    end
-  end
-
-  def i_like_exps<i_like_exps>()
-    if begin
-        true
+    def i_like_ifs<i_like_ifs>()
+      if true
+        return 1
+      else
+        return 2
       end
-      1
-    else
-      2
     end
-  end
 
-  def return_in_one_branch1<return_in_one_branch1>()
-    if begin
-        true
-      end
-      return 1
-    else
-      2
-    end
-  end
-
-  def return_in_one_branch2<return_in_one_branch2>()
-    if begin
-        true
-      end
-      1
-    else
-      return 2
-    end
-  end
-
-  def variables<variables>()
-    begin
+    def i_like_exps<i_like_exps>()
       if begin
           true
         end
-        a = 1
+        1
       else
-        a = 2
+        2
       end
+    end
+
+    def return_in_one_branch1<return_in_one_branch1>()
+      if begin
+          true
+        end
+        return 1
+      else
+        2
+      end
+    end
+
+    def return_in_one_branch2<return_in_one_branch2>()
+      if begin
+          true
+        end
+        1
+      else
+        return 2
+      end
+    end
+
+    def variables<variables>()
+      begin
+        if begin
+            true
+          end
+          a = 1
+        else
+          a = 2
+        end
+        if begin
+            false
+          end
+          b = 1
+        else
+          b = 2
+        end
+        a.+(b)
+      end
+    end
+
+    def variables_and_loop<variables_and_loop>(cond)
+      begin
+        if begin
+            true
+          end
+          a = 1
+        else
+          a = 2
+        end
+        while true
+          if begin
+              cond
+            end
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def variables_loop_if<variables_loop_if>(cond)
+      begin
+        while true
+          if begin
+              cond
+            end
+            b = 1
+          else
+            b = 2
+          end
+        end
+        b
+      end
+    end
+
+    def take_arguments<take_arguments>(i)
       if begin
           false
         end
-        b = 1
+        2
       else
-        b = 2
+        i
       end
-      a.+(b)
     end
   end
-
-  def variables_and_loop<variables_and_loop>(cond)
-    begin
-      if begin
-          true
-        end
-        a = 1
-      else
-        a = 2
-      end
-      while true
-        if begin
-            cond
-          end
-          b = 1
-        else
-          b = 2
-        end
-      end
-      b
-    end
-  end
-
-  def variables_loop_if<variables_loop_if>(cond)
-    begin
-      while true
-        if begin
-            cond
-          end
-          b = 1
-        else
-          b = 2
-        end
-      end
-      b
-    end
-  end
-
-  def take_arguments<take_arguments>(i)
-    if begin
-        false
-      end
-      2
-    else
-      i
-    end
-  end
+  <emptyTree>
 end

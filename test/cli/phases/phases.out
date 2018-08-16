@@ -43,24 +43,32 @@ class ::<root> < ::Object () @ (-e:1, https://git.corp.stripe.com/stripe-interna
 
 --- name-table end ---
 --- name-tree start ---
-class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$74>()
-    1
+begin
+  class <emptyTree><<constant:<root>>> < ()
+    def self.<static-init><<static-init>$74>()
+      1
+    end
   end
+  <emptyTree>
 end
 --- name-tree end ---
 --- name-tree-raw start ---
-ClassDef{
-  name = EmptyTree<<constant:<root>>>
-  ancestors = []
-  rhs = [
-    MethodDef{
-      flags = self
-      name = <static-init><<static-init>$74>
-      args = []
-      rhs = Literal{ value = 1 }
+InsSeq{
+  stats = [
+    ClassDef{
+      name = EmptyTree<<constant:<root>>>
+      ancestors = []
+      rhs = [
+        MethodDef{
+          flags = self
+          name = <static-init><<static-init>$74>
+          args = []
+          rhs = Literal{ value = 1 }
+        }
+      ]
     }
-  ]
+  ],
+  expr = EmptyTree
 }
 --- name-tree-raw end ---
 --- file-table-json start ---

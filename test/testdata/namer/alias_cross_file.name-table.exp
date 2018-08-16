@@ -5,5 +5,6 @@ class ::<root> < ::Object () @ (test/testdata/namer/alias_cross_file__02.rb:2, h
   class ::TestSig < ::Object () @ test/testdata/namer/alias_cross_file__01.rb:2
     method ::TestSig#<static-init> () @ test/testdata/namer/alias_cross_file__01.rb:3
     method ::TestSig#test_resolve () -> T1 @ test/testdata/namer/alias_cross_file__01.rb:4
+  method #<static-init> () @ ???
   static-field #T2 -> AliasType { symbol = ::T1 } @ test/testdata/namer/alias_cross_file__02.rb:3
 

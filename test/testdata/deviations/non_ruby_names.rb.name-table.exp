@@ -6,5 +6,7 @@ class ::<root> < ::Object () @ (test/testdata/deviations/non_ruby_names.rb:2, ht
     class ::A::B () @ test/testdata/deviations/non_ruby_names.rb:7
       class ::A::B::<Class:C> < ::<Class:Object> () @ test/testdata/deviations/non_ruby_names.rb:7
       class ::A::B::C < ::Object () @ test/testdata/deviations/non_ruby_names.rb:7
+    method ::A#<static-init> () @ test/testdata/deviations/non_ruby_names.rb:7
   class ::B (<constant:BasicObject>) @ test/testdata/deviations/non_ruby_names.rb:2
+  method #<static-init> () @ ???
 

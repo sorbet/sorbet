@@ -37,4 +37,5 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
       argument ::A#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:56
   class ::T1 < ::Object () @ test/testdata/resolver/sig_misc.rb:2
   class ::T2 < ::Object () @ test/testdata/resolver/sig_misc.rb:3
+  method #<static-init> () @ ???
 

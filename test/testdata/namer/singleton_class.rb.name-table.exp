@@ -7,4 +7,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/singleton_class.rb:2, https:
       class ::A::B::C < ::Object () @ test/testdata/namer/singleton_class.rb:2
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/namer/singleton_class.rb:5
+  method #<static-init> () @ ???
 

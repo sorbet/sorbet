@@ -4,20 +4,6 @@ begin
 
     <emptyTree>
 
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
-    <emptyTree>
-
     def main<main>()
       begin
         self(<constant:Object>).puts(::A.a())
@@ -33,7 +19,35 @@ begin
 
     def self.<static-init><<static-init>$74>()
       begin
+        begin
+          ::RubyTyper.keep_for_ide(::A)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::B)
+          <emptyTree>
+        end
         #$c = ::Object.new()
+        begin
+          ::RubyTyper.keep_for_ide(::D)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::E)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::F)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::G)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::H)
+          <emptyTree>
+        end
         self(<singleton class:<constant:<root>>>).main()
         <emptyTree>
       end
@@ -41,7 +55,11 @@ begin
   end
   class ::A<<constant:A>> < (::<todo sym>)  end
   class ::B<<constant:B>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<singleton class:<constant:B>>> < ()
     def b<b>()
@@ -49,10 +67,18 @@ begin
     end
   end
   class ::D<<constant:D>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<singleton class:<constant:D>>> < ()
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<singleton class:<singleton class:<constant:D>>>> < ()
     def d<d>()
@@ -60,12 +86,14 @@ begin
     end
   end
   class ::E<<constant:E>> < (::<todo sym>)
-    <emptyTree>
-
-    <emptyTree>
-
     def self.<static-init><<static-init>>()
-      self(<singleton class:<constant:E>>).wrapper()
+      begin
+        begin
+          <emptyTree>
+        end
+        self(<singleton class:<constant:E>>).wrapper()
+        <emptyTree>
+      end
     end
   end
   class <singleton class><<singleton class:<constant:E>>> < ()
@@ -80,7 +108,11 @@ begin
     end
   end
   class ::F<<constant:F>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<singleton class:<constant:F>>> < ()
     <emptyTree>
@@ -108,7 +140,9 @@ begin
 
     def wrapper<wrapper>()
       begin
-        <emptyTree>
+        begin
+          <emptyTree>
+        end
         self(<constant:G>).inner()
       end
     end
@@ -123,10 +157,19 @@ begin
     end
   end
   class ::H<<constant:H>> < (::<todo sym>)
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        <emptyTree>
+      end
+    end
   end
   class <singleton class><<singleton class:<constant:H>>> < ()
-    <emptyTree>
+    def self.<static-init><<static-init>>()
+      begin
+        ::RubyTyper.keep_for_ide(::<Class:H>::H2)
+        <emptyTree>
+      end
+    end
   end
   class ::<Class:H>::H2<<constant:H2>> < (::<todo sym>)
     def self.h<h>()

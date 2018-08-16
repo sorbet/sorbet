@@ -275,12 +275,16 @@ public:
                     klass->rhs.emplace_back(ast::MK::KeepForIDE(anc->deepCopy()));
                 }
             }
-            if (klass->kind == ast::Class && shouldLeaveAncestorForIDE(klass->ancestors.front())) {
-                return ast::MK::InsSeq1(klass->loc, ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()),
-                                        move(klass));
-            }
         }
-        return klass;
+        ast::InsSeq::STATS_store ideSeqs;
+        if (ast::isa_tree<ast::ConstantLit>(klass->name.get())) {
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->name->deepCopy()));
+        }
+        if (klass->kind == ast::Class && !klass->ancestors.empty() &&
+            shouldLeaveAncestorForIDE(klass->ancestors.front())) {
+            ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
+        }
+        return ast::MK::InsSeq(klass->loc, move(ideSeqs), move(klass));
     }
 
     core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {

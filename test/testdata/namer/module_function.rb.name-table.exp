@@ -15,4 +15,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/module_function.rb:2, https:
       argument ::Funcs#g#s<> -> Symbol @ test/testdata/namer/module_function.rb:10
     method ::Funcs#h (s) -> String @ test/testdata/namer/module_function.rb:16
       argument ::Funcs#h#s<> -> String @ test/testdata/namer/module_function.rb:15
+  method #<static-init> () @ ???
 

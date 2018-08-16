@@ -12,6 +12,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/simple.rb:2, https://git.cor
     class ::ANamespace::<Class:ObviousChild> < ::<Class:Object> () @ test/testdata/namer/simple.rb:14
     class ::ANamespace::ClassInNamespace < ::Object () @ test/testdata/namer/simple.rb:17
     class ::ANamespace::ObviousChild < ::Object () @ test/testdata/namer/simple.rb:14
+    method ::ANamespace#<static-init> () @ test/testdata/namer/simple.rb:14
   class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/namer/simple.rb:26
     method ::Child#<static-init> () @ test/testdata/namer/simple.rb:26
   class ::Mixin (<constant:BasicObject>) @ test/testdata/namer/simple.rb:22
@@ -20,6 +21,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/simple.rb:2, https://git.cor
     class ::NormalClass::<Class:InnerModule> < ::Module () @ test/testdata/namer/simple.rb:9
     class ::NormalClass::InnerClass < ::Object () @ test/testdata/namer/simple.rb:7
     class ::NormalClass::InnerModule (<constant:BasicObject>) @ test/testdata/namer/simple.rb:9
+    method ::NormalClass#<static-init> () @ test/testdata/namer/simple.rb:2
     method ::NormalClass#normal_method () @ test/testdata/namer/simple.rb:3
   class ::OtherMixin (<constant:BasicObject>) @ test/testdata/namer/simple.rb:24
   class ::Parent < ::Object () @ test/testdata/namer/simple.rb:20

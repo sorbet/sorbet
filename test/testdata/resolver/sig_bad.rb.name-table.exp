@@ -26,4 +26,5 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_bad.rb:2, https://git
       argument ::A#bad#o<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:26
   class ::T1 < ::Object () @ test/testdata/resolver/sig_bad.rb:2
   class ::T2 < ::Object () @ test/testdata/resolver/sig_bad.rb:3
+  method #<static-init> () @ ???
 

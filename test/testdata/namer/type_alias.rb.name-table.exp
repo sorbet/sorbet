@@ -3,7 +3,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
   class ::A (<constant:BasicObject>) @ test/testdata/namer/type_alias.rb:2
     class ::A::<Class:C1> < ::<Class:Object> () @ test/testdata/namer/type_alias.rb:5
     class ::A::C1 < ::Object () @ test/testdata/namer/type_alias.rb:5
-    method ::A#<static-init> () @ test/testdata/namer/type_alias.rb:8
+    method ::A#<static-init> () @ test/testdata/namer/type_alias.rb:2
     method ::A#f (x) -> NilClass @ test/testdata/namer/type_alias.rb:9
       argument ::A#f#x<> -> A::C1 @ test/testdata/namer/type_alias.rb:8
     static-field ::A#C2 -> AliasType { symbol = ::A::C1 } @ test/testdata/namer/type_alias.rb:6
