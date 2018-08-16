@@ -120,12 +120,17 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
     }
 
     // &foo => {|*args| foo.to_proc.call(*args) }
+
+    // NOTE(nelhage): We don't currently implement splats properly, so
+    // `foo.to_proc.call(*args)` will only ever work by accident. For now, don't
+    // call the proc, just invoke `to_proc` so we get *some* typechecking.
     auto proc = MK::Send0(loc, move(expr), core::Names::to_proc());
     MethodDef::ARGS_store args;
     unique_ptr<Expression> rest = make_unique<RestArg>(loc, MK::Local(loc, temp));
     args.emplace_back(move(rest));
-    unique_ptr<Expression> body = MK::Send1(loc, move(proc), core::Names::call(), MK::Splat(loc, MK::Local(loc, temp)));
-    return make_unique<Block>(loc, move(args), move(body));
+    // unique_ptr<Expression> body = MK::Send1(loc, move(proc), core::Names::call(), MK::Splat(loc, MK::Local(loc,
+    // temp)));
+    return make_unique<Block>(loc, move(args), move(proc));
 }
 
 unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {

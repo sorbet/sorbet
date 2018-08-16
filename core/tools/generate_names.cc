@@ -108,7 +108,7 @@ NameDef names[] = {
     {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver | DSL},
     {"nilable", Resolver | Desugar | Infer | Core},
-    {"proc", Resolver | Desugar},
+    {"proc", Core | Resolver | Desugar},
     {"untyped", Resolver | Infer | Core},
     {"Array", Infer},
     {"Hash", Infer},
@@ -219,7 +219,7 @@ NameDef names[] = {
     //  |(x,y)|; end
     {"destructureArg", "<destructure>", Desugar},
 
-    {"lambda", Parser | DSL},
+    {"lambda", Core | Parser | DSL},
     {"nil_p", "nil?", Desugar | Infer},
     {"present_p", "present?", Infer},
     {"nil", DSL | Infer},

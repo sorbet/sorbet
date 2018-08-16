@@ -1292,6 +1292,33 @@ public:
         return Types::arrayOf(ctx, ret);
     }
 } Array_compact;
+
+class Kernel_proc : public Symbol::IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
+                           vector<Loc> &argLocs, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
+                           shared_ptr<SendAndBlockLink> linkType) const override {
+        if (linkType == nullptr) {
+            return core::Types::untyped();
+        }
+
+        int arity = 0;
+        for (auto arg : linkType->block.data(ctx).arguments()) {
+            if (arg.data(ctx).isKeyword() || arg.data(ctx).isBlockArgument() || arg.data(ctx).isOptional() ||
+                arg.data(ctx).isRepeated()) {
+                return core::Types::procClass();
+            }
+            ++arity;
+        }
+        if (arity > core::Symbols::MAX_PROC_ARITY) {
+            return core::Types::procClass();
+        }
+        vector<shared_ptr<core::Type>> targs(arity + 1, core::Types::untyped());
+        auto procClass = core::Symbols::Proc(arity);
+        return make_shared<core::AppliedType>(procClass, targs);
+    }
+} Kernel_proc;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -1328,6 +1355,9 @@ const vector<Intrinsic> intrinsicMethods{
 
     {Symbols::Array(), false, Names::flatten(), &Array_flatten},
     {Symbols::Array(), false, Names::compact(), &Array_compact},
+
+    {Symbols::Kernel(), false, Names::proc(), &Kernel_proc},
+    {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
 };
 
 } // namespace core
