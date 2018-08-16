@@ -142,6 +142,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
             [&](ast::ConstantLit *a) {
+                if (a->original) {
+                    if (auto nested = ast::cast_tree<ast::ConstantLit>(a->original->scope.get())) {
+                        core::LocalVariable deadSym = cctx.newTemporary(core::Names::keepForIde());
+                        current = walk(cctx.withTarget(deadSym), nested, current);
+                    }
+                }
                 if (a->symbol.exists()) {
                     current->exprs.emplace_back(
                         cctx.target, a->loc,
