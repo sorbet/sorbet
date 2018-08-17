@@ -152,6 +152,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("stop-after", all_stop_after.str(),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -309,6 +310,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
         opts.storeState = raw["store-state"].as<string>();
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
+        opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.silenceErrors = raw["q"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
