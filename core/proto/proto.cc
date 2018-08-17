@@ -109,7 +109,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         *symbolProto.add_locs() = toProto(gs, loc);
     }
 
-    vector<pair<string, com::stripe::rubytyper::Symbol>> children;
+    vector<pair<absl::string_view, com::stripe::rubytyper::Symbol>> children;
     for (auto pair : data.members) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
@@ -120,13 +120,13 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             continue;
         }
 
-        children.emplace_back(pair.second.data(gs).show(gs), toProto(gs, pair.second));
+        children.emplace_back(pair.first.data(gs).shortName(gs), toProto(gs, pair.second));
     }
-    auto by_name = [](pair<string, com::stripe::rubytyper::Symbol> const &a,
-                      pair<string, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
+    auto by_name = [](pair<absl::string_view, com::stripe::rubytyper::Symbol> const &a,
+                      pair<absl::string_view, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
     sort(children.begin(), children.end(), by_name);
     for (auto pair : children) {
-        *symbolProto.add_children() = pair.second;
+        *symbolProto.add_children() = move(pair.second);
     }
     return symbolProto;
 }
