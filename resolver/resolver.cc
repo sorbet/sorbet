@@ -210,6 +210,9 @@ private:
                                                "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
                     } else {
                         auto suggested = scope.data(ctx).findMemberFuzzyMatch(ctx, missingConstant->original->cnst);
+                        if (suggested.size() > 3) {
+                            suggested.resize(3);
+                        }
                         if (!suggested.empty()) {
                             vector<core::ErrorLine> lines;
                             for (auto suggestion : suggested) {

@@ -4,10 +4,22 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L103: Did you mean: `::Enumerator::Yielder`?
      103 |class Enumerator::Yielder < Object
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `::Ripper`?
+     3 |class Ripper
+        ^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/dir.rbi#L2: Did you mean: `::Dir`?
+     2 |class Dir < Object
+        ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L43: Did you mean: `::Date`?
+    43 |class Date::Infinity < Numeric
+              ^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/range.rbi#L2: Did you mean: `::Range`?
+     2 |class Range < Object
+        ^^^^^^^^^^^^^^^^^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/integer.rbi#L2: Did you mean: `::Integer`?
      2 |class Integer < Numeric
         ^^^^^^^^^^^^^^^^^^^^^^^
@@ -15,6 +27,12 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L647: Did you mean: `::IO`?
+     647 |class IO::EAGAINWaitReadable < Errno::EAGAIN
+                ^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/set.rbi#L2: Did you mean: `::Set`?
+     2 |class Set < Object
+        ^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:7: Unable to resolve constant `Constant` http://go/e/5002
      7 |module A::B; Constant; end

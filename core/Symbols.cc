@@ -260,7 +260,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                         ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
-                        if (thisDistance < best.distance) {
+                        if (thisDistance <= best.distance) {
                             best.distance = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
@@ -274,12 +274,18 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
         } while (best.distance > 0 && base.data(gs).owner.exists() && base != Symbols::root());
     }
 
+    // make sure we have a stable order
+    sort(result.begin(), result.end(), [&](auto lhs, auto rhs) -> bool {
+        return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.symbol._id < rhs.symbol._id);
+    });
+
     if (best.distance > 0) {
         // find the closest by global dfs.
-        auto globalBest = best;
+        auto globalBestDistance = best.distance - 1;
+        vector<Symbol::FuzzySearchResult> globalBest;
         vector<SymbolRef> yetToGoDeeper;
         yetToGoDeeper.emplace_back(Symbols::root());
-        while (globalBest.distance > 0 && !yetToGoDeeper.empty()) {
+        while (!yetToGoDeeper.empty()) {
             const SymbolRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.data(gs).isClass());
@@ -289,10 +295,15 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                     ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
                     auto thisDistance = Levenstein::distance(
                         currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
-                    if (thisDistance < globalBest.distance) {
-                        globalBest.distance = thisDistance;
-                        globalBest.symbol = member.second;
-                        globalBest.name = member.first;
+                    if (thisDistance <= globalBestDistance) {
+                        if (thisDistance < globalBestDistance) {
+                            globalBest.clear();
+                        }
+                        globalBestDistance = thisDistance;
+                        best.distance = thisDistance;
+                        best.symbol = member.second;
+                        best.name = member.first;
+                        globalBest.emplace_back(best);
                     }
                     if (member.second.data(gs).isClass()) {
                         yetToGoDeeper.emplace_back(member.second);
@@ -300,10 +311,11 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 }
             }
         }
-        if (best.symbol != globalBest.symbol) {
-            result.emplace_back(globalBest);
+        for (auto e : globalBest) {
+            result.emplace_back(e);
         }
     }
+    reverse(result.begin(), result.end());
     return result;
 }
 
@@ -326,7 +338,8 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
         }
         auto utf8 = thisName.data(gs).raw.utf8;
         int thisDistance = Levenstein::distance(currentName, utf8, result.distance);
-        if (thisDistance < result.distance) {
+        if (thisDistance < result.distance ||
+            (thisDistance == result.distance && result.symbol._id > pair.second._id)) {
             result.distance = thisDistance;
             result.name = thisName;
             result.symbol = pair.second;

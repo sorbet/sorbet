@@ -180,6 +180,8 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                     findSimilarMethodsIn(receiverType, pattern);
                 for (auto &entry : methods) {
                     if (entry.second[0].exists()) {
+                        sort(entry.second.begin(), entry.second.end(),
+                             [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
                         addCompletionItem(items, entry.second[0], *resp);
                     }
                 }
