@@ -2,7 +2,6 @@ syntax = "proto3";
 
 package com.stripe.rubytyper;
 import "proto/Name.proto";
-import "proto/Loc.proto";
 
 message Symbol {
     enum Kind {
@@ -43,27 +42,27 @@ message Symbol {
     Name name = 2;
     Kind kind = 3;
 
-    // TYPE_ARGUMENT or TYPE_MEMBER
-    Variance variance = 4;
+//    // TYPE_ARGUMENT or TYPE_MEMBER
+//    Variance variance = 4;
 
-    // CLASS or METHOD
-    Visibility visibility = 5;
+//    // CLASS or METHOD
+//    Visibility visibility = 5;
     int32 superClass = 6;
 
-    // CLASS
-    repeated int32 typeMembers = 7;
+//    // CLASS
+//    repeated int32 typeMembers = 7;
     repeated int32 mixins = 8;
 
     // METHOD
-    repeated int32 typeArguments = 9;
+//    repeated int32 typeArguments = 9;
     repeated int32 arguments = 10;
 
     // METHOD_ARGUMENT
-    repeated Flag flags = 11;
+//    repeated Flag flags = 11;
 
     // ALL
-    string resultType = 12;
+//    string resultType = 12;
     // Loc loc = 13; Replaced by locs = 15
     repeated Symbol children = 14;
-    repeated Loc locs = 15;
+//    repeated Loc locs = 15;
 }

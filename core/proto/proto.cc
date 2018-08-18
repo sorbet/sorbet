@@ -46,38 +46,12 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
-    if (data.isTypeArgument() || data.isTypeMember()) {
-        if (data.isCovariant()) {
-            symbolProto.set_variance(com::stripe::rubytyper::Symbol::COVARIANT);
-        } else if (data.isContravariant()) {
-            symbolProto.set_variance(com::stripe::rubytyper::Symbol::CONTRAVARIANT);
-        } else if (data.isInvariant()) {
-            symbolProto.set_variance(com::stripe::rubytyper::Symbol::INVARIANT);
-        }
-    }
-
     if (data.isClass() || data.isMethod()) {
-        if (data.isMethod()) {
-            if (data.isPrivate()) {
-                symbolProto.set_visibility(com::stripe::rubytyper::Symbol::PRIVATE);
-            } else if (data.isProtected()) {
-                symbolProto.set_visibility(com::stripe::rubytyper::Symbol::PROTECTED);
-            } else {
-                symbolProto.set_visibility(com::stripe::rubytyper::Symbol::PUBLIC);
-            }
-        }
-
         if (data.isClass()) {
-            for (auto thing : data.typeMembers()) {
-                symbolProto.add_typemembers(thing._id);
-            }
             for (auto thing : data.mixins()) {
                 symbolProto.add_mixins(thing._id);
             }
         } else {
-            for (auto thing : data.typeArguments()) {
-                symbolProto.add_typearguments(thing._id);
-            }
             for (auto thing : data.arguments()) {
                 symbolProto.add_arguments(thing._id);
             }
@@ -86,27 +60,6 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         if (data.superClass.exists()) {
             symbolProto.set_superclass(data.superClass._id);
         }
-    }
-
-    if (data.isMethodArgument()) {
-        vector<pair<int, com::stripe::rubytyper::Symbol_Flag>> methodFlags = {
-            {Symbol::Flags::ARGUMENT_OPTIONAL, com::stripe::rubytyper::Symbol::OPTIONAL},
-            {Symbol::Flags::ARGUMENT_KEYWORD, com::stripe::rubytyper::Symbol::KEYWORD},
-            {Symbol::Flags::ARGUMENT_REPEATED, com::stripe::rubytyper::Symbol::REPEATED},
-            {Symbol::Flags::ARGUMENT_BLOCK, com::stripe::rubytyper::Symbol::BLOCK},
-        };
-        for (auto &flag : methodFlags) {
-            if ((data.flags & flag.first) != 0) {
-                symbolProto.add_flags(flag.second);
-            }
-        }
-    }
-    if (data.resultType) {
-        symbolProto.set_resulttype(data.resultType->show(gs));
-    }
-
-    for (auto loc : data.locs()) {
-        *symbolProto.add_locs() = toProto(gs, loc);
     }
 
     vector<pair<absl::string_view, com::stripe::rubytyper::Symbol>> children;
