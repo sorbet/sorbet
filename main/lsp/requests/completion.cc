@@ -178,7 +178,14 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                 logger->debug("Looking for method similar to {}", pattern);
                 UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
                     findSimilarMethodsIn(receiverType, pattern);
-                for (auto &entry : methods) {
+                vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
+                methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
+                                     make_move_iterator(methods.end()));
+                sort(methodsSorted.begin(), methodsSorted.end(), [&](auto leftPair, auto rightPair) -> bool {
+                    return leftPair.first.data(*finalGs).shortName(*finalGs) <
+                           rightPair.first.data(*finalGs).shortName(*finalGs);
+                });
+                for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
                         sort(entry.second.begin(), entry.second.end(),
                              [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
