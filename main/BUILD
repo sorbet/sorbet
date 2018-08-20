@@ -29,6 +29,7 @@ cc_binary(
         "realmain",
         "//payload/binary:some",
         "//payload/text:empty",
+        "@com_google_absl//absl/debugging:failure_signal_handler",
     ],
 )
 
@@ -47,6 +48,7 @@ cc_binary(
         "realmain",
         "//payload/binary:empty",
         "//payload/text:some",
+        "@com_google_absl//absl/debugging:failure_signal_handler",
     ],
 )
 
