@@ -1,7 +1,7 @@
 config_setting(
-    name = "can-use-jemalloc",
+    name = "jemalloc",
     values = {
-        "define": "unsanitized=true",
+        "define": "jemalloc=true",
         "compilation_mode": "opt",
     },
 )
@@ -21,7 +21,7 @@ cc_binary(
         "//conditions:default": 1,
     }),
     malloc = select({
-        ":can-use-jemalloc": "@jemalloc//:jemalloc",
+        ":jemalloc": "@jemalloc//:jemalloc",
         "//conditions:default": "@bazel_tools//tools/cpp:malloc",
     }),
     visibility = ["//visibility:public"],

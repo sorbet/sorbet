@@ -4,6 +4,9 @@
 
 #include "absl/strings/str_cat.h"
 
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/util/type_resolver_util.h>
+
 using namespace std;
 
 namespace sorbet {
@@ -218,10 +221,36 @@ string Proto::toJSON(const google::protobuf::Message &message) {
     string json_string;
     google::protobuf::util::JsonPrintOptions options;
     options.add_whitespace = true;
-    options.always_print_primitive_fields = true;
+    options.always_print_primitive_fields = false;
     options.preserve_proto_field_names = true;
     google::protobuf::util::MessageToJsonString(message, &json_string, options);
     return json_string;
+}
+
+const char *kTypeUrlPrefix = "type.googleapis.com";
+
+void Proto::toJSON(const google::protobuf::Message &message, std::ostream &out) {
+    string binaryProto;
+    message.SerializeToString(&binaryProto);
+
+    google::protobuf::io::ArrayInputStream istream(binaryProto.data(), binaryProto.size());
+    google::protobuf::io::OstreamOutputStream ostream(&out);
+
+    google::protobuf::util::JsonPrintOptions options;
+    options.add_whitespace = true;
+    options.always_print_primitive_fields = false;
+    options.preserve_proto_field_names = true;
+
+    const google::protobuf::DescriptorPool *pool = message.GetDescriptor()->file()->pool();
+    unique_ptr<google::protobuf::util::TypeResolver> resolver(
+        google::protobuf::util::NewTypeResolverForDescriptorPool(kTypeUrlPrefix, pool));
+
+    string url = absl::StrCat(kTypeUrlPrefix, "/", message.GetDescriptor()->full_name());
+    auto status = google::protobuf::util::BinaryToJsonStream(resolver.get(), url, &istream, &ostream, options);
+    if (!status.ok()) {
+        cerr << "error converting to proto json: " << status.error_message() << "\n";
+        abort();
+    }
 }
 
 } // namespace core

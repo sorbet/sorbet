@@ -38,6 +38,7 @@ build:dbg --config=nopie
 
 # release version: optimized, with debug symbols and version information
 build:release --define release=true
+build:release --define jemalloc=true
 build:release --compilation_mode=opt
 build:release --config=debugsymbols
 build:release --config=nopie
@@ -53,6 +54,7 @@ build:ci --cxxopt=-g3
 build:ci --config=sanitize
 build:ci --copt=-O2
 build:ci --cxxopt=-O2
+build:ci --define jemalloc=true
 build:ci --config=debugsymbols
 build:ci --config=nopie
 

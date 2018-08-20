@@ -3,6 +3,8 @@
 
 #include "core/core.h"
 
+#include <fstream>
+
 #include <google/protobuf/util/json_util.h>
 
 #include "proto/File.pb.h"
@@ -27,6 +29,7 @@ public:
                                                                         absl::string_view prefix);
 
     static std::string toJSON(const google::protobuf::Message &message);
+    static void toJSON(const google::protobuf::Message &message, std::ostream &out);
 };
 } // namespace core
 } // namespace sorbet
