@@ -1197,7 +1197,9 @@ shared_ptr<Type> MetaType::_instantiate(Context ctx, vector<SymbolRef> params, c
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {}
+MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {
+    core::categoryCounterInc("types.allocated", "metattype");
+}
 
 shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver

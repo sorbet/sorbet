@@ -487,7 +487,7 @@ public:
     // .underlying is always a ClassType
     SymbolRef klass;
     std::vector<std::shared_ptr<Type>> targs;
-    AppliedType(SymbolRef klass, std::vector<std::shared_ptr<Type>> targs) : klass(klass), targs(targs){};
+    AppliedType(SymbolRef klass, std::vector<std::shared_ptr<Type>> targs);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
