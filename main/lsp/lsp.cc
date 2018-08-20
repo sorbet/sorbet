@@ -1,4 +1,5 @@
 #include "lsp.h"
+#include "absl/algorithm/container.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
@@ -99,7 +100,7 @@ void LSPLoop::pushErrors() {
     drainErrors();
 
     // Dedup updates
-    sort(updatedErrors.begin(), updatedErrors.end());
+    absl::c_sort(updatedErrors);
     updatedErrors.erase(unique(updatedErrors.begin(), updatedErrors.end()), updatedErrors.end());
 
     for (auto file : updatedErrors) {

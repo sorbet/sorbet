@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -49,7 +50,7 @@ string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     if (ext == "rb") {
         res.erase(res.end() - ext.size() - 1, res.end());
     }
-    replace(res.begin(), res.end(), '/', '_');
+    absl::c_replace(res, '/', '_');
     return res;
 }
 
@@ -579,7 +580,7 @@ vector<Expectations> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    sort(names.begin(), names.end(), compareNames);
+    absl::c_sort(names, compareNames);
 
     Expectations current;
     for (auto &s : names) {

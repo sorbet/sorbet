@@ -6,6 +6,7 @@
 #include <algorithm> // find_if, sort
 #include <unordered_set>
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
 template class std::vector<sorbet::core::SymbolRef>;
@@ -70,10 +71,8 @@ DispatchResult AndType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc
     auto rightRet = right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, block);
 
     // If either side is missing the method, dispatch to the other.
-    auto leftOk =
-        all_of(leftRet.components.begin(), leftRet.components.end(), [&](auto &comp) { return comp.method.exists(); });
-    auto rightOk = all_of(rightRet.components.begin(), rightRet.components.end(),
-                          [&](auto &comp) { return comp.method.exists(); });
+    auto leftOk = absl::c_all_of(leftRet.components, [&](auto &comp) { return comp.method.exists(); });
+    auto rightOk = absl::c_all_of(rightRet.components, [&](auto &comp) { return comp.method.exists(); });
     if (leftOk && !rightOk) {
         return leftRet;
     }
@@ -236,7 +235,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary, vecto
             }
         }
 
-        sort(allCandidates.begin(), allCandidates.end(), [&](SymbolRef s1, SymbolRef s2) -> bool {
+        absl::c_sort(allCandidates, [&](SymbolRef s1, SymbolRef s2) -> bool {
             if (getArity(ctx, s1) < getArity(ctx, s2)) {
                 return true;
             }
@@ -311,7 +310,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary, vecto
             Comp(Context ctx) : ctx(ctx){};
         } cmp(ctx);
 
-        auto er = equal_range(leftCandidates.begin(), leftCandidates.end(), args.size(), cmp);
+        auto er = absl::c_equal_range(leftCandidates, args.size(), cmp);
         if (er.first != leftCandidates.end()) {
             leftCandidates.erase(leftCandidates.begin(), er.first);
         }
@@ -488,8 +487,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     if (data.isGenericMethod()) {
         constr->defineDomain(ctx, data.typeArguments());
     }
-    bool hasKwargs = any_of(data.arguments().begin(), data.arguments().end(),
-                            [&ctx](SymbolRef arg) { return arg.data(ctx).isKeyword(); });
+    bool hasKwargs = absl::c_any_of(data.arguments(), [&ctx](SymbolRef arg) { return arg.data(ctx).isKeyword(); });
 
     auto pit = data.arguments().begin();
     auto pend = data.arguments().end();
@@ -591,7 +589,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 }
                 ++kwit;
 
-                auto arg = find_if(hash->keys.begin(), hash->keys.end(), [&](shared_ptr<LiteralType> lit) {
+                auto arg = absl::c_find_if(hash->keys, [&](shared_ptr<LiteralType> lit) {
                     return cast_type<ClassType>(lit->underlying.get())->symbol == Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
@@ -1052,7 +1050,7 @@ public:
             return Types::arrayOfUntyped();
         }
         vector<shared_ptr<Type>> elems;
-        bool isType = any_of(args.begin(), args.end(), [ctx](auto ty) { return isa_type<MetaType>(ty.type.get()); });
+        bool isType = absl::c_any_of(args, [ctx](auto ty) { return isa_type<MetaType>(ty.type.get()); });
         int i = -1;
         for (auto &elem : args) {
             ++i;
@@ -1216,7 +1214,7 @@ public:
         auto values = shape->values;
         for (auto &key : rhs->keys) {
             auto &value = rhs->values[&key - &rhs->keys.front()];
-            auto fnd = find_if(keys.begin(), keys.end(), [&key](auto &lit) { return key->equals(lit); });
+            auto fnd = absl::c_find_if(keys, [&key](auto &lit) { return key->equals(lit); });
             if (fnd == keys.end()) {
                 keys.emplace_back(key);
                 values.emplace_back(value);

@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
 
@@ -80,7 +81,7 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
                     return;
                 }
                 string call_str = (string)src.substr(sendLocIndex, loc->endPos - sendLocIndex);
-                int numberCommas = count(call_str.begin(), call_str.end(), ',');
+                int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
                 // 2nd arg)
                 result.AddMember("activeParameter", numberCommas, alloc);

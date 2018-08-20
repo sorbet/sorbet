@@ -1,4 +1,5 @@
 #include "environment.h"
+#include "absl/algorithm/container.h"
 #include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
 
@@ -92,8 +93,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
         if (enteringLoop && bb->outerLoops <= inWhat.maxLoopWrite[local]) {
             continue;
         }
-        auto fnd = find_if(copy->yesTypeTests.begin(), copy->yesTypeTests.end(),
-                           [&](auto const &e) -> bool { return e.first == local; });
+        auto fnd = absl::c_find_if(copy->yesTypeTests, [&](auto const &e) -> bool { return e.first == local; });
         if (fnd == copy->yesTypeTests.end()) {
             // add info from env to knowledge
             ENFORCE(state.typeAndOrigins.type.get() != nullptr);
@@ -140,8 +140,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
     for (auto it = yesTypeTests.begin(); it != yesTypeTests.end(); /* nothing */) {
         auto &entry = *it;
         core::LocalVariable local = entry.first;
-        auto fnd = find_if(other.yesTypeTests.begin(), other.yesTypeTests.end(),
-                           [&](auto const &elem) -> bool { return elem.first == local; });
+        auto fnd = absl::c_find_if(other.yesTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
         if (fnd == other.yesTypeTests.end()) {
             it = yesTypeTests.erase(it);
         } else {
@@ -152,8 +151,7 @@ void KnowledgeFact::min(core::Context ctx, const KnowledgeFact &other) {
     for (auto it = noTypeTests.begin(); it != noTypeTests.end(); /* nothing */) {
         auto &entry = *it;
         core::LocalVariable local = entry.first;
-        auto fnd = find_if(other.noTypeTests.begin(), other.noTypeTests.end(),
-                           [&](auto const &elem) -> bool { return elem.first == local; });
+        auto fnd = absl::c_find_if(other.noTypeTests, [&](auto const &elem) -> bool { return elem.first == local; });
         if (fnd == other.noTypeTests.end()) {
             it = noTypeTests.erase(it);
         } else {
@@ -239,7 +237,7 @@ string Environment::toString(core::Context ctx) const {
     for (const auto &pair : vars) {
         sorted.emplace_back(pair);
     }
-    sort(sorted.begin(), sorted.end(), [](const auto &lhs, const auto &rhs) -> bool {
+    absl::c_sort(sorted, [](const auto &lhs, const auto &rhs) -> bool {
         return lhs.first._name.id() < rhs.first._name.id() ||
                (lhs.first._name.id() == rhs.first._name.id() && lhs.first.unique < rhs.first.unique);
     });
@@ -624,7 +622,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type->sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
-                if (find(thisTO.origins.begin(), thisTO.origins.end(), origin) == thisTO.origins.end()) {
+                if (!absl::c_linear_search(thisTO.origins, origin)) {
                     thisTO.origins.push_back(origin);
                 }
             }
@@ -692,7 +690,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
                 if (tp.type != nullptr) {
                     tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
                     for (auto origin : otherPin->second.origins) {
-                        if (find(tp.origins.begin(), tp.origins.end(), origin) == tp.origins.end()) {
+                        if (!absl::c_linear_search(tp.origins, origin)) {
                             tp.origins.push_back(origin);
                         }
                     }

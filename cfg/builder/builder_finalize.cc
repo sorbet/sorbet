@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "builder.h"
 #include "core/Names/cfg.h"
 
@@ -37,8 +38,9 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     sanityCheck(ctx, cfg);
                     continue;
                 } else {
-                    sort(bb->backEdges.begin(), bb->backEdges.end(),
-                         [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool { return bb1->id < bb2->id; });
+                    absl::c_sort(bb->backEdges, [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool {
+                        return bb1->id < bb2->id;
+                    });
                     bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
                 }
             }
@@ -116,8 +118,8 @@ void CFGBuilder::sanityCheck(core::Context ctx, CFG &cfg) {
         if (bb.get() != cfg.entry()) {
             ENFORCE((bb->flags & CFG::WAS_JUMP_DESTINATION) != 0, "block ", bb->id, " was never linked into cfg");
         }
-        auto thenFnd = find(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
-        auto elseFnd = find(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
+        auto thenFnd = absl::c_find(bb->bexit.thenb->backEdges, bb.get());
+        auto elseFnd = absl::c_find(bb->bexit.elseb->backEdges, bb.get());
         ENFORCE(thenFnd != bb->bexit.thenb->backEdges.end(), "backedge unset for thenb");
         ENFORCE(elseFnd != bb->bexit.elseb->backEdges.end(), "backedge unset for elseb");
     }
@@ -401,7 +403,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
                 it->args.push_back(el);
             }
         }
-        sort(it->args.begin(), it->args.end());
+        absl::c_sort(it->args);
         core::histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
 }

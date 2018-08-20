@@ -1,4 +1,5 @@
 #include "core/Counters.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "core/Counters_impl.h"
 #include "core/Names.h"
@@ -169,7 +170,7 @@ bool shouldShow(vector<string> &wantNames, string name) {
     if (wantNames == Counters::ALL_COUNTERS) {
         return true;
     }
-    return find(wantNames.begin(), wantNames.end(), name) != wantNames.end();
+    return absl::c_linear_search(wantNames, name);
 }
 
 string getCounterStatistics(vector<string> names) {
@@ -189,7 +190,7 @@ string getCounterStatistics(vector<string> names) {
             sum += e.second;
             sorted.emplace_back(e.second, e.first);
         }
-        sort(sorted.begin(), sorted.end(), [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
+        absl::c_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
         buf << " " << cat.first << "    Total: " << sum << '\n';
         if (sum == 0) {
@@ -262,8 +263,7 @@ string getCounterStatistics(vector<string> names) {
             string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + "\n";
             sortedOther.emplace_back(e.first, line);
         }
-        sort(sortedOther.begin(), sortedOther.end(),
-             [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+        absl::c_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         for (auto &e : sortedOther) {
             buf << e.second;

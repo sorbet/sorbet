@@ -1,5 +1,6 @@
 #include "options.h"
 #include "FileFlatMapper.h"
+#include "absl/algorithm/container.h"
 #include "core/Errors.h"
 #include "rang.hpp"
 #include "spdlog/fmt/ostr.h"
@@ -336,8 +337,8 @@ void readOptions(Options &opts, int argc, char *argv[],
                               "` and `-p typed-source` are incompatible. Either print out one file or all files.");
                 throw EarlyReturnWithCode(1);
             }
-            auto found = any_of(opts.inputFileNames.begin(), opts.inputFileNames.end(),
-                                [&](string &path) { return path.find(opts.typedSource) != string::npos; });
+            auto found = absl::c_any_of(
+                opts.inputFileNames, [&](const string &path) { return path.find(opts.typedSource) != string::npos; });
             if (!found) {
                 logger->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
                 throw EarlyReturnWithCode(1);

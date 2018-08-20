@@ -6,15 +6,16 @@
 #include <string>
 #include <vector>
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h"
 #include "version/version.h"
 
 using namespace std;
 
 string sourceName2funcName(string sourceName) {
-    replace(sourceName.begin(), sourceName.end(), '.', '_');
-    replace(sourceName.begin(), sourceName.end(), '/', '_');
-    replace(sourceName.begin(), sourceName.end(), '-', '_');
+    absl::c_replace(sourceName, '.', '_');
+    absl::c_replace(sourceName, '/', '_');
+    absl::c_replace(sourceName, '-', '_');
     return sourceName;
 }
 

@@ -3,6 +3,7 @@
 #include <sstream>
 #include <unordered_set>
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 
@@ -92,8 +93,8 @@ void CFG::sanityCheck(core::Context ctx) {
             continue;
         }
 
-        auto thenCount = count(bb->bexit.thenb->backEdges.begin(), bb->bexit.thenb->backEdges.end(), bb.get());
-        auto elseCount = count(bb->bexit.elseb->backEdges.begin(), bb->bexit.elseb->backEdges.end(), bb.get());
+        auto thenCount = absl::c_count(bb->bexit.thenb->backEdges, bb.get());
+        auto elseCount = absl::c_count(bb->bexit.elseb->backEdges, bb.get());
         ENFORCE(thenCount == 1, "bb id=", bb->id, "; then has ", thenCount, " back edges");
         ENFORCE(elseCount == 1, "bb id=", bb->id, "; else has ", elseCount, " back edges");
         if (bb->bexit.thenb == bb->bexit.elseb) {

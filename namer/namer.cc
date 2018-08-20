@@ -1,4 +1,5 @@
 #include "namer/namer.h"
+#include "absl/algorithm/container.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -644,8 +645,7 @@ public:
         }
 
         auto members = onSymbol.data(ctx).typeMembers();
-        auto it =
-            find_if(members.begin(), members.end(), [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
+        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
         if (it != members.end()) {
             if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx).show(ctx));

@@ -6,6 +6,7 @@
 #include "core/errors/errors.h"
 #include <utility>
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 
@@ -448,7 +449,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     flags = flags | Symbol::Flags::TYPE_MEMBER;
     SymbolRef result = enterSymbol(loc, owner, name, flags);
     auto &members = owner.data(*this).typeMembers();
-    if (find(members.begin(), members.end(), result) == members.end()) {
+    if (!absl::c_linear_search(members, result)) {
         members.emplace_back(result);
     }
     return result;
@@ -976,7 +977,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         return false;
     };
     auto sorted = annotations;
-    sort(sorted.begin(), sorted.end(), compare);
+    absl::c_sort(sorted, compare);
 
     auto source = file.data(*this).source();
     string outline(source.begin(), source.end());

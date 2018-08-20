@@ -1,5 +1,6 @@
 #include "pipeline.h"
 #include "ProgressIndicator.h"
+#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
@@ -358,7 +359,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
     auto by_file = [](unique_ptr<ast::Expression> const &a, unique_ptr<ast::Expression> const &b) {
         return a->loc.file < b->loc.file;
     };
-    sort(ret.begin(), ret.end(), by_file);
+    absl::c_sort(ret, by_file);
 
     return ret;
 }

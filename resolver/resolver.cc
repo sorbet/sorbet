@@ -10,6 +10,7 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
 #include <algorithm> // find_if
@@ -544,11 +545,12 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        sort(todo.begin(), todo.end(),
-             [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
+        absl::c_sort(todo,
+                     [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
 
-        sort(todo_ancestors.begin(), todo_ancestors.end(),
-             [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.ancestor->loc, rhs.ancestor->loc); });
+        absl::c_sort(todo_ancestors, [ctx](auto &lhs, auto &rhs) -> bool {
+            return compareLocs(ctx, lhs.ancestor->loc, rhs.ancestor->loc);
+        });
 
         for (auto &job : todo) {
             auto resolved = resolveJob(ctx, job, typeAliases, true);

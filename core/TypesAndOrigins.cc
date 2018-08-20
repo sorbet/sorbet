@@ -1,6 +1,5 @@
 #include "Types.h"
-
-#include <algorithm> // std::sort
+#include "absl/algorithm/container.h"
 
 using namespace std;
 namespace sorbet {
@@ -21,7 +20,7 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
         }
         return false;
     };
-    sort(origins.begin(), origins.end(), compare);
+    absl::c_sort(origins, compare);
     Loc last;
     for (auto o : origins) {
         if (o == last) {

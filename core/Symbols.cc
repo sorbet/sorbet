@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "Hashing.h"
 #include "Types.h"
+#include "absl/algorithm/container.h"
 #include "common/JSON.h"
 #include "core/Names/core.h"
 #include "core/errors/internal.h"
@@ -243,12 +244,12 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             while (i < candidateScopes.size()) {
                 const auto &sym = candidateScopes[i].data(gs);
                 if (sym.superClass.exists()) {
-                    if (find(candidateScopes.begin(), candidateScopes.end(), sym.superClass) == candidateScopes.end()) {
+                    if (!absl::c_linear_search(candidateScopes, sym.superClass)) {
                         candidateScopes.emplace_back(sym.superClass);
                     }
                 }
                 for (auto ancestor : sym.argumentsOrMixins) {
-                    if (find(candidateScopes.begin(), candidateScopes.end(), ancestor) == candidateScopes.end()) {
+                    if (!absl::c_linear_search(candidateScopes, ancestor)) {
                         candidateScopes.emplace_back(ancestor);
                     }
                 }
@@ -275,7 +276,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     }
 
     // make sure we have a stable order
-    sort(result.begin(), result.end(), [&](auto lhs, auto rhs) -> bool {
+    absl::c_sort(result, [&](auto lhs, auto rhs) -> bool {
         return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.symbol._id < rhs.symbol._id);
     });
 
@@ -315,7 +316,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             result.emplace_back(e);
         }
     }
-    reverse(result.begin(), result.end());
+    absl::c_reverse(result);
     return result;
 }
 
@@ -413,7 +414,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
             children.push_back(str);
         }
     }
-    sort(children.begin(), children.end());
+    absl::c_sort(children);
 
     if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
         return "";
@@ -537,7 +538,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
     os << '\n';
 
-    sort(children.begin(), children.end());
+    absl::c_sort(children);
     for (auto row : children) {
         os << row;
     }
@@ -708,7 +709,7 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
             membersOrdered.emplace_back(e.second);
         }
     }
-    sort(membersOrdered.begin(), membersOrdered.end(), [&](auto lhs, auto rhs) -> bool {
+    absl::c_sort(membersOrdered, [&](auto lhs, auto rhs) -> bool {
         return lhs.data(gs).name.data(gs).shortName(gs) < rhs.data(gs).name.data(gs).shortName(gs);
     });
     for (auto e : membersOrdered) {

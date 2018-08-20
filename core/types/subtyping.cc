@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "common/common.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
@@ -297,7 +298,7 @@ shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1, const 
                                 ++i;
                                 auto *u2 = cast_type<ClassType>(el2->underlying.get());
                                 ENFORCE(u2 != nullptr);
-                                auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                     return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                 });
@@ -626,7 +627,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
                                  ++i;
                                  auto *u2 = cast_type<ClassType>(el2->underlying.get());
                                  ENFORCE(u2 != nullptr);
-                                 auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                                 auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
                                      ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                      return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                  });
@@ -1010,7 +1011,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                              ++i;
                              auto *u2 = cast_type<ClassType>(el2->underlying.get());
                              ENFORCE(u2 != nullptr);
-                             auto fnd = find_if(h1->keys.begin(), h1->keys.end(), [&](auto &candidate) -> bool {
+                             auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
                                  ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
                                  return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                              });

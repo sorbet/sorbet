@@ -1,6 +1,8 @@
 #include "Levenstein.h"
+#include "absl/algorithm/container.h"
 #include <numeric> // iota
 #include <vector>
+
 using namespace std;
 
 int sorbet::Levenstein::distance(absl::string_view s1, absl::string_view s2, int bound) noexcept {
@@ -21,7 +23,7 @@ int sorbet::Levenstein::distance(absl::string_view s1, absl::string_view s2, int
     }
 
     vector<int> column(s1len + 1);
-    iota(column.begin(), column.end(), 0);
+    absl::c_iota(column, 0);
 
     for (int x = 1; x <= s2len; x++) {
         column[0] = x;

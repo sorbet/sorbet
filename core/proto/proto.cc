@@ -2,6 +2,7 @@
 #include "common/Random.h"
 #include "core/Counters_impl.h"
 
+#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
 #include <google/protobuf/io/zero_copy_stream_impl.h>
@@ -80,7 +81,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
     }
     auto by_name = [](pair<absl::string_view, com::stripe::rubytyper::Symbol> const &a,
                       pair<absl::string_view, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
-    sort(children.begin(), children.end(), by_name);
+    absl::c_sort(children, by_name);
     for (auto pair : children) {
         *symbolProto.add_children() = move(pair.second);
     }

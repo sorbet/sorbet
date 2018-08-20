@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "rang.hpp"
 
+#include "absl/algorithm/container.h"
 #include <algorithm>
 #include <iterator>
 
@@ -35,7 +36,7 @@ Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;
     }
-    auto it = lower_bound(file.line_breaks().begin(), file.line_breaks().end(), off);
+    auto it = absl::c_lower_bound(file.line_breaks(), off);
     if (it == file.line_breaks().begin()) {
         pos.line = 1;
         pos.column = off + 1;

@@ -1,4 +1,5 @@
 #include "configatron.h"
+#include "absl/algorithm/container.h"
 #include "yaml-cpp/yaml.h"
 #include <cctype>
 #include <dirent.h>
@@ -40,7 +41,7 @@ vector<string> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    sort(names.begin(), names.end());
+    absl::c_sort(names);
 
     closedir(dir);
     return names;
