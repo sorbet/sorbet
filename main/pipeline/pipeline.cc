@@ -231,9 +231,16 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                         mio::shared_mmap_source mmaped = mio::make_mmap_source(fileName, 0, mio::map_entire_file, error,
                                                                                mio::cache_hint::sequential);
                         if (error) {
-                            if (auto e =
-                                    lgs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
-                                e.setHeader("File Not Found: `{}`", fileName);
+                            struct stat st;
+                            int err = stat(fileName.data(), &st);
+                            if (err == 0 && st.st_size == 0) {
+                                // This is an empty file. mio errors on those,
+                                // but we should not.
+                            } else {
+                                if (auto e = lgs->beginError(sorbet::core::Loc::none(),
+                                                             core::errors::Internal::InternalError)) {
+                                    e.setHeader("File Not Found: `{}`", fileName);
+                                }
                             }
                             // continue with an empty source, because the
                             // assertion below requires every input file to map
