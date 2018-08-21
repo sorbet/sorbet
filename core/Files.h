@@ -4,6 +4,7 @@
 #include "Names.h"
 #include "StrictLevel.h"
 #include "absl/strings/string_view.h"
+#include "mio/shared_mmap.hpp"
 #include <string>
 
 namespace sorbet {
@@ -69,19 +70,35 @@ public:
     bool isRBI() const;
 
     File(std::string &&path_, std::string &&source_, Type sourceType);
+    File(std::string &&path_, mio::shared_mmap_source mmapped, Type sourceType);
     File(File &&other) = default;
     File(const File &other) = delete;
     File() = delete;
-    File deepCopy();
+    File withNewSource(std::string &&source_);
+    File withNewSource(mio::shared_mmap_source mmapped);
     std::vector<int> &line_breaks() const;
     int lineCount() const;
     bool hadErrors() const;
 
 private:
-    const std::string path_;
-    const std::string source_;
+    /*
+     * `path_` and `source_` will be references into objects inside this structure.
+     * It should not in generally be directly accessed.
+     */
+    struct {
+        std::shared_ptr<std::string> source;
+        std::shared_ptr<std::string> path;
+        mio::shared_mmap_source mmap;
+    } storage;
+    const absl::string_view path_;
+    const absl::string_view source_;
     mutable std::shared_ptr<std::vector<int>> line_breaks_;
     mutable bool hadErrors_ = false;
+    File(std::shared_ptr<std::string> keepingPathAlive, std::shared_ptr<std::string> keepingSourceAlive,
+         mio::shared_mmap_source keepingMmapAlive, absl::string_view path_, absl::string_view source_,
+         StrictLevel sigil)
+        : storage{keepingSourceAlive, keepingPathAlive, keepingMmapAlive}, path_(path_), source_(source_),
+          sigil(sigil){};
 
 public:
     const StrictLevel sigil;

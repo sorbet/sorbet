@@ -36,6 +36,7 @@ cc_library(
     deps = [
         "//common",
         "@com_google_absl//absl/strings",
+        "@mio",
         "@rang",
     ],
 )
