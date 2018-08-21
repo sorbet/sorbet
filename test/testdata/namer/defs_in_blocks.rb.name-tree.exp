@@ -2,7 +2,7 @@ begin
   class <emptyTree><<constant:<root>>> < ()
     <emptyTree>
 
-    def self.<static-init><<static-init>$74>()
+    def self.<static-init><<static-init>$75>()
       self(<singleton class:<constant:<root>>>).foobar() do ||
         begin
           <emptyTree>
