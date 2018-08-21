@@ -103,7 +103,6 @@ class NameInserter {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
         bool moduleFunctionActive;
-        int uniqueCounter = 0;
     };
 
     vector<LocalFrame> scopeStack;
@@ -524,7 +523,7 @@ public:
         blk->symbol =
             ctx.state.enterMethodSymbol(blk->loc, owner,
                                         ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
-                                                                  ++(scopeStack.back().uniqueCounter)));
+                                                                  ++(owner.data(ctx).uniqueCounter)));
 
         auto outerArgs = scopeStack.back().args;
         scopeStack.emplace_back();

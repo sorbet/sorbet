@@ -16,13 +16,21 @@ begin
   module ::A<<constant:A>> < ()
     def self.<static-init><<static-init>>()
       begin
+        ::A::B#C = 1
+        begin
+          <emptyTree>
+        end
         <emptyTree>
       end
     end
   end
   module <emptyTree>::<constant:B><<constant:B>> < ()
     def self.<static-init><<static-init>>()
-      ::A::B#C
+      begin
+        ::A::B#C
+        ::A::B#D = 1
+        <emptyTree>
+      end
     end
   end
   <emptyTree>

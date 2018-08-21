@@ -40,6 +40,7 @@ module T
   def self.reveal_type(value); end
   def self.type_parameter(var); end
   def self.self_type; end
+  def self.type_alias(other); end
 
   Sorbet.sig(arg: T.untyped, error: String).returns(T.untyped)
   def self.must(arg, error=""); end
@@ -50,6 +51,8 @@ end
 module T::Generic
   include T::Helpers
 
+  def type_member(fixed: nil); end
+  def type_template(fixed: nil); end
   def [](*types); end
 end
 

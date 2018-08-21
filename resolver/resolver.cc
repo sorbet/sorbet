@@ -810,14 +810,6 @@ private:
                     // Leave in place
                 },
 
-                [&](ast::Assign *assgn) {
-                    if (auto *id = ast::cast_tree<ast::ConstantLit>(assgn->lhs.get())) {
-                        if (id->symbol.exists() && id->symbol.data(ctx).name.data(ctx).kind == core::CONSTANT) {
-                            stat.reset(nullptr);
-                        }
-                    }
-                },
-
                 [&](ast::EmptyTree *e) { stat.reset(nullptr); },
 
                 [&](ast::Expression *e) {});

@@ -3,6 +3,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::<Class:C>#<block> (x) @ test/testdata/todo/block_in_class.rb:3
       argument ::<Class:C>#<block>#x<> @ test/testdata/todo/block_in_class.rb:3
   class ::C < ::Object () @ test/testdata/todo/block_in_class.rb:2
+    method ::C#<static-init> () @ test/testdata/todo/block_in_class.rb:3
     static-field ::C#L -> AppliedType {
       klass = ::Proc1
       targs = [

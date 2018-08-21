@@ -12,15 +12,18 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, ht
   class ::A (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:34
     class ::A::<Class:DOES_NOT_EXIST> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/resolution_order.rb:11
     class ::A::DOES_NOT_EXIST < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_order.rb:11
+    method ::A#<static-init> () @ test/testdata/resolver/resolution_order.rb:34
     static-field ::A#AB -> AliasType { symbol = ::B } @ test/testdata/resolver/resolution_order.rb:35
     static-field ::A#AV -> Integer @ test/testdata/resolver/resolution_order.rb:37
   class ::B < ::Object () @ test/testdata/resolver/resolution_order.rb:40
+    method ::B#<static-init> () @ test/testdata/resolver/resolution_order.rb:41
     static-field ::B#BC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:41
   class ::C < ::B () @ test/testdata/resolver/resolution_order.rb:44
   class ::D (<constant:BasicObject>) @ test/testdata/resolver/resolution_order.rb:62
+    method ::D#<static-init> () @ test/testdata/resolver/resolution_order.rb:63
     static-field ::D#DA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:63
   class ::E (<constant:BasicObject>, <constant:D>) @ test/testdata/resolver/resolution_order.rb:56
-    method ::E#<static-init> () @ ???
+    method ::E#<static-init> () @ test/testdata/resolver/resolution_order.rb:56
     static-field ::E#EA -> AliasType { symbol = ::A } @ test/testdata/resolver/resolution_order.rb:58
     static-field ::E#EC -> AliasType { symbol = ::C } @ test/testdata/resolver/resolution_order.rb:59
   class ::F (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_order.rb:47

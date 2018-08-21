@@ -15,6 +15,7 @@ begin
           ::RubyTyper.keep_for_ide(::Parent)
           <emptyTree>
         end
+        #Alias = ::Parent
         begin
           ::RubyTyper.keep_for_ide(::Child1)
           ::RubyTyper.keep_for_ide(::Parent)

@@ -11,6 +11,7 @@ begin
           ::RubyTyper.keep_for_ide(::<constant:B>)
           <emptyTree>
         end
+        #B = 91
         <emptyTree>
       end
     end

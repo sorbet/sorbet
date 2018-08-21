@@ -3,9 +3,9 @@ class ::<root> < ::Object () @ (test/testdata/namer/constants.rb:2, https://git.
   class ::A (<constant:BasicObject>) @ test/testdata/namer/constants.rb:2
     class ::A::<Class:B> < ::Module () @ test/testdata/namer/constants.rb:3
     class ::A::B (<constant:BasicObject>) @ test/testdata/namer/constants.rb:5
-      method ::A::B#<static-init> () @ test/testdata/namer/constants.rb:6
+      method ::A::B#<static-init> () @ test/testdata/namer/constants.rb:5
       static-field ::A::B#C -> Integer(1) @ test/testdata/namer/constants.rb:3
       static-field ::A::B#D -> Integer(1) @ test/testdata/namer/constants.rb:8
-    method ::A#<static-init> () @ test/testdata/namer/constants.rb:5
+    method ::A#<static-init> () @ test/testdata/namer/constants.rb:2
   method #<static-init> () @ ???
 

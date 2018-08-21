@@ -548,7 +548,8 @@ public:
     SymbolRef owner;
     SymbolRef superClass;
     u4 flags = Flags::NONE;
-    NameRef name; // todo: move out? it should not matter but it's important for name resolution
+    u4 uniqueCounter = 1; // used as a counter inside the namer
+    NameRef name;         // todo: move out? it should not matter but it's important for name resolution
     std::shared_ptr<Type> resultType;
 
     UnorderedMap<NameRef, SymbolRef>
