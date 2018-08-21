@@ -9,10 +9,10 @@ namespace core {
 
 bool hasSeen(const unordered_set<Loc> &seen, Loc loc) {
     for (auto &seenLoc : seen) {
-        if (seenLoc.beginPos >= loc.beginPos && seenLoc.beginPos < loc.endPos) {
+        if (seenLoc.beginPos() >= loc.beginPos() && seenLoc.beginPos() < loc.endPos()) {
             return true;
         }
-        if (seenLoc.endPos >= loc.beginPos && seenLoc.endPos < loc.endPos) {
+        if (seenLoc.endPos() >= loc.beginPos() && seenLoc.endPos() < loc.endPos()) {
             return true;
         }
     }
@@ -23,12 +23,12 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
                                                   map<FileRef, string> sources) {
     // Sort the locs backwards
     auto compare = [](AutocorrectSuggestion &left, AutocorrectSuggestion &right) {
-        if (left.loc.file != right.loc.file) {
-            return left.loc.file.id() > right.loc.file.id();
+        if (left.loc.file() != right.loc.file()) {
+            return left.loc.file().id() > right.loc.file().id();
         }
 
-        auto a = left.loc.beginPos;
-        auto b = right.loc.beginPos;
+        auto a = left.loc.beginPos();
+        auto b = right.loc.beginPos();
         if (a != b) {
             return a > b;
         }
@@ -41,18 +41,18 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
     map<FileRef, string> ret;
     for (auto &autocorrect : autocorrects) {
         auto &loc = autocorrect.loc;
-        if (!ret.count(loc.file)) {
-            ret[loc.file] = sources[loc.file];
+        if (!ret.count(loc.file())) {
+            ret[loc.file()] = sources[loc.file()];
         }
-        auto source = ret[loc.file];
-        auto start = loc.beginPos;
-        auto end = loc.endPos;
+        auto source = ret[loc.file()];
+        auto start = loc.beginPos();
+        auto end = loc.endPos();
 
         if (hasSeen(seen, loc)) {
             continue;
         }
         seen.emplace(loc);
-        ret[loc.file] = string(source.substr(0, start)) + autocorrect.replacement + string(source.substr(end, -1));
+        ret[loc.file()] = string(source.substr(0, start)) + autocorrect.replacement + string(source.substr(end, -1));
     }
     return ret;
 }

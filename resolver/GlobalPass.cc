@@ -124,7 +124,7 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs).loc();
-                if (!loc.file.data(gs).isPayload()) {
+                if (!loc.file().data(gs).isPayload()) {
                     if (auto e = gs.beginError(loc, core::errors::Resolver::VariantTypeMemberInClass)) {
                         e.setHeader("Classes can only have invariant type members");
                     }
@@ -192,7 +192,7 @@ void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vecto
 
         auto mem = sym.data(gs).findConcreteMethodTransitive(gs, proto.data(gs).name);
         auto loc = sym.data(gs).loc();
-        if (!mem.exists() && !loc.file.data(gs).isRBI()) {
+        if (!mem.exists() && !loc.file().data(gs).isRBI()) {
             if (auto e = gs.beginError(loc, core::errors::Resolver::BadAbstractMethod)) {
                 e.setHeader("Missing definition for abstract method `{}`", proto.data(gs).show(gs));
                 e.addErrorLine(proto.data(gs).loc(), "defined here");
@@ -209,7 +209,7 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         auto &data = core::SymbolRef(&gs, i).data(gs);
         auto loc = data.loc();
-        if (loc.file.exists() && loc.file.data(gs).sourceType == core::File::Type::Normal) {
+        if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (data.isMethod()) {
                 methodCount++;
             } else if (data.isClass()) {

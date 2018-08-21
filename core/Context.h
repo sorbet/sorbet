@@ -44,6 +44,7 @@ public:
         state.trace(msg);
     }
 };
+CheckSize(Context, 16, 8);
 
 class MutableContext final {
 public:
@@ -83,6 +84,7 @@ public:
         state.trace(msg);
     }
 };
+CheckSize(MutableContext, 16, 8);
 
 class GlobalSubstitution {
 public:

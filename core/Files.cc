@@ -81,7 +81,9 @@ File::File(string &&path_, mio::shared_mmap_source mmapped, Type sourceType)
     : sourceType(sourceType), storage{nullptr, make_shared<string>(path_), move(mmapped)}, path_(*storage.path),
       source_(storage.mmap.data(), storage.mmap.size()), sigil(fileSigil(this->source_)), strict(sigil) {}
 
-FileRef::FileRef(unsigned int id) : _id(id) {}
+FileRef::FileRef(unsigned int id) : _id(id) {
+    ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
+}
 
 const File &FileRef::data(const GlobalState &gs, bool allowTombStones) const {
     ENFORCE(_id < gs.filesUsed());

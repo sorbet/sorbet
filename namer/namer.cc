@@ -473,7 +473,7 @@ public:
             if (redefinitionOk(ctx, sym)) {
                 sym.data(ctx).addLoc(ctx, method->loc);
             } else {
-                if (!method->loc.file.data(ctx).isRBI()) {
+                if (!method->loc.file().data(ctx).isRBI()) {
                     if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
                         e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
                         e.addErrorLine(sym.data(ctx).loc(), "Previous definition");
@@ -515,7 +515,7 @@ public:
         if (owner == core::Symbols::noSymbol() || owner == core::Symbols::root()) {
             // Introduce intermediate host for block.
             ENFORCE(blk->loc.exists());
-            owner = ctx.state.staticInitForFile(blk->loc.file);
+            owner = ctx.state.staticInitForFile(blk->loc.file());
         } else if (owner.data(ctx).isClass()) {
             // If we're at class scope, we're actually in the context of the
             // singleton class.

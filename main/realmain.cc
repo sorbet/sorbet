@@ -251,7 +251,7 @@ int realmain(int argc, char *argv[]) {
 
     if (opts.print.ErrorFiles) {
         for (auto &tree : indexed) {
-            auto f = tree->loc.file;
+            auto f = tree->loc.file();
             if (f.data(*gs).hadErrors()) {
                 cout << f.data(*gs).path() << "\n";
             }
@@ -266,7 +266,7 @@ int realmain(int argc, char *argv[]) {
 
     if (opts.suggestTyped) {
         for (auto &tree : indexed) {
-            auto f = tree->loc.file;
+            auto f = tree->loc.file();
             if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
                 core::counterInc("types.input.files.suggest_typed");
                 logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
@@ -312,7 +312,7 @@ int realmain(int argc, char *argv[]) {
 
         if (opts.suggestTyped) {
             for (auto &tree : indexed) {
-                auto f = tree->loc.file;
+                auto f = tree->loc.file();
                 if (f.data(*gs).sigil == core::StrictLevel::Stripe) {
                     auto *metric = metrics.add_metrics();
                     metric->set_name(absl::StrCat(opts.metricsPrefix, ".suggest.", f.data(*gs).path()));

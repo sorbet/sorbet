@@ -83,7 +83,7 @@ Reference::Reference(core::Loc loc) : Expression(loc) {}
 
 ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store ancestors,
                    RHS_store rhs, ClassDefKind kind)
-    : Declaration(loc, symbol), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)), kind(kind) {
+    : Declaration(loc, symbol), kind(kind), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)) {
     core::categoryCounterInc("trees", "classdef");
     core::histogramInc("trees.classdef.kind", (int)kind);
     core::histogramInc("trees.classdef.ancestors", this->ancestors.size());
@@ -164,7 +164,7 @@ Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Expression(loc
 }
 
 UnresolvedIdent::UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name)
-    : Reference(loc), kind(kind), name(name) {
+    : Reference(loc), name(name), kind(kind) {
     core::categoryCounterInc("trees", "unresolvedident");
     _sanityCheck();
     _sanityCheck();
@@ -178,7 +178,7 @@ Assign::Assign(core::Loc loc, unique_ptr<Expression> lhs, unique_ptr<Expression>
 
 Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::ARGS_store args,
            unique_ptr<Block> block)
-    : Expression(loc), recv(move(recv)), fun(fun), args(move(args)), block(move(block)) {
+    : Expression(loc), fun(fun), recv(move(recv)), args(move(args)), block(move(block)) {
     core::categoryCounterInc("trees", "send");
     if (block) {
         core::counterInc("trees.send.with_block");
@@ -188,7 +188,7 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
 }
 
 Cast::Cast(core::Loc loc, shared_ptr<core::Type> ty, unique_ptr<Expression> arg, core::NameRef cast)
-    : Expression(loc), type(move(ty)), arg(move(arg)), cast(cast) {
+    : Expression(loc), cast(cast), type(move(ty)), arg(move(arg)) {
     core::categoryCounterInc("trees", "cast");
     _sanityCheck();
 }

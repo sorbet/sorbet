@@ -44,7 +44,7 @@ namespace lsp {
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
     auto &sym = symRef.data(*finalGs);
-    if (!sym.loc().file.exists() || hideSymbol(symRef)) {
+    if (!sym.loc().file().exists() || hideSymbol(symRef)) {
         return nullptr;
     }
     rapidjson::Value result;

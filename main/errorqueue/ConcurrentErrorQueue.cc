@@ -9,7 +9,7 @@ void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<cor
     this->errorCount.fetch_add(1);
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Error;
-    msg.whatFile = error->loc.file;
+    msg.whatFile = error->loc.file();
     msg.text = error->toString(gs);
     msg.error = move(error);
     this->queue.push(move(msg), 1);

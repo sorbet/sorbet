@@ -11,20 +11,15 @@ namespace core {
 
 using namespace std;
 
-Loc::Loc(FileRef file, u4 begin, u4 end) : file(file), beginPos(begin), endPos(end) {
-    ENFORCE(beginPos <= endPos);
-}
-
-Loc Loc::join(Loc other) {
+Loc Loc::join(Loc other) const {
     if (!this->exists()) {
         return other;
     }
     if (!other.exists()) {
         return *this;
     }
-    ENFORCE(this->file == other.file, "joining locations from different files");
-
-    return Loc{this->file, min(this->beginPos, other.beginPos), max(this->endPos, other.endPos)};
+    ENFORCE(this->file() == other.file(), "joining locations from different files");
+    return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
 Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
@@ -57,8 +52,8 @@ u4 Loc::pos2Offset(FileRef source, Loc::Detail pos, const GlobalState &gs) {
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
-    Loc::Detail begin(offset2Pos(this->file, beginPos, gs));
-    Loc::Detail end(offset2Pos(this->file, endPos, gs));
+    Loc::Detail begin(offset2Pos(this->file(), beginPos(), gs));
+    Loc::Detail end(offset2Pos(this->file(), endPos(), gs));
     return make_pair(begin, end);
 }
 namespace {
@@ -98,7 +93,7 @@ void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int po
 
 string Loc::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
-    const File &filed = this->file.data(gs);
+    const File &filed = this->file().data(gs);
     auto pos = this->position(gs);
     int posWidth = pos.second.line < 100 ? 2 : pos.second.line < 10000 ? 4 : 8;
 
@@ -146,7 +141,7 @@ string Loc::filePosToString(const GlobalState &gs) const {
         buf << "???";
     } else {
         auto pos = position(gs);
-        auto path = file.data(gs).path();
+        auto path = file().data(gs).path();
         if (path.find("https://") == 0) {
             // For github permalinks
             buf << path << "#L";
@@ -160,16 +155,16 @@ string Loc::filePosToString(const GlobalState &gs) const {
 }
 
 string Loc::source(const GlobalState &gs) const {
-    auto source = this->file.data(gs).source();
-    return string(source.substr(beginPos, endPos - beginPos));
+    auto source = this->file().data(gs).source();
+    return string(source.substr(beginPos(), endPos() - beginPos()));
 }
 
 bool Loc::contains(const Loc &other) const {
-    return file == other.file && other.beginPos >= beginPos && other.endPos <= endPos;
+    return file() == other.file() && other.beginPos() >= beginPos() && other.endPos() <= endPos();
 }
 
 bool Loc::operator==(const Loc &rhs) const {
-    return file == rhs.file && beginPos == rhs.beginPos && endPos == rhs.endPos;
+    return storage.high == rhs.storage.high && storage.low == rhs.storage.low;
 }
 
 bool Loc::operator!=(const Loc &rhs) const {

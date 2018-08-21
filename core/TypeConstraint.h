@@ -21,7 +21,7 @@ public:
     TypeConstraint() = default;
     TypeConstraint(const TypeConstraint &) = delete;
     TypeConstraint(TypeConstraint &&) = default;
-    void defineDomain(Context ctx, const std::vector<SymbolRef> &typeParams);
+    void defineDomain(Context ctx, const InlinedVector<SymbolRef, 4> &typeParams);
     bool hasUpperBound(SymbolRef forWhat) const;
     bool hasLowerBound(SymbolRef forWhat) const;
     std::shared_ptr<Type> findSolution(SymbolRef forWhat) const;

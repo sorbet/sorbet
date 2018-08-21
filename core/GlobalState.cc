@@ -956,12 +956,12 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
 
     // Sort the locs backwards
     auto compare = [](Annotation left, Annotation right) {
-        if (left.loc.file != right.loc.file) {
-            return left.loc.file.id() > right.loc.file.id();
+        if (left.loc.file() != right.loc.file()) {
+            return left.loc.file().id() > right.loc.file().id();
         }
 
-        auto a = left.pos == GlobalState::AnnotationPos::BEFORE ? left.loc.beginPos : left.loc.endPos;
-        auto b = right.pos == GlobalState::AnnotationPos::BEFORE ? right.loc.beginPos : right.loc.endPos;
+        auto a = left.pos == GlobalState::AnnotationPos::BEFORE ? left.loc.beginPos() : left.loc.endPos();
+        auto b = right.pos == GlobalState::AnnotationPos::BEFORE ? right.loc.beginPos() : right.loc.endPos();
 
         if (a != b) {
             return a > b;
@@ -982,7 +982,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
     auto source = file.data(*this).source();
     string outline(source.begin(), source.end());
     for (auto annotation : sorted) {
-        if (annotation.loc.file != file) {
+        if (annotation.loc.file() != file) {
             continue;
         }
         stringstream buf;
@@ -1013,14 +1013,14 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         size_t start_of_line;
         switch (annotation.pos) {
             case GlobalState::AnnotationPos::BEFORE:
-                start_of_line = annotation.loc.beginPos;
+                start_of_line = annotation.loc.beginPos();
                 start_of_line = outline.find_last_of('\n', start_of_line);
                 if (start_of_line == string::npos) {
                     start_of_line = 0;
                 }
                 break;
             case GlobalState::AnnotationPos::AFTER:
-                start_of_line = annotation.loc.endPos;
+                start_of_line = annotation.loc.endPos();
                 start_of_line = outline.find_first_of('\n', start_of_line);
                 if (start_of_line == string::npos) {
                     start_of_line = outline.end() - outline.begin();
@@ -1041,8 +1041,8 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
         errorQueue->hadCritical = true;
     }
     auto loc = error->loc;
-    if (loc.file.exists()) {
-        loc.file.data(*this).hadErrors_ = true;
+    if (loc.file().exists()) {
+        loc.file().data(*this).hadErrors_ = true;
     }
     if (!error->isSilenced) {
         errorQueue->pushError(*this, move(error));
@@ -1064,8 +1064,8 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
 
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     StrictLevel level = StrictLevel::Strong;
-    if (loc.file.exists()) {
-        level = loc.file.data(*this).strict;
+    if (loc.file().exists()) {
+        level = loc.file().data(*this).strict;
     }
     if (what.code == errors::Internal::InternalError.code) {
         return true;

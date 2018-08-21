@@ -454,23 +454,23 @@ public:
         core::StrictLevel left = core::StrictLevel::Strong;
         core::StrictLevel right = core::StrictLevel::Strong;
 
-        if (lhs.file.exists()) {
-            left = lhs.file.data(ctx).strict;
+        if (lhs.file().exists()) {
+            left = lhs.file().data(ctx).strict;
         }
-        if (rhs.file.exists()) {
-            right = rhs.file.data(ctx).strict;
+        if (rhs.file().exists()) {
+            right = rhs.file().data(ctx).strict;
         }
 
         if (left != right) {
             return right < left;
         }
-        if (lhs.file != rhs.file) {
-            return lhs.file < rhs.file;
+        if (lhs.file() != rhs.file()) {
+            return lhs.file() < rhs.file();
         }
-        if (lhs.beginPos != rhs.beginPos) {
-            return lhs.beginPos < rhs.beginPos;
+        if (lhs.beginPos() != rhs.beginPos()) {
+            return lhs.beginPos() < rhs.beginPos();
         }
-        return lhs.endPos < rhs.endPos;
+        return lhs.endPos() < rhs.endPos();
     }
 
     static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,
@@ -737,7 +737,7 @@ private:
                     if (debug_mode) {
                         bool hasSig = !lastSig.empty();
                         bool DSL = mdef->isDSLSynthesized();
-                        bool isRBI = mdef->loc.file.data(ctx).isRBI();
+                        bool isRBI = mdef->loc.file().data(ctx).isRBI();
                         if (hasSig) {
                             core::categoryCounterInc("method.sig", "true");
                         } else {
@@ -1079,7 +1079,7 @@ public:
             // NOTE(nelhage): In general, we potentially need to do this for
             // every class, since Ruby allows reopening classes. However, since
             // pay-server bans that behavior, this should be OK here.
-            sym = ctx.state.staticInitForFile(classDef->loc.file);
+            sym = ctx.state.staticInitForFile(classDef->loc.file());
         } else {
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, core::Names::staticInit());
         }

@@ -142,9 +142,9 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
         item.AddMember("insertText", methodSnippet(*finalGs, what), alloc);
 
         unique_ptr<string> documentation = nullptr;
-        if (what.data(*finalGs).loc().file.exists()) {
-            documentation = findDocumentation(what.data(*finalGs).loc().file.data(*finalGs).source(),
-                                              what.data(*finalGs).loc().beginPos);
+        if (what.data(*finalGs).loc().file().exists()) {
+            documentation = findDocumentation(what.data(*finalGs).loc().file().data(*finalGs).source(),
+                                              what.data(*finalGs).loc().beginPos());
         }
         if (documentation) {
             if (documentation->find("@deprecated") != documentation->npos) {

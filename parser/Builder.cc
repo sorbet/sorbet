@@ -127,7 +127,7 @@ public:
     }
 
     void error(ruby_parser::dclass err, Loc loc) {
-        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos, loc.endPos, "");
+        driver_->external_diagnostic(ruby_parser::dlevel::ERROR, err, loc.beginPos(), loc.endPos(), "");
     }
 
     /* Begin callback methods */

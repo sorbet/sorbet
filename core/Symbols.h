@@ -101,6 +101,7 @@ public:
     }
     std::string toString(const GlobalState &gs) const;
 };
+CheckSize(LocalVariable, 8, 4);
 
 namespace serialize {
 class SerializerImpl;
@@ -158,24 +159,18 @@ public:
         static constexpr int DSL_SYNTHESIZED = 0x0001;
     };
 
-    SymbolRef owner;
     Loc loc() const;
-    InlinedVector<Loc, 1> locs() const;
+    const InlinedVector<Loc, 2> &locs() const;
     void addLoc(const core::GlobalState &gs, core::Loc loc);
-
-    u4 flags = Flags::NONE;
-
-    SymbolRef superClass;
-    std::shared_ptr<Type> resultType;
 
     unsigned int hash(const GlobalState &gs) const;
 
-    inline std::vector<SymbolRef> &arguments() {
+    inline InlinedVector<SymbolRef, 4> &arguments() {
         ENFORCE(!isClass());
         return argumentsOrMixins;
     }
 
-    inline const std::vector<SymbolRef> &arguments() const {
+    inline const InlinedVector<SymbolRef, 4> &arguments() const {
         ENFORCE(!isClass());
         return argumentsOrMixins;
     }
@@ -188,22 +183,22 @@ public:
     std::shared_ptr<Type> selfType(const GlobalState &gs) const;
     std::shared_ptr<Type> externalType(const GlobalState &gs) const;
 
-    inline std::vector<SymbolRef> &mixins() {
+    inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
 
-    inline const std::vector<SymbolRef> &mixins() const {
+    inline const InlinedVector<SymbolRef, 4> &mixins() const {
         ENFORCE(isClass());
         return argumentsOrMixins;
     }
 
-    inline std::vector<SymbolRef> &typeMembers() {
+    inline InlinedVector<SymbolRef, 4> &typeMembers() {
         ENFORCE(isClass());
         return typeParams;
     }
 
-    inline const std::vector<SymbolRef> &typeMembers() const {
+    inline const InlinedVector<SymbolRef, 4> &typeMembers() const {
         ENFORCE(isClass());
         return typeParams;
     }
@@ -213,12 +208,12 @@ public:
     // members have fixed values.
     int typeArity(const GlobalState &gs) const;
 
-    inline std::vector<SymbolRef> &typeArguments() {
+    inline InlinedVector<SymbolRef, 4> &typeArguments() {
         ENFORCE(isMethod());
         return typeParams;
     }
 
-    inline const std::vector<SymbolRef> &typeArguments() const {
+    inline const InlinedVector<SymbolRef, 4> &typeArguments() const {
         ENFORCE(isMethod());
         return typeParams;
     }
@@ -550,8 +545,12 @@ public:
 
     bool ignoreInHashing(const GlobalState &gs) const;
 
-    NameRef name; // todo: move out? it should not matter but it's important for
-    // name resolution
+    SymbolRef owner;
+    SymbolRef superClass;
+    u4 flags = Flags::NONE;
+    NameRef name; // todo: move out? it should not matter but it's important for name resolution
+    std::shared_ptr<Type> resultType;
+
     UnorderedMap<NameRef, SymbolRef>
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
@@ -588,20 +587,18 @@ private:
      *   implicit superclass (`class Foo` with no `< Parent`); Once we hit
      *   Resolver::finalize(), these will be rewritten to `Object()`.
      */
-    // TODO: make into tiny
-    std::vector<SymbolRef> argumentsOrMixins;
+    InlinedVector<SymbolRef, 4> argumentsOrMixins;
 
     /** For Class or module - ordered type members of the class,
      * for method - ordered type generic type arguments of the class
      */
-    std::vector<SymbolRef> typeParams;
-    InlinedVector<Loc, 1> locs_;
+    InlinedVector<SymbolRef, 4> typeParams;
+    InlinedVector<Loc, 2> locs_;
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
                                            int maxDepth = 100) const;
 };
-
-// CheckSize(Symbol, 152, 8); // This is under too much churn to be worth checking
+// CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 
 class Symbols {
     Symbols() = delete;

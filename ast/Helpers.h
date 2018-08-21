@@ -279,7 +279,7 @@ public:
     }
 
     static std::unique_ptr<Expression> KeepForIDE(std::unique_ptr<Expression> arg) {
-        auto loc = core::Loc::none(arg->loc.file);
+        auto loc = core::Loc::none(arg->loc.file());
         return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), move(arg));
     }
 };

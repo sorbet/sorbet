@@ -44,14 +44,14 @@ vector<unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainAll() {
 void BufferedErrorQueue::checkOwned() {}
 
 void BufferedErrorQueue::markFileForFlushing(FileRef file) {
-    this->errors.erase(remove_if(this->errors.begin(), this->errors.end(),
-                                 [file, &flushedErrors = this->flushedErrors](auto &msg) -> bool {
-                                     if (msg->kind != ErrorQueueMessage::Kind::Error || msg->error->loc.file != file) {
-                                         return false;
-                                     }
-                                     flushedErrors.emplace_back(move(msg));
-                                     return true;
-                                 }));
+    this->errors.erase(remove_if(
+        this->errors.begin(), this->errors.end(), [file, &flushedErrors = this->flushedErrors](auto &msg) -> bool {
+            if (msg->kind != ErrorQueueMessage::Kind::Error || msg->error->loc.file() != file) {
+                return false;
+            }
+            flushedErrors.emplace_back(move(msg));
+            return true;
+        }));
 }
 
 } // namespace core

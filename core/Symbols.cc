@@ -389,7 +389,7 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
         return true;
     }
     for (auto loc : locs_) {
-        if (loc.file.data(gs).sourceType == File::Payload) {
+        if (loc.file().data(gs).sourceType == File::Payload) {
             return true;
         }
     }
@@ -744,22 +744,22 @@ Loc Symbol::loc() const {
     return Loc::none();
 }
 
-InlinedVector<Loc, 1> Symbol::locs() const {
+const InlinedVector<Loc, 2> &Symbol::locs() const {
     return locs_;
 }
 
 void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
-    if (!loc.file.exists()) {
+    if (!loc.file().exists()) {
         return;
     }
     for (auto &existing : locs_) {
-        if (existing.file == loc.file) {
+        if (existing.file() == loc.file()) {
             existing = loc;
             return;
         }
     }
 
-    if (loc.file.data(gs).sourceType == core::File::Type::Normal) {
+    if (loc.file().data(gs).sourceType == core::File::Type::Normal) {
         locs_.insert(locs_.begin(), loc);
     } else {
         locs_.push_back(loc);

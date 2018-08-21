@@ -27,6 +27,7 @@ public:
     // This function should be private but it makes it hard to access from template methods in TreeCopy.cc
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const = 0;
 };
+// CheckSize(Expression, 16, 8);
 
 template <class To> To *cast_tree(Expression *what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
@@ -42,6 +43,7 @@ class Reference : public Expression {
 public:
     Reference(core::Loc loc);
 };
+// CheckSize(Reference, 16, 8);
 
 class Declaration : public Expression {
 public:
@@ -49,6 +51,7 @@ public:
 
     Declaration(core::Loc loc, core::SymbolRef symbol);
 };
+// CheckSize(Declaration, 24, 8);
 
 enum ClassDefKind : u1 { Module, Class };
 
@@ -58,6 +61,7 @@ public:
         return symbol.data(ctx).parent(ctx);
     }
 
+    ClassDefKind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_RHS_COUNT> RHS_store;
 
@@ -71,7 +75,6 @@ public:
 
     ANCESTORS_store ancestors;
     ANCESTORS_store singleton_ancestors;
-    ClassDefKind kind;
 
     ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store ancestors,
              RHS_store rhs, ClassDefKind kind);
@@ -84,6 +87,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(ClassDef, 120, 8);
 
 class MethodDef final : public Declaration {
 public:
@@ -119,6 +123,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(MethodDef, 64, 8);
 
 class If final : public Expression {
 public:
@@ -136,6 +141,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(If, 40, 8);
 
 class While final : public Expression {
 public:
@@ -151,6 +157,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(While, 32, 8);
 
 class Break final : public Expression {
 public:
@@ -165,6 +172,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Break, 24, 8);
 
 class Retry final : public Expression {
 public:
@@ -177,6 +185,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Retry, 16, 8);
 
 class Next final : public Expression {
 public:
@@ -191,6 +200,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Next, 24, 8);
 
 class Return final : public Expression {
 public:
@@ -205,6 +215,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Return, 24, 8);
 
 class Yield final : public Expression {
 public:
@@ -219,10 +230,11 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Yield, 24, 8);
 
 class RescueCase final : public Expression {
 public:
-    static constexpr int EXPECTED_EXCEPTION_COUNT = 1;
+    static constexpr int EXPECTED_EXCEPTION_COUNT = 2;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_EXCEPTION_COUNT> EXCEPTION_store;
 
     EXCEPTION_store exceptions;
@@ -242,10 +254,11 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(RescueCase, 56, 8);
 
 class Rescue final : public Expression {
 public:
-    static constexpr int EXPECTED_RESCUE_CASE_COUNT = 1;
+    static constexpr int EXPECTED_RESCUE_CASE_COUNT = 2;
     typedef InlinedVector<std::unique_ptr<RescueCase>, EXPECTED_RESCUE_CASE_COUNT> RESCUE_CASE_store;
 
     std::unique_ptr<Expression> body;
@@ -263,6 +276,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Rescue, 64, 8);
 
 class Field final : public Reference {
 public:
@@ -277,6 +291,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Field, 24, 8);
 
 class Local final : public Expression {
 public:
@@ -291,6 +306,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Local, 24, 8);
 
 class UnresolvedIdent final : public Reference {
 public:
@@ -300,8 +316,8 @@ public:
         Class,
         Global,
     };
-    VarKind kind;
     core::NameRef name;
+    VarKind kind;
 
     UnresolvedIdent(core::Loc loc, VarKind kind, core::NameRef name);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
@@ -312,6 +328,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(UnresolvedIdent, 24, 8);
 
 class RestArg final : public Reference {
 public:
@@ -326,6 +343,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(RestArg, 24, 8);
 
 class KeywordArg final : public Reference {
 public:
@@ -340,6 +358,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(KeywordArg, 24, 8);
 
 class OptionalArg final : public Reference {
 public:
@@ -355,6 +374,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(OptionalArg, 32, 8);
 
 class BlockArg final : public Reference {
 public:
@@ -369,6 +389,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(BlockArg, 24, 8);
 
 class ShadowArg final : public Reference {
 public:
@@ -383,6 +404,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(ShadowArg, 24, 8);
 
 class Assign final : public Expression {
 public:
@@ -398,23 +420,23 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Assign, 32, 8);
 
 class Block;
 
 class Send final : public Expression {
 public:
-    std::unique_ptr<Expression> recv;
     core::NameRef fun;
+
+    static const int PRIVATE_OK = 1 << 0;
+    u4 flags = 0;
+
+    std::unique_ptr<Expression> recv;
 
     static constexpr int EXPECTED_ARGS_COUNT = 2;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_ARGS_COUNT> ARGS_store;
     ARGS_store args;
-    u4 flags = 0;
-
-    static const int PRIVATE_OK = 1 << 0;
-
-    // null if no block passed
-    std::unique_ptr<Block> block;
+    std::unique_ptr<Block> block; // null if no block passed
 
     Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun, ARGS_store args,
          std::unique_ptr<Block> block = nullptr);
@@ -426,14 +448,15 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Send, 64, 8);
 
 class Cast final : public Expression {
 public:
-    std::shared_ptr<core::Type> type;
-    std::unique_ptr<Expression> arg;
-
     // The name of the cast operator.
     core::NameRef cast;
+
+    std::shared_ptr<core::Type> type;
+    std::unique_ptr<Expression> arg;
 
     Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
@@ -444,6 +467,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Cast, 48, 8);
 
 class Hash final : public Expression {
 public:
@@ -463,6 +487,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Hash, 64, 8);
 
 class Array final : public Expression {
 public:
@@ -481,6 +506,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Array, 56, 8);
 
 class Literal final : public Expression {
 public:
@@ -502,6 +528,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Literal, 32, 8);
 
 class UnresolvedConstantLit final : public Expression {
 public:
@@ -517,6 +544,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(UnresolvedConstantLit, 32, 8);
 
 class ConstantLit final : public Expression {
 public:
@@ -534,6 +562,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(ConstantLit, 40, 8);
 
 class ZSuperArgs final : public Expression {
 public:
@@ -547,6 +576,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(ZSuperArgs, 16, 8);
 
 class Self final : public Expression {
 public:
@@ -561,12 +591,13 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Self, 24, 8);
 
 class Block final : public Expression {
 public:
+    core::SymbolRef symbol;
     MethodDef::ARGS_store args;
     std::unique_ptr<Expression> body;
-    core::SymbolRef symbol;
 
     Block(core::Loc loc, MethodDef::ARGS_store args, std::unique_ptr<Expression> body);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
@@ -577,6 +608,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(Block, 56, 8);
 
 class InsSeq final : public Expression {
 public:
@@ -595,6 +627,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(InsSeq, 64, 8);
 
 class EmptyTree final : public Expression {
 public:
@@ -607,6 +640,7 @@ public:
 private:
     virtual void _sanityCheck();
 };
+// CheckSize(EmptyTree, 16, 8);
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *

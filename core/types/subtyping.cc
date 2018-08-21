@@ -213,7 +213,7 @@ shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1, const 
         const std::shared_ptr<Type> &t2s = ltr ? t1 : t2;
         // now a1 <: a2
 
-        vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
+        InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
         vector<shared_ptr<Type>> newTargs;
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
@@ -776,7 +776,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
         }
         // a1 <:< a2
 
-        vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a2->klass, a2->targs, a1->klass);
+        InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(ctx, a2->klass, a2->targs, a1->klass);
 
         // code below inverts permutation of type params
 
@@ -946,7 +946,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             result = classSymbolIsAsGoodAs(ctx, a1->klass, a2->klass);
         }
         if (result) {
-            vector<SymbolRef> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
+            InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
             // code below inverts permutation of type params
             int j = 0;
             for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
@@ -1166,7 +1166,8 @@ void AliasType::_sanityCheck(Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-shared_ptr<Type> AliasType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> AliasType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                         const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 
@@ -1194,7 +1195,8 @@ bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return false;
 }
 
-shared_ptr<Type> MetaType::_instantiate(Context ctx, vector<SymbolRef> params, const vector<shared_ptr<Type>> &targs) {
+shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                        const vector<shared_ptr<Type>> &targs) {
     Error::raise("should never happen");
 }
 

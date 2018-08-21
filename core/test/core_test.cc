@@ -129,5 +129,20 @@ TEST(CoreTest, Substitute) { // NOLINT
     ASSERT_EQ("other", other2.toString(gs2));
 }
 
+TEST(CoreTest, LocTest) { // NOLINT
+    constexpr auto maxFileId = 0xffff - 1;
+    constexpr auto maxOffset = 0xffffff - 1;
+    for (auto fileRef = 0; fileRef < maxFileId; fileRef = fileRef * 2 + 1) {
+        for (auto beginPos = 0; beginPos < maxOffset; beginPos = beginPos * 2 + 1) {
+            for (auto endPos = beginPos; endPos < maxOffset; endPos = endPos * 2 + 1) {
+                Loc loc(core::FileRef(fileRef), beginPos, endPos);
+                EXPECT_EQ(loc.file().id(), fileRef);
+                EXPECT_EQ(loc.beginPos(), beginPos);
+                EXPECT_EQ(loc.endPos(), endPos);
+            }
+        }
+    }
+}
+
 } // namespace core
 } // namespace sorbet

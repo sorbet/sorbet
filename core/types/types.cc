@@ -459,13 +459,13 @@ bool OrType::isFullyDefined() {
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
-vector<SymbolRef> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<shared_ptr<Type>> &targs,
-                                           SymbolRef asIf) {
+InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<shared_ptr<Type>> &targs,
+                                                     SymbolRef asIf) {
     ENFORCE(asIf.data(ctx).isClass());
     ENFORCE(what.data(ctx).isClass());
     ENFORCE(what == asIf || what.data(ctx).derivesFrom(ctx, asIf) || asIf.data(ctx).derivesFrom(ctx, what),
             what.data(ctx).name.toString(ctx), asIf.data(ctx).name.toString(ctx));
-    vector<SymbolRef> currentAlignment;
+    InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
@@ -502,7 +502,7 @@ shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, Symbol
         return original.resultType;
     }
 
-    vector<SymbolRef> currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
+    auto currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
     return instantiate(ctx, original.resultType, currentAlignment, targs);
 }

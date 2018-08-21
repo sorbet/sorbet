@@ -67,7 +67,7 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
             auto receiverType = resp->receiver.type;
             // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
             if (resp->kind == core::QueryResponse::Kind::SEND) {
-                auto sendLocIndex = resp->termLoc.beginPos;
+                auto sendLocIndex = resp->termLoc.beginPos();
 
                 auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
                                   d["params"]["textDocument"]["uri"].GetStringLength());
@@ -80,7 +80,7 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
                 if (!loc) {
                     return;
                 }
-                string call_str = (string)src.substr(sendLocIndex, loc->endPos - sendLocIndex);
+                string call_str = (string)src.substr(sendLocIndex, loc->endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
                 // 2nd arg)

@@ -13,6 +13,7 @@ class Pickler {
 public:
     void putU4(u4 u);
     void putU1(const u1 u);
+    void putU2(const u2 u);
     void putS8(const int64_t i);
     void putStr(const absl::string_view s);
     std::vector<u1> result(int compressionDegree);
@@ -27,6 +28,7 @@ class UnPickler {
 public:
     u4 getU4();
     u1 getU1();
+    u2 getU2();
     int64_t getS8();
     absl::string_view getStr();
     explicit UnPickler(const u1 *const compressed);

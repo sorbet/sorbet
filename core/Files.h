@@ -14,7 +14,7 @@ class File;
 
 class FileRef final {
 public:
-    FileRef() : _id(-1){};
+    FileRef() : _id(0){};
     FileRef(unsigned int id);
 
     FileRef(const FileRef &f) = default;
@@ -34,7 +34,7 @@ public:
         return _id < rhs._id;
     }
 
-    inline int id() const {
+    inline u2 id() const {
         return _id;
     }
 
@@ -46,8 +46,9 @@ public:
     File &data(GlobalState &gs, bool allowTombStones = false) const;
 
 private:
-    int _id;
+    u2 _id;
 };
+CheckSize(FileRef, 2, 2);
 
 class File final {
 public:

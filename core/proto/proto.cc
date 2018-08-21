@@ -97,7 +97,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
     if (!loc.exists()) {
         protoLoc.set_path("???");
     } else {
-        auto path = loc.file.data(gs).path();
+        auto path = loc.file().data(gs).path();
         protoLoc.set_path(string(path));
 
         auto pos = loc.position(gs);

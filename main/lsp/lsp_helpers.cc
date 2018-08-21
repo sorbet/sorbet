@@ -50,7 +50,7 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
     start.SetObject();
     rapidjson::Value end;
     end.SetObject();
-    if (!loc.file.exists()) {
+    if (!loc.file().exists()) {
         start.AddMember("line", 1, alloc);
         start.AddMember("character", 1, alloc);
         end.AddMember("line", 2, alloc);
@@ -82,10 +82,10 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
     rapidjson::Value ret;
     ret.SetObject();
 
-    if (!loc.file.exists()) {
+    if (!loc.file().exists()) {
         uri = localName2Remote("???");
     } else {
-        auto &messageFile = loc.file.data(*finalGs);
+        auto &messageFile = loc.file().data(*finalGs);
         if (messageFile.sourceType == core::File::Type::Payload) {
             // This is hacky because VSCode appends #4,3 (or whatever the position is of the
             // error) to the uri before it shows it in the UI since this is the format that
@@ -103,7 +103,7 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
             uri = fmt::format("{}#L{}", (string)messageFile.path(),
                               std::to_string((int)(loc.position(*finalGs).first.line)));
         } else {
-            uri = fileRef2Uri(loc.file);
+            uri = fileRef2Uri(loc.file());
         }
     }
 

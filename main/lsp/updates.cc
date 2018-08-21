@@ -45,7 +45,7 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
 
     std::vector<std::string> emptyInputNames;
     auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
-    int id = t->loc.file.id();
+    int id = t->loc.file().id();
     if (id >= indexed.size()) {
         indexed.resize(id + 1);
     }
@@ -59,7 +59,7 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
     try {
         int i = 0;
         for (auto &tree : what) {
-            auto file = tree->loc.file;
+            auto file = tree->loc.file();
             try {
                 unique_ptr<ast::Expression> ast;
                 core::MutableContext ctx(gs, core::Symbols::root());
@@ -168,7 +168,7 @@ void LSPLoop::reIndexFromFileSystem() {
     std::vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
     std::vector<core::FileRef> emptyInputFiles;
     for (auto &t : pipeline::index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
-        int id = t->loc.file.id();
+        int id = t->loc.file().id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
         }
@@ -276,7 +276,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
         std::vector<std::unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
-            int id = t->loc.file.id();
+            int id = t->loc.file().id();
             indexed[id] = move(t);
             updatedIndexed.emplace_back(indexed[id]->deepCopy());
         }

@@ -7,7 +7,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
-    if (loc.file.exists()) {
+    if (loc.file().exists()) {
         result.PushBack(loc2Location(loc), alloc);
     }
 }

@@ -61,7 +61,7 @@ void LSPLoop::drainErrors() {
         if (silenceError(e->what)) {
             continue;
         }
-        auto file = e->loc.file;
+        auto file = e->loc.file();
         errorsAccumulated[file].emplace_back(move(e));
 
         if (!updatedErrors.empty() && updatedErrors.back() == file) {

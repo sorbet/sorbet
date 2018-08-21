@@ -48,13 +48,13 @@ public:
     CFG_Collector_and_Typer(const options::Options &opts) : opts(opts){};
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
-        if (m->loc.file.data(ctx).strict == core::StrictLevel::Stripe || m->symbol.data(ctx).isOverloaded()) {
+        if (m->loc.file().data(ctx).strict == core::StrictLevel::Stripe || m->symbol.data(ctx).isOverloaded()) {
             return m;
         }
         auto &print = opts.print;
         auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
 
-        bool printSrc = wantTypedSource(opts, ctx, m->loc.file);
+        bool printSrc = wantTypedSource(opts, ctx, m->loc.file());
 
         if (print.CFGRaw || printSrc) {
             cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
@@ -106,8 +106,8 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
             if (maybeCached) {
                 logger->trace("Reading from cache: {}", file.data(lgs).path());
                 auto t = core::serialize::Serializer::loadExpression(lgs, maybeCached, file.id());
-                t->loc.file.data(lgs).cachedParseTree = true;
-                ENFORCE(t->loc.file == file);
+                t->loc.file().data(lgs).cachedParseTree = true;
+                ENFORCE(t->loc.file() == file);
                 dslsInlined = move(t);
             }
         }
@@ -333,7 +333,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                     core::MutableContext ctx(*gs, core::Symbols::root());
                     logger->trace("Running tree substitution");
                     for (auto &tree : threadResult.trees) {
-                        auto file = tree->loc.file;
+                        auto file = tree->loc.file();
                         core::ErrorRegion errs(*gs, file);
                         if (!file.data(*gs).cachedParseTree) {
                             auto subst = ast::Substitute::run(ctx, substitution, move(tree));
@@ -357,7 +357,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
     ENFORCE(mainThreadFiles.size() + frs.size() == ret.size());
 
     auto by_file = [](unique_ptr<ast::Expression> const &a, unique_ptr<ast::Expression> const &b) {
-        return a->loc.file < b->loc.file;
+        return a->loc.file() < b->loc.file();
     };
     absl::c_sort(ret, by_file);
 
@@ -367,7 +367,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
 unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expression> resolved,
                                          const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     unique_ptr<ast::Expression> result;
-    core::FileRef f = resolved->loc.file;
+    core::FileRef f = resolved->loc.file();
     if (opts.stopAfterPhase == options::Phase::NAMER) {
         return make_unique<ast::EmptyTree>(core::Loc::none(f));
     }
@@ -420,7 +420,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             Timer timeit(logger, "naming");
             int i = 0;
             for (auto &tree : what) {
-                auto file = tree->loc.file;
+                auto file = tree->loc.file();
                 try {
                     unique_ptr<ast::Expression> ast;
                     {
@@ -449,7 +449,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             logger->trace("Resolving (global pass)...");
             vector<core::ErrorRegion> errs;
             for (auto &tree : what) {
-                auto file = tree->loc.file;
+                auto file = tree->loc.file();
                 errs.emplace_back(gs, file);
             }
             core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
@@ -494,7 +494,7 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalS
 
         core::Context ctx(*gs, core::Symbols::root());
         for (auto &resolved : what) {
-            logger->trace("enqueue-typer {}", resolved->loc.file.data(*gs).path());
+            logger->trace("enqueue-typer {}", resolved->loc.file().data(*gs).path());
             fileq->push(move(resolved), 1);
         }
 
@@ -509,7 +509,7 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalS
                     for (auto result = fileq->try_pop(job); !result.done(); result = fileq->try_pop(job)) {
                         if (result.gotItem()) {
                             processedByThread++;
-                            core::FileRef file = job->loc.file;
+                            core::FileRef file = job->loc.file();
                             try {
                                 threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
                             } catch (SRubyException &) {

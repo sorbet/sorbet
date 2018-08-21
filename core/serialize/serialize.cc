@@ -44,6 +44,9 @@ public:
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
 
     SerializerImpl() = delete;
+
+private:
+    static void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree);
 };
 
 void Pickler::putStr(const absl::string_view s) {
@@ -114,11 +117,20 @@ void Pickler::putU1(u1 u) {
     }
     data.push_back(u);
 }
+void Pickler::putU2(u2 u) {
+    putU1(u >> 8);
+    putU1(u & 255);
+}
 
 u1 UnPickler::getU1() {
     ENFORCE(zeroCounter == 0);
     auto res = data[pos++];
     return res;
+}
+u2 UnPickler::getU2() {
+    auto high = getU1();
+    auto low = getU1();
+    return (((u2)high) << 8) + low;
 }
 
 void Pickler::putU4(u4 u) {
@@ -423,9 +435,8 @@ void SerializerImpl::pickle(Pickler &p, const Symbol &what) {
     pickle(p, what.resultType.get());
     p.putU4(what.locs().size());
     for (auto &loc : what.locs()) {
-        p.putU4(loc.file.id());
-        p.putU4(loc.beginPos);
-        p.putU4(loc.endPos);
+        p.putU4(loc.storage.high);
+        p.putU4(loc.storage.low);
     }
 }
 
@@ -458,9 +469,8 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
     auto locCount = p.getU4();
     for (int i = 0; i < locCount; i++) {
         core::Loc loc;
-        loc.file = FileRef(p.getU4());
-        loc.beginPos = p.getU4();
-        loc.endPos = p.getU4();
+        loc.storage.high = p.getU4();
+        loc.storage.low = p.getU4();
         result.locs_.push_back(loc);
     }
     return result;
@@ -625,10 +635,10 @@ template <class T> void SerializerImpl::pickleTree(Pickler &p, FileRef file, uni
     tmp.release();
 }
 
-void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree) {
+void SerializerImpl::pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree) {
     p.putU1(tag);
-    p.putU4(tree->loc.beginPos);
-    p.putU4(tree->loc.endPos);
+    p.putU4(tree->loc.storage.high);
+    p.putU4(tree->loc.storage.low);
 }
 
 void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what) {
@@ -636,7 +646,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
         p.putU1(1);
         return;
     }
-    ENFORCE(!what->loc.exists() || file == what->loc.file, "Pickling a tree from file ", what->loc.file.id(),
+    ENFORCE(!what->loc.exists() || file == what->loc.file(), "Pickling a tree from file ", what->loc.file().id(),
             " inside a tree from ", file.id());
 
     typecase(what.get(),
@@ -847,9 +857,9 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
         return nullptr;
     }
     Loc loc;
-    loc.file = file;
-    loc.beginPos = p.getU4();
-    loc.endPos = p.getU4();
+    loc.storage.high = p.getU4();
+    loc.storage.low = p.getU4();
+    loc.setFile(file);
 
     switch (kind) {
         case 2: {
@@ -1089,8 +1099,8 @@ unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1
 
 vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expression> &e) {
     serialize::Pickler pickler;
-    pickler.putU4(e->loc.file.id());
-    SerializerImpl::pickle(pickler, e->loc.file, e);
+    pickler.putU4(e->loc.file().id());
+    SerializerImpl::pickle(pickler, e->loc.file(), e);
     return pickler.result(FILE_COMPRESSION_DEGREE);
 }
 

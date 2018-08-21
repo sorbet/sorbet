@@ -11,7 +11,7 @@ void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::Fil
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
             for (auto loc : mem.second.data(*finalGs).locs()) {
-                foundThisFile = foundThisFile || loc.file == filter;
+                foundThisFile = foundThisFile || loc.file() == filter;
             }
             if (!foundThisFile) {
                 continue;
@@ -31,10 +31,10 @@ void LSPLoop::handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjs
     auto fref = uri2FileRef(uri);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
         core::SymbolRef ref(finalGs.get(), idx);
-        if (!hideSymbol(ref) && (ref.data(*finalGs).owner.data(*finalGs).loc().file != fref ||
+        if (!hideSymbol(ref) && (ref.data(*finalGs).owner.data(*finalGs).loc().file() != fref ||
                                  ref.data(*finalGs).owner == core::Symbols::root())) {
             for (auto definitionLocation : ref.data(*finalGs).locs()) {
-                if (definitionLocation.file == fref) {
+                if (definitionLocation.file() == fref) {
                     auto data = symbolRef2DocumentSymbol(ref, fref);
                     if (data) {
                         result.PushBack(move(*data), alloc);
@@ -87,7 +87,7 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef s
         return nullptr;
     }
     auto &sym = symRef.data(*finalGs);
-    if (!sym.loc().file.exists() || hideSymbol(symRef)) {
+    if (!sym.loc().file().exists() || hideSymbol(symRef)) {
         return nullptr;
     }
     rapidjson::Value result;

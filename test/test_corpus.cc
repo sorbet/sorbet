@@ -285,7 +285,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     for (auto &resolvedTree : trees) {
-        auto file = resolvedTree->loc.file;
+        auto file = resolvedTree->loc.file();
         auto checkTree = [&]() {
             if (resolvedTree == nullptr) {
                 auto path = file.data(ctx).path();
@@ -428,7 +428,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     map<pair<sorbet::core::FileRef, int>, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
-        auto filePath = error->loc.file.data(gs).path();
+        auto filePath = error->loc.file().data(gs).path();
         if (!error->loc.exists()) {
             // The convention is to put `error: Unknown Location Error` at
             // the top of the file for each of these so that they are eaten
@@ -451,11 +451,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto pos = error->loc.position(gs);
         bool found = false;
         for (int i = pos.first.line; i <= pos.second.line; i++) {
-            auto expectedErrorIt = expectedErrors.find(make_pair(error->loc.file, i));
+            auto expectedErrorIt = expectedErrors.find(make_pair(error->loc.file(), i));
             if (expectedErrorIt != expectedErrors.end()) {
                 string expectedError = expectedErrorIt->second.error;
                 found = true;
-                seenErrorLines[make_pair(error->loc.file, i)]++;
+                seenErrorLines[make_pair(error->loc.file(), i)]++;
                 if (expectedError.empty()) {
                     ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
                                                           "substring of) the expected error after `# error:` "
