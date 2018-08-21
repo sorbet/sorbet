@@ -10,7 +10,7 @@ using namespace std;
 namespace sorbet {
 namespace core {
 
-vector<int> findLineBreaks(absl::string_view s) {
+vector<int> findLineBreaks(const string &s) {
     vector<int> res;
     int i = -1;
     res.push_back(-1);
@@ -74,12 +74,7 @@ StrictLevel fileSigil(absl::string_view source) {
 }
 
 File::File(string &&path_, string &&source_, Type sourceType)
-    : sourceType(sourceType), storage{make_shared<string>(source_), make_shared<string>(path_), {}},
-      path_(*storage.path), source_(*storage.source), sigil(fileSigil(this->source_)), strict(sigil) {}
-
-File::File(string &&path_, mio::shared_mmap_source mmapped, Type sourceType)
-    : sourceType(sourceType), storage{nullptr, make_shared<string>(path_), move(mmapped)}, path_(*storage.path),
-      source_(storage.mmap.data(), storage.mmap.size()), sigil(fileSigil(this->source_)), strict(sigil) {}
+    : sourceType(sourceType), path_(path_), source_(source_), sigil(fileSigil(this->source_)), strict(sigil) {}
 
 FileRef::FileRef(unsigned int id) : _id(id) {
     ENFORCE(((u2)id) == id, "FileRef overflow. Do you have 2^16 files?");
@@ -132,25 +127,6 @@ std::vector<int> &File::line_breaks() const {
 
 int File::lineCount() const {
     return line_breaks().size() - 1;
-}
-
-File File::withNewSource(std::string &&source_) {
-    mio::shared_mmap_source empty;
-    auto newSourceHolder = make_shared<string>(source_);
-    File ret(storage.path, newSourceHolder, empty, path_, *newSourceHolder, fileSigil(*newSourceHolder));
-    ret.sourceType = Normal;
-    ret.strict = ret.sigil;
-    ret.hadErrors_ = hadErrors_;
-    return ret;
-}
-
-File File::withNewSource(mio::shared_mmap_source mmapped) {
-    absl::string_view source_(mmapped.data(), mmapped.size());
-    File ret(storage.path, nullptr, mmapped, path_, source_, fileSigil(source_));
-    ret.sourceType = Normal;
-    ret.strict = ret.sigil;
-    ret.hadErrors_ = hadErrors_;
-    return ret;
 }
 
 } // namespace core

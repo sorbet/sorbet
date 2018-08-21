@@ -227,35 +227,28 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                         processedByThread++;
                         auto fileName = file.data(*lgs, true).path();
                         logger->trace("Reading: {}", fileName);
-                        std::error_code error;
-                        mio::shared_mmap_source mmaped = mio::make_mmap_source(fileName, 0, mio::map_entire_file, error,
-                                                                               mio::cache_hint::sequential);
-                        if (error) {
-                            struct stat st;
-                            int err = stat(fileName.data(), &st);
-                            if (err == 0 && st.st_size == 0) {
-                                // This is an empty file. mio errors on those,
-                                // but we should not.
-                            } else {
-                                if (auto e = lgs->beginError(sorbet::core::Loc::none(),
-                                                             core::errors::Internal::InternalError)) {
-                                    e.setHeader("File Not Found: `{}`", fileName);
-                                }
+                        string src;
+                        try {
+                            src = FileOps::read(fileName);
+                        } catch (FileNotFoundException e) {
+                            if (auto e =
+                                    lgs->beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
+                                e.setHeader("File Not Found: `{}`", fileName);
                             }
                             // continue with an empty source, because the
                             // assertion below requires every input file to map
                             // to one output tree
-                            lgs->enterNewFileAt(make_shared<core::File>(file.data(*lgs, true).withNewSource("")), file);
-                        } else {
-                            core::prodCounterAdd("types.input.bytes", mmaped.size());
-                            core::prodCounterInc("types.input.files");
+                        }
+                        core::prodCounterAdd("types.input.bytes", src.size());
+                        core::prodCounterInc("types.input.files");
 
-                            {
-                                core::UnfreezeFileTable unfreezeFiles(*lgs);
-                                auto entered = lgs->enterNewFileAt(
-                                    make_shared<core::File>(file.data(*lgs, true).withNewSource(move(mmaped))), file);
-                                ENFORCE(entered == file);
-                            }
+                        {
+                            core::UnfreezeFileTable unfreezeFiles(*lgs);
+                            auto entered =
+                                lgs->enterNewFileAt(make_shared<core::File>(string(fileName.begin(), fileName.end()),
+                                                                            move(src), core::File::Normal),
+                                                    file);
+                            ENFORCE(entered == file);
                         }
                         if (core::enable_counters) {
                             core::counterAdd("types.input.lines", file.data(*lgs).lineCount());

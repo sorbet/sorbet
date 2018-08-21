@@ -29,13 +29,6 @@ def externals():
         build_file = "//third_party:spdlog.BUILD",
     )
 
-    new_git_repository(
-        name = "mio",
-        remote="https://github.com/mandreyel/mio.git",
-        commit="587812ab73fd3d028891298907ddaab00021f407",
-        build_file ="//third_party:mio.BUILD",
-    )
-
     # their zip archive has symlinks that bazel does not like
     new_git_repository(
             name="skarupke_maps",
