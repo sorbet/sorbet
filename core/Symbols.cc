@@ -621,9 +621,17 @@ SymbolRef Symbol::attachedClass(const GlobalState &gs) const {
     return singleton;
 }
 
-SymbolRef Symbol::dealias(const GlobalState &gs) const {
+SymbolRef Symbol::dealias(const GlobalState &gs, int depthLimit) const {
     if (auto alias = cast_type<AliasType>(resultType.get())) {
-        return alias->symbol.data(gs).dealias(gs);
+        if (depthLimit == 0) {
+            if (auto e = gs.beginError(loc(), errors::Internal::CyclicReferenceError)) {
+                e.setHeader("Too many alias expansions for symbol {}, the alias is either too long or infinite. Next "
+                            "expansion would have been to {}",
+                            fullName(gs), alias->symbol.data(gs).fullName(gs));
+            }
+            return alias->symbol;
+        }
+        return alias->symbol.data(gs).dealias(gs, depthLimit - 1);
     }
     return this->ref(gs);
 }

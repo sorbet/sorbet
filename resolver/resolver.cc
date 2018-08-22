@@ -263,7 +263,15 @@ private:
 
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
         if (it.rhs->symbol.exists()) {
-            it.lhs.data(ctx).resultType = make_unique<core::AliasType>(it.rhs->symbol);
+            if (it.rhs->symbol.data(ctx).dealias(ctx) != it.lhs) {
+                it.lhs.data(ctx).resultType = make_unique<core::AliasType>(it.rhs->symbol);
+            } else {
+                if (auto e =
+                        ctx.state.beginError(it.lhs.data(ctx).loc(), core::errors::Resolver::RecursiveClassAlias)) {
+                    e.setHeader("Class alias aliases to itself");
+                }
+                it.lhs.data(ctx).resultType = core::Types::untyped();
+            }
             return true;
         }
         return false;
