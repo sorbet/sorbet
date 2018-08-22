@@ -1,4 +1,4 @@
-load(":lsp_test.bzl", "lsp_test")
+load(":lsp_test.bzl", "lsp_test", "update_test")
 
 sh_binary(
     name = "lsp_test_runner",
@@ -10,3 +10,5 @@ sh_binary(
     lsp_test(script)
     for script in glob(["*/*.rec"])
 ]
+
+update_test()

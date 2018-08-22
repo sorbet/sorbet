@@ -1,5 +1,16 @@
 #!/usr/bin/env bash
-set -e
+set -ex
+
+
+IS_REGENERATING_REC_FILE=false
+
+if [[ $# -eq 0 ]] ; then
+    echo 'Need a path to lsp recording as an argument'
+    exit 1
+elif [[ $# -eq 2 ]]; then
+    IS_REGENERATING_REC_FILE=true
+fi
+
 
 recfile="$1"
 READ_PREFIX="Read: "
@@ -45,6 +56,9 @@ do
 
 $payload"
         echo -n "$text">&"$IN_FD"
+        if [ "$IS_REGENERATING_REC_FILE" == true ]; then
+            echo "$line"
+        fi
 
     elif [[ "$line" == ${WRITE_PREFIX}* ]] ;
     then
@@ -61,10 +75,14 @@ $payload"
                 exit 3
             fi
             read -r -n "${bytelen}" -u "$OUT_FD" payload
-            if [[ "$payload" != "$expected_payload" ]];
-            then
-                diff  <(echo "$expected_payload" ) <(echo "$payload")
-                exit 1
+            if [ "$IS_REGENERATING_REC_FILE" != true ]; then
+                if [[ "$payload" != "$expected_payload" ]];
+                then
+                    diff  <(echo "$expected_payload" ) <(echo "$payload")
+                    exit 1
+                fi
+            else
+                echo "${WRITE_PREFIX}${payload}"
             fi
         else
             echo "Expected Context-Length:XXX, got $header"

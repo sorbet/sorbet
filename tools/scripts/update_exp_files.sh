@@ -41,4 +41,4 @@ done
 
 parallel --joblog - < "$COMMAND_FILE"
 
-bazel test -c opt test/cli:update
+bazel test -c opt test/cli:update test/lsp:update

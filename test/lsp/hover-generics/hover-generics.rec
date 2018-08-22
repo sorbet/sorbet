@@ -6,4 +6,4 @@ Read: {"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument
 Read: {"jsonrpc":"2.0","id":11,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/foo.rb"},"position":{"line":12,"character":19}}}
 Write: {"jsonrpc":"2.0","id":11,"result":{"contents":{"kind":"markdown","value":"sig().returns(Integer)"}}}
 Read: {"jsonrpc":"2.0","id":12,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/foo.rb"},"position":{"line":13,"character":5}}}
-Write: {"jsonrpc":"2.0","id":12,"result":{"contents":{"kind":"markdown","value":"```T::Array[Integer] Array#map(blk: Proc1[Integer, Integer])```"}}}
+Write: {"jsonrpc":"2.0","id":12,"result":{"contents":{"kind":"markdown","value":"sig(blk: Proc1[Integer, Integer]).returns(T::Array[Integer])"}}}
