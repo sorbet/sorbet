@@ -1,58 +1,58 @@
 class <emptyTree><<constant:<root>>> < ()
   begin
-    <assignTemp$2 = ::<Magic>.<expand-splat>(self(<constant:<todo sym>>).some_array(), 3, 0)
-    <emptyTree>::<constant:A> = <assignTemp$2.[](0)
-    <emptyTree>::<constant:B> = <assignTemp$2.[](1)
-    <emptyTree>::<constant:C> = <assignTemp$2.[](2)
-    <assignTemp$2
+    <assignTemp>$2 = ::<Magic>.<expand-splat>(self(<constant:<todo sym>>).some_array(), 3, 0)
+    <emptyTree>::<constant:A> = <assignTemp>$2.[](0)
+    <emptyTree>::<constant:B> = <assignTemp>$2.[](1)
+    <emptyTree>::<constant:C> = <assignTemp>$2.[](2)
+    <assignTemp>$2
   end
 
   class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
     def some_method<<constant:<todo sym>>>(array)
       begin
         begin
-          <assignTemp$2 = ::<Magic>.<expand-splat>(array, 3, 0)
-          a = <assignTemp$2.[](0)
-          b = <assignTemp$2.[](1)
+          <assignTemp>$2 = ::<Magic>.<expand-splat>(array, 3, 0)
+          a = <assignTemp>$2.[](0)
+          b = <assignTemp>$2.[](1)
           begin
-            <assignTemp$3 = ::<Magic>.<expand-splat>(<assignTemp$2.[](2), 2, 0)
-            c = <assignTemp$3.[](0)
-            d = <assignTemp$3.[](1)
-            <assignTemp$3
+            <assignTemp>$3 = ::<Magic>.<expand-splat>(<assignTemp>$2.[](2), 2, 0)
+            c = <assignTemp>$3.[](0)
+            d = <assignTemp>$3.[](1)
+            <assignTemp>$3
           end
-          <assignTemp$2
+          <assignTemp>$2
         end
         begin
-          <assignTemp$4 = ::<Magic>.<expand-splat>(array, 2, 0)
-          a.[]=(b, <assignTemp$4.[](0))
-          c = <assignTemp$4.[](1)
-          <assignTemp$4
+          <assignTemp>$4 = ::<Magic>.<expand-splat>(array, 2, 0)
+          a.[]=(b, <assignTemp>$4.[](0))
+          c = <assignTemp>$4.[](1)
+          <assignTemp>$4
         end
         begin
-          <assignTemp$5 = ::<Magic>.<expand-splat>(array, 1, 0)
-          a = <assignTemp$5.[](0)
-          b = <assignTemp$5.slice(::Range.new(1, -1, false))
-          <assignTemp$5
+          <assignTemp>$5 = ::<Magic>.<expand-splat>(array, 1, 0)
+          a = <assignTemp>$5.[](0)
+          b = <assignTemp>$5.slice(::Range.new(1, -1, false))
+          <assignTemp>$5
         end
         begin
-          <assignTemp$6 = ::<Magic>.<expand-splat>(array, 0, 1)
-          a = <assignTemp$6.slice(::Range.new(0, -1, true))
-          b = <assignTemp$6.[](-1)
-          <assignTemp$6
+          <assignTemp>$6 = ::<Magic>.<expand-splat>(array, 0, 1)
+          a = <assignTemp>$6.slice(::Range.new(0, -1, true))
+          b = <assignTemp>$6.[](-1)
+          <assignTemp>$6
         end
         begin
-          <assignTemp$7 = ::<Magic>.<expand-splat>(array, 2, 2)
-          a = <assignTemp$7.[](0)
-          b = <assignTemp$7.[](1)
-          c = <assignTemp$7.slice(::Range.new(2, -2, true))
-          d = <assignTemp$7.[](-2)
-          e = <assignTemp$7.[](-1)
-          <assignTemp$7
+          <assignTemp>$7 = ::<Magic>.<expand-splat>(array, 2, 2)
+          a = <assignTemp>$7.[](0)
+          b = <assignTemp>$7.[](1)
+          c = <assignTemp>$7.slice(::Range.new(2, -2, true))
+          d = <assignTemp>$7.[](-2)
+          e = <assignTemp>$7.[](-1)
+          <assignTemp>$7
         end
         begin
-          <assignTemp$8 = ::<Magic>.<expand-splat>(array, 1, 0)
-          a = <assignTemp$8.[](0)
-          <assignTemp$8
+          <assignTemp>$8 = ::<Magic>.<expand-splat>(array, 1, 0)
+          a = <assignTemp>$8.[](0)
+          <assignTemp>$8
         end
       end
     end

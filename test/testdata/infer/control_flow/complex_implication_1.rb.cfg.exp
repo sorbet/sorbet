@@ -6,7 +6,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_1" [shape = parallelogram];
 
     "bb::ModuleMethods#instrumented_request_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : T.untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : T.untyped\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ModuleMethods\lfinal_attempt = load_arg(<selfMethodTemp>$3#instrumented_request, 0) : T.untyped\lfoo = load_arg(<selfMethodTemp>$3#instrumented_request, 1) : T.untyped\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_0" -> "bb::ModuleMethods#instrumented_request_3" [style="bold"];
@@ -18,14 +18,14 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3](<rescueTemp$5, final_attempt, foo)\l<rescueTemp$6 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$7 = <rescueTemp$5.is_a?(<rescueTemp$6) : T.untyped\l<rescueTemp$7\l"
+        label = "block[id=3](final_attempt, foo)\le = <unanalyzable> : T.untyped\l<exceptionClassTemp>$6 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$7 = e.is_a?(<exceptionClassTemp>$6) : T.untyped\l<isaCheckTemp>$7\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_7" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_1" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_7" [
-        label = "block[id=7](<rescueTemp$5, final_attempt, foo)\le = <rescueTemp$5 : StandardError\lerr = e : StandardError\l<unconditional>\l"
+        label = "block[id=7](final_attempt, foo, e)\lerr = e : StandardError\l<unconditional>\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_9" [style="bold"];

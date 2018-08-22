@@ -69,7 +69,7 @@ ClassDef{
                 ]
                 var = UnresolvedIdent{
                   kind = Local
-                  name = <rescueTemp$2
+                  name = <rescueTemp>$2
                 }
                 body = InsSeq{
                   stats = [

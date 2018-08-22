@@ -28,14 +28,14 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
     "bb::A#initialize_5" [
-        label = "block[id=5]()\louterLoops: 1\l<rescueTemp$10 = <unanalyzable> : T.untyped\l<rescueTemp$10\l"
+        label = "block[id=5]()\louterLoops: 1\l<rescueStartTemp>$10 = <unanalyzable> : T.untyped\l<rescueStartTemp>$10\l"
     ];
 
     "bb::A#initialize_5" -> "bb::A#initialize_6" [style="bold"];
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
     "bb::A#initialize_6" [
-        label = "block[id=6](<rescueTemp$10)\louterLoops: 1\l<rescueTemp$11 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$12 = <rescueTemp$10.is_a?(<rescueTemp$11) : T.untyped\l<rescueTemp$12\l"
+        label = "block[id=6]()\louterLoops: 1\lse$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$11 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$12 = se$2.is_a?(<exceptionClassTemp>$11) : T.untyped\l<isaCheckTemp>$12\l"
     ];
 
     "bb::A#initialize_6" -> "bb::A#initialize_10" [style="bold"];
@@ -47,7 +47,7 @@ subgraph "cluster_::A#initialize" {
 
     "bb::A#initialize_7" -> "bb::A#initialize_12" [style="bold"];
     "bb::A#initialize_10" [
-        label = "block[id=10](<rescueTemp$10)\louterLoops: 1\l<blockReturnTemp>$9 = 2 : Integer(2)\l<unconditional>\l"
+        label = "block[id=10]()\louterLoops: 1\l<blockReturnTemp>$9 = 2 : Integer(2)\l<unconditional>\l"
     ];
 
     "bb::A#initialize_10" -> "bb::A#initialize_12" [style="bold"];

@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=0]()\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<rescueTemp$5)\l<rescueTemp$7 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$8 = <rescueTemp$5.is_a?(<rescueTemp$7) : T.untyped\l<rescueTemp$8\l"
+        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$7 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$8 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$7) : T.untyped\l<isaCheckTemp>$8\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_7" [style="bold"];
@@ -30,7 +30,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_7" [
-        label = "block[id=7](<rescueTemp$5)\l<returnTemp>$9 = 2 : Integer(2)\l<statTemp>$4 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+        label = "block[id=7]()\l<returnTemp>$9 = 2 : Integer(2)\l<statTemp>$4 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_1" [style="bold"];

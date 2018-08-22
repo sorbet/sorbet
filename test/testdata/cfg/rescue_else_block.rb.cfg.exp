@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<rescueTemp$4 = <unanalyzable> : T.untyped\l<rescueTemp$4\l"
+        label = "block[id=0]()\l<rescueStartTemp>$4 = <unanalyzable> : T.untyped\l<rescueStartTemp>$4\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3](<rescueTemp$4)\l<rescueTemp$6 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$7 = <rescueTemp$4.is_a?(<rescueTemp$6) : T.untyped\l<rescueTemp$7\l"
+        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$6 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$7 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$6) : T.untyped\l<isaCheckTemp>$7\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_12" [style="bold"];

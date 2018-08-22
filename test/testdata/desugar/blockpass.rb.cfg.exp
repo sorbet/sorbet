@@ -247,7 +247,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_26" -> "bb::Object#foo_27" [style="tapered"];
 
     "bb::Object#foo_27" [
-        label = "block[id=27]()\l<statTemp>$83 = Solve<::Object#foo#<block>> : T.untyped\l<assignTemp$7 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<ifTemp>$93 = <assignTemp$7.nil?() : TrueClass | FalseClass\l<ifTemp>$93\l"
+        label = "block[id=27]()\l<statTemp>$83 = Solve<::Object#foo#<block>> : T.untyped\l<assignTemp>$7 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<ifTemp>$93 = <assignTemp>$7.nil?() : TrueClass | FalseClass\l<ifTemp>$93\l"
     ];
 
     "bb::Object#foo_27" -> "bb::Object#foo_34" [style="bold"];
@@ -259,7 +259,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_28" -> "bb::Object#foo_26" [style="bold"];
     "bb::Object#foo_30" [
-        label = "block[id=30](<assignTemp$7)\l<block-pre-call-temp>$96 = <assignTemp$7.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=30](<assignTemp>$7)\l<block-pre-call-temp>$96 = <assignTemp>$7.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_30" -> "bb::Object#foo_31" [style="bold"];

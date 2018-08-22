@@ -325,15 +325,15 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Rescue *a) {
                 auto rescueStartBlock = cctx.inWhat.freshBlock(cctx.loops);
-                auto unanalyzableCondition = cctx.newTemporary(core::Names::rescueTemp());
-                rescueStartBlock->exprs.emplace_back(unanalyzableCondition, what->loc, make_unique<Unanalyzable>());
                 unconditionalJump(current, rescueStartBlock, cctx.inWhat, a->loc);
                 cctx.rescueScope = rescueStartBlock;
 
                 auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops);
-                conditionalJump(rescueStartBlock, unanalyzableCondition, rescueHandlersBlock, bodyBlock, cctx.inWhat,
-                                a->loc);
+                auto rescueStartTemp = cctx.newTemporary(core::Names::rescueStartTemp());
+                rescueStartBlock->exprs.emplace_back(rescueStartTemp, what->loc, make_unique<Unanalyzable>());
+                rescueStartBlock->exprs.back().value->isSynthetic = true;
+                conditionalJump(rescueStartBlock, rescueStartTemp, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
@@ -348,6 +348,11 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
                     auto &exceptions = rescueCase->exceptions;
                     auto added = false;
+                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
+                    ENFORCE(local != nullptr, "rescue case var not a local?");
+                    rescueHandlersBlock->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
+                                                            make_unique<Unanalyzable>());
+
                     if (exceptions.empty()) {
                         // rescue without a class catches StandardError
                         exceptions.emplace_back(
@@ -356,17 +361,17 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                     for (auto &ex : exceptions) {
                         auto loc = ex->loc;
-                        auto exceptionClass = cctx.newTemporary(core::Names::rescueTemp());
+                        auto exceptionClass = cctx.newTemporary(core::Names::exceptionClassTemp());
                         rescueHandlersBlock = walk(cctx.withTarget(exceptionClass), ex.get(), rescueHandlersBlock);
 
-                        auto isaCheck = cctx.newTemporary(core::Names::rescueTemp());
+                        auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
                         vector<core::LocalVariable> args;
                         vector<core::Loc> argLocs = {loc};
                         args.emplace_back(exceptionClass);
 
                         rescueHandlersBlock->exprs.emplace_back(
                             isaCheck, loc,
-                            make_unique<Send>(unanalyzableCondition, core::Names::is_a_p(), loc, args, argLocs));
+                            make_unique<Send>(local->localVariable, core::Names::is_a_p(), loc, args, argLocs));
 
                         auto otherHandlerBlock = cctx.inWhat.freshBlock(cctx.loops);
                         conditionalJump(rescueHandlersBlock, isaCheck, caseBody, otherHandlerBlock, cctx.inWhat, loc);
@@ -375,11 +380,6 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     if (added) {
                         exceptions.pop_back();
                     }
-
-                    auto *local = ast::cast_tree<ast::Local>(rescueCase->var.get());
-                    ENFORCE(local != nullptr, "rescue case var not a local?");
-                    caseBody->exprs.emplace_back(local->localVariable, rescueCase->var->loc,
-                                                 make_unique<Ident>(unanalyzableCondition));
 
                     caseBody = walk(cctx, rescueCase->body.get(), caseBody);
                     if (ret == cctx.inWhat.deadBlock()) {

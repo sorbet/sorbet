@@ -16,14 +16,14 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2](try)\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=2](try)\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](<rescueTemp$5, try)\l<rescueTemp$24 = alias <constant:A> : <Class:A>\l<rescueTemp$25 = <rescueTemp$5.is_a?(<rescueTemp$24) : T.untyped\l<rescueTemp$25\l"
+        label = "block[id=3](try)\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$24 = alias <constant:A> : <Class:A>\l<isaCheckTemp>$25 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$24) : T.untyped\l<isaCheckTemp>$25\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_13" [style="bold"];
@@ -54,19 +54,19 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_7" -> "bb::Object#main_17" [style="bold"];
     "bb::Object#main_13" [
-        label = "block[id=13](<rescueTemp$5, try)\l<statTemp>$27 = self : Object\l<statTemp>$28 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$26 = <statTemp>$27.puts(<statTemp>$28) : NilClass\l<unconditional>\l"
+        label = "block[id=13](try)\l<statTemp>$27 = self : Object\l<statTemp>$28 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$26 = <statTemp>$27.puts(<statTemp>$28) : NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_13" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_14" [
-        label = "block[id=14](<rescueTemp$5, try)\l<rescueTemp$30 = alias <constant:B> : <Class:B>\l<rescueTemp$31 = <rescueTemp$5.is_a?(<rescueTemp$30) : T.untyped\l<rescueTemp$31\l"
+        label = "block[id=14](try)\l<rescueTemp>$3 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$30 = alias <constant:B> : <Class:B>\l<isaCheckTemp>$31 = <rescueTemp>$3.is_a?(<exceptionClassTemp>$30) : T.untyped\l<isaCheckTemp>$31\l"
     ];
 
     "bb::Object#main_14" -> "bb::Object#main_15" [style="bold"];
     "bb::Object#main_14" -> "bb::Object#main_1" [style="tapered"];
 
     "bb::Object#main_15" [
-        label = "block[id=15](<rescueTemp$5, try)\l<statTemp>$33 = self : Object\l<statTemp>$34 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$32 = <statTemp>$33.puts(<statTemp>$34) : NilClass\l<unconditional>\l"
+        label = "block[id=15](try)\l<statTemp>$33 = self : Object\l<statTemp>$34 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$32 = <statTemp>$33.puts(<statTemp>$34) : NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_15" -> "bb::Object#main_2" [style="bold"];

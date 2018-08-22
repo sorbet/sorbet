@@ -26,9 +26,9 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def multiple_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).baz()
-    rescue => <rescueTemp$3
+    rescue => <rescueTemp>$3
       self(<constant:<todo sym>>).bar()
     end
   end
@@ -44,7 +44,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_rescue_ensure<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).baz()
     ensure
       self(<constant:<todo sym>>).bar()
@@ -54,7 +54,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
     begin
       <emptyTree>
-    rescue <emptyTree>::<constant:LoadError> => <rescueTemp$2
+    rescue <emptyTree>::<constant:LoadError> => <rescueTemp>$2
       <emptyTree>
     end
   end
@@ -62,14 +62,14 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).take_arg(begin
         self(<constant:<todo sym>>).bar()
-      rescue => <rescueTemp$2
+      rescue => <rescueTemp>$2
         nil
       end)
   end
 
   def parse_rescue_mod<<constant:<todo sym>>>()
     self(<constant:<todo sym>>).meth()
-  rescue => <rescueTemp$2
+  rescue => <rescueTemp>$2
     self(<constant:<todo sym>>).bar()
   end
 
@@ -84,7 +84,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_rescue_else_ensure<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).baz()
     else
       self(<constant:<todo sym>>).foo()
@@ -96,7 +96,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_rescue<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).foo()
     end
   end
@@ -112,9 +112,9 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   def parse_resbody_var_1<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       begin
-        @ex = <rescueTemp$2
+        @ex = <rescueTemp>$2
         self(<constant:<todo sym>>).bar()
       end
     end
@@ -122,19 +122,19 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
 
   def parse_rescue_mod_op_assign<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       self(<constant:<todo sym>>).bar())
   end
 
   def parse_ruby_bug_12402<<constant:<todo sym>>>()
     foo = self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-  rescue => <rescueTemp$2
+  rescue => <rescueTemp>$2
     nil
   end
 
   def parse_ruby_bug_12402_1<<constant:<todo sym>>>()
     foo = foo.+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-    rescue => <rescueTemp$2
+    rescue => <rescueTemp>$2
       nil)
   end
 
@@ -143,7 +143,7 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
       []$3 = self(<constant:<todo sym>>).foo()
       []$4 = 0
       []$3.[]=([]$4, []$3.[]([]$4).+(self(<constant:<todo sym>>).raise(self(<constant:<todo sym>>).bar())
-        rescue => <rescueTemp$2
+        rescue => <rescueTemp>$2
           nil))
     end
   end

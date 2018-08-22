@@ -6,7 +6,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_1" [shape = parallelogram];
 
     "bb::Object#a_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Object\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Object\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
     ];
 
     "bb::Object#a_0" -> "bb::Object#a_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_3" [
-        label = "block[id=3](<rescueTemp$5)\l<rescueTemp$7 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$8 = <rescueTemp$5.is_a?(<rescueTemp$7) : T.untyped\l<rescueTemp$8\l"
+        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$7 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$8 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$7) : T.untyped\l<isaCheckTemp>$8\l"
     ];
 
     "bb::Object#a_3" -> "bb::Object#a_7" [style="bold"];
@@ -30,7 +30,7 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_7" [
-        label = "block[id=7](<rescueTemp$5)\la = 2 : Integer(2)\l<statTemp>$11 = 3 : Integer(3)\l<returnMethodTemp>$2 = a.+(<statTemp>$11) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=7]()\la = 2 : Integer(2)\l<statTemp>$11 = 3 : Integer(3)\l<returnMethodTemp>$2 = a.+(<statTemp>$11) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#a_7" -> "bb::Object#a_1" [style="bold"];

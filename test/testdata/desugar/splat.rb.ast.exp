@@ -41,10 +41,10 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>::<constant:Child>.new().foo()
       b = <emptyTree>::<constant:Splatable>.new().to_a()
       begin
-        <assignTemp$2 = begin
+        <assignTemp>$2 = begin
           1
         end
-        if ::<Magic>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(<assignTemp$2)
+        if ::<Magic>.<splat>(<emptyTree>::<constant:Integer>.to_a()).===(<assignTemp>$2)
           <emptyTree>
         else
           <emptyTree>
@@ -52,12 +52,12 @@ class <emptyTree><<constant:<root>>> < ()
       end
       begin
         self(<constant:<todo sym>>).raise("a")
-      rescue <emptyTree>::<constant:Rescueable>.new().to_a() => <rescueTemp$3
+      rescue <emptyTree>::<constant:Rescueable>.new().to_a() => <rescueTemp>$3
         <emptyTree>
       end
       begin
         self(<constant:<todo sym>>).raise("a")
-      rescue [<emptyTree>::<constant:Array>].concat(<emptyTree>::<constant:Rescueable>.new().to_a()).concat([<emptyTree>::<constant:Float>]) => <rescueTemp$4
+      rescue [<emptyTree>::<constant:Array>].concat(<emptyTree>::<constant:Rescueable>.new().to_a()).concat([<emptyTree>::<constant:Float>]) => <rescueTemp>$4
         <emptyTree>
       end
     end

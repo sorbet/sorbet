@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#initialize" {
     "bb::Foo#initialize_1" [shape = parallelogram];
 
     "bb::Foo#initialize_0" [
-        label = "block[id=0]()\l@ivar$4 = alias @ivar : Integer\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : T.untyped\l<castTemp$8 = 0 : Integer(0)\l@ivar$4 = cast(<castTemp$8, Integer); : Integer\l<returnMethodTemp>$2 = @ivar$4 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@ivar$4 = alias @ivar : Integer\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : T.untyped\l<castTemp>$8 = 0 : Integer(0)\l@ivar$4 = cast(<castTemp>$8, Integer); : Integer\l<returnMethodTemp>$2 = @ivar$4 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Foo#initialize_0" -> "bb::Foo#initialize_1" [style="bold"];
