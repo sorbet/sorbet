@@ -262,9 +262,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    ::Sorbet.sig().returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    ::Sorbet.sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
-    def foreign_<<constant:<todo sym>>>()
+    def foreign_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
 
@@ -280,9 +280,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    ::Sorbet.sig().returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    ::Sorbet.sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
-    def foreign_lazy_<<constant:<todo sym>>>()
+    def foreign_lazy_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
 
@@ -298,9 +298,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    ::Sorbet.sig().returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
+    ::Sorbet.sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:ForeignClass>))
 
-    def foreign_proc_<<constant:<todo sym>>>()
+    def foreign_proc_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
 
@@ -316,9 +316,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    ::Sorbet.sig().returns(::T.untyped())
+    ::Sorbet.sig({:"opts" => ::T.untyped()}).returns(::T.untyped())
 
-    def foreign_invalid_<<constant:<todo sym>>>()
+    def foreign_invalid_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
   end

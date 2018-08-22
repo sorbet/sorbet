@@ -16,9 +16,9 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
-    ::Sorbet.sig().returns(::T.nilable(<emptyTree>::<constant:Other>))
+    ::Sorbet.sig({:"opts" => ::T.untyped()}).returns(::T.nilable(<emptyTree>::<constant:Other>))
 
-    def foo_<<constant:<todo sym>>>()
+    def foo_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
   end

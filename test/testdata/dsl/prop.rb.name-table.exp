@@ -73,19 +73,23 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::AdvancedODM#foreign () -> String | NilClass @ test/testdata/dsl/prop.rb:55
     method ::AdvancedODM#foreign= (arg0) -> String @ test/testdata/dsl/prop.rb:55
       argument ::AdvancedODM#foreign=#arg0<> -> String @ test/testdata/dsl/prop.rb:55
-    method ::AdvancedODM#foreign_ () -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:55
+    method ::AdvancedODM#foreign_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:55
+      argument ::AdvancedODM#foreign_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:55
     method ::AdvancedODM#foreign_invalid () -> String | NilClass @ test/testdata/dsl/prop.rb:58
     method ::AdvancedODM#foreign_invalid= (arg0) -> String @ test/testdata/dsl/prop.rb:58
       argument ::AdvancedODM#foreign_invalid=#arg0<> -> String @ test/testdata/dsl/prop.rb:58
-    method ::AdvancedODM#foreign_invalid_ () -> T.untyped @ test/testdata/dsl/prop.rb:58
+    method ::AdvancedODM#foreign_invalid_ (opts) -> T.untyped @ test/testdata/dsl/prop.rb:58
+      argument ::AdvancedODM#foreign_invalid_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:58
     method ::AdvancedODM#foreign_lazy () -> String | NilClass @ test/testdata/dsl/prop.rb:56
     method ::AdvancedODM#foreign_lazy= (arg0) -> String @ test/testdata/dsl/prop.rb:56
       argument ::AdvancedODM#foreign_lazy=#arg0<> -> String @ test/testdata/dsl/prop.rb:56
-    method ::AdvancedODM#foreign_lazy_ () -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:56
+    method ::AdvancedODM#foreign_lazy_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:56
+      argument ::AdvancedODM#foreign_lazy_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:56
     method ::AdvancedODM#foreign_proc () -> String | NilClass @ test/testdata/dsl/prop.rb:57
     method ::AdvancedODM#foreign_proc= (arg0) -> String @ test/testdata/dsl/prop.rb:57
       argument ::AdvancedODM#foreign_proc=#arg0<> -> String @ test/testdata/dsl/prop.rb:57
-    method ::AdvancedODM#foreign_proc_ () -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:57
+    method ::AdvancedODM#foreign_proc_ (opts) -> ForeignClass | NilClass @ test/testdata/dsl/prop.rb:57
+      argument ::AdvancedODM#foreign_proc_#opts<keyword, repeated> -> T.untyped @ test/testdata/dsl/prop.rb:57
     method ::AdvancedODM#hash_of () -> AppliedType {
       klass = ::Hash
       targs = [

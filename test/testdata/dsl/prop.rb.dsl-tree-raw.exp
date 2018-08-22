@@ -3220,6 +3220,24 @@ ClassDef{
             fun = sig
             block = nullptr
             args = [
+              Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :"opts" }
+                    value = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
+                      }
+                      fun = untyped
+                      block = nullptr
+                      args = [
+                      ]
+                    }
+                  ]
+                ]
+              }
             ]
           }
           fun = returns
@@ -3246,7 +3264,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_<<constant:<todo sym>>>
-          args = []
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = opts
+            } } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3421,6 +3442,24 @@ ClassDef{
             fun = sig
             block = nullptr
             args = [
+              Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :"opts" }
+                    value = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
+                      }
+                      fun = untyped
+                      block = nullptr
+                      args = [
+                      ]
+                    }
+                  ]
+                ]
+              }
             ]
           }
           fun = returns
@@ -3447,7 +3486,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_lazy_<<constant:<todo sym>>>
-          args = []
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = opts
+            } } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3622,6 +3664,24 @@ ClassDef{
             fun = sig
             block = nullptr
             args = [
+              Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :"opts" }
+                    value = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
+                      }
+                      fun = untyped
+                      block = nullptr
+                      args = [
+                      ]
+                    }
+                  ]
+                ]
+              }
             ]
           }
           fun = returns
@@ -3648,7 +3708,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_proc_<<constant:<todo sym>>>
-          args = []
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = opts
+            } } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
@@ -3823,6 +3886,24 @@ ClassDef{
             fun = sig
             block = nullptr
             args = [
+              Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :"opts" }
+                    value = Send{
+                      recv = ConstantLit{
+                        orig = nullptr
+                        symbol = ::T
+                        typeAlias = nullptr
+                      }
+                      fun = untyped
+                      block = nullptr
+                      args = [
+                      ]
+                    }
+                  ]
+                ]
+              }
             ]
           }
           fun = returns
@@ -3845,7 +3926,10 @@ ClassDef{
         MethodDef{
           flags = dsl
           name = foreign_invalid_<<constant:<todo sym>>>
-          args = []
+          args = [RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+              kind = Local
+              name = opts
+            } } }]
           rhs = Send{
             recv = ConstantLit{
               orig = nullptr
