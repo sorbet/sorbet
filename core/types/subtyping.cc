@@ -187,7 +187,7 @@ shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1, const 
             return lub(ctx, t1, t2filtered);
         }
         return OrType::make_shared(t1, t2filtered);
-    } else if (cast_type<OrType>(t1.get()) != nullptr) {
+    } else if (isa_type<OrType>(t1.get())) {
         categoryCounterInc("lub", "<or");
         return lubDistributeOr(ctx, t1, t2);
     }
@@ -373,18 +373,13 @@ shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1, const 
     }
 
     {
-        auto *p1 = cast_type<LambdaParam>(t1.get());
-        auto *p2 = cast_type<LambdaParam>(t2.get());
-
-        if (p1 != nullptr || p2 != nullptr) {
+        if (isa_type<LambdaParam>(t1.get()) || isa_type<LambdaParam>(t2.get())) {
             return OrType::make_shared(t1, t2);
         }
     }
 
     {
-        auto *tv1 = cast_type<TypeVar>(t1.get());
-        auto *tv2 = cast_type<TypeVar>(t2.get());
-        if (tv1 != nullptr || tv2 != nullptr) {
+        if (isa_type<TypeVar>(t1.get()) || isa_type<TypeVar>(t2.get())) {
             return OrType::make_shared(t1, t2);
         }
     }
@@ -579,10 +574,10 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
     if (t1->kind() > t2->kind()) { // force the relation to be symmentric and half the implementation
         return glb(ctx, t2, t1);
     }
-    if (auto *a1 = cast_type<AndType>(t1.get())) { // 4, 5
+    if (isa_type<AndType>(t1.get())) { // 4, 5
         categoryCounterInc("glb", "<and");
         return glbDistributeAnd(ctx, t1, t2);
-    } else if (auto *a2 = cast_type<AndType>(t2.get())) { // 2
+    } else if (isa_type<AndType>(t2.get())) { // 2
         categoryCounterInc("glb", "and>");
         return glbDistributeAnd(ctx, t2, t1);
     }
@@ -676,7 +671,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
                 return Types::bottom();
             }
         }
-    } else if (auto *p2 = cast_type<ProxyType>(t2.get())) {
+    } else if (isa_type<ProxyType>(t2.get())) {
         // only 1st is proxy
         if (Types::isSubType(ctx, t2, t1)) {
             return t2;
@@ -698,7 +693,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
             return t2;
         }
 
-        if (cast_type<ClassType>(t1.get()) || cast_type<AppliedType>(t1.get())) {
+        if (isa_type<ClassType>(t1.get()) || isa_type<AppliedType>(t1.get())) {
             auto lft = Types::all(ctx, t1, o2->left);
             if (Types::isSubType(ctx, lft, o2->right) && !lft->isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
@@ -814,9 +809,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
         return make_shared<AppliedType>(a1->klass, newTargs);
     }
     {
-        auto *tv1 = cast_type<TypeVar>(t1.get());
-        auto *tv2 = cast_type<TypeVar>(t2.get());
-        if (tv1 != nullptr || tv2 != nullptr) {
+        if (isa_type<TypeVar>(t1.get()) || isa_type<TypeVar>(t2.get())) {
             return AndType::make_shared(t1, t2);
         }
     }
@@ -897,7 +890,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             return true;
         }
     }
-    //    ENFORCE(cast_type<LambdaParam>(t1.get()) == nullptr); // sandly, this is false in Resolver, as we build
+    //    ENFORCE(!isa_type<LambdaParam>(t1.get())); // sandly, this is false in Resolver, as we build
     //    original signatures using lub ENFORCE(cast_type<LambdaParam>(t2.get()) == nullptr);
 
     {
@@ -973,7 +966,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
         }
         return result;
     }
-    if (auto *a2 = cast_type<AppliedType>(t2.get())) {
+    if (isa_type<AppliedType>(t2.get())) {
         if (auto *pt = cast_type<ProxyType>(t1.get())) {
             return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying, t2);
         }
@@ -1042,7 +1035,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             shared_ptr<Type> und = p1->underlying;
             return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
         }
-    } else if (auto *p2 = cast_type<ProxyType>(t2.get())) {
+    } else if (isa_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
         return false;
     } else if (isa_type<MetaType>(t1.get()) || isa_type<MetaType>(t2.get())) {
