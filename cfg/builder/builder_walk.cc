@@ -335,8 +335,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 conditionalJump(rescueStartBlock, unanalyzableCondition, rescueHandlersBlock, bodyBlock, cctx.inWhat,
                                 a->loc);
 
-                //                cctx.loops += 1; // should formally be here but this makes us report a lot of false
-                //                errors
+                // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
                 bodyBlock = walk(cctx, a->body.get(), bodyBlock);
                 auto elseBody = cctx.inWhat.freshBlock(cctx.loops);
                 unconditionalJump(bodyBlock, elseBody, cctx.inWhat, a->loc);
