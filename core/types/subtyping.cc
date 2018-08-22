@@ -698,7 +698,7 @@ shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1, const 
             return t2;
         }
 
-        if (auto *c1 = cast_type<ClassType>(t1.get())) {
+        if (cast_type<ClassType>(t1.get()) || cast_type<AppliedType>(t1.get())) {
             auto lft = Types::all(ctx, t1, o2->left);
             if (Types::isSubType(ctx, lft, o2->right) && !lft->isBottom()) {
                 categoryCounterInc("glb", "ZZZorClass");
