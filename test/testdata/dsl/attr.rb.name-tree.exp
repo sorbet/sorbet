@@ -21,8 +21,14 @@ begin
 
     def initialize<initialize>()
       begin
-        ::TestAttr#@v1 = T.let(0, Integer)
-        ::TestAttr#@v2 = T.let("", String)
+        ::TestAttr#@v1 = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.let(0, Integer)
+        end
+        ::TestAttr#@v2 = begin
+          ::RubyTyper.keep_for_typechecking(::String)
+          T.let("", String)
+        end
       end
     end
 

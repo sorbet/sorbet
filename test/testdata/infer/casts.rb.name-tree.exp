@@ -11,18 +11,39 @@ begin
 
     def test_casts<test_casts>()
       begin
-        t = T.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
+        t = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.assert_type!(self(<constant:TestCasts>).untyped(), Integer)
+        end
         t.+(4)
-        t1 = T.assert_type!("hi", Integer)
+        t1 = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.assert_type!("hi", Integer)
+        end
         t1.+(1)
-        s = T.cast(self(<constant:TestCasts>).untyped(), String)
+        s = begin
+          ::RubyTyper.keep_for_typechecking(::String)
+          T.cast(self(<constant:TestCasts>).untyped(), String)
+        end
         s.+("hi")
-        s = T.cast(6, String)
+        s = begin
+          ::RubyTyper.keep_for_typechecking(::String)
+          T.cast(6, String)
+        end
         s.+("hi")
         s.+(3)
-        s = T.cast(6, Integer)
-        s = T.cast(6, T.untyped)
-        s = T.cast(6, T.untyped)
+        s = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.cast(6, Integer)
+        end
+        s = begin
+          ::RubyTyper.keep_for_typechecking(::T.untyped())
+          T.cast(6, T.untyped)
+        end
+        s = begin
+          ::RubyTyper.keep_for_typechecking(7)
+          T.cast(6, T.untyped)
+        end
         s.+("hi")
         s.+(3)
       end

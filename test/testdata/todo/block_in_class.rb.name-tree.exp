@@ -2,15 +2,18 @@ begin
   ::RubyTyper.keep_for_ide(::C)
   class ::C<<constant:C>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
-      ::C#L = T.let(self(<singleton class:<constant:C>>).lambda() do |x$1|
-        x$1.*(x$1)
-      end, AppliedType {
-        klass = ::Proc1
-        targs = [
-          <constant:Return> = Integer
-          <constant:Arg0> = Integer
-        ]
-      })
+      ::C#L = begin
+        ::RubyTyper.keep_for_typechecking(::T.proc({:"x" => ::Integer}).returns(::Integer))
+        T.let(self(<singleton class:<constant:C>>).lambda() do |x$1|
+          x$1.*(x$1)
+        end, AppliedType {
+          klass = ::Proc1
+          targs = [
+            <constant:Return> = Integer
+            <constant:Arg0> = Integer
+          ]
+        })
+      end
     end
   end
   <emptyTree>

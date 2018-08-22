@@ -217,6 +217,9 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                                             bool allowSelfType) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
+            if (send->args.size() != 1) {
+                return core::Types::untyped(); // error will be reported in infer.
+            }
             return core::Types::any(ctx, TypeSyntax::getResultType(ctx, send->args[0], sig, allowSelfType),
                                     core::Types::nilClass());
         case core::Names::all()._id: {

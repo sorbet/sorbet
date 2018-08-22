@@ -6,7 +6,7 @@ subgraph "cluster_::Main#basic" {
     "bb::Main#basic_1" [shape = parallelogram];
 
     "bb::Main#basic_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String\l<statTemp>$5 = self : Main\l<statTemp>$8 = alias <constant:String> : <Class:String>\l<statTemp>$6 = a.is_a?(<statTemp>$8) : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$10 = a : String\l<statTemp>$9 = cast(<castTemp$10, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#basic, 0) : Integer | String\l<statTemp>$5 = self : Main\l<statTemp>$8 = alias <constant:String> : <Class:String>\l<statTemp>$6 = a.is_a?(<statTemp>$8) : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<statTemp>$11 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$12 = alias <constant:String> : <Class:String>\l<statTemp>$10 = <statTemp>$11.keep_for_typechecking(<statTemp>$12) : T.untyped\l<castTemp$13 = a : String\l<statTemp>$9 = cast(<castTemp$13, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Main#basic_0" -> "bb::Main#basic_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Main#not" {
     "bb::Main#not_1" [shape = parallelogram];
 
     "bb::Main#not_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#not, 0) : String | NilClass\l<statTemp>$5 = self : Main\l<statTemp>$7 = a.nil?() : TrueClass | FalseClass\l<statTemp>$6 = <statTemp>$7.!() : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$10 = a : String\l<statTemp>$9 = cast(<castTemp$10, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Main\la = load_arg(<selfMethodTemp>$3#not, 0) : String | NilClass\l<statTemp>$5 = self : Main\l<statTemp>$7 = a.nil?() : TrueClass | FalseClass\l<statTemp>$6 = <statTemp>$7.!() : TrueClass | FalseClass\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<statTemp>$11 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$12 = alias <constant:String> : <Class:String>\l<statTemp>$10 = <statTemp>$11.keep_for_typechecking(<statTemp>$12) : T.untyped\l<castTemp$13 = a : String\l<statTemp>$9 = cast(<castTemp$13, String); : String\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Main#not_0" -> "bb::Main#not_1" [style="bold"];
@@ -64,7 +64,7 @@ subgraph "cluster_::Main#with_and" {
 
     "bb::Main#with_and_3" -> "bb::Main#with_and_4" [style="bold"];
     "bb::Main#with_and_4" [
-        label = "block[id=4](<statTemp>$5, <statTemp>$6, a)\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<castTemp$13 = a : NilClass\l<statTemp>$12 = cast(<castTemp$13, NilClass); : NilClass\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=4](<statTemp>$5, <statTemp>$6, a)\l<statTemp>$4 = <statTemp>$5.hard_assert(<statTemp>$6) : NilClass\l<statTemp>$14 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$15 = alias <constant:NilClass> : <Class:NilClass>\l<statTemp>$13 = <statTemp>$14.keep_for_typechecking(<statTemp>$15) : T.untyped\l<castTemp$16 = a : NilClass\l<statTemp>$12 = cast(<castTemp$16, NilClass); : NilClass\l<returnMethodTemp>$2 = nil : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Main#with_and_4" -> "bb::Main#with_and_1" [style="bold"];

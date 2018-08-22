@@ -13,6 +13,9 @@ end
 module RubyTyper
   def self.keep_for_ide(expr)
   end
+
+  def self.keep_for_typechecking(expr)
+  end
 end
 
 class RubyTyper::DynamicStruct < Struct

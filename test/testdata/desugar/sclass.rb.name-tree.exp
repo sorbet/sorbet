@@ -122,7 +122,10 @@ begin
     <emptyTree>
 
     def initialize<initialize>()
-      ::<Class:F>#@f = T.let(0, Integer)
+      ::<Class:F>#@f = begin
+        ::RubyTyper.keep_for_typechecking(::Integer)
+        T.let(0, Integer)
+      end
     end
 
     def f=<f=>(f)

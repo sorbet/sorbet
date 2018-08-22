@@ -282,6 +282,11 @@ public:
         auto loc = core::Loc::none(arg->loc.file());
         return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForIde(), move(arg));
     }
+
+    static std::unique_ptr<Expression> KeepForTypechecking(std::unique_ptr<Expression> arg) {
+        auto loc = core::Loc::none(arg->loc.file());
+        return Send1(loc, Constant(loc, core::Symbols::RubyTyper()), core::Names::keepForTypechecking(), move(arg));
+    }
 };
 
 } // namespace ast

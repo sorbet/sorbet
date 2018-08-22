@@ -34,8 +34,14 @@ begin
 
     def initialize<initialize>()
       begin
-        ::Parent#@ivar = T.let(1, Integer)
-        ::Parent#@ivar2 = T.let(2, Integer)
+        ::Parent#@ivar = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.let(1, Integer)
+        end
+        ::Parent#@ivar2 = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.let(2, Integer)
+        end
       end
     end
 
@@ -47,13 +53,19 @@ begin
     end
 
     def self.<static-init><<static-init>>()
-      ::Parent#@@class_var = T.let("hi", String)
+      ::Parent#@@class_var = begin
+        ::RubyTyper.keep_for_typechecking(::String)
+        T.let("hi", String)
+      end
     end
   end
   module ::Mixin<<constant:Mixin>> < ()
     def self.<static-init><<static-init>>()
       begin
-        ::Mixin#@@mixin_cvar = T.let(3, Integer)
+        ::Mixin#@@mixin_cvar = begin
+          ::RubyTyper.keep_for_typechecking(::Integer)
+          T.let(3, Integer)
+        end
         ::Mixin#@@mixin_cvar
         <emptyTree>
       end

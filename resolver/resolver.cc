@@ -844,6 +844,7 @@ private:
                 }
                 result = cast->type;
             },
+            [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr); },
             [&](ast::Expression *expr) {
                 result = core::Types::untyped();
                 if (auto *send = ast::cast_tree<ast::Send>(expr)) {
@@ -868,8 +869,12 @@ private:
         if (uid->kind != ast::UnresolvedIdent::Instance && uid->kind != ast::UnresolvedIdent::Class) {
             return false;
         }
+        ast::Expression *recur = asgn->rhs.get();
+        while (auto outer = ast::cast_tree<ast::InsSeq>(recur)) {
+            recur = outer->expr.get();
+        }
 
-        auto *cast = ast::cast_tree<ast::Cast>(asgn->rhs.get());
+        auto *cast = ast::cast_tree<ast::Cast>(recur);
         if (cast == nullptr) {
             return false;
         } else if (cast->cast != core::Names::let()) {
@@ -999,7 +1004,8 @@ public:
                 auto expr = move(send->args[0]);
                 ParsedSig emptySig;
                 auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false);
-                return make_unique<ast::Cast>(send->loc, type, move(expr), send->fun);
+                return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(move(send->args[1])),
+                                        make_unique<ast::Cast>(send->loc, type, move(expr), send->fun));
             }
             default:
                 return send;

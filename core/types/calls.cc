@@ -892,7 +892,7 @@ public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, shared_ptr<Type> selfRef, shared_ptr<Type> fullType,
                            shared_ptr<SendAndBlockLink> linkType) const override {
-        if (args.empty()) {
+        if (args.size() != 1) {
             return Types::untyped();
         }
 
