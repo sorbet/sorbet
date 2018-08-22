@@ -4,7 +4,7 @@ begin
       begin
         #<constant:A> = 91
         begin
-          ::RubyTyper.keep_for_ide(::A)
+          ::RubyTyper.keep_for_ide(#<constant:A>)
           <emptyTree>
         end
         begin
@@ -16,7 +16,7 @@ begin
       end
     end
   end
-  class ::A<<constant:A>> < (::<todo sym>)  end
+  class #<constant:A><<constant:A>> < (::<todo sym>)  end
   class ::<constant:B><<constant:B>$1> < (::<todo sym>)  end
   <emptyTree>
 end

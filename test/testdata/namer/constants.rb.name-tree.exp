@@ -18,13 +18,14 @@ begin
       begin
         ::A::B#C = 1
         begin
+          ::RubyTyper.keep_for_ide(::A::B)
           <emptyTree>
         end
         <emptyTree>
       end
     end
   end
-  module <emptyTree>::<constant:B><<constant:B>> < ()
+  module ::A::B<<constant:B>> < ()
     def self.<static-init><<static-init>>()
       begin
         ::A::B#C

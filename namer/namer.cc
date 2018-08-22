@@ -40,15 +40,15 @@ class NameInserter {
 
         auto newOwner = squashNames(ctx, owner, constLit->scope);
         core::SymbolRef existing = newOwner.data(ctx).findMember(ctx, constLit->cnst);
-        if (existing.exists()) {
-            return existing;
+        if (!existing.exists()) {
+            existing = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
+            existing.data(ctx).singletonClass(ctx); // force singleton class into existance
         }
-        auto sym = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
-        sym.data(ctx).singletonClass(ctx); // force singleton class into existance
+
         node.release();
         unique_ptr<ast::UnresolvedConstantLit> constTmp(constLit);
-        node = make_unique<ast::ConstantLit>(constLit->loc, sym, move(constTmp), nullptr);
-        return sym;
+        node = make_unique<ast::ConstantLit>(constLit->loc, existing, move(constTmp), nullptr);
+        return existing;
     }
 
     pair<core::SymbolRef, core::NameRef> arg2Symbol(core::MutableContext ctx, ast::Expression *arg, int pos) {
@@ -196,8 +196,9 @@ public:
                     e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx).show(ctx));
                     e.addErrorLine(klass->symbol.data(ctx).loc(), "Previous definition");
                 }
+                auto origName = klass->symbol.data(ctx).name;
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name, core::UniqueNameKind::Namer);
-                klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+                klass->symbol = ctx.state.enterClassSymbol(klass->loc, klass->symbol.data(ctx).owner, origName);
             } else if (klass->symbol.data(ctx).isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx).isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {

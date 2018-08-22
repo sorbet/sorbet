@@ -27,6 +27,7 @@ begin
           <emptyTree>
         end
         begin
+          ::RubyTyper.keep_for_ide(::Outer2::Inner1::Inner2)
           <emptyTree>
         end
         begin
@@ -66,7 +67,7 @@ begin
       end
     end
   end
-  class <emptyTree>::<constant:Inner1>::<constant:Inner2><<constant:Inner2>> < (::<todo sym>)
+  class ::Outer2::Inner1::Inner2<<constant:Inner2>> < (::<todo sym>)
     def self.<static-init><<static-init>>()
       begin
         ::Outer2::C
