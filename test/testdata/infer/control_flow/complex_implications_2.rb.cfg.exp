@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<constant:StandardError>$9 = alias <constant:StandardError> : <Class:StandardError>\l<selfMethodTemp>$3 = self : Object\lfoo = load_arg(<selfMethodTemp>$3#foo, 0) : T.untyped\lfoo\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Object\lfoo = load_arg(<selfMethodTemp>$3#foo, 0) : T.untyped\lfoo\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](<constant:StandardError>$9, foo)\lbar = foo.is_a?(<constant:StandardError>$9) : T.untyped\lbar\l"
+        label = "block[id=2](foo)\l<statTemp>$8 = alias <constant:StandardError> : <Class:StandardError>\lbar = foo.is_a?(<statTemp>$8) : T.untyped\lbar\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];

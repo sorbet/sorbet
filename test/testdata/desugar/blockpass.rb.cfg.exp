@@ -59,7 +59,7 @@ subgraph "cluster_::Object#calls_with_object" {
     "bb::Object#calls_with_object_1" [shape = parallelogram];
 
     "bb::Object#calls_with_object_0" [
-        label = "block[id=0]()\l<constant:HasMeth>$7 = alias <constant:HasMeth> : <Class:HasMeth>\l<selfMethodTemp>$3 = self : Object\lblk = load_arg(<selfMethodTemp>$3#calls_with_object, 0) : T.untyped\l<statTemp>$4 = self : Object\l<statTemp>$5 = <constant:HasMeth>$7.new() : HasMeth\l<block-pre-call-temp>$8 = <statTemp>$4.calls_arg_with_object(<statTemp>$5) : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Object\lblk = load_arg(<selfMethodTemp>$3#calls_with_object, 0) : T.untyped\l<statTemp>$4 = self : Object\l<statTemp>$6 = alias <constant:HasMeth> : <Class:HasMeth>\l<statTemp>$5 = <statTemp>$6.new() : HasMeth\l<block-pre-call-temp>$7 = <statTemp>$4.calls_arg_with_object(<statTemp>$5) : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#calls_with_object_0" -> "bb::Object#calls_with_object_2" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_::Object#calls_with_object" {
 
     "bb::Object#calls_with_object_3" -> "bb::Object#calls_with_object_1" [style="bold"];
     "bb::Object#calls_with_object_4" [
-        label = "block[id=4](blk)\louterLoops: 1\l<blk>$9 = load_yield_params(::Object#calls_with_object#<block>, Object#calls_with_object#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$10 = 0 : Integer(0)\l<block-pass>$2$4 = <blk>$9.[](<blk>$10) : T.untyped\l<blockReturnTemp>$11 = blk.to_proc() : T.untyped\l<blockReturnTemp>$13 = blockreturn<::Object#calls_with_object#<block>> <blockReturnTemp>$11 : <impossible>\l<unconditional>\l"
+        label = "block[id=4](blk)\louterLoops: 1\l<blk>$8 = load_yield_params(::Object#calls_with_object#<block>, Object#calls_with_object#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$9 = 0 : Integer(0)\l<block-pass>$2$4 = <blk>$8.[](<blk>$9) : T.untyped\l<blockReturnTemp>$10 = blk.to_proc() : T.untyped\l<blockReturnTemp>$12 = blockreturn<::Object#calls_with_object#<block>> <blockReturnTemp>$10 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#calls_with_object_4" -> "bb::Object#calls_with_object_2" [style="bold"];
@@ -94,7 +94,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$22 = alias <constant:<Magic>> : <Magic>\l<constant:HasMeth>$118 = alias <constant:HasMeth> : <Class:HasMeth>\l<constant:HasToProc>$69 = alias <constant:HasToProc> : <Class:HasToProc>\l<constant:CallsWithObject>$87 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<constant:CallsWithObjectChild>$107 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>\l<selfMethodTemp>$3 = self : Object\lblk = load_arg(<selfMethodTemp>$3#foo, 0) : T.untyped\l<statTemp>$5 = self : Object\l<block-pre-call-temp>$6 = <statTemp>$5.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Object\lblk = load_arg(<selfMethodTemp>$3#foo, 0) : T.untyped\l<statTemp>$5 = self : Object\l<block-pre-call-temp>$6 = <statTemp>$5.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];
@@ -104,218 +104,218 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=2](blk)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$4 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$13 = self : Object\l<block-pre-call-temp>$14 = <statTemp>$13.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=3](blk)\l<statTemp>$4 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$13 = self : Object\l<block-pre-call-temp>$14 = <statTemp>$13.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$7 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$8 = 0 : Integer(0)\l<block-pass>$2$4 = <blk>$7.[](<blk>$8) : T.untyped\l<blockReturnTemp>$9 = <block-pass>$2$4.meth() : T.untyped\l<blockReturnTemp>$11 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
+        label = "block[id=4](blk)\louterLoops: 1\l<blk>$7 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$8 = 0 : Integer(0)\l<block-pass>$2$4 = <blk>$7.[](<blk>$8) : T.untyped\l<blockReturnTemp>$9 = <block-pass>$2$4.meth() : T.untyped\l<blockReturnTemp>$11 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$9 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];
     "bb::Object#foo_5" [
-        label = "block[id=5](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=5](blk)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_5" -> "bb::Object#foo_7" [style="bold"];
     "bb::Object#foo_5" -> "bb::Object#foo_6" [style="tapered"];
 
     "bb::Object#foo_6" [
-        label = "block[id=6](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$12 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$27 = self : Object\l<block-pre-call-temp>$28 = <statTemp>$27.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=6](blk)\l<statTemp>$12 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$26 = self : Object\l<block-pre-call-temp>$27 = <statTemp>$26.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_6" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_7" [
-        label = "block[id=7](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$15 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$16 = 0 : Integer(0)\largs$5 = <blk>$15.[](<blk>$16) : T.untyped\l<statTemp>$19 = :\"meth\" : Symbol(:\"meth\")\l<statTemp>$18 = <statTemp>$19.to_proc() : Proc\l<statTemp>$23 = args$5.to_a() : T.untyped\l<statTemp>$20 = <constant:<Magic>>$22.<splat>(<statTemp>$23) : T.untyped\l<blockReturnTemp>$17 = <statTemp>$18.call(<statTemp>$20) : T.untyped\l<blockReturnTemp>$25 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$17 : <impossible>\l<unconditional>\l"
+        label = "block[id=7](blk)\louterLoops: 1\l<blk>$15 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$16 = 0 : Integer(0)\largs$5 = <blk>$15.[](<blk>$16) : T.untyped\l<statTemp>$19 = :\"meth\" : Symbol(:\"meth\")\l<statTemp>$18 = <statTemp>$19.to_proc() : Proc\l<statTemp>$21 = alias <constant:<Magic>> : <Magic>\l<statTemp>$22 = args$5.to_a() : T.untyped\l<statTemp>$20 = <statTemp>$21.<splat>(<statTemp>$22) : T.untyped\l<blockReturnTemp>$17 = <statTemp>$18.call(<statTemp>$20) : T.untyped\l<blockReturnTemp>$24 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$17 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_7" -> "bb::Object#foo_5" [style="bold"];
     "bb::Object#foo_8" [
-        label = "block[id=8](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=8](blk)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_8" -> "bb::Object#foo_10" [style="bold"];
     "bb::Object#foo_8" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_9" [
-        label = "block[id=9](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$26 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$37 = self : Object\l<block-pre-call-temp>$38 = <statTemp>$37.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=9](blk)\l<statTemp>$25 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$36 = self : Object\l<block-pre-call-temp>$37 = <statTemp>$36.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_11" [style="bold"];
     "bb::Object#foo_10" [
-        label = "block[id=10](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$29 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$30 = 0 : Integer(0)\lx$6 = <blk>$29.[](<blk>$30) : T.untyped\l<statTemp>$33 = :\"meth\" : Symbol(:\"meth\")\l<statTemp>$32 = <statTemp>$33.to_proc() : Proc\l<blockReturnTemp>$31 = <statTemp>$32.call(x$6) : T.untyped\l<blockReturnTemp>$35 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$31 : <impossible>\l<unconditional>\l"
+        label = "block[id=10](blk)\louterLoops: 1\l<blk>$28 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$29 = 0 : Integer(0)\lx$6 = <blk>$28.[](<blk>$29) : T.untyped\l<statTemp>$32 = :\"meth\" : Symbol(:\"meth\")\l<statTemp>$31 = <statTemp>$32.to_proc() : Proc\l<blockReturnTemp>$30 = <statTemp>$31.call(x$6) : T.untyped\l<blockReturnTemp>$34 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$30 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_10" -> "bb::Object#foo_8" [style="bold"];
     "bb::Object#foo_11" [
-        label = "block[id=11](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=11](blk)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_11" -> "bb::Object#foo_13" [style="bold"];
     "bb::Object#foo_11" -> "bb::Object#foo_12" [style="tapered"];
 
     "bb::Object#foo_12" [
-        label = "block[id=12](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$36 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$45 = self : Object\l<block-pre-call-temp>$46 = <statTemp>$45.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=12](blk)\l<statTemp>$35 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$44 = self : Object\l<block-pre-call-temp>$45 = <statTemp>$44.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_12" -> "bb::Object#foo_14" [style="bold"];
     "bb::Object#foo_13" [
-        label = "block[id=13](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$39 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$40 = 0 : Integer(0)\lx$7 = <blk>$39.[](<blk>$40) : T.untyped\l<blockReturnTemp>$41 = x$7.meth() : T.untyped\l<blockReturnTemp>$43 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$41 : <impossible>\l<unconditional>\l"
+        label = "block[id=13](blk)\louterLoops: 1\l<blk>$38 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$39 = 0 : Integer(0)\lx$7 = <blk>$38.[](<blk>$39) : T.untyped\l<blockReturnTemp>$40 = x$7.meth() : T.untyped\l<blockReturnTemp>$42 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$40 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_13" -> "bb::Object#foo_11" [style="bold"];
     "bb::Object#foo_14" [
-        label = "block[id=14](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=14](blk)\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_14" -> "bb::Object#foo_16" [style="bold"];
     "bb::Object#foo_14" -> "bb::Object#foo_15" [style="tapered"];
 
     "bb::Object#foo_15" [
-        label = "block[id=15](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$44 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$53 = self : Object\l<block-pre-call-temp>$54 = <statTemp>$53.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=15]()\l<statTemp>$43 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$52 = self : Object\l<block-pre-call-temp>$53 = <statTemp>$52.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_15" -> "bb::Object#foo_17" [style="bold"];
     "bb::Object#foo_16" [
-        label = "block[id=16](<constant:<Magic>>$22, blk, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$47 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$48 = 0 : Integer(0)\l<block-pass>$3$8 = <blk>$47.[](<blk>$48) : T.untyped\l<blockReturnTemp>$49 = blk.to_proc() : T.untyped\l<blockReturnTemp>$51 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$49 : <impossible>\l<unconditional>\l"
+        label = "block[id=16](blk)\louterLoops: 1\l<blk>$46 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$47 = 0 : Integer(0)\l<block-pass>$3$8 = <blk>$46.[](<blk>$47) : T.untyped\l<blockReturnTemp>$48 = blk.to_proc() : T.untyped\l<blockReturnTemp>$50 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$48 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_16" -> "bb::Object#foo_14" [style="bold"];
     "bb::Object#foo_17" [
-        label = "block[id=17](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=17]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_17" -> "bb::Object#foo_19" [style="bold"];
     "bb::Object#foo_17" -> "bb::Object#foo_18" [style="tapered"];
 
     "bb::Object#foo_18" [
-        label = "block[id=18](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$52 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$62 = self : Object\l<block-pre-call-temp>$63 = <statTemp>$62.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=18]()\l<statTemp>$51 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$61 = self : Object\l<block-pre-call-temp>$62 = <statTemp>$61.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_18" -> "bb::Object#foo_20" [style="bold"];
     "bb::Object#foo_19" [
-        label = "block[id=19](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$55 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$56 = 0 : Integer(0)\l<block-pass>$4$9 = <blk>$55.[](<blk>$56) : T.untyped\l<statTemp>$59 = self : Object\l<statTemp>$58 = <statTemp>$59.returns_lambda() : T.untyped\l<blockReturnTemp>$57 = <statTemp>$58.to_proc() : T.untyped\l<blockReturnTemp>$60 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$57 : <impossible>\l<unconditional>\l"
+        label = "block[id=19]()\louterLoops: 1\l<blk>$54 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$55 = 0 : Integer(0)\l<block-pass>$4$9 = <blk>$54.[](<blk>$55) : T.untyped\l<statTemp>$58 = self : Object\l<statTemp>$57 = <statTemp>$58.returns_lambda() : T.untyped\l<blockReturnTemp>$56 = <statTemp>$57.to_proc() : T.untyped\l<blockReturnTemp>$59 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$56 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_19" -> "bb::Object#foo_17" [style="bold"];
     "bb::Object#foo_20" [
-        label = "block[id=20](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=20]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_20" -> "bb::Object#foo_22" [style="bold"];
     "bb::Object#foo_20" -> "bb::Object#foo_21" [style="tapered"];
 
     "bb::Object#foo_21" [
-        label = "block[id=21](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$61 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$72 = self : Object\l<block-pre-call-temp>$73 = <statTemp>$72.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=21]()\l<statTemp>$60 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$70 = self : Object\l<block-pre-call-temp>$71 = <statTemp>$70.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_21" -> "bb::Object#foo_23" [style="bold"];
     "bb::Object#foo_22" [
-        label = "block[id=22](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$64 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$65 = 0 : Integer(0)\l<block-pass>$5$10 = <blk>$64.[](<blk>$65) : T.untyped\l<statTemp>$67 = <constant:HasToProc>$69.new() : HasToProc\l<blockReturnTemp>$66 = <statTemp>$67.to_proc() : T.untyped\l<blockReturnTemp>$70 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$66 : <impossible>\l<unconditional>\l"
+        label = "block[id=22]()\louterLoops: 1\l<blk>$63 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$64 = 0 : Integer(0)\l<block-pass>$5$10 = <blk>$63.[](<blk>$64) : T.untyped\l<statTemp>$67 = alias <constant:HasToProc> : <Class:HasToProc>\l<statTemp>$66 = <statTemp>$67.new() : HasToProc\l<blockReturnTemp>$65 = <statTemp>$66.to_proc() : T.untyped\l<blockReturnTemp>$68 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$65 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_22" -> "bb::Object#foo_20" [style="bold"];
     "bb::Object#foo_23" [
-        label = "block[id=23](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=23]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_23" -> "bb::Object#foo_25" [style="bold"];
     "bb::Object#foo_23" -> "bb::Object#foo_24" [style="tapered"];
 
     "bb::Object#foo_24" [
-        label = "block[id=24](<constant:HasMeth>$118, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$71 = Solve<::Object#foo#<block>> : T.untyped\l<block-pre-call-temp>$88 = <constant:CallsWithObject>$87.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=24]()\l<statTemp>$69 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$84 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<block-pre-call-temp>$85 = <statTemp>$84.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_24" -> "bb::Object#foo_26" [style="bold"];
     "bb::Object#foo_25" [
-        label = "block[id=25](<constant:<Magic>>$22, <constant:HasMeth>$118, <constant:HasToProc>$69, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$74 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$75 = 0 : Integer(0)\largs$11 = <blk>$74.[](<blk>$75) : T.untyped\l<statTemp>$78 = <constant:HasToProc>$69.new() : HasToProc\l<statTemp>$77 = <statTemp>$78.to_proc() : T.untyped\l<statTemp>$82 = args$11.to_a() : T.untyped\l<statTemp>$80 = <constant:<Magic>>$22.<splat>(<statTemp>$82) : T.untyped\l<blockReturnTemp>$76 = <statTemp>$77.call(<statTemp>$80) : T.untyped\l<blockReturnTemp>$84 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$76 : <impossible>\l<unconditional>\l"
+        label = "block[id=25]()\louterLoops: 1\l<blk>$72 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$73 = 0 : Integer(0)\largs$11 = <blk>$72.[](<blk>$73) : T.untyped\l<statTemp>$77 = alias <constant:HasToProc> : <Class:HasToProc>\l<statTemp>$76 = <statTemp>$77.new() : HasToProc\l<statTemp>$75 = <statTemp>$76.to_proc() : T.untyped\l<statTemp>$79 = alias <constant:<Magic>> : <Magic>\l<statTemp>$80 = args$11.to_a() : T.untyped\l<statTemp>$78 = <statTemp>$79.<splat>(<statTemp>$80) : T.untyped\l<blockReturnTemp>$74 = <statTemp>$75.call(<statTemp>$78) : T.untyped\l<blockReturnTemp>$82 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$74 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_25" -> "bb::Object#foo_23" [style="bold"];
     "bb::Object#foo_26" [
-        label = "block[id=26](<constant:HasMeth>$118, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=26]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_26" -> "bb::Object#foo_28" [style="bold"];
     "bb::Object#foo_26" -> "bb::Object#foo_27" [style="tapered"];
 
     "bb::Object#foo_27" [
-        label = "block[id=27](<constant:HasMeth>$118, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<statTemp>$85 = Solve<::Object#foo#<block>> : T.untyped\l<ifTemp>$96 = <constant:CallsWithObject>$87.nil?() : TrueClass | FalseClass\l<ifTemp>$96\l"
+        label = "block[id=27]()\l<statTemp>$83 = Solve<::Object#foo#<block>> : T.untyped\l<assignTemp$7 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<ifTemp>$93 = <assignTemp$7.nil?() : TrueClass | FalseClass\l<ifTemp>$93\l"
     ];
 
     "bb::Object#foo_27" -> "bb::Object#foo_34" [style="bold"];
     "bb::Object#foo_27" -> "bb::Object#foo_30" [style="tapered"];
 
     "bb::Object#foo_28" [
-        label = "block[id=28](<constant:HasMeth>$118, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$89 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$90 = 0 : Integer(0)\l<block-pass>$6$12 = <blk>$89.[](<blk>$90) : T.untyped\l<blockReturnTemp>$91 = <block-pass>$6$12.meth() : T.untyped\l<blockReturnTemp>$93 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$91 : <impossible>\l<unconditional>\l"
+        label = "block[id=28]()\louterLoops: 1\l<blk>$86 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$87 = 0 : Integer(0)\l<block-pass>$6$12 = <blk>$86.[](<blk>$87) : T.untyped\l<blockReturnTemp>$88 = <block-pass>$6$12.meth() : T.untyped\l<blockReturnTemp>$90 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$88 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_28" -> "bb::Object#foo_26" [style="bold"];
     "bb::Object#foo_30" [
-        label = "block[id=30](<constant:HasMeth>$118, <constant:CallsWithObject>$87, <constant:CallsWithObjectChild>$107)\l<block-pre-call-temp>$99 = <constant:CallsWithObject>$87.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=30](<assignTemp$7)\l<block-pre-call-temp>$96 = <assignTemp$7.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_30" -> "bb::Object#foo_31" [style="bold"];
     "bb::Object#foo_31" [
-        label = "block[id=31](<constant:HasMeth>$118, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=31]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_31" -> "bb::Object#foo_33" [style="bold"];
     "bb::Object#foo_31" -> "bb::Object#foo_32" [style="tapered"];
 
     "bb::Object#foo_32" [
-        label = "block[id=32](<constant:HasMeth>$118, <constant:CallsWithObjectChild>$107)\l<statTemp>$94 = Solve<::Object#foo#<block>> : T.untyped\l<unconditional>\l"
+        label = "block[id=32]()\l<statTemp>$91 = Solve<::Object#foo#<block>> : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_32" -> "bb::Object#foo_34" [style="bold"];
     "bb::Object#foo_33" [
-        label = "block[id=33](<constant:HasMeth>$118, <constant:CallsWithObjectChild>$107)\louterLoops: 1\l<blk>$100 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$101 = 0 : Integer(0)\l<block-pass>$8$13 = <blk>$100.[](<blk>$101) : T.untyped\l<blockReturnTemp>$102 = <block-pass>$8$13.meth() : T.untyped\l<blockReturnTemp>$104 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$102 : <impossible>\l<unconditional>\l"
+        label = "block[id=33]()\louterLoops: 1\l<blk>$97 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$98 = 0 : Integer(0)\l<block-pass>$8$13 = <blk>$97.[](<blk>$98) : T.untyped\l<blockReturnTemp>$99 = <block-pass>$8$13.meth() : T.untyped\l<blockReturnTemp>$101 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$99 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_33" -> "bb::Object#foo_31" [style="bold"];
     "bb::Object#foo_34" [
-        label = "block[id=34](<constant:HasMeth>$118, <constant:CallsWithObjectChild>$107)\l<block-pre-call-temp>$108 = <constant:CallsWithObjectChild>$107.calls_with_object() : T.untyped\l<unconditional>\l"
+        label = "block[id=34]()\l<statTemp>$103 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>\l<block-pre-call-temp>$104 = <statTemp>$103.calls_with_object() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_34" -> "bb::Object#foo_35" [style="bold"];
     "bb::Object#foo_35" [
-        label = "block[id=35](<constant:HasMeth>$118)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=35]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_35" -> "bb::Object#foo_37" [style="bold"];
     "bb::Object#foo_35" -> "bb::Object#foo_36" [style="tapered"];
 
     "bb::Object#foo_36" [
-        label = "block[id=36](<constant:HasMeth>$118)\l<statTemp>$105 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$115 = self : Object\l<statTemp>$116 = <constant:HasMeth>$118.new() : HasMeth\l<block-pre-call-temp>$119 = <statTemp>$115.calls_arg_with_object(<statTemp>$116) : T.untyped\l<unconditional>\l"
+        label = "block[id=36]()\l<statTemp>$102 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$111 = self : Object\l<statTemp>$113 = alias <constant:HasMeth> : <Class:HasMeth>\l<statTemp>$112 = <statTemp>$113.new() : HasMeth\l<block-pre-call-temp>$114 = <statTemp>$111.calls_arg_with_object(<statTemp>$112) : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_36" -> "bb::Object#foo_38" [style="bold"];
     "bb::Object#foo_37" [
-        label = "block[id=37](<constant:HasMeth>$118)\louterLoops: 1\l<blk>$109 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$110 = 0 : Integer(0)\l<block-pass>$9$14 = <blk>$109.[](<blk>$110) : T.untyped\l<blockReturnTemp>$111 = <block-pass>$9$14.meth() : T.untyped\l<blockReturnTemp>$113 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$111 : <impossible>\l<unconditional>\l"
+        label = "block[id=37]()\louterLoops: 1\l<blk>$105 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$106 = 0 : Integer(0)\l<block-pass>$9$14 = <blk>$105.[](<blk>$106) : T.untyped\l<blockReturnTemp>$107 = <block-pass>$9$14.meth() : T.untyped\l<blockReturnTemp>$109 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$107 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_37" -> "bb::Object#foo_35" [style="bold"];
     "bb::Object#foo_38" [
-        label = "block[id=38](<constant:HasMeth>$118)\louterLoops: 1\l<block-call>\l"
+        label = "block[id=38]()\louterLoops: 1\l<block-call>\l"
     ];
 
     "bb::Object#foo_38" -> "bb::Object#foo_40" [style="bold"];
     "bb::Object#foo_38" -> "bb::Object#foo_39" [style="tapered"];
 
     "bb::Object#foo_39" [
-        label = "block[id=39](<constant:HasMeth>$118)\l<statTemp>$114 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$125 = self : Object\l<statTemp>$126 = <constant:HasMeth>$118.new() : HasMeth\l<block-pre-call-temp>$128 = <statTemp>$125.calls_arg_with_object(<statTemp>$126) : T.untyped\l<unconditional>\l"
+        label = "block[id=39]()\l<statTemp>$110 = Solve<::Object#foo#<block>> : T.untyped\l<statTemp>$120 = self : Object\l<statTemp>$122 = alias <constant:HasMeth> : <Class:HasMeth>\l<statTemp>$121 = <statTemp>$122.new() : HasMeth\l<block-pre-call-temp>$123 = <statTemp>$120.calls_arg_with_object(<statTemp>$121) : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_39" -> "bb::Object#foo_41" [style="bold"];
     "bb::Object#foo_40" [
-        label = "block[id=40](<constant:HasMeth>$118)\louterLoops: 1\l<blk>$120 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$121 = 0 : Integer(0)\l<block-pass>$10$15 = <blk>$120.[](<blk>$121) : T.untyped\l<blockReturnTemp>$122 = <block-pass>$10$15.meth() : T.untyped\l<blockReturnTemp>$124 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$122 : <impossible>\l<unconditional>\l"
+        label = "block[id=40]()\louterLoops: 1\l<blk>$115 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$116 = 0 : Integer(0)\l<block-pass>$10$15 = <blk>$115.[](<blk>$116) : T.untyped\l<blockReturnTemp>$117 = <block-pass>$10$15.meth() : T.untyped\l<blockReturnTemp>$119 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$117 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_40" -> "bb::Object#foo_38" [style="bold"];
@@ -332,7 +332,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_42" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_43" [
-        label = "block[id=43]()\louterLoops: 1\l<blk>$129 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$130 = 0 : Integer(0)\lx$16 = <blk>$129.[](<blk>$130) : T.untyped\l<blockReturnTemp>$131 = x$16.meth() : T.untyped\l<blockReturnTemp>$133 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$131 : <impossible>\l<unconditional>\l"
+        label = "block[id=43]()\louterLoops: 1\l<blk>$124 = load_yield_params(::Object#foo#<block>, Object#foo#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$125 = 0 : Integer(0)\lx$16 = <blk>$124.[](<blk>$125) : T.untyped\l<blockReturnTemp>$126 = x$16.meth() : T.untyped\l<blockReturnTemp>$128 = blockreturn<::Object#foo#<block>> <blockReturnTemp>$126 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#foo_43" -> "bb::Object#foo_41" [style="bold"];
@@ -345,7 +345,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<constant:RubyTyper>$7 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:HasMeth>$9 = alias <constant:HasMeth> : <Class:HasMeth>\l<constant:HasToProc>$14 = alias <constant:HasToProc> : <Class:HasToProc>\l<constant:CallsWithObject>$19 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<constant:CallsWithObjectChild>$24 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>\l<statTemp>$5 = <constant:RubyTyper>$7.keep_for_ide(<constant:HasMeth>$9) : T.untyped\l<statTemp>$11 = <constant:RubyTyper>$7.keep_for_ide(<constant:HasToProc>$14) : T.untyped\l<statTemp>$16 = <constant:RubyTyper>$7.keep_for_ide(<constant:CallsWithObject>$19) : T.untyped\l<statTemp>$21 = <constant:RubyTyper>$7.keep_for_ide(<constant:CallsWithObjectChild>$24) : T.untyped\l<statTemp>$25 = <constant:RubyTyper>$7.keep_for_ide(<constant:CallsWithObject>$19) : T.untyped\l<statTemp>$29 = self : <Class:<root>>\l<block-pre-call-temp>$30 = <statTemp>$29.foo() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:HasMeth> : <Class:HasMeth>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : T.untyped\l<statTemp>$10 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$11 = alias <constant:HasToProc> : <Class:HasToProc>\l<statTemp>$9 = <statTemp>$10.keep_for_ide(<statTemp>$11) : T.untyped\l<statTemp>$14 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$15 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<statTemp>$13 = <statTemp>$14.keep_for_ide(<statTemp>$15) : T.untyped\l<statTemp>$18 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$19 = alias <constant:CallsWithObjectChild> : <Class:CallsWithObjectChild>\l<statTemp>$17 = <statTemp>$18.keep_for_ide(<statTemp>$19) : T.untyped\l<statTemp>$21 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$22 = alias <constant:CallsWithObject> : <Class:CallsWithObject>\l<statTemp>$20 = <statTemp>$21.keep_for_ide(<statTemp>$22) : T.untyped\l<statTemp>$24 = self : <Class:<root>>\l<block-pre-call-temp>$25 = <statTemp>$24.foo() : T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
@@ -362,12 +362,12 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
 
     "bb#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$28 = Solve<#<static-init>#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$23 = Solve<#<static-init>#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];
     "bb#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$31 = load_yield_params(#<static-init>#<block>, <static-init>#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$32 = 0 : Integer(0)\lx$17 = <blk>$31.[](<blk>$32) : T.untyped\l<blockReturnTemp>$33 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$34 = blockreturn<#<static-init>#<block>> <blockReturnTemp>$33 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$26 = load_yield_params(#<static-init>#<block>, <static-init>#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$27 = 0 : Integer(0)\lx$17 = <blk>$26.[](<blk>$27) : T.untyped\l<blockReturnTemp>$28 = \"foo\" : String(\"foo\")\l<blockReturnTemp>$29 = blockreturn<#<static-init>#<block>> <blockReturnTemp>$28 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_4" -> "bb#<static-init>_2" [style="bold"];
@@ -416,7 +416,7 @@ subgraph "cluster_::<Class:CallsWithObject>#calls_with_object" {
     "bb::<Class:CallsWithObject>#calls_with_object_1" [shape = parallelogram];
 
     "bb::<Class:CallsWithObject>#calls_with_object_0" [
-        label = "block[id=0]()\l<constant:HasMeth>$7 = alias <constant:HasMeth> : <Class:HasMeth>\l<selfMethodTemp>$3 = self : <Class:CallsWithObject>\lblk = load_arg(<selfMethodTemp>$3#calls_with_object, 0) : T.untyped\l<statTemp>$5 = <constant:HasMeth>$7.new() : HasMeth\l<returnMethodTemp>$2 = blk.call(<statTemp>$5) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : <Class:CallsWithObject>\lblk = load_arg(<selfMethodTemp>$3#calls_with_object, 0) : T.untyped\l<statTemp>$6 = alias <constant:HasMeth> : <Class:HasMeth>\l<statTemp>$5 = <statTemp>$6.new() : HasMeth\l<returnMethodTemp>$2 = blk.call(<statTemp>$5) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::<Class:CallsWithObject>#calls_with_object_0" -> "bb::<Class:CallsWithObject>#calls_with_object_1" [style="bold"];

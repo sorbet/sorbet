@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<constant:<Magic>>$6 = alias <constant:<Magic>> : <Magic>\l<arrayTemp>$5 = 1 : Integer(1)\l<statTemp>$4 = <constant:<Magic>>$6.<build-array>(<arrayTemp>$5) : TupleType {\l  0 = Integer(1)\l}\l<block-pre-call-temp>$7 = <statTemp>$4.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+        label = "block[id=0]()\l<arrayTemp>$5 = 1 : Integer(1)\l<magic>$6 = alias <constant:<Magic>> : <Magic>\l<statTemp>$4 = <magic>$6.<build-array>(<arrayTemp>$5) : TupleType {\l  0 = Integer(1)\l}\l<block-pre-call-temp>$7 = <statTemp>$4.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_2" [style="bold"];

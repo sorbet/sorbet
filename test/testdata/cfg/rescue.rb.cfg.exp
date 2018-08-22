@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<constant:StandardError>$8 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$4 = <unanalyzable> : T.untyped\l<rescueTemp$4\l"
+        label = "block[id=0]()\l<rescueTemp$4 = <unanalyzable> : T.untyped\l<rescueTemp$4\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_3" [style="bold"];
@@ -18,7 +18,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3](<rescueTemp$4, <constant:StandardError>$8)\l<rescueTemp$9 = <rescueTemp$4.is_a?(<constant:StandardError>$8) : T.untyped\l<rescueTemp$9\l"
+        label = "block[id=3](<rescueTemp$4)\l<rescueTemp$7 = alias <constant:StandardError> : <Class:StandardError>\l<rescueTemp$8 = <rescueTemp$4.is_a?(<rescueTemp$7) : T.untyped\l<rescueTemp$8\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_7" [style="bold"];
@@ -30,12 +30,12 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_4" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6](<returnMethodTemp>$2)\l<statTemp>$12 = self : Object\l<rescueTemp$11 = <statTemp>$12.d() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=6](<returnMethodTemp>$2)\l<statTemp>$11 = self : Object\l<rescueTemp$10 = <statTemp>$11.d() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_7" [
-        label = "block[id=7](<rescueTemp$4)\l<statTemp>$10 = self : Object\l<returnMethodTemp>$2 = <statTemp>$10.b() : T.untyped\l<unconditional>\l"
+        label = "block[id=7](<rescueTemp$4)\l<statTemp>$9 = self : Object\l<returnMethodTemp>$2 = <statTemp>$9.b() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_6" [style="bold"];

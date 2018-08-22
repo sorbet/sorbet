@@ -12,23 +12,27 @@ class A
   #   Symbol(:"y") => <Class:Integer>
   # }
   #
+  # <statTemp>$9: <Class:T>
+  #
+  # <statTemp>$10: <Class:String>
+  #
+  # <statTemp>$11: <Class:Integer>
+  #
+  # <statTemp>$15: <Class:Integer>
+  #
   # <returnMethodTemp>$2: T.untyped
   #
   # <hashTemp>$7: Symbol(:"x")
   #
   # <hashTemp>$8: MetaType
   #
-  # <hashTemp>$15: Symbol(:"y")
+  # <hashTemp>$12: Symbol(:"y")
+  #
+  # <hashTemp>$13: <Class:Integer>
   #
   # <finalReturn>: <impossible>
   #
-  # <constant:Integer>$14: <Class:Integer>
-  #
-  # <constant:String>$12: <Class:String>
-  #
-  # <constant:T>$10: <Class:T>
-  #
-  # <constant:<Magic>>$17: <Magic>
+  # <magic>$14: <Magic>
   def a_method(x, y)
     if x.is_a?(String)
        # <ifTemp>$5: TrueClass | FalseClass
@@ -39,9 +43,9 @@ class A
        #     x NOT to be String
        #     x NOT to be String
        #
-       # <selfMethodTemp>$3: A
+       # <statTemp>$7: <Class:String>
        #
-       # <constant:String>$8: <Class:String>
+       # <selfMethodTemp>$3: A
        #
        # x: String | Integer
        #
@@ -50,7 +54,7 @@ class A
           #
           # y: Integer
       x = x.to_i
-          # <statTemp>$9: String
+          # <statTemp>$8: String
           #
           # x: Integer
           #

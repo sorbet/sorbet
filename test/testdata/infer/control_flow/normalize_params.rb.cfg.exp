@@ -6,7 +6,7 @@ subgraph "cluster_::Test#normalize_params" {
     "bb::Test#normalize_params_1" [shape = parallelogram];
 
     "bb::Test#normalize_params_0" [
-        label = "block[id=0]()\l<constant:Array>$15 = alias <constant:Array> : <Class:Array>\l<constant:Hash>$7 = alias <constant:Hash> : <Class:Hash>\l<selfMethodTemp>$3 = self : Test\lv = load_arg(<selfMethodTemp>$3#normalize_params, 0) : T.untyped\l<ifTemp>$4 = v.is_a?(<constant:Hash>$7) : T.untyped\l<ifTemp>$4\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Test\lv = load_arg(<selfMethodTemp>$3#normalize_params, 0) : T.untyped\l<statTemp>$6 = alias <constant:Hash> : <Class:Hash>\l<ifTemp>$4 = v.is_a?(<statTemp>$6) : T.untyped\l<ifTemp>$4\l"
     ];
 
     "bb::Test#normalize_params_0" -> "bb::Test#normalize_params_2" [style="bold"];
@@ -18,19 +18,19 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_1" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_2" [
-        label = "block[id=2](v)\l<statTemp>$9 = self : Test\l<statTemp>$10 = v.to_a() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = AppliedType {\l        klass = ::Array\l        targs = [\l          <constant:Elem> = T.untyped\l        ]\l      }\l  ]\l}\l<statTemp>$8 = <statTemp>$9.normalize_params(<statTemp>$10) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$8.sort() : T.untyped\l<unconditional>\l"
+        label = "block[id=2](v)\l<statTemp>$8 = self : Test\l<statTemp>$9 = v.to_a() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = AppliedType {\l        klass = ::Array\l        targs = [\l          <constant:Elem> = T.untyped\l        ]\l      }\l  ]\l}\l<statTemp>$7 = <statTemp>$8.normalize_params(<statTemp>$9) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$7.sort() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_3" [
-        label = "block[id=3](<constant:Array>$15, v)\l<ifTemp>$12 = v.is_a?(<constant:Array>$15) : T.untyped\l<ifTemp>$12\l"
+        label = "block[id=3](v)\l<statTemp>$13 = alias <constant:Array> : <Class:Array>\l<ifTemp>$11 = v.is_a?(<statTemp>$13) : T.untyped\l<ifTemp>$11\l"
     ];
 
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_4" [style="bold"];
     "bb::Test#normalize_params_3" -> "bb::Test#normalize_params_5" [style="tapered"];
 
     "bb::Test#normalize_params_4" [
-        label = "block[id=4](v)\l<block-pre-call-temp>$17 = v.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
+        label = "block[id=4](v)\l<block-pre-call-temp>$15 = v.map() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TypeVar(U$1)\l  ]\l}\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_4" -> "bb::Test#normalize_params_6" [style="bold"];
@@ -52,7 +52,7 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_7" -> "bb::Test#normalize_params_10" [style="bold"];
     "bb::Test#normalize_params_8" [
-        label = "block[id=8]()\louterLoops: 1\l<blk>$18 = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$19 = 0 : Integer(0)\le$2 = <blk>$18.[](<blk>$19) : T.untyped\l<statTemp>$21 = self : Test\l<blockReturnTemp>$20 = <statTemp>$21.normalize_params(e$2) : T.untyped\l<blockReturnTemp>$23 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$20 : <impossible>\l<unconditional>\l"
+        label = "block[id=8]()\louterLoops: 1\l<blk>$16 = load_yield_params(::Test#normalize_params#<block>, Test#normalize_params#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$17 = 0 : Integer(0)\le$2 = <blk>$16.[](<blk>$17) : T.untyped\l<statTemp>$19 = self : Test\l<blockReturnTemp>$18 = <statTemp>$19.normalize_params(e$2) : T.untyped\l<blockReturnTemp>$21 = blockreturn<::Test#normalize_params#<block>> <blockReturnTemp>$18 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_8" -> "bb::Test#normalize_params_6" [style="bold"];

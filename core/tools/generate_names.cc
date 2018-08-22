@@ -84,6 +84,7 @@ NameDef names[] = {
     {"castTemp", "<castTemp", Resolver | CFG | Core},
     {"finalReturn", "<finalReturn>", CFG | Infer | Core},
     {"cfgAlias", "<cfgAlias>", CFG | Infer | Core},
+    {"magic", "<magic>", CFG},
     // end CFG temporaries
 
     {"include", Namer | Resolver | DSL},

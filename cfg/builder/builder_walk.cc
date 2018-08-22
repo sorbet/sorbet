@@ -149,9 +149,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     }
                 }
                 if (a->symbol.exists()) {
-                    current->exprs.emplace_back(
-                        cctx.target, a->loc,
-                        make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
+                    current->exprs.emplace_back(cctx.target, a->loc, make_unique<Alias>(a->symbol));
                     ret = current;
                 } else {
                     ret = walk(cctx, a->typeAlias.get(), current);
@@ -179,6 +177,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     // lhs = core::Symbols::todo();
                     Error::raise("should never be reached");
                 }
+
                 auto rhsCont = walk(cctx.withTarget(lhs), a->rhs.get(), current);
                 rhsCont->exprs.emplace_back(cctx.target, a->loc, make_unique<Ident>(lhs));
                 ret = rhsCont;
@@ -415,7 +414,9 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(h->keys[i]->loc);
                     locs.emplace_back(h->values[i]->loc);
                 }
-                core::LocalVariable magic = global2Local(cctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
+                current->exprs.emplace_back(magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
+
                 current->exprs.emplace_back(cctx.target, h->loc,
                                             make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs));
                 ret = current;
@@ -430,7 +431,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     vars.push_back(tmp);
                     locs.emplace_back(a->loc);
                 }
-                core::LocalVariable magic = global2Local(cctx, core::Symbols::Magic(), cctx.inWhat, cctx.aliases);
+                core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
+                current->exprs.emplace_back(magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
                 current->exprs.emplace_back(cctx.target, a->loc,
                                             make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs));
                 ret = current;

@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<constant:A>$15 = alias <constant:A> : <Class:A>\l<constant:B>$25 = alias <constant:B> : <Class:B>\ltry = 0 : Integer(0)\l<unconditional>\l"
+        label = "block[id=0]()\ltry = 0 : Integer(0)\l<unconditional>\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];
@@ -16,57 +16,57 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2](<constant:A>$15, <constant:B>$25, try)\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
+        label = "block[id=2](try)\l<rescueTemp$5 = <unanalyzable> : T.untyped\l<rescueTemp$5\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)\l<rescueTemp$27 = <rescueTemp$5.is_a?(<constant:A>$15) : T.untyped\l<rescueTemp$27\l"
+        label = "block[id=3](<rescueTemp$5, try)\l<rescueTemp$24 = alias <constant:A> : <Class:A>\l<rescueTemp$25 = <rescueTemp$5.is_a?(<rescueTemp$24) : T.untyped\l<rescueTemp$25\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_13" [style="bold"];
     "bb::Object#main_3" -> "bb::Object#main_14" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4](<constant:A>$15, <constant:B>$25, try)\l<statTemp>$8 = 3 : Integer(3)\l<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass\l<ifTemp>$6\l"
+        label = "block[id=4](try)\l<statTemp>$8 = 3 : Integer(3)\l<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass\l<ifTemp>$6\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
     "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
 
     "bb::Object#main_5" [
-        label = "block[id=5](<constant:A>$15, try)\l<statTemp>$10 = try : Integer(0)\l<statTemp>$11 = 1 : Integer(1)\ltry = <statTemp>$10.+(<statTemp>$11) : Integer\l<statTemp>$12 = self : Object\l<statTemp>$13 = <constant:A>$15.new() : A\l<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <impossible>\l<unconditional>\l"
+        label = "block[id=5](try)\l<statTemp>$10 = try : Integer(0)\l<statTemp>$11 = 1 : Integer(1)\ltry = <statTemp>$10.+(<statTemp>$11) : Integer\l<statTemp>$12 = self : Object\l<statTemp>$14 = alias <constant:A> : <Class:A>\l<statTemp>$13 = <statTemp>$14.new() : A\l<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_17" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6](<constant:B>$25, try)\l<statTemp>$18 = 6 : Integer(6)\l<ifTemp>$16 = try.<(<statTemp>$18) : TrueClass | FalseClass\l<ifTemp>$16\l"
+        label = "block[id=6](try)\l<statTemp>$17 = 6 : Integer(6)\l<ifTemp>$15 = try.<(<statTemp>$17) : TrueClass | FalseClass\l<ifTemp>$15\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_7" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_17" [style="tapered"];
 
     "bb::Object#main_7" [
-        label = "block[id=7](<constant:B>$25, try)\l<statTemp>$20 = try : Integer(0)\l<statTemp>$21 = 1 : Integer(1)\ltry = <statTemp>$20.+(<statTemp>$21) : Integer\l<statTemp>$22 = self : Object\l<statTemp>$23 = <constant:B>$25.new() : B\l<returnMethodTemp>$2 = <statTemp>$22.raise(<statTemp>$23) : <impossible>\l<unconditional>\l"
+        label = "block[id=7](try)\l<statTemp>$19 = try : Integer(0)\l<statTemp>$20 = 1 : Integer(1)\ltry = <statTemp>$19.+(<statTemp>$20) : Integer\l<statTemp>$21 = self : Object\l<statTemp>$23 = alias <constant:B> : <Class:B>\l<statTemp>$22 = <statTemp>$23.new() : B\l<returnMethodTemp>$2 = <statTemp>$21.raise(<statTemp>$22) : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#main_7" -> "bb::Object#main_17" [style="bold"];
     "bb::Object#main_13" [
-        label = "block[id=13](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)\l<statTemp>$29 = self : Object\l<statTemp>$30 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$28 = <statTemp>$29.puts(<statTemp>$30) : NilClass\l<unconditional>\l"
+        label = "block[id=13](<rescueTemp$5, try)\l<statTemp>$27 = self : Object\l<statTemp>$28 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$26 = <statTemp>$27.puts(<statTemp>$28) : NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_13" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_14" [
-        label = "block[id=14](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)\l<rescueTemp$33 = <rescueTemp$5.is_a?(<constant:B>$25) : T.untyped\l<rescueTemp$33\l"
+        label = "block[id=14](<rescueTemp$5, try)\l<rescueTemp$30 = alias <constant:B> : <Class:B>\l<rescueTemp$31 = <rescueTemp$5.is_a?(<rescueTemp$30) : T.untyped\l<rescueTemp$31\l"
     ];
 
     "bb::Object#main_14" -> "bb::Object#main_15" [style="bold"];
     "bb::Object#main_14" -> "bb::Object#main_1" [style="tapered"];
 
     "bb::Object#main_15" [
-        label = "block[id=15](<rescueTemp$5, <constant:A>$15, <constant:B>$25, try)\l<statTemp>$35 = self : Object\l<statTemp>$36 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$34 = <statTemp>$35.puts(<statTemp>$36) : NilClass\l<unconditional>\l"
+        label = "block[id=15](<rescueTemp$5, try)\l<statTemp>$33 = self : Object\l<statTemp>$34 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$32 = <statTemp>$33.puts(<statTemp>$34) : NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_15" -> "bb::Object#main_2" [style="bold"];
@@ -84,7 +84,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<constant:RubyTyper>$7 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<constant:Exception>$13 = alias <constant:Exception> : <Class:Exception>\l<constant:A>$9 = alias <constant:A> : <Class:A>\l<constant:B>$18 = alias <constant:B> : <Class:B>\l<statTemp>$5 = <constant:RubyTyper>$7.keep_for_ide(<constant:A>$9) : T.untyped\l<statTemp>$10 = <constant:RubyTyper>$7.keep_for_ide(<constant:Exception>$13) : T.untyped\l<statTemp>$15 = <constant:RubyTyper>$7.keep_for_ide(<constant:B>$18) : T.untyped\l<statTemp>$19 = <constant:RubyTyper>$7.keep_for_ide(<constant:Exception>$13) : T.untyped\l<statTemp>$23 = self : <Class:<root>>\l<statTemp>$22 = <statTemp>$23.main() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:A> : <Class:A>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : T.untyped\l<statTemp>$9 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$10 = alias <constant:Exception> : <Class:Exception>\l<statTemp>$8 = <statTemp>$9.keep_for_ide(<statTemp>$10) : T.untyped\l<statTemp>$13 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$14 = alias <constant:B> : <Class:B>\l<statTemp>$12 = <statTemp>$13.keep_for_ide(<statTemp>$14) : T.untyped\l<statTemp>$16 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$17 = alias <constant:Exception> : <Class:Exception>\l<statTemp>$15 = <statTemp>$16.keep_for_ide(<statTemp>$17) : T.untyped\l<statTemp>$19 = self : <Class:<root>>\l<statTemp>$18 = <statTemp>$19.main() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
