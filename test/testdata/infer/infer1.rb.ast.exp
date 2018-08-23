@@ -23,9 +23,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   def baz5<<constant:<todo sym>>>(cond)
     begin
-      if begin
-          cond
-        end
+      if cond
         b = 1
       else
         b = "foo"
@@ -36,9 +34,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   def baz6<<constant:<todo sym>>>(cond)
     begin
-      if begin
-          cond
-        end
+      if cond
         b = 1
       else
         b = "foo"
@@ -49,9 +45,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   def baz7<<constant:<todo sym>>>(cond)
     begin
-      if begin
-          cond
-        end
+      if cond
         b = 1
       else
         <emptyTree>
@@ -61,9 +55,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   def baz8<<constant:<todo sym>>>()
-    while begin
-        true
-      end
+    while true
       b = 1
     end
   end

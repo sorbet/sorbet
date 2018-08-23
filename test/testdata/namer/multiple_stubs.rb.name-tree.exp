@@ -1,12 +1,9 @@
-begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$75>()
-      begin
-        ::Foo::Bar.baz(1)
-        ::Foo::Bar.baz(2)
-        <emptyTree>
-      end
+class <emptyTree><<constant:<root>>> < ()
+  def self.<static-init><<static-init>$75>()
+    begin
+      ::Foo::Bar.baz(1)
+      ::Foo::Bar.baz(2)
+      <emptyTree>
     end
   end
-  <emptyTree>
 end

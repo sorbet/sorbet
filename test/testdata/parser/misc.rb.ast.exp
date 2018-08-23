@@ -25,9 +25,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   <emptyTree>
 
-  begin
-    nil
-  end
+  nil
 
   begin
     self(<constant:<todo sym>>).a()
@@ -160,11 +158,9 @@ class <emptyTree><<constant:<root>>> < ()
 
   ::Kernel.<constant:Complex>("5")
 
-  begin
-    <emptyTree>
-  rescue <emptyTree>::<constant:E> => x
-    nil
-  end
+  <emptyTree>
+rescue <emptyTree>::<constant:E> => x
+  nil
 
   begin
     <assignTemp>$10 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
@@ -172,9 +168,7 @@ class <emptyTree><<constant:<root>>> < ()
     <assignTemp>$10
   end
 
-  "foo".concat(begin
-      self(<constant:<todo sym>>).bar()
-    end.to_s()).intern()
+  "foo".concat(self(<constant:<todo sym>>).bar().to_s()).intern()
 
   [:"sym"]
 

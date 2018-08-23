@@ -1,34 +1,31 @@
-begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$75>()
+class <emptyTree><<constant:<root>>> < ()
+  def self.<static-init><<static-init>$75>()
+    begin
       begin
-        begin
-          ::RubyTyper.keep_for_typechecking(::T.nilable())
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::RubyTyper.keep_for_typechecking(::T.nilable(::Integer, ::Integer))
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::RubyTyper.keep_for_typechecking(::T.any())
-          T.cast(nil, T.untyped)
-        end
-        begin
-          ::RubyTyper.keep_for_typechecking(::T.all())
-          T.cast(nil, T.untyped)
-        end
-        ::T.must()
-        ::T.let(1)
-        begin
-          ::RubyTyper.keep_for_typechecking(2)
-          T.let(1, T.untyped)
-        end
-        ::T.reveal_type()
-        ::T.reveal_type(1, 2)
-        <emptyTree>
+        ::RubyTyper.keep_for_typechecking(::T.nilable())
+        T.cast(nil, T.untyped)
       end
+      begin
+        ::RubyTyper.keep_for_typechecking(::T.nilable(::Integer, ::Integer))
+        T.cast(nil, T.untyped)
+      end
+      begin
+        ::RubyTyper.keep_for_typechecking(::T.any())
+        T.cast(nil, T.untyped)
+      end
+      begin
+        ::RubyTyper.keep_for_typechecking(::T.all())
+        T.cast(nil, T.untyped)
+      end
+      ::T.must()
+      ::T.let(1)
+      begin
+        ::RubyTyper.keep_for_typechecking(2)
+        T.let(1, T.untyped)
+      end
+      ::T.reveal_type()
+      ::T.reveal_type(1, 2)
+      <emptyTree>
     end
   end
-  <emptyTree>
 end

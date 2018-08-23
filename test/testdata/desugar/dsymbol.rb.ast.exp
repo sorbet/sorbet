@@ -5,7 +5,5 @@ class <emptyTree><<constant:<root>>> < ()
 
   :""
 
-  "hello_".concat(begin
-      self(<constant:<todo sym>>).name()
-    end.to_s()).concat("!").intern()
+  "hello_".concat(self(<constant:<todo sym>>).name().to_s()).concat("!").intern()
 end

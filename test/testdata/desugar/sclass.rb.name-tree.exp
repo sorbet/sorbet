@@ -55,11 +55,7 @@ begin
   end
   class ::A<<constant:A>> < (::<todo sym>)  end
   class ::B<<constant:B>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
-      begin
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <singleton class><<singleton class:<constant:B>>> < ()
     def b<b>()
@@ -67,18 +63,10 @@ begin
     end
   end
   class ::D<<constant:D>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
-      begin
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <singleton class><<singleton class:<constant:D>>> < ()
-    def self.<static-init><<static-init>>()
-      begin
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <singleton class><<singleton class:<singleton class:<constant:D>>>> < ()
     def d<d>()
@@ -86,14 +74,12 @@ begin
     end
   end
   class ::E<<constant:E>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
     def self.<static-init><<static-init>>()
-      begin
-        begin
-          <emptyTree>
-        end
-        self(<singleton class:<constant:E>>).wrapper()
-        <emptyTree>
-      end
+      self(<singleton class:<constant:E>>).wrapper()
     end
   end
   class <singleton class><<singleton class:<constant:E>>> < ()
@@ -108,11 +94,7 @@ begin
     end
   end
   class ::F<<constant:F>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
-      begin
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <singleton class><<singleton class:<constant:F>>> < ()
     <emptyTree>
@@ -143,9 +125,7 @@ begin
 
     def wrapper<wrapper>()
       begin
-        begin
-          <emptyTree>
-        end
+        <emptyTree>
         self(<constant:G>).inner()
       end
     end
@@ -160,11 +140,7 @@ begin
     end
   end
   class ::H<<constant:H>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
-      begin
-        <emptyTree>
-      end
-    end
+    <emptyTree>
   end
   class <singleton class><<singleton class:<constant:H>>> < ()
     def self.<static-init><<static-init>>()

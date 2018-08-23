@@ -2,21 +2,19 @@ class <emptyTree><<constant:<root>>> < ()
   def main<<constant:<todo sym>>>()
     begin
       try = 0
-      begin
-        if try.<(3)
-          begin
-            try = try.+(1)
-            self(<constant:<todo sym>>).raise("e")
-          end
-        else
-          <emptyTree>
-        end
-      rescue => <rescueTemp>$2
+      if try.<(3)
         begin
-          self(<constant:<todo sym>>).puts("rescue")
-          retry
-          1
+          try = try.+(1)
+          self(<constant:<todo sym>>).raise("e")
         end
+      else
+        <emptyTree>
+      end
+    rescue => <rescueTemp>$2
+      begin
+        self(<constant:<todo sym>>).puts("rescue")
+        retry
+        1
       end
     end
   end

@@ -142,7 +142,10 @@ public:
 
     static std::unique_ptr<Expression> InsSeq(core::Loc loc, InsSeq::STATS_store stats,
                                               std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::InsSeq>(loc, move(stats), move(expr));
+        if (!stats.empty()) {
+            return std::make_unique<ast::InsSeq>(loc, move(stats), move(expr));
+        }
+        return expr;
     }
 
     static std::unique_ptr<Expression> Splat(core::Loc loc, std::unique_ptr<Expression> arg) {

@@ -89,6 +89,7 @@ void If::_sanityCheck() {
 }
 
 void InsSeq::_sanityCheck() {
+    ENFORCE(!stats.empty());
     for (auto &node : stats) {
         ENFORCE(node);
     }

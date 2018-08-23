@@ -9,11 +9,7 @@ class <emptyTree><<constant:<root>>> < ()
       <emptyTree>::<constant:Regexp>.new("abc", 0.|(<emptyTree>::<constant:Regexp>::<constant:IGNORECASE>).|(<emptyTree>::<constant:Regexp>::<constant:EXTENDED>).|(<emptyTree>::<constant:Regexp>::<constant:MULTILINE>))
       a = "a"
       c = "c"
-      ::Regexp.new(begin
-          a
-        end.to_s().concat("b".to_s()).concat(begin
-            c
-          end.to_s()), 0)
+      ::Regexp.new(a.to_s().concat("b".to_s()).concat(c.to_s()), 0)
       <emptyTree>::<constant:Regexp>.new(a.+("b").+(c))
       ::Regexp.new("abc", 0)
     end

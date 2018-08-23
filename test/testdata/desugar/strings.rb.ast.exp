@@ -3,9 +3,7 @@ class <emptyTree><<constant:<root>>> < ()
     begin
       ""
       "foo"
-      "foo".concat(begin
-          1
-        end.to_s()).to_s()
+      "foo".concat(1.to_s()).to_s()
     end
   end
 end

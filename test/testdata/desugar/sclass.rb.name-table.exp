@@ -11,7 +11,6 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
   class ::<Class:B> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:12
     method ::<Class:B>#b () @ test/testdata/desugar/sclass.rb:13
   class ::<Class:D> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:27
-    method ::<Class:D>#<static-init> () @ test/testdata/desugar/sclass.rb:28
   class ::<Class:E> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:37
     method ::<Class:E>#e () @ test/testdata/desugar/sclass.rb:39
     method ::<Class:E>#wrapper () @ test/testdata/desugar/sclass.rb:38
@@ -31,17 +30,13 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
     method ::<Class:H>#<static-init> () @ test/testdata/desugar/sclass.rb:76
   class ::A < ::Object () @ test/testdata/desugar/sclass.rb:2
   class ::B < ::Object () @ test/testdata/desugar/sclass.rb:11
-    method ::B#<static-init> () @ test/testdata/desugar/sclass.rb:12
   class ::D < ::Object () @ test/testdata/desugar/sclass.rb:26
-    method ::D#<static-init> () @ test/testdata/desugar/sclass.rb:27
   class ::E < ::Object () @ test/testdata/desugar/sclass.rb:36
-    method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:36
+    method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:44
   class ::F < ::Object () @ test/testdata/desugar/sclass.rb:47
-    method ::F#<static-init> () @ test/testdata/desugar/sclass.rb:48
   class ::G < ::Object () @ test/testdata/desugar/sclass.rb:60
     method ::G#wrapper () @ test/testdata/desugar/sclass.rb:61
   class ::H < ::Object () @ test/testdata/desugar/sclass.rb:74
-    method ::H#<static-init> () @ test/testdata/desugar/sclass.rb:75
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L718
     method ::Object#main () @ test/testdata/desugar/sclass.rb:84
   field #$c @ test/testdata/desugar/sclass.rb:19

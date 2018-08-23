@@ -15,15 +15,12 @@ begin
   module ::Foo<<constant:Foo>> < ()  end
   <emptyTree>
 end
-begin
-  class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$76>()
-      begin
-        ::Bar
-        ::Foo::Bar
-        <emptyTree>
-      end
+class <emptyTree><<constant:<root>>> < ()
+  def self.<static-init><<static-init>$76>()
+    begin
+      ::Bar
+      ::Foo::Bar
+      <emptyTree>
     end
   end
-  <emptyTree>
 end

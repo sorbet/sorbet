@@ -50,6 +50,9 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
                      },
                      [&](ast::Expression *e) { inseq->stats.emplace_back(move(stat)); });
         }
+        if (inseq->stats.empty()) {
+            mdef->rhs = move(inseq->expr);
+        }
     }
 
     ret.emplace_back(ast::MK::Method(loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs),

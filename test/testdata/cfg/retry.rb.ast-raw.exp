@@ -16,80 +16,76 @@ ClassDef{
             rhs = Literal{ value = 0 }
           }
         ],
-        expr = InsSeq{
-          stats = [
-          ],
-          expr = Rescue{
-            body = If{
-              cond = Send{
-                recv = UnresolvedIdent{
-                  kind = Local
-                  name = try
-                }
-                fun = <
-                block = nullptr
-                args = [
-                  Literal{ value = 3 }
-                ]
+        expr = Rescue{
+          body = If{
+            cond = Send{
+              recv = UnresolvedIdent{
+                kind = Local
+                name = try
               }
-              thenp = InsSeq{
-                stats = [
-                  Assign{
-                    lhs = UnresolvedIdent{
+              fun = <
+              block = nullptr
+              args = [
+                Literal{ value = 3 }
+              ]
+            }
+            thenp = InsSeq{
+              stats = [
+                Assign{
+                  lhs = UnresolvedIdent{
+                    kind = Local
+                    name = try
+                  }
+                  rhs = Send{
+                    recv = UnresolvedIdent{
                       kind = Local
                       name = try
                     }
-                    rhs = Send{
-                      recv = UnresolvedIdent{
-                        kind = Local
-                        name = try
-                      }
-                      fun = +
-                      block = nullptr
-                      args = [
-                        Literal{ value = 1 }
-                      ]
-                    }
+                    fun = +
+                    block = nullptr
+                    args = [
+                      Literal{ value = 1 }
+                    ]
                   }
-                ],
-                expr = Send{
-                  recv = Self{ claz = ::<todo sym> }
-                  fun = raise
-                  block = nullptr
-                  args = [
-                    Literal{ value = "e" }
-                  ]
                 }
-              }
-              elsep = EmptyTree
-            }
-            rescueCases = [
-              RescueCase{
-                exceptions = [
+              ],
+              expr = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = raise
+                block = nullptr
+                args = [
+                  Literal{ value = "e" }
                 ]
-                var = UnresolvedIdent{
-                  kind = Local
-                  name = <rescueTemp>$2
-                }
-                body = InsSeq{
-                  stats = [
-                    Send{
-                      recv = Self{ claz = ::<todo sym> }
-                      fun = puts
-                      block = nullptr
-                      args = [
-                        Literal{ value = "rescue" }
-                      ]
-                    }
-                    Retry{}
-                  ],
-                  expr = Literal{ value = 1 }
-                }
               }
-            ]
-            else = EmptyTree
-            ensure = EmptyTree
+            }
+            elsep = EmptyTree
           }
+          rescueCases = [
+            RescueCase{
+              exceptions = [
+              ]
+              var = UnresolvedIdent{
+                kind = Local
+                name = <rescueTemp>$2
+              }
+              body = InsSeq{
+                stats = [
+                  Send{
+                    recv = Self{ claz = ::<todo sym> }
+                    fun = puts
+                    block = nullptr
+                    args = [
+                      Literal{ value = "rescue" }
+                    ]
+                  }
+                  Retry{}
+                ],
+                expr = Literal{ value = 1 }
+              }
+            }
+          ]
+          else = EmptyTree
+          ensure = EmptyTree
         }
       }
     }

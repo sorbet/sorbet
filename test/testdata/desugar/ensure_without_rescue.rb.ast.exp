@@ -1,10 +1,8 @@
 class <emptyTree><<constant:<root>>> < ()
   def main<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).a()
-    ensure
-      self(<constant:<todo sym>>).b()
-    end
+    self(<constant:<todo sym>>).a()
+  ensure
+    self(<constant:<todo sym>>).b()
   end
 
   def a<<constant:<todo sym>>>()

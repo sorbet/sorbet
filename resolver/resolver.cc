@@ -1140,8 +1140,9 @@ public:
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = make_unique<ast::InsSeq>(tree->loc, move(stats), move(tree));
-            return addClasses(ctx, move(tree));
+            auto sorted = sortedClasses();
+            stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
+            return ast::MK::InsSeq(tree->loc, move(stats), move(tree));
         }
 
         for (auto &clas : sortedClasses()) {

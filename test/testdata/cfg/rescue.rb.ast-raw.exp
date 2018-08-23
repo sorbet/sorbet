@@ -6,48 +6,44 @@ ClassDef{
       flags = 0
       name = main<<constant:<todo sym>>>
       args = []
-      rhs = InsSeq{
-        stats = [
-        ],
-        expr = Rescue{
-          body = Send{
-            recv = Self{ claz = ::<todo sym> }
-            fun = a
-            block = nullptr
-            args = [
-            ]
-          }
-          rescueCases = [
-            RescueCase{
-              exceptions = [
-              ]
-              var = UnresolvedIdent{
-                kind = Local
-                name = <rescueTemp>$2
-              }
-              body = Send{
-                recv = Self{ claz = ::<todo sym> }
-                fun = b
-                block = nullptr
-                args = [
-                ]
-              }
-            }
+      rhs = Rescue{
+        body = Send{
+          recv = Self{ claz = ::<todo sym> }
+          fun = a
+          block = nullptr
+          args = [
           ]
-          else = Send{
-            recv = Self{ claz = ::<todo sym> }
-            fun = c
-            block = nullptr
-            args = [
+        }
+        rescueCases = [
+          RescueCase{
+            exceptions = [
             ]
+            var = UnresolvedIdent{
+              kind = Local
+              name = <rescueTemp>$2
+            }
+            body = Send{
+              recv = Self{ claz = ::<todo sym> }
+              fun = b
+              block = nullptr
+              args = [
+              ]
+            }
           }
-          ensure = Send{
-            recv = Self{ claz = ::<todo sym> }
-            fun = d
-            block = nullptr
-            args = [
-            ]
-          }
+        ]
+        else = Send{
+          recv = Self{ claz = ::<todo sym> }
+          fun = c
+          block = nullptr
+          args = [
+          ]
+        }
+        ensure = Send{
+          recv = Self{ claz = ::<todo sym> }
+          fun = d
+          block = nullptr
+          args = [
+          ]
         }
       }
     }

@@ -26,9 +26,7 @@ begin
     end
 
     def i_like_exps<i_like_exps>()
-      if begin
-          true
-        end
+      if true
         1
       else
         2
@@ -36,9 +34,7 @@ begin
     end
 
     def return_in_one_branch1<return_in_one_branch1>()
-      if begin
-          true
-        end
+      if true
         return 1
       else
         2
@@ -46,9 +42,7 @@ begin
     end
 
     def return_in_one_branch2<return_in_one_branch2>()
-      if begin
-          true
-        end
+      if true
         1
       else
         return 2
@@ -57,16 +51,12 @@ begin
 
     def variables<variables>()
       begin
-        if begin
-            true
-          end
+        if true
           a = 1
         else
           a = 2
         end
-        if begin
-            false
-          end
+        if false
           b = 1
         else
           b = 2
@@ -77,17 +67,13 @@ begin
 
     def variables_and_loop<variables_and_loop>(cond)
       begin
-        if begin
-            true
-          end
+        if true
           a = 1
         else
           a = 2
         end
         while true
-          if begin
-              cond
-            end
+          if cond
             b = 1
           else
             b = 2
@@ -100,9 +86,7 @@ begin
     def variables_loop_if<variables_loop_if>(cond)
       begin
         while true
-          if begin
-              cond
-            end
+          if cond
             b = 1
           else
             b = 2
@@ -113,9 +97,7 @@ begin
     end
 
     def take_arguments<take_arguments>(i)
-      if begin
-          false
-        end
+      if false
         2
       else
         i

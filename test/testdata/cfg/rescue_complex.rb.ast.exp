@@ -24,47 +24,37 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   end
 
   def multiple_rescue<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp>$2
-      self(<constant:<todo sym>>).baz()
-    rescue => <rescueTemp>$3
-      self(<constant:<todo sym>>).bar()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue => <rescueTemp>$2
+    self(<constant:<todo sym>>).baz()
+  rescue => <rescueTemp>$3
+    self(<constant:<todo sym>>).bar()
   end
 
   def multiple_rescue_classes<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue <emptyTree>::<constant:Foo>, <emptyTree>::<constant:Bar> => baz
-      baz
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue <emptyTree>::<constant:Foo>, <emptyTree>::<constant:Bar> => baz
+    baz
   end
 
   def parse_rescue_ensure<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp>$2
-      self(<constant:<todo sym>>).baz()
-    ensure
-      self(<constant:<todo sym>>).bar()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue => <rescueTemp>$2
+    self(<constant:<todo sym>>).baz()
+  ensure
+    self(<constant:<todo sym>>).bar()
   end
 
   def parse_bug_rescue_empty_else<<constant:<todo sym>>>()
-    begin
-      <emptyTree>
-    rescue <emptyTree>::<constant:LoadError> => <rescueTemp>$2
-      <emptyTree>
-    end
+    <emptyTree>
+  rescue <emptyTree>::<constant:LoadError> => <rescueTemp>$2
+    <emptyTree>
   end
 
   def parse_ruby_bug_12686<<constant:<todo sym>>>()
-    self(<constant:<todo sym>>).take_arg(begin
-        self(<constant:<todo sym>>).bar()
-      rescue => <rescueTemp>$2
-        nil
-      end)
+    self(<constant:<todo sym>>).take_arg(self(<constant:<todo sym>>).bar()
+    rescue => <rescueTemp>$2
+      nil)
   end
 
   def parse_rescue_mod<<constant:<todo sym>>>()
@@ -74,49 +64,39 @@ class <emptyTree>::<constant:TestRescue><<constant:<todo sym>>> < (::<todo sym>)
   end
 
   def parse_resbody_list_var<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue self(<constant:<todo sym>>).foo() => ex
-      self(<constant:<todo sym>>).bar()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue self(<constant:<todo sym>>).foo() => ex
+    self(<constant:<todo sym>>).bar()
   end
 
   def parse_rescue_else_ensure<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp>$2
-      self(<constant:<todo sym>>).baz()
-    else
-      self(<constant:<todo sym>>).foo()
-    ensure
-      self(<constant:<todo sym>>).bar()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue => <rescueTemp>$2
+    self(<constant:<todo sym>>).baz()
+  else
+    self(<constant:<todo sym>>).foo()
+  ensure
+    self(<constant:<todo sym>>).bar()
   end
 
   def parse_rescue<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp>$2
-      self(<constant:<todo sym>>).foo()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue => <rescueTemp>$2
+    self(<constant:<todo sym>>).foo()
   end
 
   def parse_resbody_var<<constant:<todo sym>>>()
-    begin
-      self(<constant:<todo sym>>).meth()
-    rescue => ex
-      self(<constant:<todo sym>>).bar()
-    end
+    self(<constant:<todo sym>>).meth()
+  rescue => ex
+    self(<constant:<todo sym>>).bar()
   end
 
   def parse_resbody_var_1<<constant:<todo sym>>>()
+    self(<constant:<todo sym>>).meth()
+  rescue => <rescueTemp>$2
     begin
-      self(<constant:<todo sym>>).meth()
-    rescue => <rescueTemp>$2
-      begin
-        @ex = <rescueTemp>$2
-        self(<constant:<todo sym>>).bar()
-      end
+      @ex = <rescueTemp>$2
+      self(<constant:<todo sym>>).bar()
     end
   end
 
