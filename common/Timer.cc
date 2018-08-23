@@ -6,7 +6,7 @@ long timespec_delta(struct timespec *start, struct timespec *stop) {
     return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
 }
 
-Timer::Timer(shared_ptr<spdlog::logger> log, string msg) : log(move(log)), msg(move(msg)) {
+Timer::Timer(const shared_ptr<spdlog::logger> &log, string msg) : log(log), msg(move(msg)) {
     clock_gettime(CLOCK_REALTIME, &begin);
 }
 

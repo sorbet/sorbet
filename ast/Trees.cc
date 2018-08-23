@@ -187,8 +187,8 @@ Send::Send(core::Loc loc, unique_ptr<Expression> recv, core::NameRef fun, Send::
     _sanityCheck();
 }
 
-Cast::Cast(core::Loc loc, shared_ptr<core::Type> ty, unique_ptr<Expression> arg, core::NameRef cast)
-    : Expression(loc), cast(cast), type(move(ty)), arg(move(arg)) {
+Cast::Cast(core::Loc loc, const shared_ptr<core::Type> &ty, unique_ptr<Expression> arg, core::NameRef cast)
+    : Expression(loc), cast(cast), type(ty), arg(move(arg)) {
     core::categoryCounterInc("trees", "cast");
     _sanityCheck();
 }
@@ -224,7 +224,7 @@ BlockArg::BlockArg(core::Loc loc, unique_ptr<Reference> expr) : Reference(loc), 
     _sanityCheck();
 }
 
-Literal::Literal(core::Loc loc, shared_ptr<core::Type> value) : Expression(loc), value(move(value)) {
+Literal::Literal(core::Loc loc, const shared_ptr<core::Type> &value) : Expression(loc), value(move(value)) {
     core::categoryCounterInc("trees", "literal");
     _sanityCheck();
 }

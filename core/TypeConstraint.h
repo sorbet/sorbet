@@ -34,10 +34,10 @@ public:
     }
 
     // At least one of arguments has to be a typevar
-    bool rememberIsSubtype(Context ctx, std::shared_ptr<Type>, std::shared_ptr<Type>);
+    bool rememberIsSubtype(Context ctx, const std::shared_ptr<Type> &, const std::shared_ptr<Type> &);
 
     // At least one of arguments has to be a typevar
-    bool isAlreadyASubType(Context ctx, std::shared_ptr<Type>, std::shared_ptr<Type>) const;
+    bool isAlreadyASubType(Context ctx, const std::shared_ptr<Type> &, const std::shared_ptr<Type> &) const;
     // returns true if was successfully solved
     bool solve(Context ctx);
     std::shared_ptr<Type> getInstantiation(SymbolRef) const;

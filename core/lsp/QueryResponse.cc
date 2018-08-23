@@ -5,7 +5,7 @@ namespace core {
 
 void QueryResponse::setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
                                      core::DispatchResult::ComponentVec dispatchComponents,
-                                     std::shared_ptr<core::TypeConstraint> constraint, core::Loc termLoc,
+                                     const std::shared_ptr<core::TypeConstraint> &constraint, core::Loc termLoc,
                                      core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType) {
     auto queryResponse = std::make_unique<core::QueryResponse>();
     queryResponse->kind = kind;

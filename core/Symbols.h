@@ -565,8 +565,8 @@ public:
     public:
         virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc,
                                             std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                            std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
-                                            std::shared_ptr<SendAndBlockLink> linkType) const = 0;
+                                            const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                            const std::shared_ptr<SendAndBlockLink> &linkType) const = 0;
     };
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is

@@ -23,7 +23,7 @@ string Return::toString(core::Context ctx) {
     return "return " + this->what.toString(ctx);
 }
 
-BlockReturn::BlockReturn(shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what)
+BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what)
     : link(move(link)), what(what) {
     core::categoryCounterInc("cfg", "blockreturn");
 }
@@ -33,13 +33,13 @@ string BlockReturn::toString(core::Context ctx) {
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc, vector<core::LocalVariable> &args,
-           vector<core::Loc> &argLocs, shared_ptr<core::SendAndBlockLink> link)
+           vector<core::Loc> &argLocs, const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), args(move(args)), argLocs(move(argLocs)), link(move(link)) {
     core::categoryCounterInc("cfg", "send");
     core::histogramInc("cfg.send.args", this->args.size());
 }
 
-Literal::Literal(shared_ptr<core::Type> value) : value(move(value)) {
+Literal::Literal(const shared_ptr<core::Type> &value) : value(move(value)) {
     core::categoryCounterInc("cfg", "literal");
 }
 

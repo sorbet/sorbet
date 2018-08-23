@@ -87,7 +87,7 @@ class WorkerPool {
     void multiplexJob_(Task_ t);
 
 public:
-    WorkerPool(int size, std::shared_ptr<spd::logger> logger);
+    WorkerPool(int size, const std::shared_ptr<spd::logger> &logger);
     ~WorkerPool();
 
     void multiplexJob(Task t);

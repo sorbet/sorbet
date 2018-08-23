@@ -41,7 +41,7 @@ public:
     CFGContext withTarget(core::LocalVariable target);
     CFGContext withLoopScope(BasicBlock *nextScope, BasicBlock *breakScope,
                              core::SymbolRef rubyBlock = core::Symbols::noSymbol());
-    CFGContext withSendAndBlockLink(std::shared_ptr<core::SendAndBlockLink> link);
+    CFGContext withSendAndBlockLink(const std::shared_ptr<core::SendAndBlockLink> &link);
 
     core::LocalVariable newTemporary(core::NameRef name);
 

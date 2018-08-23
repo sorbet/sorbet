@@ -458,7 +458,7 @@ public:
     std::shared_ptr<core::Type> type;
     std::unique_ptr<Expression> arg;
 
-    Cast(core::Loc loc, std::shared_ptr<core::Type> ty, std::unique_ptr<Expression> arg, core::NameRef cast);
+    Cast(core::Loc loc, const std::shared_ptr<core::Type> &ty, std::unique_ptr<Expression> arg, core::NameRef cast);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();
@@ -512,7 +512,7 @@ class Literal final : public Expression {
 public:
     std::shared_ptr<core::Type> value;
 
-    Literal(core::Loc loc, std::shared_ptr<core::Type> value);
+    Literal(core::Loc loc, const std::shared_ptr<core::Type> &value);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

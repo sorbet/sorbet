@@ -134,9 +134,9 @@ CFGContext CFGContext::withLoopScope(BasicBlock *nextScope, BasicBlock *breakSco
     return ret;
 }
 
-CFGContext CFGContext::withSendAndBlockLink(shared_ptr<core::SendAndBlockLink> link) {
+CFGContext CFGContext::withSendAndBlockLink(const shared_ptr<core::SendAndBlockLink> &link) {
     auto ret = CFGContext(*this);
-    ret.link = move(link);
+    ret.link = link;
     return ret;
 }
 

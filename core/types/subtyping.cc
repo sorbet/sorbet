@@ -1193,7 +1193,7 @@ shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolR
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(shared_ptr<Type> wrapped) : wrapped(move(wrapped)) {
+MetaType::MetaType(const shared_ptr<Type> &wrapped) : wrapped(move(wrapped)) {
     core::categoryCounterInc("types.allocated", "metattype");
 }
 

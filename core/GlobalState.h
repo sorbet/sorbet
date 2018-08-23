@@ -43,7 +43,7 @@ class GlobalState final {
     friend class UnfreezeFileTable;
 
 public:
-    GlobalState(std::shared_ptr<ErrorQueue> errorQueue);
+    GlobalState(const std::shared_ptr<ErrorQueue> &errorQueue);
 
     void initEmpty();
     void installIntrinsics();
@@ -77,11 +77,11 @@ public:
 
     FileRef enterFile(absl::string_view path, absl::string_view source);
     FileRef enterFileAt(absl::string_view path, absl::string_view source, FileRef id);
-    FileRef enterFile(std::shared_ptr<File> file);
-    FileRef enterNewFileAt(std::shared_ptr<File> file, FileRef id);
+    FileRef enterFile(const std::shared_ptr<File> &file);
+    FileRef enterNewFileAt(const std::shared_ptr<File> &file, FileRef id);
     FileRef reserveFileRef(std::string path);
     static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
-                                                    std::shared_ptr<File> withWhat);
+                                                    const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
     FileRef findFileByPath(absl::string_view path);
 

@@ -445,15 +445,15 @@ std::shared_ptr<Type> Types::replaceSelfType(Context ctx, const std::shared_ptr<
     return what;
 }
 
-std::shared_ptr<Type> SelfType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> SelfType::_replaceSelfType(Context ctx, const shared_ptr<Type> &receiver) {
     return receiver;
 }
 
-std::shared_ptr<Type> Type::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> Type::_replaceSelfType(Context ctx, const shared_ptr<Type> &receiver) {
     return nullptr;
 }
 
-std::shared_ptr<Type> OrType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> OrType::_replaceSelfType(Context ctx, const shared_ptr<Type> &receiver) {
     auto left = this->left->_replaceSelfType(ctx, receiver);
     auto right = this->right->_replaceSelfType(ctx, receiver);
     if (left || right) {
@@ -468,7 +468,7 @@ std::shared_ptr<Type> OrType::_replaceSelfType(Context ctx, std::shared_ptr<Type
     return nullptr;
 }
 
-std::shared_ptr<Type> AndType::_replaceSelfType(Context ctx, std::shared_ptr<Type> receiver) {
+std::shared_ptr<Type> AndType::_replaceSelfType(Context ctx, const shared_ptr<Type> &receiver) {
     auto left = this->left->_replaceSelfType(ctx, receiver);
     auto right = this->right->_replaceSelfType(ctx, receiver);
     if (left || right) {

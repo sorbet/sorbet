@@ -54,7 +54,7 @@ public:
 class SolveConstraint final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    SolveConstraint(std::shared_ptr<core::SendAndBlockLink> link) : link(link){};
+    SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link){};
     virtual std::string toString(core::Context ctx);
 };
 
@@ -68,7 +68,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc, std::vector<core::LocalVariable> &args,
-         std::vector<core::Loc> &argLocs, std::shared_ptr<core::SendAndBlockLink> link = nullptr);
+         std::vector<core::Loc> &argLocs, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);
 };
@@ -86,7 +86,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     core::LocalVariable what;
 
-    BlockReturn(std::shared_ptr<core::SendAndBlockLink> link, core::LocalVariable what);
+    BlockReturn(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -94,7 +94,7 @@ class Literal final : public Instruction {
 public:
     std::shared_ptr<core::Type> value;
 
-    Literal(std::shared_ptr<core::Type> value);
+    Literal(const std::shared_ptr<core::Type> &value);
     virtual std::string toString(core::Context ctx);
 };
 
@@ -143,7 +143,7 @@ public:
     std::shared_ptr<core::SendAndBlockLink> link;
     core::SymbolRef block;
 
-    LoadYieldParams(std::shared_ptr<core::SendAndBlockLink> link, core::SymbolRef blk) : link(link), block(blk) {
+    LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link, core::SymbolRef blk) : link(link), block(blk) {
         core::categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
@@ -155,7 +155,7 @@ public:
     std::shared_ptr<core::Type> type;
     core::NameRef cast;
 
-    Cast(core::LocalVariable value, std::shared_ptr<core::Type> type, core::NameRef cast)
+    Cast(core::LocalVariable value, const std::shared_ptr<core::Type> &type, core::NameRef cast)
         : value(value), type(type), cast(cast) {}
 
     virtual std::string toString(core::Context ctx);

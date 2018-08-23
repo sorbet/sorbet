@@ -101,8 +101,8 @@ SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bo
 atomic<int> globalStateIdCounter(1);
 const int Symbols::MAX_PROC_ARITY;
 
-GlobalState::GlobalState(shared_ptr<ErrorQueue> errorQueue)
-    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(move(errorQueue)) {
+GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
+    : globalStateId(globalStateIdCounter.fetch_add(1)), errorQueue(errorQueue) {
     // Empirically determined to be the smallest powers of two larger than the
     // values required by the payload
     unsigned int max_name_count = 8192;
@@ -757,7 +757,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
     return NameRef(*this, idx);
 }
 
-FileRef GlobalState::enterFile(shared_ptr<File> file) {
+FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
     ENFORCE(!fileTableFrozen);
 
     DEBUG_ONLY(for (auto &f
@@ -792,7 +792,7 @@ FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view sourc
     return ret;
 }
 
-FileRef GlobalState::enterNewFileAt(shared_ptr<File> file, FileRef id) {
+FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
     ENFORCE(!fileTableFrozen);
     ENFORCE(id.id() < this->files.size());
     ENFORCE(this->files[id.id()]->sourceType == File::Type::TombStone);
@@ -1106,10 +1106,10 @@ void GlobalState::markAsPayload() {
 }
 
 std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
-                                                      std::shared_ptr<File> withWhat) {
+                                                      const std::shared_ptr<File> &withWhat) {
     ENFORCE(whatFile.id() < inWhat->filesUsed());
     ENFORCE(whatFile.data(*inWhat, true).path() == withWhat->path());
-    inWhat->files[whatFile.id()] = move(withWhat);
+    inWhat->files[whatFile.id()] = withWhat;
     return inWhat;
 }
 

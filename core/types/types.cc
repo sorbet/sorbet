@@ -232,7 +232,7 @@ ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-ProxyType::ProxyType(shared_ptr<Type> underlying) : underlying(move(underlying)) {}
+ProxyType::ProxyType(const shared_ptr<Type> &underlying) : underlying(move(underlying)) {}
 
 void ProxyType::_sanityCheck(Context ctx) {
     ENFORCE(cast_type<ClassType>(this->underlying.get()) != nullptr ||
@@ -273,7 +273,7 @@ LiteralType::LiteralType(bool val) : ProxyType(val ? Types::trueClass() : Types:
     core::categoryCounterInc("types.allocated", "literaltype");
 }
 
-TupleType::TupleType(shared_ptr<Type> underlying, vector<shared_ptr<Type>> elements)
+TupleType::TupleType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> elements)
     : ProxyType(move(underlying)), elems(move(elements)) {
     core::categoryCounterInc("types.allocated", "tupletype");
 }
@@ -283,11 +283,11 @@ shared_ptr<Type> TupleType::build(Context ctx, vector<shared_ptr<Type>> elements
     return make_shared<TupleType>(move(underlying), move(elements));
 }
 
-AndType::AndType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {
+AndType::AndType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
     core::categoryCounterInc("types.allocated", "andtype");
 }
 
-bool LiteralType::equals(shared_ptr<LiteralType> rhs) const {
+bool LiteralType::equals(const shared_ptr<LiteralType> &rhs) const {
     if (this->value != rhs->value) {
         return false;
     }
@@ -299,7 +299,7 @@ bool LiteralType::equals(shared_ptr<LiteralType> rhs) const {
     return lklass->symbol == rklass->symbol;
 }
 
-OrType::OrType(shared_ptr<Type> left, shared_ptr<Type> right) : left(move(left)), right(move(right)) {
+OrType::OrType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
     core::categoryCounterInc("types.allocated", "ortype");
 }
 
@@ -597,15 +597,15 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, i
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                          vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                         shared_ptr<Type> selfType, shared_ptr<Type> fullType,
-                                         shared_ptr<SendAndBlockLink> block) {
+                                         const shared_ptr<Type> &selfType, const shared_ptr<Type> &fullType,
+                                         const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                            vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                           shared_ptr<Type> selfType, shared_ptr<Type> fullType,
-                                           shared_ptr<SendAndBlockLink> block) {
+                                           const shared_ptr<Type> &selfType, const shared_ptr<Type> &fullType,
+                                           const shared_ptr<SendAndBlockLink> &block) {
     return Types::untyped()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType, block);
 }
 
@@ -698,8 +698,8 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 
 DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                       std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                      std::shared_ptr<Type> selfRef, std::shared_ptr<Type> fullType,
-                                      std::shared_ptr<SendAndBlockLink> link) {
+                                      const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
+                                      const std::shared_ptr<SendAndBlockLink> &link) {
     Error::raise("should never happen");
 }
 

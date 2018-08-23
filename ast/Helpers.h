@@ -29,7 +29,7 @@ public:
         return send;
     }
 
-    static std::unique_ptr<Literal> Literal(core::Loc loc, std::shared_ptr<core::Type> tpe) {
+    static std::unique_ptr<Literal> Literal(core::Loc loc, const std::shared_ptr<core::Type> &tpe) {
         auto lit = std::make_unique<ast::Literal>(loc, tpe);
         return lit;
     }

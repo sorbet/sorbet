@@ -87,7 +87,7 @@ bool TypeConstraint::solve(Context ctx) {
     return true;
 }
 
-bool TypeConstraint::rememberIsSubtype(Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) {
+bool TypeConstraint::rememberIsSubtype(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
     ENFORCE(!wasSolved);
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         auto &entry = findUpperBound(t1p->sym);
@@ -113,7 +113,7 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, shared_ptr<Type> t1, shared_
     return true;
 }
 
-bool TypeConstraint::isAlreadyASubType(Context ctx, shared_ptr<Type> t1, shared_ptr<Type> t2) const {
+bool TypeConstraint::isAlreadyASubType(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) const {
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         if (!hasLowerBound(t1p->sym)) {
             return Types::isSubType(ctx, Types::top(), t2);
