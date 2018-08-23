@@ -15,6 +15,8 @@ class FileFlatMapper {
     int &argc;
     char **&argv;
     std::vector<char *> args;
+    // Pointers into those args will be passed in argv
+    std::vector<std::string> stringArgs;
 
 public:
     FileFlatMapper(int &argc, char **&argv, std::shared_ptr<spdlog::logger> logger);
