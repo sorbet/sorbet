@@ -816,6 +816,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         for (auto &err : comp.errors) {
                             ctx.state._error(move(err));
                         }
+                        lspQueryMatch = lspQueryMatch ||
+                                        (ctx.state.lspQuerySymbol.exists() && ctx.state.lspQuerySymbol == comp.method);
                     }
 
                     if (lspQueryMatch) {
@@ -840,6 +842,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::Alias *a) {
                 core::SymbolRef symbol = a->what.data(ctx).dealias(ctx);
+                lspQueryMatch =
+                    lspQueryMatch || (ctx.state.lspQuerySymbol.exists() && symbol == ctx.state.lspQuerySymbol);
                 const core::Symbol &data = symbol.data(ctx);
                 if (data.isClass()) {
                     if (!data.resultType) { // common case

@@ -7,9 +7,9 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
-#include "core/lsp/DefLocSaver.h"
 #include "core/lsp/QueryResponse.h"
 #include "lsp.h"
+#include "main/lsp/DefLocSaver.h"
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
@@ -200,15 +200,13 @@ void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
         return;
     }
     for (auto &t : indexedCopies) {
-        sorbet::lsp::DefLocSaver defLocSaver;
+        DefLocSaver defLocSaver;
         core::Context ctx(*finalGs, core::Symbols::root());
         t = ast::TreeMap::apply(ctx, defLocSaver, move(t));
     }
 }
 
-void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
-
-                              &changedFiles) {
+void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFiles) {
     logger->debug("Taking slow path");
 
     invalidateAllErrors();
@@ -229,12 +227,12 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>>
     }
 
     finalGs = initialGS->deepCopy(true);
-    tryApplyDefLocSaver(finalGs, indexedCopies);
-    pipeline::typecheck(finalGs, pipeline::resolve(*finalGs, move(indexedCopies), opts, logger), opts, workers, logger);
+    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger);
+    tryApplyDefLocSaver(finalGs, resolved);
+    pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
 }
-void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
 
-                              &changedFiles) {
+void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
@@ -270,6 +268,15 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
     }
 
     if (good) {
+        if (allFiles) {
+            subset.clear();
+            for (int i = 1; i < finalGs->filesUsed(); i++) {
+                core::FileRef fref(i);
+                if (fref.data(*finalGs).sourceType == core::File::Type::Normal) {
+                    subset.emplace_back(core::FileRef(i));
+                }
+            }
+        }
         invalidateErrorsFor(subset);
         logger->debug("Taking happy path");
 
@@ -281,9 +288,9 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>>
             updatedIndexed.emplace_back(indexed[id]->deepCopy());
         }
 
-        tryApplyDefLocSaver(finalGs, updatedIndexed);
-        pipeline::typecheck(finalGs, incrementalResolve(*finalGs, move(updatedIndexed), opts, logger), opts, workers,
-                            logger);
+        auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
+        tryApplyDefLocSaver(finalGs, resolved);
+        pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
     } else {
         runSlowPath(changedFiles);
     }

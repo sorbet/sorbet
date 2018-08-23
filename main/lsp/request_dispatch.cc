@@ -118,6 +118,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                                "       \"workspaceSymbolProvider\": true, "
                                "       \"definitionProvider\": true, "
                                "       \"hoverProvider\":true,"
+                               "       \"referencesProvider\":true,"
                                "       \"signatureHelpProvider\": { "
                                "           \"triggerCharacters\": [\"(\", \",\"]"
                                "       },"
@@ -146,6 +147,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             handleTextDocumentCompletion(result, d);
         } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
             handleTextSignatureHelp(result, d);
+        } else if (method == LSPMethod::TextDocumentRefernces()) {
+            handleTextDocumentReferences(result, d);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
             errorCode = (int)LSPErrorCodes::MethodNotFound;

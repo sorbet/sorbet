@@ -4,7 +4,10 @@ cc_library(
         "*.cc",
         "requests/*.cc",
     ]),
-    hdrs = ["lsp.h"],
+    hdrs = [
+        "DefLocSaver.h",
+        "lsp.h",
+    ],
     copts = ["--std=c++14"],
     visibility = ["//visibility:public"],
     deps = [

@@ -126,6 +126,7 @@ public:
     // When set, contains a location at which the typechecker should generate information
     // See ErrorQueue#queryResponse
     Loc lspInfoQueryLoc;
+    SymbolRef lspQuerySymbol;
 
     void trace(const std::string &msg) const;
 

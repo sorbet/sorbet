@@ -98,6 +98,9 @@ struct LSPMethod {
     static const inline LSPMethod TextDocumentCompletion() {
         return LSPMethod{"textDocument/completion", false, LSPMethod::Kind::ClientInitiated};
     };
+    static const inline LSPMethod TextDocumentRefernces() {
+        return LSPMethod{"textDocument/references", false, LSPMethod::Kind::ClientInitiated};
+    };
     static const inline LSPMethod TextDocumentSignatureHelp() {
         return LSPMethod{"textDocument/signatureHelp", false, LSPMethod::Kind::ClientInitiated};
     };
@@ -207,7 +210,7 @@ class LSPLoop {
     /** Conservatively rerun entire pipeline without caching any trees */
     void runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    void tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles);
+    void tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
@@ -235,9 +238,11 @@ class LSPLoop {
     std::unique_ptr<rapidjson::Value> symbolRef2DocumentSymbol(core::SymbolRef, core::FileRef filter);
     int symbolRef2SymbolKind(core::SymbolRef);
     bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
+    bool setupLSPQueryBySymbol(core::SymbolRef symbol, const LSPMethod &forMethod);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d);
     void handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d);
+    void handleTextDocumentReferences(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
     UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(std::shared_ptr<core::Type> receiver,

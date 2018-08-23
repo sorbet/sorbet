@@ -1,4 +1,5 @@
 #include "core/lsp/QueryResponse.h"
+template class std::unique_ptr<sorbet::core::QueryResponse>;
 
 namespace sorbet {
 namespace core {

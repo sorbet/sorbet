@@ -18,6 +18,26 @@ LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
 }
 
+namespace {
+class LSPQuerrySetup {
+    core::GlobalState &gs;
+
+public:
+    LSPQuerrySetup(core::GlobalState &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
+        ENFORCE(!gs.lspInfoQueryLoc.exists());
+        ENFORCE(!gs.lspQuerySymbol.exists());
+        ENFORCE(loc.exists() || symbol.exists());
+        gs.lspInfoQueryLoc = loc;
+        gs.lspQuerySymbol = symbol;
+    }
+    ~LSPQuerrySetup() {
+        gs.lspInfoQueryLoc = core::Loc::none();
+        gs.lspQuerySymbol = core::Symbols::noSymbol();
+    }
+};
+
+} // namespace
+
 bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
     auto uri =
         string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
@@ -35,15 +55,31 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
             1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
         return false;
     }
+    auto loc = lspPos2Loc(fref, d, *finalGs);
+    if (!loc) {
+        sendError(d, (int)LSPErrorCodes::InvalidParams,
+                  fmt::format("Did not find location at uri {} in {}", uri, forMethod.name));
+        return false;
+    }
 
-    initialGS->lspInfoQueryLoc = *lspPos2Loc(fref, d, *finalGs);
-    finalGs->lspInfoQueryLoc = *lspPos2Loc(fref, d, *finalGs);
+    {
+        LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
+        LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
+        vector<shared_ptr<core::File>> files;
+        files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+        tryFastPath(files);
+    }
+
+    return true;
+}
+bool LSPLoop::setupLSPQueryBySymbol(core::SymbolRef sym, const LSPMethod &forMethod) {
+    ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
-    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
-    tryFastPath(files);
-
-    initialGS->lspInfoQueryLoc = core::Loc::none();
-    finalGs->lspInfoQueryLoc = core::Loc::none();
+    {
+        LSPQuerrySetup setup(*finalGs, core::Loc::none(), sym);
+        tryFastPath(files, true);
+    }
+    // this function currently always returns true, but we're keeping API symmetric to setupLSPQueryByLoc.
     return true;
 }
 
@@ -197,6 +233,7 @@ const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                     TextDocumentDefinition(),
                                                     TextDocumentHover(),
                                                     TextDocumentCompletion(),
+                                                    TextDocumentRefernces(),
                                                     TextDocumentSignatureHelp(),
                                                     ReadFile(),
                                                     WorkspaceSymbols(),
