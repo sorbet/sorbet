@@ -152,6 +152,12 @@ private:
         }
         ast::Expression *resolvedScope = c->scope.get();
         if (auto *id = ast::cast_tree<ast::ConstantLit>(resolvedScope)) {
+            if (id->typeAlias) {
+                if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::ConstantInTypeAlias)) {
+                    e.setHeader("Resolving constants through type aliases is not supported");
+                }
+                return core::Symbols::untyped();
+            }
             if (!id->symbol.exists()) {
                 // TODO: try to resolve if not resolved.
                 return core::Symbols::noSymbol();

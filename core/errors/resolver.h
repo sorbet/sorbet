@@ -37,6 +37,7 @@ constexpr ErrorClass BadStdlibGeneric{5026, StrictLevel::Stripe};
 constexpr ErrorClass InvalidTypeDeclarationTyped{5027, StrictLevel::Typed};
 constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
 constexpr ErrorClass RecursiveClassAlias{5030, StrictLevel::Stripe};
+constexpr ErrorClass ConstantInTypeAlias{5031, StrictLevel::Stripe};
 } // namespace Resolver
 } // namespace errors
 } // namespace core
