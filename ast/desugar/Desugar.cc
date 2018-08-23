@@ -1,8 +1,8 @@
 #include <algorithm>
 
-#include "Desugar.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
+#include "ast/desugar/Desugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
 #include "core/Names/desugar.h"

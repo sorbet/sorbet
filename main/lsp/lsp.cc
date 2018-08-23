@@ -1,4 +1,4 @@
-#include "lsp.h"
+#include "main/lsp/lsp.h"
 #include "absl/algorithm/container.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"

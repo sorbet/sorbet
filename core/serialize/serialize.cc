@@ -1,5 +1,4 @@
 #include "core/serialize/serialize.h"
-#include "../Symbols.h"
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"

@@ -1,4 +1,4 @@
-#include "substitute.h"
+#include "ast/substitute/substitute.h"
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 

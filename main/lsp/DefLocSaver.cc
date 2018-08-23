@@ -1,5 +1,4 @@
 #include "DefLocSaver.h"
-#include "../../core/core.h"
 
 using namespace std;
 namespace sorbet {

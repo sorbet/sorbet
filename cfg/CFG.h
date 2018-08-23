@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "Instructions.h"
+#include "cfg/Instructions.h"
 
 namespace sorbet {
 namespace cfg {

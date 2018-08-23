@@ -1,7 +1,7 @@
 #ifndef SORBET_ERRO_H
 #define SORBET_ERRO_H
 
-#include "os/os.h"
+#include "common/os/os.h"
 #include "spdlog/spdlog.h"
 #include <cstdio>
 #include <memory>
