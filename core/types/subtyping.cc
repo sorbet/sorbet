@@ -137,6 +137,9 @@ shared_ptr<Type> dropLubComponents(Context ctx, const shared_ptr<Type> &t1, cons
 }
 
 shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+    ENFORCE(!isa_type<MetaType>(t1.get()));
+    ENFORCE(!isa_type<MetaType>(t2.get()));
+
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -536,6 +539,9 @@ shared_ptr<Type> Types::all(Context ctx, const shared_ptr<Type> &t1, const share
 }
 
 shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+    ENFORCE(!isa_type<MetaType>(t1.get()));
+    ENFORCE(!isa_type<MetaType>(t2.get()));
+
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;

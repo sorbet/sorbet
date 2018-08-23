@@ -118,9 +118,10 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
             // Adding this information makes environments much larger than they
             // would be otherwise; Many of the performance optimizations in this
             // file effectively exist to support this feature.
-            //
-            if (isNeeded && !state.typeAndOrigins.type->isUntyped()) {
-                copy.mutate().yesTypeTests.emplace_back(local, state.typeAndOrigins.type);
+
+            auto type = state.typeAndOrigins.type;
+            if (isNeeded && !type->isUntyped() && !core::isa_type<core::MetaType>(type.get())) {
+                copy.mutate().yesTypeTests.emplace_back(local, type);
             }
         } else {
             auto &second = fnd->second;
