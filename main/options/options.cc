@@ -49,7 +49,7 @@ StopAfterOptions stop_after_options[] = {
     {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
 };
 
-core::StrictLevel text2StrictLevel(absl::string_view key, std::shared_ptr<spdlog::logger> logger) {
+core::StrictLevel text2StrictLevel(absl::string_view key, shared_ptr<spdlog::logger> logger) {
     if (key == "ruby" || key == "stripe") {
         return core::StrictLevel::Stripe;
     } else if (key == "typed" || key == "true") {
@@ -66,9 +66,8 @@ core::StrictLevel text2StrictLevel(absl::string_view key, std::shared_ptr<spdlog
     }
 }
 
-UnorderedMap<std::string, core::StrictLevel> extractStricnessOverrides(string fileName,
-                                                                       std::shared_ptr<spdlog::logger> logger) {
-    UnorderedMap<std::string, core::StrictLevel> result;
+UnorderedMap<string, core::StrictLevel> extractStricnessOverrides(string fileName, shared_ptr<spdlog::logger> logger) {
+    UnorderedMap<string, core::StrictLevel> result;
     YAML::Node config = YAML::LoadFile(fileName);
     switch (config.Type()) {
         case YAML::NodeType::Map:
@@ -199,7 +198,7 @@ cxxopts::Options buildOptions() {
     return options;
 }
 
-bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, std::shared_ptr<spdlog::logger> logger) {
+bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog::logger> logger) {
     if (raw.count("print") == 0) {
         return true;
     }
@@ -234,7 +233,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, std::shared_ptr<s
     return true;
 }
 
-Phase extractStopAfter(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger> logger) {
+Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> logger) {
     string opt = raw["stop-after"].as<string>();
     for (auto &known : stop_after_options) {
         if (known.option == opt) {
@@ -252,8 +251,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, std::shared_ptr<spdlog::logger
     return Phase::INIT;
 }
 
-void readOptions(Options &opts, int argc, char *argv[],
-                 std::shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode) {
+void readOptions(Options &opts, int argc, char *argv[], shared_ptr<spdlog::logger> logger) throw(EarlyReturnWithCode) {
     FileFlatMapper flatMapper(argc, argv, logger);
 
     cxxopts::Options options = buildOptions();

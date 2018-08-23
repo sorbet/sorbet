@@ -22,7 +22,7 @@ namespace infer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("infer_test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 class InferFixture : public ::testing::Test {
 public:

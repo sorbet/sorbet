@@ -1321,8 +1321,8 @@ vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vect
     return trees;
 }
 
-std::vector<std::unique_ptr<ast::Expression>>
-Resolver::resolveSigs(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees) {
+vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext ctx,
+                                                          vector<unique_ptr<ast::Expression>> trees) {
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
     ctx.trace("Resolving sigs and vars");
@@ -1341,7 +1341,7 @@ Resolver::resolveSigs(core::MutableContext ctx, std::vector<std::unique_ptr<ast:
     return trees;
 }
 
-void Resolver::sanityCheck(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> &trees) {
+void Resolver::sanityCheck(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> &trees) {
     if (debug_mode) {
         ctx.trace("Sanity checking");
         ResolveSanityCheckWalk sanity;

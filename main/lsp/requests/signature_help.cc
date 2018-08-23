@@ -63,7 +63,7 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentSignatureHelp(), false)) {
         auto queryResponses = errorQueue->drainQueryResponses();
         if (!queryResponses.empty()) {
-            auto resp = std::move(queryResponses[0]);
+            auto resp = move(queryResponses[0]);
             auto receiverType = resp->receiver.type;
             // only triggers on sends. Some SignatureHelps are triggered when the variable is being typed.
             if (resp->kind == core::QueryResponse::Kind::SEND) {

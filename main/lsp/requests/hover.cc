@@ -17,7 +17,7 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
             return;
         }
 
-        auto resp = std::move(queryResponses[0]);
+        auto resp = move(queryResponses[0]);
         if (resp->kind == core::QueryResponse::Kind::SEND) {
             if (resp->dispatchComponents.empty()) {
                 sendError(d, (int)LSPErrorCodes::InvalidParams,

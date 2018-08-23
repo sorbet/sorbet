@@ -43,7 +43,7 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
         fref = initialGS->enterFile(move(file));
     }
 
-    std::vector<std::string> emptyInputNames;
+    vector<string> emptyInputNames;
     auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
     int id = t->loc.file().id();
     if (id >= indexed.size()) {
@@ -91,7 +91,7 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
 }
 
 vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::File>> &files) {
-    std::vector<unsigned int> res(files.size());
+    vector<unsigned int> res(files.size());
     shared_ptr<ConcurrentBoundedQueue<int>> fileq = make_shared<ConcurrentBoundedQueue<int>>(files.size());
     for (int i = 0; i < files.size(); i++) {
         auto copy = i;
@@ -102,10 +102,10 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
     res.resize(files.size());
 
-    shared_ptr<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>> resultq =
-        make_shared<BlockingBoundedQueue<vector<std::pair<int, unsigned int>>>>(files.size());
+    shared_ptr<BlockingBoundedQueue<vector<pair<int, unsigned int>>>> resultq =
+        make_shared<BlockingBoundedQueue<vector<pair<int, unsigned int>>>>(files.size());
     workers.multiplexJob([fileq, resultq, files, logger = this->logger]() {
-        vector<std::pair<int, unsigned int>> threadResult;
+        vector<pair<int, unsigned int>> threadResult;
         int processedByThread = 0;
         int job;
         options::Options emptyOpts;
@@ -120,8 +120,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         threadResult.emplace_back(make_pair(job, 0));
                         continue;
                     }
-                    shared_ptr<core::GlobalState> lgs = make_shared<core::GlobalState>(
-                        (std::make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
+                    shared_ptr<core::GlobalState> lgs =
+                        make_shared<core::GlobalState>((make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
                     lgs->silenceErrors = true;
                     core::UnfreezeFileTable fileTableAccess(*lgs);
@@ -143,7 +143,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
     });
 
     {
-        std::vector<std::pair<int, unsigned int>> threadResult;
+        vector<pair<int, unsigned int>> threadResult;
         for (auto result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS);
              !result.done(); result = resultq->wait_pop_timed(threadResult, pipeline::PROGRESS_REFRESH_TIME_MILLIS)) {
             if (result.gotItem()) {
@@ -165,8 +165,8 @@ void LSPLoop::reIndexFromFileSystem() {
             fileNamesDedup.insert((string)f.data(*initialGS, true).path());
         }
     }
-    std::vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
-    std::vector<core::FileRef> emptyInputFiles;
+    vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
+    vector<core::FileRef> emptyInputFiles;
     for (auto &t : pipeline::index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
         int id = t->loc.file().id();
         if (id >= indexed.size()) {
@@ -206,12 +206,12 @@ void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
     }
 }
 
-void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFiles) {
+void LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
     logger->debug("Taking slow path");
 
     invalidateAllErrors();
 
-    std::vector<core::FileRef> changedFileRefs;
+    vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
     for (auto &t : changedFiles) {
         if (!isTestFile(t)) {
@@ -232,7 +232,7 @@ void LSPLoop::runSlowPath(const std::vector<shared_ptr<core::File>> &changedFile
     pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
 }
 
-void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
@@ -280,7 +280,7 @@ void LSPLoop::tryFastPath(std::vector<shared_ptr<core::File>> &changedFiles, boo
         invalidateErrorsFor(subset);
         logger->debug("Taking happy path");
 
-        std::vector<std::unique_ptr<ast::Expression>> updatedIndexed;
+        vector<unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
             int id = t->loc.file().id();

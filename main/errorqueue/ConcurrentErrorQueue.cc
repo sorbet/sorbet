@@ -15,8 +15,7 @@ void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<cor
     this->queue.push(move(msg), 1);
 }
 
-void ConcurrentErrorQueue::collectForFile(core::FileRef whatFile,
-                                          std::vector<std::unique_ptr<core::ErrorQueueMessage>> &out) {
+void ConcurrentErrorQueue::collectForFile(core::FileRef whatFile, vector<unique_ptr<core::ErrorQueueMessage>> &out) {
     auto it = collected.find(whatFile);
     if (it == collected.end()) {
         return;
@@ -27,10 +26,10 @@ void ConcurrentErrorQueue::collectForFile(core::FileRef whatFile,
     collected[whatFile].clear();
 };
 
-std::vector<std::unique_ptr<core::ErrorQueueMessage>> ConcurrentErrorQueue::drainFlushed() {
+vector<unique_ptr<core::ErrorQueueMessage>> ConcurrentErrorQueue::drainFlushed() {
     checkOwned();
 
-    std::vector<std::unique_ptr<core::ErrorQueueMessage>> ret;
+    vector<unique_ptr<core::ErrorQueueMessage>> ret;
 
     core::ErrorQueueMessage msg;
     for (auto result = queue.try_pop(msg); result.gotItem(); result = queue.try_pop(msg)) {

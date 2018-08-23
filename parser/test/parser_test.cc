@@ -16,7 +16,7 @@ using sorbet::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 TEST(ParserTest, SimpleParse) { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);

@@ -95,7 +95,7 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
 }
 
 unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                     unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger) {
+                                     unique_ptr<KeyValueStore> &kvstore, shared_ptr<spdlog::logger> logger) {
     auto &print = opts.print;
     unique_ptr<ast::Expression> dslsInlined;
 
@@ -474,10 +474,9 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
     return what;
 }
 
-std::vector<std::unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
-                                                        vector<unique_ptr<ast::Expression>> what,
-                                                        const options::Options &opts, WorkerPool &workers,
-                                                        shared_ptr<spdlog::logger> logger) {
+vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
+                                              vector<unique_ptr<ast::Expression>> what, const options::Options &opts,
+                                              WorkerPool &workers, shared_ptr<spdlog::logger> logger) {
     vector<unique_ptr<ast::Expression>> typecheck_result;
 
     {

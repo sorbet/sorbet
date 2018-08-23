@@ -67,7 +67,7 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
     string ret;
 
     auto shortName = method.data(gs).name.data(gs).shortName(gs);
-    std::vector<string> typeAndArgNames;
+    vector<string> typeAndArgNames;
 
     int i = 1;
     if (method.data(gs).isMethod()) {
@@ -81,7 +81,7 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
-    std::stringstream ss;
+    stringstream ss;
     for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
         if (i != 0) {
             ss << ", ";
@@ -106,7 +106,7 @@ unique_ptr<string> findDocumentation(absl::string_view sourceCode, int beginInde
         return nullptr;
     }
 
-    std::string documentation = "";
+    string documentation = "";
     // keep looking for previous newline locations, searching for lines with # in them.
     while (prevLine.find('#') != prevLine.npos) {
         documentation = (string)prevLine.substr(prevLine.find('#') + 1, prevLine.size()) + "\n" + documentation;
@@ -171,7 +171,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
         auto queryResponses = errorQueue->drainQueryResponses();
         if (!queryResponses.empty()) {
-            auto resp = std::move(queryResponses[0]);
+            auto resp = move(queryResponses[0]);
 
             auto receiverType = resp->receiver.type;
             if (resp->kind == core::QueryResponse::Kind::SEND) {

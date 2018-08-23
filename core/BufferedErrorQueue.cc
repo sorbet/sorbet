@@ -9,7 +9,7 @@ BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer)
 
 BufferedErrorQueue::~BufferedErrorQueue() = default;
 
-void BufferedErrorQueue::pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) {
+void BufferedErrorQueue::pushError(const GlobalState &gs, unique_ptr<BasicError> error) {
     this->errorCount.fetch_add(1);
     auto msg = make_unique<ErrorQueueMessage>();
     msg->text = error->toString(gs);
@@ -18,21 +18,21 @@ void BufferedErrorQueue::pushError(const GlobalState &gs, std::unique_ptr<BasicE
     errors.push_back(move(msg));
 }
 
-void BufferedErrorQueue::pushQueryResponse(std::unique_ptr<QueryResponse> response) {
+void BufferedErrorQueue::pushQueryResponse(unique_ptr<QueryResponse> response) {
     auto msg = make_unique<ErrorQueueMessage>();
     msg->queryResponse = move(response);
     msg->kind = ErrorQueueMessage::Kind::QueryResponse;
     errors.push_back(move(msg));
 }
 
-std::vector<std::unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainFlushed() {
-    std::vector<std::unique_ptr<ErrorQueueMessage>> out;
+vector<unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainFlushed() {
+    vector<unique_ptr<ErrorQueueMessage>> out;
     swap(out, flushedErrors);
     return out;
 }
 
 vector<unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainAll() {
-    std::vector<std::unique_ptr<ErrorQueueMessage>> out;
+    vector<unique_ptr<ErrorQueueMessage>> out;
     swap(out, flushedErrors);
     for (auto &msg : errors) {
         out.emplace_back(move(msg));

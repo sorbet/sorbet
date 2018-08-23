@@ -185,7 +185,7 @@ string getCounterStatistics(vector<string> names) {
             continue;
         }
         CounterImpl::CounterType sum = 0;
-        std::vector<pair<CounterImpl::CounterType, string>> sorted;
+        vector<pair<CounterImpl::CounterType, string>> sorted;
         for (auto &e : cat.second) {
             sum += e.second;
             sorted.emplace_back(e.second, e.first);

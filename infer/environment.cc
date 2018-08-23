@@ -757,7 +757,7 @@ shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> t
     return result;
 }
 
-shared_ptr<core::Type> flatmapHack(core::Context ctx, const std::shared_ptr<core::SendAndBlockLink> &link,
+shared_ptr<core::Type> flatmapHack(core::Context ctx, const shared_ptr<core::SendAndBlockLink> &link,
                                    shared_ptr<core::Type> returnType) {
     if (link->fun != core::Names::flatMap()) {
         return returnType;
@@ -822,7 +822,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                     if (lspQueryMatch) {
                         core::QueryResponse::setQueryResponse(
-                            ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
+                            ctx, core::QueryResponse::Kind::SEND, move(dispatched.components),
                             send->link ? send->link->constr : nullptr, bind.loc, send->fun, recvType, tp);
                     }
                 }
@@ -876,9 +876,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
                     components.push_back(core::DispatchComponent{tp.type, symbol, {}});
-                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT,
-                                                          std::move(components), nullptr, bind.loc,
-                                                          symbol.data(ctx).name, dealiasedReceiver, tp);
+                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, move(components),
+                                                          nullptr, bind.loc, symbol.data(ctx).name, dealiasedReceiver,
+                                                          tp);
                 }
                 pinnedTypes[bind.bind] = tp;
             },

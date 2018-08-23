@@ -8,7 +8,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 
-std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
+string LSPLoop::remoteName2Local(const absl::string_view uri) {
     ENFORCE(absl::StartsWith(uri, rootUri));
     const char *start = uri.data() + rootUri.length();
     if (*start == '/') {
@@ -17,7 +17,7 @@ std::string LSPLoop::remoteName2Local(const absl::string_view uri) {
     return string(start, uri.end());
 }
 
-std::string LSPLoop::localName2Remote(const absl::string_view uri) {
+string LSPLoop::localName2Remote(const absl::string_view uri) {
     ENFORCE(!absl::StartsWith(uri, rootUri));
     return absl::StrCat(rootUri, "/", uri);
 }
@@ -30,7 +30,7 @@ core::FileRef LSPLoop::uri2FileRef(const absl::string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
-std::string LSPLoop::fileRef2Uri(core::FileRef file) {
+string LSPLoop::fileRef2Uri(core::FileRef file) {
     if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
         return (string)file.data(*finalGs).path();
     } else {
@@ -100,8 +100,8 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
             // but shows you the same thing as
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-            uri = fmt::format("{}#L{}", (string)messageFile.path(),
-                              std::to_string((int)(loc.position(*finalGs).first.line)));
+            uri =
+                fmt::format("{}#L{}", (string)messageFile.path(), to_string((int)(loc.position(*finalGs).first.line)));
         } else {
             uri = fileRef2Uri(loc.file());
         }
@@ -156,7 +156,7 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
         retType = getResultType(method, receiver, constraint);
     }
     string methodReturnType = (retType == core::Types::void_()) ? "void" : "returns(" + retType->show(*finalGs) + ")";
-    std::vector<string> typeAndArgNames;
+    vector<string> typeAndArgNames;
 
     if (method.data(*finalGs).isMethod()) {
         for (auto &argSym : method.data(*finalGs).arguments()) {
@@ -165,14 +165,14 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
         }
     }
 
-    std::stringstream ss;
+    stringstream ss;
     for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
         if (i != 0) {
             ss << ", ";
         }
         ss << typeAndArgNames[i];
     }
-    std::string joinedTypeAndArgNames = ss.str();
+    string joinedTypeAndArgNames = ss.str();
 
     return fmt::format("sig({}).{}", joinedTypeAndArgNames, methodReturnType);
 }

@@ -11,7 +11,7 @@ ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer) : logger(
 
 ErrorQueue::~ErrorQueue() {}
 
-std::vector<std::unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
+vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
     checkOwned();
     vector<unique_ptr<core::QueryResponse>> out;
 
@@ -26,9 +26,9 @@ std::vector<std::unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponse
     return out;
 }
 
-std::vector<std::unique_ptr<core::BasicError>> ErrorQueue::drainAllErrors() {
+vector<unique_ptr<core::BasicError>> ErrorQueue::drainAllErrors() {
     checkOwned();
-    std::vector<std::unique_ptr<core::BasicError>> out;
+    vector<unique_ptr<core::BasicError>> out;
     auto collected = drainAll();
 
     for (auto &msg : collected) {
@@ -45,7 +45,7 @@ void ErrorQueue::flushErrors(bool all) {
     if (ignoreFlushes) {
         return;
     }
-    std::vector<std::unique_ptr<ErrorQueueMessage>> errors;
+    vector<unique_ptr<ErrorQueueMessage>> errors;
     if (all) {
         errors = drainAll();
     } else {

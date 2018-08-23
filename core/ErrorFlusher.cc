@@ -6,7 +6,7 @@ using namespace std;
 namespace sorbet {
 namespace core {
 
-void ErrorFlusher::flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> errors) {
+void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
     stringstream critical;
     stringstream nonCritical;
     for (auto &error : errors) {

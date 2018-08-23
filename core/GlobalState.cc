@@ -804,7 +804,7 @@ FileRef GlobalState::enterNewFileAt(const shared_ptr<File> &file, FileRef id) {
     return result;
 }
 
-FileRef GlobalState::reserveFileRef(std::string path) {
+FileRef GlobalState::reserveFileRef(string path) {
     return GlobalState::enterFile(make_shared<File>(move(path), "", File::Type::TombStone));
 }
 
@@ -1106,8 +1106,8 @@ void GlobalState::markAsPayload() {
     }
 }
 
-std::unique_ptr<GlobalState> GlobalState::replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
-                                                      const std::shared_ptr<File> &withWhat) {
+unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat, FileRef whatFile,
+                                                 const shared_ptr<File> &withWhat) {
     ENFORCE(whatFile.id() < inWhat->filesUsed());
     ENFORCE(whatFile.data(*inWhat, true).path() == withWhat->path());
     inWhat->files[whatFile.id()] = withWhat;
@@ -1122,7 +1122,7 @@ FileRef GlobalState::findFileByPath(absl::string_view path) {
     return FileRef();
 }
 
-std::unique_ptr<GlobalState> GlobalState::markFileAsTombStone(std::unique_ptr<GlobalState> what, FileRef fref) {
+unique_ptr<GlobalState> GlobalState::markFileAsTombStone(unique_ptr<GlobalState> what, FileRef fref) {
     ENFORCE(fref.id() < what->filesUsed());
     what->files[fref.id()]->sourceType = File::Type::TombStone;
     return what;
@@ -1144,7 +1144,7 @@ unsigned int GlobalState::hash() const {
     return result;
 }
 
-std::vector<std::shared_ptr<File>> GlobalState::getFiles() const {
+vector<shared_ptr<File>> GlobalState::getFiles() const {
     return files;
 }
 

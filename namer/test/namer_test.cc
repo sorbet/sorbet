@@ -19,7 +19,7 @@ namespace namer {
 namespace test {
 
 auto logger = spd::stderr_color_mt("namer_test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 class NamerFixture : public ::testing::Test {
 public:
@@ -77,7 +77,7 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
-    std::unique_ptr<sorbet::ast::Expression> newtree;
+    unique_ptr<sorbet::ast::Expression> newtree;
     {
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols

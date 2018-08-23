@@ -31,16 +31,16 @@ public:
     static void pickle(Pickler &p, const Name &what);
     static void pickle(Pickler &p, Type *what);
     static void pickle(Pickler &p, const Symbol &what);
-    static void pickle(Pickler &p, FileRef file, const std::unique_ptr<ast::Expression> &what);
+    static void pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what);
 
     template <class T> static void pickleTree(Pickler &p, FileRef file, std::unique_ptr<T> &t);
 
-    static std::shared_ptr<File> unpickleFile(UnPickler &p);
+    static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
-    static std::shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
+    static shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
-    static std::unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, GlobalState &, FileRef file);
+    static unique_ptr<ast::Expression> unpickleExpr(UnPickler &p, GlobalState &, FileRef file);
     static NameRef unpickleNameRef(UnPickler &p, GlobalState &);
 
     SerializerImpl() = delete;
@@ -406,7 +406,7 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
             return make_shared<TypeVar>(sym);
         }
         case 11: {
-            return std::make_shared<SelfType>();
+            return make_shared<SelfType>();
         }
         default:
             Error::raise("Uknown type tag {}", tag);
@@ -592,7 +592,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         names_by_hash.emplace_back(make_pair(hash, value));
     }
 
-    UnorderedMap<std::string, FileRef> fileRefByPath;
+    UnorderedMap<string, FileRef> fileRefByPath;
     result.trace("moving");
     int i = 0;
     for (auto f : files) {

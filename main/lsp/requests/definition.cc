@@ -17,7 +17,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition(), true)) {
         auto queryResponses = errorQueue->drainQueryResponses();
         if (!queryResponses.empty()) {
-            auto resp = std::move(queryResponses[0]);
+            auto resp = move(queryResponses[0]);
 
             if (resp->kind == core::QueryResponse::Kind::IDENT) {
                 for (auto &originLoc : resp->retType.origins) {

@@ -9,7 +9,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 
-bool safeGetline(std::istream &is, std::string &t) {
+bool safeGetline(istream &is, string &t) {
     t.clear();
 
     // The characters in the stream are read one-by-one using a std::streambuf.
@@ -18,8 +18,8 @@ bool safeGetline(std::istream &is, std::string &t) {
     // The sentry object performs various tasks,
     // such as thread synchronization and updating the stream state.
 
-    std::istream::sentry se(is, true);
-    std::streambuf *sb = is.rdbuf();
+    istream::sentry se(is, true);
+    streambuf *sb = is.rdbuf();
 
     for (;;) {
         int c = sb->sbumpc();
@@ -30,10 +30,10 @@ bool safeGetline(std::istream &is, std::string &t) {
                 if (sb->sgetc() == '\n')
                     sb->sbumpc();
                 return true;
-            case std::streambuf::traits_type::eof():
+            case streambuf::traits_type::eof():
                 // Also handle the case when the last line has no line ending
                 if (t.empty())
-                    is.setstate(std::ios::eofbit);
+                    is.setstate(ios::eofbit);
                 return false;
             default:
                 t += (char)c;
@@ -41,10 +41,10 @@ bool safeGetline(std::istream &is, std::string &t) {
     }
 }
 
-bool getNewRequest(rapidjson::Document &d, const std::shared_ptr<spd::logger> &logger) {
+bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger) {
     int length = -1;
     {
-        std::string line;
+        string line;
         while (safeGetline(cin, line)) {
             logger->trace("raw read: {}", line);
             if (line == "") {
@@ -73,8 +73,8 @@ void LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     deque<rapidjson::Document> pendingRequests;
     bool terminate = false;
-    std::mutex mtx;
-    std::condition_variable cv;
+    mutex mtx;
+    condition_variable cv;
     rapidjson::MemoryPoolAllocator<>
         inner_alloc; // we need objects created by inner thread to outlive the thread itself.
 
@@ -259,7 +259,7 @@ void LSPLoop::sendRaw(rapidjson::Document &raw) {
     raw.Accept(writer);
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
     logger->debug("Write: {}\n", strbuf.GetString());
-    std::cout << outResult << std::flush;
+    cout << outResult << flush;
 }
 
 void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {
@@ -275,8 +275,8 @@ void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {
     sendRaw(request);
 }
 
-void LSPLoop::sendRequest(LSPMethod meth, rapidjson::Value &data, std::function<void(rapidjson::Value &)> onComplete,
-                          std::function<void(rapidjson::Value &)> onFail) {
+void LSPLoop::sendRequest(LSPMethod meth, rapidjson::Value &data, function<void(rapidjson::Value &)> onComplete,
+                          function<void(rapidjson::Value &)> onFail) {
     ENFORCE(!meth.isNotification);
     ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
     rapidjson::Document request(&alloc);

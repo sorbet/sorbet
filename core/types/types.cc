@@ -121,7 +121,7 @@ shared_ptr<Type> Types::falsyTypes() {
     return res;
 }
 
-shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> &from, SymbolRef klass) {
+shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from, SymbolRef klass) {
     shared_ptr<Type> result;
 
     if (from->isUntyped()) {
@@ -177,7 +177,7 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> 
     return result;
 }
 
-bool Types::canBeTruthy(Context ctx, const std::shared_ptr<Type> &what) {
+bool Types::canBeTruthy(Context ctx, const shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -186,7 +186,7 @@ bool Types::canBeTruthy(Context ctx, const std::shared_ptr<Type> &what) {
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
-bool Types::canBeFalsy(Context ctx, const std::shared_ptr<Type> &what) {
+bool Types::canBeFalsy(Context ctx, const shared_ptr<Type> &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -195,8 +195,7 @@ bool Types::canBeFalsy(Context ctx, const std::shared_ptr<Type> &what) {
                             what); // check if inhabited by falsy values
 }
 
-shared_ptr<Type> Types::approximateSubtract(Context ctx, const std::shared_ptr<Type> &from,
-                                            const std::shared_ptr<Type> &what) {
+shared_ptr<Type> Types::approximateSubtract(Context ctx, const shared_ptr<Type> &from, const shared_ptr<Type> &what) {
     shared_ptr<Type> result;
     typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
              [&](AppliedType *c) { result = Types::dropSubtypesOf(ctx, from, c->klass); },
@@ -207,7 +206,7 @@ shared_ptr<Type> Types::approximateSubtract(Context ctx, const std::shared_ptr<T
     return result;
 }
 
-shared_ptr<Type> Types::dropLiteral(const std::shared_ptr<Type> &tp) {
+shared_ptr<Type> Types::dropLiteral(const shared_ptr<Type> &tp) {
     if (auto *a = cast_type<LiteralType>(tp.get())) {
         return a->underlying;
     }
@@ -222,7 +221,7 @@ shared_ptr<Type> Types::lubAll(Context ctx, vector<shared_ptr<Type>> &elements) 
     return acc;
 }
 
-shared_ptr<Type> Types::arrayOf(Context ctx, const std::shared_ptr<Type> &elem) {
+shared_ptr<Type> Types::arrayOf(Context ctx, const shared_ptr<Type> &elem) {
     vector<shared_ptr<Type>> targs{move(elem)};
     return make_shared<AppliedType>(Symbols::Array(), targs);
 }
@@ -519,7 +518,7 @@ shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &p
     return applied->targs.front();
 }
 
-bool Types::isSubType(Context ctx, const std::shared_ptr<Type> &t1, const std::shared_ptr<Type> &t2) {
+bool Types::isSubType(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
     return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
 }
 
@@ -596,14 +595,14 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, i
 }
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                         vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                         vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                          const shared_ptr<Type> &selfType, const shared_ptr<Type> &fullType,
                                          const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                           vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                           vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                            const shared_ptr<Type> &selfType, const shared_ptr<Type> &fullType,
                                            const shared_ptr<SendAndBlockLink> &block) {
     return Types::untyped()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType, block);
@@ -676,11 +675,11 @@ shared_ptr<Type> TupleType::elementType() const {
 SelfType::SelfType() {
     core::categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(SymbolRef klass, std::vector<std::shared_ptr<Type>> targs) : klass(klass), targs(targs) {
+AppliedType::AppliedType(SymbolRef klass, vector<shared_ptr<Type>> targs) : klass(klass), targs(targs) {
     core::categoryCounterInc("types.allocated", "appliedtype");
 }
 
-std::string SelfType::typeName() const {
+string SelfType::typeName() const {
     return "SelfType";
 }
 
@@ -688,7 +687,7 @@ bool SelfType::isFullyDefined() {
     return false;
 }
 
-std::shared_ptr<Type> SelfType::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> SelfType::getCallArgumentType(Context ctx, NameRef name, int i) {
     Error::raise("should never happen");
 }
 
@@ -697,9 +696,9 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 }
 
 DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                      std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                      vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                       const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
-                                      const std::shared_ptr<SendAndBlockLink> &link) {
+                                      const shared_ptr<SendAndBlockLink> &link) {
     Error::raise("should never happen");
 }
 

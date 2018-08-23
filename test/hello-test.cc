@@ -17,7 +17,7 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("hello-test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
@@ -174,7 +174,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
 TEST(PayloadTests, CloneSubstitutePayload) {
     auto logger = spd::stderr_color_mt("ClonePayload");
-    auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);

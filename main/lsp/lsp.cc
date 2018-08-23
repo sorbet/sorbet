@@ -11,8 +11,8 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 
-LSPLoop::LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts,
-                 std::shared_ptr<spd::logger> &logger, WorkerPool &workers)
+LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
+                 WorkerPool &workers)
     : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {
     errorQueue = dynamic_pointer_cast<realmain::ConcurrentErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
@@ -66,7 +66,7 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
         LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
         LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
         vector<shared_ptr<core::File>> files;
-        files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+        files.emplace_back(make_shared<core::File>((move(fref.data(*finalGs)))));
         tryFastPath(files);
     }
 
@@ -219,27 +219,27 @@ void LSPLoop::pushErrors() {
     updatedErrors.clear();
 }
 
-const std::vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
-                                                    Initialize(),
-                                                    Shutdown(),
-                                                    Exit(),
-                                                    RegisterCapability(),
-                                                    UnRegisterCapability(),
-                                                    DidChangeWatchedFiles(),
-                                                    PushDiagnostics(),
-                                                    TextDocumentDidOpen(),
-                                                    TextDocumentDidChange(),
-                                                    TextDocumentDocumentSymbol(),
-                                                    TextDocumentDefinition(),
-                                                    TextDocumentHover(),
-                                                    TextDocumentCompletion(),
-                                                    TextDocumentRefernces(),
-                                                    TextDocumentSignatureHelp(),
-                                                    ReadFile(),
-                                                    WorkspaceSymbols(),
-                                                    CancelRequest(),
-                                                    Pause(),
-                                                    Resume()};
+const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
+                                               Initialize(),
+                                               Shutdown(),
+                                               Exit(),
+                                               RegisterCapability(),
+                                               UnRegisterCapability(),
+                                               DidChangeWatchedFiles(),
+                                               PushDiagnostics(),
+                                               TextDocumentDidOpen(),
+                                               TextDocumentDidChange(),
+                                               TextDocumentDocumentSymbol(),
+                                               TextDocumentDefinition(),
+                                               TextDocumentHover(),
+                                               TextDocumentCompletion(),
+                                               TextDocumentRefernces(),
+                                               TextDocumentSignatureHelp(),
+                                               ReadFile(),
+                                               WorkspaceSymbols(),
+                                               CancelRequest(),
+                                               Pause(),
+                                               Resume()};
 
 const LSPMethod LSPMethod::getByName(const absl::string_view name) {
     for (auto &candidate : ALL_METHODS) {

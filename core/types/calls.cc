@@ -16,7 +16,7 @@ namespace sorbet {
 namespace core {
 
 DispatchResult ProxyType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                       vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                       vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "proxytype");
@@ -28,9 +28,8 @@ shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i
 }
 
 DispatchResult OrType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                    vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                    const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
-                                    const shared_ptr<SendAndBlockLink> &block) {
+                                    vector<TypeAndOrigins> &args, vector<Loc> &argLocs, const shared_ptr<Type> &selfRef,
+                                    const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, left, fullType, block);
     auto rightRet = right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, block);
@@ -49,7 +48,7 @@ shared_ptr<Type> OrType::getCallArgumentType(Context ctx, NameRef name, int i) {
 }
 
 DispatchResult AppliedType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                         vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                         vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                          const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                          const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "appliedType");
@@ -59,14 +58,14 @@ DispatchResult AppliedType::dispatchCall(Context ctx, NameRef name, Loc callLoc,
 }
 
 DispatchResult TypeVar::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                     vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                     vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                      const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                      const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("should never happen");
 }
 
 DispatchResult AndType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                     vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                     vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                      const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                      const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "andtype");
@@ -106,7 +105,7 @@ shared_ptr<Type> AndType::getCallArgumentType(Context ctx, NameRef name, int i) 
 }
 
 DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
-                                       vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                       vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "shapetype");
@@ -125,7 +124,7 @@ DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Lo
 }
 
 DispatchResult TupleType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
-                                       vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                       vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "tupletype");
@@ -716,7 +715,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 }
 
 DispatchResult ClassType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
-                                       vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                       vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     vector<shared_ptr<Type>> empty;
@@ -766,7 +765,7 @@ shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int
 }
 
 DispatchResult AliasType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                       vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                       vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("AliasType::dispatchCall");
@@ -777,7 +776,7 @@ shared_ptr<Type> AliasType::getCallArgumentType(Context ctx, NameRef name, int i
 }
 
 DispatchResult MetaType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                      vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                      vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                       const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                       const shared_ptr<SendAndBlockLink> &block) {
     switch (name._id) {

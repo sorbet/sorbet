@@ -230,7 +230,7 @@ string Proto::toJSON(const google::protobuf::Message &message) {
 
 const char *kTypeUrlPrefix = "type.googleapis.com";
 
-void Proto::toJSON(const google::protobuf::Message &message, std::ostream &out) {
+void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
     string binaryProto;
     message.SerializeToString(&binaryProto);
 

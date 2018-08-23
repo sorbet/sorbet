@@ -13,7 +13,7 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("error-check-test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 

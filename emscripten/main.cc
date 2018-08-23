@@ -37,11 +37,11 @@ public:
 };
 
 extern const sorbet::u1 *const getNameTablePayload;
-std::shared_ptr<spdlog::logger> logger = spd::stderr_logger_st("logger");
+shared_ptr<spdlog::logger> logger = spd::stderr_logger_st("logger");
 
 extern "C" {
 void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
-    auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
     core::ErrorColors::enableColors();
     sorbet::core::GlobalState gs(errorQueue);
     core::MutableContext ctx(gs, core::Symbols::root());
