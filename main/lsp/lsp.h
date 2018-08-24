@@ -53,6 +53,9 @@ struct LSPMethod {
     inline bool operator==(const LSPMethod &other) const {
         return other.name == this->name;
     }
+    inline bool operator!=(const LSPMethod &other) const {
+        return other.name != this->name;
+    }
     static const inline LSPMethod CancelRequest() {
         return LSPMethod{"$/cancelRequest", true, LSPMethod::Kind::Both};
     };
@@ -255,6 +258,12 @@ class LSPLoop {
     void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);
     void addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method, const core::QueryResponse &resp,
                               int activeParameter);
+    static void mergeDidChanges(std::deque<rapidjson::Document> &pendingRequests);
+    static std::deque<rapidjson::Document>::iterator
+    findRequestToBeCancelled(std::deque<rapidjson::Document> &pendingRequests,
+                             rapidjson::Document &cancellationRequest);
+    static std::deque<rapidjson::Document>::iterator
+    findFirstPositionAfterLSPInitialization(std::deque<rapidjson::Document> &pendingRequests);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
