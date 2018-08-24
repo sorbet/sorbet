@@ -27,7 +27,7 @@ shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
 string sorbet::FileOps::read(const absl::string_view filename) {
     string fileNameStr(filename.data(), filename.size());
-    ifstream fin(fileNameStr);
+    ifstream fin(fileNameStr, ios::in | ios::binary);
     if (!fin.good()) {
         throw sorbet::FileNotFoundException();
     }
@@ -39,10 +39,10 @@ string sorbet::FileOps::read(const absl::string_view filename) {
         // file. Treat it as nonexistent.
         throw sorbet::FileNotFoundException();
     }
-    src.reserve(fin.tellg());
-    fin.seekg(0, ios::beg);
 
-    src.assign((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+    src.resize(fin.tellg());
+    fin.seekg(0, ios::beg);
+    fin.read(&src[0], src.size());
     return src;
 }
 
