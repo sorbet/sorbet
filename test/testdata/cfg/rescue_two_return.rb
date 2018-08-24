@@ -5,5 +5,5 @@ def foo
   rescue
     return 2
   end
-  deadcode
+  deadcode # error: This code is unreachable
 end

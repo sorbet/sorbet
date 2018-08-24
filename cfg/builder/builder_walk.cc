@@ -64,6 +64,11 @@ core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inW
     return alias;
 }
 
+void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, std::unique_ptr<Instruction> inst) {
+    bb->exprs.emplace_back(var, loc, move(inst));
+    bb->exprs.back().value->isSynthetic = true;
+}
+
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.
  * store result of evaluation into `target`. Returns basic block in which evaluation should proceed.
  */
@@ -96,8 +101,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     walk(cctx.withTarget(bodySym).withLoopScope(headerBlock, continueBlock), a->body.get(), bodyBlock);
                 unconditionalJump(body, headerBlock, cctx.inWhat, a->loc);
 
-                continueBlock->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
-                continueBlock->exprs.back().value->isSynthetic = true;
+                synthesizeExpr(continueBlock, cctx.target, a->loc, make_unique<Literal>(core::Types::nilClass()));
                 ret = continueBlock;
             },
             [&](ast::Return *a) {
@@ -255,7 +259,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                                           s->block->body.get(), bodyBlock);
                     if (blockLast != cctx.inWhat.deadBlock()) {
                         core::LocalVariable dead = cctx.newTemporary(core::Names::blockReturnTemp());
-                        blockLast->exprs.emplace_back(dead, s->block->loc, make_unique<BlockReturn>(link, blockrv));
+                        synthesizeExpr(blockLast, dead, s->block->loc, make_unique<BlockReturn>(link, blockrv));
                     }
 
                     unconditionalJump(blockLast, headerBlock, cctx.inWhat, s->loc);
@@ -328,11 +332,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 unconditionalJump(current, rescueStartBlock, cctx.inWhat, a->loc);
                 cctx.rescueScope = rescueStartBlock;
 
+                // We have a simplified view of the control flow here but in
+                // practise it has been reasonable on our codebase.
+                // We don't model that each expression in the `body` or `else` could
+                // throw, instead we model only never running anything in the
+                // body, or running the whole thing. To do this we  have a magic
+                // Unanalyzable variable at the top of the body using
+                // `rescueStartTemp` and one at the end of the else using
+                // `rescueEndTemp` which can jump into the rescue handlers.
                 auto rescueHandlersBlock = cctx.inWhat.freshBlock(cctx.loops);
                 auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops);
                 auto rescueStartTemp = cctx.newTemporary(core::Names::rescueStartTemp());
-                rescueStartBlock->exprs.emplace_back(rescueStartTemp, what->loc, make_unique<Unanalyzable>());
-                rescueStartBlock->exprs.back().value->isSynthetic = true;
+                synthesizeExpr(rescueStartBlock, rescueStartTemp, what->loc, make_unique<Unanalyzable>());
                 conditionalJump(rescueStartBlock, rescueStartTemp, rescueHandlersBlock, bodyBlock, cctx.inWhat, a->loc);
 
                 // cctx.loops += 1; // should formally be here but this makes us report a lot of false errors
@@ -342,7 +353,12 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                 elseBody = walk(cctx, a->else_.get(), elseBody);
                 auto ensureBody = cctx.inWhat.freshBlock(cctx.loops);
-                unconditionalJump(elseBody, ensureBody, cctx.inWhat, a->loc);
+
+                auto shouldEnsureBlock = cctx.inWhat.freshBlock(cctx.loops);
+                unconditionalJump(elseBody, shouldEnsureBlock, cctx.inWhat, a->loc);
+                auto rescueEndTemp = cctx.newTemporary(core::Names::rescueEndTemp());
+                synthesizeExpr(shouldEnsureBlock, rescueEndTemp, what->loc, make_unique<Unanalyzable>());
+                conditionalJump(shouldEnsureBlock, rescueEndTemp, rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
 
                 for (auto &rescueCase : a->rescueCases) {
                     auto caseBody = cctx.inWhat.freshBlock(cctx.loops);
@@ -391,13 +407,18 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     unconditionalJump(caseBody, ensureBody, cctx.inWhat, a->loc);
                 }
 
-                auto throwAway = cctx.newTemporary(core::Names::rescueTemp());
+                // This magic local remembers if none of the `rescue`s match,
+                // and if so, after the ensure runs, we should jump to dead
+                // since in Ruby the exception would propagate up the statck.
+                auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
+                synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a->loc,
+                               make_unique<Literal>(make_shared<core::LiteralType>(true)));
+                unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
+
+                auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());
                 ensureBody = walk(cctx.withTarget(throwAway), a->ensure.get(), ensureBody);
                 ret = cctx.inWhat.freshBlock(cctx.loops);
-                unconditionalJump(ensureBody, ret, cctx.inWhat, a->loc);
-
-                // None of the handlers were taken
-                jumpToDead(rescueHandlersBlock, cctx.inWhat, a->loc);
+                conditionalJump(ensureBody, gotoDeadTemp, cctx.inWhat.deadBlock(), ret, cctx.inWhat, a->loc);
             },
 
             [&](ast::Hash *h) {

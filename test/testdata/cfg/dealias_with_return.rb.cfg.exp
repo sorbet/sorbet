@@ -18,22 +18,36 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_3" [
-        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$7 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$8 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$7) : T.untyped\l<isaCheckTemp>$8\l"
+        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$8 = alias <constant:StandardError> : <Class:StandardError>\l<isaCheckTemp>$9 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$8) : T.untyped\l<isaCheckTemp>$9\l"
     ];
 
-    "bb::Object#a_3" -> "bb::Object#a_7" [style="bold"];
-    "bb::Object#a_3" -> "bb::Object#a_1" [style="tapered"];
+    "bb::Object#a_3" -> "bb::Object#a_8" [style="bold"];
+    "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_4" [
         label = "block[id=4]()\l<returnTemp>$6 = 1 : Integer(1)\l<statTemp>$4 = return <returnTemp>$6 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
-    "bb::Object#a_7" [
-        label = "block[id=7]()\la = 2 : Integer(2)\l<statTemp>$11 = 3 : Integer(3)\l<returnMethodTemp>$2 = a.+(<statTemp>$11) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    "bb::Object#a_8" [
+        label = "block[id=8]()\la = 2 : Integer(2)\l<gotoDeadTemp>$10\l"
     ];
 
-    "bb::Object#a_7" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_8" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_8" -> "bb::Object#a_10" [style="tapered"];
+
+    "bb::Object#a_9" [
+        label = "block[id=9]()\l<gotoDeadTemp>$10 = true : TrueClass(true)\l<gotoDeadTemp>$10\l"
+    ];
+
+    "bb::Object#a_9" -> "bb::Object#a_1" [style="bold"];
+    "bb::Object#a_9" -> "bb::Object#a_10" [style="tapered"];
+
+    "bb::Object#a_10" [
+        label = "block[id=10](a)\l<statTemp>$13 = 3 : Integer(3)\l<returnMethodTemp>$2 = a.+(<statTemp>$13) : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::Object#a_10" -> "bb::Object#a_1" [style="bold"];
 }
 
 }

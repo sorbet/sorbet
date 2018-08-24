@@ -16,21 +16,21 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2](try)\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
+        label = "block[id=2](<returnMethodTemp>$2, try)\l<rescueStartTemp>$5 = <unanalyzable> : T.untyped\l<rescueStartTemp>$5\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](try)\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$24 = alias <constant:A> : <Class:A>\l<isaCheckTemp>$25 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$24) : T.untyped\l<isaCheckTemp>$25\l"
+        label = "block[id=3](<returnMethodTemp>$2, try)\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$25 = alias <constant:A> : <Class:A>\l<isaCheckTemp>$26 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$25) : T.untyped\l<isaCheckTemp>$26\l"
     ];
 
-    "bb::Object#main_3" -> "bb::Object#main_13" [style="bold"];
-    "bb::Object#main_3" -> "bb::Object#main_14" [style="tapered"];
+    "bb::Object#main_3" -> "bb::Object#main_14" [style="bold"];
+    "bb::Object#main_3" -> "bb::Object#main_15" [style="tapered"];
 
     "bb::Object#main_4" [
-        label = "block[id=4](try)\l<statTemp>$8 = 3 : Integer(3)\l<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass\l<ifTemp>$6\l"
+        label = "block[id=4](<returnMethodTemp>$2, try)\l<statTemp>$8 = 3 : Integer(3)\l<ifTemp>$6 = try.<(<statTemp>$8) : TrueClass | FalseClass\l<ifTemp>$6\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_5" [style="bold"];
@@ -40,41 +40,62 @@ subgraph "cluster_::Object#main" {
         label = "block[id=5](try)\l<statTemp>$10 = try : Integer(0)\l<statTemp>$11 = 1 : Integer(1)\ltry = <statTemp>$10.+(<statTemp>$11) : Integer\l<statTemp>$12 = self : Object\l<statTemp>$14 = alias <constant:A> : <Class:A>\l<statTemp>$13 = <statTemp>$14.new() : A\l<returnMethodTemp>$2 = <statTemp>$12.raise(<statTemp>$13) : <impossible>\l<unconditional>\l"
     ];
 
-    "bb::Object#main_5" -> "bb::Object#main_17" [style="bold"];
+    "bb::Object#main_5" -> "bb::Object#main_13" [style="bold"];
     "bb::Object#main_6" [
-        label = "block[id=6](try)\l<statTemp>$17 = 6 : Integer(6)\l<ifTemp>$15 = try.<(<statTemp>$17) : TrueClass | FalseClass\l<ifTemp>$15\l"
+        label = "block[id=6](<returnMethodTemp>$2, try)\l<statTemp>$17 = 6 : Integer(6)\l<ifTemp>$15 = try.<(<statTemp>$17) : TrueClass | FalseClass\l<ifTemp>$15\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_7" [style="bold"];
-    "bb::Object#main_6" -> "bb::Object#main_17" [style="tapered"];
+    "bb::Object#main_6" -> "bb::Object#main_13" [style="tapered"];
 
     "bb::Object#main_7" [
         label = "block[id=7](try)\l<statTemp>$19 = try : Integer(0)\l<statTemp>$20 = 1 : Integer(1)\ltry = <statTemp>$19.+(<statTemp>$20) : Integer\l<statTemp>$21 = self : Object\l<statTemp>$23 = alias <constant:B> : <Class:B>\l<statTemp>$22 = <statTemp>$23.new() : B\l<returnMethodTemp>$2 = <statTemp>$21.raise(<statTemp>$22) : <impossible>\l<unconditional>\l"
     ];
 
-    "bb::Object#main_7" -> "bb::Object#main_17" [style="bold"];
+    "bb::Object#main_7" -> "bb::Object#main_13" [style="bold"];
+    "bb::Object#main_12" [
+        label = "block[id=12](<returnMethodTemp>$2, <gotoDeadTemp>$37)\l<gotoDeadTemp>$37\l"
+    ];
+
+    "bb::Object#main_12" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_12" -> "bb::Object#main_18" [style="tapered"];
+
     "bb::Object#main_13" [
-        label = "block[id=13](try)\l<statTemp>$27 = self : Object\l<statTemp>$28 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$26 = <statTemp>$27.puts(<statTemp>$28) : NilClass\l<unconditional>\l"
+        label = "block[id=13](<returnMethodTemp>$2, try)\l<rescueEndTemp>$24 = <unanalyzable> : T.untyped\l<rescueEndTemp>$24\l"
     ];
 
-    "bb::Object#main_13" -> "bb::Object#main_2" [style="bold"];
+    "bb::Object#main_13" -> "bb::Object#main_3" [style="bold"];
+    "bb::Object#main_13" -> "bb::Object#main_12" [style="tapered"];
+
     "bb::Object#main_14" [
-        label = "block[id=14](try)\l<rescueTemp>$3 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$30 = alias <constant:B> : <Class:B>\l<isaCheckTemp>$31 = <rescueTemp>$3.is_a?(<exceptionClassTemp>$30) : T.untyped\l<isaCheckTemp>$31\l"
+        label = "block[id=14](<returnMethodTemp>$2, try)\l<statTemp>$28 = self : Object\l<statTemp>$29 = \"rescue A \" : String(\"rescue A \")\l<statTemp>$27 = <statTemp>$28.puts(<statTemp>$29) : NilClass\l<unconditional>\l"
     ];
 
-    "bb::Object#main_14" -> "bb::Object#main_15" [style="bold"];
-    "bb::Object#main_14" -> "bb::Object#main_1" [style="tapered"];
-
+    "bb::Object#main_14" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_15" [
-        label = "block[id=15](try)\l<statTemp>$33 = self : Object\l<statTemp>$34 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$32 = <statTemp>$33.puts(<statTemp>$34) : NilClass\l<unconditional>\l"
+        label = "block[id=15](<returnMethodTemp>$2, try)\l<rescueTemp>$3 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$31 = alias <constant:B> : <Class:B>\l<isaCheckTemp>$32 = <rescueTemp>$3.is_a?(<exceptionClassTemp>$31) : T.untyped\l<isaCheckTemp>$32\l"
     ];
 
-    "bb::Object#main_15" -> "bb::Object#main_2" [style="bold"];
+    "bb::Object#main_15" -> "bb::Object#main_16" [style="bold"];
+    "bb::Object#main_15" -> "bb::Object#main_17" [style="tapered"];
+
+    "bb::Object#main_16" [
+        label = "block[id=16](<returnMethodTemp>$2, try)\l<statTemp>$34 = self : Object\l<statTemp>$35 = \"rescue B \" : String(\"rescue B \")\l<statTemp>$33 = <statTemp>$34.puts(<statTemp>$35) : NilClass\l<unconditional>\l"
+    ];
+
+    "bb::Object#main_16" -> "bb::Object#main_2" [style="bold"];
     "bb::Object#main_17" [
-        label = "block[id=17](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=17](<returnMethodTemp>$2)\l<gotoDeadTemp>$37 = true : TrueClass(true)\l<gotoDeadTemp>$37\l"
     ];
 
     "bb::Object#main_17" -> "bb::Object#main_1" [style="bold"];
+    "bb::Object#main_17" -> "bb::Object#main_18" [style="tapered"];
+
+    "bb::Object#main_18" [
+        label = "block[id=18](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::Object#main_18" -> "bb::Object#main_1" [style="bold"];
 }
 
 subgraph "cluster_#<static-init>" {

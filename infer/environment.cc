@@ -519,12 +519,7 @@ const Environment &Environment::withCond(core::Context ctx, const Environment &e
 
 void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVariable cond, core::Loc loc,
                                   const UnorderedMap<core::LocalVariable, VariableState> &filter) {
-    auto fnd = vars.find(cond);
-    if (fnd == vars.end()) {
-        // Can't use getKnowledge because of loops
-        return;
-    }
-    auto &thisKnowledge = fnd->second.knowledge;
+    auto &thisKnowledge = getKnowledge(cond, false);
     thisKnowledge.sanityCheck();
     if (!isTrue) {
         if (getKnownTruthy(cond)) {

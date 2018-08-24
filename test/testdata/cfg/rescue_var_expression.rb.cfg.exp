@@ -18,27 +18,45 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$7 = alias <constant:Exception> : <Class:Exception>\l<isaCheckTemp>$8 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$7) : T.untyped\l<isaCheckTemp>$8\l"
+        label = "block[id=3](<returnMethodTemp>$2)\l<rescueTemp>$2 = <unanalyzable> : T.untyped\l<exceptionClassTemp>$8 = alias <constant:Exception> : <Class:Exception>\l<isaCheckTemp>$9 = <rescueTemp>$2.is_a?(<exceptionClassTemp>$8) : T.untyped\l<isaCheckTemp>$9\l"
     ];
 
-    "bb::Object#foo_3" -> "bb::Object#foo_7" [style="bold"];
-    "bb::Object#foo_3" -> "bb::Object#foo_1" [style="tapered"];
+    "bb::Object#foo_3" -> "bb::Object#foo_8" [style="bold"];
+    "bb::Object#foo_3" -> "bb::Object#foo_9" [style="tapered"];
 
     "bb::Object#foo_4" [
-        label = "block[id=4]()\l<statTemp>$5 = self : Object\l<statTemp>$6 = \"boop\" : String(\"boop\")\l<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\l<statTemp>$5 = self : Object\l<statTemp>$6 = \"boop\" : String(\"boop\")\l<returnMethodTemp>$2 = <statTemp>$5.raise(<statTemp>$6) : <impossible>\l<rescueEndTemp>$7 = <unanalyzable>\l<rescueEndTemp>$7\l"
     ];
 
-    "bb::Object#foo_4" -> "bb::Object#foo_9" [style="bold"];
-    "bb::Object#foo_7" [
-        label = "block[id=7](<rescueTemp>$2)\l<statTemp>$11 = alias <constant:MyClass> : <Class:MyClass>\l<statTemp>$10 = <statTemp>$11.new() : MyClass\l<statTemp>$9 = <statTemp>$10.foo=(<rescueTemp>$2) : T.untyped\l<returnMethodTemp>$2 = 3 : Integer(3)\l<unconditional>\l"
+    "bb::Object#foo_4" -> "bb::Object#foo_3" [style="bold"];
+    "bb::Object#foo_4" -> "bb::Object#foo_6" [style="tapered"];
+
+    "bb::Object#foo_6" [
+        label = "block[id=6](<returnMethodTemp>$2, <gotoDeadTemp>$14)\l<gotoDeadTemp>$14\l"
     ];
 
-    "bb::Object#foo_7" -> "bb::Object#foo_9" [style="bold"];
+    "bb::Object#foo_6" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_6" -> "bb::Object#foo_10" [style="tapered"];
+
+    "bb::Object#foo_8" [
+        label = "block[id=8](<rescueTemp>$2)\l<statTemp>$12 = alias <constant:MyClass> : <Class:MyClass>\l<statTemp>$11 = <statTemp>$12.new() : MyClass\l<statTemp>$10 = <statTemp>$11.foo=(<rescueTemp>$2) : T.untyped\l<returnMethodTemp>$2 = 3 : Integer(3)\l<gotoDeadTemp>$14\l"
+    ];
+
+    "bb::Object#foo_8" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_8" -> "bb::Object#foo_10" [style="tapered"];
+
     "bb::Object#foo_9" [
-        label = "block[id=9](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=9](<returnMethodTemp>$2)\l<gotoDeadTemp>$14 = true : TrueClass(true)\l<gotoDeadTemp>$14\l"
     ];
 
     "bb::Object#foo_9" -> "bb::Object#foo_1" [style="bold"];
+    "bb::Object#foo_9" -> "bb::Object#foo_10" [style="tapered"];
+
+    "bb::Object#foo_10" [
+        label = "block[id=10](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::Object#foo_10" -> "bb::Object#foo_1" [style="bold"];
 }
 
 subgraph "cluster_#<static-init>" {
