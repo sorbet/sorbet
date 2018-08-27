@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -ex
+set -e
 
 
 IS_REGENERATING_REC_FILE=false
