@@ -448,7 +448,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                     vector<ErrorLine> lines;
                     for (auto alternative : alternatives) {
                         lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc(), "Did you mean: `{}`?",
-                                                           alternative.name.toString(ctx)));
+                                                           alternative.symbol.show(ctx)));
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }

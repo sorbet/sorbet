@@ -225,7 +225,7 @@ private:
                             for (auto suggestion : suggested) {
                                 lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).loc(),
                                                                          "Did you mean: `{}`?",
-                                                                         suggestion.symbol.data(ctx).fullName(ctx)));
+                                                                         suggestion.symbol.show(ctx)));
                             }
                             e.addErrorSection(core::ErrorSection(lines));
                         }
