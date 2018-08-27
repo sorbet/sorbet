@@ -5,17 +5,6 @@
 using namespace std;
 namespace sorbet {
 
-bool isSyntheticBlock(core::Context ctx, cfg::BasicBlock *bb) {
-    core::LocalVariable allowedLocal;
-    for (auto &expr : bb->exprs) {
-        if (expr.value->isSynthetic) {
-            continue;
-        }
-        return false;
-    }
-    return true;
-}
-
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     core::prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
@@ -98,10 +87,15 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         visited[bb->id] = true;
         if (current.isDead) {
             // this block is unreachable.
-            if (!bb->exprs.empty() && !(isSyntheticBlock(ctx, bb)) // synthetic final return
-            ) {
-                if (auto e = ctx.state.beginError(bb->exprs[0].loc, core::errors::Infer::DeadBranchInferencer)) {
-                    e.setHeader("This code is unreachable");
+            if (!bb->exprs.empty()) {
+                for (auto &expr : bb->exprs) {
+                    if (expr.value->isSynthetic) {
+                        continue;
+                    }
+                    if (auto e = ctx.state.beginError(expr.loc, core::errors::Infer::DeadBranchInferencer)) {
+                        e.setHeader("This code is unreachable");
+                    }
+                    break;
                 }
             }
             continue;

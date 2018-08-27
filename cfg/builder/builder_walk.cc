@@ -435,7 +435,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(h->values[i]->loc);
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
-                current->exprs.emplace_back(magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
+                synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
 
                 current->exprs.emplace_back(cctx.target, h->loc,
                                             make_unique<Send>(magic, core::Names::buildHash(), h->loc, vars, locs));
@@ -452,7 +452,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     locs.emplace_back(a->loc);
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());
-                current->exprs.emplace_back(magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
+                synthesizeExpr(current, magic, core::Loc::none(), make_unique<Alias>(core::Symbols::Magic()));
                 current->exprs.emplace_back(cctx.target, a->loc,
                                             make_unique<Send>(magic, core::Names::buildArray(), a->loc, vars, locs));
                 ret = current;
