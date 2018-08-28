@@ -864,8 +864,10 @@ public:
         }
 
         shared_ptr<Type> res = Types::bottom();
+        auto i = -1;
         for (auto &arg : args) {
-            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            i++;
+            auto ty = unwrapType(ctx, argLocs[i], arg.type);
             res = Types::any(ctx, res, ty);
         }
 
@@ -883,8 +885,10 @@ public:
         }
 
         shared_ptr<Type> res = Types::top();
+        auto i = -1;
         for (auto &arg : args) {
-            auto ty = unwrapType(ctx, arg.origins[0], arg.type);
+            i++;
+            auto ty = unwrapType(ctx, argLocs[i], arg.type);
             res = Types::all(ctx, res, ty);
         }
 
@@ -1010,7 +1014,7 @@ public:
             if (mem.data(ctx).isFixed()) {
                 targs.emplace_back(mem.data(ctx).resultType);
             } else if (it != args.end()) {
-                targs.emplace_back(unwrapType(ctx, it->origins[0], it->type));
+                targs.emplace_back(unwrapType(ctx, argLocs[it - args.begin()], it->type));
                 ++it;
             } else if (attachedClass == Symbols::Hash() && i == 2) {
                 auto tupleArgs = targs;
