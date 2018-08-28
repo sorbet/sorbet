@@ -92,11 +92,11 @@ unique_ptr<Expression> desugarDString(core::MutableContext ctx, core::Loc loc, p
     return res;
 }
 
-unique_ptr<MethodDef> buildMethod(core::MutableContext ctx, core::Loc loc, core::NameRef name,
+unique_ptr<MethodDef> buildMethod(core::MutableContext ctx, core::Loc loc, core::Loc declLoc, core::NameRef name,
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body,
                                   u2 &uniqueCounter) {
     auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body, uniqueCounter);
-    return MK::Method(loc, name, move(argsAndBody.first), move(argsAndBody.second));
+    return MK::Method(loc, declLoc, name, move(argsAndBody.first), move(argsAndBody.second));
 }
 
 unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> node, u2 &uniqueCounter) {
@@ -541,9 +541,10 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::Module *module) {
                 ClassDef::RHS_store body = scopeNodeToBody(ctx, move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
-                unique_ptr<Expression> res = make_unique<ClassDef>(
-                    loc, core::Symbols::todo(), node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
-                    move(body), ClassDefKind::Module);
+                unique_ptr<Expression> res =
+                    make_unique<ClassDef>(module->loc, module->declLoc, core::Symbols::todo(),
+                                          node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
+                                          move(body), ClassDefKind::Module);
                 result.swap(res);
             },
             [&](parser::Class *claz) {
@@ -555,7 +556,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     ancestors.emplace_back(node2TreeImpl(ctx, move(claz->superclass), uniqueCounter));
                 }
 
-                unique_ptr<Expression> res = make_unique<ClassDef>(loc, core::Symbols::todo(),
+                unique_ptr<Expression> res = make_unique<ClassDef>(claz->loc, claz->declLoc, core::Symbols::todo(),
                                                                    node2TreeImpl(ctx, move(claz->name), uniqueCounter),
                                                                    move(ancestors), move(body), ClassDefKind::Class);
                 result.swap(res);
@@ -598,14 +599,15 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::DefMethod *method) {
                 u2 uniqueCounter1 = 1;
-                unique_ptr<Expression> res =
-                    buildMethod(ctx, loc, method->name, method->args, method->body, uniqueCounter1);
+                unique_ptr<Expression> res = buildMethod(ctx, method->loc, method->declLoc, method->name, method->args,
+                                                         method->body, uniqueCounter1);
                 result.swap(res);
             },
             [&](parser::DefS *method) {
                 auto *self = parser::cast_node<parser::Self>(method->singleton.get());
                 if (self == nullptr) {
-                    if (auto e = ctx.state.beginError(loc, core::errors::Desugar::InvalidSingletonDef)) {
+                    if (auto e =
+                            ctx.state.beginError(method->singleton->loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "def EXPRESSION.method", "def self.method");
                     }
                     unique_ptr<Expression> res = MK::EmptyTree(loc);
@@ -613,8 +615,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     return;
                 }
                 u2 uniqueCounter1 = 1;
-                unique_ptr<MethodDef> meth =
-                    buildMethod(ctx, loc, method->name, method->args, method->body, uniqueCounter1);
+                unique_ptr<MethodDef> meth = buildMethod(ctx, method->loc, method->declLoc, method->name, method->args,
+                                                         method->body, uniqueCounter1);
                 meth->flags |= MethodDef::SelfMethod;
                 unique_ptr<Expression> res(meth.release());
                 result.swap(res);
@@ -624,7 +626,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 // which will get the symbol of `class.singleton_class`
                 auto *self = parser::cast_node<parser::Self>(sclass->expr.get());
                 if (self == nullptr) {
-                    if (auto e = ctx.state.beginError(sclass->loc, core::errors::Desugar::InvalidSingletonDef)) {
+                    if (auto e = ctx.state.beginError(sclass->expr->loc, core::errors::Desugar::InvalidSingletonDef)) {
                         e.setHeader("`{}` is only supported for `{}`", "class << EXPRESSION", "class << self");
                     }
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
@@ -635,7 +637,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 ClassDef::RHS_store body = scopeNodeToBody(ctx, move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 unique_ptr<Expression> res = make_unique<ClassDef>(
-                    what->loc, core::Symbols::todo(),
+                    sclass->loc, sclass->declLoc, core::Symbols::todo(),
                     make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class, core::Names::singleton()),
                     move(emptyAncestors), move(body), ClassDefKind::Class);
                 result.swap(res);
@@ -1318,7 +1320,7 @@ unique_ptr<Expression> liftTopLevel(core::MutableContext ctx, unique_ptr<Express
     } else {
         rhs.emplace_back(move(what));
     }
-    return make_unique<ClassDef>(loc, core::Symbols::root(), MK::EmptyTree(core::Loc::none()),
+    return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(core::Loc::none()),
                                  ClassDef::ANCESTORS_store(), move(rhs), Class);
 }
 } // namespace

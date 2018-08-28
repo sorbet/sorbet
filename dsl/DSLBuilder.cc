@@ -78,20 +78,20 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
         arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));
     }
-    stats.emplace_back(ast::MK::Method1(loc, name, move(arg), ast::MK::EmptyTree(loc),
+    stats.emplace_back(ast::MK::Method1(loc, loc, name, move(arg), ast::MK::EmptyTree(loc),
                                         ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     if (!skipGetter) {
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx).toString(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-        stats.emplace_back(ast::MK::Method(loc, getName, ast::MethodDef::ARGS_store(),
+        stats.emplace_back(ast::MK::Method(loc, loc, getName, ast::MethodDef::ARGS_store(),
                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                            ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
         // def <prop>()
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
-        stats.emplace_back(ast::MK::Method(loc, name, ast::MethodDef::ARGS_store(),
+        stats.emplace_back(ast::MK::Method(loc, loc, name, ast::MethodDef::ARGS_store(),
                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)), ast::MethodDef::DSLSynthesized));
     }
 

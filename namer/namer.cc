@@ -198,7 +198,7 @@ public:
                 }
                 auto origName = klass->symbol.data(ctx).name;
                 ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name, core::UniqueNameKind::Namer);
-                klass->symbol = ctx.state.enterClassSymbol(klass->loc, klass->symbol.data(ctx).owner, origName);
+                klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx).owner, origName);
             } else if (klass->symbol.data(ctx).isClassModuleSet() &&
                        isModule != klass->symbol.data(ctx).isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
@@ -262,7 +262,7 @@ public:
             klass->symbol.data(ctx).superClass = core::Symbols::todo();
         }
 
-        klass->symbol.data(ctx).addLoc(ctx, klass->loc);
+        klass->symbol.data(ctx).addLoc(ctx, klass->declLoc);
         klass->symbol.data(ctx).singletonClass(ctx); // force singleton class into existance
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
@@ -285,7 +285,7 @@ public:
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
-        return ast::MK::InsSeq(klass->loc, move(ideSeqs), move(klass));
+        return ast::MK::InsSeq(klass->declLoc, move(ideSeqs), move(klass));
     }
 
     core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
@@ -464,17 +464,17 @@ public:
 
         auto sym = owner.data(ctx).findMember(ctx, method->name);
         if (sym.exists()) {
-            if (method->loc == sym.data(ctx).loc()) {
+            if (method->declLoc == sym.data(ctx).loc()) {
                 // Reparsing the same file
                 method->symbol = sym;
                 fillInArgs(ctx.withOwner(method->symbol), method->args);
                 return method;
             }
             if (redefinitionOk(ctx, sym)) {
-                sym.data(ctx).addLoc(ctx, method->loc);
+                sym.data(ctx).addLoc(ctx, method->declLoc);
             } else {
                 if (!method->loc.file().data(ctx).isRBI()) {
-                    if (auto e = ctx.state.beginError(method->loc, core::errors::Namer::RedefinitionOfMethod)) {
+                    if (auto e = ctx.state.beginError(method->declLoc, core::errors::Namer::RedefinitionOfMethod)) {
                         e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
                         e.addErrorLine(sym.data(ctx).loc(), "Previous definition");
                     }
@@ -484,9 +484,9 @@ public:
                 ctx.state.mangleRenameSymbol(sym, method->name, core::UniqueNameKind::Namer);
             }
         }
-        method->symbol = ctx.state.enterMethodSymbol(method->loc, owner, method->name);
+        method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
-        method->symbol.data(ctx).addLoc(ctx, method->loc);
+        method->symbol.data(ctx).addLoc(ctx, method->declLoc);
         if (method->isDSLSynthesized()) {
             method->symbol.data(ctx).setDSLSynthesized();
         }

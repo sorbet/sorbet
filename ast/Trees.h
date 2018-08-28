@@ -47,9 +47,10 @@ public:
 
 class Declaration : public Expression {
 public:
+    core::Loc declLoc;
     core::SymbolRef symbol;
 
-    Declaration(core::Loc loc, core::SymbolRef symbol);
+    Declaration(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol);
 };
 // CheckSize(Declaration, 24, 8);
 
@@ -76,8 +77,8 @@ public:
     ANCESTORS_store ancestors;
     ANCESTORS_store singleton_ancestors;
 
-    ClassDef(core::Loc loc, core::SymbolRef symbol, std::unique_ptr<Expression> name, ANCESTORS_store ancestors,
-             RHS_store rhs, ClassDefKind kind);
+    ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, std::unique_ptr<Expression> name,
+             ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind);
 
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
@@ -105,7 +106,7 @@ public:
         DSLSynthesized = 2,
     };
 
-    MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
+    MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
               std::unique_ptr<Expression> rhs, u4 flags);
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);

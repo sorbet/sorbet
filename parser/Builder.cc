@@ -510,35 +510,42 @@ public:
 
     unique_ptr<Node> def_class(const token *class_, unique_ptr<Node> name, const token *lt_,
                                unique_ptr<Node> superclass, unique_ptr<Node> body, const token *end_) {
-        Loc loc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
+        Loc declLoc = tok_loc(class_).join(maybe_loc(name)).join(maybe_loc(superclass));
+        Loc loc = tok_loc(class_, end_);
 
-        return make_unique<Class>(loc, move(name), move(superclass), move(body));
+        return make_unique<Class>(loc, declLoc, move(name), move(superclass), move(body));
     }
 
     unique_ptr<Node> def_method(const token *def, const token *name, unique_ptr<Node> args, unique_ptr<Node> body,
                                 const token *end) {
-        Loc loc = tok_loc(def, name).join(maybe_loc(args));
+        Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
+        Loc loc = tok_loc(def, end);
 
-        return make_unique<DefMethod>(loc, gs_.enterNameUTF8(name->string()), move(args), move(body));
+        return make_unique<DefMethod>(loc, declLoc, gs_.enterNameUTF8(name->string()), move(args), move(body));
     }
 
     unique_ptr<Node> def_module(const token *module, unique_ptr<Node> name, unique_ptr<Node> body, const token *end_) {
-        Loc loc = tok_loc(module).join(maybe_loc(name));
-        return make_unique<Module>(loc, move(name), move(body));
+        Loc declLoc = tok_loc(module).join(maybe_loc(name));
+        Loc loc = tok_loc(module, end_);
+        return make_unique<Module>(loc, declLoc, move(name), move(body));
     }
 
     unique_ptr<Node> def_sclass(const token *class_, const token *lshft_, unique_ptr<Node> expr, unique_ptr<Node> body,
                                 const token *end_) {
-        return make_unique<SClass>(tok_loc(class_), move(expr), move(body));
+        Loc declLoc = tok_loc(class_);
+        Loc loc = tok_loc(class_, end_);
+        return make_unique<SClass>(loc, declLoc, move(expr), move(body));
     }
 
     unique_ptr<Node> def_singleton(const token *def, unique_ptr<Node> definee, const token *dot, const token *name,
                                    unique_ptr<Node> args, unique_ptr<Node> body, const token *end) {
-        Loc loc = tok_loc(def, name).join(maybe_loc(args));
+        Loc declLoc = tok_loc(def, name).join(maybe_loc(args));
+        Loc loc = tok_loc(def, end);
 
         // TODO: Ruby interprets (e.g.) def 1.method as a parser error; Do we
         // need to reject it here, or can we defer that until later analysis?
-        return make_unique<DefS>(loc, move(definee), gs_.enterNameUTF8(name->string()), move(args), move(body));
+        return make_unique<DefS>(loc, declLoc, move(definee), gs_.enterNameUTF8(name->string()), move(args),
+                                 move(body));
     }
 
     unique_ptr<Node> encoding_literal(const token *tok) {

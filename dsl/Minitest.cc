@@ -55,8 +55,8 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
     }
 
     if (send->args.empty() && send->fun == core::Names::before()) {
-        return ast::MK::Method0(send->loc, core::Names::initialize(), prepareBody(ctx, move(send->block->body)),
-                                ast::MethodDef::DSLSynthesized);
+        return ast::MK::Method0(send->loc, send->loc, core::Names::initialize(),
+                                prepareBody(ctx, move(send->block->body)), ast::MethodDef::DSLSynthesized);
     }
 
     if (send->args.size() != 1) {
@@ -73,10 +73,10 @@ unique_ptr<ast::Expression> replaceDSLSingle(core::MutableContext ctx, ast::Send
         rhs.emplace_back(prepareBody(ctx, move(send->block->body)));
         auto name = ast::MK::UnresolvedConstant(arg->loc, ast::MK::EmptyTree(arg->loc),
                                                 ctx.state.enterNameConstant("<class_" + argString + ">"));
-        return ast::MK::Class(send->loc, move(name), move(ancestors), move(rhs), ast::ClassDefKind::Class);
+        return ast::MK::Class(send->loc, send->loc, move(name), move(ancestors), move(rhs), ast::ClassDefKind::Class);
     } else if (send->fun == core::Names::it()) {
         auto name = ctx.state.enterNameUTF8("<test_" + argString + ">");
-        return ast::MK::Method0(send->loc, move(name), prepareBody(ctx, move(send->block->body)),
+        return ast::MK::Method0(send->loc, send->loc, move(name), prepareBody(ctx, move(send->block->body)),
                                 ast::MethodDef::DSLSynthesized);
     }
 

@@ -78,7 +78,8 @@ $payload"
             if [ "$IS_REGENERATING_REC_FILE" != true ]; then
                 if [[ "$payload" != "$expected_payload" ]];
                 then
-                    diff  <(echo "$expected_payload" ) <(echo "$payload")
+                    diff -u  <(echo "$expected_payload" | python -m json.tool)\
+                         <(echo "$payload" | python -m json.tool)
                     exit 1
                 fi
             else

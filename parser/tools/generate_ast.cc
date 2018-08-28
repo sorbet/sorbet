@@ -11,6 +11,7 @@ enum FieldType {
     NodeVec,
     String,
     Uint,
+    Loc,
 };
 
 struct FieldDef {
@@ -54,7 +55,7 @@ NodeDef nodes[] = {
     // appears in the `scope` of a `::Constant` `Const` node
     {"Cbase", vector<FieldDef>()},
     // superclass is Null if empty superclass, body is Begin if multiple statements
-    {"Class", vector<FieldDef>({{"name", Node}, {"superclass", Node}, {"body", Node}})},
+    {"Class", vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"superclass", Node}, {"body", Node}})},
     {"Complex", vector<FieldDef>({{"value", String}})},
     // Used as path to Select, scope is Null for end of specified list
     {"Const", vector<FieldDef>({{"scope", Node}, {"name", Name}})},
@@ -67,11 +68,11 @@ NodeDef nodes[] = {
     // @@foo class variable in the lhs of an Mlhs
     {"CVarLhs", vector<FieldDef>({{"name", Name}})},
     // args may be NULL, body does not have to be a block.
-    {"DefMethod", vector<FieldDef>({{"name", Name}, {"args", Node}, {"body", Node}})},
+    {"DefMethod", vector<FieldDef>({{"declLoc", Loc}, {"name", Name}, {"args", Node}, {"body", Node}})},
     // defined?() built-in pseudo-function
     {"Defined", vector<FieldDef>({{"value", Node}})},
     // def <expr>.name singleton-class method def
-    {"DefS", vector<FieldDef>({{"singleton", Node}, {"name", Name}, {"args", Node}, {"body", Node}})},
+    {"DefS", vector<FieldDef>({{"declLoc", Loc}, {"singleton", Node}, {"name", Name}, {"args", Node}, {"body", Node}})},
     // string interpolation, all nodes are concatenated in a single string
     {"DString", vector<FieldDef>({{"nodes", NodeVec}})},
     // symbol interoplation, :"foo#{bar}"
@@ -130,7 +131,7 @@ NodeDef nodes[] = {
     {"Masgn", vector<FieldDef>({{"lhs", Node}, {"rhs", Node}})},
     // multiple left hand sides: `@rules, invalid_rules = ...`
     {"Mlhs", vector<FieldDef>({{"exprs", NodeVec}})},
-    {"Module", vector<FieldDef>({{"name", Node}, {"body", Node}})},
+    {"Module", vector<FieldDef>({{"declLoc", Loc}, {"name", Node}, {"body", Node}})},
     // next(args); `next` is like `return` but for blocks
     {"Next", vector<FieldDef>({{"exprs", NodeVec}})},
     {"Nil", vector<FieldDef>()},
@@ -171,7 +172,7 @@ NodeDef nodes[] = {
     // `return` keyword
     {"Return", vector<FieldDef>({{"exprs", NodeVec}})},
     // class << expr; body; end;
-    {"SClass", vector<FieldDef>({{"expr", Node}, {"body", Node}})},
+    {"SClass", vector<FieldDef>({{"declLoc", Loc}, {"expr", Node}, {"body", Node}})},
     {"Self", vector<FieldDef>()},
     // invocation
     {"Send", vector<FieldDef>({{"receiver", Node}, {"method", Name}, {"args", NodeVec}})},
@@ -210,6 +211,8 @@ string arg_type(FieldType arg) {
             return "const std::string &";
         case Uint:
             return "u4 ";
+        case Loc:
+            return "core::Loc ";
     }
 }
 
@@ -225,6 +228,8 @@ string field_type(FieldType arg) {
             return "const std::string";
         case Uint:
             return "u4";
+        case Loc:
+            return "core::Loc";
     }
 }
 
@@ -279,6 +284,9 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     out << "    buf << \"" << node.name << " {\" << '\\n';" << '\n';
     // Generate fields
     for (auto &arg : node.fields) {
+        if (arg.type == Loc) {
+            continue;
+        }
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case Name:
@@ -304,6 +312,10 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
             case Uint:
                 out << "    buf << \"" << arg.name << " = \" << " << arg.name << " << '\\n';" << '\n';
                 break;
+            case Loc:
+                // Placate the compiler; we skip these
+                abort();
+                break;
         }
     }
     out << "    printTabs(buf, tabs);" << '\n';
@@ -324,6 +336,9 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     int i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
+        if (arg.type == Loc) {
+            continue;
+        }
         maybeComma = "";
         if (++i + 1 < node.fields.size()) {
             maybeComma = ",";
@@ -361,6 +376,10 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
             case Uint:
                 out << R"(    buf << "\")" << arg.name << R"(\" : \"" << )" << arg.name << R"( << "\")" << maybeComma
                     << "\" << '\\n';" << '\n';
+                break;
+            case Loc:
+                // quiet the compiler; we skip Loc fields above
+                abort();
                 break;
         }
     }

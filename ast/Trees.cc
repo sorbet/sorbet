@@ -81,24 +81,25 @@ Expression::Expression(core::Loc loc) : loc(loc) {}
 
 Reference::Reference(core::Loc loc) : Expression(loc) {}
 
-ClassDef::ClassDef(core::Loc loc, core::SymbolRef symbol, unique_ptr<Expression> name, ANCESTORS_store ancestors,
-                   RHS_store rhs, ClassDefKind kind)
-    : Declaration(loc, symbol), kind(kind), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)) {
+ClassDef::ClassDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, unique_ptr<Expression> name,
+                   ANCESTORS_store ancestors, RHS_store rhs, ClassDefKind kind)
+    : Declaration(loc, declLoc, symbol), kind(kind), rhs(move(rhs)), name(move(name)), ancestors(move(ancestors)) {
     core::categoryCounterInc("trees", "classdef");
     core::histogramInc("trees.classdef.kind", (int)kind);
     core::histogramInc("trees.classdef.ancestors", this->ancestors.size());
     _sanityCheck();
 }
 
-MethodDef::MethodDef(core::Loc loc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
+MethodDef::MethodDef(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol, core::NameRef name, ARGS_store args,
                      unique_ptr<Expression> rhs, u4 flags)
-    : Declaration(loc, symbol), rhs(move(rhs)), args(move(args)), name(name), flags(flags) {
+    : Declaration(loc, declLoc, symbol), rhs(move(rhs)), args(move(args)), name(name), flags(flags) {
     core::categoryCounterInc("trees", "methoddef");
     core::histogramInc("trees.methodDef.args", this->args.size());
     _sanityCheck();
 }
 
-Declaration::Declaration(core::Loc loc, core::SymbolRef symbol) : Expression(loc), symbol(symbol) {}
+Declaration::Declaration(core::Loc loc, core::Loc declLoc, core::SymbolRef symbol)
+    : Expression(loc), declLoc(declLoc), symbol(symbol) {}
 
 If::If(core::Loc loc, unique_ptr<Expression> cond, unique_ptr<Expression> thenp, unique_ptr<Expression> elsep)
     : Expression(loc), cond(move(cond)), thenp(move(thenp)), elsep(move(elsep)) {

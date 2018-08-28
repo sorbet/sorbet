@@ -55,7 +55,7 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
         }
     }
 
-    ret.emplace_back(ast::MK::Method(loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs),
+    ret.emplace_back(ast::MK::Method(loc, loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs),
                                      ast::MethodDef::DSLSynthesized));
 
     return ret;

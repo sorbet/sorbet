@@ -1061,7 +1061,7 @@ private:
         if (inits.size() == 1) {
             return move(inits.front());
         }
-        return make_unique<ast::InsSeq>(klass->loc, move(inits), make_unique<ast::EmptyTree>(core::Loc::none()));
+        return make_unique<ast::InsSeq>(klass->declLoc, move(inits), make_unique<ast::EmptyTree>(core::Loc::none()));
     }
 
 public:
@@ -1095,7 +1095,7 @@ public:
         } else {
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, core::Names::staticInit());
         }
-        auto init = make_unique<ast::MethodDef>(inits->loc, sym, core::Names::staticInit(),
+        auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(),
                                                 ast::MethodDef::ARGS_store(), move(inits), true);
         classDef->rhs.emplace_back(move(init));
 

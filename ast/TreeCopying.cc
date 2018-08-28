@@ -28,7 +28,7 @@ unique_ptr<Expression> ClassDef::_deepCopy(const Expression *avoid, bool root) c
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<ClassDef>(this->loc, this->symbol, this->name->_deepCopy(avoid),
+    return make_unique<ClassDef>(this->loc, this->declLoc, this->symbol, this->name->_deepCopy(avoid),
                                  deepCopyVec(avoid, this->ancestors), deepCopyVec(avoid, this->rhs), this->kind);
 }
 
@@ -36,7 +36,7 @@ unique_ptr<Expression> MethodDef::_deepCopy(const Expression *avoid, bool root) 
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<MethodDef>(this->loc, this->symbol, this->name, deepCopyVec(avoid, this->args),
+    return make_unique<MethodDef>(this->loc, this->declLoc, this->symbol, this->name, deepCopyVec(avoid, this->args),
                                   rhs->_deepCopy(avoid), flags);
 }
 

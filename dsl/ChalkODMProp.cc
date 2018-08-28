@@ -13,11 +13,11 @@ namespace sorbet {
 namespace dsl {
 
 unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::Method0(loc, name, move(rhs), ast::MethodDef::DSLSynthesized);
+    return ast::MK::Method0(loc, loc, name, move(rhs), ast::MethodDef::DSLSynthesized);
 }
 
 unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
-    return ast::MK::Method1(loc, name, ast::MK::Local(loc, core::Names::arg0()), move(rhs),
+    return ast::MK::Method1(loc, loc, name, ast::MK::Local(loc, core::Names::arg0()), move(rhs),
                             ast::MethodDef::DSLSynthesized);
 }
 
@@ -244,7 +244,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
         unique_ptr<ast::Expression> arg =
             ast::MK::RestArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, core::Names::opts())));
-        stats.emplace_back(ast::MK::Method1(loc, fk_method, move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
+        stats.emplace_back(ast::MK::Method1(loc, loc, fk_method, move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                             ast::MethodDef::DSLSynthesized));
     }
 
