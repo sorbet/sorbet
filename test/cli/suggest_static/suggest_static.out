@@ -1,0 +1,14 @@
+test/cli/suggest_static/suggest_static.rb:11: Method `foo` does not exist on `A` http://go/e/7003
+    11 |A.new.foo
+        ^^^^^^^^^
+    test/cli/suggest_static/suggest_static.rb:3: Did you mean: `A.foo`?
+     3 |  def self.foo
+          ^^^^^^^^^^^^
+
+test/cli/suggest_static/suggest_static.rb:7: Method `foo` does not exist on `A` http://go/e/7003
+     7 |    foo
+            ^^^
+    test/cli/suggest_static/suggest_static.rb:3: Did you mean: `A.foo`?
+     3 |  def self.foo
+          ^^^^^^^^^^^^
+Errors: 2

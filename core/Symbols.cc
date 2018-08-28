@@ -203,6 +203,14 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatch(const GlobalState
         auto sym = findMemberFuzzyMatchUTF8(gs, name, betterThan);
         if (sym.symbol.exists()) {
             res.emplace_back(sym);
+        } else {
+            auto singleton = lookupSingletonClass(gs);
+            if (singleton.exists()) {
+                sym = singleton.data(gs).findMemberFuzzyMatchUTF8(gs, name, betterThan);
+                if (sym.symbol.exists()) {
+                    res.emplace_back(sym);
+                }
+            }
         }
     } else if (name.data(gs).kind == NameKind::CONSTANT) {
         res = findMemberFuzzyMatchConstant(gs, name, betterThan);

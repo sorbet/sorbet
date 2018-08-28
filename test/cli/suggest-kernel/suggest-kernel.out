@@ -1,5 +1,8 @@
-test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Opus::DB::Model` http://go/e/7003
+test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `Foo` http://go/e/7003
      4 |    raise "hi"
             ^^^^^^^^^^
   Did you mean to `include Kernel` in this module?
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L594: Did you mean: `Kernel#raise`?
+     594 |  def raise(arg0=_, arg1=_, arg2=_); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

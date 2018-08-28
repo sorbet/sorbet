@@ -1,5 +1,5 @@
 # typed: true
-module M
+module Foo
   def foo
     raise "hi"
   end
