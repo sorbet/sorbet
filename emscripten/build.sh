@@ -108,3 +108,6 @@ emcc $CXXFLAGS emscripten/main.cc \
      -s 'EXPORTED_FUNCTIONS=["_typecheck"]' \
      -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]' \
      -o "$here"/sorbet.html
+
+echo "now run:"
+echo "  cp emscripten/sorbet.js emscripten/sorbet.wasm ../sorbet.run/docs/"
