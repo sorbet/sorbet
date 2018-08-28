@@ -122,24 +122,17 @@ void LSPLoop::runLSP() {
                     }
                 } else if (method == LSPMethod::CancelRequest()) {
                     // see if they are cancelling request that we didn't yet even start processing.
-                    for (auto &current : pendingRequests) {
-                        auto fnd = current.FindMember("id");
-                        if (fnd != current.MemberEnd()) {
-                            if (d["params"]["id"].IsString()) {
-                                if (current["id"].IsString() &&
-                                    current["id"].GetString() == d["params"]["id"].GetString()) {
-                                    current.AddMember("cancelled", move(d), current.GetAllocator());
-                                    break;
-                                }
-                            } else if (d["params"]["id"].IsInt()) {
-                                if (current["id"].IsInt() && current["id"].GetInt() == d["params"]["id"].GetInt()) {
-                                    current.AddMember("cancelled", move(d), current.GetAllocator());
-                                    break;
-                                }
-                            } else {
-                                Error::raise("should never happen. Request id is neither int nor string.");
-                            }
-                        }
+                    rapidjson::Document canceledRequest;
+                    auto it = findRequestToBeCancelled(pendingRequests, d);
+                    if (it != pendingRequests.end()) {
+                        auto &requestToBeCancelled = *it;
+                        requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
+                        canceledRequest = move(requestToBeCancelled);
+                        pendingRequests.erase(it);
+                        // move the cancelled request to the front
+                        auto itFront = findFirstPositionAfterLSPInitialization(pendingRequests);
+                        pendingRequests.insert(itFront, move(canceledRequest));
+                        LSPLoop::mergeDidChanges(pendingRequests);
                     }
 
                     // if we started processing it already, well... swallow the cancellation request and continue
@@ -176,6 +169,64 @@ void LSPLoop::runLSP() {
             processRequest(doc);
         }
     }
+}
+
+void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
+    // make pass through pendingRequests and squish any consecutive didChanges that are for the same
+    // file together
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
+        auto &current = *it;
+        auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
+        if (method == LSPMethod::TextDocumentDidChange()) {
+            string thisURI(current["params"]["textDocument"]["uri"].GetString(),
+                           current["params"]["textDocument"]["uri"].GetStringLength());
+            auto nextIt = it + 1;
+            if (nextIt != pendingRequests.end()) {
+                string nextURI((*nextIt)["params"]["textDocument"]["uri"].GetString(),
+                               (*nextIt)["params"]["textDocument"]["uri"].GetStringLength());
+                if (nextURI == thisURI) {
+                    it = pendingRequests.erase(it);
+                    continue;
+                }
+            }
+        }
+        ++it;
+    }
+}
+
+std::deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(deque<rapidjson::Document> &pendingRequests,
+                                                                            rapidjson::Document &cancellationRequest) {
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
+        auto &current = *it;
+        auto fnd = current.FindMember("id");
+        if (fnd != current.MemberEnd()) {
+            if (cancellationRequest["params"]["id"].IsString()) {
+                if (current["id"].IsString() &&
+                    current["id"].GetString() == cancellationRequest["params"]["id"].GetString()) {
+                    return it;
+                }
+            } else if (cancellationRequest["params"]["id"].IsInt()) {
+                if (current["id"].IsInt() && current["id"].GetInt() == cancellationRequest["params"]["id"].GetInt()) {
+                    return it;
+                }
+            } else {
+                Error::raise("should never happen. Request id is neither int nor string.");
+            }
+        }
+    }
+    return pendingRequests.end();
+}
+
+std::deque<rapidjson::Document>::iterator
+LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pendingRequests) {
+    for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
+        auto &current = *it;
+        auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
+        if (method != LSPMethod::LSPMethod::Initialize() && method != LSPMethod::LSPMethod::Initialized()) {
+            return it;
+        }
+    }
+    return pendingRequests.end();
 }
 
 void LSPLoop::sendShowMessageNotification(int messageType, string message) {
