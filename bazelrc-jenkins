@@ -3,3 +3,5 @@ common --color yes
 
 test --crosstool_top=//tools/cpp/ci:toolchain --experimental_multi_threaded_digest --jobs 30
 build --crosstool_top=//tools/cpp/ci:toolchain --experimental_multi_threaded_digest --jobs 30
+
+build:sanitize --linkopt=-lubsan

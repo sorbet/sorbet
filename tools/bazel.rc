@@ -83,7 +83,6 @@ build:sanitize --linkopt=-fsanitize=address --linkopt=-fsanitize-address-use-aft
 build:sanitize --copt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --cxxopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
 build:sanitize --linkopt=-fsanitize=undefined --copt=-fno-sanitize-recover=undefined
-build:sanitize --linkopt=-lubsan
 build:sanitize --define unsanitized=false
 
 build:tsan --copt=-fsanitize=thread
