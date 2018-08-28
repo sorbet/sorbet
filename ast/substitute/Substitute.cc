@@ -29,11 +29,8 @@ private:
         Expression *arg = argp.get();
         while (arg != nullptr) {
             typecase(arg, [&](RestArg *rest) { arg = rest->expr.get(); }, [&](KeywordArg *kw) { arg = kw->expr.get(); },
-                     [&](OptionalArg *opt) {
-                         opt->default_ = TreeMap::apply(ctx, *this, move(opt->default_));
-                         arg = opt->expr.get();
-                     },
-                     [&](BlockArg *opt) { arg = opt->expr.get(); }, [&](ShadowArg *opt) { arg = opt->expr.get(); },
+                     [&](OptionalArg *opt) { arg = opt->expr.get(); }, [&](BlockArg *opt) { arg = opt->expr.get(); },
+                     [&](ShadowArg *opt) { arg = opt->expr.get(); },
                      [&](UnresolvedIdent *nm) {
                          nm->name = subst.substitute(nm->name);
                          arg = nullptr;
@@ -82,7 +79,10 @@ public:
     unique_ptr<Expression> postTransformLiteral(core::MutableContext ctx, unique_ptr<Literal> original) {
         if (original->isString(ctx)) {
             auto nameRef = original->asString(ctx);
-            auto newName = subst.substitute(nameRef);
+            // The 'from' and 'to' GlobalState in this substitution will always be the same,
+            // because the newly created nameRef reuses our current GlobalState id
+            bool allowSameFromTo = true;
+            auto newName = subst.substitute(nameRef, allowSameFromTo);
             if (newName == nameRef) {
                 return original;
             }
@@ -90,7 +90,10 @@ public:
         }
         if (original->isSymbol(ctx)) {
             auto nameRef = original->asSymbol(ctx);
-            auto newName = subst.substitute(nameRef);
+            // The 'from' and 'to' GlobalState in this substitution will always be the same,
+            // because the newly created nameRef reuses our current GlobalState id
+            bool allowSameFromTo = true;
+            auto newName = subst.substitute(nameRef, allowSameFromTo);
             if (newName == nameRef) {
                 return original;
             }

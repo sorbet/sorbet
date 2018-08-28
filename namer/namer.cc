@@ -451,6 +451,7 @@ public:
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
         scopeStack.emplace_back();
+        pushEnclosingArgs();
         ++scopeId;
         core::SymbolRef owner = methodOwner(ctx);
 
@@ -467,7 +468,6 @@ public:
                 // Reparsing the same file
                 method->symbol = sym;
                 fillInArgs(ctx.withOwner(method->symbol), method->args);
-                pushEnclosingArgs(move(method->args));
                 return method;
             }
             if (redefinitionOk(ctx, sym)) {
@@ -491,13 +491,13 @@ public:
             method->symbol.data(ctx).setDSLSynthesized();
         }
 
-        pushEnclosingArgs(move(method->args));
-
         return method;
     }
 
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        method->args = popEnclosingArgs();
+        if (unique_ptr<ast::Local> discoveredBlockArg = popEnclosingArgs()) {
+            method->args.emplace_back(move(discoveredBlockArg));
+        }
         ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size());
         scopeStack.pop_back();
         if (scopeStack.back().moduleFunctionActive) {
@@ -528,6 +528,7 @@ public:
 
         auto outerArgs = scopeStack.back().args;
         scopeStack.emplace_back();
+        pushEnclosingArgs();
         scopeStack.back().args = move(outerArgs);
         ++scopeId;
         auto &parent = *(scopeStack.end() - 2);
@@ -542,13 +543,13 @@ public:
         // them in `frame.locals`
         fillInArgs(ctx.withOwner(blk->symbol), blk->args);
 
-        pushEnclosingArgs(move(blk->args));
-
         return blk;
     }
 
     unique_ptr<ast::Block> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
-        blk->args = popEnclosingArgs();
+        if (unique_ptr<ast::Local> discoveredBlockArg = popEnclosingArgs()) {
+            blk->args.emplace_back(move(discoveredBlockArg));
+        }
         scopeStack.pop_back();
         return blk;
     }
@@ -740,17 +741,19 @@ public:
             }
         }
         if (!blockArg) {
+            // Found yield, and method doesn't have a blk arg, so let's make one.
             auto name = core::Names::blkArg();
             blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
             blockArg.data(ctx).setBlockArgument();
             blockArg.data(ctx).resultType = core::Types::untyped();
             method.data(ctx).arguments().push_back(blockArg);
 
-            // Also put it in the MethodDef since we rely on that being correct for blocks
+            // Save it on ourself so we can stick it into the MethodDef's arg list in postTransformMethodDef
             core::LocalVariable local = enterLocal(ctx, name);
             scopeStack.back().locals[name] = local;
-            auto localExpr = make_unique<ast::Local>(yield->loc, local);
-            peekEnclosingArgs().emplace_back(move(localExpr));
+            auto &discoveredBlockArg = peekEnclosingArgs();
+            ENFORCE(!discoveredBlockArg, "Already created a Local for this block arg!");
+            discoveredBlockArg = make_unique<ast::Local>(yield->loc, local);
         }
 
         auto name = blockArg.data(ctx).name;
@@ -769,16 +772,18 @@ private:
         scopeId = 0;
     }
 
-    vector<ast::MethodDef::ARGS_store> enclosingArgsStack;
-    void pushEnclosingArgs(ast::MethodDef::ARGS_store arg) {
-        enclosingArgsStack.emplace_back(move(arg));
+    vector<unique_ptr<ast::Local>> enclosingArgsStack;
+    void pushEnclosingArgs() {
+        // Create a new box to hold any block arg we might discover
+        enclosingArgsStack.emplace_back();
     }
-    ast::MethodDef::ARGS_store popEnclosingArgs() {
+    unique_ptr<ast::Local> popEnclosingArgs() {
+        ENFORCE(enclosingArgsStack.size() > 0, "Forgot to pushEnclosingArgs(). Have we pushed in every branch?");
         auto ret = move(enclosingArgsStack.back());
         enclosingArgsStack.pop_back();
         return ret;
     }
-    ast::MethodDef::ARGS_store &peekEnclosingArgs() {
+    unique_ptr<ast::Local> &peekEnclosingArgs() {
         return enclosingArgsStack.back();
     }
 }; // namespace namer

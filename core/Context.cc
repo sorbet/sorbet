@@ -61,7 +61,11 @@ SymbolRef MutableContext::contextClass() const {
 }
 
 GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
-                                       const GlobalState *optionalCommonParent) {
+                                       const GlobalState *optionalCommonParent)
+#ifdef DEBUG_MODE
+    : toGlobalStateId(to.globalStateId)
+#endif
+{
     ENFORCE(from.symbols.size() == to.symbols.size(), "Can't substitute symbols yet");
 
     const_cast<GlobalState &>(from).sanityCheck();

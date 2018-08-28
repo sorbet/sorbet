@@ -26,6 +26,7 @@ void Block::_sanityCheck() {
 
 void BlockArg::_sanityCheck() {
     ENFORCE(expr);
+    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Break::_sanityCheck() {
@@ -98,6 +99,7 @@ void InsSeq::_sanityCheck() {
 
 void KeywordArg::_sanityCheck() {
     ENFORCE(expr);
+    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Local::_sanityCheck() {
@@ -119,6 +121,7 @@ void Next::_sanityCheck() {
 void OptionalArg::_sanityCheck() {
     ENFORCE(expr);
     ENFORCE(default_);
+    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Return::_sanityCheck() {
@@ -144,6 +147,7 @@ void RescueCase::_sanityCheck() {
 
 void RestArg::_sanityCheck() {
     ENFORCE(expr);
+    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void Retry::_sanityCheck() {}
@@ -162,6 +166,7 @@ void Send::_sanityCheck() {
 
 void ShadowArg::_sanityCheck() {
     ENFORCE(expr);
+    ENFORCE(!isa_tree<OptionalArg>(expr.get()), "OptionalArgs must be at the top-level of an arg.");
 }
 
 void UnresolvedIdent::_sanityCheck() {

@@ -319,6 +319,13 @@ private:
                     v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
+
+                for (auto &arg : v->args) {
+                    // Only OptionalArgs have subexpressions within them.
+                    if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
+                        optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
+                    }
+                }
                 v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol));
 
                 if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
@@ -626,6 +633,12 @@ private:
                         ctx, move(v), func);
                 }
 
+                for (auto &arg : v->args) {
+                    // Only OptionalArgs have subexpressions within them.
+                    if (auto *optArg = cast_tree<OptionalArg>(arg.get())) {
+                        optArg->default_ = mapIt(move(optArg->default_), ctx.withOwner(v->symbol));
+                    }
+                }
                 v->body = mapIt(move(v->body), ctx.withOwner(v->symbol));
 
                 if (HAS_MEMBER_postTransformBlock<FUNC>::value) {

@@ -90,8 +90,15 @@ class GlobalSubstitution {
 public:
     GlobalSubstitution(const GlobalState &from, GlobalState &to, const GlobalState *optionalCommonParent = nullptr);
 
-    NameRef substitute(NameRef from) const {
-        ENFORCE(from._id < nameSubstitution.size(), "name substitution index out of bounds");
+    NameRef substitute(NameRef from, bool allowSameFromTo = false) const {
+#ifdef DEBUG_MODE
+        if (!allowSameFromTo) {
+            ENFORCE(from.globalStateId != toGlobalStateId, "substituting a name twice!");
+        }
+#endif
+        ENFORCE(from._id < nameSubstitution.size(), "name substitution index out of bounds, got " +
+                                                        std::to_string(from._id) + " where subsitution size is " +
+                                                        std::to_string(nameSubstitution.size()));
         return nameSubstitution[from._id];
     }
 
@@ -101,6 +108,10 @@ private:
     std::vector<NameRef> nameSubstitution;
     // set if no substitution is actually necessary
     bool fastPath;
+
+#ifdef DEBUG_MODE
+    const int toGlobalStateId;
+#endif
 };
 
 } // namespace core
