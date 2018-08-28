@@ -1150,7 +1150,16 @@ string KeywordArg::nodeName() {
 }
 
 string OptionalArg::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ expr = " + expr->showRaw(gs, tabs) + " }";
+    stringstream buf;
+    buf << nodeName() << "{" << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "expr = " + expr->showRaw(gs, tabs + 1) << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "default_ = " + default_->showRaw(gs, tabs + 1) << '\n';
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
 }
 
 string OptionalArg::nodeName() {

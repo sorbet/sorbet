@@ -1,0 +1,172 @@
+ClassDef{
+  name = UnresolvedConstantLit{
+    scope = EmptyTree
+    cnst = <constant:A>
+  }<<constant:<todo sym>>>
+  ancestors = [ConstantLit{
+      orig = nullptr
+      symbol = ::<todo sym>
+      typeAlias = nullptr
+    }]
+  rhs = [
+    MethodDef{
+      flags = 0
+      name = take_arguments<<constant:<todo sym>>>
+      args = [UnresolvedIdent{
+          kind = Local
+          name = a
+        }, OptionalArg{
+          expr = UnresolvedIdent{
+            kind = Local
+            name = b
+          }
+          default_ = Literal{ value = 1 }
+        }, RestArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = c
+        } }, KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = d
+        } }, OptionalArg{
+          expr = KeywordArg{ expr = UnresolvedIdent{
+            kind = Local
+            name = e
+          } }
+          default_ = Literal{ value = 2 }
+        }, RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = f
+        } } }, BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = g
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Array{
+            elems = [
+              UnresolvedIdent{
+                kind = Local
+                name = a
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = b
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = c
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = d
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = e
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = f
+              }
+              UnresolvedIdent{
+                kind = Local
+                name = g
+              }
+            ]
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = h
+            }
+            rhs = Literal{ value = 1 }
+          }
+        ],
+        expr = Send{
+          recv = Self{ claz = ::<todo sym> }
+          fun = proc
+          block = Block {
+            args = [
+              UnresolvedIdent{
+                kind = Local
+                name = a
+              }
+              OptionalArg{
+                expr = UnresolvedIdent{
+                  kind = Local
+                  name = b
+                }
+                default_ = Literal{ value = 1 }
+              }
+              RestArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = c
+              } }
+              KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = d
+              } }
+              OptionalArg{
+                expr = KeywordArg{ expr = UnresolvedIdent{
+                  kind = Local
+                  name = e
+                } }
+                default_ = Literal{ value = 2 }
+              }
+              RestArg{ expr = KeywordArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = f
+              } } }
+              BlockArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = g
+              } }
+              ShadowArg{ expr = UnresolvedIdent{
+                kind = Local
+                name = h
+              } }
+            ]
+            body = Array{
+              elems = [
+                UnresolvedIdent{
+                  kind = Local
+                  name = a
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = b
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = c
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = d
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = e
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = f
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = g
+                }
+                UnresolvedIdent{
+                  kind = Local
+                  name = h
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+      }
+    }
+  ]
+}
