@@ -955,6 +955,7 @@ void GlobalState::addAnnotation(Loc loc, string str, AnnotationPos pos) const {
 }
 
 string GlobalState::showAnnotatedSource(FileRef file) const {
+    unique_lock<mutex> lk(annotations_mtx);
     if (annotations.empty()) {
         return "";
     }
