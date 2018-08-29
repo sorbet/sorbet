@@ -4,33 +4,30 @@ namespace sorbet {
 namespace core {
 
 UnfreezeSymbolTable::UnfreezeSymbolTable(GlobalState &gs) : gs(gs) {
-    this->oldState = gs.unfreezeSymbolTable();
+    auto oldState = gs.unfreezeSymbolTable();
+    ENFORCE(oldState);
 }
 
 UnfreezeSymbolTable::~UnfreezeSymbolTable() {
-    if (oldState) {
-        gs.freezeSymbolTable();
-    }
+    gs.freezeSymbolTable();
 }
 
 UnfreezeNameTable::UnfreezeNameTable(GlobalState &gs) : gs(gs) {
-    this->oldState = gs.unfreezeNameTable();
+    auto oldState = gs.unfreezeNameTable();
+    ENFORCE(oldState);
 }
 
 UnfreezeNameTable::~UnfreezeNameTable() {
-    if (oldState) {
-        gs.freezeNameTable();
-    }
+    gs.freezeNameTable();
 }
 
 UnfreezeFileTable::UnfreezeFileTable(GlobalState &gs) : gs(gs) {
-    this->oldState = gs.unfreezeFileTable();
+    auto oldState = gs.unfreezeFileTable();
+    ENFORCE(oldState);
 }
 
 UnfreezeFileTable::~UnfreezeFileTable() {
-    if (oldState) {
-        gs.freezeFileTable();
-    }
+    gs.freezeFileTable();
 }
 
 } // namespace core

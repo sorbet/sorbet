@@ -3,6 +3,7 @@
 #include "Errors.h"
 #include "Types.h"
 #include "core/Names/core.h"
+#include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include <utility>
 
@@ -116,6 +117,9 @@ GlobalState::GlobalState(const shared_ptr<ErrorQueue> &errorQueue)
 }
 
 void GlobalState::initEmpty() {
+    UnfreezeFileTable fileTableAccess(*this);
+    UnfreezeNameTable nameTableAccess(*this);
+    UnfreezeSymbolTable symTableAccess(*this);
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
     names[0].raw.utf8 = absl::string_view();

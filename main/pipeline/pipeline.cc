@@ -151,6 +151,7 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
 
             {
                 logger->trace("Inlining DSLs: {}", file.data(lgs).path());
+                core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
                 core::ErrorRegion errs(lgs, file);
                 dslsInlined = dsl::DSL::run(ctx, move(ast));
             }
@@ -195,14 +196,17 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
         fileq = make_shared<ConcurrentBoundedQueue<core::FileRef>>(frs.size());
         resultq = make_shared<BlockingBoundedQueue<thread_result>>(frs.size());
     }
+    {
+        core::UnfreezeFileTable unfreezeFiles(*gs);
 
-    for (auto f : frs) {
-        logger->trace("enqueue: {}", f);
-        auto job = gs->findFileByPath(f);
-        if (!job.exists()) {
-            job = gs->reserveFileRef(f);
+        for (auto f : frs) {
+            logger->trace("enqueue: {}", f);
+            auto job = gs->findFileByPath(f);
+            if (!job.exists()) {
+                job = gs->reserveFileRef(f);
+            }
+            fileq->push(move(job), 1);
         }
-        fileq->push(move(job), 1);
     }
 
     gs->sanityCheck();

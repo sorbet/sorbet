@@ -155,9 +155,9 @@ private:
     bool unfreezeSymbolTable();
     bool unfreezeNameTable();
     bool unfreezeFileTable();
-    bool nameTableFrozen = false;
-    bool symbolTableFrozen = false;
-    bool fileTableFrozen = false;
+    bool nameTableFrozen = true;
+    bool symbolTableFrozen = true;
+    bool fileTableFrozen = true;
 
     void expandNames(int growBy = 2);
 

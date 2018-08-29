@@ -65,6 +65,8 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
                 core::MutableContext ctx(gs, core::Symbols::root());
                 logger->trace("Naming: {}", file.data(gs).path());
                 core::ErrorRegion errs(gs, file);
+                core::UnfreezeSymbolTable symbolTable(gs);
+                core::UnfreezeNameTable nameTable(gs);
                 tree = sorbet::namer::Namer::run(ctx, move(tree));
                 i++;
             } catch (SRubyException &) {
@@ -79,6 +81,9 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
             Timer timeit(logger, "Incremental resolving");
             logger->trace("Resolving (incremental pass)...");
             core::ErrorRegion errs(gs, sorbet::core::FileRef());
+            core::UnfreezeSymbolTable symbolTable(gs);
+            core::UnfreezeNameTable nameTable(gs);
+
             what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
         }
     } catch (SRubyException &) {
@@ -124,12 +129,14 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         make_shared<core::GlobalState>((make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
                     lgs->silenceErrors = true;
-                    core::UnfreezeFileTable fileTableAccess(*lgs);
-                    core::UnfreezeSymbolTable symbolTable(*lgs);
-                    core::UnfreezeNameTable nameTable(*lgs);
-                    auto fref = lgs->enterFile(files[job]);
+                    core::FileRef fref;
+                    {
+                        core::UnfreezeFileTable fileTableAccess(*lgs);
+                        fref = lgs->enterFile(files[job]);
+                    }
                     vector<unique_ptr<ast::Expression>> single;
                     unique_ptr<KeyValueStore> kvstore;
+
                     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
                     pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
                     threadResult.emplace_back(make_pair(job, lgs->hash()));
@@ -239,31 +246,34 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
     ENFORCE(changedFiles.size() == hashes.size());
     vector<core::FileRef> subset;
     int i = -1;
-    for (auto &f : changedFiles) {
-        ++i;
-        if (!f || isTestFile(f)) {
-            continue;
-        }
-        auto wasFiles = initialGS->filesUsed();
-        auto fref = addNewFile(f);
-        if (wasFiles != initialGS->filesUsed()) {
-            logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
-            good = false;
-            if (globalStateHashes.size() <= fref.id()) {
-                globalStateHashes.resize(fref.id() + 1);
-                globalStateHashes[fref.id()] = hashes[i];
+    {
+        core::UnfreezeFileTable fileTableAccess(*initialGS);
+        for (auto &f : changedFiles) {
+            ++i;
+            if (!f || isTestFile(f)) {
+                continue;
             }
-        } else {
-            if (hashes[i] != globalStateHashes[fref.id()]) {
-                logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+            auto wasFiles = initialGS->filesUsed();
+            auto fref = addNewFile(f);
+            if (wasFiles != initialGS->filesUsed()) {
+                logger->debug("Taking sad path because {} is a new file", changedFiles[i]->path());
                 good = false;
-                globalStateHashes[fref.id()] = hashes[i];
-            }
-            if (good) {
-                finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
-            }
+                if (globalStateHashes.size() <= fref.id()) {
+                    globalStateHashes.resize(fref.id() + 1);
+                    globalStateHashes[fref.id()] = hashes[i];
+                }
+            } else {
+                if (hashes[i] != globalStateHashes[fref.id()]) {
+                    logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
+                    good = false;
+                    globalStateHashes[fref.id()] = hashes[i];
+                }
+                if (good) {
+                    finalGs = core::GlobalState::replaceFile(move(finalGs), fref, changedFiles[i]);
+                }
 
-            subset.emplace_back(fref);
+                subset.emplace_back(fref);
+            }
         }
     }
 

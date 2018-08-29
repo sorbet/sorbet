@@ -8,7 +8,6 @@ namespace core {
 
 class UnfreezeSymbolTable {
     GlobalState &gs;
-    bool oldState;
 
 public:
     UnfreezeSymbolTable(GlobalState &gs);
@@ -17,7 +16,6 @@ public:
 };
 class UnfreezeNameTable {
     GlobalState &gs;
-    bool oldState;
 
 public:
     UnfreezeNameTable(GlobalState &gs);
@@ -25,7 +23,6 @@ public:
 };
 class UnfreezeFileTable {
     GlobalState &gs;
-    bool oldState;
 
 public:
     UnfreezeFileTable(GlobalState &gs);
