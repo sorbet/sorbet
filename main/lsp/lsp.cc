@@ -108,7 +108,7 @@ void LSPLoop::drainErrors() {
     auto iter = errorsAccumulated.begin();
     for (; iter != errorsAccumulated.end();) {
         if (iter->first.data(*initialGS).sourceType == core::File::TombStone) {
-            errorsAccumulated.erase(iter++);
+            iter = errorsAccumulated.erase(iter);
         } else {
             ++iter;
         }

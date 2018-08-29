@@ -118,46 +118,27 @@ void LSPLoop::runLSP() {
                 continue;
             }
 
-            if (!guardedState.pendingRequests.empty()) {
-                // see if we can be smarter about requests that are waiting to be processed.
-                if (method == LSPMethod::TextDocumentDidChange()) {
-                    // see if previous notification is modification of the same file, if so, take the most recent
-                    // version.
-                    // TODO: if we ever support diffs, this would need to be extended.
-                    auto &prev = guardedState.pendingRequests.back();
-                    auto prevMethod =
-                        LSPMethod::getByName({prev["method"].GetString(), prev["method"].GetStringLength()});
-                    if (prevMethod == LSPMethod::TextDocumentDidChange()) {
-                        string thisURI(d["params"]["textDocument"]["uri"].GetString(),
-                                       d["params"]["textDocument"]["uri"].GetStringLength());
-                        string prevURI(prev["params"]["textDocument"]["uri"].GetString(),
-                                       prev["params"]["textDocument"]["uri"].GetStringLength());
-                        if (prevURI == thisURI) {
-                            guardedState.pendingRequests.pop_back();
-                        }
-                    }
-                } else if (method == LSPMethod::CancelRequest()) {
-                    // see if they are cancelling request that we didn't yet even start processing.
-                    rapidjson::Document canceledRequest;
-                    auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
-                    if (it != guardedState.pendingRequests.end()) {
-                        auto &requestToBeCancelled = *it;
-                        requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
-                        canceledRequest = move(requestToBeCancelled);
-                        guardedState.pendingRequests.erase(it);
-                        // move the cancelled request to the front
-                        auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
-                        guardedState.pendingRequests.insert(itFront, move(canceledRequest));
-                        LSPLoop::mergeDidChanges(guardedState.pendingRequests);
-                    }
-
-                    // if we started processing it already, well... swallow the cancellation request and continue
-                    // computing.
-                    continue;
+            if (method == LSPMethod::CancelRequest()) {
+                // see if they are cancelling request that we didn't yet even start processing.
+                rapidjson::Document canceledRequest;
+                auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
+                if (it != guardedState.pendingRequests.end()) {
+                    auto &requestToBeCancelled = *it;
+                    requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
+                    canceledRequest = move(requestToBeCancelled);
+                    guardedState.pendingRequests.erase(it);
+                    // move the cancelled request to the front
+                    auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
+                    guardedState.pendingRequests.insert(itFront, move(canceledRequest));
+                    LSPLoop::mergeDidChanges(guardedState.pendingRequests);
                 }
+                // if we started processing it already, well... swallow the cancellation request and continue
+                // computing.
+                continue;
             }
 
             guardedState.pendingRequests.emplace_back(move(d));
+            LSPLoop::mergeDidChanges(guardedState.pendingRequests);
         }
     });
 
@@ -184,9 +165,9 @@ void LSPLoop::runLSP() {
 }
 
 void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
-    { return; } // this function is buggy and @sctu is working on a fix
     // make pass through pendingRequests and squish any consecutive didChanges that are for the same
     // file together
+    // TODO: if we ever support diffs, this would need to be extended
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
         auto &current = *it;
         auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
@@ -195,11 +176,15 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
                            current["params"]["textDocument"]["uri"].GetStringLength());
             auto nextIt = it + 1;
             if (nextIt != pendingRequests.end()) {
-                string nextURI((*nextIt)["params"]["textDocument"]["uri"].GetString(),
-                               (*nextIt)["params"]["textDocument"]["uri"].GetStringLength());
-                if (nextURI == thisURI) {
-                    it = pendingRequests.erase(it);
-                    continue;
+                auto nextMethod =
+                    LSPMethod::getByName({(*nextIt)["method"].GetString(), (*nextIt)["method"].GetStringLength()});
+                if (nextMethod == LSPMethod::TextDocumentDidChange()) {
+                    string nextURI((*nextIt)["params"]["textDocument"]["uri"].GetString(),
+                                   (*nextIt)["params"]["textDocument"]["uri"].GetStringLength());
+                    if (nextURI == thisURI) {
+                        it = pendingRequests.erase(it);
+                        continue;
+                    }
                 }
             }
         }
