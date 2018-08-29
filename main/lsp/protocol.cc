@@ -1,7 +1,6 @@
+#include "absl/synchronization/mutex.h"
 #include "lsp.h"
-#include <condition_variable> // std::condition_variable
 #include <deque>
-#include <mutex> // std::mutex, std::unique_lock
 
 using namespace std;
 
@@ -69,46 +68,63 @@ bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger
     return true;
 }
 
+class NotifyOnDestruction {
+    absl::Mutex &mutex;
+    bool &flag;
+
+public:
+    NotifyOnDestruction(absl::Mutex &mutex, bool &flag) : mutex(mutex), flag(flag){};
+    ~NotifyOnDestruction() {
+        absl::MutexLock lck(&mutex);
+        flag = true;
+    }
+};
+
 void LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
-    deque<rapidjson::Document> pendingRequests;
-    bool terminate = false;
-    mutex mtx;
-    condition_variable cv;
+    struct GuardedState {
+        deque<rapidjson::Document> pendingRequests;
+        bool terminate = false;
+        bool paused = false;
+    } guardedState;
+    absl::Mutex mtx;
+
     rapidjson::MemoryPoolAllocator<>
         inner_alloc; // we need objects created by inner thread to outlive the thread itself.
 
-    auto readerThread = runInAThread([&pendingRequests, &mtx, &cv, &terminate, logger = this->logger, &inner_alloc] {
+    auto readerThread = runInAThread([&guardedState, &mtx, logger = this->logger, &inner_alloc] {
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
-        unique_lock<mutex> globalLock(mtx, defer_lock);
-        while (!terminate) {
+        NotifyOnDestruction notify(mtx, guardedState.terminate);
+        while (true) {
             rapidjson::Document d(&inner_alloc);
+
             if (!getNewRequest(d, logger)) {
-                terminate = true;
                 break;
             }
-            unique_ptr<unique_lock<mutex>> lck = globalLock ? nullptr : make_unique<unique_lock<mutex>>(mtx);
-            if (!pendingRequests.empty()) {
-                // see if we can be smarter about requests that are waiting to be processed.
+            absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
-                const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
-                if (method == LSPMethod::Pause()) {
-                    if (!globalLock) {
-                        ENFORCE(lck);
-                        globalLock = move(*lck);
-                    }
-                    continue;
-                } else if (method == LSPMethod::Resume()) {
-                    if (globalLock) {
-                        globalLock.unlock();
-                    }
-                    continue;
-                } else if (method == LSPMethod::TextDocumentDidChange()) {
+            const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
+
+            if (method == LSPMethod::Pause()) {
+                ENFORCE(!guardedState.paused);
+                logger->error("Pausing");
+                guardedState.paused = true;
+                continue;
+            } else if (method == LSPMethod::Resume()) {
+                logger->error("Resuming");
+                ENFORCE(guardedState.paused);
+                guardedState.paused = false;
+                continue;
+            }
+
+            if (!guardedState.pendingRequests.empty()) {
+                // see if we can be smarter about requests that are waiting to be processed.
+                if (method == LSPMethod::TextDocumentDidChange()) {
                     // see if previous notification is modification of the same file, if so, take the most recent
                     // version.
                     // TODO: if we ever support diffs, this would need to be extended.
-                    auto &prev = pendingRequests.back();
+                    auto &prev = guardedState.pendingRequests.back();
                     auto prevMethod =
                         LSPMethod::getByName({prev["method"].GetString(), prev["method"].GetStringLength()});
                     if (prevMethod == LSPMethod::TextDocumentDidChange()) {
@@ -117,22 +133,22 @@ void LSPLoop::runLSP() {
                         string prevURI(prev["params"]["textDocument"]["uri"].GetString(),
                                        prev["params"]["textDocument"]["uri"].GetStringLength());
                         if (prevURI == thisURI) {
-                            pendingRequests.pop_back();
+                            guardedState.pendingRequests.pop_back();
                         }
                     }
                 } else if (method == LSPMethod::CancelRequest()) {
                     // see if they are cancelling request that we didn't yet even start processing.
                     rapidjson::Document canceledRequest;
-                    auto it = findRequestToBeCancelled(pendingRequests, d);
-                    if (it != pendingRequests.end()) {
+                    auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
+                    if (it != guardedState.pendingRequests.end()) {
                         auto &requestToBeCancelled = *it;
                         requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
                         canceledRequest = move(requestToBeCancelled);
-                        pendingRequests.erase(it);
+                        guardedState.pendingRequests.erase(it);
                         // move the cancelled request to the front
-                        auto itFront = findFirstPositionAfterLSPInitialization(pendingRequests);
-                        pendingRequests.insert(itFront, move(canceledRequest));
-                        LSPLoop::mergeDidChanges(pendingRequests);
+                        auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
+                        guardedState.pendingRequests.insert(itFront, move(canceledRequest));
+                        LSPLoop::mergeDidChanges(guardedState.pendingRequests);
                     }
 
                     // if we started processing it already, well... swallow the cancellation request and continue
@@ -141,29 +157,25 @@ void LSPLoop::runLSP() {
                 }
             }
 
-            pendingRequests.emplace_back(move(d));
-            cv.notify_one();
-        }
-        {
-            // signal that coordinator thread should die
-            unique_ptr<unique_lock<mutex>> lck = globalLock ? nullptr : make_unique<unique_lock<mutex>>(mtx);
-            terminate = true;
-            cv.notify_one();
+            guardedState.pendingRequests.emplace_back(move(d));
         }
     });
 
     while (true) {
         rapidjson::Document doc;
         {
-            unique_lock<mutex> lck(mtx);
-            while (pendingRequests.empty() && !terminate) {
-                cv.wait(lck);
-            }
-            if (terminate) {
+            absl::MutexLock lck(&mtx);
+            mtx.Await(absl::Condition(
+                +[](GuardedState *guardedState) -> bool {
+                    return guardedState->terminate || (!guardedState->paused && !guardedState->pendingRequests.empty());
+                },
+                &guardedState));
+            ENFORCE(!guardedState.paused);
+            if (guardedState.terminate) {
                 return;
             }
-            doc.CopyFrom(pendingRequests.front(), alloc);
-            pendingRequests.pop_front();
+            doc.CopyFrom(guardedState.pendingRequests.front(), alloc);
+            guardedState.pendingRequests.pop_front();
         }
         if (!handleReplies(doc)) {
             processRequest(doc);

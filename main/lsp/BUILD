@@ -22,6 +22,7 @@ cc_library(
         "//main/pipeline",
         "//payload/binary",
         "//payload/text",
+        "@com_google_absl//absl/synchronization",
         "@rapidjson",
     ],
 )
