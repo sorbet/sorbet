@@ -184,6 +184,7 @@ void LSPLoop::runLSP() {
 }
 
 void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
+    { return; } // this function is buggy and @sctu is working on a fix
     // make pass through pendingRequests and squish any consecutive didChanges that are for the same
     // file together
     for (auto it = pendingRequests.begin(); it != pendingRequests.end();) {
