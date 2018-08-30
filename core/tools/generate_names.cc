@@ -317,10 +317,14 @@ int main(int argc, char **argv) {
             cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
-
+        header << "namespace sorbet {" << '\n';
+        header << "namespace core {" << '\n';
+        header << "class GlobalState;" << '\n';
         header << "namespace Names {" << '\n';
         header << "    void registerNames(GlobalState &gs);" << '\n';
-        header << "};" << '\n';
+        header << "}" << '\n';
+        header << "}" << '\n';
+        header << "}" << '\n';
     }
 
     // emit initialization .cc file
@@ -331,6 +335,8 @@ int main(int argc, char **argv) {
             return 1;
         }
         classfile << "#include \"core/GlobalState.h\"" << '\n' << '\n';
+        classfile << "#include \"core/Names.h\"" << '\n' << '\n';
+        classfile << "#include \"core/Names_gen.h\"" << '\n' << '\n';
         classfile << "namespace sorbet {" << '\n';
         classfile << "namespace core {" << '\n';
         classfile << "namespace {" << '\n';
@@ -368,7 +374,7 @@ int main(int argc, char **argv) {
             return 1;
         }
 
-        header << "#include \"core/Names.h\"" << '\n' << '\n';
+        header << "#include \"core/NameRef.h\"" << '\n' << '\n';
         header << "namespace sorbet {" << '\n';
         header << "namespace core {" << '\n';
         header << "namespace Names {" << '\n';

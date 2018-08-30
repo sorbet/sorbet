@@ -32,5 +32,9 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
     return result;
 }
 
+TypeAndOrigins::~TypeAndOrigins() {
+    histogramInc("TypeAndOrigins.origins.size", origins.size());
+}
+
 } // namespace core
 } // namespace sorbet

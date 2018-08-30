@@ -1,8 +1,8 @@
 #ifndef SORBET_TYPECASE_H
 #define SORBET_TYPECASE_H
 
-#include "Error.h"
-#include "common.h"
+#include "common/Error.h"
+#include "common/common.h"
 #include <functional>
 #include <string>
 #include <typeinfo>

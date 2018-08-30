@@ -1,6 +1,7 @@
 #include "absl/base/casts.h"
 #include "common/common.h"
 #include "core/Context.h"
+#include "core/Hashing.h"
 #include "core/Names.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"

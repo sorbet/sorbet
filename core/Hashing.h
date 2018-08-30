@@ -1,7 +1,7 @@
 #ifndef SORBET_HASHING_H
 #define SORBET_HASHING_H
 
-#include "Names.h"
+#include "core/Names.h"
 
 namespace sorbet {
 namespace core {

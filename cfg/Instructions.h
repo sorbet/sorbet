@@ -1,7 +1,11 @@
 #ifndef SORBET_INSTRUCTIONS_H
 #define SORBET_INSTRUCTIONS_H
 
-#include "core/core.h"
+#include "core/Context.h"
+#include "core/GlobalState.h"
+#include "core/LocalVariable.h"
+#include "core/NameRef.h"
+#include "core/Types.h"
 #include <climits>
 #include <memory>
 #include <unordered_map>

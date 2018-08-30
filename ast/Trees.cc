@@ -1,4 +1,5 @@
-#include "Trees.h"
+#include "ast/Trees.h"
+#include "core/Symbols.h"
 #include <sstream>
 #include <utility>
 
@@ -1180,6 +1181,10 @@ string ShadowArg::nodeName() {
 
 string BlockArg::nodeName() {
     return "BlockArg";
+}
+
+core::SymbolRef ClassDef::parent(core::MutableContext ctx) const {
+    return symbol.data(ctx).parent(ctx);
 }
 
 } // namespace ast

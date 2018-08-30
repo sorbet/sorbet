@@ -1,4 +1,4 @@
-#include "BufferedErrorQueue.h"
+#include "core/BufferedErrorQueue.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;

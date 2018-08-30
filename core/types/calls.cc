@@ -1,5 +1,7 @@
 #include "common/common.h"
+#include "core/GlobalState.h"
 #include "core/Names/core.h"
+#include "core/Symbols.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 #include "core/errors/infer.h"
@@ -822,7 +824,7 @@ SymbolRef unwrapSymbol(const shared_ptr<Type> &typeO) {
 }
 namespace {
 
-class T_untyped : public Symbol::IntrinsicMethod {
+class T_untyped : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -831,7 +833,7 @@ public:
     }
 } T_untyped;
 
-class T_must : public Symbol::IntrinsicMethod {
+class T_must : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -855,7 +857,7 @@ public:
     }
 } T_must;
 
-class T_any : public Symbol::IntrinsicMethod {
+class T_any : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -876,7 +878,7 @@ public:
     }
 } T_any;
 
-class T_all : public Symbol::IntrinsicMethod {
+class T_all : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -897,7 +899,7 @@ public:
     }
 } T_all;
 
-class T_revealType : public Symbol::IntrinsicMethod {
+class T_revealType : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -914,7 +916,7 @@ public:
     }
 } T_revealType;
 
-class Object_class : public Symbol::IntrinsicMethod {
+class Object_class : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -928,7 +930,7 @@ public:
     }
 } Object_class;
 
-class Class_new : public Symbol::IntrinsicMethod {
+class Class_new : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -966,7 +968,7 @@ public:
     }
 } Class_new;
 
-class T_Generic_squareBrackets : public Symbol::IntrinsicMethod {
+class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1029,7 +1031,7 @@ public:
     }
 } T_Generic_squareBrackets;
 
-class Magic_buildHash : public Symbol::IntrinsicMethod {
+class Magic_buildHash : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1051,7 +1053,7 @@ public:
     }
 } Magic_buildHash;
 
-class Magic_buildArray : public Symbol::IntrinsicMethod {
+class Magic_buildArray : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1080,7 +1082,7 @@ public:
     }
 } Magic_buildArray;
 
-class Magic_expandSplat : public Symbol::IntrinsicMethod {
+class Magic_expandSplat : public IntrinsicMethod {
     static shared_ptr<Type> expandArray(Context ctx, const shared_ptr<Type> &type, int expandTo) {
         if (auto *ot = cast_type<OrType>(type.get())) {
             return Types::any(ctx, expandArray(ctx, ot->left, expandTo), expandArray(ctx, ot->right, expandTo));
@@ -1125,7 +1127,7 @@ public:
     }
 } Magic_expandSplat;
 
-class Tuple_squareBrackets : public Symbol::IntrinsicMethod {
+class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1151,7 +1153,7 @@ public:
     }
 } Tuple_squareBrackets;
 
-class Tuple_last : public Symbol::IntrinsicMethod {
+class Tuple_last : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1169,7 +1171,7 @@ public:
     }
 } Tuple_last;
 
-class Tuple_first : public Symbol::IntrinsicMethod {
+class Tuple_first : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1187,7 +1189,7 @@ public:
     }
 } Tuple_first;
 
-class Tuple_minMax : public Symbol::IntrinsicMethod {
+class Tuple_minMax : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1205,7 +1207,7 @@ public:
     }
 } Tuple_minMax;
 
-class Shape_merge : public Symbol::IntrinsicMethod {
+class Shape_merge : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1237,7 +1239,7 @@ public:
     }
 } Shape_merge;
 
-class Array_flatten : public Symbol::IntrinsicMethod {
+class Array_flatten : public IntrinsicMethod {
     static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, const shared_ptr<Type> &type) {
         shared_ptr<Type> result;
 
@@ -1281,7 +1283,7 @@ public:
     }
 } Array_flatten;
 
-class Array_compact : public Symbol::IntrinsicMethod {
+class Array_compact : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
@@ -1301,7 +1303,7 @@ public:
     }
 } Array_compact;
 
-class Kernel_proc : public Symbol::IntrinsicMethod {
+class Kernel_proc : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,

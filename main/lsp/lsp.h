@@ -2,7 +2,7 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "ast/ast.h"
-#include "core/Files.h"
+#include "core/core.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/options/options.h"
 #define RAPIDJSON_ASSERT(x) ENFORCE(x)

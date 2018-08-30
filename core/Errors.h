@@ -1,9 +1,9 @@
 #ifndef SORBET_REPORTER_H
 #define SORBET_REPORTER_H
 
-#include "AutocorrectSuggestion.h"
-#include "Loc.h"
-#include "StrictLevel.h"
+#include "core/AutocorrectSuggestion.h"
+#include "core/Loc.h"
+#include "core/StrictLevel.h"
 #include "spdlog/fmt/fmt.h"
 #include <initializer_list>
 #include <memory>
@@ -45,7 +45,8 @@ public:
     static void disableColors();
 };
 
-struct BasicError {
+class BasicError {
+public:
     Loc loc;
     ErrorClass what;
     std::string formatted;
@@ -82,7 +83,8 @@ struct ErrorSection {
     std::string toString(const GlobalState &gs);
 };
 
-struct ComplexError : public BasicError {
+class ComplexError : public BasicError {
+public:
     std::vector<ErrorSection> sections;
     virtual std::string toString(const GlobalState &gs);
     ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)

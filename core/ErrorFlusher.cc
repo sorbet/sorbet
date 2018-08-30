@@ -1,4 +1,4 @@
-#include "ErrorFlusher.h"
+#include "core/ErrorFlusher.h"
 #include "core/lsp/QueryResponse.h"
 
 using namespace std;

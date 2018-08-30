@@ -1,7 +1,9 @@
 #ifndef SORBET_CFG_H
 #define SORBET_CFG_H
 
-#include "core/core.h"
+#include "core/Context.h"
+#include "core/LocalVariable.h"
+#include "core/Types.h"
 #include <climits>
 #include <memory>
 #include <unordered_map>

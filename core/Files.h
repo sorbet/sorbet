@@ -1,9 +1,9 @@
 #ifndef SORBET_AST_FILES_H
 #define SORBET_AST_FILES_H
 
-#include "Names.h"
-#include "StrictLevel.h"
 #include "absl/strings/string_view.h"
+#include "core/Names.h"
+#include "core/StrictLevel.h"
 #include <string>
 
 namespace sorbet {

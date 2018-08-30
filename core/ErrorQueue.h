@@ -1,8 +1,8 @@
 #ifndef SORBET_ERROR_QUEUE_H
 #define SORBET_ERROR_QUEUE_H
 
-#include "ErrorFlusher.h"
-#include "ErrorQueueMessage.h"
+#include "core/ErrorFlusher.h"
+#include "core/ErrorQueueMessage.h"
 
 namespace sorbet {
 namespace core {

@@ -3,6 +3,7 @@
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Names.h"
+#include "core/Symbols.h"
 #include "core/TypeConstraint.h"
 #include <utility>
 
@@ -272,7 +273,7 @@ LiteralType::LiteralType(bool val)
     core::categoryCounterInc("types.allocated", "literaltype");
 }
 
-std::shared_ptr<Type> LiteralType::underlying() const {
+shared_ptr<Type> LiteralType::underlying() const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
             return Types::Integer();
@@ -331,17 +332,17 @@ ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
     core::categoryCounterInc("types.allocated", "shapetype");
 }
 
-ShapeType::ShapeType(const std::shared_ptr<Type> &underlying, vector<shared_ptr<LiteralType>> keys,
+ShapeType::ShapeType(const shared_ptr<Type> &underlying, vector<shared_ptr<LiteralType>> keys,
                      vector<shared_ptr<Type>> values)
     : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
     core::categoryCounterInc("types.allocated", "shapetype");
 }
 
-std::shared_ptr<Type> ShapeType::underlying() const {
+shared_ptr<Type> ShapeType::underlying() const {
     return this->underlying_;
 }
 
-std::shared_ptr<Type> TupleType::underlying() const {
+shared_ptr<Type> TupleType::underlying() const {
     return this->underlying_;
 }
 
@@ -658,8 +659,18 @@ bool OrType::hasUntyped() {
     return left->hasUntyped() || right->hasUntyped();
 }
 
+shared_ptr<Type> OrType::make_shared(const shared_ptr<Type> &left, const shared_ptr<Type> &right) {
+    shared_ptr<Type> res(new OrType(left, right));
+    return res;
+}
+
 bool AndType::hasUntyped() {
     return left->hasUntyped() || right->hasUntyped();
+}
+
+shared_ptr<Type> AndType::make_shared(const shared_ptr<Type> &left, const shared_ptr<Type> &right) {
+    shared_ptr<Type> res(new AndType(left, right));
+    return res;
 }
 
 bool AppliedType::hasUntyped() {

@@ -4,7 +4,7 @@
 namespace sorbet {
 namespace core {
 
-struct BasicError;
+class BasicError;
 struct QueryResponse;
 
 struct ErrorQueueMessage {

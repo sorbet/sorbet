@@ -3,6 +3,7 @@
 
 #include "ast/Trees.h"
 #include "core/Context.h"
+#include "core/GlobalState.h"
 #include "core/errors/internal.h"
 #include <memory>
 #include <type_traits> // To use 'std::integral_constant'.

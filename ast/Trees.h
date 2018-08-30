@@ -3,7 +3,8 @@
 
 #include "common/common.h"
 #include "core/Context.h"
-#include "core/Symbols.h"
+#include "core/LocalVariable.h"
+#include "core/SymbolRef.h"
 #include "core/Types.h"
 #include <memory>
 #include <vector>
@@ -58,9 +59,7 @@ enum ClassDefKind : u1 { Module, Class };
 
 class ClassDef final : public Declaration {
 public:
-    inline core::SymbolRef parent(core::MutableContext ctx) {
-        return symbol.data(ctx).parent(ctx);
-    }
+    core::SymbolRef parent(core::MutableContext ctx) const;
 
     ClassDefKind kind;
     static constexpr int EXPECTED_RHS_COUNT = 4;

@@ -1,4 +1,5 @@
-#include "TypeConstraint.h"
+#include "core/TypeConstraint.h"
+#include "core/Symbols.h"
 using namespace std;
 namespace sorbet {
 namespace core {

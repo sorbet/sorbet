@@ -1,16 +1,16 @@
-#include "Symbols.h"
-#include "Context.h"
-#include "Hashing.h"
-#include "Types.h"
+#include "core/Symbols.h"
 #include "absl/algorithm/container.h"
 #include "common/JSON.h"
+#include "core/Context.h"
+#include "core/GlobalState.h"
+#include "core/Hashing.h"
 #include "core/Names/core.h"
+#include "core/Types.h"
 #include "core/errors/internal.h"
 #include <sstream>
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
-template class std::vector<sorbet::core::LocalVariable>;
 template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::SymbolRef>>;
 template class std::vector<const sorbet::core::Symbol *>;
 
@@ -798,46 +798,6 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     } else {
         locs_.push_back(loc);
     }
-}
-
-LocalVariable::LocalVariable(NameRef name, u4 unique) : _name(name), unique(unique) {}
-LocalVariable::LocalVariable() {}
-bool LocalVariable::exists() const {
-    return _name._id > 0;
-}
-
-bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
-    if (_name.data(gs).kind == NameKind::UNIQUE) {
-        return true;
-    }
-    if (unique == 0) {
-        return false;
-    }
-    return _name == Names::whileTemp() || _name == Names::ifTemp() || _name == Names::returnTemp() ||
-           _name == Names::statTemp() || _name == Names::assignTemp() || _name == Names::returnMethodTemp() ||
-           _name == Names::blockReturnTemp() || _name == Names::nextTemp() || _name == Names::selfMethodTemp() ||
-           _name == Names::hashTemp() || _name == Names::arrayTemp() || _name == Names::rescueTemp() ||
-           _name == Names::rescueStartTemp() || _name == Names::rescueEndTemp() || _name == Names::gotoDeadTemp() ||
-           _name == Names::isaCheckTemp() || _name == Names::throwAwayTemp() || _name == Names::castTemp() ||
-           _name == Names::finalReturn();
-}
-
-bool LocalVariable::isAliasForGlobal(const GlobalState &gs) const {
-    return _name == Names::cfgAlias();
-}
-
-bool LocalVariable::operator==(const LocalVariable &rhs) const {
-    return this->_name == rhs._name && this->unique == rhs.unique;
-}
-
-bool LocalVariable::operator!=(const LocalVariable &rhs) const {
-    return !this->operator==(rhs);
-}
-string LocalVariable::toString(const GlobalState &gs) const {
-    if (unique == 0) {
-        return this->_name.toString(gs);
-    }
-    return this->_name.toString(gs) + "$" + to_string(this->unique);
 }
 
 } // namespace core

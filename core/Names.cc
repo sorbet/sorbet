@@ -1,6 +1,7 @@
-#include "Names.h"
-#include "Context.h"
-#include "Hashing.h"
+#include "core/Names.h"
+#include "core/Context.h"
+#include "core/GlobalState.h"
+#include "core/Hashing.h"
 #include "core/Names/core.h"
 #include <numeric> // accumulate
 

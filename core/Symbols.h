@@ -1,10 +1,11 @@
 #ifndef SORBET_SYMBOLS_H
 #define SORBET_SYMBOLS_H
 
-#include "Loc.h"
-#include "Names.h"
 #include "common/common.h"
-#include "core/Names/core.h"
+#include "core/Loc.h"
+#include "core/Names.h"
+#include "core/SymbolRef.h"
+#include "core/Types.h"
 #include <memory>
 #include <tuple>
 #include <vector>
@@ -19,93 +20,18 @@ class Context;
 class TypeAndOrigins;
 class SendAndBlockLink;
 
-enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
-
-class SymbolRef final {
-    friend class GlobalState;
-    friend class Symbol;
-
-public:
-    SymbolRef(GlobalState const *from, u4 _id);
-    SymbolRef(const GlobalState &from, u4 _id);
-    SymbolRef() : _id(0){};
-
-    bool inline exists() const {
-        return _id;
-    }
-
-    inline SymbolRef orElse(SymbolRef other) const {
-        if (exists())
-            return *this;
-        else
-            return other;
-    }
-
-    bool isSynthetic() const;
-
-    Symbol &data(GlobalState &gs, bool allowNone = false) const;
-    const Symbol &data(const GlobalState &gs, bool allowNone = false) const;
-
-    bool operator==(const SymbolRef &rhs) const;
-
-    bool operator!=(const SymbolRef &rhs) const;
-
-    bool operator!() {
-        return !_id;
-    }
-
-    std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
-    std::string show(const GlobalState &gs) const;
-
-    u4 _id;
-
-private:
-};
-#ifndef DEBUG_MODE
-CheckSize(SymbolRef, 4, 4);
-#endif
-
-class LocalVariable final {
-public:
-    NameRef _name;
-    u4 unique;
-    LocalVariable(NameRef name, u4 unique);
-    LocalVariable();
-    bool exists() const;
-    bool isSyntheticTemporary(const GlobalState &gs) const;
-    bool isAliasForGlobal(const GlobalState &gs) const;
-    LocalVariable(const LocalVariable &) = default;
-    LocalVariable(LocalVariable &&) = default;
-    LocalVariable &operator=(LocalVariable &&) = default;
-    LocalVariable &operator=(const LocalVariable &) = default;
-
-    bool operator==(const LocalVariable &rhs) const;
-
-    bool operator!=(const LocalVariable &rhs) const;
-    inline bool operator<(const LocalVariable &rhs) const {
-        if (this->_name.id() < rhs._name.id()) {
-            return true;
-        }
-        if (this->_name.id() > rhs._name.id()) {
-            return false;
-        }
-        return this->unique < rhs.unique;
-    }
-
-    static inline LocalVariable noVariable() {
-        return LocalVariable(NameRef::noName(), 0);
-    };
-
-    static inline LocalVariable blockCall() {
-        return LocalVariable(Names::blockCall(), 0);
-    }
-    std::string toString(const GlobalState &gs) const;
-};
-CheckSize(LocalVariable, 8, 4);
-
 namespace serialize {
 class SerializerImpl;
 }
+class IntrinsicMethod {
+public:
+    virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, std::vector<TypeAndOrigins> &args,
+                                        std::vector<Loc> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &linkType) const = 0;
+};
+
+enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
 
 class Symbol final {
 public:
@@ -316,9 +242,9 @@ public:
         if (isInvariant())
             return Variance::Invariant;
         if (isCovariant())
-            return Variance ::CoVariant;
+            return Variance::CoVariant;
         if (isContravariant())
-            return Variance ::ContraVariant;
+            return Variance::ContraVariant;
         Error::raise("Should not happen");
     }
 
@@ -570,15 +496,8 @@ public:
     Symbol deepCopy(const GlobalState &to) const;
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
-    SymbolRef enclosingClass(const GlobalState &gs) const;
 
-    class IntrinsicMethod {
-    public:
-        virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc,
-                                            std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                            const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                            const std::shared_ptr<SendAndBlockLink> &linkType) const = 0;
-    };
+    SymbolRef enclosingClass(const GlobalState &gs) const;
 
     // All `IntrinsicMethod`s in sorbet should be statically-allocated, which is
     // why raw pointers are safe.
@@ -612,280 +531,6 @@ private:
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 
-class Symbols {
-    Symbols() = delete;
-
-public:
-    static SymbolRef noSymbol() {
-        return SymbolRef(nullptr, 0);
-    }
-
-    static SymbolRef top() {
-        return SymbolRef(nullptr, 1);
-    }
-
-    static SymbolRef bottom() {
-        return SymbolRef(nullptr, 2);
-    }
-
-    static SymbolRef root() {
-        return SymbolRef(nullptr, 3);
-    }
-
-    static SymbolRef todo() {
-        return SymbolRef(nullptr, 4);
-    }
-
-    static SymbolRef Object() {
-        return SymbolRef(nullptr, 5);
-    }
-
-    static SymbolRef Integer() {
-        return SymbolRef(nullptr, 6);
-    }
-
-    static SymbolRef Float() {
-        return SymbolRef(nullptr, 7);
-    }
-
-    static SymbolRef String() {
-        return SymbolRef(nullptr, 8);
-    }
-
-    static SymbolRef Symbol() {
-        return SymbolRef(nullptr, 9);
-    }
-
-    static SymbolRef Array() {
-        return SymbolRef(nullptr, 10);
-    }
-
-    static SymbolRef Hash() {
-        return SymbolRef(nullptr, 11);
-    }
-
-    static SymbolRef TrueClass() {
-        return SymbolRef(nullptr, 12);
-    }
-
-    static SymbolRef FalseClass() {
-        return SymbolRef(nullptr, 13);
-    }
-
-    static SymbolRef NilClass() {
-        return SymbolRef(nullptr, 14);
-    }
-
-    static SymbolRef untyped() {
-        return SymbolRef(nullptr, 15);
-    }
-
-    static SymbolRef Opus() {
-        return SymbolRef(nullptr, 16);
-    }
-
-    static SymbolRef T() {
-        return SymbolRef(nullptr, 17);
-    }
-
-    static SymbolRef Class() {
-        return SymbolRef(nullptr, 18);
-    }
-
-    static SymbolRef BasicObject() {
-        return SymbolRef(nullptr, 19);
-    }
-
-    static SymbolRef Kernel() {
-        return SymbolRef(nullptr, 20);
-    }
-
-    static SymbolRef Range() {
-        return SymbolRef(nullptr, 21);
-    }
-
-    static SymbolRef Regexp() {
-        return SymbolRef(nullptr, 22);
-    }
-
-    static SymbolRef Magic() {
-        return SymbolRef(nullptr, 23);
-    }
-
-    static SymbolRef Module() {
-        return SymbolRef(nullptr, 24);
-    }
-
-    static SymbolRef StandardError() {
-        return SymbolRef(nullptr, 25);
-    }
-
-    static SymbolRef Complex() {
-        return SymbolRef(nullptr, 26);
-    }
-
-    static SymbolRef Rational() {
-        return SymbolRef(nullptr, 27);
-    }
-
-    static SymbolRef T_Array() {
-        return SymbolRef(nullptr, 28);
-    }
-
-    static SymbolRef T_Hash() {
-        return SymbolRef(nullptr, 29);
-    }
-
-    static SymbolRef T_Proc() {
-        return SymbolRef(nullptr, 30);
-    }
-
-    static SymbolRef Proc() {
-        return SymbolRef(nullptr, 31);
-    }
-
-    static SymbolRef Enumerable() {
-        return SymbolRef(nullptr, 32);
-    }
-
-    static SymbolRef Set() {
-        return SymbolRef(nullptr, 33);
-    }
-
-    static SymbolRef Struct() {
-        return SymbolRef(nullptr, 34);
-    }
-
-    static SymbolRef File() {
-        return SymbolRef(nullptr, 35);
-    }
-
-    static SymbolRef RubyTyper() {
-        return SymbolRef(nullptr, 36);
-    }
-
-    static SymbolRef StubClass() {
-        return SymbolRef(nullptr, 37);
-    }
-
-    static SymbolRef StubModule() {
-        return SymbolRef(nullptr, 38);
-    }
-
-    static SymbolRef T_Enumerable() {
-        return SymbolRef(nullptr, 39);
-    }
-
-    static SymbolRef T_Range() {
-        return SymbolRef(nullptr, 40);
-    }
-
-    static SymbolRef T_Set() {
-        return SymbolRef(nullptr, 41);
-    }
-
-    static SymbolRef Configatron() {
-        return SymbolRef(nullptr, 42);
-    }
-
-    static SymbolRef Configatron_Store() {
-        return SymbolRef(nullptr, 43);
-    }
-
-    static SymbolRef Configatron_RootStore() {
-        return SymbolRef(nullptr, 44);
-    }
-
-    static SymbolRef Sinatra() {
-        return SymbolRef(nullptr, 45);
-    }
-
-    static SymbolRef SinatraBase() {
-        return SymbolRef(nullptr, 46);
-    }
-
-    static SymbolRef void_() {
-        return SymbolRef(nullptr, 47);
-    }
-
-    // Synthetic symbol used by resolver to mark type alias assignments.
-    static SymbolRef typeAliasTemp() {
-        return SymbolRef(nullptr, 48);
-    }
-
-    static SymbolRef Chalk() {
-        return SymbolRef(nullptr, 49);
-    }
-    static SymbolRef Chalk_Tools() {
-        return SymbolRef(nullptr, 50);
-    }
-    static SymbolRef Chalk_Tools_Accessible() {
-        return SymbolRef(nullptr, 51);
-    }
-
-    static SymbolRef T_Generic() {
-        return SymbolRef(nullptr, 52);
-    }
-
-    static SymbolRef Tuple() {
-        return SymbolRef(nullptr, 53);
-    }
-
-    static SymbolRef Shape() {
-        return SymbolRef(nullptr, 54);
-    }
-
-    static SymbolRef Subclasses() {
-        return SymbolRef(nullptr, 55);
-    }
-
-    static SymbolRef Sorbet() {
-        return SymbolRef(nullptr, 56);
-    }
-
-    static SymbolRef RubyTyper_ImplicitModuleSuperClass() {
-        return SymbolRef(nullptr, 57);
-    }
-
-    static constexpr int MAX_PROC_ARITY = 10;
-    static SymbolRef Proc0() {
-        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);
-    }
-
-    static SymbolRef Proc(int argc) {
-        if (argc > MAX_PROC_ARITY) {
-            return noSymbol();
-        }
-        return SymbolRef(nullptr, Proc0()._id + argc * 2);
-    }
-
-    static SymbolRef last_proc() {
-        return Proc(MAX_PROC_ARITY);
-    }
-
-    // Keep as last and update to match the last entry
-    static SymbolRef last_synthetic_sym() {
-        ENFORCE(last_proc()._id == MAX_SYNTHETIC_SYMBOLS - 2);
-        return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - 1);
-    }
-
-    static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
-};
-
 } // namespace core
 } // namespace sorbet
-
-namespace std {
-template <> struct hash<sorbet::core::SymbolRef> {
-    std::size_t operator()(const sorbet::core::SymbolRef k) const {
-        return k._id;
-    }
-};
-
-template <> struct hash<sorbet::core::LocalVariable> {
-    std::size_t operator()(const sorbet::core::LocalVariable k) const {
-        return k._name._id * 63 + k.unique;
-    }
-};
-} // namespace std
 #endif // SORBET_SYMBOLS_H

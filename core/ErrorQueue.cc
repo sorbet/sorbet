@@ -1,5 +1,5 @@
-#include "ErrorQueue.h"
-#include "Errors.h"
+#include "core/ErrorQueue.h"
+#include "core/Errors.h"
 #include "lsp/QueryResponse.h"
 
 namespace sorbet {

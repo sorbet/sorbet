@@ -1,5 +1,6 @@
 #include "environment.h"
 #include "absl/algorithm/container.h"
+#include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
 

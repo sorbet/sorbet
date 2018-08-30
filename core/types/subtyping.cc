@@ -1,5 +1,6 @@
 #include "absl/algorithm/container.h"
 #include "common/common.h"
+#include "core/Symbols.h"
 #include "core/TypeConstraint.h"
 #include "core/Types.h"
 #include <algorithm> // find_if

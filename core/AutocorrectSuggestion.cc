@@ -1,4 +1,4 @@
-#include "AutocorrectSuggestion.h"
+#include "core/AutocorrectSuggestion.h"
 #include "absl/algorithm/container.h"
 #include <unordered_set>
 

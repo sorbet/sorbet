@@ -1,8 +1,9 @@
 #include "GlobalState.h"
 
-#include "Errors.h"
-#include "Types.h"
+#include "core/Errors.h"
 #include "core/Names/core.h"
+#include "core/Names_gen.h"
+#include "core/Types.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
 #include <utility>

@@ -1,12 +1,15 @@
 #ifndef SORBET_CONTEXT_H
 #define SORBET_CONTEXT_H
 
-#include "GlobalState.h"
 #include "common/common.h"
+#include "core/NameRef.h"
+#include "core/SymbolRef.h"
 #include <vector>
 
 namespace sorbet {
 namespace core {
+class GlobalState;
+class MutableContext;
 
 class Context {
 public:
@@ -34,15 +37,9 @@ public:
     // the class in which to look up class variables.
     SymbolRef contextClass() const;
 
-    Context withOwner(SymbolRef sym) const {
-        Context r = Context(*this);
-        r.owner = sym;
-        return r;
-    }
+    Context withOwner(SymbolRef sym) const;
 
-    void trace(const std::string &msg) const {
-        state.trace(msg);
-    }
+    void trace(const std::string &msg) const;
 };
 CheckSize(Context, 16, 8);
 
@@ -80,9 +77,7 @@ public:
         return r;
     }
 
-    void trace(const std::string &msg) const {
-        state.trace(msg);
-    }
+    void trace(const std::string &msg) const;
 };
 CheckSize(MutableContext, 16, 8);
 

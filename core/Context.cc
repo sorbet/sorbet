@@ -1,7 +1,7 @@
-#include "Context.h"
-#include "Hashing.h"
-#include "Types.h"
-#include "Unfreeze.h"
+#include "core/Context.h"
+#include "core/Hashing.h"
+#include "core/Types.h"
+#include "core/Unfreeze.h"
 
 #include "common/common.h"
 #include <algorithm>
@@ -54,6 +54,20 @@ SymbolRef Context::contextClass() const {
 }
 
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
+
+void Context::trace(const std::string &msg) const {
+    state.trace(msg);
+}
+
+void MutableContext::trace(const std::string &msg) const {
+    state.trace(msg);
+}
+
+Context Context::withOwner(SymbolRef sym) const {
+    Context r = Context(*this);
+    r.owner = sym;
+    return r;
+}
 
 SymbolRef MutableContext::contextClass() const {
     Context self(*this);

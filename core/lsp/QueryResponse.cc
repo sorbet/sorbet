@@ -1,4 +1,5 @@
 #include "core/lsp/QueryResponse.h"
+#include "core/GlobalState.h"
 template class std::unique_ptr<sorbet::core::QueryResponse>;
 
 using namespace std;

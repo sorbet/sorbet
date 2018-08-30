@@ -1,7 +1,7 @@
 #ifndef SORBET_AUTOCORRECTSUGGESTION_H
 #define SORBET_AUTOCORRECTSUGGESTION_H
 
-#include "Loc.h"
+#include "core/Loc.h"
 #include <map>
 
 namespace sorbet {

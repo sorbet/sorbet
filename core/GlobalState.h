@@ -1,12 +1,12 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
-#include "ErrorQueue.h"
-#include "Errors.h"
-#include "Files.h"
-#include "Hashing.h"
-#include "Loc.h"
-#include "Names.h"
-#include "Symbols.h"
+#include "core/ErrorQueue.h"
+#include "core/Errors.h"
+#include "core/Files.h"
+#include "core/Hashing.h"
+#include "core/Loc.h"
+#include "core/Names.h"
+#include "core/Symbols.h"
 #include <memory>
 #include <mutex>
 

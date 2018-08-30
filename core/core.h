@@ -1,11 +1,12 @@
 #ifndef SORBET_CORE_H
 #define SORBET_CORE_H
 
-#include "Context.h"
-#include "Counters.h"
-#include "GlobalState.h"
-#include "Loc.h"
-#include "Names.h"
-#include "Types.h"
+#include "core/Context.h"
+#include "core/Counters.h"
+#include "core/GlobalState.h"
+#include "core/Loc.h"
+#include "core/Names.h"
+#include "core/SymbolRef.h"
+#include "core/Types.h"
 
 #endif // SORBET_CORE_H

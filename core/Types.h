@@ -1,9 +1,10 @@
 #ifndef SORBET_TYPES_H
 #define SORBET_TYPES_H
 
-#include "Context.h"
-#include "Counters.h"
-#include "Symbols.h"
+#include "core/Context.h"
+#include "core/Counters.h"
+#include "core/Errors.h"
+#include "core/SymbolRef.h"
 #include <memory>
 #include <string>
 
@@ -11,9 +12,13 @@ namespace sorbet {
 namespace core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
+class IntrinsicMethod;
 class TypeConstraint;
+struct DispatchComponent;
+struct DispatchResult;
 class TypeVar;
 class SendAndBlockLink;
+class TypeAndOrigins;
 class Types final {
 public:
     /** Greater lower bound: the widest type that is subtype of both t1 and t2 */
@@ -97,42 +102,9 @@ struct Intrinsic {
     const SymbolRef symbol;
     const bool singleton;
     const NameRef method;
-    const Symbol::IntrinsicMethod *impl;
+    const IntrinsicMethod *impl;
 };
 extern const std::vector<Intrinsic> intrinsicMethods;
-
-class TypeAndOrigins final {
-public:
-    std::shared_ptr<Type> type;
-    InlinedVector<Loc, 2> origins;
-    std::vector<ErrorLine> origins2Explanations(Context ctx);
-    ~TypeAndOrigins() {
-        histogramInc("TypeAndOrigins.origins.size", origins.size());
-    }
-};
-CheckSize(TypeAndOrigins, 40, 8);
-
-struct DispatchComponent {
-    std::shared_ptr<Type> receiver;
-    SymbolRef method;
-    std::vector<std::unique_ptr<BasicError>> errors;
-};
-
-struct DispatchResult {
-    using ComponentVec = InlinedVector<DispatchComponent, 1>;
-
-    std::shared_ptr<Type> returnType;
-    ComponentVec components;
-
-    DispatchResult() = default;
-    DispatchResult(const std::shared_ptr<Type> &returnType, ComponentVec components)
-        : returnType(move(returnType)), components(move(components)){};
-
-    DispatchResult(const std::shared_ptr<Type> &returnType, const std::shared_ptr<Type> &receiver, SymbolRef method)
-        : returnType(move(returnType)) {
-        components.emplace_back(DispatchComponent{move(receiver), method, std::vector<std::unique_ptr<BasicError>>()});
-    }
-};
 
 class Type {
 public:
@@ -182,19 +154,6 @@ template <class To> To *cast_type(Type *what) {
 template <class To> bool isa_type(Type *what) {
     return cast_type<To>(what) != nullptr;
 }
-
-class SendAndBlockLink {
-public:
-    SymbolRef block;
-    std::shared_ptr<Type> receiver;
-    NameRef fun;
-    std::shared_ptr<TypeConstraint> constr;
-    std::shared_ptr<Type> returnTp;
-    std::shared_ptr<Type> blockPreType;
-    std::shared_ptr<Type> sendTp;
-    SendAndBlockLink(const SendAndBlockLink &) = delete;
-    SendAndBlockLink(SymbolRef block, NameRef fun);
-};
 
 class GroundType : public Type {};
 
@@ -248,327 +207,6 @@ public:
     virtual bool hasUntyped() override;
 };
 CheckSize(ClassType, 16, 8);
-
-class OrType final : public GroundType {
-public:
-    std::shared_ptr<Type> left;
-    std::shared_ptr<Type> right;
-    virtual int kind() final;
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual bool hasUntyped() override;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
-
-private:
-    /*
-     * You probably want Types::any() instead.
-     */
-    OrType(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
-
-    /*
-     * These implementation methods are allowed to directly instantiate
-     * `OrType`. Because `make_shared<OrType>` is not compatible with private
-     * constructors + friend declarations (it's `shared_ptr` calling the
-     * constructor, so the friend declaration doesn't work), we provide the
-     * `make_shared` helper here.
-     */
-    friend std::shared_ptr<Type> Types::falsyTypes();
-    friend std::shared_ptr<Type> Types::Boolean();
-    friend class GlobalSubstitution;
-    friend class serialize::SerializerImpl;
-    friend std::shared_ptr<Type> lubDistributeOr(Context ctx, const std::shared_ptr<Type> &t1,
-                                                 const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1,
-                                           const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1,
-                                            const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1,
-                                            const std::shared_ptr<Type> &t2);
-
-    static inline std::shared_ptr<Type> make_shared(const std::shared_ptr<Type> &left,
-                                                    const std::shared_ptr<Type> &right) {
-        std::shared_ptr<Type> res(new OrType(left, right));
-        return res;
-    }
-};
-CheckSize(OrType, 40, 8);
-
-class AndType final : public GroundType {
-public:
-    std::shared_ptr<Type> left;
-    std::shared_ptr<Type> right;
-    virtual int kind() final;
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
-    virtual bool hasUntyped() override;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-
-private:
-    /*
-     * You probably want Types::all() instead.
-     */
-    AndType(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
-
-    friend class GlobalSubstitution;
-    friend class serialize::SerializerImpl;
-    friend class TypeConstraint;
-
-    friend std::shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1,
-                                           const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, const std::shared_ptr<Type> &t1,
-                                                  const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> glbGround(Context ctx, const std::shared_ptr<Type> &t1,
-                                           const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1,
-                                            const std::shared_ptr<Type> &t2);
-    friend std::shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1,
-                                            const std::shared_ptr<Type> &t2);
-
-    static inline std::shared_ptr<Type> make_shared(const std::shared_ptr<Type> &left,
-                                                    const std::shared_ptr<Type> &right) {
-        std::shared_ptr<Type> res(new AndType(left, right));
-        return res;
-    }
-};
-CheckSize(AndType, 40, 8);
-
-/** This is a specific kind of self-type that should only be used in method return position.
- * It indicates that the method may(or will) return `self` or type that behaves equivalently
- * to self(e.g. in case of `.clone`).
- */
-class SelfType final : public Type {
-public:
-    SelfType();
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string showValue(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
-    virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
-
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    void _sanityCheck(Context ctx) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-};
-CheckSize(SelfType, 8, 8);
-
-class LiteralType final : public ProxyType {
-public:
-    union {
-        const int64_t value;
-        const double floatval;
-    };
-
-    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
-    const LiteralTypeKind literalKind;
-    LiteralType(int64_t val);
-    LiteralType(double val);
-    LiteralType(SymbolRef klass, NameRef val);
-    LiteralType(bool val);
-    virtual std::shared_ptr<Type> underlying() const override;
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string showValue(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
-    virtual bool isFullyDefined() final;
-
-    bool equals(const std::shared_ptr<LiteralType> &rhs) const;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-};
-CheckSize(LiteralType, 24, 8);
-
-class ShapeType final : public ProxyType {
-public:
-    std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
-    std::vector<std::shared_ptr<Type>> values;
-    const std::shared_ptr<Type> underlying_;
-    ShapeType();
-    ShapeType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<LiteralType>> keys,
-              std::vector<std::shared_ptr<Type>> values);
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-    virtual bool hasUntyped() override;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> underlying() const override;
-};
-CheckSize(ShapeType, 72, 8);
-
-class TupleType final : public ProxyType {
-private:
-    TupleType() = delete;
-
-public:
-    std::vector<std::shared_ptr<Type>> elems;
-    const std::shared_ptr<Type> underlying_;
-
-    TupleType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<Type>> elements);
-    static std::shared_ptr<Type> build(Context ctx, std::vector<std::shared_ptr<Type>> elements);
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const override;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    virtual bool hasUntyped() override;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-
-    // Return the type of the underlying array that this tuple decays into
-    std::shared_ptr<Type> elementType() const;
-    virtual std::shared_ptr<Type> underlying() const override;
-};
-CheckSize(TupleType, 48, 8);
-
-class TypeVar final : public Type {
-public:
-    SymbolRef sym;
-    TypeVar(SymbolRef sym);
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-};
-CheckSize(TypeVar, 16, 8);
-
-class AppliedType final : public Type {
-public:
-    // .underlying is always a ClassType
-    SymbolRef klass;
-    std::vector<std::shared_ptr<Type>> targs;
-    AppliedType(SymbolRef klass, std::vector<std::shared_ptr<Type>> targs);
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-    virtual bool hasUntyped() override;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
-};
-CheckSize(AppliedType, 40, 8);
-
-// MetaType is the type of a Type. You can think of it as generalization of
-// Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
-// of the *value* `A`, MetaType[T] is the *type* of a *value* that holds the
-// type T during execution. For instance, the type of `T.untyped` is
-// `MetaType(Types::untyped())`.
-//
-// These are used within the inferencer in places where we need to track
-// user-written types in the source code.
-class MetaType final : public Type {
-public:
-    std::shared_ptr<Type> wrapped;
-
-    MetaType(const std::shared_ptr<Type> &wrapped);
-
-    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
-    virtual std::string show(const GlobalState &gs) const final;
-    virtual std::string typeName() const final;
-
-    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
-
-    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
-                                        const std::shared_ptr<SendAndBlockLink> &block) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
-    void _sanityCheck(Context ctx) final;
-    virtual bool isFullyDefined() final;
-
-    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                               const std::vector<std::shared_ptr<Type>> &targs) override;
-    virtual int kind() final;
-    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
-};
-CheckSize(MetaType, 24, 8);
 
 class LambdaParam final : public Type {
 public:
@@ -642,6 +280,364 @@ public:
     virtual int kind() final;
 };
 CheckSize(AliasType, 16, 8);
+
+/** This is a specific kind of self-type that should only be used in method return position.
+ * It indicates that the method may(or will) return `self` or type that behaves equivalently
+ * to self(e.g. in case of `.clone`).
+ */
+class SelfType final : public Type {
+public:
+    SelfType();
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string showValue(const GlobalState &gs) const final;
+    virtual std::string typeName() const override;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
+
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    void _sanityCheck(Context ctx) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+};
+CheckSize(SelfType, 8, 8);
+
+class LiteralType final : public ProxyType {
+public:
+    union {
+        const int64_t value;
+        const double floatval;
+    };
+
+    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
+    const LiteralTypeKind literalKind;
+    LiteralType(int64_t val);
+    LiteralType(double val);
+    LiteralType(SymbolRef klass, NameRef val);
+    LiteralType(bool val);
+    virtual std::shared_ptr<Type> underlying() const override;
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string showValue(const GlobalState &gs) const final;
+    virtual std::string typeName() const override;
+    virtual bool isFullyDefined() final;
+
+    bool equals(const std::shared_ptr<LiteralType> &rhs) const;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+};
+CheckSize(LiteralType, 24, 8);
+
+class TypeVar final : public Type {
+public:
+    SymbolRef sym;
+    TypeVar(SymbolRef sym);
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+};
+CheckSize(TypeVar, 16, 8);
+
+class OrType final : public GroundType {
+public:
+    std::shared_ptr<Type> left;
+    std::shared_ptr<Type> right;
+    virtual int kind() final;
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual bool hasUntyped() override;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
+
+private:
+    /*
+     * You probably want Types::any() instead.
+     */
+    OrType(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
+
+    /*
+     * These implementation methods are allowed to directly instantiate
+     * `OrType`. Because `make_shared<OrType>` is not compatible with private
+     * constructors + friend declarations (it's `shared_ptr` calling the
+     * constructor, so the friend declaration doesn't work), we provide the
+     * `make_shared` helper here.
+     */
+    friend std::shared_ptr<Type> Types::falsyTypes();
+    friend std::shared_ptr<Type> Types::Boolean();
+    friend class GlobalSubstitution;
+    friend class serialize::SerializerImpl;
+    friend std::shared_ptr<Type> lubDistributeOr(Context ctx, const std::shared_ptr<Type> &t1,
+                                                 const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+
+    static std::shared_ptr<Type> make_shared(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
+};
+CheckSize(OrType, 40, 8);
+
+class AndType final : public GroundType {
+public:
+    std::shared_ptr<Type> left;
+    std::shared_ptr<Type> right;
+    virtual int kind() final;
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
+    virtual bool hasUntyped() override;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+
+private:
+    /*
+     * You probably want Types::all() instead.
+     */
+    AndType(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
+
+    friend class GlobalSubstitution;
+    friend class serialize::SerializerImpl;
+    friend class TypeConstraint;
+
+    friend std::shared_ptr<Type> lubGround(Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbDistributeAnd(Context ctx, const std::shared_ptr<Type> &t1,
+                                                  const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> glbGround(Context ctx, const std::shared_ptr<Type> &t1,
+                                           const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::lub(Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1,
+                                            const std::shared_ptr<Type> &t2);
+
+    static std::shared_ptr<Type> make_shared(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
+};
+CheckSize(AndType, 40, 8);
+
+class ShapeType final : public ProxyType {
+public:
+    std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
+    std::vector<std::shared_ptr<Type>> values;
+    const std::shared_ptr<Type> underlying_;
+    ShapeType();
+    ShapeType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<LiteralType>> keys,
+              std::vector<std::shared_ptr<Type>> values);
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const override;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual bool hasUntyped() override;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> underlying() const override;
+};
+CheckSize(ShapeType, 72, 8);
+
+class TupleType final : public ProxyType {
+private:
+    TupleType() = delete;
+
+public:
+    std::vector<std::shared_ptr<Type>> elems;
+    const std::shared_ptr<Type> underlying_;
+
+    TupleType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<Type>> elements);
+    static std::shared_ptr<Type> build(Context ctx, std::vector<std::shared_ptr<Type>> elements);
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const override;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    virtual bool hasUntyped() override;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+
+    // Return the type of the underlying array that this tuple decays into
+    std::shared_ptr<Type> elementType() const;
+    virtual std::shared_ptr<Type> underlying() const override;
+};
+CheckSize(TupleType, 48, 8);
+
+class AppliedType final : public Type {
+public:
+    // .underlying is always a ClassType
+    SymbolRef klass;
+    std::vector<std::shared_ptr<Type>> targs;
+    AppliedType(SymbolRef klass, std::vector<std::shared_ptr<Type>> targs);
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+    virtual bool hasUntyped() override;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+};
+CheckSize(AppliedType, 40, 8);
+
+// MetaType is the type of a Type. You can think of it as generalization of
+// Ruby's singleton classes to Types; Just as `A.singleton_class` is the *type*
+// of the *value* `A`, MetaType[T] is the *type* of a *value* that holds the
+// type T during execution. For instance, the type of `T.untyped` is
+// `MetaType(Types::untyped())`.
+//
+// These are used within the inferencer in places where we need to track
+// user-written types in the source code.
+class MetaType final : public Type {
+public:
+    std::shared_ptr<Type> wrapped;
+
+    MetaType(const std::shared_ptr<Type> &wrapped);
+
+    virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
+    virtual std::string show(const GlobalState &gs) const final;
+    virtual std::string typeName() const final;
+
+    virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
+
+    virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
+                                        std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
+                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<SendAndBlockLink> &block) final;
+    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    void _sanityCheck(Context ctx) final;
+    virtual bool isFullyDefined() final;
+
+    virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
+                                               const std::vector<std::shared_ptr<Type>> &targs) override;
+    virtual int kind() final;
+    virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+};
+CheckSize(MetaType, 24, 8);
+
+class SendAndBlockLink {
+public:
+    SymbolRef block;
+    std::shared_ptr<Type> receiver;
+    NameRef fun;
+    std::shared_ptr<TypeConstraint> constr;
+    std::shared_ptr<Type> returnTp;
+    std::shared_ptr<Type> blockPreType;
+    std::shared_ptr<Type> sendTp;
+    SendAndBlockLink(const SendAndBlockLink &) = delete;
+    SendAndBlockLink(SymbolRef block, NameRef fun);
+};
+
+class TypeAndOrigins final {
+public:
+    std::shared_ptr<Type> type;
+    InlinedVector<Loc, 2> origins;
+    std::vector<ErrorLine> origins2Explanations(Context ctx);
+    ~TypeAndOrigins();
+};
+CheckSize(TypeAndOrigins, 40, 8);
+
+struct DispatchComponent {
+    std::shared_ptr<Type> receiver;
+    SymbolRef method;
+    std::vector<std::unique_ptr<BasicError>> errors;
+};
+
+struct DispatchResult {
+    using ComponentVec = InlinedVector<DispatchComponent, 1>;
+
+    std::shared_ptr<Type> returnType;
+    ComponentVec components;
+
+    DispatchResult() = default;
+    DispatchResult(std::shared_ptr<Type> returnType, ComponentVec components)
+        : returnType(std::move(returnType)), components(std::move(components)){};
+
+    DispatchResult(std::shared_ptr<Type> returnType, std::shared_ptr<Type> receiver, SymbolRef method)
+        : returnType(std::move(returnType)) {
+        components.emplace_back(
+            DispatchComponent{std::move(receiver), method, std::vector<std::unique_ptr<BasicError>>()});
+    }
+};
 
 } // namespace core
 } // namespace sorbet

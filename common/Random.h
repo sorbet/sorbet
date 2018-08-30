@@ -1,7 +1,7 @@
 #ifndef SORBET_RANDOM_H
 #define SORBET_RANDOM_H
 
-#include "common.h"
+#include "common/common.h"
 #include <random>
 
 namespace sorbet {

@@ -1,14 +1,14 @@
 #ifndef SORBET_BUFFERED_ERRORQUEUE_H
 #define SORBET_BUFFERED_ERRORQUEUE_H
-#include "ErrorQueue.h"
-#include "ErrorQueueMessage.h"
-#include "Errors.h"
+#include "core/ErrorQueue.h"
 #include "spdlog/spdlog.h"
 
 namespace spd = spdlog;
 
 namespace sorbet {
 namespace core {
+struct ErrorQueueMessage;
+class BasicError;
 
 // This is a simple, non-thread-safe, implementation of ErrorQueue that buffers
 // all errors in memory for later retrieval.

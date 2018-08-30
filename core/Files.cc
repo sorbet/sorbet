@@ -1,4 +1,6 @@
-#include "Context.h"
+#include "core/Files.h"
+#include "core/Context.h"
+#include "core/GlobalState.h"
 #include <vector>
 
 #include "absl/strings/match.h"
