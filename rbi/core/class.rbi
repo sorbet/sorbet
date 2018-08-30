@@ -24,4 +24,20 @@ class Class < Module
   Sorbet.sig.returns(T.nilable(Class))
   Sorbet.sig.returns(Class)
   def superclass(); end
+
+  Sorbet.sig.void
+  Sorbet.sig(
+      superclass: Class,
+  )
+  .void
+  Sorbet.sig(
+      blk: T.proc(arg0: Class).returns(BasicObject),
+  )
+  .void
+  Sorbet.sig(
+      superclass: Class,
+      blk: T.proc(arg0: Class).returns(BasicObject),
+  )
+  .void
+  def initialize(superclass=_, &blk); end
 end
