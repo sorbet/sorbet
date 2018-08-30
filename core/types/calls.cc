@@ -20,11 +20,12 @@ DispatchResult ProxyType::dispatchCall(Context ctx, NameRef name, Loc callLoc, L
                                        const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                                        const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "proxytype");
-    return underlying->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, underlying, fullType, block);
+    auto und = underlying();
+    return und->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, und, fullType, block);
 }
 
 shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    return underlying->getCallArgumentType(ctx, name, i);
+    return underlying()->getCallArgumentType(ctx, name, i);
 }
 
 DispatchResult OrType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
@@ -345,7 +346,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
         for (auto value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(ctx, loc, value));
         }
-        return make_shared<ShapeType>(shapeType->keys, unwrappedValues);
+        return make_shared<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
         vector<shared_ptr<Type>> unwrappedElems;
         for (auto elem : tupleType->elems) {
@@ -568,7 +569,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 } else if (spec.isRepeated()) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = *it;
-                        SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
+                        SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
                         }
@@ -593,7 +594,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 ++kwit;
 
                 auto arg = absl::c_find_if(hash->keys, [&](shared_ptr<LiteralType> lit) {
-                    return cast_type<ClassType>(lit->underlying.get())->symbol == Symbols::Symbol() &&
+                    return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
                            lit->value == spec.name._id;
                 });
                 if (arg == hash->keys.end()) {
@@ -615,7 +616,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 }
             }
             for (auto &key : hash->keys) {
-                SymbolRef klass = cast_type<ClassType>(key->underlying.get())->symbol;
+                SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
                 if (klass == Symbols::Symbol() && consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
                     continue;
                 }
@@ -813,7 +814,7 @@ SymbolRef unwrapSymbol(const shared_ptr<Type> &typeO) {
 
                  [&](AppliedType *app) { result = app->klass; },
 
-                 [&](ProxyType *proxy) { type = proxy->underlying; },
+                 [&](ProxyType *proxy) { type = proxy->underlying(); },
 
                  [&](Type *ty) { ENFORCE(false, "Unexpected type: ", ty->typeName()); });
     }
@@ -1046,7 +1047,7 @@ public:
             keys.push_back(shared_ptr<LiteralType>(args[i].type, key));
             values.push_back(args[i + 1].type);
         }
-        return make_unique<ShapeType>(keys, values);
+        return make_unique<ShapeType>(Types::hashOfUntyped(), keys, values);
     }
 } Magic_buildHash;
 
@@ -1114,8 +1115,8 @@ public:
         auto val = args.front().type;
         auto *beforeLit = cast_type<LiteralType>(args[1].type.get());
         auto *afterLit = cast_type<LiteralType>(args[2].type.get());
-        if (!(beforeLit->underlying->derivesFrom(ctx, Symbols::Integer()) &&
-              afterLit->underlying->derivesFrom(ctx, Symbols::Integer()))) {
+        if (!(beforeLit->underlying()->derivesFrom(ctx, Symbols::Integer()) &&
+              afterLit->underlying()->derivesFrom(ctx, Symbols::Integer()))) {
             return Types::untyped();
         }
         int before = (int)beforeLit->value;
@@ -1135,7 +1136,7 @@ public:
         if (args.size() == 1) {
             lit = cast_type<LiteralType>(args.front().type.get());
         }
-        if (!lit || !lit->underlying->derivesFrom(ctx, Symbols::Integer())) {
+        if (!lit || !lit->underlying()->derivesFrom(ctx, Symbols::Integer())) {
             return nullptr;
         }
 
@@ -1232,7 +1233,7 @@ public:
             }
         }
 
-        return make_shared<ShapeType>(move(keys), move(values));
+        return make_shared<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
     }
 } Shape_merge;
 

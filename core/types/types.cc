@@ -164,7 +164,7 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from
                  }
              },
              [&](ProxyType *c) {
-                 if (dropSubtypesOf(ctx, c->underlying, klass)->isBottom()) {
+                 if (dropSubtypesOf(ctx, c->underlying(), klass)->isBottom()) {
                      result = Types::bottom();
                  } else {
                      result = from;
@@ -208,7 +208,7 @@ shared_ptr<Type> Types::approximateSubtract(Context ctx, const shared_ptr<Type> 
 
 shared_ptr<Type> Types::dropLiteral(const shared_ptr<Type> &tp) {
     if (auto *a = cast_type<LiteralType>(tp.get())) {
-        return a->underlying;
+        return a->underlying();
     }
     return tp;
 }
@@ -231,12 +231,10 @@ ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     ENFORCE(symbol.exists());
 }
 
-ProxyType::ProxyType(const shared_ptr<Type> &underlying) : underlying(move(underlying)) {}
-
 void ProxyType::_sanityCheck(Context ctx) {
-    ENFORCE(cast_type<ClassType>(this->underlying.get()) != nullptr ||
-            cast_type<AppliedType>(this->underlying.get()) != nullptr);
-    this->underlying->sanityCheck(ctx);
+    ENFORCE(cast_type<ClassType>(this->underlying().get()) != nullptr ||
+            cast_type<AppliedType>(this->underlying().get()) != nullptr);
+    this->underlying()->sanityCheck(ctx);
 }
 
 bool Type::isUntyped() {
@@ -254,26 +252,46 @@ bool Type::isBottom() {
     return t != nullptr && t->symbol == Symbols::bottom();
 }
 
-LiteralType::LiteralType(int64_t val) : ProxyType(Types::Integer()), value(val) {
+LiteralType::LiteralType(int64_t val) : ProxyType(), value(val), literalKind(LiteralTypeKind::Integer) {
     core::categoryCounterInc("types.allocated", "literaltype");
 }
 
-LiteralType::LiteralType(double val) : ProxyType(Types::Float()), floatval(val) {
+LiteralType::LiteralType(double val) : ProxyType(), floatval(val), literalKind(LiteralTypeKind::Float) {
     core::categoryCounterInc("types.allocated", "literaltype");
 }
 
 LiteralType::LiteralType(SymbolRef klass, NameRef val)
-    : ProxyType(klass == Symbols::String() ? Types::String() : Types::Symbol()), value(val._id) {
+    : ProxyType(), value(val._id),
+      literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
     core::categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
-LiteralType::LiteralType(bool val) : ProxyType(val ? Types::trueClass() : Types::falseClass()), value(val ? 1 : 0) {
+LiteralType::LiteralType(bool val)
+    : ProxyType(), value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
     core::categoryCounterInc("types.allocated", "literaltype");
 }
 
+std::shared_ptr<Type> LiteralType::underlying() const {
+    switch (literalKind) {
+        case LiteralTypeKind::Integer:
+            return Types::Integer();
+        case LiteralTypeKind::Float:
+            return Types::Float();
+        case LiteralTypeKind::String:
+            return Types::String();
+        case LiteralTypeKind::Symbol:
+            return Types::Symbol();
+        case LiteralTypeKind::True:
+            return Types::trueClass();
+        case LiteralTypeKind::False:
+            return Types::falseClass();
+    }
+    Error::raise("should never be reached");
+}
+
 TupleType::TupleType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> elements)
-    : ProxyType(move(underlying)), elems(move(elements)) {
+    : ProxyType(), elems(move(elements)), underlying_(underlying) {
     core::categoryCounterInc("types.allocated", "tupletype");
 }
 
@@ -290,8 +308,8 @@ bool LiteralType::equals(const shared_ptr<LiteralType> &rhs) const {
     if (this->value != rhs->value) {
         return false;
     }
-    auto *lklass = cast_type<ClassType>(this->underlying.get());
-    auto *rklass = cast_type<ClassType>(rhs->underlying.get());
+    auto *lklass = cast_type<ClassType>(this->underlying().get());
+    auto *rklass = cast_type<ClassType>(rhs->underlying().get());
     if (!lklass || !rklass) {
         return false;
     }
@@ -304,18 +322,27 @@ OrType::OrType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : le
 
 void TupleType::_sanityCheck(Context ctx) {
     ProxyType::_sanityCheck(ctx);
-    auto *applied = cast_type<AppliedType>(this->underlying.get());
+    auto *applied = cast_type<AppliedType>(this->underlying().get());
     ENFORCE(applied);
     ENFORCE(applied->klass == Symbols::Array());
 }
 
-ShapeType::ShapeType() : ProxyType(Types::hashOfUntyped()) {
+ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
     core::categoryCounterInc("types.allocated", "shapetype");
 }
 
-ShapeType::ShapeType(vector<shared_ptr<LiteralType>> keys, vector<shared_ptr<Type>> values)
-    : ProxyType(Types::hashOfUntyped()), keys(move(keys)), values(move(values)) {
+ShapeType::ShapeType(const std::shared_ptr<Type> &underlying, vector<shared_ptr<LiteralType>> keys,
+                     vector<shared_ptr<Type>> values)
+    : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
     core::categoryCounterInc("types.allocated", "shapetype");
+}
+
+std::shared_ptr<Type> ShapeType::underlying() const {
+    return this->underlying_;
+}
+
+std::shared_ptr<Type> TupleType::underlying() const {
+    return this->underlying_;
 }
 
 void ShapeType::_sanityCheck(Context ctx) {
@@ -665,7 +692,7 @@ SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun)
     : block(block), fun(fun), constr(make_shared<TypeConstraint>()) {}
 
 shared_ptr<Type> TupleType::elementType() const {
-    auto *ap = cast_type<AppliedType>(this->underlying.get());
+    auto *ap = cast_type<AppliedType>(this->underlying().get());
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
     ENFORCE(ap->targs.size() == 1);

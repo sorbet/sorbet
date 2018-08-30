@@ -182,7 +182,7 @@ shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr
     core::Context ctx(*finalGs, core::Symbols::root());
     auto resultType = ofWhat.data(*finalGs).resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
-        receiver = proxy->underlying;
+        receiver = proxy->underlying();
     }
     if (auto *applied = core::cast_type<core::AppliedType>(receiver.get())) {
         /* instantiate generic classes */

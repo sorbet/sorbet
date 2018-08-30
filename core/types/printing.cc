@@ -39,16 +39,16 @@ string LiteralType::typeName() const {
 }
 
 string LiteralType::toString(const GlobalState &gs, int tabs) const {
-    return this->underlying->toString(gs, tabs) + "(" + showValue(gs) + ")";
+    return this->underlying()->toString(gs, tabs) + "(" + showValue(gs) + ")";
 }
 
 string LiteralType::show(const GlobalState &gs) const {
-    return this->underlying->show(gs) + "(" + showValue(gs) + ")";
+    return this->underlying()->show(gs) + "(" + showValue(gs) + ")";
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
     string value;
-    SymbolRef undSymbol = cast_type<ClassType>(this->underlying.get())->symbol;
+    SymbolRef undSymbol = cast_type<ClassType>(this->underlying().get())->symbol;
     if (undSymbol == Symbols::String()) {
         value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
     } else if (undSymbol == Symbols::Symbol()) {
@@ -142,7 +142,7 @@ string ShapeType::show(const GlobalState &gs) const {
         } else {
             buf << ", ";
         }
-        SymbolRef undSymbol = cast_type<ClassType>(key->underlying.get())->symbol;
+        SymbolRef undSymbol = cast_type<ClassType>(key->underlying().get())->symbol;
         if (undSymbol == Symbols::Symbol()) {
             buf << NameRef(gs, key->value).toString(gs) << ": ";
         } else {

@@ -173,7 +173,7 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const InlinedVector<Symbol
             newValues[i] = this->values[i];
             i++;
         }
-        return make_shared<ShapeType>(this->keys, newValues);
+        return make_shared<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
     }
     return nullptr;
 }
@@ -199,7 +199,7 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const TypeConstraint &tc) 
             newValues[i] = this->values[i];
             i++;
         }
-        return make_shared<ShapeType>(this->keys, newValues);
+        return make_shared<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
     }
     return nullptr;
 }
@@ -225,7 +225,7 @@ shared_ptr<Type> ShapeType::_approximate(Context ctx, const TypeConstraint &tc) 
             newValues[i] = this->values[i];
             i++;
         }
-        return make_shared<ShapeType>(this->keys, newValues);
+        return make_shared<ShapeType>(Types::hashOfUntyped(), this->keys, newValues);
     }
     return nullptr;
 }

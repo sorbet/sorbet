@@ -293,7 +293,7 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
         pickle(p, o->right.get());
     } else if (auto *c = cast_type<LiteralType>(what)) {
         p.putU4(3);
-        pickle(p, c->underlying.get());
+        p.putU1((u1)c->literalKind);
         p.putS8(c->value);
     } else if (auto *a = cast_type<AndType>(what)) {
         p.putU4(4);
@@ -301,14 +301,14 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
         pickle(p, a->right.get());
     } else if (auto *arr = cast_type<TupleType>(what)) {
         p.putU4(5);
-        pickle(p, arr->underlying.get());
+        pickle(p, arr->underlying().get());
         p.putU4(arr->elems.size());
         for (auto &el : arr->elems) {
             pickle(p, el.get());
         }
     } else if (auto *hash = cast_type<ShapeType>(what)) {
         p.putU4(6);
-        pickle(p, hash->underlying.get());
+        pickle(p, hash->underlying().get());
         p.putU4(hash->keys.size());
         ENFORCE(hash->keys.size() == hash->values.size());
         for (auto &el : hash->keys) {
@@ -353,9 +353,24 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
         case 2:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case 3: {
+            auto kind = (core::LiteralType::LiteralTypeKind)p.getU1();
+            auto value = p.getS8();
+            switch (kind) {
+                case LiteralType::LiteralTypeKind::Integer:
+                    return make_shared<LiteralType>(value);
+                case LiteralType::LiteralTypeKind::Float:
+                    return make_shared<LiteralType>(absl::bit_cast<double>(value));
+                case LiteralType::LiteralTypeKind::String:
+                    return make_shared<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
+                case LiteralType::LiteralTypeKind::Symbol:
+                    return make_shared<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
+                case LiteralType::LiteralTypeKind::True:
+                    return make_shared<LiteralType>(true);
+                case LiteralType::LiteralTypeKind::False:
+                    return make_shared<LiteralType>(false);
+            }
             shared_ptr<LiteralType> result = make_shared<LiteralType>(true);
-            result->underlying = unpickleType(p, gs);
-            result->value = p.getS8();
+
             return result;
         }
         case 4:
@@ -384,8 +399,7 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
             for (auto &value : values) {
                 value = unpickleType(p, gs);
             }
-            auto result = make_shared<ShapeType>(keys, values);
-            result->underlying = underlying;
+            auto result = make_shared<ShapeType>(underlying, keys, values);
             return result;
         }
         case 7:

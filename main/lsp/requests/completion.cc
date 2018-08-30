@@ -59,7 +59,7 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
                  }
              },
              [&](core::AppliedType *c) { result = findSimilarMethodsIn(make_shared<core::ClassType>(c->klass), name); },
-             [&](core::ProxyType *c) { result = findSimilarMethodsIn(c->underlying, name); }, [&](core::Type *c) {});
+             [&](core::ProxyType *c) { result = findSimilarMethodsIn(c->underlying(), name); }, [&](core::Type *c) {});
     return result;
 }
 

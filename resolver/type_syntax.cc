@@ -376,7 +376,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                     }
                 }
             }
-            result = make_shared<core::ShapeType>(keys, values);
+            result = make_shared<core::ShapeType>(core::Types::hashOfUntyped(), keys, values);
         },
         [&](ast::ConstantLit *i) {
             if (i->typeAlias) {

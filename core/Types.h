@@ -201,8 +201,8 @@ class GroundType : public Type {};
 class ProxyType : public Type {
 public:
     // TODO: use shared pointers that use inline counter
-    std::shared_ptr<Type> underlying;
-    ProxyType(const std::shared_ptr<Type> &underlying);
+    virtual std::shared_ptr<Type> underlying() const = 0;
+    ProxyType() = default;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                         std::vector<TypeAndOrigins> &args, std::vector<Loc> &argLocs,
@@ -213,7 +213,7 @@ public:
 
     void _sanityCheck(Context ctx) override;
 };
-CheckSize(ProxyType, 24, 8);
+CheckSize(ProxyType, 8, 8);
 
 class ClassType final : public GroundType {
 public:
@@ -392,13 +392,17 @@ CheckSize(SelfType, 8, 8);
 class LiteralType final : public ProxyType {
 public:
     union {
-        int64_t value;
-        double floatval;
+        const int64_t value;
+        const double floatval;
     };
+
+    enum class LiteralTypeKind : u1 { Integer, String, Symbol, True, False, Float };
+    const LiteralTypeKind literalKind;
     LiteralType(int64_t val);
     LiteralType(double val);
     LiteralType(SymbolRef klass, NameRef val);
     LiteralType(bool val);
+    virtual std::shared_ptr<Type> underlying() const override;
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -412,14 +416,16 @@ public:
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
 };
-CheckSize(LiteralType, 32, 8);
+CheckSize(LiteralType, 24, 8);
 
 class ShapeType final : public ProxyType {
 public:
     std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
+    const std::shared_ptr<Type> underlying_;
     ShapeType();
-    ShapeType(std::vector<std::shared_ptr<LiteralType>> keys, std::vector<std::shared_ptr<Type>> values);
+    ShapeType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<LiteralType>> keys,
+              std::vector<std::shared_ptr<Type>> values);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;
     virtual std::string show(const GlobalState &gs) const final;
@@ -437,6 +443,7 @@ public:
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
     virtual std::shared_ptr<Type> _instantiate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> underlying() const override;
 };
 CheckSize(ShapeType, 72, 8);
 
@@ -446,6 +453,7 @@ private:
 
 public:
     std::vector<std::shared_ptr<Type>> elems;
+    const std::shared_ptr<Type> underlying_;
 
     TupleType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<Type>> elements);
     static std::shared_ptr<Type> build(Context ctx, std::vector<std::shared_ptr<Type>> elements);
@@ -469,6 +477,7 @@ public:
 
     // Return the type of the underlying array that this tuple decays into
     std::shared_ptr<Type> elementType() const;
+    virtual std::shared_ptr<Type> underlying() const override;
 };
 CheckSize(TupleType, 48, 8);
 

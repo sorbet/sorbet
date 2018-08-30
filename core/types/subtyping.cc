@@ -37,9 +37,9 @@ shared_ptr<Type> Types::any(Context ctx, const shared_ptr<Type> &t1, const share
     return ret;
 }
 
-const shared_ptr<Type> &underlying(const shared_ptr<Type> &t1) {
+const shared_ptr<Type> underlying(const shared_ptr<Type> &t1) {
     if (auto *f = cast_type<ProxyType>(t1.get())) {
-        return f->underlying;
+        return f->underlying();
     }
     return t1;
 }
@@ -285,7 +285,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             result = Types::arrayOfUntyped();
                         }
                     } else {
-                        result = lub(ctx, p1->underlying, p2->underlying);
+                        result = lub(ctx, p1->underlying(), p2->underlying());
                     }
                 },
                 [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
@@ -299,10 +299,10 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
                                 ++i;
-                                auto *u2 = cast_type<ClassType>(el2->underlying.get());
+                                auto *u2 = cast_type<ClassType>(el2->underlying().get());
                                 ENFORCE(u2 != nullptr);
                                 auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                    ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
+                                    ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
                                     return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                 });
                                 if (fnd != h1->keys.end()) {
@@ -320,31 +320,31 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = make_shared<ShapeType>(keys, valueLubs);
+                                result = make_shared<ShapeType>(Types::hashOfUntyped(), keys, valueLubs);
                             }
                         } else {
                             result = Types::hashOfUntyped();
                         }
                     } else {
-                        result = lub(ctx, p1->underlying, p2->underlying);
+                        result = lub(ctx, p1->underlying(), p2->underlying());
                     }
                 },
                 [&](LiteralType *l1) {
                     if (auto *l2 = cast_type<LiteralType>(p2)) {
-                        auto *u1 = cast_type<ClassType>(l1->underlying.get());
-                        auto *u2 = cast_type<ClassType>(l2->underlying.get());
+                        auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                        auto *u2 = cast_type<ClassType>(l2->underlying().get());
                         ENFORCE(u1 != nullptr && u2 != nullptr);
                         if (u1->symbol == u2->symbol) {
                             if (l1->value == l2->value) {
                                 result = t1;
                             } else {
-                                result = l1->underlying;
+                                result = l1->underlying();
                             }
                         } else {
-                            result = lubGround(ctx, l1->underlying, l2->underlying);
+                            result = lubGround(ctx, l1->underlying(), l2->underlying());
                         }
                     } else {
-                        result = lub(ctx, p1->underlying, p2->underlying);
+                        result = lub(ctx, p1->underlying(), p2->underlying());
                     }
                 });
             ENFORCE(result.get() != nullptr);
@@ -352,7 +352,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         } else {
             bool allowProxyInLub = isa_type<TupleType>(p1) || isa_type<ShapeType>(p1);
             // only 1st is proxy
-            shared_ptr<Type> und = p1->underlying;
+            shared_ptr<Type> und = p1->underlying();
             if (isSubType(ctx, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
@@ -365,7 +365,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(p2) || isa_type<ShapeType>(p2);
         // only 1st is proxy
-        shared_ptr<Type> und = p2->underlying;
+        shared_ptr<Type> und = p2->underlying();
         if (isSubType(ctx, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
@@ -626,10 +626,10 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              vector<shared_ptr<Type>> valueLubs;
                              for (auto &el2 : h2->keys) {
                                  ++i;
-                                 auto *u2 = cast_type<ClassType>(el2->underlying.get());
+                                 auto *u2 = cast_type<ClassType>(el2->underlying().get());
                                  ENFORCE(u2 != nullptr);
                                  auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
+                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
                                      return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                  });
                                  if (fnd != h1->keys.end()) {
@@ -645,7 +645,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                                      return;
                                  }
                              }
-                             result = make_shared<ShapeType>(keys, valueLubs);
+                             result = make_shared<ShapeType>(Types::hashOfUntyped(), keys, valueLubs);
                          } else {
                              result = Types::bottom();
                          }
@@ -654,8 +654,8 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                      [&](LiteralType *l1) {
                          auto *l2 = cast_type<LiteralType>(p2);
                          ENFORCE(l2 != nullptr);
-                         auto *u1 = cast_type<ClassType>(l1->underlying.get());
-                         auto *u2 = cast_type<ClassType>(l2->underlying.get());
+                         auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                         auto *u2 = cast_type<ClassType>(l2->underlying().get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
                          if (u1->symbol == u2->symbol) {
                              if (l1->value == l2->value) {
@@ -974,7 +974,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
     }
     if (isa_type<AppliedType>(t2.get())) {
         if (auto *pt = cast_type<ProxyType>(t1.get())) {
-            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying, t2);
+            return Types::isSubTypeUnderConstraint(ctx, constr, pt->underlying(), t2);
         }
         return false;
     }
@@ -1008,10 +1008,10 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                          int i = -1;
                          for (auto &el2 : h2->keys) {
                              ++i;
-                             auto *u2 = cast_type<ClassType>(el2->underlying.get());
+                             auto *u2 = cast_type<ClassType>(el2->underlying().get());
                              ENFORCE(u2 != nullptr);
                              auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying.get());
+                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
                                  return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                              });
                              result = fnd != h1->keys.end() &&
@@ -1029,8 +1029,8 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                              result = false;
                              return;
                          }
-                         auto *u1 = cast_type<ClassType>(l1->underlying.get());
-                         auto *u2 = cast_type<ClassType>(l2->underlying.get());
+                         auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                         auto *u2 = cast_type<ClassType>(l2->underlying().get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
                          result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
                      });
@@ -1038,7 +1038,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             // both are proxy
         } else {
             // only 1st is proxy
-            shared_ptr<Type> und = p1->underlying;
+            shared_ptr<Type> und = p1->underlying();
             return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
         }
     } else if (isa_type<ProxyType>(t2.get())) {
@@ -1139,7 +1139,7 @@ bool Types::equiv(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type
 }
 
 bool ProxyType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    return underlying->derivesFrom(gs, klass);
+    return underlying()->derivesFrom(gs, klass);
 }
 
 bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
