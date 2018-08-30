@@ -142,7 +142,9 @@ class NameInserter {
             return false;
         }
 
-        for (auto &arg : send->args) {
+        for (auto it = send->args.rbegin(); it != send->args.rend(); it++) {
+            // Reverse order is intentional: that's how Ruby does it.
+            auto &arg = *it;
             auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
             if (constLit == nullptr) {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::IncludeNotConstant)) {

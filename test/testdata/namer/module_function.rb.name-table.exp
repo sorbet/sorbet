@@ -7,7 +7,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/module_function.rb:2, https:
   class ::C < ::Object (<constant:Funcs>) @ test/testdata/namer/module_function.rb:19
     method ::C#<static-init> () @ ???
     method ::C#test_calls () @ test/testdata/namer/module_function.rb:22
-  class ::Funcs (<constant:BasicObject>) @ test/testdata/namer/module_function.rb:2
+  class ::Funcs < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/namer/module_function.rb:2
     method ::Funcs#<static-init> () @ test/testdata/namer/module_function.rb:2
     method ::Funcs#f (x) -> Integer @ test/testdata/namer/module_function.rb:6
       argument ::Funcs#f#x<> -> Integer @ test/testdata/namer/module_function.rb:5

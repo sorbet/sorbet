@@ -14,9 +14,6 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                    ^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L43: Did you mean: `Date`?
-    43 |class Date::Infinity < Numeric
-              ^^^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/range.rbi#L2: Did you mean: `Range`?
      2 |class Range < Object
         ^^^^^^^^^^^^^^^^^^^^

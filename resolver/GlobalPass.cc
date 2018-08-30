@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "core/Names/resolver.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -207,7 +208,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
-        auto &data = core::SymbolRef(&gs, i).data(gs);
+        auto ref = core::SymbolRef(&gs, i);
+        auto &data = ref.data(gs);
         auto loc = data.loc();
         if (loc.file().exists() && loc.file().data(gs).sourceType == core::File::Type::Normal) {
             if (data.isMethod()) {
@@ -224,7 +226,13 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
             // we did not see a declaration for this type not did we see it used. Default to module.
             data.setIsModule(true);
         }
-        if (data.superClass != core::Symbols::todo()) {
+        if (data.superClass.exists() && data.superClass != core::Symbols::todo()) {
+            continue;
+        }
+        if (ref == core::Symbols::RubyTyper_ImplicitModuleSuperClass()) {
+            // only happens if we run without stdlib
+            ENFORCE(!core::Symbols::RubyTyper_ImplicitModuleSuperClass().data(gs).loc().exists());
+            data.superClass = core::Symbols::BasicObject();
             continue;
         }
 
@@ -233,19 +241,155 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         if (isSingleton) {
             if (attached == core::Symbols::BasicObject()) {
                 data.superClass = core::Symbols::Class();
-            } else if (!attached.data(gs).superClass.exists()) {
+            } else if (attached.data(gs).superClass == core::Symbols::RubyTyper_ImplicitModuleSuperClass()) {
+                // Note: this depends on attached classes having lower indexes in name table than their singletons
                 data.superClass = core::Symbols::Module();
             } else {
                 ENFORCE(attached.data(gs).superClass != core::Symbols::todo());
                 data.superClass = attached.data(gs).superClass.data(gs).singletonClass(gs);
             }
         } else {
-            data.superClass = core::Symbols::Object();
+            if (data.isClassClass()) {
+                if (!core::Symbols::Object().data(gs).derivesFrom(gs, ref) && core::Symbols::Object() != ref) {
+                    data.superClass = core::Symbols::Object();
+                }
+            } else {
+                if (!core::Symbols::BasicObject().data(gs).derivesFrom(gs, ref) &&
+                    core::Symbols::BasicObject() != ref) {
+                    data.superClass = core::Symbols::RubyTyper_ImplicitModuleSuperClass();
+                }
+            }
         }
     }
 
     core::prodCounterAdd("types.input.classes.total", classCount);
     core::prodCounterAdd("types.input.methods.total", methodCount);
+}
+
+struct ParentLinearizationInformation {
+    const InlinedVector<core::SymbolRef, 4> &mixins;
+    core::SymbolRef superClass;
+    core::SymbolRef klass;
+    InlinedVector<core::SymbolRef, 4> fullLinearizationSlow(core::GlobalState &gs);
+};
+
+int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<core::SymbolRef, 4> &mixinList,
+                  core::SymbolRef mixin, core::SymbolRef parent, int pos) {
+    if (forSym == mixin) {
+        Error::raise("Loop in mixins");
+    }
+    if (parent.data(gs).derivesFrom(gs, mixin)) {
+        return pos;
+    }
+    auto fnd = find(mixinList.begin(), mixinList.end(), mixin);
+    if (fnd != mixinList.end()) {
+        auto newPos = fnd - mixinList.begin();
+        if (newPos >= pos) {
+            return newPos + 1;
+        }
+        return pos;
+    } else {
+        mixinList.insert(mixinList.begin() + pos, mixin);
+        return pos + 1;
+    }
+}
+
+// ** This implements Dmitry's understanding of Ruby linerarization with an optimization that common
+// tails of class linearization aren't copied around.
+// In order to obtain Ruby-side ancestors, one would need to walk superclass chain and concatenate `mixins`.
+// The algorithm is harder to explain than to code, so just follow code & tests if `testdata/resolver/linearization`
+ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core::SymbolRef ofClass) {
+    ENFORCE(ofClass.exists());
+    auto &data = ofClass.data(gs);
+    ENFORCE(data.isClass());
+    if (!data.isClassLinearizationComputed()) {
+        if (data.superClass.exists()) {
+            computeLinearization(gs, data.superClass);
+        }
+        InlinedVector<core::SymbolRef, 4> currentMixins = data.mixins();
+        InlinedVector<core::SymbolRef, 4> newMixins;
+        for (auto mixin : currentMixins) {
+            if (mixin == data.superClass) {
+                continue;
+            }
+            if (mixin.data(gs).superClass == core::Symbols::StubClass() ||
+                mixin.data(gs).superClass == core::Symbols::StubModule()) {
+                newMixins.emplace_back(mixin);
+                continue;
+            }
+            ENFORCE(mixin.data(gs).isClass());
+            ParentLinearizationInformation mixinLinearization = computeLinearization(gs, mixin);
+
+            if (!mixin.data(gs).isClassModule()) {
+                if (mixin != core::Symbols::SinatraBase() && mixin != core::Symbols::BasicObject()) {
+                    // This is a class but Sinatra pass `include`'s it.
+                    // Because Sinatra does weird stuff and that's how we model it :-()
+                    if (auto e = gs.beginError(data.loc(), core::errors::Resolver::IncludesNonModule)) {
+                        e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
+                                    mixin.data(gs).fullName(gs));
+                    }
+                }
+                // insert all transitive parents of class to bring methods back.
+                auto allMixins = mixinLinearization.fullLinearizationSlow(gs);
+                newMixins.insert(newMixins.begin(), allMixins.begin(), allMixins.end());
+            } else {
+                int pos = 0;
+                pos = maybeAddMixin(gs, ofClass, newMixins, mixin, data.superClass, pos);
+                for (auto &mixinLinearizationComponent : mixinLinearization.mixins) {
+                    pos = maybeAddMixin(gs, ofClass, newMixins, mixinLinearizationComponent, data.superClass, pos);
+                }
+            }
+        }
+        data.mixins() = move(newMixins);
+        data.setClassLinearizationComputed();
+        if (debug_mode) {
+            for (auto oldMixin : currentMixins) {
+                ENFORCE(ofClass.data(gs).derivesFrom(gs, oldMixin),
+                        ofClass.data(gs).fullName(gs) + " no longer derrives from " + oldMixin.data(gs).fullName(gs));
+            }
+        }
+    }
+    ENFORCE(data.isClassLinearizationComputed());
+    return ParentLinearizationInformation{data.mixins(), data.superClass, ofClass};
+}
+
+void fullLinearizationSlowImpl(core::GlobalState &gs, const ParentLinearizationInformation &info,
+                               InlinedVector<core::SymbolRef, 4> &acc) {
+    ENFORCE(!absl::c_linear_search(acc, info.klass));
+    acc.emplace_back(info.klass);
+
+    for (auto m : info.mixins) {
+        if (!absl::c_linear_search(acc, m)) {
+            if (m.data(gs).isClassModule()) {
+                acc.emplace_back(m);
+            } else {
+                fullLinearizationSlowImpl(gs, computeLinearization(gs, m), acc);
+            }
+        }
+    }
+    if (info.superClass.exists()) {
+        if (!absl::c_linear_search(acc, info.superClass)) {
+            fullLinearizationSlowImpl(gs, computeLinearization(gs, info.superClass), acc);
+        }
+    }
+    return;
+};
+InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizationSlow(core::GlobalState &gs) {
+    InlinedVector<core::SymbolRef, 4> res;
+    fullLinearizationSlowImpl(gs, *this, res);
+    return res;
+}
+
+void computeLinearization(core::GlobalState &gs) {
+    gs.trace("Computing linearization");
+    // TODO: this does not support `prepend`
+    for (int i = 1; i < gs.symbolsUsed(); ++i) {
+        auto &data = core::SymbolRef(&gs, i).data(gs);
+        if (!data.isClass()) {
+            continue;
+        }
+        computeLinearization(gs, core::SymbolRef(&gs, i));
+    }
 }
 
 void Resolver::finalizeResolution(core::GlobalState &gs) {
@@ -284,6 +428,7 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 
+    computeLinearization(gs);
     UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> abstractCache;
 
     for (int i = 1; i < gs.symbolsUsed(); ++i) {

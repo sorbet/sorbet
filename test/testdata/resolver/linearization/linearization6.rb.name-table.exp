@@ -1,0 +1,16 @@
+class ::<root> < ::Object () @ (test/testdata/resolver/linearization/linearization6.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  class ::<Class:A6> < ::Module () @ test/testdata/resolver/linearization/linearization6.rb:2
+  class ::<Class:B6> < ::Module () @ test/testdata/resolver/linearization/linearization6.rb:3
+  class ::<Class:C6> < ::Module () @ test/testdata/resolver/linearization/linearization6.rb:4
+  class ::<Class:D6> < ::Module () @ test/testdata/resolver/linearization/linearization6.rb:8
+  class ::<Class:E6> < ::Module () @ test/testdata/resolver/linearization/linearization6.rb:12
+  class ::A6 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/linearization/linearization6.rb:2
+  class ::B6 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/linearization/linearization6.rb:3
+  class ::C6 < ::RubyTyper::ImplicitModuleSuperclass (<constant:A6>, <constant:B6>) @ test/testdata/resolver/linearization/linearization6.rb:4
+    method ::C6#<static-init> () @ test/testdata/resolver/linearization/linearization6.rb:4
+  class ::D6 < ::RubyTyper::ImplicitModuleSuperclass (<constant:B6>, <constant:A6>) @ test/testdata/resolver/linearization/linearization6.rb:8
+    method ::D6#<static-init> () @ test/testdata/resolver/linearization/linearization6.rb:8
+  class ::E6 < ::RubyTyper::ImplicitModuleSuperclass (<constant:D6>, <constant:C6>, <constant:A6>, <constant:B6>) @ test/testdata/resolver/linearization/linearization6.rb:12
+    method ::E6#<static-init> () @ test/testdata/resolver/linearization/linearization6.rb:12
+  method #<static-init> () @ ???
+

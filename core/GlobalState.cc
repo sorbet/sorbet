@@ -73,6 +73,7 @@ const char *tuple_str = "Tuple";
 const char *shape_str = "Shape";
 const char *subclasses_str = "SUBCLASSES";
 const char *sorbet_str = "Sorbet";
+const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
@@ -240,6 +241,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Subclasses());
     id = synthesizeClass(sorbet_str);
     ENFORCE(id == Symbols::Sorbet());
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(implicit_module_superclass_str));
+    ENFORCE(id == Symbols::RubyTyper_ImplicitModuleSuperClass());
 
     // Root members
     Symbols::root().data(*this, true).members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

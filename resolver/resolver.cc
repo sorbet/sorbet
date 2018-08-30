@@ -400,9 +400,6 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         core::SymbolRef klass = original->symbol;
-        if (original->kind == ast::Module && klass.data(ctx).mixins().empty()) {
-            klass.data(ctx).mixins().emplace_back(core::Symbols::BasicObject());
-        }
 
         for (auto &ancst : original->ancestors) {
             bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front());

@@ -10,7 +10,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/class_instance_vars.rb:2,
     static-field ::Child#@@undefined_cvar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:25
   class ::Child1 < ::Parent () @ test/testdata/resolver/class_instance_vars.rb:36
     method ::Child1#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:37
-  class ::Mixin (<constant:BasicObject>) @ test/testdata/resolver/class_instance_vars.rb:15
+  class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/class_instance_vars.rb:15
     method ::Mixin#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:15
     static-field ::Mixin#@@mixin_cvar -> Integer @ test/testdata/resolver/class_instance_vars.rb:16
   class ::Parent < ::Object () @ test/testdata/resolver/class_instance_vars.rb:2

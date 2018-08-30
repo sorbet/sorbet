@@ -68,10 +68,17 @@ shared_ptr<Type> Symbol::externalType(const GlobalState &gs) const {
 }
 
 bool Symbol::derivesFrom(const GlobalState &gs, SymbolRef sym) const {
-    // TODO: add baseClassSet
-    for (SymbolRef a : argumentsOrMixins) {
-        if (a == sym || a.data(gs).derivesFrom(gs, sym)) {
-            return true;
+    if (isClassLinearizationComputed()) {
+        for (SymbolRef a : argumentsOrMixins) {
+            if (a == sym) {
+                return true;
+            }
+        }
+    } else {
+        for (SymbolRef a : argumentsOrMixins) {
+            if (a == sym || a.data(gs).derivesFrom(gs, sym)) {
+                return true;
+            }
         }
     }
     if (this->superClass.exists()) {
@@ -183,9 +190,19 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             return result;
         }
     }
-    for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+    for (auto it = this->argumentsOrMixins.begin(); it != this->argumentsOrMixins.end(); ++it) {
         ENFORCE(it->exists());
-        result = it->data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+        if (isClassLinearizationComputed()) {
+            result = it->data(gs).findMember(gs, name);
+            if (result.exists()) {
+                if (mask == 0 || (result.data(gs).flags & mask) == flags) {
+                    return result;
+                }
+            }
+            result = core::Symbols::noSymbol();
+        } else {
+            result = it->data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+        }
         if (result.exists()) {
             return result;
         }

@@ -39,11 +39,11 @@ begin
       ::RubyTyper.keep_for_ide(::Mixin2)
     end
   end
-  class ::MultipleInclude<<constant:MultipleInclude>> < (::<todo sym>, ::Mixin1, ::Mixin2)
+  class ::MultipleInclude<<constant:MultipleInclude>> < (::<todo sym>, ::Mixin2, ::Mixin1)
     def self.<static-init><<static-init>>()
       begin
-        ::RubyTyper.keep_for_ide(::Mixin1)
         ::RubyTyper.keep_for_ide(::Mixin2)
+        ::RubyTyper.keep_for_ide(::Mixin1)
         <emptyTree>
       end
     end

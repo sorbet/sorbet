@@ -31,6 +31,9 @@ end
 class RubyTyper::StubClass
 end
 
+class RubyTyper::ImplicitModuleSuperclass < BasicObject
+end
+
 # C++ code delegates the implementation of many methods on tuples and
 # shapes (arrays and hashes, respectively, of known shape) to these
 # two classes. All the actual methods on this class are implemented in

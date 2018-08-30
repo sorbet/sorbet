@@ -2,16 +2,16 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_scoping.rb:2, 
   class ::<Class:A> < ::<Class:B> () @ test/testdata/resolver/resolution_scoping.rb:2
   class ::<Class:B> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/resolution_scoping.rb:2
   class ::<Class:D> < ::Module () @ test/testdata/resolver/resolution_scoping.rb:11
-  class ::A < ::B (<constant:B>, <constant:C>) @ test/testdata/resolver/resolution_scoping.rb:2
+  class ::A < ::B (<constant:C>, <constant:B>) @ test/testdata/resolver/resolution_scoping.rb:2
     class ::A::<Class:B> < ::Module () @ test/testdata/resolver/resolution_scoping.rb:5
     class ::A::<Class:C> < ::Module () @ test/testdata/resolver/resolution_scoping.rb:3
-    class ::A::B (<constant:BasicObject>) @ test/testdata/resolver/resolution_scoping.rb:5
-    class ::A::C (<constant:BasicObject>) @ test/testdata/resolver/resolution_scoping.rb:3
+    class ::A::B < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_scoping.rb:5
+    class ::A::C < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_scoping.rb:3
     method ::A#<static-init> () @ test/testdata/resolver/resolution_scoping.rb:2
   class ::B < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/resolution_scoping.rb:2
-  class ::D (<constant:BasicObject>, <constant:E>) @ test/testdata/resolver/resolution_scoping.rb:11
+  class ::D < ::RubyTyper::ImplicitModuleSuperclass (<constant:E>) @ test/testdata/resolver/resolution_scoping.rb:11
     class ::D::<Class:E> < ::Module () @ test/testdata/resolver/resolution_scoping.rb:13
-    class ::D::E (<constant:BasicObject>) @ test/testdata/resolver/resolution_scoping.rb:13
+    class ::D::E < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/resolution_scoping.rb:13
     method ::D#<static-init> () @ test/testdata/resolver/resolution_scoping.rb:11
   method #<static-init> () @ ???
 

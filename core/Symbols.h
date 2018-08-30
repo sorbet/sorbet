@@ -130,6 +130,7 @@ public:
         static constexpr int CLASS_MODULE = 0x0080;
         static constexpr int CLASS_ABSTRACT = 0x0040;
         static constexpr int CLASS_INTERFACE = 0x0020;
+        static constexpr int CLASS_LINEARIZATION_COMPUTED = 0x0010;
 
         // Method argument flags
         static constexpr int ARGUMENT_OPTIONAL = 0x0100;
@@ -366,6 +367,11 @@ public:
         return (flags & Symbol::Flags::CLASS_INTERFACE) != 0;
     }
 
+    inline bool isClassLinearizationComputed() const {
+        ENFORCE(isClass());
+        return (flags & Symbol::Flags::CLASS_LINEARIZATION_COMPUTED) != 0;
+    }
+
     inline void setClass() {
         ENFORCE(!isStaticField() && !isField() && !isMethod() && !isTypeArgument() && !isTypeMember());
         flags = flags | Symbol::Flags::CLASS;
@@ -489,6 +495,11 @@ public:
     inline void setClassInterface() {
         ENFORCE(isClass());
         flags |= Symbol::Flags::CLASS_INTERFACE;
+    }
+
+    inline void setClassLinearizationComputed() {
+        ENFORCE(isClass());
+        flags |= Symbol::Flags::CLASS_LINEARIZATION_COMPUTED;
     }
 
     inline void setStaticTypeAlias() {
@@ -830,6 +841,10 @@ public:
 
     static SymbolRef Sorbet() {
         return SymbolRef(nullptr, 56);
+    }
+
+    static SymbolRef RubyTyper_ImplicitModuleSuperClass() {
+        return SymbolRef(nullptr, 57);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;
