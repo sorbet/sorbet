@@ -1,5 +1,9 @@
 #!/bin/bash
 
+if [ ! -z "$LOCAL_BAZEL_OVERRIDE" ]; then
+    exec $LOCAL_BAZEL_OVERRIDE "$@"
+fi
+
 # update this to move to later versions of this repo:
 # https://github.com/bazelbuild/bazel
 
@@ -22,7 +26,16 @@ function try_goto_cmd_location() {
 # So we do it as a try
 try_goto_cmd_location
 
-set -e
+set -eo pipefail
+
+if [ "$(uname -s)" == "Linux" ]; then
+  export BAZEL_LAUNCHER_PLATFORM_NAME='linux'
+elif [ "$(uname -s)" == "Darwin" ]; then
+  export BAZEL_LAUNCHER_PLATFORM_NAME='darwin'
+else
+  "Your platform $(uname -s) is unsupported, sorry"
+  exit 1
+fi
 
 if [ -z "$BAZEL_REMOTE_SOURCE" ]; then
   export BAZEL_REMOTE_SOURCE=https://github.com/bazelbuild/bazel/releases/download
@@ -46,11 +59,62 @@ findWorkspace
 REPO_ROOT=$PWD
 cd $ORIGINAL_PWD
 
+if [ -f $REPO_ROOT/stripe-build.yaml ]
+then
+    # version is pulled out of stripe-build.yaml
+    bazel_version_regex='version: "(([0-9]+\.[0-9]+)\.[0-9]+)"'
+    stripe_build_yaml=`cat $REPO_ROOT/stripe-build.yaml`
+    if [[ $stripe_build_yaml =~ $bazel_version_regex ]]
+    then
+      export BAZEL_VERSION=${BASH_REMATCH[1]}
+      export BAZEL_MAJOR_MINOR=${BASH_REMATCH[2]}
+    else
+      echo "$0: Failed to extract Bazel version from stripe-build.yaml" >&2
+      exit 1
+    fi
+else
+    # version is pulled out of WORKSPACE
+    bazel_version_regex='BAZEL_VERSION = "(([0-9]+\.[0-9]+)\.[0-9]+)"'
+    stripe_build_yaml=`cat $REPO_ROOT/WORKSPACE`
+    if [[ $stripe_build_yaml =~ $bazel_version_regex ]]
+    then
+      export BAZEL_VERSION=${BASH_REMATCH[1]}
+      export BAZEL_MAJOR_MINOR=${BASH_REMATCH[2]}
+    else
+      echo "$0: Failed to extract Bazel version from WORKSPACE" >&2
+      exit 1
+    fi
+fi
+
+# in some cases (like building the kube image), we want to use the host
+# bazel. however, this should ideally be the same bazel version, specified
+# in stripe-build.yaml
+if ! [ -z "$STRIPE_BUILD_JENKINS_BAZEL" ] && ! [ -z "$BAZEL_REAL" ]; then
+    # first check that the version is expected
+    actual_bazel_version_regex='Build label: (([0-9]+\.[0-9]+)\.[0-9]+)'
+    bazel_version_output=`$BAZEL_REAL version`
+    if [[ $bazel_version_output =~ $actual_bazel_version_regex ]]
+    then
+        ACTUAL_BAZEL_VERSION=${BASH_REMATCH[1]}
+        ACTUAL_BAZEL_MAJOR_MINOR=${BASH_REMATCH[2]}
+        if [ "$ACTUAL_BAZEL_MAJOR_MINOR" != "$BAZEL_MAJOR_MINOR" ]; then
+            echo "$0: Expected bazel version $BAZEL_VERSION but got $ACTUAL_BAZEL_VERSION (major.minor mismatch)" >&2
+            exit 1
+        fi
+    else
+        echo "$0: Failed to extract Bazel version from stripe-build.yaml" >&2
+        exit 1
+    fi
+    exec $BAZEL_REAL "$@"
+fi
+
+
+
 BAZEL_RC_PATH=${TMPDIR}/bazel_bazel_rc_${RND_UID}
 echo "" > $BAZEL_RC_PATH
 
-if [ -f $REPO_ROOT/tools/default_bazel_rc ]; then
-  cat $REPO_ROOT/tools/default_bazel_rc >> $BAZEL_RC_PATH
+if [ -f $REPO_ROOT/shared_tools/default_bazel_rc ]; then
+  cat $REPO_ROOT/shared_tools/default_bazel_rc >> $BAZEL_RC_PATH
 fi
 
 if [ -f /etc/bazelrc ]; then
@@ -65,30 +129,49 @@ if [ -f $REPO_ROOT/.bazelrc ]; then
   cat $REPO_ROOT/.bazelrc >> $BAZEL_RC_PATH
 fi
 
+IS_CACHE_WORTHY_COMMAND=false
+for var in "$@"
+do
+  case "$var" in
+  build|test|run)
+    IS_CACHE_WORTHY_COMMAND=true
+    break
+    ;;
+  *)
+    if [[ ! $var == --* ]]; then
+      break;
+    fi
+    ;;
+  esac
+done
 
-export BAZEL_VERSION=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_VERSION\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
-
+if [ -z "$BAZEL_INSTALLER_VERSION_SHA" ]; then
+  ## TODO(gkk): load shas from stripe-build.yaml instead of WORKSPACE once the yaml file supports it
+  SHA_VARIABLE_NAME="BAZEL_INSTALLER_VERSION_${BAZEL_LAUNCHER_PLATFORM_NAME}_SHA"
+  export BAZEL_INSTALLER_VERSION_SHA=$(cat $REPO_ROOT/WORKSPACE | egrep "^${SHA_VARIABLE_NAME}\s*=\s*" | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
+fi
 # So we can compare what we download against an expected SHA 256
-export BAZEL_VERSION_SHA=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_VERSION_SHA\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
+# export BAZEL_INSTALLER_VERSION_SHA=$(ruby -ryaml -e 'puts YAML.load_file("'$REPO_ROOT'/stripe-build.yaml")["bazel"]["dist_sha256_'$BAZEL_LAUNCHER_PLATFORM_NAME'"]')
+
 export BAZEL_ZIP_PATH=$(cat $REPO_ROOT/WORKSPACE | egrep '^BAZEL_ZIP_PATH\s*=\s*' | sed -e 's/.*=//g' -e 's/ //g' -e 's/"//g')
 
-if [ -z BAZEL_VERSION_SHA ]; then
-  echo "Must supply a BAZEL_VERSION in the workspace"
+if [ -z "$BAZEL_VERSION" ]; then
+  echo "Must supply a BAZEL_VERSION in the workspace or in the stripe-build.yaml"
   exit 1
 fi
-if [ -z "$BAZEL_VERSION_SHA" ]; then
-  echo "Must supply a BAZEL_VERSION_SHA in the workspace"
+if [ -z "$BAZEL_INSTALLER_VERSION_SHA" ]; then
+  echo "Must supply a 'dist_sha256_$BAZEL_LAUNCHER_PLATFORM_NAME' in the workspace or in the stripe-build.yaml"
   exit 1
 fi
 if [ -z "$BAZEL_BIN_LOC" ]; then
-  BAZEL_BIN_LOC=~/.bazel
+  BAZEL_BIN_LOC=~/.bazel_binaries
 fi
 
 mkdir -p $BAZEL_BIN_LOC
-export BAZEL_EXEC_PATH=$BAZEL_BIN_LOC/$BAZEL_VERSION
+export BAZEL_EXEC_PATH=$BAZEL_BIN_LOC/$BAZEL_VERSION/bin/bazel-real
 
 if [ -f "$BAZEL_EXEC_PATH" ]; then
-   exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
+    exec $BAZEL_EXEC_PATH --bazelrc $BAZEL_RC_PATH "$@"
 fi
 
 RND_UID=$(date "+%s")
@@ -97,30 +180,29 @@ mkdir -p $BUILD_DIR
 
 ( # Opens a subshell
   set -e
-  echo "Building Bazel, this will take ~40mins"
-
+  echo "Installing Bazel, this will take ~1min"
   cd $BUILD_DIR
-  ZIP_NAME="bazel-${BAZEL_VERSION}-dist.zip"
+
+  INSTALLER_NAME="bazel-${BAZEL_VERSION}-installer-${BAZEL_LAUNCHER_PLATFORM_NAME}-x86_64.sh"
   echo $PWD
-  if [ -z $BAZEL_ZIP_PATH ]; then
-    BAZEL_ZIP_PATH=$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$ZIP_NAME
+  if [ -z $BAZEL_INSTALLER_PATH ]; then
+    BAZEL_INSTALLER_PATH=$BAZEL_REMOTE_SOURCE/${BAZEL_VERSION}/$INSTALLER_NAME
   fi
-  curl -O -L $BAZEL_ZIP_PATH
 
-  GENERATED_SHA_256=$(shasum -a 256 $ZIP_NAME | awk '{print $1}')
+  curl -O -L $BAZEL_INSTALLER_PATH
 
-  if [ "$GENERATED_SHA_256" != "$BAZEL_VERSION_SHA" ]; then
-    echo "Sha 256 does not match, expected: $BAZEL_VERSION_SHA"
+  GENERATED_SHA_256=$(shasum -a 256 $INSTALLER_NAME | awk '{print $1}')
+
+  if [ "$GENERATED_SHA_256" != "$BAZEL_INSTALLER_VERSION_SHA" ]; then
+    echo "Sha 256 does not match, expected: $BAZEL_INSTALLER_VERSION_SHA"
     echo "But found $GENERATED_SHA_256"
     echo "Recommend you:  update the sha to the expected"
     echo "and then re-run this script"
     exit 1
   fi
 
-
-  unzip $ZIP_NAME > /dev/null
-  ./compile.sh > /dev/null
-  mv output/bazel $BAZEL_EXEC_PATH
+  chmod +x ${INSTALLER_NAME}
+  ./${INSTALLER_NAME} --base=${BAZEL_BIN_LOC}/${BAZEL_VERSION} --bin=${BAZEL_BIN_LOC}/${BAZEL_VERSION}/bin_t
 )
 rm -rf $BUILD_DIR
 
