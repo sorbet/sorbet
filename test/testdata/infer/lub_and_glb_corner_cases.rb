@@ -38,7 +38,7 @@ module Main
 
   def generic_class_glb_bottom
     ret = T.cast(nil, T.all(String, T::Hash[String, String]))
-    T.assert_type!(ret, T.noreturn)
+    foo # error: This code is unreachable
   end
 
   def generic_class_glb_collapse

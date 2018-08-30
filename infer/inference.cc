@@ -101,6 +101,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             continue;
         }
 
+        core::Loc madeBlockDead;
         for (cfg::Binding &bind : bb->exprs) {
             if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
                 current.ensureGoodAssignTarget(ctx, bind.bind);
@@ -113,7 +114,14 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                 bind.tpe->sanityCheck(ctx);
                 if (bind.tpe->isBottom()) {
                     current.isDead = true;
+                    madeBlockDead = bind.loc;
                 }
+            } else if (current.isDead && !bind.value->isSynthetic) {
+                if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
+                    e.setHeader("This code is unreachable");
+                    e.addErrorLine(madeBlockDead, "This expression can never be computed");
+                }
+                break;
             }
         }
         if (!current.isDead) {
