@@ -47,7 +47,7 @@ class File < IO
       dir: String,
   )
   .returns(String)
-  def self.absolute_path(file, dir=_); end
+  def self.absolute_path(file, dir=T.unsafe(nil)); end
 
   Sorbet.sig(
       file: BasicObject,
@@ -60,7 +60,7 @@ class File < IO
       suffix: String,
   )
   .returns(String)
-  def self.basename(file, suffix=_); end
+  def self.basename(file, suffix=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
@@ -77,7 +77,7 @@ class File < IO
       arg2: Integer,
   )
   .returns(String)
-  def self.binread(arg0, arg1=_, arg2=_); end
+  def self.binread(arg0, arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 
   Sorbet.sig(
       file: BasicObject,
@@ -159,7 +159,7 @@ class File < IO
       dir: BasicObject,
   )
   .returns(String)
-  def self.expand_path(file, dir=_); end
+  def self.expand_path(file, dir=T.unsafe(nil)); end
 
   Sorbet.sig(
       path: String,
@@ -179,7 +179,7 @@ class File < IO
       flags: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def self.fnmatch(pattern, path, flags=_); end
+  def self.fnmatch(pattern, path, flags=T.unsafe(nil)); end
 
   Sorbet.sig(
       file: String,
@@ -281,14 +281,14 @@ class File < IO
       dir: String,
   )
   .returns(String)
-  def self.realdirpath(pathname, dir=_); end
+  def self.realdirpath(pathname, dir=T.unsafe(nil)); end
 
   Sorbet.sig(
       pathname: String,
       dir: String,
   )
   .returns(String)
-  def self.realpath(pathname, dir=_); end
+  def self.realpath(pathname, dir=T.unsafe(nil)); end
 
   Sorbet.sig(
       old: String,
@@ -369,7 +369,7 @@ class File < IO
       arg0: Integer,
   )
   .returns(Integer)
-  def self.umask(arg0=_); end
+  def self.umask(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       atime: Time,
@@ -444,7 +444,7 @@ class File < IO
       opt: Integer,
   )
   .void
-  def initialize(file, mode=_, perm=_, opt=_); end
+  def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil)); end
 
   Sorbet.sig.returns(File::Stat)
   def lstat(); end
@@ -470,7 +470,7 @@ class File < IO
       flags: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def self.fnmatch?(pattern, path, flags=_); end
+  def self.fnmatch?(pattern, path, flags=T.unsafe(nil)); end
 
   Sorbet.sig(
       files: String,

@@ -50,7 +50,7 @@ class Hash < Object
       blk: T.proc(arg0: K).returns(V),
   )
   .returns(T.nilable(V))
-  def default(arg0=_, &blk); end
+  def default(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: V,
@@ -121,7 +121,7 @@ class Hash < Object
       blk: T.proc(arg0: K).returns(V),
   )
   .returns(V)
-  def fetch(arg0, arg1=_, &blk); end
+  def fetch(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: K,
@@ -144,7 +144,7 @@ class Hash < Object
       blk: T.proc(hash: Hash, key: Object).returns(Object)
   )
   .void
-  def initialize(default=_, &blk); end
+  def initialize(default=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def inspect(); end

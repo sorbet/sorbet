@@ -36,7 +36,7 @@ module URI
       enc: Encoding,
   )
   .returns(T::Array[[String, String]])
-  def self.decode_www_form_component(str, enc=_); end
+  def self.decode_www_form_component(str, enc=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg: String,
@@ -56,7 +56,7 @@ module URI
       blk: BasicObject,
   )
   .returns(T::Array[String])
-  def self.extract(str, schemes=_, &blk); end
+  def self.extract(str, schemes=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       str: String,
@@ -74,7 +74,7 @@ module URI
       schemes: Array,
   )
   .returns(T::Array[String])
-  def self.regexp(schemes=_); end
+  def self.regexp(schemes=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Hash[String, Class])
   def self.scheme_list(); end

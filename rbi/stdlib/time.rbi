@@ -17,7 +17,7 @@ class Time
       now: Time,
   )
   .returns(Time)
-  def self.parse(date, now=_); end
+  def self.parse(date, now=T.unsafe(nil)); end
 
   Sorbet.sig(
       date: String,
@@ -37,7 +37,7 @@ class Time
       now: Time,
   )
   .returns(Time)
-  def self.strptime(date, format, now=_); end
+  def self.strptime(date, format, now=T.unsafe(nil)); end
 
   Sorbet.sig(
       date: String,

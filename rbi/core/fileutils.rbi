@@ -10,14 +10,14 @@ module FileUtils
       preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
   )
   .returns(T::Array[String])
-  def self.cp_r(src, dest, preserve=_); end
+  def self.cp_r(src, dest, preserve=T.unsafe(nil)); end
 
   Sorbet.sig(
       list: T.any(String, Pathname),
       mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
   )
   .returns(T::Array[String])
-  def self.mkdir_p(list, mode=_); end
+  def self.mkdir_p(list, mode=T.unsafe(nil)); end
 end
 
 module FileUtils::DryRun

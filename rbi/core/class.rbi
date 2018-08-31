@@ -16,7 +16,7 @@ class Class < Module
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def instance_methods(arg0=_); end
+  def instance_methods(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def name(); end

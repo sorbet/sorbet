@@ -11,7 +11,7 @@ module Benchmark
       labels: String,
   )
   .returns(T::Array[Benchmark::Tms])
-  def self.benchmark(caption, label_width=_, format=_, *labels); end
+  def self.benchmark(caption, label_width=T.unsafe(nil), format=T.unsafe(nil), *labels); end
 
   Sorbet.sig(
       label_width: Integer,
@@ -19,20 +19,20 @@ module Benchmark
       blk: T.proc(arg0: Process).returns(NilClass),
   )
   .returns(T::Array[Benchmark::Tms])
-  def self.bm(label_width=_, *labels, &blk); end
+  def self.bm(label_width=T.unsafe(nil), *labels, &blk); end
 
   Sorbet.sig(
       width: Integer,
       blk: T.proc(arg0: Process).returns(NilClass),
   )
   .returns(T::Array[Benchmark::Tms])
-  def self.bmbm(width=_, &blk); end
+  def self.bmbm(width=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       label: String,
   )
   .returns(Benchmark::Tms)
-  def self.measure(label=_); end
+  def self.measure(label=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: BasicObject,

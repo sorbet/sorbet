@@ -87,7 +87,7 @@ class WEBrick::BasicLog
     level: T.untyped,
   )
   .void
-  def initialize(log_file=_, level=_); end
+  def initialize(log_file=T.unsafe(nil), level=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.untyped)
   def level(); end
@@ -240,7 +240,7 @@ class WEBrick::GenericServer
     default: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(config=_, default=_); end
+  def initialize(config=T.unsafe(nil), default=T.unsafe(nil)); end
 
   Sorbet.sig(
     address: T.untyped,
@@ -356,7 +356,7 @@ class WEBrick::HTTPAuth::BasicAuth
     default: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(config, default=_); end
+  def initialize(config, default=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.untyped)
   def logger(); end
@@ -398,14 +398,14 @@ class WEBrick::HTTPAuth::DigestAuth
     stale: T.untyped,
   )
   .returns(T.untyped)
-  def challenge(req, res, stale=_); end
+  def challenge(req, res, stale=T.unsafe(nil)); end
 
   Sorbet.sig(
     config: T.untyped,
     default: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(config, default=_); end
+  def initialize(config, default=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.untyped)
   def qop(); end
@@ -479,7 +479,7 @@ class WEBrick::HTTPAuth::Htdigest
     output: T.untyped,
   )
   .returns(T.untyped)
-  def flush(output=_); end
+  def flush(output=T.unsafe(nil)); end
 
   Sorbet.sig(
     realm: T.untyped,
@@ -519,7 +519,7 @@ class WEBrick::HTTPAuth::Htgroup
     output: T.untyped,
   )
   .returns(T.untyped)
-  def flush(output=_); end
+  def flush(output=T.unsafe(nil)); end
 
   Sorbet.sig(
     path: T.untyped,
@@ -553,7 +553,7 @@ class WEBrick::HTTPAuth::Htpasswd
     output: T.untyped,
   )
   .returns(T.untyped)
-  def flush(output=_); end
+  def flush(output=T.unsafe(nil)); end
 
   Sorbet.sig(
     realm: T.untyped,
@@ -612,7 +612,7 @@ module WEBrick::HTTPAuth::UserDB
     reload_db: T.untyped,
   )
   .returns(T.untyped)
-  def get_passwd(realm, user, reload_db=_); end
+  def get_passwd(realm, user, reload_db=T.unsafe(nil)); end
 
   Sorbet.sig(
     realm: T.untyped,
@@ -711,7 +711,7 @@ class WEBrick::HTTPRequest
     socket: T.untyped,
   )
   .returns(T.untyped)
-  def parse(socket=_); end
+  def parse(socket=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.untyped)
   def path(); end
@@ -946,7 +946,7 @@ class WEBrick::HTTPResponse
     backtrace: T.untyped,
   )
   .returns(T.untyped)
-  def set_error(ex, backtrace=_); end
+  def set_error(ex, backtrace=T.unsafe(nil)); end
 
   Sorbet.sig(
     status: T.untyped,
@@ -995,7 +995,7 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
     default: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(config=_, default=_); end
+  def initialize(config=T.unsafe(nil), default=T.unsafe(nil)); end
 
   Sorbet.sig(
     req: T.untyped,
@@ -1016,7 +1016,7 @@ class WEBrick::HTTPServer < WEBrick::GenericServer
     proc: T.untyped,
   )
   .returns(T.untyped)
-  def mount_proc(dir, proc=_); end
+  def mount_proc(dir, proc=T.unsafe(nil)); end
 
   Sorbet.sig(
     sock: T.untyped,
@@ -1251,7 +1251,7 @@ class WEBrick::HTTPServlet::FileHandler < WEBrick::HTTPServlet::AbstractServlet
     default: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(server, root, options=_, default=_); end
+  def initialize(server, root, options=T.unsafe(nil), default=T.unsafe(nil)); end
 
   Sorbet.sig(
     req: T.untyped,
@@ -1850,7 +1850,7 @@ class WEBrick::Log < WEBrick::BasicLog
     level: T.untyped,
   )
   .returns(T.untyped)
-  def initialize(log_file=_, level=_); end
+  def initialize(log_file=T.unsafe(nil), level=T.unsafe(nil)); end
 
   Sorbet.sig(
     level: T.untyped,
@@ -1916,7 +1916,7 @@ module WEBrick::Utils
     exception: T.untyped,
   )
   .returns(T.untyped)
-  def self.timeout(seconds, exception=_); end
+  def self.timeout(seconds, exception=T.unsafe(nil)); end
 end
 
 class WEBrick::Utils::TimeoutHandler

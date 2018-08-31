@@ -46,7 +46,7 @@ class Enumerator < Object
       blk: T.proc(arg0: T::Array[T.type_parameter(:U)]).returns(BasicObject),
   )
   .void
-  def initialize(arg0=_, &blk); end
+  def initialize(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def inspect(); end

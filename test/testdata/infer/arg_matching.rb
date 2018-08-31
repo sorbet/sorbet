@@ -72,7 +72,7 @@ class TestArgs
     v: Integer
   )
   .returns(NilClass)
-  def mixed(x, y=_, z=_, *w, u:, v: 0)
+  def mixed(x, y=T.unsafe(nil), z=T.unsafe(nil), *w, u:, v: 0)
   end
 
   def call_mixed
@@ -82,7 +82,7 @@ class TestArgs
     mixed(0, 1, {z: 1}, "hi", "there", u: 1, v: 0)
   end
 
-  def optkw(x, y=_, u:)
+  def optkw(x, y=T.unsafe(nil), u:)
   end
 
   def call_optkw

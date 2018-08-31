@@ -5,7 +5,7 @@ class StringScanner < Object
       arg1: T.any(TrueClass, FalseClass),
   )
   .returns(StringScanner)
-  def self.new(arg0, arg1=_); end
+  def self.new(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def eos?(); end

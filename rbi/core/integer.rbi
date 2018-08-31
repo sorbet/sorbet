@@ -491,7 +491,7 @@ class Integer < Numeric
       arg0: Numeric,
   )
   .returns(Rational)
-  def rationalize(arg0=_); end
+  def rationalize(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def real(); end
@@ -522,7 +522,7 @@ class Integer < Numeric
       arg0: Numeric,
   )
   .returns(Numeric)
-  def round(arg0=_); end
+  def round(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def size(); end

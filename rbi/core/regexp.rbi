@@ -17,7 +17,7 @@ class Regexp < Object
       arg0: Integer,
   )
   .returns(String)
-  def self.last_match(arg0=_); end
+  def self.last_match(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       obj: BasicObject,
@@ -65,7 +65,7 @@ class Regexp < Object
       arg0: Regexp,
   )
   .void
-  def initialize(arg0, options=_, kcode=_); end
+  def initialize(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
@@ -75,7 +75,7 @@ class Regexp < Object
       arg1: Integer,
   )
   .returns(T.nilable(MatchData))
-  def match(arg0, arg1=_); end
+  def match(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Hash[String, T::Array[Integer]])
   def named_captures(); end
@@ -105,7 +105,7 @@ class Regexp < Object
       arg0: Regexp,
   )
   .returns(T.self_type)
-  def self.compile(arg0, options=_, kcode=_); end
+  def self.compile(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(String, Symbol),

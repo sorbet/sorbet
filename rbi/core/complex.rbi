@@ -220,7 +220,7 @@ class Complex < Numeric
       arg0: Numeric,
   )
   .returns(Rational)
-  def rationalize(arg0=_); end
+  def rationalize(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(Integer, Float, Rational, BigDecimal))
   def real(); end

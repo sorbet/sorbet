@@ -62,7 +62,7 @@ class Array < Object
       arg1: Integer,
   )
   .returns(T.nilable(T::Array[Elem]))
-  def [](arg0, arg1=_); end
+  def [](arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -80,7 +80,7 @@ class Array < Object
       arg1: Elem,
   )
   .returns(Elem)
-  def []=(arg0, arg1, arg2=_); end
+  def []=(arg0, arg1, arg2=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Elem,
@@ -137,7 +137,7 @@ class Array < Object
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
-  def count(arg0=_, &blk); end
+  def count(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -148,7 +148,7 @@ class Array < Object
       arg0: Integer,
   )
   .returns(Enumerator[Elem])
-  def cycle(arg0=_, &blk); end
+  def cycle(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Elem,
@@ -218,7 +218,7 @@ class Array < Object
       blk: T.proc(arg0: Integer).returns(Elem),
   )
   .returns(Elem)
-  def fetch(arg0, arg1=_, &blk); end
+  def fetch(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Elem,
@@ -250,14 +250,14 @@ class Array < Object
       blk: T.proc(arg0: Integer).returns(Elem),
   )
   .returns(T::Array[Elem])
-  def fill(arg0=_, arg1=_, arg2=_, &blk); end
+  def fill(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.nilable(Elem))
   Sorbet.sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def first(arg0=_); end
+  def first(arg0=T.unsafe(nil)); end
 
   # This is implemented in C++ to fix the return type
   Sorbet.sig.returns(T::Array[T.untyped])
@@ -278,7 +278,7 @@ class Array < Object
   )
   .returns(Integer)
   Sorbet.sig.returns(Enumerator[Elem])
-  def index(arg0=_, &blk); end
+  def index(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Object)
   Sorbet.sig(
@@ -290,7 +290,7 @@ class Array < Object
       arg1: Elem,
   )
   .void
-  def initialize(arg0=_, arg1=_); end
+  def initialize(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -306,7 +306,7 @@ class Array < Object
       arg0: String,
   )
   .returns(String)
-  def join(arg0=_); end
+  def join(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
@@ -319,7 +319,7 @@ class Array < Object
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def last(arg0=_); end
+  def last(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def length(); end
@@ -353,14 +353,14 @@ class Array < Object
       blk: T.proc(arg0: T::Array[Elem]).returns(BasicObject),
   )
   .returns(T::Array[Elem])
-  def permutation(arg0=_, &blk); end
+  def permutation(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
   Sorbet.sig.returns(T.nilable(Elem))
-  def pop(arg0=_); end
+  def pop(arg0=T.unsafe(nil)); end
 
   type_parameters(:U).sig(
       arg0: T::Array[T.type_parameter(:U)],
@@ -438,26 +438,26 @@ class Array < Object
   )
   .returns(T.nilable(Integer))
   Sorbet.sig.returns(Enumerator[Elem])
-  def rindex(arg0=_, &blk); end
+  def rindex(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def rotate(arg0=_); end
+  def rotate(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def rotate!(arg0=_); end
+  def rotate!(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.nilable(Elem))
   Sorbet.sig(
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def sample(arg0=_); end
+  def sample(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),
@@ -478,7 +478,7 @@ class Array < Object
       arg0: Integer,
   )
   .returns(T::Array[Elem])
-  def shift(arg0=_); end
+  def shift(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Array[Elem])
   def shuffle(); end
@@ -499,7 +499,7 @@ class Array < Object
       arg0: T.any(Integer, Float),
   )
   .returns(T.nilable(Elem))
-  def slice!(arg0, arg1=_); end
+  def slice!(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Array[Elem])
   Sorbet.sig(
@@ -590,7 +590,7 @@ class Array < Object
       arg1: Integer,
   )
   .returns(T.nilable(T::Array[Elem]))
-  def slice(arg0, arg1=_); end
+  def slice(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def to_s(); end

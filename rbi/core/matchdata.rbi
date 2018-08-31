@@ -23,7 +23,7 @@ class MatchData < Object
       i_or_start_or_range_or_name: T.any(String, Symbol),
   )
   .returns(T.nilable(String))
-  def [](i_or_start_or_range_or_name, length=_); end
+  def [](i_or_start_or_range_or_name, length=T.unsafe(nil)); end
 
   Sorbet.sig(
       n: Integer,

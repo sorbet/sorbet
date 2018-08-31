@@ -73,7 +73,7 @@ class String < Object
       arg0: String,
   )
   .returns(T.nilable(String))
-  def [](arg0, arg1=_); end
+  def [](arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def ascii_only?(); end
@@ -96,7 +96,7 @@ class String < Object
       arg0: T::Range[Integer],
   )
   .returns(T.nilable(String))
-  def byteslice(arg0, arg1=_); end
+  def byteslice(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def capitalize(); end
@@ -115,7 +115,7 @@ class String < Object
       arg1: String,
   )
   .returns(String)
-  def center(arg0, arg1=_); end
+  def center(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Array)
   def chars(); end
@@ -124,13 +124,13 @@ class String < Object
       arg0: String,
   )
   .returns(String)
-  def chomp(arg0=_); end
+  def chomp(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
   )
   .returns(T.nilable(String))
-  def chomp!(arg0=_); end
+  def chomp!(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def chop(); end
@@ -223,7 +223,7 @@ class String < Object
       arg0: String,
   )
   .returns(Enumerator[String])
-  def each_line(arg0=_, &blk); end
+  def each_line(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def empty?(); end
@@ -278,7 +278,7 @@ class String < Object
       arg0: T.any(Regexp, String),
   )
   .returns(String)
-  def gsub(arg0, arg1=_, &blk); end
+  def gsub(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: T.any(Regexp, String),
@@ -294,7 +294,7 @@ class String < Object
       arg0: T.any(Regexp, String),
   )
   .returns(Enumerator[String])
-  def gsub!(arg0, arg1=_, &blk); end
+  def gsub!(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Integer)
   def hash(); end
@@ -313,13 +313,13 @@ class String < Object
       arg1: Integer,
   )
   .returns(T.nilable(Integer))
-  def index(arg0, arg1=_); end
+  def index(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       str: String,
   )
   .void
-  def initialize(str=_); end
+  def initialize(str=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -341,14 +341,14 @@ class String < Object
       arg0: String,
   )
   .returns(T::Array[String])
-  def lines(arg0=_); end
+  def lines(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
       arg1: String,
   )
   .returns(String)
-  def ljust(arg0, arg1=_); end
+  def ljust(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def lstrip(); end
@@ -365,7 +365,7 @@ class String < Object
       arg1: Integer,
   )
   .returns(MatchData)
-  def match(arg0, arg1=_); end
+  def match(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def next(); end
@@ -405,14 +405,14 @@ class String < Object
       arg1: Integer,
   )
   .returns(T.nilable(Integer))
-  def rindex(arg0, arg1=_); end
+  def rindex(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
       arg1: String,
   )
   .returns(String)
-  def rjust(arg0, arg1=_); end
+  def rjust(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(String, Regexp),
@@ -446,7 +446,7 @@ class String < Object
       blk: T.proc(arg0: T.untyped).returns(BasicObject),
   )
   .returns(String)
-  def scrub(arg0=_, &blk); end
+  def scrub(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: String,
@@ -457,7 +457,7 @@ class String < Object
       blk: T.proc(arg0: T.untyped).returns(BasicObject),
   )
   .returns(String)
-  def scrub!(arg0=_, &blk); end
+  def scrub!(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -492,7 +492,7 @@ class String < Object
       arg0: String,
   )
   .returns(T.nilable(String))
-  def slice!(arg0, arg1=_); end
+  def slice!(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Regexp, String),
@@ -503,19 +503,19 @@ class String < Object
       arg0: Integer,
   )
   .returns(T::Array[String])
-  def split(arg0=_, arg1=_); end
+  def split(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
   )
   .returns(String)
-  def squeeze(arg0=_); end
+  def squeeze(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
   )
   .returns(String)
-  def squeeze!(arg0=_); end
+  def squeeze!(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
@@ -539,7 +539,7 @@ class String < Object
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  def sub(arg0, arg1=_, &blk); end
+  def sub(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: T.any(Regexp, String),
@@ -551,7 +551,7 @@ class String < Object
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  def sub!(arg0, arg1=_, &blk); end
+  def sub!(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def succ(); end
@@ -560,7 +560,7 @@ class String < Object
       arg0: Integer,
   )
   .returns(Integer)
-  def sum(arg0=_); end
+  def sum(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def swapcase(); end
@@ -578,7 +578,7 @@ class String < Object
       arg0: Integer,
   )
   .returns(Integer)
-  def to_i(arg0=_); end
+  def to_i(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Rational)
   def to_r(); end
@@ -643,7 +643,7 @@ class String < Object
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(String)
-  def upto(arg0, arg1=_, &blk); end
+  def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def valid_encoding?(); end
@@ -677,5 +677,5 @@ class String < Object
       arg0: String,
   )
   .returns(T.nilable(String))
-  def slice(arg0, arg1=_); end
+  def slice(arg0, arg1=T.unsafe(nil)); end
 end

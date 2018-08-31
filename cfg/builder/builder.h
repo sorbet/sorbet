@@ -12,6 +12,7 @@ public:
     static std::unique_ptr<CFG> addDebugEnvironment(core::Context ctx, std::unique_ptr<CFG> cfg);
 
 private:
+    static ast::Local *arg2Local(ast::Expression *arg);
     static BasicBlock *walk(CFGContext cctx, ast::Expression *what, BasicBlock *current);
     static void fillInTopoSorts(core::Context ctx, CFG &cfg);
     static void dealias(core::Context ctx, CFG &cfg);

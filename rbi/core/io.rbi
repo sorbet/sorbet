@@ -54,7 +54,7 @@ class IO < Object
       len: Integer,
   )
   .returns(NilClass)
-  def advise(arg0, offset=_, len=_); end
+  def advise(arg0, offset=T.unsafe(nil), len=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(TrueClass, FalseClass),
@@ -103,7 +103,7 @@ class IO < Object
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def each(sep=_, limit=_, &blk); end
+  def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
@@ -159,7 +159,7 @@ class IO < Object
       limit: Integer,
   )
   .returns(T.nilable(String))
-  def gets(sep=_, limit=_); end
+  def gets(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig(
       fd: Integer,
@@ -167,7 +167,7 @@ class IO < Object
       opt: Integer,
   )
   .void
-  def initialize(fd, mode=_, opt=_); end
+  def initialize(fd, mode=T.unsafe(nil), opt=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
@@ -236,7 +236,7 @@ class IO < Object
       outbuf: String,
   )
   .returns(T.nilable(String))
-  def read(length=_, outbuf=_); end
+  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
 
   Sorbet.sig(
       len: Integer,
@@ -247,7 +247,7 @@ class IO < Object
       buf: String,
   )
   .returns(String)
-  def read_nonblock(len, buf=_); end
+  def read_nonblock(len, buf=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def readbyte(); end
@@ -260,14 +260,14 @@ class IO < Object
       limit: Integer,
   )
   .returns(String)
-  def readline(sep=_, limit=_); end
+  def readline(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(T::Array[String])
-  def readlines(sep=_, limit=_); end
+  def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig(
       maxlen: Integer,
@@ -278,7 +278,7 @@ class IO < Object
       outbuf: String,
   )
   .returns(String)
-  def readpartial(maxlen, outbuf=_); end
+  def readpartial(maxlen, outbuf=T.unsafe(nil)); end
 
   Sorbet.sig(
       other_IO_or_path: IO,
@@ -289,7 +289,7 @@ class IO < Object
       mode_str: String,
   )
   .returns(IO)
-  def reopen(other_IO_or_path, mode_str=_); end
+  def reopen(other_IO_or_path, mode_str=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def rewind(); end
@@ -299,7 +299,7 @@ class IO < Object
       whence: Integer,
   )
   .returns(Integer)
-  def seek(amount, whence=_); end
+  def seek(amount, whence=T.unsafe(nil)); end
 
   Sorbet.sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
@@ -310,7 +310,7 @@ class IO < Object
       int_enc: T.any(String, Encoding),
   )
   .returns(T.self_type)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+  def set_encoding(ext_or_ext_int_enc=T.unsafe(nil), int_enc=T.unsafe(nil)); end
 
   Sorbet.sig.returns(File::Stat)
   def stat(); end
@@ -336,7 +336,7 @@ class IO < Object
       whence: Integer,
   )
   .returns(Integer)
-  def sysseek(amount, whence=_); end
+  def sysseek(amount, whence=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
@@ -377,7 +377,7 @@ class IO < Object
       offset: Integer,
   )
   .returns(String)
-  def self.binread(name, length=_, offset=_); end
+  def self.binread(name, length=T.unsafe(nil), offset=T.unsafe(nil)); end
 
   Sorbet.sig(
       name: String,
@@ -392,7 +392,7 @@ class IO < Object
       mode: String,
   )
   .returns(Integer)
-  def self.binwrite(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.binwrite(name, arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   Sorbet.sig(
       src: T.any(String, IO),
@@ -401,7 +401,7 @@ class IO < Object
       src_offset: Integer,
   )
   .returns(Integer)
-  def self.copy_stream(src, dst, copy_length=_, src_offset=_); end
+  def self.copy_stream(src, dst, copy_length=T.unsafe(nil), src_offset=T.unsafe(nil)); end
 
   Sorbet.sig(
       name: String,
@@ -416,7 +416,7 @@ class IO < Object
       mode: String,
   )
   .returns(String)
-  def self.read(name, length=_, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.read(name, length=T.unsafe(nil), offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   Sorbet.sig(
       name: String,
@@ -431,7 +431,7 @@ class IO < Object
       mode: String,
   )
   .returns(T::Array[String])
-  def self.readlines(name, sep=_, limit=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.readlines(name, sep=T.unsafe(nil), limit=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   Sorbet.sig(
       read_array: T::Array[IO],
@@ -440,7 +440,7 @@ class IO < Object
       timeout: Integer,
   )
   .returns(T.nilable(T::Array[IO]))
-  def self.select(read_array, write_array=_, error_array=_, timeout=_); end
+  def self.select(read_array, write_array=T.unsafe(nil), error_array=T.unsafe(nil), timeout=T.unsafe(nil)); end
 
   Sorbet.sig(
       path: String,
@@ -448,7 +448,7 @@ class IO < Object
       perm: String,
   )
   .returns(Integer)
-  def self.sysopen(path, mode=_, perm=_); end
+  def self.sysopen(path, mode=T.unsafe(nil), perm=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: BasicObject,
@@ -469,7 +469,7 @@ class IO < Object
       mode: String,
   )
   .returns(Integer)
-  def self.write(name, arg0, offset=_, external_encoding: _, internal_encoding: _, encoding: _, textmode: _, binmode: _, autoclose: _, mode: _); end
+  def self.write(name, arg0, offset=T.unsafe(nil), external_encoding: T.unsafe(nil), internal_encoding: T.unsafe(nil), encoding: T.unsafe(nil), textmode: T.unsafe(nil), binmode: T.unsafe(nil), autoclose: T.unsafe(nil), mode: T.unsafe(nil)); end
 
   Sorbet.sig(
       fd: Integer,
@@ -477,7 +477,7 @@ class IO < Object
       opt: Integer,
   )
   .returns(T.self_type)
-  def self.for_fd(fd, mode=_, opt=_); end
+  def self.for_fd(fd, mode=T.unsafe(nil), opt=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
@@ -511,7 +511,7 @@ class IO < Object
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def each_line(sep=_, limit=_, &blk); end
+  def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def eof?(); end
@@ -527,7 +527,7 @@ class IO < Object
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def lines(sep=_, limit=_, &blk); end
+  def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Integer)
   def to_i(); end

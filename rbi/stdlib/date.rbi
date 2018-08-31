@@ -52,7 +52,7 @@ class Date
     options: T.untyped,
   )
   .returns(T.untyped)
-  def localize(locale=_, options=_); end
+  def localize(locale=T.unsafe(nil), options=T.unsafe(nil)); end
 
   Sorbet.sig(arg0: T.untyped).returns(T.untyped)
   def <=>(arg0); end
@@ -437,7 +437,7 @@ class DateTime
     options: T.untyped,
   )
   .returns(T.untyped)
-  def localize(locale=_, options=_); end
+  def localize(locale=T.unsafe(nil), options=T.unsafe(nil)); end
 
   Sorbet.sig(arg0: T.untyped).returns(T.untyped)
   def self.new(*arg0); end

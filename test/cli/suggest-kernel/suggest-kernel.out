@@ -3,6 +3,6 @@ test/cli/suggest-kernel/suggest-kernel.rb:4: Method `raise` does not exist on `F
             ^^^^^^^^^^
   Did you mean to `include Kernel` in this module?
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L594: Did you mean: `Kernel#raise`?
-     594 |  def raise(arg0=_, arg1=_, arg2=_); end
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     594 |  def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Errors: 1

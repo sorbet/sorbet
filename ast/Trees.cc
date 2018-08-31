@@ -160,7 +160,7 @@ Field::Field(core::Loc loc, core::SymbolRef symbol) : Reference(loc), symbol(sym
     _sanityCheck();
 }
 
-Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Expression(loc), localVariable(localVariable1) {
+Local::Local(core::Loc loc, core::LocalVariable localVariable1) : Reference(loc), localVariable(localVariable1) {
     core::categoryCounterInc("trees", "local");
     _sanityCheck();
 }

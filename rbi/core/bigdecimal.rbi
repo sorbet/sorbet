@@ -466,7 +466,7 @@ class BigDecimal < Numeric
       arg0: Integer,
   )
   .returns(BigDecimal)
-  def round(arg0=_); end
+  def round(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def sign(); end
@@ -510,7 +510,7 @@ class BigDecimal < Numeric
       arg0: Integer,
   )
   .returns(Rational)
-  def truncate(arg0=_); end
+  def truncate(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end

@@ -51,52 +51,65 @@ class NameInserter {
         return existing;
     }
 
-    pair<core::SymbolRef, core::NameRef> arg2Symbol(core::MutableContext ctx, ast::Expression *arg, int pos) {
-        auto loc = arg->loc;
-        bool optional = false, keyword = false, block = false, repeated = false;
-
-        while (true) {
-            if (auto *nm = ast::cast_tree<ast::UnresolvedIdent>(arg)) {
-                if (pos < ctx.owner.data(ctx).arguments().size()) {
-                    core::SymbolRef sym = ctx.owner.data(ctx).arguments()[pos];
-                    // TODO: check that flags match;
-                    return make_pair(sym, nm->name);
-                }
-                core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(loc, ctx.owner, nm->name);
-                core::Symbol &data = sym.data(ctx);
-                if (optional) {
-                    data.setOptional();
-                }
-                if (keyword) {
-                    data.setKeyword();
-                }
-                if (block) {
-                    data.setBlockArgument();
-                }
-                if (repeated) {
-                    data.setRepeated();
-                }
-                return make_pair(sym, nm->name);
+    pair<core::SymbolRef, core::LocalVariable> arg2Symbol(core::MutableContext ctx, unique_ptr<ast::Reference> &arg,
+                                                          int pos, bool optional, bool keyword, bool block,
+                                                          bool repeated) {
+        if (auto *nm = ast::cast_tree<ast::UnresolvedIdent>(arg.get())) {
+            if (pos < ctx.owner.data(ctx).arguments().size()) {
+                // TODO: check that flags match;
+                core::SymbolRef sym = ctx.owner.data(ctx).arguments()[pos];
+                core::LocalVariable localVariable = enterLocal(ctx, nm->name);
+                unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
+                arg.swap(localExpr);
+                return make_pair(sym, localVariable);
             }
-            typecase(arg,
-                     [&](ast::RestArg *rest) {
-                         repeated = true;
-                         arg = rest->expr.get();
-                     },
-                     [&](ast::KeywordArg *kw) {
-                         keyword = true;
-                         arg = kw->expr.get();
-                     },
-                     [&](ast::OptionalArg *opt) {
-                         optional = true;
-                         arg = opt->expr.get();
-                     },
-                     [&](ast::BlockArg *opt) {
-                         block = true;
-                         arg = opt->expr.get();
-                     },
-                     [&](ast::ShadowArg *opt) { arg = opt->expr.get(); });
+            core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(arg->loc, ctx.owner, nm->name);
+            core::Symbol &data = sym.data(ctx);
+            if (optional) {
+                data.setOptional();
+            }
+            if (keyword) {
+                data.setKeyword();
+            }
+            if (block) {
+                data.setBlockArgument();
+            }
+            if (repeated) {
+                data.setRepeated();
+            }
+            core::LocalVariable localVariable = enterLocal(ctx, nm->name);
+            unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
+            arg.swap(localExpr);
+            return make_pair(sym, localVariable);
         }
+
+        pair<core::SymbolRef, core::LocalVariable> result;
+        typecase(arg.get(),
+                 [&](ast::RestArg *rest) {
+                     repeated = true;
+                     result = arg2Symbol(ctx, rest->expr, pos, optional, keyword, block, repeated);
+                 },
+                 [&](ast::KeywordArg *kw) {
+                     keyword = true;
+                     result = arg2Symbol(ctx, kw->expr, pos, optional, keyword, block, repeated);
+                 },
+                 [&](ast::OptionalArg *opt) {
+                     optional = true;
+                     result = arg2Symbol(ctx, opt->expr, pos, optional, keyword, block, repeated);
+                 },
+                 [&](ast::BlockArg *blk) {
+                     block = true;
+                     result = arg2Symbol(ctx, blk->expr, pos, optional, keyword, block, repeated);
+                 },
+                 [&](ast::ShadowArg *shadow) {
+                     result = arg2Symbol(ctx, shadow->expr, pos, optional, keyword, block, repeated);
+                 });
+        return result;
+    }
+
+    pair<core::SymbolRef, core::LocalVariable> arg2Symbol(core::MutableContext ctx, unique_ptr<ast::Reference> &arg,
+                                                          int pos) {
+        return arg2Symbol(ctx, arg, pos, false, false, false, false);
     }
 
     struct LocalFrame {
@@ -312,27 +325,33 @@ public:
                 name = id->name;
                 localVariable = enterLocal(ctx, name);
                 inShadows = true;
+                unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
+                arg.swap(localExpr);
             } else if (auto *local = ast::cast_tree<ast::Local>(arg.get())) {
                 name = local->localVariable._name;
                 localVariable = local->localVariable;
             } else {
                 ENFORCE(!inShadows, "shadow argument followed by non-shadow argument!");
-                auto pair = arg2Symbol(ctx, arg.get(), i);
-                core::SymbolRef sym = pair.first;
-                name = pair.second;
-                localVariable = enterLocal(ctx, name);
-                if (i < ctx.owner.data(ctx).arguments().size()) {
-                    ENFORCE(ctx.owner.data(ctx).arguments()[i] == sym);
+                if (auto *refExp = ast::cast_tree<ast::Reference>(arg.get())) {
+                    unique_ptr<ast::Reference> refExpImpl(refExp);
+                    arg.release();
+                    auto pair = arg2Symbol(ctx, refExpImpl, i);
+                    arg = move(refExpImpl);
+                    core::SymbolRef sym = pair.first;
+                    localVariable = pair.second;
+                    name = localVariable._name;
+                    if (i < ctx.owner.data(ctx).arguments().size()) {
+                        ENFORCE(ctx.owner.data(ctx).arguments()[i] == sym);
+                    } else {
+                        ctx.owner.data(ctx).arguments().push_back(sym);
+                    }
                 } else {
-                    ctx.owner.data(ctx).arguments().push_back(sym);
+                    Error::raise("Must be a reference!");
                 }
             }
 
             scopeStack.back().locals[name] = localVariable;
             scopeStack.back().args.emplace_back(localVariable);
-
-            unique_ptr<ast::Expression> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
-            arg.swap(localExpr);
         }
     }
 
@@ -774,19 +793,23 @@ private:
         scopeId = 0;
     }
 
-    vector<unique_ptr<ast::Local>> enclosingArgsStack;
+    // For certain constructs (yield, .call) we might _discover_ that there's
+    // an implicit parameter to the current method. In these cases, we need to
+    // create and stash a block arg for the current scope so we can add it to
+    // the arg list on the postTransform.
+    vector<unique_ptr<ast::Local>> blockArgStack;
     void pushEnclosingArgs() {
-        // Create a new box to hold any block arg we might discover
-        enclosingArgsStack.emplace_back();
+        // Create a new (empty) box to hold any block arg we might discover
+        blockArgStack.emplace_back();
     }
     unique_ptr<ast::Local> popEnclosingArgs() {
-        ENFORCE(enclosingArgsStack.size() > 0, "Forgot to pushEnclosingArgs(). Have we pushed in every branch?");
-        auto ret = move(enclosingArgsStack.back());
-        enclosingArgsStack.pop_back();
+        ENFORCE(!blockArgStack.empty(), "Forgot to pushEnclosingArgs(). Have we pushed in every branch?");
+        auto ret = move(blockArgStack.back());
+        blockArgStack.pop_back();
         return ret;
     }
     unique_ptr<ast::Local> &peekEnclosingArgs() {
-        return enclosingArgsStack.back();
+        return blockArgStack.back();
     }
 }; // namespace namer
 

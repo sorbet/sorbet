@@ -119,7 +119,7 @@ module Math
       base: T.any(Integer, Float, Rational, BigDecimal),
   )
   .returns(Float)
-  def self.log(x, base=_); end
+  def self.log(x, base=T.unsafe(nil)); end
 
   Sorbet.sig(
       x: T.any(Integer, Float, Rational, BigDecimal),

@@ -214,7 +214,7 @@ class Numeric < Object
       arg1: Numeric,
   )
   .returns(Enumerator[Numeric])
-  def step(arg0, arg1=_, &blk); end
+  def step(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Complex)
   def to_c(); end

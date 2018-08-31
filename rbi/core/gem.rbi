@@ -19,7 +19,7 @@ module Gem
       requirements: Gem::Requirement,
   )
   .returns(String)
-  def self.bin_path(name, args=_, *requirements); end
+  def self.bin_path(name, args=T.unsafe(nil), *requirements); end
 
   Sorbet.sig.returns(String)
   def self.binary_mode(); end
@@ -28,7 +28,7 @@ module Gem
       install_dir: String,
   )
   .returns(String)
-  def self.bindir(install_dir=_); end
+  def self.bindir(install_dir=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Hash)
   def self.clear_default_specs(); end

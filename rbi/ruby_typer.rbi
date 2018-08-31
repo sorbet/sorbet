@@ -113,7 +113,7 @@ class RubyTyper::ENVClass
       blk: T.proc(key: String).returns(String),
   )
   .returns(String)
-  def fetch(key, value=_, &blk); end
+  def fetch(key, value=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       key: String

@@ -54,7 +54,7 @@ class StringIO
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def each(sep=_, limit=_, &blk); end
+  def each(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Integer).returns(BasicObject),
@@ -107,7 +107,7 @@ class StringIO
       limit: Integer,
   )
   .returns(T.nilable(String))
-  def gets(sep=_, limit=_); end
+  def gets(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Encoding)
   def internal_encoding(); end
@@ -169,7 +169,7 @@ class StringIO
       outbuf: String,
   )
   .returns(T.nilable(String))
-  def read(length=_, outbuf=_); end
+  def read(length=T.unsafe(nil), outbuf=T.unsafe(nil)); end
 
   Sorbet.sig(
       len: Integer,
@@ -180,7 +180,7 @@ class StringIO
       buf: String,
   )
   .returns(String)
-  def read_nonblock(len, buf=_); end
+  def read_nonblock(len, buf=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def readbyte(); end
@@ -193,14 +193,14 @@ class StringIO
       limit: Integer,
   )
   .returns(String)
-  def readline(sep=_, limit=_); end
+  def readline(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig(
       sep: String,
       limit: Integer,
   )
   .returns(T::Array[String])
-  def readlines(sep=_, limit=_); end
+  def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil)); end
 
   Sorbet.sig(
       maxlen: Integer,
@@ -211,7 +211,7 @@ class StringIO
       outbuf: String,
   )
   .returns(String)
-  def readpartial(maxlen, outbuf=_); end
+  def readpartial(maxlen, outbuf=T.unsafe(nil)); end
 
   Sorbet.sig(
       other: StringIO,
@@ -222,7 +222,7 @@ class StringIO
       mode_str: String,
   )
   .returns(T.self_type)
-  def reopen(other, mode_str=_); end
+  def reopen(other, mode_str=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def rewind(); end
@@ -232,7 +232,7 @@ class StringIO
       whence: Integer,
   )
   .returns(Integer)
-  def seek(amount, whence=_); end
+  def seek(amount, whence=T.unsafe(nil)); end
 
   Sorbet.sig(
       ext_or_ext_int_enc: T.any(String, Encoding),
@@ -243,7 +243,7 @@ class StringIO
       int_enc: T.any(String, Encoding),
   )
   .returns(T.self_type)
-  def set_encoding(ext_or_ext_int_enc=_, int_enc=_); end
+  def set_encoding(ext_or_ext_int_enc=T.unsafe(nil), int_enc=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def string(); end
@@ -332,7 +332,7 @@ class StringIO
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def each_line(sep=_, limit=_, &blk); end
+  def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def eof?(); end
@@ -348,5 +348,5 @@ class StringIO
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def lines(sep=_, limit=_, &blk); end
+  def lines(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 end

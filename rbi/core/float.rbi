@@ -426,7 +426,7 @@ class Float < Numeric
       arg0: Numeric,
   )
   .returns(Rational)
-  def rationalize(arg0=_); end
+  def rationalize(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Float)
   def real(); end
@@ -439,7 +439,7 @@ class Float < Numeric
       arg0: Numeric,
   )
   .returns(T.any(Integer, Float))
-  def round(arg0=_); end
+  def round(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Complex)
   def to_c(); end

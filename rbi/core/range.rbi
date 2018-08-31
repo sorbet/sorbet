@@ -50,7 +50,7 @@ class Range < Object
       n: Integer,
   )
   .returns(T::Array[Elem])
-  def first(n=_); end
+  def first(n=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def hash(); end
@@ -67,7 +67,7 @@ class Range < Object
       exclude_end: T.any(TrueClass, FalseClass),
   )
   .void
-  def initialize(_begin, _end, exclude_end=_); end
+  def initialize(_begin, _end, exclude_end=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
@@ -77,7 +77,7 @@ class Range < Object
       n: Integer,
   )
   .returns(T::Array[Elem])
-  def last(n=_); end
+  def last(n=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Elem)
   Sorbet.sig(
@@ -93,7 +93,7 @@ class Range < Object
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def max(n=_, &blk); end
+  def max(n=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Elem)
   Sorbet.sig(
@@ -109,7 +109,7 @@ class Range < Object
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def min(n=_, &blk); end
+  def min(n=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.nilable(Integer))
   def size(); end
@@ -123,7 +123,7 @@ class Range < Object
       n: Integer,
   )
   .returns(Enumerator[Elem])
-  def step(n=_, &blk); end
+  def step(n=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def to_s(); end

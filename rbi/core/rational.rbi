@@ -247,7 +247,7 @@ class Rational < Numeric
       arg0: Integer,
   )
   .returns(Numeric)
-  def ceil(arg0=_); end
+  def ceil(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Integer,
@@ -333,7 +333,7 @@ class Rational < Numeric
       arg0: Integer,
   )
   .returns(Numeric)
-  def floor(arg0=_); end
+  def floor(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def hash(); end
@@ -398,7 +398,7 @@ class Rational < Numeric
       arg0: Numeric,
   )
   .returns(Rational)
-  def rationalize(arg0=_); end
+  def rationalize(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Rational)
   def real(); end
@@ -411,7 +411,7 @@ class Rational < Numeric
       arg0: Integer,
   )
   .returns(Numeric)
-  def round(arg0=_); end
+  def round(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Complex)
   def to_c(); end
@@ -433,7 +433,7 @@ class Rational < Numeric
       arg0: Integer,
   )
   .returns(Rational)
-  def truncate(arg0=_); end
+  def truncate(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end

@@ -104,9 +104,7 @@ private:
     // set if no substitution is actually necessary
     bool fastPath;
 
-#ifdef DEBUG_MODE
     const int toGlobalStateId;
-#endif
 };
 
 } // namespace core

@@ -94,7 +94,7 @@ class Set < Object
       enum: T::Enumerable[T.type_parameter(:U)],
   )
   .void
-  def initialize(enum=_); end
+  def initialize(enum=T.unsafe(nil)); end
 
   Sorbet.sig(
       set: T::Set[Elem],

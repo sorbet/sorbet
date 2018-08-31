@@ -121,7 +121,7 @@ class Module < Object
       lineno: Integer,
   )
   .returns(T.untyped)
-  def class_eval(arg0, filename=_, lineno=_); end
+  def class_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
 
   Sorbet.sig(
       args: BasicObject,
@@ -153,21 +153,21 @@ class Module < Object
       inherit: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def class_variables(inherit=_); end
+  def class_variables(inherit=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),
       inherit: T.any(TrueClass, FalseClass),
   )
   .returns(T.any(TrueClass, FalseClass))
-  def const_defined?(arg0, inherit=_); end
+  def const_defined?(arg0, inherit=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),
       inherit: T.any(TrueClass, FalseClass),
   )
   .returns(T.untyped)
-  def const_get(arg0, inherit=_); end
+  def const_get(arg0, inherit=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Symbol,
@@ -186,7 +186,7 @@ class Module < Object
       inherit: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def constants(inherit=_); end
+  def constants(inherit=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Symbol,
@@ -198,7 +198,7 @@ class Module < Object
       blk: BasicObject,
   )
   .returns(Symbol)
-  def define_method(arg0, arg1=_, &blk); end
+  def define_method(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       other: BasicObject,
@@ -265,7 +265,7 @@ class Module < Object
       include_super: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def instance_methods(include_super=_); end
+  def instance_methods(include_super=T.unsafe(nil)); end
 
   Sorbet.sig(
       meth: Symbol,
@@ -291,7 +291,7 @@ class Module < Object
       lineno: Integer,
   )
   .returns(T.untyped)
-  def module_eval(arg0, filename=_, lineno=_); end
+  def module_eval(arg0, filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
 
   Sorbet.sig(
       args: BasicObject,
@@ -349,7 +349,7 @@ class Module < Object
       include_super: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def private_instance_methods(include_super=_); end
+  def private_instance_methods(include_super=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),
@@ -367,7 +367,7 @@ class Module < Object
       include_super: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def protected_instance_methods(include_super=_); end
+  def protected_instance_methods(include_super=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),
@@ -403,7 +403,7 @@ class Module < Object
       include_super: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def public_instance_methods(include_super=_); end
+  def public_instance_methods(include_super=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),

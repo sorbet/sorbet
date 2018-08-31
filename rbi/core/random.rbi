@@ -20,7 +20,7 @@ class Random < Object
       seed: Integer,
   )
   .void
-  def initialize(seed=_); end
+  def initialize(seed=T.unsafe(nil)); end
 
   Sorbet.sig(
       max: T.any(Integer, T::Range[Integer]),
@@ -30,7 +30,7 @@ class Random < Object
       max: T.any(Float, T::Range[Float]),
   )
   .returns(Float)
-  def rand(max=_); end
+  def rand(max=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def seed(); end
@@ -42,11 +42,11 @@ class Random < Object
       max: Integer,
   )
   .returns(Numeric)
-  def self.rand(max=_); end
+  def self.rand(max=T.unsafe(nil)); end
 
   Sorbet.sig(
       number: Integer,
   )
   .returns(Numeric)
-  def self.srand(number=_); end
+  def self.srand(number=T.unsafe(nil)); end
 end

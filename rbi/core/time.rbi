@@ -14,7 +14,7 @@ class Time < Object
       microseconds_with_frac: Numeric,
   )
   .returns(Time)
-  def self.at(seconds, microseconds_with_frac=_); end
+  def self.at(seconds, microseconds_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig(
       year: Integer,
@@ -26,7 +26,7 @@ class Time < Object
       usec_with_frac: Numeric,
   )
   .returns(Time)
-  def self.gm(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  def self.gm(year, month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig(
       year: Integer,
@@ -38,7 +38,7 @@ class Time < Object
       usec_with_frac: Numeric,
   )
   .returns(Time)
-  def self.local(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  def self.local(year, month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Time)
   def self.now(); end
@@ -53,7 +53,7 @@ class Time < Object
       usec_with_frac: Numeric,
   )
   .returns(Time)
-  def self.utc(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  def self.utc(year, month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Numeric,
@@ -129,7 +129,7 @@ class Time < Object
       utc_offset: Integer,
   )
   .returns(Time)
-  def getlocal(utc_offset=_); end
+  def getlocal(utc_offset=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Time)
   def getutc(); end
@@ -159,7 +159,7 @@ class Time < Object
       usec_with_frac: T.any(Numeric, String),
   )
   .void
-  def initialize(year=_, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  def initialize(year=T.unsafe(nil), month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
@@ -171,7 +171,7 @@ class Time < Object
       utc_offset: String,
   )
   .returns(T.self_type)
-  def localtime(utc_offset=_); end
+  def localtime(utc_offset=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def mday(); end
@@ -282,7 +282,7 @@ class Time < Object
       usec_with_frac: Numeric,
   )
   .returns(Time)
-  def self.mktime(year, month=_, day=_, hour=_, min=_, sec=_, usec_with_frac=_); end
+  def self.mktime(year, month=T.unsafe(nil), day=T.unsafe(nil), hour=T.unsafe(nil), min=T.unsafe(nil), sec=T.unsafe(nil), usec_with_frac=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def gmtoff(); end

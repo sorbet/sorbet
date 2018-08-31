@@ -17,13 +17,13 @@ module GC
       immediate_sweep: T.any(TrueClass, FalseClass),
   )
   .returns(NilClass)
-  def self.start(full_mark: _, immediate_sweep: _); end
+  def self.start(full_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Hash, Symbol),
   )
   .returns(T::Hash[Symbol, Integer])
-  def self.stat(arg0=_); end
+  def self.stat(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(Integer, TrueClass, FalseClass))
   def self.stress(); end

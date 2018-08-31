@@ -38,7 +38,7 @@ module Process
       msg: String,
   )
   .returns(T.untyped)
-  def self.abort(msg=_); end
+  def self.abort(msg=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def self.argv0(); end
@@ -48,21 +48,21 @@ module Process
       unit: Symbol,
   )
   .returns(T.any(Float, Integer))
-  def self.clock_getres(clock_id, unit=_); end
+  def self.clock_getres(clock_id, unit=T.unsafe(nil)); end
 
   Sorbet.sig(
       clock_id: T.any(Symbol, Integer),
       unit: Symbol,
   )
   .returns(T.any(Float, Integer))
-  def self.clock_gettime(clock_id, unit=_); end
+  def self.clock_gettime(clock_id, unit=T.unsafe(nil)); end
 
   Sorbet.sig(
       nochdir: BasicObject,
       noclose: BasicObject,
   )
   .returns(Integer)
-  def self.daemon(nochdir=_, noclose=_); end
+  def self.daemon(nochdir=T.unsafe(nil), noclose=T.unsafe(nil)); end
 
   Sorbet.sig(
       pid: Integer,
@@ -92,13 +92,13 @@ module Process
       status: Integer,
   )
   .returns(T.untyped)
-  def self.exit(status=_); end
+  def self.exit(status=T.unsafe(nil)); end
 
   Sorbet.sig(
       status: Integer,
   )
   .returns(T.untyped)
-  def self.exit!(status=_); end
+  def self.exit!(status=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.nilable(Integer))
   Sorbet.sig(
@@ -133,7 +133,7 @@ module Process
       pid: Integer,
   )
   .returns(Integer)
-  def self.getsid(pid=_); end
+  def self.getsid(pid=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def self.gid(); end
@@ -209,7 +209,7 @@ module Process
       max_limit: Integer,
   )
   .returns(NilClass)
-  def self.setrlimit(resource, cur_limit, max_limit=_); end
+  def self.setrlimit(resource, cur_limit, max_limit=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def self.setsid(); end
@@ -231,14 +231,14 @@ module Process
       flags: Integer,
   )
   .returns(Integer)
-  def self.wait(pid=_, flags=_); end
+  def self.wait(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
   .returns([Integer, Integer])
-  def self.wait2(pid=_, flags=_); end
+  def self.wait2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Array[[Integer, Integer]])
   def self.waitall(); end
@@ -248,14 +248,14 @@ module Process
       flags: Integer,
   )
   .returns(Integer)
-  def self.waitpid(pid=_, flags=_); end
+  def self.waitpid(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
   Sorbet.sig(
       pid: Integer,
       flags: Integer,
   )
   .returns([Integer, Integer])
-  def self.waitpid2(pid=_, flags=_); end
+  def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 end
 
 module Process::GID

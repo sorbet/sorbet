@@ -9,6 +9,25 @@ using namespace std;
 namespace sorbet {
 namespace cfg {
 
+ast::Local *CFGBuilder::arg2Local(ast::Expression *arg) {
+    while (true) {
+        if (auto *local = ast::cast_tree<ast::Local>(arg)) {
+            // Buried deep within every argument is a Local
+            return local;
+        }
+
+        // Recurse into structure to find the Local
+        typecase(arg, [&](ast::RestArg *rest) { arg = rest->expr.get(); },
+                 [&](ast::KeywordArg *kw) { arg = kw->expr.get(); },
+                 [&](ast::OptionalArg *opt) { arg = opt->expr.get(); },
+                 [&](ast::BlockArg *blk) { arg = blk->expr.get(); },
+                 [&](ast::ShadowArg *shadow) { arg = shadow->expr.get(); },
+                 // ENFORCES are last so that we don't pay the price of casting in the happy path.
+                 [&](ast::UnresolvedIdent *opt) { ENFORCE(false, "Namer should have created a Local for this arg."); },
+                 [&](ast::Expression *expr) { ENFORCE(false, "Unexpected node type in argument position."); });
+    }
+}
+
 void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
@@ -35,8 +54,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     int i = -1;
     for (auto &argExpr : md.args) {
         i++;
-        auto *a = ast::cast_tree<ast::Local>(argExpr.get());
-        ENFORCE(a, "Namer did not do replace arguments with locals");
+        auto *a = arg2Local(argExpr.get());
         entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, methodName, i));
         entry->exprs.back().value->isSynthetic = true;
         aliases[md.symbol.data(ctx).arguments()[i]] = a->localVariable;

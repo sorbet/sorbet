@@ -14,12 +14,12 @@ module Marshal
       arg1: Integer,
   )
   .returns(Object)
-  def self.dump(arg0, arg1=_, arg2=_); end
+  def self.dump(arg0, arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
       arg1: Proc,
   )
   .returns(Object)
-  def self.load(arg0, arg1=_); end
+  def self.load(arg0, arg1=T.unsafe(nil)); end
 end

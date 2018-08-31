@@ -663,6 +663,50 @@ private:
         }
     }
 
+    // In order to check a default argument that looks like
+    //
+    //     sig(x: T)
+    //     def foo(x: <expr>)
+    //       ...
+    //     end
+    //
+    // we elaborate the method definition to
+    //
+    //     def foo(x: <expr>)
+    //       T.let(<expr>, T)
+    //       ...
+    //     end
+    //
+    // which will then get checked later on in the pipeline.
+    void injectOptionalArgs(core::MutableContext ctx, ast::MethodDef *mdef) {
+        ast::InsSeq::STATS_store lets;
+
+        if (mdef->symbol.data(ctx).isAbstract()) {
+            // TODO(jez) Check that abstract methods don't have defined bodies earlier (currently done in infer)
+            // so that we can unblock checking default arguments of abstract methods
+            return;
+        }
+
+        int i = -1;
+        for (auto argSym : mdef->symbol.data(ctx).arguments()) {
+            i++;
+            auto &argExp = mdef->args[i];
+            auto argType = argSym.data(ctx).resultType;
+
+            if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
+                // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the body.
+                auto let = make_unique<ast::Cast>(optArgExp->loc, argType, optArgExp->default_->deepCopy(),
+                                                  core::Names::let());
+                lets.emplace_back(move(let));
+            }
+        }
+
+        if (lets.size() > 0) {
+            auto loc = mdef->rhs->loc;
+            mdef->rhs = ast::MK::InsSeq(loc, move(lets), move(mdef->rhs));
+        }
+    }
+
     void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
         if (!ctx.owner.data(ctx).isClassModule()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
@@ -790,6 +834,11 @@ private:
                         }
 
                         fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded);
+
+                        // TODO(jez) Should we handle isOverloaded?
+                        if (!isOverloaded) {
+                            injectOptionalArgs(ctx, mdef);
+                        }
 
                         // OVERLOAD
                         lastSig.clear();

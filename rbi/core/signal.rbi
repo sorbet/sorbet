@@ -19,5 +19,5 @@ module Signal
       blk: T.proc(arg0: Integer).returns(BasicObject),
   )
   .returns(T.any(String, Proc))
-  def self.trap(signal, command=_, &blk); end
+  def self.trap(signal, command=T.unsafe(nil), &blk); end
 end

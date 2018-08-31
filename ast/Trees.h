@@ -293,7 +293,7 @@ private:
 };
 // CheckSize(Field, 24, 8);
 
-class Local final : public Expression {
+class Local final : public Reference {
 public:
     core::LocalVariable localVariable;
 

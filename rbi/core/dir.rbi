@@ -14,7 +14,7 @@ class Dir < Object
       blk: T.proc(arg0: String).returns(T.type_parameter(:U)),
   )
   .returns(T.type_parameter(:U))
-  def self.chdir(arg0=_, &blk); end
+  def self.chdir(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: String,
@@ -33,7 +33,7 @@ class Dir < Object
       arg1: Encoding,
   )
   .returns(T::Array[String])
-  def self.entries(arg0, arg1=_); end
+  def self.entries(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       file: String,
@@ -52,7 +52,7 @@ class Dir < Object
       arg0: Encoding,
   )
   .returns(Enumerator[String])
-  def self.foreach(dir, arg0=_, &blk); end
+  def self.foreach(dir, arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def self.getwd(); end
@@ -68,20 +68,20 @@ class Dir < Object
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(NilClass)
-  def self.glob(pattern, flags=_, &blk); end
+  def self.glob(pattern, flags=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: String,
   )
   .returns(String)
-  def self.home(arg0=_); end
+  def self.home(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(Integer)
-  def self.mkdir(arg0, arg1=_); end
+  def self.mkdir(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
@@ -94,7 +94,7 @@ class Dir < Object
       blk: T.proc(arg0: Dir).returns(T.type_parameter(:U)),
   )
   .returns(T.type_parameter(:U))
-  def self.open(arg0, arg1=_, &blk); end
+  def self.open(arg0, arg1=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(String)
   def self.pwd(); end
@@ -129,7 +129,7 @@ class Dir < Object
       arg1: Encoding,
   )
   .void
-  def initialize(arg0, arg1=_); end
+  def initialize(arg0, arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
@@ -175,5 +175,5 @@ class Dir < Object
       blk: T.proc(arg0: String).returns(BasicObject),
   )
   .returns(NilClass)
-  def self.[](pattern, flags=_, &blk); end
+  def self.[](pattern, flags=T.unsafe(nil), &blk); end
 end

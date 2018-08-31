@@ -16,7 +16,7 @@ class Proc < Object
       arity: Integer,
   )
   .returns(Proc)
-  def curry(arity=_); end
+  def curry(arity=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
   def hash(); end

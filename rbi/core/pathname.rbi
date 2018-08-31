@@ -13,7 +13,7 @@ class Pathname < Object
       p2: String,
   )
   .returns(T::Array[Pathname])
-  def self.glob(p1, p2=_); end
+  def self.glob(p1, p2=T.unsafe(nil)); end
 
   def initialize(p); end
 
@@ -57,21 +57,21 @@ class Pathname < Object
       p1: String,
   )
   .returns(Pathname)
-  def basename(p1=_); end
+  def basename(p1=T.unsafe(nil)); end
 
   Sorbet.sig(
       length: Integer,
       offset: Integer,
   )
   .returns(String)
-  def binread(length=_, offset=_); end
+  def binread(length=T.unsafe(nil), offset=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
       offset: Integer,
   )
   .returns(Integer)
-  def binwrite(arg0, offset=_); end
+  def binwrite(arg0, offset=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Time)
   def birthtime(); end
@@ -105,7 +105,7 @@ class Pathname < Object
       consider_symlink: T.any(TrueClass, FalseClass),
   )
   .returns(T.untyped)
-  def cleanpath(consider_symlink=_); end
+  def cleanpath(consider_symlink=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Time)
   def ctime(); end
@@ -156,7 +156,7 @@ class Pathname < Object
       limit: Integer,
   )
   .returns(Enumerator[String])
-  def each_line(sep=_, limit=_, &blk); end
+  def each_line(sep=T.unsafe(nil), limit=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T::Array[Pathname])
   def entries(); end
@@ -180,7 +180,7 @@ class Pathname < Object
       p1: T.any(String, Pathname),
   )
   .returns(Pathname)
-  def expand_path(p1=_); end
+  def expand_path(p1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def extname(); end
@@ -204,7 +204,7 @@ class Pathname < Object
       flags: Integer,
   )
   .returns(T.any(TrueClass, FalseClass))
-  def fnmatch(pattern, flags=_); end
+  def fnmatch(pattern, flags=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.self_type)
   def freeze(); end
@@ -271,7 +271,7 @@ class Pathname < Object
       blk: T.proc(arg0: File).returns(T.type_parameter(:T)),
   )
   .returns(T.type_parameter(:T))
-  def open(mode=_, perm=_, opt=_, &blk); end
+  def open(mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       arg0: Encoding,
@@ -282,7 +282,7 @@ class Pathname < Object
       blk: T.proc(arg0: Dir).returns(T.type_parameter(:U)),
   )
   .returns(T.type_parameter(:U))
-  def opendir(arg0=_, &blk); end
+  def opendir(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def owned?(); end
@@ -299,7 +299,7 @@ class Pathname < Object
       open_args: Integer,
   )
   .returns(String)
-  def read(length=_, offset=_, open_args=_); end
+  def read(length=T.unsafe(nil), offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def readable?(); end
@@ -313,7 +313,7 @@ class Pathname < Object
       open_args: Integer,
   )
   .returns(T::Array[String])
-  def readlines(sep=_, limit=_, open_args=_); end
+  def readlines(sep=T.unsafe(nil), limit=T.unsafe(nil), open_args=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def readlink(); end
@@ -322,13 +322,13 @@ class Pathname < Object
       p1: String,
   )
   .returns(String)
-  def realdirpath(p1=_); end
+  def realdirpath(p1=T.unsafe(nil)); end
 
   Sorbet.sig(
       p1: String,
   )
   .returns(String)
-  def realpath(p1=_); end
+  def realpath(p1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def relative?(); end
@@ -395,14 +395,14 @@ class Pathname < Object
   )
   .returns(Integer)
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
-  def symlink?(old=_); end
+  def symlink?(old=T.unsafe(nil)); end
 
   Sorbet.sig(
       mode: Integer,
       perm: Integer,
   )
   .returns(Integer)
-  def sysopen(mode=_, perm=_); end
+  def sysopen(mode=T.unsafe(nil), perm=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.self_type)
   def taint(); end
@@ -447,7 +447,7 @@ class Pathname < Object
       open_args: Integer,
   )
   .returns(Integer)
-  def write(arg0, offset=_, open_args=_); end
+  def write(arg0, offset=T.unsafe(nil), open_args=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def zero?(); end

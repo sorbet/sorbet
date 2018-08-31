@@ -39,7 +39,7 @@ module Enumerable
       blk: T.proc(arg0: Elem).returns(BasicObject),
   )
   .returns(Integer)
-  def count(arg0=_, &blk); end
+  def count(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       n: Integer,
@@ -50,7 +50,7 @@ module Enumerable
       n: Integer,
   )
   .returns(Enumerator[Elem])
-  def cycle(n=_, &blk); end
+  def cycle(n=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       ifnone: Proc,
@@ -61,7 +61,7 @@ module Enumerable
       ifnone: Proc,
   )
   .returns(Enumerator[Elem])
-  def detect(ifnone=_, &blk); end
+  def detect(ifnone=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       n: Integer,
@@ -113,14 +113,14 @@ module Enumerable
   )
   .returns(T.nilable(Integer))
   Sorbet.sig.returns(Enumerator[Elem])
-  def find_index(value=_, &blk); end
+  def find_index(value=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.nilable(Elem))
   Sorbet.sig(
       n: Integer,
   )
   .returns(T.nilable(T::Array[Elem]))
-  def first(n=_); end
+  def first(n=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: BasicObject,
@@ -164,7 +164,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
   .returns(T.nilable(Elem))
-  def inject(initial=_, arg0=_, &blk); end
+  def inject(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.nilable(Elem))
   Sorbet.sig(
@@ -180,7 +180,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def max(arg0=_, &blk); end
+  def max(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Enumerator[Elem])
   Sorbet.sig(
@@ -196,7 +196,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def max_by(arg0=_, &blk); end
+  def max_by(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(T.nilable(Elem))
   Sorbet.sig(
@@ -212,7 +212,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def min(arg0=_, &blk); end
+  def min(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns(Enumerator[Elem])
   Sorbet.sig(
@@ -228,7 +228,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
   )
   .returns(T::Array[Elem])
-  def min_by(arg0=_, &blk); end
+  def min_by(arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig.returns([T.nilable(Elem), T.nilable(Elem)])
   Sorbet.sig(
@@ -329,7 +329,7 @@ module Enumerable
       ifnone: Proc,
   )
   .returns(Enumerator[Elem])
-  def find(ifnone=_, &blk); end
+  def find(ifnone=T.unsafe(nil), &blk); end
 
   # N.B. this signature is wrong; Our generic method implementation
   # cannot model the correct signature, so we pass through the return
@@ -380,7 +380,7 @@ module Enumerable
       blk: T.proc(arg0: Elem, arg1: Elem).returns(Elem),
   )
   .returns(T.nilable(Elem))
-  def reduce(initial=_, arg0=_, &blk); end
+  def reduce(initial=T.unsafe(nil), arg0=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       blk: T.proc(arg0: Elem).returns(BasicObject),

@@ -38,7 +38,7 @@ class BasicObject
       blk: T.proc().returns(BasicObject),
   )
   .returns(T.untyped)
-  def instance_eval(arg0=_, filename=_, lineno=_, &blk); end
+  def instance_eval(arg0=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil), &blk); end
 
   Sorbet.sig(
       args: BasicObject,

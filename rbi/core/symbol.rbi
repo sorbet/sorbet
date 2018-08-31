@@ -36,7 +36,7 @@ class Symbol < Object
       idx_or_range: T::Range[Integer],
   )
   .returns(String)
-  def [](idx_or_range, n=_); end
+  def [](idx_or_range, n=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Symbol)
   def capitalize(); end
@@ -102,7 +102,7 @@ class Symbol < Object
       idx_or_range: T::Range[Integer],
   )
   .returns(String)
-  def slice(idx_or_range, n=_); end
+  def slice(idx_or_range, n=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def to_s(); end

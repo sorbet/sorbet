@@ -21,7 +21,7 @@ module Kernel
       start_or_range: T::Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
-  def caller(start_or_range=_, length=_); end
+  def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   Sorbet.sig(
       start_or_range: Integer,
@@ -32,7 +32,7 @@ module Kernel
       start_or_range: T::Range[Integer],
   )
   .returns(T.nilable(T::Array[String]))
-  def caller_locations(start_or_range=_, length=_); end
+  def caller_locations(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
@@ -41,7 +41,7 @@ module Kernel
       lineno: Integer,
   )
   .returns(T.untyped)
-  def eval(arg0, arg1=_, filename=_, lineno=_); end
+  def eval(arg0, arg1=T.unsafe(nil), filename=T.unsafe(nil), lineno=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def iterator?(); end
@@ -102,7 +102,7 @@ module Kernel
       blk: BasicObject,
   )
   .returns(Enumerator[T.untyped])
-  def enum_for(method=_, *args, &blk); end
+  def enum_for(method=T.unsafe(nil), *args, &blk); end
 
   Sorbet.sig(
       other: BasicObject,
@@ -178,7 +178,7 @@ module Kernel
       regular: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def methods(regular=_); end
+  def methods(regular=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
   def nil?(); end
@@ -187,13 +187,13 @@ module Kernel
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def private_methods(all=_); end
+  def private_methods(all=T.unsafe(nil)); end
 
   Sorbet.sig(
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def protected_methods(all=_); end
+  def protected_methods(all=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: Symbol,
@@ -205,7 +205,7 @@ module Kernel
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def public_methods(all=_); end
+  def public_methods(all=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: T.any(Symbol, String),
@@ -246,7 +246,7 @@ module Kernel
       all: T.any(TrueClass, FalseClass),
   )
   .returns(T::Array[Symbol])
-  def singleton_methods(all=_); end
+  def singleton_methods(all=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T.self_type)
   def taint(); end
@@ -265,7 +265,7 @@ module Kernel
       blk: BasicObject,
   )
   .returns(Enumerator[T.untyped])
-  def to_enum(method=_, *args, &blk); end
+  def to_enum(method=T.unsafe(nil), *args, &blk); end
 
   Sorbet.sig.returns(String)
   def to_s(); end
@@ -304,7 +304,7 @@ module Kernel
       x: String,
   )
   .returns(Complex)
-  def Complex(x, y=_); end
+  def Complex(x, y=T.unsafe(nil)); end
 
   Sorbet.sig(
       x: T.any(Numeric, String),
@@ -323,7 +323,7 @@ module Kernel
       base: Integer,
   )
   .returns(Integer)
-  def Integer(arg, base=_); end
+  def Integer(arg, base=T.unsafe(nil)); end
 
   Sorbet.sig(
       x: T.any(Numeric, String),
@@ -334,7 +334,7 @@ module Kernel
       x: Object,
   )
   .returns(Rational)
-  def Rational(x, y=_); end
+  def Rational(x, y=T.unsafe(nil)); end
 
   Sorbet.sig(
       x: Object,
@@ -361,7 +361,7 @@ module Kernel
       msg: String,
   )
   .returns(T.noreturn)
-  def abort(msg=_); end
+  def abort(msg=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: T.proc().returns(BasicObject),
@@ -393,7 +393,7 @@ module Kernel
       status: T.any(Integer, TrueClass, FalseClass),
   )
   .returns(T.noreturn)
-  def exit(status=_); end
+  def exit(status=T.unsafe(nil)); end
 
   Sorbet.sig(
       status: T.any(Integer, TrueClass, FalseClass),
@@ -417,7 +417,7 @@ module Kernel
       arg2: T::Array[String],
   )
   .returns(T.noreturn)
-  def fail(arg0=_, arg1=_, arg2=_); end
+  def fail(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 
   Sorbet.sig(
       format: String,
@@ -431,7 +431,7 @@ module Kernel
       arg1: Integer,
   )
   .returns(String)
-  def gets(arg0=_, arg1=_); end
+  def gets(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   Sorbet.sig.returns(T::Array[Symbol])
   def global_variables(); end
@@ -441,7 +441,7 @@ module Kernel
       arg0: T.any(TrueClass, FalseClass),
   )
   .returns(T.any(TrueClass, FalseClass))
-  def load(filename, arg0=_); end
+  def load(filename, arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       blk: T.proc().returns(T.untyped)
@@ -456,7 +456,7 @@ module Kernel
       block: String,
   )
   .returns(T.nilable(IO))
-  def open(name, rest=_, block=_); end
+  def open(name, rest=T.unsafe(nil), block=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: IO,
@@ -464,7 +464,7 @@ module Kernel
       arg2: BasicObject,
   )
   .returns(NilClass)
-  def printf(arg0=_, arg1=_, *arg2); end
+  def printf(arg0=T.unsafe(nil), arg1=T.unsafe(nil), *arg2); end
 
   Sorbet.sig(
       blk: BasicObject,
@@ -503,21 +503,21 @@ module Kernel
       arg0: T::Range[Float],
   )
   .returns(Float)
-  def rand(arg0=_); end
+  def rand(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(String)
-  def readline(arg0=_, arg1=_); end
+  def readline(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
       arg1: Integer,
   )
   .returns(T::Array[String])
-  def readlines(arg0=_, arg1=_); end
+  def readlines(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
   Sorbet.sig(
       path: String,
@@ -538,7 +538,7 @@ module Kernel
       timeout: Integer,
   )
   .returns(T::Array[String])
-  def select(read, write=_, error=_, timeout=_); end
+  def select(read, write=T.unsafe(nil), error=T.unsafe(nil), timeout=T.unsafe(nil)); end
 
   Sorbet.sig(
       duration: Numeric,
@@ -566,7 +566,7 @@ module Kernel
       file2: String,
   )
   .returns(T.any(TrueClass, FalseClass, Time))
-  def test(cmd, file1, file2=_); end
+  def test(cmd, file1, file2=T.unsafe(nil)); end
 
   Sorbet.sig(
       msg: String,
@@ -591,5 +591,5 @@ module Kernel
       arg2: T::Array[String],
   )
   .returns(T.noreturn)
-  def raise(arg0=_, arg1=_, arg2=_); end
+  def raise(arg0=T.unsafe(nil), arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 end

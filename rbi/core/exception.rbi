@@ -19,13 +19,13 @@ class Exception < Object
       arg0: String,
   )
   .returns(Exception)
-  def exception(arg0=_); end
+  def exception(arg0=T.unsafe(nil)); end
 
   Sorbet.sig(
       arg0: String,
   )
   .void
-  def initialize(arg0=_); end
+  def initialize(arg0=T.unsafe(nil)); end
 
   Sorbet.sig.returns(String)
   def inspect(); end
