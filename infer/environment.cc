@@ -787,11 +787,6 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     args.emplace_back(getTypeAndOrigin(ctx, arg));
                 }
 
-                vector<core::Loc> argLocs;
-                for (auto loc : send->argLocs) {
-                    argLocs.emplace_back(loc);
-                }
-
                 auto recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->link) {
                     send->link->receiver = recvType.type;
@@ -804,8 +799,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     // TODO
                     tp.type = core::Types::untypedUntracked();
                 } else {
-                    auto dispatched = recvType.type->dispatchCall(ctx, send->fun, bind.loc, send->receiverLoc, args,
-                                                                  argLocs, recvType.type, recvType.type, send->link);
+                    auto dispatched =
+                        recvType.type->dispatchCall(ctx, send->fun, bind.loc, send->receiverLoc, args, send->argLocs,
+                                                    recvType.type, recvType.type, send->link);
 
                     core::histogramInc("dispatchCall.components", dispatched.components.size());
                     tp.type = dispatched.returnType;

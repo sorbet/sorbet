@@ -26,7 +26,7 @@ class SerializerImpl;
 class IntrinsicMethod {
 public:
     virtual std::shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, std::vector<TypeAndOrigins> &args,
-                                        std::vector<Loc> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::vector<Loc> &argLocs, const std::shared_ptr<Type> &selfRef,
                                         const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &linkType) const = 0;
 };
