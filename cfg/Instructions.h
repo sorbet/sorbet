@@ -45,6 +45,7 @@ public:
     Ident(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Ident, 24, 8);
 
 class Alias final : public Instruction {
 public:
@@ -54,6 +55,7 @@ public:
 
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Alias, 16, 8);
 
 class SolveConstraint final : public Instruction {
 public:
@@ -61,21 +63,24 @@ public:
     SolveConstraint(const std::shared_ptr<core::SendAndBlockLink> &link) : link(link){};
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(SolveConstraint, 32, 8);
 
 class Send final : public Instruction {
 public:
     core::LocalVariable recv;
     core::NameRef fun;
     core::Loc receiverLoc;
-    std::vector<core::LocalVariable> args;
+    InlinedVector<core::LocalVariable, 2> args;
     std::vector<core::Loc> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
-    Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc, std::vector<core::LocalVariable> &args,
-         std::vector<core::Loc> &argLocs, const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
+    Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
+         InlinedVector<core::LocalVariable, 2> &args, std::vector<core::Loc> &argLocs,
+         const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Send, 96, 8);
 
 class Return final : public Instruction {
 public:
@@ -84,6 +89,7 @@ public:
     Return(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Return, 24, 8);
 
 class BlockReturn final : public Instruction {
 public:
@@ -93,6 +99,7 @@ public:
     BlockReturn(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(BlockReturn, 40, 8);
 
 class Literal final : public Instruction {
 public:
@@ -101,6 +108,7 @@ public:
     Literal(const std::shared_ptr<core::Type> &value);
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Literal, 32, 8);
 
 class Unanalyzable : public Instruction {
 public:
@@ -109,6 +117,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Unanalyzable, 16, 8);
 
 class NotSupported final : public Unanalyzable {
 public:
@@ -119,6 +128,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(NotSupported, 40, 8);
 
 class Self final : public Instruction {
 public:
@@ -129,6 +139,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Self, 16, 8);
 
 class LoadArg final : public Instruction {
 public:
@@ -141,6 +152,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(LoadArg, 32, 8);
 
 class LoadYieldParams final : public Instruction {
 public:
@@ -152,6 +164,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(LoadYieldParams, 40, 8);
 
 class Cast final : public Instruction {
 public:
@@ -164,6 +177,7 @@ public:
 
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(Cast, 48, 8);
 
 class DebugEnvironment final : public Instruction {
 public:
@@ -173,6 +187,7 @@ public:
     DebugEnvironment(core::GlobalState::AnnotationPos pos);
     virtual std::string toString(core::Context ctx);
 };
+CheckSize(DebugEnvironment, 48, 8);
 
 } // namespace cfg
 } // namespace sorbet
