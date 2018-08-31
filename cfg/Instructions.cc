@@ -33,9 +33,9 @@ string BlockReturn::toString(core::Context ctx) {
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-           InlinedVector<core::LocalVariable, 2> &args, vector<core::Loc> &argLocs,
+           const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), args(move(args)), argLocs(move(argLocs)), link(move(link)) {
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), args(args), argLocs(argLocs), link(move(link)) {
     core::categoryCounterInc("cfg", "send");
     core::histogramInc("cfg.send.args", this->args.size());
 }

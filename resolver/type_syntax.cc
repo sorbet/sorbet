@@ -480,7 +480,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             vector<core::TypeAndOrigins> targs;
-            vector<core::Loc> argLocs;
+            InlinedVector<core::Loc, 2> argLocs;
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);

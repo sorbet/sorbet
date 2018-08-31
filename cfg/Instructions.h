@@ -71,11 +71,11 @@ public:
     core::NameRef fun;
     core::Loc receiverLoc;
     InlinedVector<core::LocalVariable, 2> args;
-    std::vector<core::Loc> argLocs;
+    InlinedVector<core::Loc, 2> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
     Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
-         InlinedVector<core::LocalVariable, 2> &args, std::vector<core::Loc> &argLocs,
+         const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
          const std::shared_ptr<core::SendAndBlockLink> &link = nullptr);
 
     virtual std::string toString(core::Context ctx);

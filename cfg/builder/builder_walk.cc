@@ -200,7 +200,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current = walk(cctx.withTarget(recv), s->recv.get(), current);
 
                 InlinedVector<core::LocalVariable, 2> args;
-                vector<core::Loc> argLocs;
+                InlinedVector<core::Loc, 2> argLocs;
                 for (auto &exp : s->args) {
                     core::LocalVariable temp;
                     temp = cctx.newTemporary(core::Names::statTemp());
@@ -240,7 +240,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         bodyBlock->exprs.emplace_back(idxTmp, id->loc,
                                                       make_unique<Literal>(make_shared<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
-                        vector<core::Loc> locs{id->loc};
+                        InlinedVector<core::Loc, 2> locs{id->loc};
                         bodyBlock->exprs.emplace_back(
                             argLoc, id->loc,
                             make_unique<Send>(argTemp, core::Names::squareBrackets(), s->block->loc, idxVec, locs));
@@ -381,7 +381,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
                         auto isaCheck = cctx.newTemporary(core::Names::isaCheckTemp());
                         InlinedVector<core::LocalVariable, 2> args;
-                        vector<core::Loc> argLocs = {loc};
+                        InlinedVector<core::Loc, 2> argLocs = {loc};
                         args.emplace_back(exceptionClass);
 
                         rescueHandlersBlock->exprs.emplace_back(
@@ -422,7 +422,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Hash *h) {
                 InlinedVector<core::LocalVariable, 2> vars;
-                vector<core::Loc> locs;
+                InlinedVector<core::Loc, 2> locs;
                 for (int i = 0; i < h->keys.size(); i++) {
                     core::LocalVariable keyTmp = cctx.newTemporary(core::Names::hashTemp());
                     core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
@@ -443,7 +443,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::Array *a) {
                 InlinedVector<core::LocalVariable, 2> vars;
-                vector<core::Loc> locs;
+                InlinedVector<core::Loc, 2> locs;
                 for (auto &elem : a->elems) {
                     core::LocalVariable tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
