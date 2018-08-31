@@ -66,7 +66,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:MyException> : <Class:MyException>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : T.untyped\l<statTemp>$9 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$10 = alias <constant:Exception> : <Class:Exception>\l<statTemp>$8 = <statTemp>$9.keep_for_ide(<statTemp>$10) : T.untyped\l<statTemp>$12 = self : <Class:<root>>\l<statTemp>$14 = self : <Class:<root>>\l<statTemp>$13 = <statTemp>$14.foo() : T.untyped\l<statTemp>$11 = <statTemp>$12.puts(<statTemp>$13) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:MyException> : <Class:MyException>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : RubyTyper::Void\l<statTemp>$9 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$10 = alias <constant:Exception> : <Class:Exception>\l<statTemp>$8 = <statTemp>$9.keep_for_ide(<statTemp>$10) : RubyTyper::Void\l<statTemp>$12 = self : <Class:<root>>\l<statTemp>$14 = self : <Class:<root>>\l<statTemp>$13 = <statTemp>$14.foo() : T.untyped\l<statTemp>$11 = <statTemp>$12.puts(<statTemp>$13) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

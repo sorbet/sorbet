@@ -176,6 +176,9 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("statsd-host", "StatsD sever hostname", cxxopts::value<string>()->default_value(""),
                                "host");
     options.add_options("dev")("counters", "Print all internal counters");
+    if (sorbet::debug_mode) {
+        options.add_options("dev")("suggest-sig", "Report typing candidates. Only supported in debug builds");
+    }
     options.add_options("dev")("suggest-typed", "Suggest which files to add `typed: true` to");
     options.add_options("dev")("statsd-prefix", "StatsD prefix",
                                cxxopts::value<string>()->default_value("ruby_typer.unknown"), "prefix");
@@ -323,6 +326,9 @@ void readOptions(Options &opts, int argc, char *argv[], shared_ptr<spdlog::logge
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.typedSource = raw["typed-source"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        if (sorbet::debug_mode) {
+            opts.suggestSig = raw["suggest-sig"].as<bool>();
+        }
 
         if (raw.count("e") == 0 && opts.inputFileNames.empty() && !opts.runLSP && opts.storeState.empty()) {
             logger->info("You must pass either `-e` or at least one ruby file.\n\n{}", options.help());

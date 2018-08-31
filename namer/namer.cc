@@ -676,7 +676,7 @@ public:
 
                         // TODO(nelhage): This creates an order
                         // dependency in the resolver. See RUBYPLAT-520
-                        sym.data(ctx).resultType = core::Types::untyped();
+                        sym.data(ctx).resultType = core::Types::untyped(ctx, sym);
 
                         asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
                         return asgn;
@@ -747,7 +747,7 @@ public:
             auto name = core::Names::blkArg();
             blockArg = ctx.state.enterMethodArgumentSymbol(yield->loc, method, name);
             blockArg.data(ctx).setBlockArgument();
-            blockArg.data(ctx).resultType = core::Types::untyped();
+            blockArg.data(ctx).resultType = core::Types::untyped(ctx, blockArg);
             method.data(ctx).arguments().push_back(blockArg);
 
             // Save it on ourself so we can stick it into the MethodDef's arg list in postTransformMethodDef

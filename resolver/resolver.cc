@@ -10,6 +10,7 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
+#include "../core/Symbols.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
@@ -235,7 +236,7 @@ private:
 
             core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
             stub.data(ctx).superClass = core::Symbols::StubClass();
-            stub.data(ctx).resultType = core::Types::untyped();
+            stub.data(ctx).resultType = core::Types::untypedUntracked();
             stub.data(ctx).setIsModule(false);
             stub.data(ctx).singletonClass(ctx); // force singleton class into existence.
             bool resolved = resolveJob(ctx, job, typeAliases, true);
@@ -276,7 +277,7 @@ private:
                         ctx.state.beginError(it.lhs.data(ctx).loc(), core::errors::Resolver::RecursiveClassAlias)) {
                     e.setHeader("Class alias aliases to itself");
                 }
-                it.lhs.data(ctx).resultType = core::Types::untyped();
+                it.lhs.data(ctx).resultType = core::Types::untypedUntracked();
             }
             return true;
         }
@@ -585,7 +586,7 @@ private:
     void fillInInfoFromSig(core::MutableContext ctx, core::SymbolRef method, ast::Send *send, bool isOverloaded) {
         auto exprLoc = send->loc;
 
-        auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true);
+        auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true, method);
 
         if (!sig.seen.returns && !sig.seen.void_) {
             if (sig.seen.args ||
@@ -634,7 +635,7 @@ private:
             } else if (arg.data(ctx).resultType != nullptr) {
                 ++it;
             } else {
-                arg.data(ctx).resultType = core::Types::untyped();
+                arg.data(ctx).resultType = core::Types::untyped(ctx, arg);
                 if (sig.seen.args || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
                     if (auto e =
@@ -843,7 +844,8 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
+    shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+                                               core::SymbolRef ofSym) {
         shared_ptr<core::Type> result;
         typecase(
             expr.get(), [&](ast::Literal *a) { result = a->value; },
@@ -855,9 +857,9 @@ private:
                 }
                 result = cast->type;
             },
-            [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr); },
+            [&](ast::InsSeq *outer) { result = resolveConstantType(ctx, outer->expr, ofSym); },
             [&](ast::Expression *expr) {
-                result = core::Types::untyped();
+                result = core::Types::untyped(ctx, ofSym);
                 if (auto *send = ast::cast_tree<ast::Send>(expr)) {
                     if (send->fun == core::Names::typeAlias()) {
                         // short circuit if this is a type alias
@@ -974,7 +976,7 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false);
+                        data.resultType = TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false, id->symbol);
                     }
                 }
             }
@@ -982,7 +984,7 @@ public:
             if (data.resultType != nullptr) {
                 return asgn;
             }
-            data.resultType = resolveConstantType(ctx, asgn->rhs);
+            data.resultType = resolveConstantType(ctx, asgn->rhs, id->symbol);
         }
 
         return asgn;
@@ -1014,7 +1016,7 @@ public:
 
                 auto expr = move(send->args[0]);
                 ParsedSig emptySig;
-                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false);
+                auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false, core::Symbols::noSymbol());
                 return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(move(send->args[1])),
                                         make_unique<ast::Cast>(send->loc, type, move(expr), send->fun));
             }
@@ -1272,7 +1274,7 @@ public:
             } else {
                 sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
             }
-            sym.data(ctx).resultType = core::Types::untyped();
+            sym.data(ctx).resultType = core::Types::untyped(ctx, sym);
         }
 
         return make_unique<ast::Field>(id->loc, sym);
@@ -1339,7 +1341,6 @@ vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext c
         tree = flatten.addClasses(ctx, move(tree));
         tree = flatten.addMethods(ctx, move(tree));
     }
-    core::prodCounterAdd("types.input.sends.total", sigs.sendCount);
 
     return trees;
 }

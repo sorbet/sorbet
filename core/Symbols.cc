@@ -51,19 +51,20 @@ shared_ptr<Type> Symbol::selfType(const GlobalState &gs) const {
 
 shared_ptr<Type> Symbol::externalType(const GlobalState &gs) const {
     ENFORCE(isClass());
+    auto ref = this->ref(gs);
     // todo: also cache these?
     if (typeMembers().empty()) {
-        return make_shared<ClassType>(ref(gs));
+        return make_shared<ClassType>(ref);
     } else {
         vector<shared_ptr<Type>> targs;
         for (auto tm : typeMembers()) {
             if (tm.data(gs).isFixed()) {
                 targs.emplace_back(tm.data(gs).resultType);
             } else {
-                targs.emplace_back(Types::untyped());
+                targs.emplace_back(Types::untyped(gs, ref));
             }
         }
-        return make_shared<AppliedType>(ref(gs), targs);
+        return make_shared<AppliedType>(ref, targs);
     }
 }
 

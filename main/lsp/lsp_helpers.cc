@@ -189,7 +189,7 @@ shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr
         resultType = core::Types::resultTypeAsSeenFrom(ctx, ofWhat, applied->klass, applied->targs);
     }
     if (!resultType) {
-        resultType = core::Types::untyped();
+        resultType = core::Types::untypedUntracked();
     }
 
     resultType = core::Types::replaceSelfType(ctx, resultType, receiver); // instantiate self types

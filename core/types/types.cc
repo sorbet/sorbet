@@ -35,9 +35,17 @@ shared_ptr<Type> Types::nilClass() {
     return res;
 }
 
-shared_ptr<Type> Types::untyped() {
+shared_ptr<Type> Types::untypedUntracked() {
     static auto res = make_shared<ClassType>(Symbols::untyped());
     return res;
+}
+
+shared_ptr<Type> Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
+    if (sorbet::debug_mode) {
+        return make_shared<BlamedUntyped>(blame);
+    } else {
+        return untypedUntracked();
+    }
 }
 
 shared_ptr<Type> Types::void_() {
@@ -81,13 +89,14 @@ shared_ptr<Type> Types::hashClass() {
 }
 
 shared_ptr<Type> Types::arrayOfUntyped() {
-    static vector<shared_ptr<Type>> targs{Types::untyped()};
+    static vector<shared_ptr<Type>> targs{Types::untypedUntracked()};
     static auto res = make_shared<AppliedType>(Symbols::Array(), targs);
     return res;
 }
 
 shared_ptr<Type> Types::hashOfUntyped() {
-    static vector<shared_ptr<Type>> targs{Types::untyped(), Types::untyped(), Types::untyped()};
+    static vector<shared_ptr<Type>> targs{Types::untypedUntracked(), Types::untypedUntracked(),
+                                          Types::untypedUntracked()};
     static auto res = make_shared<AppliedType>(Symbols::Hash(), targs);
     return res;
 }
@@ -241,6 +250,15 @@ void ProxyType::_sanityCheck(Context ctx) {
 bool Type::isUntyped() {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == Symbols::untyped();
+}
+
+core::SymbolRef Type::untypedBlame() {
+    ENFORCE(isUntyped());
+    auto *t = cast_type<BlamedUntyped>(this);
+    if (t == nullptr) {
+        return Symbols::noSymbol();
+    }
+    return t->blame;
 }
 
 bool Type::isTop() {
@@ -536,11 +554,11 @@ shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, Symbol
 
 shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &procType) {
     if (!procType->derivesFrom(ctx, Symbols::Proc())) {
-        return Types::untyped();
+        return Types::untypedUntracked();
     }
     auto *applied = cast_type<AppliedType>(procType.get());
     if (applied == nullptr || applied->targs.empty()) {
-        return Types::untyped();
+        return Types::untypedUntracked();
     }
     // Proc types have their return type as the first targ
     return applied->targs.front();
@@ -619,7 +637,7 @@ shared_ptr<Type> LambdaParam::getCallArgumentType(Context ctx, NameRef name, int
 }
 
 shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, int i) {
-    return Types::untyped()->getCallArgumentType(ctx, name, i);
+    return Types::untypedUntracked()->getCallArgumentType(ctx, name, i);
 }
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
@@ -633,7 +651,8 @@ DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLo
                                            vector<TypeAndOrigins> &args, vector<Loc> &argLocs,
                                            const shared_ptr<Type> &selfType, const shared_ptr<Type> &fullType,
                                            const shared_ptr<SendAndBlockLink> &block) {
-    return Types::untyped()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType, block);
+    return Types::untypedUntracked()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType,
+                                                   block);
 }
 
 void LambdaParam::_sanityCheck(Context ctx) {}

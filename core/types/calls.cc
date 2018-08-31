@@ -157,9 +157,10 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
                                     SymbolRef inClass, SymbolRef method, TypeAndOrigins &argTpe, const Symbol &argSym,
                                     const shared_ptr<Type> &fullType, vector<shared_ptr<Type>> &targs, Loc loc,
                                     bool mayBeSetter = false) {
-    shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, argSym.ref(ctx), inClass, targs);
+    auto ref = argSym.ref(ctx);
+    shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
     if (!expectedType) {
-        expectedType = Types::untyped();
+        expectedType = Types::untyped(ctx, ref);
     }
 
     expectedType = Types::replaceSelfType(
@@ -337,7 +338,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
             }
-            return Types::untyped();
+            return Types::untypedUntracked();
         }
 
         return attachedClass.data(ctx).externalType(ctx);
@@ -359,7 +360,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
         if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
             e.setHeader("Unsupported usage of literal type");
         }
-        return Types::untyped();
+        return Types::untypedUntracked();
     }
     return tp;
 }
@@ -402,12 +403,12 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                                                 const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "classtype");
     if (isUntyped()) {
-        return DispatchResult(Types::untyped(), move(selfRef), Symbols::untyped());
+        return DispatchResult(Types::untyped(ctx, untypedBlame()), move(selfRef), Symbols::untyped());
     } else if (this->symbol == Symbols::void_()) {
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", fun.data(ctx).toString(ctx));
         }
-        return DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
+        return DispatchResult(Types::untypedUntracked(), move(selfRef), Symbols::noSymbol());
     }
 
     SymbolRef mayBeOverloaded = this->symbol.data(ctx).findMemberTransitive(ctx, fun);
@@ -418,7 +419,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
+            auto result = DispatchResult(Types::untypedUntracked(), move(selfRef), Symbols::noSymbol());
             if (!args.empty()) {
                 if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0, args.size());
@@ -427,7 +428,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
             }
             return result;
         }
-        auto result = DispatchResult(Types::untyped(), move(selfRef), Symbols::noSymbol());
+        auto result = DispatchResult(Types::untypedUntracked(), move(selfRef), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::UnknownMethod)) {
             if (fullType.get() != this) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", fun.data(ctx).toString(ctx),
@@ -684,7 +685,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     }
 
     if (!resultType) {
-        resultType = Types::untyped();
+        resultType = Types::untyped(ctx, method);
     } else if (!constr->isEmpty() && constr->isSolved()) {
         resultType = Types::instantiate(ctx, resultType, *constr);
     }
@@ -702,7 +703,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
         } else {
             shared_ptr<Type> blockType = Types::resultTypeAsSeenFrom(ctx, bspec, this->symbol, targs);
             if (!blockType) {
-                blockType = Types::untyped();
+                blockType = Types::untyped(ctx, bspec);
             }
 
             block->returnTp = Types::getProcReturnType(ctx, blockType);
@@ -727,7 +728,7 @@ DispatchResult ClassType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Lo
 
 shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i) {
     if (isUntyped()) {
-        return Types::untyped();
+        return Types::untyped(ctx, untypedBlame());
     }
     SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
 
@@ -742,7 +743,7 @@ shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i
 
     shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
     if (!resultType) {
-        resultType = Types::untyped();
+        resultType = Types::untyped(ctx, data.arguments()[i]);
     }
     return resultType;
 }
@@ -762,7 +763,7 @@ shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int
 
     shared_ptr<Type> resultType = Types::resultTypeAsSeenFrom(ctx, data.arguments()[i], this->klass, this->targs);
     if (!resultType) {
-        resultType = Types::untyped();
+        resultType = Types::untyped(ctx, data.arguments()[i]);
     }
     return resultType;
 }
@@ -792,7 +793,7 @@ DispatchResult MetaType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Lo
             return res;
         }
         default: {
-            auto res = DispatchResult(Types::untyped(), selfRef, Symbols::noSymbol());
+            auto res = DispatchResult(Types::untypedUntracked(), selfRef, Symbols::noSymbol());
             if (auto e = ctx.state.beginError(callLoc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
                 res.components.front().errors.emplace_back(e.build());
@@ -829,7 +830,7 @@ public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, vector<TypeAndOrigins> &args,
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
-        return Types::untyped();
+        return Types::untypedUntracked();
     }
 } T_untyped;
 
@@ -863,7 +864,7 @@ public:
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
-            return Types::untyped();
+            return Types::untypedUntracked();
         }
 
         shared_ptr<Type> res = Types::bottom();
@@ -884,7 +885,7 @@ public:
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
-            return Types::untyped();
+            return Types::untypedUntracked();
         }
 
         shared_ptr<Type> res = Types::top();
@@ -905,7 +906,7 @@ public:
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.size() != 1) {
-            return Types::untyped();
+            return Types::untypedUntracked();
         }
 
         if (auto e = ctx.state.beginError(callLoc, errors::Infer::RevealType)) {
@@ -1023,7 +1024,7 @@ public:
                 auto tupleArgs = targs;
                 targs.emplace_back(TupleType::build(ctx, tupleArgs));
             } else {
-                targs.emplace_back(Types::untyped());
+                targs.emplace_back(Types::untypedUntracked());
             }
         }
 
@@ -1119,7 +1120,7 @@ public:
         auto *afterLit = cast_type<LiteralType>(args[2].type.get());
         if (!(beforeLit->underlying()->derivesFrom(ctx, Symbols::Integer()) &&
               afterLit->underlying()->derivesFrom(ctx, Symbols::Integer()))) {
-            return Types::untyped();
+            return Types::untypedUntracked();
         }
         int before = (int)beforeLit->value;
         int after = (int)afterLit->value;
@@ -1309,7 +1310,7 @@ public:
                            vector<Loc> &argLocs, const shared_ptr<Type> &selfRef, const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (linkType == nullptr) {
-            return core::Types::untyped();
+            return core::Types::untypedUntracked();
         }
 
         int arity = 0;
@@ -1323,7 +1324,7 @@ public:
         if (arity > core::Symbols::MAX_PROC_ARITY) {
             return core::Types::procClass();
         }
-        vector<shared_ptr<core::Type>> targs(arity + 1, core::Types::untyped());
+        vector<shared_ptr<core::Type>> targs(arity + 1, core::Types::untypedUntracked());
         auto procClass = core::Symbols::Proc(arity);
         return make_shared<core::AppliedType>(procClass, targs);
     }

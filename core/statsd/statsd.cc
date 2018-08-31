@@ -36,8 +36,8 @@ public:
 bool StatsD::submitCounters(const CounterState &counters, string host, int port, string prefix) {
     StatsdClientWrapper statsd(host, port, prefix);
 
-    auto canon = counters.counters->canonicalize();
-    for (auto &cat : canon.counters_by_category) {
+    counters.counters->canonicalize();
+    for (auto &cat : counters.counters->counters_by_category) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;
@@ -47,7 +47,7 @@ bool StatsD::submitCounters(const CounterState &counters, string host, int port,
         statsd.gauge(absl::StrCat(cat.first, ".total"), sum);
     }
 
-    for (auto &hist : canon.histograms) {
+    for (auto &hist : counters.counters->histograms) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
@@ -57,7 +57,7 @@ bool StatsD::submitCounters(const CounterState &counters, string host, int port,
         statsd.gauge(absl::StrCat(hist.first, ".total"), sum);
     }
 
-    for (auto &e : canon.counters) {
+    for (auto &e : counters.counters->counters) {
         statsd.gauge(e.first, e.second);
     }
 

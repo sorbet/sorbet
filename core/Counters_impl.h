@@ -12,7 +12,7 @@ struct CounterImpl {
     CounterImpl &operator=(CounterImpl &&) = delete;
     using CounterType = unsigned long;
 
-    CounterImpl canonicalize();
+    void canonicalize();
     void clear();
 
     const char *internKey(const char *str);

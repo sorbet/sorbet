@@ -73,8 +73,8 @@ TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
     EXPECT_TRUE(core::Types::isSubType(ctx, stringLit, stringLit));
 
     EXPECT_FALSE(core::Types::isSubType(ctx, intClass, intLit));
-    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::top(), core::Types::untyped()));
-    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::untyped(), core::Types::top()));
+    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::top(), core::Types::untypedUntracked()));
+    EXPECT_TRUE(core::Types::isSubType(ctx, core::Types::untypedUntracked(), core::Types::top()));
 }
 
 TEST_F(InferFixture, ClassesSubtyping) { // NOLINT

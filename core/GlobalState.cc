@@ -251,7 +251,7 @@ void GlobalState::initEmpty() {
     Symbols::root().data(*this, true).members[enterNameConstant(bottom_str)] = Symbols::bottom();
 
     // Synthesize untyped = T.untyped
-    Symbols::untyped().data(*this).resultType = Types::untyped();
+    Symbols::untyped().data(*this).resultType = Types::untyped(*this, Symbols::untyped());
 
     // <Magic> has its own type
     Symbols::Magic().data(*this).resultType = make_shared<ClassType>(Symbols::Magic());
@@ -260,7 +260,7 @@ void GlobalState::initEmpty() {
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = Types::untyped();
+    arg.data(*this).resultType = Types::untyped(*this, arg);
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::hashOfUntyped();
 
@@ -268,7 +268,7 @@ void GlobalState::initEmpty() {
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildArray());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
-    arg.data(*this).resultType = Types::untyped();
+    arg.data(*this).resultType = Types::untyped(*this, arg);
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::arrayOfUntyped();
 
@@ -277,7 +277,7 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = Types::arrayOfUntyped();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = Types::untyped();
+    method.data(*this).resultType = Types::untyped(*this, method);
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
@@ -289,7 +289,7 @@ void GlobalState::initEmpty() {
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
-    arg.data(*this).resultType = Types::untyped();
+    arg.data(*this).resultType = Types::untyped(*this, method);
     method.data(*this).arguments().push_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
     arg.data(*this).resultType = Types::Integer();
@@ -297,7 +297,7 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
     arg.data(*this).resultType = Types::Integer();
     method.data(*this).arguments().push_back(arg);
-    method.data(*this).resultType = Types::untyped();
+    method.data(*this).resultType = Types::untyped(*this, method);
 
     // Some of these are Modules
     Symbols::T().data(*this).setIsModule(true);

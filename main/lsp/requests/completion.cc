@@ -131,7 +131,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
     item.AddMember("label", (string)what.data(*finalGs).name.data(*finalGs).shortName(*finalGs), alloc);
     auto resultType = what.data(*finalGs).resultType;
     if (!resultType) {
-        resultType = core::Types::untyped();
+        resultType = core::Types::untypedUntracked();
     }
     if (what.data(*finalGs).isMethod()) {
         item.AddMember("kind", 3, alloc); // Function

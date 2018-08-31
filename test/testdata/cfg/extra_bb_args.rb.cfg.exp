@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$8 = alias <constant:T> : <Class:T>\l<statTemp>$9 = alias <constant:String> : <Class:String>\l<statTemp>$7 = <statTemp>$8.nilable(<statTemp>$9) : T.untyped\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : T.untyped\l<castTemp>$10 = nil : NilClass\lname = cast(<castTemp>$10, String | NilClass); : String | NilClass\l<ifTemp>$12 = name.nil?() : TrueClass | FalseClass\l<ifTemp>$12\l"
+        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$8 = alias <constant:T> : <Class:T>\l<statTemp>$9 = alias <constant:String> : <Class:String>\l<statTemp>$7 = <statTemp>$8.nilable(<statTemp>$9) : T.untyped\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : RubyTyper::Void\l<castTemp>$10 = nil : NilClass\lname = cast(<castTemp>$10, String | NilClass); : String | NilClass\l<ifTemp>$12 = name.nil?() : TrueClass | FalseClass\l<ifTemp>$12\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_2" [style="bold"];

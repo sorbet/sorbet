@@ -1,4 +1,5 @@
 #include "main/realmain.h"
+#include "absl/algorithm/container.h"
 #include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
@@ -277,6 +278,22 @@ int realmain(int argc, char *argv[]) {
     if (!opts.storeState.empty()) {
         gs->markAsPayload();
         FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
+    }
+
+    auto untypedSources = core::getAndClearHistogram("untyped.sources");
+    if (opts.suggestSig) {
+        ENFORCE(sorbet::debug_mode);
+        vector<pair<string, int>> withNames;
+        long sum = 0;
+        for (auto e : untypedSources) {
+            withNames.emplace_back(core::SymbolRef(*gs, e.first).data(*gs, true).fullName(*gs), e.second);
+            sum += e.second;
+        }
+        absl::c_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
+        for (auto &p : withNames) {
+            logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
+                          p.second, sum);
+        }
     }
 
     if (!opts.someCounters.empty()) {

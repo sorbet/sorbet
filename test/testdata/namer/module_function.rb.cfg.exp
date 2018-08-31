@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : T.untyped\l<statTemp>$10 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$11 = alias <constant:C> : <Class:C>\l<statTemp>$9 = <statTemp>$10.keep_for_ide(<statTemp>$11) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : RubyTyper::Void\l<statTemp>$10 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$11 = alias <constant:C> : <Class:C>\l<statTemp>$9 = <statTemp>$10.keep_for_ide(<statTemp>$11) : RubyTyper::Void\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -114,7 +114,7 @@ subgraph "cluster_::C#<static-init>" {
     "bb::C#<static-init>_1" [shape = parallelogram];
 
     "bb::C#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$5 = alias <constant:Funcs> : <Class:Funcs>\l<returnMethodTemp>$2 = <statTemp>$4.keep_for_ide(<statTemp>$5) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$5 = alias <constant:Funcs> : <Class:Funcs>\l<returnMethodTemp>$2 = <statTemp>$4.keep_for_ide(<statTemp>$5) : RubyTyper::Void\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::C#<static-init>_0" -> "bb::C#<static-init>_1" [style="bold"];

@@ -84,6 +84,7 @@ void categoryCounterInc(ConstExprStr category, ConstExprStr counter);
 void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value);
 void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
+std::map<int, int> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
 } // namespace core
 } // namespace sorbet

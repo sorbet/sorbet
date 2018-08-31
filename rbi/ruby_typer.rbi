@@ -11,9 +11,17 @@ class Struct
 end
 
 module RubyTyper
+  Sorbet.sig(
+      expr: T.untyped,
+  )
+  .void
   def self.keep_for_ide(expr)
   end
 
+  Sorbet.sig(
+      expr: T.untyped,
+  )
+  .void
   def self.keep_for_typechecking(expr)
   end
 end

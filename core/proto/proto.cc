@@ -129,8 +129,8 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
 
     metrics.set_uuid(uuid);
 
-    auto canon = counters.counters->canonicalize();
-    for (auto &cat : canon.counters_by_category) {
+    counters.counters->canonicalize();
+    for (auto &cat : counters.counters->counters_by_category) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : cat.second) {
             sum += e.second;
@@ -144,7 +144,7 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         metric->set_value(sum);
     }
 
-    for (auto &hist : canon.histograms) {
+    for (auto &hist : counters.counters->histograms) {
         CounterImpl::CounterType sum = 0;
         for (auto &e : hist.second) {
             sum += e.second;
@@ -179,7 +179,7 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         metric->set_value(sum);
     }
 
-    for (auto &e : canon.counters) {
+    for (auto &e : counters.counters->counters) {
         com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", e.first));
         metric->set_value(e.second);

@@ -175,7 +175,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
         case YAML::NodeType::Sequence: {
             shared_ptr<core::Type> elemType;
             for (const auto &child : node) {
-                auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::untyped();
+                auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::untypedUntracked();
                 if (elemType) {
                     elemType =
                         core::Types::any(core::MutableContext(gs, core::Symbols::root()), elemType, thisElemType);

@@ -8,6 +8,7 @@ namespace sorbet {
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     core::prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
+    int totalSendCount = 0;
     const int startErrorCount = ctx.state.totalErrors();
     unique_ptr<core::TypeConstraint> _constr;
     core::TypeConstraint *constr = &core::TypeConstraint::EmptyFrozenConstraint;
@@ -107,8 +108,13 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                 current.ensureGoodAssignTarget(ctx, bind.bind);
                 bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
                                                   *constr);
-                if (bind.tpe && !bind.tpe->isUntyped() && cfg::isa_instruction<cfg::Send>(bind.value.get())) {
-                    typedSendCount++;
+                if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
+                    totalSendCount++;
+                    if (bind.tpe && !bind.tpe->isUntyped()) {
+                        typedSendCount++;
+                    } else if (bind.tpe->isUntyped()) {
+                        DEBUG_ONLY(core::histogramInc("untyped.sources", bind.tpe->untypedBlame()._id););
+                    }
                 }
                 ENFORCE(bind.tpe);
                 bind.tpe->sanityCheck(ctx);
@@ -141,6 +147,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
     }
 
     core::prodCounterAdd("types.input.sends.typed", typedSendCount);
+    core::prodCounterAdd("types.input.sends.total", totalSendCount);
 
     return cfg;
 }

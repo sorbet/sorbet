@@ -79,6 +79,21 @@ void CounterImpl::clear() {
     this->counters_by_category.clear();
 }
 
+map<int, int> getAndClearHistogram(ConstExprStr histogram) {
+    counterState.canonicalize();
+    map<int, int> ret;
+    auto fnd = counterState.histograms.find(counterState.internKey(histogram.str));
+    if (fnd != counterState.histograms.end()) {
+        for (auto e : fnd->second) {
+            ret[e.first] = e.second;
+        }
+
+        counterState.histograms.erase(fnd);
+        return ret;
+    }
+    return ret;
+}
+
 void counterConsume(CounterState cs) {
     for (auto &cat : cs.counters->counters_by_category) {
         for (auto &e : cat.second) {
@@ -144,7 +159,7 @@ string padOrLimit(string s, int l) {
     return s;
 }
 
-CounterImpl CounterImpl::canonicalize() {
+void CounterImpl::canonicalize() {
     CounterImpl out;
 
     for (auto &cat : this->counters_by_category) {
@@ -162,7 +177,9 @@ CounterImpl CounterImpl::canonicalize() {
     for (auto &e : this->counters) {
         out.counterAdd(internKey(e.first), e.second, true);
     }
-    return out;
+    this->counters_by_category = move(out.counters_by_category);
+    this->histograms = move(out.histograms);
+    this->counters = move(out.counters);
 }
 
 const vector<string> Counters::ALL_COUNTERS = {"<all>"};
@@ -178,9 +195,9 @@ string getCounterStatistics(vector<string> names) {
 
     buf << "Counters and Histograms: " << '\n';
 
-    auto canon = counterState.canonicalize();
+    counterState.canonicalize();
 
-    for (auto &cat : canon.counters_by_category) {
+    for (auto &cat : counterState.counters_by_category) {
         if (!shouldShow(names, cat.first)) {
             continue;
         }
@@ -206,7 +223,7 @@ string getCounterStatistics(vector<string> names) {
         buf << '\n';
     }
 
-    for (auto &hist : canon.histograms) {
+    for (auto &hist : counterState.histograms) {
         if (!shouldShow(names, hist.first)) {
             continue;
         }
@@ -252,7 +269,7 @@ string getCounterStatistics(vector<string> names) {
 
     {
         vector<pair<string, string>> sortedOther;
-        for (auto &e : canon.counters) {
+        for (auto &e : counterState.counters) {
             if (!shouldShow(names, e.first)) {
                 continue;
             }

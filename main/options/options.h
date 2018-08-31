@@ -58,6 +58,7 @@ struct Options {
     bool showProgress = false;
     bool suggestTyped = false;
     bool silenceErrors = false;
+    bool suggestSig = false;
     bool supressNonCriticalErrors = false;
     bool runLSP = false;
     bool noErrorCount = false;

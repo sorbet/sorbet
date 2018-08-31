@@ -38,7 +38,8 @@ public:
     static std::shared_ptr<Type> top();
     static std::shared_ptr<Type> bottom();
     static std::shared_ptr<Type> nilClass();
-    static std::shared_ptr<Type> untyped();
+    static std::shared_ptr<Type> untyped(const core::GlobalState &gs, core::SymbolRef blame);
+    static std::shared_ptr<Type> untypedUntracked();
     static std::shared_ptr<Type> void_();
     static std::shared_ptr<Type> trueClass();
     static std::shared_ptr<Type> falseClass();
@@ -135,6 +136,7 @@ public:
     }
 
     bool isUntyped();
+    core::SymbolRef untypedBlame();
     bool isBottom();
     bool isTop();
     virtual bool hasUntyped();
@@ -174,7 +176,7 @@ public:
 };
 CheckSize(ProxyType, 8, 8);
 
-class ClassType final : public GroundType {
+class ClassType : public GroundType {
 public:
     SymbolRef symbol;
     ClassType(SymbolRef symbol);
@@ -637,6 +639,12 @@ struct DispatchResult {
         components.emplace_back(
             DispatchComponent{std::move(receiver), method, std::vector<std::unique_ptr<BasicError>>()});
     }
+};
+
+class BlamedUntyped final : public ClassType {
+public:
+    const core::SymbolRef blame;
+    BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 };
 
 } // namespace core
