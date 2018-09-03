@@ -37,6 +37,7 @@ namespace sorbet {
 #if !defined(EMSCRIPTEN)
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
 template <class K, class V> using UnorderedMap = ska::unordered_map<K, V>;
+template <class E> using UnorderedSet = ska::unordered_set<E>;
 #else
 template <class T, size_t N> using InlinedVector = std::vector<T>;
 template <class K, class V> using UnorderedMap = std::unordered_map<K, V>;

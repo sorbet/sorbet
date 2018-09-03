@@ -1,13 +1,12 @@
 #include "core/AutocorrectSuggestion.h"
 #include "absl/algorithm/container.h"
-#include <unordered_set>
 
 using namespace std;
 
 namespace sorbet {
 namespace core {
 
-bool hasSeen(const unordered_set<Loc> &seen, Loc loc) {
+bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     for (auto &seenLoc : seen) {
         if (seenLoc.beginPos() >= loc.beginPos() && seenLoc.beginPos() < loc.endPos()) {
             return true;
@@ -37,7 +36,7 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
     };
     absl::c_sort(autocorrects, compare);
 
-    unordered_set<Loc> seen; // used to make sure nothing overlaps
+    UnorderedSet<Loc> seen; // used to make sure nothing overlaps
     map<FileRef, string> ret;
     for (auto &autocorrect : autocorrects) {
         auto &loc = autocorrect.loc;

@@ -6,7 +6,6 @@
 #include "core/Types.h"
 #include "core/errors/infer.h"
 #include <algorithm> // find_if, sort
-#include <unordered_set>
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
@@ -549,7 +548,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     }
 
     if (hasKwargs && ait != aend) {
-        unordered_set<NameRef> consumed;
+        UnorderedSet<NameRef> consumed;
         auto &hashArg = *(aend - 1);
 
         // find keyword arguments and advance `pend` before them; We'll walk
