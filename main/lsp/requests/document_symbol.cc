@@ -7,7 +7,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out) {
-    for (auto mem : sym.data(*finalGs).members) {
+    for (auto mem : sym.data(*finalGs).membersStableOrderSlow(*finalGs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
             for (auto loc : mem.second.data(*finalGs).locs()) {

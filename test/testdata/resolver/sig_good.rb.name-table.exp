@@ -1,8 +1,5 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:7
-  class ::<Class:M1> < ::Module () @ test/testdata/resolver/sig_good.rb:4
-  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:2
-  class ::<Class:T2> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:3
+  method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/resolver/sig_good.rb:7
     method ::A#<static-init> () @ test/testdata/resolver/sig_good.rb:8
     method ::A#good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_good.rb:29
@@ -46,9 +43,12 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
         String("hi") => String
         Symbol(:"bye") => String
       } @ test/testdata/resolver/sig_good.rb:26
-  class ::M1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/sig_good.rb:4
-  class ::T1 < ::Object () @ test/testdata/resolver/sig_good.rb:2
-  class ::T2 < ::Object () @ test/testdata/resolver/sig_good.rb:3
-  method #<static-init> () @ ???
+  class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:7
   static-field #A1 -> AliasType { symbol = ::T1 } @ test/testdata/resolver/sig_good.rb:5
+  class ::M1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/sig_good.rb:4
+  class ::<Class:M1> < ::Module () @ test/testdata/resolver/sig_good.rb:4
+  class ::T1 < ::Object () @ test/testdata/resolver/sig_good.rb:2
+  class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:2
+  class ::T2 < ::Object () @ test/testdata/resolver/sig_good.rb:3
+  class ::<Class:T2> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:3
 

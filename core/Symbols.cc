@@ -282,7 +282,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                 i++;
             }
             for (const auto scope : candidateScopes) {
-                for (auto member : scope.data(gs).members) {
+                for (auto member : scope.data(gs).membersStableOrderSlow(gs)) {
                     if (member.first.data(gs).kind == NameKind::CONSTANT) {
                         ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
                         auto thisDistance = Levenstein::distance(
@@ -316,7 +316,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             const SymbolRef thisIter = yetToGoDeeper.back();
             yetToGoDeeper.pop_back();
             ENFORCE(thisIter.data(gs).isClass());
-            for (auto member : thisIter.data(gs).members) {
+            for (auto member : thisIter.data(gs).membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() &&
                     member.first.data(gs).kind == NameKind::CONSTANT) {
                     ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
@@ -429,7 +429,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
     vector<string> children;
     children.reserve(members.size());
-    for (auto pair : members) {
+    for (auto pair : membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
             continue;
@@ -440,7 +440,6 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
             children.push_back(str);
         }
     }
-    absl::c_sort(children);
 
     if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
         return "";
@@ -564,7 +563,6 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
     os << '\n';
 
-    absl::c_sort(children);
     for (auto row : children) {
         os << row;
     }
@@ -738,17 +736,10 @@ unsigned int Symbol::hash(const GlobalState &gs) const {
     result = mix(result, this->owner._id);
     result = mix(result, this->superClass._id);
     // argumentsOrMixins, typeParams, typeAliases
-    vector<core::SymbolRef> membersOrdered;
-    for (const auto &e : members) {
+    for (auto e : membersStableOrderSlow(gs)) {
         if (e.second.exists() && !e.second.data(gs).ignoreInHashing(gs)) {
-            membersOrdered.emplace_back(e.second);
+            result = mix(result, _hash(e.second.data(gs).name.data(gs).shortName(gs)));
         }
-    }
-    absl::c_sort(membersOrdered, [&](auto lhs, auto rhs) -> bool {
-        return lhs.data(gs).name.data(gs).shortName(gs) < rhs.data(gs).name.data(gs).shortName(gs);
-    });
-    for (auto e : membersOrdered) {
-        result = mix(result, _hash(e.data(gs).name.data(gs).shortName(gs)));
     }
     for (const auto &e : argumentsOrMixins) {
         if (e.exists() && !e.data(gs).ignoreInHashing(gs)) {
@@ -799,6 +790,21 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     } else {
         locs_.push_back(loc);
     }
+}
+
+std::vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
+    vector<pair<NameRef, SymbolRef>> result;
+    result.reserve(members.size());
+    for (const auto &e : members) {
+        result.emplace_back(e);
+    }
+    absl::c_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
+        auto lhsShort = lhs.first.data(gs).shortName(gs);
+        auto rhsShort = rhs.first.data(gs).shortName(gs);
+        return lhsShort < rhsShort ||
+               (lhsShort == rhsShort && lhs.first.data(gs).toString(gs) < rhs.first.data(gs).toString(gs));
+    });
+    return result;
 }
 
 } // namespace core

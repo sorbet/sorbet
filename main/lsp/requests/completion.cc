@@ -26,7 +26,7 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
     typecase(receiver.get(),
              [&](core::ClassType *c) {
                  auto &owner = c->symbol.data(*finalGs);
-                 for (auto member : owner.members) {
+                 for (auto member : owner.membersStableOrderSlow(*finalGs)) {
                      auto sym = member.second;
                      if (sym.data(*finalGs).isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs).name, name)) {
                          result[sym.data(*finalGs).name].emplace_back(sym);
@@ -182,7 +182,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                 vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
                 methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
                                      make_move_iterator(methods.end()));
-                sort(methodsSorted.begin(), methodsSorted.end(), [&](auto leftPair, auto rightPair) -> bool {
+                absl::c_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
                     return leftPair.first.data(*finalGs).shortName(*finalGs) <
                            rightPair.first.data(*finalGs).shortName(*finalGs);
                 });
@@ -200,7 +200,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                     core::SymbolRef owner = c->symbol;
                     do {
                         owner = owner.data(*finalGs).owner;
-                        for (auto member : owner.data(*finalGs).members) {
+                        for (auto member : owner.data(*finalGs).membersStableOrderSlow(*finalGs)) {
                             auto sym = member.second;
                             if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
                                 sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT &&

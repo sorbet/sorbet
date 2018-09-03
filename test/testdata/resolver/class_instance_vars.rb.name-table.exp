@@ -1,25 +1,25 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/class_instance_vars.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::<Class:Child1> < ::<Class:Parent> () @ test/testdata/resolver/class_instance_vars.rb:36
-  class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/resolver/class_instance_vars.rb:20
-  class ::<Class:Mixin> < ::Module () @ test/testdata/resolver/class_instance_vars.rb:15
-  class ::<Class:Parent> < ::<Class:Object> () @ test/testdata/resolver/class_instance_vars.rb:2
+  method #<static-init> () @ ???
+  static-field #Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/class_instance_vars.rb:35
   class ::Child < ::Parent (<constant:Mixin>) @ test/testdata/resolver/class_instance_vars.rb:20
-    field ::Child#@undefinedivar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:31
     method ::Child#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:20
-    method ::Child#child_method () @ test/testdata/resolver/class_instance_vars.rb:27
     static-field ::Child#@@undefined_cvar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:25
+    field ::Child#@undefinedivar -> T.untyped @ test/testdata/resolver/class_instance_vars.rb:31
+    method ::Child#child_method () @ test/testdata/resolver/class_instance_vars.rb:27
+  class ::<Class:Child> < ::<Class:Parent> () @ test/testdata/resolver/class_instance_vars.rb:20
   class ::Child1 < ::Parent () @ test/testdata/resolver/class_instance_vars.rb:36
     method ::Child1#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:37
+  class ::<Class:Child1> < ::<Class:Parent> () @ test/testdata/resolver/class_instance_vars.rb:36
   class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/class_instance_vars.rb:15
     method ::Mixin#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:15
     static-field ::Mixin#@@mixin_cvar -> Integer @ test/testdata/resolver/class_instance_vars.rb:16
+  class ::<Class:Mixin> < ::Module () @ test/testdata/resolver/class_instance_vars.rb:15
   class ::Parent < ::Object () @ test/testdata/resolver/class_instance_vars.rb:2
+    method ::Parent#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:7
+    static-field ::Parent#@@class_var -> String @ test/testdata/resolver/class_instance_vars.rb:7
     field ::Parent#@ivar -> Integer @ test/testdata/resolver/class_instance_vars.rb:4
     field ::Parent#@ivar2 -> Integer @ test/testdata/resolver/class_instance_vars.rb:5
-    method ::Parent#<static-init> () @ test/testdata/resolver/class_instance_vars.rb:7
     method ::Parent#hi () @ test/testdata/resolver/class_instance_vars.rb:9
     method ::Parent#initialize () @ test/testdata/resolver/class_instance_vars.rb:3
-    static-field ::Parent#@@class_var -> String @ test/testdata/resolver/class_instance_vars.rb:7
-  method #<static-init> () @ ???
-  static-field #Alias -> AliasType { symbol = ::Parent } @ test/testdata/resolver/class_instance_vars.rb:35
+  class ::<Class:Parent> < ::<Class:Object> () @ test/testdata/resolver/class_instance_vars.rb:2
 

@@ -67,8 +67,7 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
         }
     }
 
-    vector<pair<absl::string_view, com::stripe::rubytyper::Symbol>> children;
-    for (auto pair : data.members) {
+    for (auto pair : data.membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
             continue;
@@ -78,14 +77,9 @@ com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef s
             continue;
         }
 
-        children.emplace_back(pair.first.data(gs).shortName(gs), toProto(gs, pair.second));
+        *symbolProto.add_children() = toProto(gs, pair.second);
     }
-    auto by_name = [](pair<absl::string_view, com::stripe::rubytyper::Symbol> const &a,
-                      pair<absl::string_view, com::stripe::rubytyper::Symbol> const &b) { return a.first < b.first; };
-    absl::c_sort(children, by_name);
-    for (auto pair : children) {
-        *symbolProto.add_children() = move(pair.second);
-    }
+
     return symbolProto;
 }
 

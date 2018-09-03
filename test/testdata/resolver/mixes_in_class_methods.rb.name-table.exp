@@ -1,34 +1,34 @@
 class ::<root> < ::Object () @ (test/testdata/resolver/mixes_in_class_methods.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  class ::<Class:Bad1> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
-  class ::<Class:Bad2> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
-  class ::<Class:Bad3> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
-  class ::<Class:Bad4> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
-  class ::<Class:Bad5> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
-  class ::<Class:Bad6> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
-  class ::<Class:Mixin> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
-  class ::<Class:Test> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
+  method #<static-init> () @ ???
   class ::Bad1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:24
+  class ::<Class:Bad1> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:24
   class ::Bad2 < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:29
-    class ::Bad2::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
-    class ::Bad2::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:31
     method ::Bad2#<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+    class ::Bad2::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+    class ::Bad2::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:31
+  class ::<Class:Bad2> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:29
   class ::Bad3 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:35
-    class ::Bad3::<Class:ClassMethods> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
-    class ::Bad3::ClassMethods < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:38
     method ::Bad3#<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class ::Bad3::ClassMethods < ::Object () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+    class ::Bad3::<Class:ClassMethods> < ::<Class:Object> () @ test/testdata/resolver/mixes_in_class_methods.rb:38
+  class ::<Class:Bad3> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:35
   class ::Bad4 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:42
-    class ::Bad4::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
-    class ::Bad4::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:45
     method ::Bad4#<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+    class ::Bad4::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+    class ::Bad4::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:45
+  class ::<Class:Bad4> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:42
   class ::Bad5 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:50
+  class ::<Class:Bad5> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:50
   class ::Bad6 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:56
+  class ::<Class:Bad6> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:56
   class ::Mixin < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:2
-    class ::Mixin::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+    method ::Mixin#<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:5
     class ::Mixin::ClassMethods < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/mixes_in_class_methods.rb:5
       method ::Mixin::ClassMethods#mixin_class_method () @ test/testdata/resolver/mixes_in_class_methods.rb:6
-    method ::Mixin#<static-init> () @ test/testdata/resolver/mixes_in_class_methods.rb:5
+    class ::Mixin::<Class:ClassMethods> < ::Module () @ test/testdata/resolver/mixes_in_class_methods.rb:5
     method ::Mixin#mixin_method () @ test/testdata/resolver/mixes_in_class_methods.rb:12
+  class ::<Class:Mixin> < ::Module (<constant:Helpers>) @ test/testdata/resolver/mixes_in_class_methods.rb:2
   class ::Test < ::Object (<constant:Mixin>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
     method ::Test#<static-init> () @ ???
-  method #<static-init> () @ ???
+  class ::<Class:Test> < ::<Class:Object> (<constant:ClassMethods>) @ test/testdata/resolver/mixes_in_class_methods.rb:16
 

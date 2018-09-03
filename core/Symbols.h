@@ -493,6 +493,8 @@ public:
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol
     // optimize for absence
 
+    std::vector<std::pair<NameRef, SymbolRef>> membersStableOrderSlow(const GlobalState &gs) const;
+
     Symbol deepCopy(const GlobalState &to) const;
     void sanityCheck(const GlobalState &gs) const;
     SymbolRef enclosingMethod(const GlobalState &gs) const;
