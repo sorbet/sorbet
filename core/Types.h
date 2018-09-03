@@ -123,8 +123,9 @@ public:
 
     virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver);
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &linkType) = 0;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) = 0;
@@ -166,8 +167,9 @@ public:
     ProxyType() = default;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) override;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) override;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) override;
@@ -186,17 +188,19 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) override;
     DispatchResult dispatchCallWithTargs(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
-                                         std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                         const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                         InlinedVector<const TypeAndOrigins *, 2> &args,
+                                         const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                         const std::shared_ptr<Type> &fullType,
                                          std::vector<std::shared_ptr<Type>> &targs,
                                          const std::shared_ptr<SendAndBlockLink> &block);
     DispatchResult dispatchCallIntrinsic(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                         std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                         const std::shared_ptr<Type> &fullType,
+                                         InlinedVector<const TypeAndOrigins *, 2> &args,
+                                         const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &fullType,
                                          std::vector<std::shared_ptr<Type>> &targs,
                                          const std::shared_ptr<SendAndBlockLink> &block);
 
@@ -222,8 +226,9 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     void _sanityCheck(Context ctx) final;
@@ -247,8 +252,9 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     void _sanityCheck(Context ctx) final;
@@ -267,8 +273,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
@@ -302,8 +309,9 @@ public:
     virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver) override;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     void _sanityCheck(Context ctx) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
@@ -348,8 +356,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -374,8 +383,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
@@ -428,8 +438,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
 
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
@@ -481,8 +492,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const override;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -518,8 +530,9 @@ public:
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual bool hasUntyped() override;
     virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
@@ -542,8 +555,9 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -582,8 +596,9 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual DispatchResult dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                        std::vector<TypeAndOrigins> &args, const InlinedVector<Loc, 2> &argLocs,
-                                        const std::shared_ptr<Type> &selfRef, const std::shared_ptr<Type> &fullType,
+                                        InlinedVector<const TypeAndOrigins *, 2> &args,
+                                        const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
+                                        const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
     virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     void _sanityCheck(Context ctx) final;
@@ -613,7 +628,7 @@ class TypeAndOrigins final {
 public:
     std::shared_ptr<Type> type;
     InlinedVector<Loc, 2> origins;
-    std::vector<ErrorLine> origins2Explanations(Context ctx);
+    std::vector<ErrorLine> origins2Explanations(Context ctx) const;
     ~TypeAndOrigins();
 };
 CheckSize(TypeAndOrigins, 40, 8);

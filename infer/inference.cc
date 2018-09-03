@@ -6,6 +6,7 @@ using namespace std;
 namespace sorbet {
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
+    auto methodLoc = ctx.owner.data(ctx).loc();
     core::prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
     int totalSendCount = 0;
@@ -24,7 +25,10 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         }
     }
     vector<Environment> outEnvironments;
-    outEnvironments.resize(cfg->maxBasicBlockId);
+    outEnvironments.reserve(cfg->maxBasicBlockId);
+    for (int i = 0; i < cfg->maxBasicBlockId; i++) {
+        outEnvironments.emplace_back(methodLoc);
+    }
     for (int i = 0; i < cfg->basicBlocks.size(); i++) {
         outEnvironments[cfg->forwardsTopoSort[i]->id].bb = cfg->forwardsTopoSort[i];
     }
@@ -48,7 +52,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             auto *parent = bb->backEdges[0];
             bool isTrueBranch = parent->bexit.thenb == bb;
             if (!outEnvironments[parent->id].isDead) {
-                Environment tempEnv;
+                Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
                 current.populateFrom(ctx, envAsSeenFromBranch);
@@ -62,7 +66,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                     continue;
                 }
                 bool isTrueBranch = parent->bexit.thenb == bb;
-                Environment tempEnv;
+                Environment tempEnv(methodLoc);
                 auto &envAsSeenFromBranch =
                     Environment::withCond(ctx, outEnvironments[parent->id], tempEnv, isTrueBranch, current.vars);
                 if (!envAsSeenFromBranch.isDead) {

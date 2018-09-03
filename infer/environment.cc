@@ -268,13 +268,10 @@ bool Environment::hasType(core::Context ctx, core::LocalVariable symbol) const {
     return fnd->second.typeAndOrigins.type.get() != nullptr;
 }
 
-core::TypeAndOrigins Environment::getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const {
+const core::TypeAndOrigins &Environment::getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const {
     auto fnd = vars.find(symbol);
     if (fnd == vars.end()) {
-        core::TypeAndOrigins ret;
-        ret.type = core::Types::nilClass();
-        ret.origins.push_back(ctx.owner.data(ctx).loc());
-        return ret;
+        return uninitialized;
     }
     ENFORCE(fnd->second.typeAndOrigins.type.get() != nullptr);
     return fnd->second.typeAndOrigins;
@@ -286,15 +283,6 @@ bool Environment::getKnownTruthy(core::LocalVariable var) const {
         return false;
     }
     return fnd->second.knownTruthy;
-}
-
-core::TypeAndOrigins Environment::getOrCreateTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) {
-    auto &ret = vars[symbol].typeAndOrigins;
-    if (ret.type == nullptr) {
-        ret.type = core::Types::nilClass();
-        ret.origins.push_back(ctx.owner.data(ctx).loc());
-    }
-    return ret;
 }
 
 void Environment::propagateKnowledge(core::Context ctx, core::LocalVariable to, core::LocalVariable from,
@@ -379,8 +367,8 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         }
         // Note that this assumes that .present? is a rails compatible monkey patch on both NilClass
         // and Object. In all other cases this flow analysis might produce incorrect assumptions.
-        core::TypeAndOrigins receiverType = getTypeAndOrigin(ctx, send->recv);
-        auto originalType = receiverType.type;
+        const core::TypeAndOrigins &receiverType = getTypeAndOrigin(ctx, send->recv);
+        auto &originalType = receiverType.type;
         auto knowledgeTypeWithoutNil =
             core::Types::approximateSubtract(ctx, receiverType.type, core::Types::nilClass());
         auto knowledgeTypeWithoutFalse =
@@ -401,7 +389,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        core::TypeAndOrigins klass = getTypeAndOrigin(ctx, send->args[0]);
+        const core::TypeAndOrigins &klass = getTypeAndOrigin(ctx, send->args[0]);
         if (klass.type->derivesFrom(ctx, core::Symbols::Module())) {
             auto *s = core::cast_type<core::ClassType>(klass.type.get());
             if (s == nullptr) {
@@ -422,8 +410,8 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        core::TypeAndOrigins tp1 = getTypeAndOrigin(ctx, send->args[0]);
-        core::TypeAndOrigins tp2 = getTypeAndOrigin(ctx, send->recv);
+        const core::TypeAndOrigins &tp1 = getTypeAndOrigin(ctx, send->args[0]);
+        const core::TypeAndOrigins &tp2 = getTypeAndOrigin(ctx, send->recv);
 
         auto &truthy = send->fun == core::Names::eqeq() ? whoKnows.truthy : whoKnows.falsy;
         auto &falsy = send->fun == core::Names::eqeq() ? whoKnows.falsy : whoKnows.truthy;
@@ -456,7 +444,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             return;
         }
         auto &whoKnows = getKnowledge(local);
-        core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
+        const core::TypeAndOrigins &recvKlass = getTypeAndOrigin(ctx, send->recv);
         if (!recvKlass.type->derivesFrom(ctx, core::Symbols::Module())) {
             return;
         }
@@ -477,7 +465,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         whoKnows.sanityCheck();
 
     } else if (send->fun == core::Names::hardAssert()) {
-        core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
+        const core::TypeAndOrigins &recvKlass = getTypeAndOrigin(ctx, send->recv);
         if (!recvKlass.type->derivesFrom(ctx, core::Symbols::Kernel())) {
             return;
         }
@@ -489,8 +477,8 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             }
         }
     } else if (send->fun == core::Names::lessThan()) {
-        core::TypeAndOrigins recvKlass = getTypeAndOrigin(ctx, send->recv);
-        core::TypeAndOrigins argType = getTypeAndOrigin(ctx, send->args[0]);
+        const core::TypeAndOrigins &recvKlass = getTypeAndOrigin(ctx, send->recv);
+        const core::TypeAndOrigins &argType = getTypeAndOrigin(ctx, send->args[0]);
         auto *argClass = core::cast_type<core::ClassType>(argType.type.get());
         if (!argClass || !recvKlass.type->derivesFrom(ctx, core::Symbols::Class()) ||
             !argClass->symbol.data(ctx).derivesFrom(ctx, core::Symbols::Class())) {
@@ -603,7 +591,7 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
 
 core::TypeAndOrigins Environment::getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
                                                                const Environment &other) {
-    auto otherTO = other.getTypeAndOrigin(ctx, var);
+    core::TypeAndOrigins otherTO = other.getTypeAndOrigin(ctx, var);
     otherTO.type = dropConstructor(ctx, otherTO.origins.front(), otherTO.type);
     return otherTO;
 }
@@ -613,8 +601,8 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
     this->isDead |= other.isDead;
     for (auto &pair : vars) {
         auto var = pair.first;
-        auto otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
-        auto &thisTO = pair.second.typeAndOrigins;
+        const core::TypeAndOrigins otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
+        core::TypeAndOrigins &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type.get() != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type->sanityCheck(ctx);
@@ -708,7 +696,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : vars) {
         auto var = pair.first;
-        auto otherTO = other.getTypeAndOrigin(ctx, var);
+        const core::TypeAndOrigins &otherTO = other.getTypeAndOrigin(ctx, var);
         pair.second.typeAndOrigins.type = dropConstructor(ctx, otherTO.origins[0], otherTO.type);
         pair.second.typeAndOrigins.origins = otherTO.origins;
         pair.second.knowledge = other.getKnowledge(var, false);
@@ -780,14 +768,14 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
         typecase(
             bind.value.get(),
             [&](cfg::Send *send) {
-                vector<core::TypeAndOrigins> args;
+                InlinedVector<const core::TypeAndOrigins *, 2> args;
 
                 args.reserve(send->args.size());
                 for (core::LocalVariable arg : send->args) {
-                    args.emplace_back(getTypeAndOrigin(ctx, arg));
+                    args.emplace_back(&getTypeAndOrigin(ctx, arg));
                 }
 
-                auto recvType = getTypeAndOrigin(ctx, send->recv);
+                const core::TypeAndOrigins &recvType = getTypeAndOrigin(ctx, send->recv);
                 if (send->link) {
                     send->link->receiver = recvType.type;
                     send->link->returnTp = core::Types::untypedUntracked();
@@ -823,7 +811,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Ident *i) {
-                auto typeAndOrigin = getOrCreateTypeAndOrigin(ctx, i->what);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 tp.type = typeAndOrigin.type;
                 tp.origins = typeAndOrigin.origins;
 
@@ -957,7 +945,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.type = core::Types::bottom();
                 tp.origins.push_back(bind.loc);
 
-                auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to method result type");
@@ -977,7 +965,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 ENFORCE(i->link);
                 ENFORCE(i->link->returnTp != nullptr);
 
-                auto typeAndOrigin = getTypeAndOrigin(ctx, i->what);
+                const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what);
                 auto expectedType = i->link->returnTp;
                 if (!core::Types::isSubTypeUnderConstraint(ctx, *i->link->constr, typeAndOrigin.type, expectedType)) {
                     // TODO(nelhage): We should somehow report location
@@ -1021,7 +1009,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     noLoopChecking = true;
                 }
 
-                auto ty = getTypeAndOrigin(ctx, c->value);
+                const core::TypeAndOrigins &ty = getTypeAndOrigin(ctx, c->value);
                 if (c->cast != core::Names::cast()) {
                     if (c->cast == core::Names::assertType() && ty.type->isUntyped()) {
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::CastTypeMismatch)) {
@@ -1071,21 +1059,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
         }
         ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
 
-        core::TypeAndOrigins cur = getOrCreateTypeAndOrigin(ctx, bind.bind);
-
-        if (noLoopChecking || loopCount == bindMinLoops) {
-            clearKnowledge(ctx, bind.bind, knowledgeFilter);
-            if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
-                updateKnowledge(ctx, bind.bind, bind.loc, send, knowledgeFilter);
-            } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
-                propagateKnowledge(ctx, bind.bind, i->what, knowledgeFilter);
-            }
-            setTypeAndOrigin(bind.bind, tp);
-        } else {
+        if (!noLoopChecking && loopCount != bindMinLoops) {
             auto pin = pinnedTypes.find(bind.bind);
-            if (pin != pinnedTypes.end()) {
-                cur = pin->second;
-            }
+            const core::TypeAndOrigins &cur =
+                (pin != pinnedTypes.end()) ? pin->second : getTypeAndOrigin(ctx, bind.bind);
+
             bool asGoodAs =
                 core::Types::isSubType(ctx, core::Types::dropLiteral(tp.type), core::Types::dropLiteral(cur.type));
 
@@ -1157,6 +1135,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
             }
         }
+        setTypeAndOrigin(bind.bind, tp);
 
         clearKnowledge(ctx, bind.bind, knowledgeFilter);
         if (auto *send = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
@@ -1164,7 +1143,6 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
         } else if (auto *i = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
             propagateKnowledge(ctx, bind.bind, i->what, knowledgeFilter);
         }
-        setTypeAndOrigin(bind.bind, tp);
 
         return tp.type;
     } catch (SRubyException &) {
@@ -1176,7 +1154,10 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 }
 
 void Environment::cloneFrom(const Environment &rhs) {
-    *this = rhs;
+    this->isDead = rhs.isDead;
+    this->vars = rhs.vars;
+    this->bb = rhs.bb;
+    this->pinnedTypes = rhs.pinnedTypes;
 }
 
 const TestedKnowledge &Environment::getKnowledge(core::LocalVariable symbol, bool shouldFail) const {
@@ -1188,6 +1169,15 @@ const TestedKnowledge &Environment::getKnowledge(core::LocalVariable symbol, boo
     fnd->second.knowledge.sanityCheck();
     return fnd->second.knowledge;
 }
+
+core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
+    core::TypeAndOrigins ret;
+    ret.type = core::Types::nilClass();
+    ret.origins.push_back(loc);
+    return ret;
+}
+
+Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)) {}
 
 TestedKnowledge TestedKnowledge::empty;
 

@@ -96,8 +96,10 @@ public:
 };
 
 class Environment {
+    const core::TypeAndOrigins uninitialized;
+
 public:
-    Environment() = default;
+    Environment(core::Loc ownerLoc);
     Environment(const Environment &rhs) = delete;
     Environment(Environment &&rhs) = default;
 
@@ -130,7 +132,6 @@ public:
     };
     UnorderedMap<core::LocalVariable, VariableState> vars;
 
-    UnorderedMap<core::SymbolRef, std::shared_ptr<core::Type>> blockTypes;
     UnorderedMap<core::LocalVariable, core::TypeAndOrigins> pinnedTypes;
 
     std::string toString(core::Context ctx) const;
@@ -139,10 +140,7 @@ public:
 
     // NB: you can't call this function on vars in the first basic block since
     // their type will be nullptr
-    core::TypeAndOrigins getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const;
-
-    core::TypeAndOrigins getOrCreateTypeAndOrigin(core::Context ctx, core::LocalVariable symbol);
-
+    const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const;
     const TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) const;
     bool getKnownTruthy(core::LocalVariable var) const;
 

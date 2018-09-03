@@ -6,7 +6,7 @@ namespace sorbet {
 namespace core {
 
 // This sorts the underlying `origins`
-vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
+vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) const {
     vector<ErrorLine> result;
     auto compare = [](Loc &left, Loc &right) {
         if (left.file() != right.file()) {
@@ -20,9 +20,10 @@ vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) {
         }
         return false;
     };
-    absl::c_sort(origins, compare);
+    auto sortedOrigins = origins;
+    absl::c_sort(sortedOrigins, compare);
     Loc last;
-    for (auto o : origins) {
+    for (auto o : sortedOrigins) {
         if (o == last) {
             continue;
         }

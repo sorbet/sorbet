@@ -479,14 +479,19 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
             }
 
-            vector<core::TypeAndOrigins> targs;
+            InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> holders;
+            InlinedVector<const core::TypeAndOrigins *, 2> targs;
             InlinedVector<core::Loc, 2> argLocs;
+            targs.reserve(s->args.size());
+            argLocs.reserve(s->args.size());
+            holders.reserve(s->args.size());
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
                 ty.type = make_shared<core::MetaType>(
                     TypeSyntax::getResultType(ctx, arg, sigBeingParsed, false, untypedBlame));
-                targs.emplace_back(ty);
+                holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
+                targs.emplace_back(holders.back().get());
                 argLocs.emplace_back(arg->loc);
             }
 
