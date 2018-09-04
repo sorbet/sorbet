@@ -14,6 +14,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include "unordered_map.hpp"
 #else
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #endif
 #include <cstring>
@@ -41,6 +42,7 @@ template <class E> using UnorderedSet = ska::unordered_set<E>;
 #else
 template <class T, size_t N> using InlinedVector = std::vector<T>;
 template <class K, class V> using UnorderedMap = std::unordered_map<K, V>;
+template <class E> using UnorderedSet = std::unordered_set<E>;
 #endif
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
