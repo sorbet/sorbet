@@ -260,8 +260,8 @@ class Array < Object
   def first(arg0=T.unsafe(nil)); end
 
   # This is implemented in C++ to fix the return type
-  Sorbet.sig.returns(T::Array[T.untyped])
-  def flatten(); end
+  Sorbet.sig(depth: Integer).returns(T::Array[T.untyped])
+  def flatten(depth = -1); end
 
   type_parameters(:U).sig(
       arg0: T.type_parameter(:U),

@@ -1258,14 +1258,23 @@ public:
 } Shape_merge;
 
 class Array_flatten : public IntrinsicMethod {
-    static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, const shared_ptr<Type> &type) {
-        shared_ptr<Type> result;
+    // Flattens a (nested) array all way down to its (inner) element type, stopping if we hit the depth limit first.
+    static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, const shared_ptr<Type> &type, const int64_t depth) {
+        ENFORCE(type != nullptr);
 
+        if (depth == 0) {
+            return type;
+        }
+        const int newDepth = depth - 1;
+
+        shared_ptr<Type> result;
         typecase(type.get(),
 
+                 // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
+                 // So to properly handle nested tuples, we have to descend into the OrType's.
                  [&](OrType *o) {
-                     result = Types::any(ctx, recursivelyFlattenArrays(ctx, o->left),
-                                         recursivelyFlattenArrays(ctx, o->right));
+                     result = Types::any(ctx, recursivelyFlattenArrays(ctx, o->left, newDepth),
+                                         recursivelyFlattenArrays(ctx, o->right, newDepth));
                  },
 
                  [&](AppliedType *a) {
@@ -1274,10 +1283,10 @@ class Array_flatten : public IntrinsicMethod {
                          return;
                      }
                      ENFORCE(a->targs.size() == 1);
-                     result = recursivelyFlattenArrays(ctx, a->targs.front());
+                     result = recursivelyFlattenArrays(ctx, a->targs.front(), newDepth);
                  },
 
-                 [&](TupleType *t) { result = recursivelyFlattenArrays(ctx, t->elementType()); },
+                 [&](TupleType *t) { result = recursivelyFlattenArrays(ctx, t->elementType(), newDepth); },
 
                  [&](Type *t) { result = move(type); });
         return result;
@@ -1288,6 +1297,7 @@ public:
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
                            const shared_ptr<Type> &fullType,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
+        // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         shared_ptr<Type> element;
         if (auto *ap = cast_type<AppliedType>(selfRef.get())) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx).derivesFrom(ctx, Symbols::Array()));
@@ -1298,7 +1308,33 @@ public:
         } else {
             ENFORCE(false, "Array#flatten on unexpected type: ", selfRef->show(ctx));
         }
-        return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element));
+
+        int64_t depth = INT64_MAX;
+        if (args.size() == 1) {
+            auto argTyp = args[0]->type;
+            ENFORCE(argLocs.size() == 1, "Mismatch between args.size() and argLocs.size(): ", argLocs.size());
+            auto argLoc = argLocs[0];
+
+            auto lt = cast_type<LiteralType>(argTyp.get());
+            if (!lt) {
+                if (auto e = ctx.state.beginError(argLoc, core::errors::Infer::ExpectedLiteralType)) {
+                    e.setHeader("You must pass an Integer literal to specify a depth with Array#flatten");
+                }
+                return Types::untypedUntracked();
+            }
+            ENFORCE(lt->literalKind == LiteralType::LiteralTypeKind::Integer, "depth arg must be an Integer literal");
+
+            if (lt->value >= 0) {
+                depth = lt->value;
+            } else {
+                // Negative values behave like no depth was given
+                depth = INT64_MAX;
+            }
+        } else {
+            ENFORCE(args.empty(), "Array#flatten passed too many args: ", args.size());
+        }
+
+        return Types::arrayOf(ctx, recursivelyFlattenArrays(ctx, element, depth));
     }
 } Array_flatten;
 

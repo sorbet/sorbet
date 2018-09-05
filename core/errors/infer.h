@@ -21,6 +21,7 @@ constexpr ErrorClass FieldReassignmentTypeMismatch{7013, StrictLevel::Typed};
 constexpr ErrorClass GenericMethodConstaintUnsolved{7013, StrictLevel::Typed};
 constexpr ErrorClass RevealType{7014, StrictLevel::Typed};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
+constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::Typed};
 
 } // namespace Infer
 } // namespace errors
