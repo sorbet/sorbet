@@ -367,6 +367,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     auto elsep = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), move(body), move(elsep));
                     result.swap(iff);
+                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
+                    if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                        e.setHeader("Constant reassignment is not supported");
+                    }
+                    unique_ptr<Expression> res = MK::EmptyTree(what->loc);
+                    result.swap(res);
                 } else {
                     Error::notImplemented();
                 }
@@ -408,7 +414,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     auto elsep = MK::cpRef(*i);
                     auto iff = MK::If(loc, move(cond), move(elsep), move(body));
                     result.swap(iff);
-
+                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
+                    if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                        e.setHeader("Constant reassignment is not supported");
+                    }
+                    unique_ptr<Expression> res = MK::EmptyTree(what->loc);
+                    result.swap(res);
                 } else {
                     Error::notImplemented();
                 }
@@ -444,6 +455,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     auto lhs = MK::cpRef(*i);
                     auto send = MK::Send1(loc, move(recv), opAsgn->op, move(rhs));
                     auto res = MK::Assign(loc, move(lhs), move(send));
+                    result.swap(res);
+                } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
+                    if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
+                        e.setHeader("Constant reassignment is not supported");
+                    }
+                    unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
                 } else {
                     Error::notImplemented();

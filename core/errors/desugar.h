@@ -8,6 +8,7 @@ constexpr ErrorClass InvalidSingletonDef{3001, StrictLevel::Typed};
 constexpr ErrorClass IntegerOutOfRange{3002, StrictLevel::Typed};
 constexpr ErrorClass UnsupportedNode{3003, StrictLevel::Stripe};
 constexpr ErrorClass FloatOutOfRange{3004, StrictLevel::Typed};
+constexpr ErrorClass NoConstantReassignment{3005, StrictLevel::Typed};
 } // namespace Desugar
 } // namespace errors
 } // namespace core
