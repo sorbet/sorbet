@@ -1,0 +1,73 @@
+digraph "meta_types.rb" {
+subgraph "cluster_::TestMetaType#_" {
+    label = "::TestMetaType#_";
+    color = blue;
+    "bb::TestMetaType#__0" [shape = invhouse];
+    "bb::TestMetaType#__1" [shape = parallelogram];
+
+    "bb::TestMetaType#__0" [
+        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#__0" -> "bb::TestMetaType#__1" [style="bold"];
+    "bb::TestMetaType#__1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#__1" -> "bb::TestMetaType#__1" [style="bold"];
+}
+
+subgraph "cluster_::TestMetaType#testit" {
+    label = "::TestMetaType#testit";
+    color = blue;
+    "bb::TestMetaType#testit_0" [shape = invhouse];
+    "bb::TestMetaType#testit_1" [shape = parallelogram];
+
+    "bb::TestMetaType#testit_0" [
+        label = "block[id=0]()\l<statTemp>$5 = self : TestMetaType\lkeep_for_ide$8 = alias <constant:T> : <Class:T>\l<statTemp>$7 = alias <constant:Array> : <Class:T::Array>\l<statTemp>$9 = alias <constant:String> : <Class:String>\l<statTemp>$6 = <statTemp>$7.[](<statTemp>$9) : MetaType\l<statTemp>$4 = <statTemp>$5.puts(<statTemp>$6) : NilClass\l<statTemp>$11 = self : TestMetaType\l<statTemp>$14 = self : TestMetaType\l<ifTemp>$13 = <statTemp>$14._() : T.untyped\l<ifTemp>$13\l"
+    ];
+
+    "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_2" [style="bold"];
+    "bb::TestMetaType#testit_0" -> "bb::TestMetaType#testit_3" [style="tapered"];
+
+    "bb::TestMetaType#testit_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_1" -> "bb::TestMetaType#testit_1" [style="bold"];
+    "bb::TestMetaType#testit_2" [
+        label = "block[id=2](<statTemp>$11)\lkeep_for_ide$16 = alias <constant:T> : <Class:T>\l<statTemp>$15 = alias <constant:Array> : <Class:T::Array>\l<statTemp>$17 = alias <constant:String> : <Class:String>\l<statTemp>$12 = <statTemp>$15.[](<statTemp>$17) : MetaType\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_2" -> "bb::TestMetaType#testit_4" [style="bold"];
+    "bb::TestMetaType#testit_3" [
+        label = "block[id=3](<statTemp>$11)\l<statTemp>$12 = false : FalseClass\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_3" -> "bb::TestMetaType#testit_4" [style="bold"];
+    "bb::TestMetaType#testit_4" [
+        label = "block[id=4](<statTemp>$11, <statTemp>$12)\l<statTemp>$10 = <statTemp>$11.puts(<statTemp>$12) : NilClass\l<statTemp>$18 = self : TestMetaType\l<statTemp>$21 = self : TestMetaType\l<ifTemp>$20 = <statTemp>$21._() : T.untyped\l<ifTemp>$20\l"
+    ];
+
+    "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_5" [style="bold"];
+    "bb::TestMetaType#testit_4" -> "bb::TestMetaType#testit_6" [style="tapered"];
+
+    "bb::TestMetaType#testit_5" [
+        label = "block[id=5](<statTemp>$18)\lkeep_for_ide$23 = alias <constant:T> : <Class:T>\l<statTemp>$22 = alias <constant:Array> : <Class:T::Array>\l<statTemp>$24 = alias <constant:String> : <Class:String>\l<statTemp>$19 = <statTemp>$22.[](<statTemp>$24) : MetaType\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_5" -> "bb::TestMetaType#testit_7" [style="bold"];
+    "bb::TestMetaType#testit_6" [
+        label = "block[id=6](<statTemp>$18)\lkeep_for_ide$26 = alias <constant:T> : <Class:T>\l<statTemp>$25 = alias <constant:Array> : <Class:T::Array>\l<statTemp>$27 = alias <constant:Float> : <Class:Float>\l<statTemp>$19 = <statTemp>$25.[](<statTemp>$27) : MetaType\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
+    "bb::TestMetaType#testit_7" [
+        label = "block[id=7](<statTemp>$18, <statTemp>$19)\l<returnMethodTemp>$2 = <statTemp>$18.puts(<statTemp>$19) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];
+}
+
+}
+

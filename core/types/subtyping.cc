@@ -138,9 +138,6 @@ shared_ptr<Type> dropLubComponents(Context ctx, const shared_ptr<Type> &t1, cons
 }
 
 shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
-    ENFORCE(!isa_type<MetaType>(t1.get()));
-    ENFORCE(!isa_type<MetaType>(t2.get()));
-
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -347,6 +344,15 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                     } else {
                         result = lub(ctx, p1->underlying(), p2->underlying());
                     }
+                },
+                [&](MetaType *m1) {
+                    if (auto *m2 = cast_type<MetaType>(p2)) {
+                        if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
+                            result = t1;
+                            return;
+                        }
+                    }
+                    result = lub(ctx, p1->underlying(), p2->underlying());
                 });
             ENFORCE(result.get() != nullptr);
             return result;
@@ -540,9 +546,6 @@ shared_ptr<Type> Types::all(Context ctx, const shared_ptr<Type> &t1, const share
 }
 
 shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
-    ENFORCE(!isa_type<MetaType>(t1.get()));
-    ENFORCE(!isa_type<MetaType>(t2.get()));
-
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -664,6 +667,15 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              } else {
                                  result = Types::bottom();
                              }
+                         } else {
+                             result = Types::bottom();
+                         }
+                     },
+                     [&](MetaType *m1) {
+                         auto *m2 = cast_type<MetaType>(p2);
+                         ENFORCE(m2 != nullptr);
+                         if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
+                             result = t1;
                          } else {
                              result = Types::bottom();
                          }
@@ -1034,6 +1046,16 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                          auto *u2 = cast_type<ClassType>(l2->underlying().get());
                          ENFORCE(u1 != nullptr && u2 != nullptr);
                          result = l2 != nullptr && u1->symbol == u2->symbol && l1->value == l2->value;
+                     },
+                     [&](MetaType *m1) {
+                         auto *m2 = cast_type<MetaType>(p2);
+                         if (m2 == nullptr) {
+                             // is a literal a subtype of a different kind of proxy
+                             result = false;
+                             return;
+                         }
+
+                         result = Types::equiv(ctx, m1->wrapped, m2->wrapped);
                      });
             return result;
             // both are proxy
@@ -1044,11 +1066,6 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
         }
     } else if (isa_type<ProxyType>(t2.get())) {
         // non-proxies are never subtypes of proxies.
-        return false;
-    } else if (isa_type<MetaType>(t1.get()) || isa_type<MetaType>(t2.get())) {
-        // MetaTypes are not a subclass of anything and nothing is a subclass of
-        // them. Correct code should never reach this point, but erroneous code
-        // can (e.g. `puts(T::Array[String])`).
         return false;
     } else {
         if (auto *c1 = cast_type<ClassType>(t1.get())) {
@@ -1184,6 +1201,7 @@ string MetaType::typeName() const {
 }
 
 void MetaType::_sanityCheck(Context ctx) {
+    ENFORCE(!core::isa_type<MetaType>(wrapped.get()));
     this->wrapped->sanityCheck(ctx);
 }
 
@@ -1200,13 +1218,17 @@ shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolR
     Error::raise("should never happen");
 }
 
-MetaType::MetaType(const shared_ptr<Type> &wrapped) : wrapped(move(wrapped)) {
+MetaType::MetaType(const shared_ptr<Type> &wrapped) : ProxyType(), wrapped(move(wrapped)) {
     core::categoryCounterInc("types.allocated", "metattype");
 }
 
 shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver
     return nullptr;
+}
+
+std::shared_ptr<Type> MetaType::underlying() const {
+    return Types::Object();
 }
 } // namespace core
 } // namespace sorbet

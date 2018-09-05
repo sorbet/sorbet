@@ -794,18 +794,9 @@ DispatchResult MetaType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Lo
             return res;
         }
         default: {
-            auto res = DispatchResult(Types::untypedUntracked(), selfRef, Symbols::noSymbol());
-            if (auto e = ctx.state.beginError(callLoc, errors::Infer::BareTypeUsage)) {
-                e.setHeader("Unsupported usage of bare type");
-                res.components.front().errors.emplace_back(e.build());
-            }
-            return res;
+            return ProxyType::dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
         }
     }
-}
-
-shared_ptr<Type> MetaType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    Error::raise("should never happen");
 }
 
 SymbolRef unwrapSymbol(const shared_ptr<Type> &typeO) {
@@ -922,6 +913,20 @@ public:
         return args[0]->type;
     }
 } T_revealType;
+
+class T_nilable : public IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
+                           const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
+                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<SendAndBlockLink> &linkType) const override {
+        if (args.size() != 1) {
+            return Types::untypedUntracked();
+        }
+
+        return make_shared<MetaType>(Types::any(ctx, unwrapType(ctx, argLocs[0], args[0]->type), Types::nilClass()));
+    }
+} T_nilable;
 
 class Object_class : public IntrinsicMethod {
 public:
@@ -1393,6 +1398,7 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::T(), true, Names::must(), &T_must},
     {Symbols::T(), true, Names::all(), &T_all},
     {Symbols::T(), true, Names::any(), &T_any},
+    {Symbols::T(), true, Names::nilable(), &T_nilable},
     {Symbols::T(), true, Names::revealType(), &T_revealType},
 
     {Symbols::T_Generic(), false, Names::squareBrackets(), &T_Generic_squareBrackets},

@@ -96,7 +96,7 @@ subgraph "cluster_::TestRescue#initialize" {
     "bb::TestRescue#initialize_1" [shape = parallelogram];
 
     "bb::TestRescue#initialize_0" [
-        label = "block[id=0]()\l@ex$4 = alias @ex : StandardError | NilClass\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$8 = alias <constant:T> : <Class:T>\l<statTemp>$9 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$7 = <statTemp>$8.nilable(<statTemp>$9) : T.untyped\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : RubyTyper::Void\l<castTemp>$10 = nil : NilClass\l@ex$4 = cast(<castTemp>$10, StandardError | NilClass); : StandardError | NilClass\l<returnMethodTemp>$2 = @ex$4 : StandardError | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@ex$4 = alias @ex : StandardError | NilClass\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$8 = alias <constant:T> : <Class:T>\l<statTemp>$9 = alias <constant:StandardError> : <Class:StandardError>\l<statTemp>$7 = <statTemp>$8.nilable(<statTemp>$9) : MetaType\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : RubyTyper::Void\l<castTemp>$10 = nil : NilClass\l@ex$4 = cast(<castTemp>$10, StandardError | NilClass); : StandardError | NilClass\l<returnMethodTemp>$2 = @ex$4 : StandardError | NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::TestRescue#initialize_0" -> "bb::TestRescue#initialize_1" [style="bold"];

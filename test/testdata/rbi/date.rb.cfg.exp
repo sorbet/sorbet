@@ -24,7 +24,7 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_1" [shape = parallelogram];
 
     "bb::A#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : <Class:A>\l<hashTemp>$7 = :\"t\" : Symbol(:\"t\")\l<hashTemp>$8 = alias <constant:Time> : <Class:Time>\l<magic>$9 = alias <constant:<Magic>> : <Magic>\l<statTemp>$6 = <magic>$9.<build-hash>(<hashTemp>$7, <hashTemp>$8) : ShapeType {\l  Symbol(:\"t\") => <Class:Time>\l}\l<statTemp>$4 = <statTemp>$5.sig(<statTemp>$6) : T.untyped\l<statTemp>$10 = alias <constant:Time> : <Class:Time>\l<returnMethodTemp>$2 = <statTemp>$4.returns(<statTemp>$10) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5 = self : <Class:A>\l<hashTemp>$7 = :\"t\" : Symbol(:\"t\")\l<hashTemp>$8 = alias <constant:Time> : <Class:Time>\l<magic>$9 = alias <constant:<Magic>> : <Magic>\l<statTemp>$6 = <magic>$9.<build-hash>(<hashTemp>$7, <hashTemp>$8) : ShapeType {\l  Symbol(:\"t\") => <Class:Time>\l}\l<statTemp>$4 = <statTemp>$5.sig(<statTemp>$6) : Sorbet::Private::Builder\l<statTemp>$10 = alias <constant:Time> : <Class:Time>\l<returnMethodTemp>$2 = <statTemp>$4.returns(<statTemp>$10) : Sorbet::Private::Builder\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_0" -> "bb::A#<static-init>_1" [style="bold"];

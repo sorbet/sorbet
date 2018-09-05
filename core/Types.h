@@ -583,7 +583,7 @@ CheckSize(AppliedType, 40, 8);
 //
 // These are used within the inferencer in places where we need to track
 // user-written types in the source code.
-class MetaType final : public Type {
+class MetaType final : public ProxyType {
 public:
     std::shared_ptr<Type> wrapped;
 
@@ -600,7 +600,6 @@ public:
                                         const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
                                         const std::shared_ptr<Type> &fullType,
                                         const std::shared_ptr<SendAndBlockLink> &block) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -608,6 +607,7 @@ public:
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
     virtual std::shared_ptr<Type> _approximate(Context ctx, const TypeConstraint &tc) override;
+    virtual std::shared_ptr<Type> underlying() const override;
 };
 CheckSize(MetaType, 24, 8);
 

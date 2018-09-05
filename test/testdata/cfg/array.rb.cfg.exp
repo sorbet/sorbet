@@ -60,7 +60,7 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_1" [shape = parallelogram];
 
     "bb::TestArray#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = self : <Class:TestArray>\l<statTemp>$5 = <statTemp>$6.sig() : T.untyped\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$4 = <statTemp>$5.returns(<statTemp>$7) : T.untyped\l<statTemp>$10 = self : <Class:TestArray>\l<statTemp>$9 = <statTemp>$10.sig() : T.untyped\l<statTemp>$11 = alias <constant:String> : <Class:String>\l<statTemp>$8 = <statTemp>$9.returns(<statTemp>$11) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6 = self : <Class:TestArray>\l<statTemp>$5 = <statTemp>$6.sig() : Sorbet::Private::Builder\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$4 = <statTemp>$5.returns(<statTemp>$7) : Sorbet::Private::Builder\l<statTemp>$10 = self : <Class:TestArray>\l<statTemp>$9 = <statTemp>$10.sig() : Sorbet::Private::Builder\l<statTemp>$11 = alias <constant:String> : <Class:String>\l<statTemp>$8 = <statTemp>$9.returns(<statTemp>$11) : Sorbet::Private::Builder\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_0" -> "bb::TestArray#<static-init>_1" [style="bold"];

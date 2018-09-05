@@ -3,7 +3,7 @@ class A
 
   sig(x: T.any(String, Integer), y: Integer).returns(Integer)
   # dead=1
-  # <statTemp>$4: T.untyped
+  # <statTemp>$4: Sorbet::Private::Builder
   #
   # <statTemp>$5: <Class:A>
   #
@@ -20,7 +20,7 @@ class A
   #
   # <statTemp>$15: <Class:Integer>
   #
-  # <returnMethodTemp>$2: T.untyped
+  # <returnMethodTemp>$2: Sorbet::Private::Builder
   #
   # <hashTemp>$7: Symbol(:"x")
   #

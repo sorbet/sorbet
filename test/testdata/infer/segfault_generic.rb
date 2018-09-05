@@ -6,7 +6,7 @@ end
 def foo
   loop do
     if bar
-      type = T::Array[Integer] # error: Unsupported usage of bare type
+      type = T::Array[Integer]
     elsif bar
       puts type
     end

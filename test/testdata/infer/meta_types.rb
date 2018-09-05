@@ -7,14 +7,22 @@ class TestMetaType
   def _; end
 
   def testit
-    puts(T::Array[String]) # error: `<Type: T::Array[String]>` doesn't match `BasicObject` for argument `arg0`
+    puts(T::Array[String])
 
     puts(
       if _
-        T::Array[String] # error: Unsupported usage of bare type
+        T::Array[String]
       else
         false
       end
     )
+
+    puts(
+          if _
+            T::Array[String]
+          else
+            T::Array[Float]
+          end
+        )
   end
 end

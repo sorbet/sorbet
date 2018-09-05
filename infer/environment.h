@@ -176,9 +176,6 @@ public:
     void assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVariable cond, core::Loc loc,
                          const UnorderedMap<core::LocalVariable, VariableState> &filter);
 
-    core::TypeAndOrigins getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
-                                                      const Environment &other);
-
     void mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat, cfg::BasicBlock *bb,
                    KnowledgeFilter &knowledgeFilter);
 

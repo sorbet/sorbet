@@ -127,8 +127,7 @@ KnowledgeRef KnowledgeFact::under(core::Context ctx, const KnowledgeRef &what, c
         } else {
             auto &second = fnd->second;
             auto &typeAndOrigin = state.typeAndOrigins;
-            auto combinedType =
-                core::Types::all(ctx, dropConstructor(ctx, typeAndOrigin.origins[0], typeAndOrigin.type), second);
+            auto combinedType = core::Types::all(ctx, typeAndOrigin.type, second);
             if (combinedType->isBottom()) {
                 copy.mutate().isDead = true;
                 break;
@@ -589,20 +588,13 @@ void Environment::assumeKnowledge(core::Context ctx, bool isTrue, core::LocalVar
     }
 }
 
-core::TypeAndOrigins Environment::getTypeAndOriginFromOtherEnv(core::Context ctx, core::LocalVariable var,
-                                                               const Environment &other) {
-    core::TypeAndOrigins otherTO = other.getTypeAndOrigin(ctx, var);
-    otherTO.type = dropConstructor(ctx, otherTO.origins.front(), otherTO.type);
-    return otherTO;
-}
-
 void Environment::mergeWith(core::Context ctx, const Environment &other, core::Loc loc, cfg::CFG &inWhat,
                             cfg::BasicBlock *bb, KnowledgeFilter &knowledgeFilter) {
     this->isDead |= other.isDead;
     for (auto &pair : vars) {
         auto var = pair.first;
-        const core::TypeAndOrigins otherTO = getTypeAndOriginFromOtherEnv(ctx, var, other);
-        core::TypeAndOrigins &thisTO = pair.second.typeAndOrigins;
+        const auto &otherTO = other.getTypeAndOrigin(ctx, var);
+        auto &thisTO = pair.second.typeAndOrigins;
         if (thisTO.type.get() != nullptr) {
             thisTO.type = core::Types::any(ctx, thisTO.type, otherTO.type);
             thisTO.type->sanityCheck(ctx);
@@ -696,9 +688,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->isDead = other.isDead;
     for (auto &pair : vars) {
         auto var = pair.first;
-        const core::TypeAndOrigins &otherTO = other.getTypeAndOrigin(ctx, var);
-        pair.second.typeAndOrigins.type = dropConstructor(ctx, otherTO.origins[0], otherTO.type);
-        pair.second.typeAndOrigins.origins = otherTO.origins;
+        pair.second.typeAndOrigins = other.getTypeAndOrigin(ctx, var);
         pair.second.knowledge = other.getKnowledge(var, false);
         pair.second.knownTruthy = other.getKnownTruthy(var);
     }
