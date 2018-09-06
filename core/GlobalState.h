@@ -130,6 +130,7 @@ public:
 
     void trace(const std::string &msg) const;
 
+    static constexpr int HASH_STATE_INVALID = 0;
     unsigned int hash() const;
     std::vector<std::shared_ptr<File>> getFiles() const;
 

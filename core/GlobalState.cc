@@ -1150,7 +1150,8 @@ unsigned int GlobalState::hash() const {
             errorQueue->logger.info("Hashing symbols: {}, {}", result, sym.name.show(*this));
         }
     }
-    return result;
+
+    return (result == GlobalState::HASH_STATE_INVALID) ? GlobalState::HASH_STATE_INVALID + 1 : result;
 }
 
 vector<shared_ptr<File>> GlobalState::getFiles() const {

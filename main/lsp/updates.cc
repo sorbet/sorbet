@@ -2,10 +2,12 @@
 #include "common/Timer.h"
 #include "core/Errors.h"
 #include "core/Files.h"
+#include "core/GlobalState.h"
 #include "core/Names/resolver.h"
 #include "core/Unfreeze.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
+#include "core/errors/parser.h"
 #include "core/errors/resolver.h"
 #include "core/lsp/QueryResponse.h"
 #include "lsp.h"
@@ -128,7 +130,6 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     shared_ptr<core::GlobalState> lgs =
                         make_shared<core::GlobalState>((make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
-                    lgs->silenceErrors = true;
                     core::FileRef fref;
                     {
                         core::UnfreezeFileTable fileTableAccess(*lgs);
@@ -138,8 +139,17 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     unique_ptr<KeyValueStore> kvstore;
 
                     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
+                    auto errs = lgs->errorQueue->drainAllErrors();
+                    bool fileParseError = false;
+                    for (auto &e : errs) {
+                        if (e->what == core::errors::Parser::ParserError) {
+                            fileParseError = true;
+                        }
+                    }
                     pipeline::resolve(*lgs, move(single), emptyOpts, logger, true);
-                    threadResult.emplace_back(make_pair(job, lgs->hash()));
+
+                    unsigned int ret = (fileParseError) ? core::GlobalState::HASH_STATE_INVALID : lgs->hash();
+                    threadResult.emplace_back(make_pair(job, ret));
                 }
             }
         }
@@ -263,7 +273,7 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
                     globalStateHashes[fref.id()] = hashes[i];
                 }
             } else {
-                if (hashes[i] != globalStateHashes[fref.id()]) {
+                if (hashes[i] != core::GlobalState::HASH_STATE_INVALID && hashes[i] != globalStateHashes[fref.id()]) {
                     logger->debug("Taking sad path because {} has changed definitions", changedFiles[i]->path());
                     good = false;
                     globalStateHashes[fref.id()] = hashes[i];
