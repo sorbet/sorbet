@@ -372,7 +372,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
                                          const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file();
-    if (opts.stopAfterPhase == options::Phase::NAMER) {
+    if (opts.stopAfterPhase == options::Phase::RESOLVER) {
         return make_unique<ast::EmptyTree>(core::Loc::none(f));
     }
     if (f.data(ctx).isRBI()) {
@@ -446,6 +446,19 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             }
         }
 
+        for (auto &named : what) {
+            if (opts.print.NameTree) {
+                cout << named->toString(gs, 0) << '\n';
+            }
+            if (opts.print.NameTreeRaw) {
+                cout << named->showRaw(gs) << '\n';
+            }
+        }
+
+        if (opts.stopAfterPhase == options::Phase::NAMER) {
+            return what;
+        }
+
         core::MutableContext ctx(gs, core::Symbols::root());
         ProgressIndicator namingProgress(opts.showProgress, "Resolving", 1);
         {
@@ -468,10 +481,10 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
     gs.errorQueue->flushErrors();
 
     for (auto &resolved : what) {
-        if (opts.print.NameTree) {
+        if (opts.print.ResolveTree) {
             cout << resolved->toString(gs, 0) << '\n';
         }
-        if (opts.print.NameTreeRaw) {
+        if (opts.print.ResolveTreeRaw) {
             cout << resolved->showRaw(gs) << '\n';
         }
     }

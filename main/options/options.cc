@@ -33,6 +33,8 @@ const vector<PrintOptions> print_options({
     {"name-tree", &Printers::NameTree, true},
     {"name-tree-raw", &Printers::NameTreeRaw, true},
     {"file-table-json", &Printers::FileTableJson, true},
+    {"resolve-tree", &Printers::ResolveTree, true},
+    {"resolve-tree-raw", &Printers::ResolveTreeRaw, true},
     {"cfg", &Printers::CFG, true},
     {"cfg-raw", &Printers::CFGRaw, true},
     {"typed-source", &Printers::TypedSource, true},
@@ -45,8 +47,9 @@ struct StopAfterOptions {
 };
 
 StopAfterOptions stop_after_options[] = {
-    {"init", Phase::INIT},   {"parser", Phase::PARSER}, {"desugarer", Phase::DESUGARER},   {"dsl", Phase::DSL},
-    {"namer", Phase::NAMER}, {"cfg", Phase::CFG},       {"inferencer", Phase::INFERENCER},
+    {"init", Phase::INIT}, {"parser", Phase::PARSER},         {"desugarer", Phase::DESUGARER},
+    {"dsl", Phase::DSL},   {"namer", Phase::NAMER},           {"resolver", Phase::RESOLVER},
+    {"cfg", Phase::CFG},   {"inferencer", Phase::INFERENCER},
 };
 
 core::StrictLevel text2StrictLevel(absl::string_view key, shared_ptr<spdlog::logger> logger) {

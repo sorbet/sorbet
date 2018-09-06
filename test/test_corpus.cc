@@ -124,9 +124,9 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {"parse-tree",   "parse-tree-json", "ast",       "ast-raw",       "dsl-tree",
-                                     "dsl-tree-raw", "name-table",      "name-tree", "name-tree-raw", "cfg",
-                                     "cfg-raw",      "typed-source"};
+unordered_set<string> knownPasses = {
+    "parse-tree", "parse-tree-json", "ast",          "ast-raw",          "dsl-tree", "dsl-tree-raw", "name-table",
+    "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw", "cfg",      "cfg-raw",      "typed-source"};
 
 unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
                                                   unique_ptr<sorbet::ast::Expression> expr) {
@@ -252,6 +252,21 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
             namedTree = testSerialize(gs, sorbet::namer::Namer::run(ctx, move(dslUnwound)));
         }
+
+        expectation = test.expectations.find("name-tree");
+        if (expectation != test.expectations.end()) {
+            got["name-tree"].append(namedTree->toString(gs)).append("\n");
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
+        expectation = test.expectations.find("name-tree-raw");
+        if (expectation != test.expectations.end()) {
+            got["name-tree-raw"].append(namedTree->showRaw(gs));
+            auto newErrors = errorQueue->drainAllErrors();
+            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+        }
+
         trees.emplace_back(move(namedTree));
     }
 
@@ -269,16 +284,16 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     for (auto &resolvedTree : trees) {
-        expectation = test.expectations.find("name-tree");
+        expectation = test.expectations.find("resolve-tree");
         if (expectation != test.expectations.end()) {
-            got["name-tree"].append(resolvedTree->toString(gs)).append("\n");
+            got["resolve-tree"].append(resolvedTree->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
-        expectation = test.expectations.find("name-tree-raw");
+        expectation = test.expectations.find("resolve-tree-raw");
         if (expectation != test.expectations.end()) {
-            got["name-tree-raw"].append(resolvedTree->showRaw(gs));
+            got["resolve-tree-raw"].append(resolvedTree->showRaw(gs));
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

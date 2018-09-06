@@ -44,12 +44,26 @@ class ::<root> < ::Object () @ (-e:1, https://git.corp.stripe.com/stripe-interna
 --- name-table end ---
 --- name-tree start ---
 class <emptyTree><<constant:<root>>> < ()
+  1
+end
+--- name-tree end ---
+--- name-tree-raw start ---
+ClassDef{
+  name = EmptyTree<<constant:<root>>>
+  ancestors = []
+  rhs = [
+    Literal{ value = 1 }
+  ]
+}
+--- name-tree-raw end ---
+--- resolve-tree start ---
+class <emptyTree><<constant:<root>>> < ()
   def self.<static-init><<static-init>$75>()
     1
   end
 end
---- name-tree end ---
---- name-tree-raw start ---
+--- resolve-tree end ---
+--- resolve-tree-raw start ---
 ClassDef{
   name = EmptyTree<<constant:<root>>>
   ancestors = []
@@ -62,7 +76,7 @@ ClassDef{
     }
   ]
 }
---- name-tree-raw end ---
+--- resolve-tree-raw end ---
 --- file-table-json start ---
 {
  "files": [

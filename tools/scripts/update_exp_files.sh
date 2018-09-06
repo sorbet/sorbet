@@ -3,7 +3,7 @@ set -e
 
 COMMAND_FILE=$(mktemp)
 
-passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw cfg cfg-raw typed-source)
+passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source)
 
 bazel build //main:sorbet -c opt
 

@@ -1,0 +1,53 @@
+begin
+  ::RubyTyper.keep_for_ide(::Test)
+  class ::Test<<constant:Test>> < (::<todo sym>)
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    <emptyTree>
+
+    def foo<foo>(x)
+      begin
+        T.let(nil, String)
+        x
+      end
+    end
+
+    def bar<bar>(y)
+      begin
+        T.let(nil, String)
+        y
+      end
+    end
+
+    def qux<qux>(z)
+      begin
+        T.let("", String)
+        z
+      end
+    end
+
+    def baz<baz>(w)
+      begin
+        T.let("", String)
+        w
+      end
+    end
+
+    def self.<static-init><<static-init>>()
+      begin
+        self(<singleton class:<constant:Test>>).sig({:"x" => ::String}).returns(::String)
+        self(<singleton class:<constant:Test>>).sig({:"y" => ::String}).returns(::String)
+        self(<singleton class:<constant:Test>>).sig({:"z" => ::String}).returns(::String)
+        self(<singleton class:<constant:Test>>).sig({:"w" => ::String}).returns(::String)
+        <emptyTree>
+      end
+    end
+  end
+  <emptyTree>
+end

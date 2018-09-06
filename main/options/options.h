@@ -27,6 +27,8 @@ struct Printers {
     bool NameTableJson = false;
     bool NameTableFull = false;
     bool FileTableJson = false;
+    bool ResolveTree = false;
+    bool ResolveTreeRaw = false;
     bool CFG = false;
     bool CFGRaw = false;
     bool TypedSource = false;
@@ -39,6 +41,7 @@ enum Phase {
     DESUGARER,
     DSL,
     NAMER,
+    RESOLVER,
     CFG,
     INFERENCER,
 };
