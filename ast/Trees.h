@@ -614,8 +614,10 @@ class InsSeq final : public Expression {
 public:
     static constexpr int EXPECTED_STATS_COUNT = 4;
     typedef InlinedVector<std::unique_ptr<Expression>, EXPECTED_STATS_COUNT> STATS_store;
+    // Statements
     STATS_store stats;
 
+    // The distinguished final expression (determines return value)
     std::unique_ptr<Expression> expr;
 
     InsSeq(core::Loc loc, STATS_store stats, std::unique_ptr<Expression> expr);

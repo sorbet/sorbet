@@ -119,7 +119,7 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
         return make_unique<Block>(loc, move(args), move(body));
     }
 
-    // &foo => {|*args| foo.to_proc.call(*args) }
+    // &foo => {|*args| foo.to_proc }
 
     // NOTE(nelhage): We don't currently implement splats properly, so
     // `foo.to_proc.call(*args)` will only ever work by accident. For now, don't

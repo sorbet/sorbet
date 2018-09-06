@@ -78,9 +78,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
 
         current.computePins(ctx, outEnvironments, *cfg.get(), bb);
 
-        int i = -1;
         for (auto &uninitialized : current.vars) {
-            i++;
             if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
                 uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
                 uninitialized.second.typeAndOrigins.origins.push_back(ctx.owner.data(ctx).loc());

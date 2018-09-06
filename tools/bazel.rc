@@ -58,6 +58,8 @@ build:ci --define jemalloc=true
 build:ci --config=debugsymbols
 build:ci --config=nopie
 
+# DEBUG_MODE is set by default for all builds except --config=release.
+# Use this flag to set DEBUG_MODE even for --config=release.
 build:forcedebug --copt=-DFORCE_DEBUG
 build:forcedebug --cxxopt=-DFORCE_DEBUG
 
