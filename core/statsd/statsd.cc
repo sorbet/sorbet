@@ -6,6 +6,7 @@ extern "C" {
 }
 
 #include "absl/strings/str_cat.h"
+#include "absl/strings/str_replace.h"
 
 #include <string>
 
@@ -15,21 +16,47 @@ namespace sorbet {
 namespace core {
 
 class StatsdClientWrapper {
+    constexpr static int PKT_LEN = 512; // conservative bound for MTU
     statsd_link *link;
+    string packet;
+
+    string cleanMetricName(const string &name) {
+        return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
+    }
+
+    void addMetric(const string &name, size_t value, const string &type) {
+        // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
+        auto newLine =
+            strprintf("%s%s:%zd|%s", link->ns ? link->ns : "", cleanMetricName(name).c_str(), value, type.c_str());
+        if (packet.size() + newLine.size() + 1 < PKT_LEN) {
+            packet = packet + "\n" + newLine;
+        } else {
+            if (packet.size() > 0) {
+                statsd_send(link, packet.c_str());
+                packet = move(newLine);
+            } else {
+                // the packet itself might be bigger than MTU
+                statsd_send(link, newLine.c_str());
+            }
+        }
+    }
 
 public:
     StatsdClientWrapper(string host, int port, string prefix)
-        : link(statsd_init_with_namespace(host.c_str(), port, prefix.c_str())) {}
+        : link(statsd_init_with_namespace(host.c_str(), port, cleanMetricName(prefix).c_str())) {}
 
     ~StatsdClientWrapper() {
+        if (packet.size() > 0) {
+            statsd_send(link, packet.c_str());
+        }
         statsd_finalize(link);
     }
 
-    void gauge(string name, size_t value) {
-        statsd_gauge(link, const_cast<char *>(name.c_str()), value);
+    void gauge(const string &name, size_t value) { // type : g
+        addMetric(name, value, "g");
     }
-    void timing(string name, size_t ms) {
-        statsd_timing(link, const_cast<char *>(name.c_str()), ms);
+    void timing(const string &name, size_t ms) { // type: ms
+        addMetric(name, ms, "ms");
     }
 };
 
