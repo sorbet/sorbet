@@ -54,7 +54,7 @@ bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger
         logger->trace("final raw read: {}, length: {}", line, length);
     }
     if (length < 0) {
-        logger->debug("eof");
+        logger->debug("eof or no \"Content-Length: %i\" header found.");
         return false;
     }
 

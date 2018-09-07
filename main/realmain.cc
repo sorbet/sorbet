@@ -210,6 +210,12 @@ int realmain(int argc, char *argv[]) {
 
     if (opts.runLSP) {
         gs->errorQueue->ignoreFlushes = true;
+        logger->debug("Starting sorbet version {} in LSP server mode. "
+                      "Talk ‘\\r\\n’-separated JSON-RPC to me. "
+                      "More details at https://microsoft.github.io/language-server-protocol/specification."
+                      "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
+                      "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
+                      Version::build_scm_revision);
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
         loop.runLSP();
         return 0;
