@@ -326,7 +326,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                     // Because Sinatra does weird stuff and that's how we model it :-()
                     if (auto e = gs.beginError(data.loc(), core::errors::Resolver::IncludesNonModule)) {
                         e.setHeader("Only modules can be `{}`d. This module or class includes `{}`", "include",
-                                    mixin.data(gs).fullName(gs));
+                                    mixin.data(gs).show(gs));
                     }
                 }
                 // insert all transitive parents of class to bring methods back.
