@@ -80,7 +80,7 @@ public:
     }
 };
 
-void LSPLoop::runLSP() {
+std::unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     struct GuardedState {
         deque<rapidjson::Document> pendingRequests;
@@ -153,15 +153,21 @@ void LSPLoop::runLSP() {
                 &guardedState));
             ENFORCE(!guardedState.paused);
             if (guardedState.terminate) {
-                return;
+                break;
             }
             doc.CopyFrom(guardedState.pendingRequests.front(), alloc);
             guardedState.pendingRequests.pop_front();
         }
+        core::prodCounterInc("lsp.requests.received");
         if (!handleReplies(doc)) {
             processRequest(doc);
         }
     }
+    if (finalGs) {
+        initialGS = nullptr;
+        return move(finalGs);
+    }
+    return move(initialGS);
 }
 
 void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {

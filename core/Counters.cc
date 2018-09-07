@@ -53,13 +53,21 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
         return;
     }
 
+    prodCategoryCounterAdd(category, counter, value);
+}
+
+void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned int value) {
     this->counters_by_category[category][counter] += value;
 }
 
-void CounterImpl::counterAdd(const char *counter, unsigned int value, bool isProdCounter) {
-    if (!enable_counters && !isProdCounter) {
+void CounterImpl::counterAdd(const char *counter, unsigned int value) {
+    if (!enable_counters) {
         return;
     }
+    prodCounterAdd(counter, value);
+}
+
+void CounterImpl::prodCounterAdd(const char *counter, unsigned int value) {
     this->counters[counter] += value;
 }
 
@@ -97,7 +105,7 @@ map<int, int> getAndClearHistogram(ConstExprStr histogram) {
 void counterConsume(CounterState cs) {
     for (auto &cat : cs.counters->counters_by_category) {
         for (auto &e : cat.second) {
-            counterState.categoryCounterAdd(cat.first, e.first, e.second);
+            counterState.prodCategoryCounterAdd(cat.first, e.first, e.second);
         }
     }
 
@@ -108,12 +116,12 @@ void counterConsume(CounterState cs) {
     }
 
     for (auto &e : cs.counters->counters) {
-        counterState.counterAdd(e.first, e.second, true);
+        counterState.prodCounterAdd(e.first, e.second);
     }
 }
 
 void counterAdd(ConstExprStr counter, unsigned int value) {
-    counterState.counterAdd(counter.str, value, false);
+    counterState.counterAdd(counter.str, value);
 }
 
 void counterInc(ConstExprStr counter) {
@@ -121,7 +129,7 @@ void counterInc(ConstExprStr counter) {
 }
 
 void prodCounterAdd(ConstExprStr counter, unsigned int value) {
-    counterState.counterAdd(counter.str, value, true);
+    counterState.prodCounterAdd(counter.str, value);
 }
 
 void prodCounterInc(ConstExprStr counter) {
@@ -132,8 +140,16 @@ void categoryCounterInc(ConstExprStr category, ConstExprStr counter) {
     categoryCounterAdd(category, counter, 1);
 }
 
+void prodCategoryCounterInc(ConstExprStr category, ConstExprStr counter) {
+    prodCategoryCounterAdd(category, counter, 1);
+}
+
 void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
     counterState.categoryCounterAdd(category.str, counter.str, value);
+}
+
+void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
+    counterState.prodCategoryCounterAdd(category.str, counter.str, value);
 }
 
 void histogramInc(ConstExprStr histogram, int key) {
@@ -164,7 +180,7 @@ void CounterImpl::canonicalize() {
 
     for (auto &cat : this->counters_by_category) {
         for (auto &e : cat.second) {
-            out.categoryCounterAdd(internKey(cat.first), internKey(e.first), e.second);
+            out.prodCategoryCounterAdd(internKey(cat.first), internKey(e.first), e.second);
         }
     }
 
@@ -175,7 +191,7 @@ void CounterImpl::canonicalize() {
     }
 
     for (auto &e : this->counters) {
-        out.counterAdd(internKey(e.first), e.second, true);
+        out.prodCounterAdd(internKey(e.first), e.second);
     }
     this->counters_by_category = move(out.counters_by_category);
     this->histograms = move(out.histograms);

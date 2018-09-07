@@ -41,6 +41,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                         [](rapidjson::Value &error) -> void {});
         }
         if (method == LSPMethod::TextDocumentDidChange()) {
+            core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
             Timer timeit(logger, "handle update");
             vector<shared_ptr<core::File>> files;
             auto &edits = d["params"];
@@ -64,6 +65,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
+            core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.didOpen");
             Timer timeit(logger, "handle open");
             vector<shared_ptr<core::File>> files;
             auto &edits = d["params"];
@@ -84,6 +86,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             }
         }
         if (method == LSPMethod::Initialized()) {
+            core::prodCategoryCounterInc("lsp.requests.processed", "initialized");
             // initialize ourselves
             {
                 Timer timeit(logger, "index");
@@ -105,10 +108,12 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         int errorCode = 0;
         string errorString;
         if (d.FindMember("cancelled") != d.MemberEnd()) {
+            core::prodCounterInc("lsp.requests.cancelled");
             errorCode = (int)LSPErrorCodes::RequestCancelled;
             errorString = "Request was cancelled";
             sendError(d, errorCode, errorString);
         } else if (method == LSPMethod::Initialize()) {
+            core::prodCategoryCounterInc("lsp.requests.processed", "initialize");
             result.SetObject();
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
             string serverCap = "{\"capabilities\": "
@@ -133,6 +138,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             result.CopyFrom(temp, alloc);
             sendResult(d, result);
         } else if (method == LSPMethod::Shutdown()) {
+            core::prodCategoryCounterInc("lsp.requests.processed", "shutdown");
             // return default value: null
             sendResult(d, result);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {

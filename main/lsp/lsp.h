@@ -268,7 +268,7 @@ class LSPLoop {
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers);
-    void runLSP();
+    std::unique_ptr<core::GlobalState> runLSP();
 
     void invalidateAllErrors();
 };

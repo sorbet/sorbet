@@ -20,8 +20,10 @@ struct CounterImpl {
     void histogramAdd(const char *histogram, int key, unsigned int value);
 
     void categoryCounterAdd(const char *category, const char *counter, unsigned int value);
+    void prodCategoryCounterAdd(const char *category, const char *counter, unsigned int value);
 
-    void counterAdd(const char *counter, unsigned int value, bool isProdCounter);
+    void counterAdd(const char *counter, unsigned int value);
+    void prodCounterAdd(const char *counter, unsigned int value);
 
     // absl::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.

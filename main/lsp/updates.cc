@@ -224,6 +224,7 @@ void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
 }
 
 void LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
+    core::prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
 
     invalidateAllErrors();
@@ -299,6 +300,7 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
         }
         invalidateErrorsFor(subset);
         logger->debug("Taking happy path");
+        core::prodCategoryCounterInc("lsp.updates", "fastpath");
 
         vector<unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {

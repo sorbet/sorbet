@@ -190,6 +190,7 @@ int realmain(int argc, char *argv[]) {
 
     unique_ptr<core::GlobalState> gs =
         make_unique<core::GlobalState>((make_shared<ConcurrentErrorQueue>(*typeErrorsConsole, *logger)));
+    vector<unique_ptr<ast::Expression>> indexed;
 
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
@@ -217,88 +218,87 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::build_scm_revision);
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
-        loop.runLSP();
-        return 0;
-    }
-    Timer timeall(logger, "Done in");
-    vector<core::FileRef> inputFiles;
-    logger->trace("Files: ");
-    {
-        Timer timeit(logger, "reading files");
-        core::UnfreezeFileTable fileTableAccess(*gs);
-        if (!opts.inlineInput.empty()) {
-            core::prodCounterAdd("types.input.bytes", opts.inlineInput.size());
-            core::prodCounterInc("types.input.lines");
-            core::prodCounterInc("types.input.files");
-            auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
-            inputFiles.push_back(file);
-            if (opts.forceMaxStrict < core::StrictLevel::Typed) {
-                logger->error("`-e` is incompatible with `--typed=ruby`");
-                return 1;
-            }
-            file.data(*gs).strict = core::StrictLevel::Strict;
-        }
-    }
-
-    vector<unique_ptr<ast::Expression>> indexed;
-    {
-        Timer timeit(logger, "index");
-        indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
-    }
-
-    if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-        Timer timeit(logger, "caching global state");
-        kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
-        KeyValueStore::commit(move(kvstore));
-    }
-
-    indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
-
-    gs->errorQueue->flushErrors();
-
-    if (opts.print.ErrorFiles) {
-        for (auto &tree : indexed) {
-            auto f = tree->loc.file();
-            if (f.data(*gs).hadErrors()) {
-                cout << f.data(*gs).path() << "\n";
+        gs = loop.runLSP();
+    } else {
+        Timer timeall(logger, "Done in");
+        vector<core::FileRef> inputFiles;
+        logger->trace("Files: ");
+        {
+            Timer timeit(logger, "reading files");
+            core::UnfreezeFileTable fileTableAccess(*gs);
+            if (!opts.inlineInput.empty()) {
+                core::prodCounterAdd("types.input.bytes", opts.inlineInput.size());
+                core::prodCounterInc("types.input.lines");
+                core::prodCounterInc("types.input.files");
+                auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
+                inputFiles.push_back(file);
+                if (opts.forceMaxStrict < core::StrictLevel::Typed) {
+                    logger->error("`-e` is incompatible with `--typed=ruby`");
+                    return 1;
+                }
+                file.data(*gs).strict = core::StrictLevel::Strict;
             }
         }
-    } else if (!opts.noErrorCount) {
-        gs->errorQueue->flushErrorCount();
-    }
-    if (opts.autocorrect) {
-        gs->errorQueue->flushAutocorrects(*gs);
-    }
-    logger->trace("sorbet done");
 
-    if (opts.suggestTyped) {
-        for (auto &tree : indexed) {
-            auto f = tree->loc.file();
-            if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
-                core::counterInc("types.input.files.suggest_typed");
-                logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
+        {
+            Timer timeit(logger, "index");
+            indexed = pipeline::index(gs, opts.inputFileNames, inputFiles, opts, workers, kvstore, logger);
+        }
+
+        if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
+            Timer timeit(logger, "caching global state");
+            kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
+            KeyValueStore::commit(move(kvstore));
+        }
+
+        indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
+
+        gs->errorQueue->flushErrors();
+
+        if (opts.print.ErrorFiles) {
+            for (auto &tree : indexed) {
+                auto f = tree->loc.file();
+                if (f.data(*gs).hadErrors()) {
+                    cout << f.data(*gs).path() << "\n";
+                }
+            }
+        } else if (!opts.noErrorCount) {
+            gs->errorQueue->flushErrorCount();
+        }
+        if (opts.autocorrect) {
+            gs->errorQueue->flushAutocorrects(*gs);
+        }
+        logger->trace("sorbet done");
+
+        if (opts.suggestTyped) {
+            for (auto &tree : indexed) {
+                auto f = tree->loc.file();
+                if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
+                    core::counterInc("types.input.files.suggest_typed");
+                    logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
+                }
             }
         }
-    }
 
-    if (!opts.storeState.empty()) {
-        gs->markAsPayload();
-        FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
-    }
-
-    auto untypedSources = core::getAndClearHistogram("untyped.sources");
-    if (opts.suggestSig) {
-        ENFORCE(sorbet::debug_mode);
-        vector<pair<string, int>> withNames;
-        long sum = 0;
-        for (auto e : untypedSources) {
-            withNames.emplace_back(core::SymbolRef(*gs, e.first).data(*gs, true).fullName(*gs), e.second);
-            sum += e.second;
+        if (!opts.storeState.empty()) {
+            gs->markAsPayload();
+            FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
-        absl::c_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
-        for (auto &p : withNames) {
-            logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
-                          p.second, sum);
+
+        auto untypedSources = core::getAndClearHistogram("untyped.sources");
+        if (opts.suggestSig) {
+            ENFORCE(sorbet::debug_mode);
+            vector<pair<string, int>> withNames;
+            long sum = 0;
+            for (auto e : untypedSources) {
+                withNames.emplace_back(core::SymbolRef(*gs, e.first).data(*gs, true).fullName(*gs), e.second);
+                sum += e.second;
+            }
+            absl::c_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
+            for (auto &p : withNames) {
+                logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
+                              p.second, sum);
+            }
         }
     }
 

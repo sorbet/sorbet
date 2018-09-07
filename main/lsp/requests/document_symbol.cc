@@ -25,6 +25,7 @@ void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::Fil
 }
 
 void LSPLoop::handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d) {
+    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.documentSymbol");
     result.SetArray();
     auto uri =
         string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
