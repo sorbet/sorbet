@@ -1,17 +1,9 @@
 #include "common/Timer.h"
-
-#include <utility>
 using namespace std;
-long timespec_delta(struct timespec *start, struct timespec *stop) {
-    return (stop->tv_sec - start->tv_sec) * 1000000000 + stop->tv_nsec - start->tv_nsec;
-}
 
-Timer::Timer(const shared_ptr<spdlog::logger> &log, string msg) : log(log), msg(move(msg)) {
-    clock_gettime(CLOCK_REALTIME, &begin);
-}
+Timer::Timer(const shared_ptr<spdlog::logger> &log, string msg)
+    : log(log), msg(move(msg)), begin(chrono::steady_clock::now()) {}
 
 Timer::~Timer() {
-    struct timespec end;
-    clock_gettime(CLOCK_REALTIME, &end);
-    log->debug("{}: {}ms", this->msg, timespec_delta(&begin, &end) / 1000000);
+    log->debug("{}: {}ms", this->msg, chrono::duration<double, milli>(chrono::steady_clock::now() - begin).count());
 }

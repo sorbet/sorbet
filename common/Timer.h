@@ -1,5 +1,5 @@
 #include "spdlog/spdlog.h"
-#include <ctime>
+#include <chrono>
 #include <memory>
 #include <string>
 
@@ -11,5 +11,5 @@ public:
 private:
     std::shared_ptr<spdlog::logger> log;
     const std::string msg;
-    struct timespec begin;
+    const std::chrono::time_point<std::chrono::steady_clock> begin;
 };
