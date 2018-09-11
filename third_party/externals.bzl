@@ -172,3 +172,17 @@ package(default_visibility = ["//visibility:public"])
         remote ="https://github.com/BLAKE2/libb2",
         build_file = "//third_party:libb2.BUILD",
     )
+
+    new_git_repository(
+        name = "com_github_msgpack_msgpack",
+        commit = "b6803a5fecbe321458faafd6a079dac466614ff9",
+        remote = "https://github.com/msgpack/msgpack-c",
+        build_file = "//third_party:msgpack.BUILD",
+    )
+
+    new_git_repository(
+        name = "com_github_d_bahr_crcpp",
+        commit = "76dc872e163ea91ca51468db686ba16912979765",
+        remote = "https://github.com/d-bahr/CRCpp.git",
+        build_file = "//third_party:crcpp.BUILD",
+    )

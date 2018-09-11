@@ -1413,5 +1413,13 @@ vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext
     return trees;
 }
 
+std::vector<std::unique_ptr<ast::Expression>>
+Resolver::runConstantResolution(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees) {
+    trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
+    sanityCheck(ctx, trees);
+
+    return trees;
+}
+
 } // namespace resolver
 } // namespace sorbet

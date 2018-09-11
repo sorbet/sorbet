@@ -1,0 +1,20 @@
+# ParsedFile: test/testdata/autogen/bare_module.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=module
+ defines_behavior=0
+ is_empty=1
+ defining_ref=[Foo]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[Foo]
+ nesting=[]
+ resolved=[Foo]
+ loc=test/testdata/autogen/bare_module.rb:3
+ is_defining_ref=1

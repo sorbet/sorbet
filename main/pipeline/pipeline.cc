@@ -408,43 +408,51 @@ struct typecheck_thread_result {
     core::CounterState counters;
 };
 
+vector<unique_ptr<ast::Expression>> name(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
+                                         const options::Options &opts, shared_ptr<spdlog::logger> logger,
+                                         bool skipConfigatron) {
+    if (!skipConfigatron) {
+        core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
+        core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
+        namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
+    }
+
+    {
+        ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
+
+        Timer timeit(logger, "naming");
+        int i = 0;
+        for (auto &tree : what) {
+            auto file = tree->loc.file();
+            try {
+                unique_ptr<ast::Expression> ast;
+                {
+                    core::MutableContext ctx(gs, core::Symbols::root());
+                    logger->trace("Naming: {}", file.data(gs).path());
+                    core::ErrorRegion errs(gs, file);
+                    core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+                    core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+                    tree = namer::Namer::run(ctx, move(tree));
+                }
+                gs.errorQueue->flushErrors();
+                namingProgress.reportProgress(i);
+                i++;
+            } catch (SRubyException &) {
+                if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
+                    e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
+                }
+            }
+        }
+    }
+
+    return what;
+}
+
 vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
                                             const options::Options &opts, shared_ptr<spdlog::logger> logger,
                                             bool skipConfigatron) {
     try {
-        if (!skipConfigatron) {
-            core::UnfreezeNameTable nameTableAccess(gs);     // creates names from config
-            core::UnfreezeSymbolTable symbolTableAccess(gs); // creates methods for them
-            namer::configatron::fillInFromFileSystem(gs, opts.configatronDirs, opts.configatronFiles);
-        }
-
-        {
-            ProgressIndicator namingProgress(opts.showProgress, "Naming", what.size());
-
-            Timer timeit(logger, "naming");
-            int i = 0;
-            for (auto &tree : what) {
-                auto file = tree->loc.file();
-                try {
-                    unique_ptr<ast::Expression> ast;
-                    {
-                        core::MutableContext ctx(gs, core::Symbols::root());
-                        logger->trace("Naming: {}", file.data(gs).path());
-                        core::ErrorRegion errs(gs, file);
-                        core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-                        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-                        tree = namer::Namer::run(ctx, move(tree));
-                    }
-                    gs.errorQueue->flushErrors();
-                    namingProgress.reportProgress(i);
-                    i++;
-                } catch (SRubyException &) {
-                    if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
-                        e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
-                    }
-                }
-            }
-        }
+        what = name(gs, move(what), opts, logger, skipConfigatron);
 
         for (auto &named : what) {
             if (opts.print.NameTree) {

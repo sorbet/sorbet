@@ -19,6 +19,9 @@ public:
     static std::vector<std::unique_ptr<ast::Expression>>
     runTreePasses(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees);
 
+    static std::vector<std::unique_ptr<ast::Expression>>
+    runConstantResolution(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees);
+
 private:
     static void finalizeAncestors(core::GlobalState &gs);
     static void finalizeResolution(core::GlobalState &gs);

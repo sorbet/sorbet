@@ -10,6 +10,7 @@
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
+#include "main/autogen/autogen.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
@@ -125,8 +126,9 @@ public:
 };
 
 unordered_set<string> knownPasses = {
-    "parse-tree", "parse-tree-json", "ast",          "ast-raw",          "dsl-tree", "dsl-tree-raw", "name-table",
-    "name-tree",  "name-tree-raw",   "resolve-tree", "resolve-tree-raw", "cfg",      "cfg-raw",      "typed-source"};
+    "parse-tree", "parse-tree-json", "ast",           "ast-raw",      "dsl-tree",         "dsl-tree-raw",
+    "name-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
+    "cfg-raw",    "typed-source",    "autogen"};
 
 unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
                                                   unique_ptr<sorbet::ast::Expression> expr) {
@@ -270,13 +272,30 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         trees.emplace_back(move(namedTree));
     }
 
-    {
+    auto expectation = test.expectations.find("autogen");
+    if (expectation != test.expectations.end()) {
+        {
+            sorbet::core::UnfreezeNameTable nameTableAccess(gs);
+            sorbet::core::UnfreezeSymbolTable symbolAccess(gs);
+
+            trees = sorbet::resolver::Resolver::runConstantResolution(ctx, move(trees));
+        }
+
+        for (auto &tree : trees) {
+            auto pf = sorbet::autogen::Autogen::generate(ctx, move(tree));
+            tree = move(pf.tree);
+            got["autogen"].append(pf.toString(ctx));
+        }
+
+        auto newErrors = errorQueue->drainAllErrors();
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+    } else {
         sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
         trees = sorbet::resolver::Resolver::run(ctx, move(trees));
     }
 
-    auto expectation = test.expectations.find("name-table");
+    expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
         got["name-table"] = gs.toString() + "\n";
         auto newErrors = errorQueue->drainAllErrors();

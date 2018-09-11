@@ -6,11 +6,13 @@
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "core/statsd/statsd.h"
+#include "main/autogen/autogen.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
+#include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
 
@@ -251,7 +253,36 @@ int realmain(int argc, char *argv[]) {
             KeyValueStore::commit(move(kvstore));
         }
 
-        indexed = pipeline::typecheck(gs, pipeline::resolve(*gs, move(indexed), opts, logger), opts, workers, logger);
+        if (opts.print.Autogen || opts.print.AutogenMsgPack) {
+            core::MutableContext ctx(*gs, core::Symbols::root());
+
+            indexed = pipeline::name(*gs, move(indexed), opts, logger);
+            {
+                core::UnfreezeNameTable nameTableAccess(*gs);
+                core::UnfreezeSymbolTable symbolAccess(*gs);
+
+                indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
+            }
+
+            Timer timeit(logger, "emitting autogen");
+            for (auto &tree : indexed) {
+                if (tree->loc.file().data(ctx).isRBI()) {
+                    continue;
+                }
+                auto pf = autogen::Autogen::generate(ctx, move(tree));
+                tree = move(pf.tree);
+
+                if (opts.print.Autogen) {
+                    cout << pf.toString(ctx);
+                }
+                if (opts.print.AutogenMsgPack) {
+                    cout << pf.toMsgpack(ctx);
+                }
+            }
+        } else {
+            indexed = pipeline::resolve(*gs, move(indexed), opts, logger);
+            indexed = pipeline::typecheck(gs, move(indexed), opts, workers, logger);
+        }
 
         gs->errorQueue->flushErrors();
 

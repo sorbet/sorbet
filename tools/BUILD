@@ -38,6 +38,7 @@ compilation_database(
         "//main/options:options",
         "//version:version",
         "//main/errorqueue:errorqueue",
+        "//main/autogen:autogen",
         "//infer:infer_test",
         "//resolver:resolver",
         "//namer:namer",

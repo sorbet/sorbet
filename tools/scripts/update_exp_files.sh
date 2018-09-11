@@ -3,7 +3,7 @@ set -e
 
 COMMAND_FILE=$(mktemp)
 
-passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source)
+passes=(parse-tree parse-tree-json ast ast-raw dsl-tree dsl-tree-raw name-table name-tree name-tree-raw resolve-tree resolve-tree-raw cfg cfg-raw typed-source autogen)
 
 bazel build //main:sorbet -c opt
 
@@ -29,8 +29,12 @@ for this_src in "${rb_src[@]}" DUMMY; do
     if [ "$basename" ]; then
         for pass in "${passes[@]}" ; do
             candidate="$basename.$pass.exp"
+            args=()
+            if [ "$pass" = "autogen" ]; then
+                args=("--stop-after=namer")
+            fi
             if [ -e "$candidate" ]; then
-                echo bazel-bin/main/sorbet  --suppress-non-critical --print "$pass" --max-threads 1 "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+                echo bazel-bin/main/sorbet  --suppress-non-critical --print "$pass" --max-threads 1 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
             fi
         done
     fi

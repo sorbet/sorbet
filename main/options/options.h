@@ -33,6 +33,8 @@ struct Printers {
     bool CFGRaw = false;
     bool TypedSource = false;
     bool ErrorFiles = false;
+    bool Autogen = false;
+    bool AutogenMsgPack = false;
 };
 
 enum Phase {

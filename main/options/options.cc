@@ -39,6 +39,8 @@ const vector<PrintOptions> print_options({
     {"cfg-raw", &Printers::CFGRaw, true},
     {"typed-source", &Printers::TypedSource, true},
     {"error-files", &Printers::ErrorFiles, true},
+    {"autogen", &Printers::Autogen, true},
+    {"autogen-msgpack", &Printers::AutogenMsgPack, true},
 });
 
 struct StopAfterOptions {
@@ -278,6 +280,10 @@ void readOptions(Options &opts, int argc, char *argv[], shared_ptr<spdlog::logge
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
             logger->info("lsp mode does not yet support caching.");
+            throw EarlyReturnWithCode(1);
+        }
+        if ((opts.print.Autogen || opts.print.AutogenMsgPack) && opts.stopAfterPhase != Phase::NAMER) {
+            logger->info("-p autogen{} requires --stop-after=namer", opts.print.AutogenMsgPack ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
         opts.noErrorCount = raw["no-error-count"].as<bool>();

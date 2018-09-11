@@ -1,0 +1,36 @@
+# typed: true
+module One
+  FOO = 1
+end
+module Two
+  FOO = 2
+end
+module Three
+  FOO = 3
+end
+class Base
+  include Three
+  FOO = 4
+end
+
+
+class OneTwo < Base
+  include One
+  include Two
+  FOO # Should resolve to Two::FOO
+end
+
+class TwoOne < Base
+  include Two
+  include One
+  FOO # Should resolve to One::FOO
+end
+
+# Commented out because this currently fails.
+# We don't properly handle resolution order involving shared ancestors
+# (see WARNING comment in DefTree.from_deps).
+#
+# class ThreeAlone < Base
+#   include Three
+#   FOO # Should resolve to Base::FOO, but currently resolves to Three::FOO
+# end

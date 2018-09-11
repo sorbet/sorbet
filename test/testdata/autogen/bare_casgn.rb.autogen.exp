@@ -1,0 +1,20 @@
+# ParsedFile: test/testdata/autogen/bare_casgn.rb
+requires: []
+## defs:
+[def id=0]
+ type=module
+ defines_behavior=0
+ is_empty=0
+[def id=1]
+ type=casgn
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[FOO]
+## refs:
+[ref id=0]
+ scope=[]
+ name=[FOO]
+ nesting=[]
+ resolved=[FOO]
+ loc=test/testdata/autogen/bare_casgn.rb:2
+ is_defining_ref=1

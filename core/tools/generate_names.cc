@@ -267,6 +267,8 @@ NameDef names[] = {
     {"compact", Core},
 
     {"staticInit", "<static-init>", Resolver | Core},
+
+    {"require", Resolver},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
