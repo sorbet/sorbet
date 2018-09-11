@@ -127,6 +127,9 @@ end
 class Errno::EAGAIN < SystemCallError
 end
 
+class Errno::EWOULDBLOCK < SystemCallError
+end
+
 class Errno::EALREADY < SystemCallError
 end
 
