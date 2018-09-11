@@ -33,7 +33,101 @@ core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
     return res;
 }
 
-vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, ast::Send *send) {
+// Slightly modified from TypeSyntax::isSig.
+// We don't want to depend on resolver so that one day everything in the DSL pass can be standalone.
+//
+// There must be both a `sig` and a `returns` in order for isSig to be true.
+bool isSig(const ast::Send *send) {
+    if (send == nullptr || send->fun != core::Names::returns()) {
+        return false;
+    }
+    if (send->args.size() != 1) {
+        // They will already get an error about too many / not enough arguments later in the pipeline.
+        return false;
+    }
+
+    while (send != nullptr) {
+        if (send->fun == core::Names::sig()) {
+            // self.sig
+            if (ast::isa_tree<ast::Self>(send->recv.get())) {
+                return true;
+            }
+
+            // Sorbet.sig
+            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+            if (recv && recv->symbol == core::Symbols::Sorbet()) {
+                return true;
+            }
+        }
+
+        send = ast::cast_tree<ast::Send>(send->recv.get());
+    }
+    return false;
+}
+
+// To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
+// value into the `sig(...)` using whatever name we have for the setter.
+//
+// This change is done in place; it's assumed that the caller created a new sig for us.
+unique_ptr<ast::Send> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
+                                         const core::NameRef name) {
+    ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
+    ENFORCE(sharedSig->fun == core::Names::returns(),
+            "Top-level sig->fun is not 'returns': ", sharedSig->fun.toString(ctx));
+    ENFORCE(sharedSig->args.size() == 1, "Return must have one arg, but has ", sharedSig->args.size());
+
+    // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
+    unique_ptr<ast::Expression> sigExp = sharedSig->deepCopy();
+    auto sigSend = ast::cast_tree<ast::Send>(sigExp.get());
+    ENFORCE(sigSend, "Just deep copied this, so it should be non-null");
+    unique_ptr<ast::Send> sig(sigSend);
+    sigExp.release();
+
+    unique_ptr<ast::Expression> resultType = sig->args[0]->deepCopy();
+
+    // Loop down the chain of recv's until we get to the inner 'sig' node.
+    ast::Send *cur = sig.get();
+    while (cur != nullptr) {
+        if (cur->fun == core::Names::sig()) {
+            cur->args.clear();
+            cur->args.emplace_back(ast::MK::Hash1(cur->loc, ast::MK::Symbol(cur->loc, name), move(resultType)));
+            break;
+        }
+
+        cur = ast::cast_tree<ast::Send>(cur->recv.get());
+    }
+    return sig;
+}
+
+// Converts something like
+//
+//     sig.returns(String)
+//     attr_accessor :foo, :bar
+//
+// Into something like
+//
+//     sig.returns(String)                  (1)
+//     def foo; @foo; end
+//     sig(foo: String).returns(String)     (2)
+//     def foo=(foo); @foo = foo; end
+//
+//     sig.returns(String)                  (3)
+//     def bar; @bar; end
+//     sig(bar: String).returns(String)     (4)
+//     def bar=(bar); @bar = bar; end
+//
+// We have to do a bit of work, because the one `sig` we have will have to be
+// duplicated onto all but the first synthesized method. For example, sig (1)
+// above will actually be untouched in the syntax tree, but (2), (3), and (4)
+// will have to be synthesized. Handling this case gets a little tricky
+// considering that this DSL pass handles all three of attr_reader,
+// attr_writer, and attr_accessor.
+//
+// Also note that the burden is on the user to provide an accurate type signature.
+// All attr_accessor's should probably have `T.nilable(...)` to account for a
+// read-before-write.
+vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, const ast::Send *send,
+                                                           const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> empty;
 
     bool makeReader = false;
@@ -52,14 +146,29 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
     auto loc = send->loc;
     vector<unique_ptr<ast::Expression>> stats;
 
+    auto sig = ast::cast_tree_const<ast::Send>(prevStat);
+    bool hasSig = isSig(sig);
+
+    bool usedPrevSig = false;
+
     if (makeReader) {
         for (auto &arg : send->args) {
             auto name = getName(ctx, arg.get());
             if (!name.exists()) {
                 return empty;
             }
-
             core::NameRef varName = name.addAt(ctx);
+
+            if (hasSig) {
+                ENFORCE(sig != nullptr);
+
+                if (usedPrevSig) {
+                    stats.emplace_back(sig->deepCopy());
+                } else {
+                    usedPrevSig = true;
+                }
+            }
+
             stats.emplace_back(
                 ast::MK::Method0(loc, loc, name, ast::MK::Instance(loc, varName), ast::MethodDef::DSLSynthesized));
         }
@@ -74,6 +183,17 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
 
             core::NameRef varName = name.addAt(ctx);
             core::NameRef setName = name.addEq(ctx);
+
+            if (hasSig) {
+                ENFORCE(sig != nullptr);
+
+                if (usedPrevSig) {
+                    stats.emplace_back(toWriterSigForName(ctx, sig, name));
+                } else {
+                    usedPrevSig = true;
+                }
+            }
+
             auto body = ast::MK::Assign(loc, ast::MK::Instance(loc, varName), ast::MK::Local(loc, name));
             stats.emplace_back(ast::MK::Method1(loc, loc, setName, ast::MK::Local(loc, name), move(body),
                                                 ast::MethodDef::DSLSynthesized));

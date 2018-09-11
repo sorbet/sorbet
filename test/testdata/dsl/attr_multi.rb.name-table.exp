@@ -1,0 +1,32 @@
+class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  class ::Test < ::Object () @ test/testdata/dsl/attr_multi.rb:3
+    method ::Test#<static-init> () @ test/testdata/dsl/attr_multi.rb:3
+    field ::Test#@a -> T.untyped @ test/testdata/dsl/attr_multi.rb:7
+    field ::Test#@b -> T.untyped @ test/testdata/dsl/attr_multi.rb:10
+    field ::Test#@c -> T.untyped @ test/testdata/dsl/attr_multi.rb:10
+    field ::Test#@d -> T.untyped @ test/testdata/dsl/attr_multi.rb:13
+    field ::Test#@e -> T.untyped @ test/testdata/dsl/attr_multi.rb:16
+    field ::Test#@f -> T.untyped @ test/testdata/dsl/attr_multi.rb:16
+    field ::Test#@g -> T.untyped @ test/testdata/dsl/attr_multi.rb:19
+    field ::Test#@h -> T.untyped @ test/testdata/dsl/attr_multi.rb:22
+    field ::Test#@i -> T.untyped @ test/testdata/dsl/attr_multi.rb:22
+    method ::Test#a () -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
+    method ::Test#a= (a) -> String | NilClass @ test/testdata/dsl/attr_multi.rb:7
+      argument ::Test#a=#a<> -> String | NilClass @ test/testdata/dsl/attr_multi.rb:6
+    method ::Test#b () -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+    method ::Test#b= (b) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::Test#b=#b<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:9
+    method ::Test#c () -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+    method ::Test#c= (c) -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:10
+      argument ::Test#c=#c<> -> Integer | NilClass @ test/testdata/dsl/attr_multi.rb:9
+    method ::Test#d () -> String @ test/testdata/dsl/attr_multi.rb:13
+    method ::Test#e () -> String @ test/testdata/dsl/attr_multi.rb:16
+    method ::Test#f () -> String @ test/testdata/dsl/attr_multi.rb:16
+    method ::Test#g= (g) -> String @ test/testdata/dsl/attr_multi.rb:19
+      argument ::Test#g=#g<> -> String @ test/testdata/dsl/attr_multi.rb:18
+    method ::Test#h= (h) -> String @ test/testdata/dsl/attr_multi.rb:22
+      argument ::Test#h=#h<> -> String @ test/testdata/dsl/attr_multi.rb:21
+    method ::Test#i= (i) -> String @ test/testdata/dsl/attr_multi.rb:22
+      argument ::Test#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:21
+  class ::<Class:Test> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/dsl/attr_multi.rb:3
+

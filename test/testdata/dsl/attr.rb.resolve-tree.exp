@@ -65,6 +65,7 @@ begin
         self(<singleton class:<constant:TestAttr>>).sig().returns(::Integer)
         self(<singleton class:<constant:TestAttr>>).sig({:"v1" => ::Integer}).returns(::Integer)
         self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
+        self(<singleton class:<constant:TestAttr>>).sig({:"v2" => ::String}).returns(::String)
         self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
         <emptyTree>
       end

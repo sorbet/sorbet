@@ -36,6 +36,13 @@ template <class To> To *cast_tree(Expression *what) {
     return fast_cast<Expression, To>(what);
 }
 
+// A variant of cast_tree that preserves the const-ness (if const in, then const out)
+template <class To> const To *cast_tree_const(const Expression *what) {
+    static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
+    static_assert(std::is_assignable<Expression *&, To *>::value, "Ill Formed To, has to be a subclass of Expression");
+    return fast_cast<Expression, To>(const_cast<Expression *>(what));
+}
+
 template <class To> bool isa_tree(Expression *what) {
     return cast_tree<To>(what) != nullptr;
 }

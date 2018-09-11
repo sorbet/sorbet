@@ -21,6 +21,7 @@ public:
     unique_ptr<ast::ClassDef> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> classDef) {
         Command::patchDSL(ctx, classDef.get());
 
+        ast::Expression *prevStat = nullptr;
         UnorderedMap<ast::Expression *, vector<unique_ptr<ast::Expression>>> replaceNodes;
         for (auto &stat : classDef->rhs) {
             typecase(stat.get(),
@@ -39,12 +40,6 @@ public:
                              return;
                          }
 
-                         nodes = AttrReader::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
-                             return;
-                         }
-
                          nodes = Minitest::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
@@ -52,6 +47,13 @@ public:
                          }
 
                          nodes = DSLBuilder::replaceDSL(ctx, send);
+                         if (!nodes.empty()) {
+                             replaceNodes[stat.get()] = move(nodes);
+                             return;
+                         }
+
+                         // This one is different: it gets an extra prevStat argument.
+                         nodes = AttrReader::replaceDSL(ctx, send, prevStat);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
                              return;
@@ -67,6 +69,8 @@ public:
                      },
 
                      [&](ast::Expression *e) {});
+
+            prevStat = stat.get();
         }
         if (replaceNodes.empty()) {
             return classDef;
