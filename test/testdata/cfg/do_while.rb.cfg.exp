@@ -1,0 +1,88 @@
+digraph "do_while.rb" {
+subgraph "cluster_#<static-init>" {
+    label = "#<static-init>";
+    color = blue;
+    "bb#<static-init>_0" [shape = invhouse];
+    "bb#<static-init>_1" [shape = parallelogram];
+
+    "bb#<static-init>_0" [
+        label = "block[id=0]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
+    "bb#<static-init>_1" [
+        label = "block[id=1]()\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_1" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$5 = true : TrueClass\l<whileTemp>$5\l"
+    ];
+
+    "bb#<static-init>_2" -> "bb#<static-init>_4" [style="bold"];
+    "bb#<static-init>_2" -> "bb#<static-init>_7" [style="tapered"];
+
+    "bb#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$8 = self : <Class:<root>>\l<statTemp>$9 = 2 : Integer(2)\lforTemp$2 = <statTemp>$8.puts(<statTemp>$9) : NilClass\l<statTemp>$11 = false : FalseClass\l<ifTemp>$10 = <statTemp>$11.!() : TrueClass | FalseClass\l<ifTemp>$10\l"
+    ];
+
+    "bb#<static-init>_4" -> "bb#<static-init>_7" [style="bold"];
+    "bb#<static-init>_4" -> "bb#<static-init>_2" [style="tapered"];
+
+    "bb#<static-init>_7" [
+        label = "block[id=7]()\louterLoops: 1\l<whileTemp>$14 = true : TrueClass\l<whileTemp>$14\l"
+    ];
+
+    "bb#<static-init>_7" -> "bb#<static-init>_9" [style="bold"];
+    "bb#<static-init>_7" -> "bb#<static-init>_8" [style="tapered"];
+
+    "bb#<static-init>_8" [
+        label = "block[id=8]()\lx = 0 : Integer(0)\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_8" -> "bb#<static-init>_12" [style="bold"];
+    "bb#<static-init>_9" [
+        label = "block[id=9]()\louterLoops: 1\l<statTemp>$17 = self : <Class:<root>>\l<statTemp>$18 = 2 : Integer(2)\lforTemp$3 = <statTemp>$17.puts(<statTemp>$18) : NilClass\l<ifTemp>$19 = true : TrueClass\l<ifTemp>$19\l"
+    ];
+
+    "bb#<static-init>_9" -> "bb#<static-init>_8" [style="bold"];
+    "bb#<static-init>_9" -> "bb#<static-init>_7" [style="tapered"];
+
+    "bb#<static-init>_12" [
+        label = "block[id=12](x)\louterLoops: 1\l<whileTemp>$23 = false : FalseClass\l<whileTemp>$23\l"
+    ];
+
+    "bb#<static-init>_12" -> "bb#<static-init>_14" [style="bold"];
+    "bb#<static-init>_12" -> "bb#<static-init>_13" [style="tapered"];
+
+    "bb#<static-init>_13" [
+        label = "block[id=13](x)\ly = 0 : Integer(0)\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_13" -> "bb#<static-init>_15" [style="bold"];
+    "bb#<static-init>_14" [
+        label = "block[id=14](x)\louterLoops: 1\l<statTemp>$26 = self\l<statTemp>$27 = 2\l<statTemp>$25 = <statTemp>$26.puts(<statTemp>$27)\lx = 1\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_14" -> "bb#<static-init>_12" [style="bold"];
+    "bb#<static-init>_15" [
+        label = "block[id=15](x, y)\louterLoops: 1\l<statTemp>$31 = true : TrueClass\l<whileTemp>$30 = <statTemp>$31.!() : TrueClass | FalseClass\l<whileTemp>$30\l"
+    ];
+
+    "bb#<static-init>_15" -> "bb#<static-init>_17" [style="bold"];
+    "bb#<static-init>_15" -> "bb#<static-init>_16" [style="tapered"];
+
+    "bb#<static-init>_16" [
+        label = "block[id=16](x, y)\l<statTemp>$37 = self : <Class:<root>>\l<statTemp>$36 = <statTemp>$37.puts(x, y) : NilClass\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_16" -> "bb#<static-init>_1" [style="bold"];
+    "bb#<static-init>_17" [
+        label = "block[id=17](x, y)\louterLoops: 1\l<statTemp>$34 = self : <Class:<root>>\l<statTemp>$35 = 2 : Integer(2)\l<statTemp>$33 = <statTemp>$34.puts(<statTemp>$35) : NilClass\ly = 1 : Integer(1)\l<unconditional>\l"
+    ];
+
+    "bb#<static-init>_17" -> "bb#<static-init>_15" [style="bold"];
+}
+
+}
+

@@ -131,15 +131,37 @@ class <emptyTree><<constant:<root>>> < ()
     nil
   end
 
-  begin
-    <assignTemp>$8 = ::<Magic>.<expand-splat>(1, 2, 0)
-    a = <assignTemp>$8.[](0)
+  while true
     begin
-      <assignTemp>$9 = ::<Magic>.<expand-splat>(<assignTemp>$8.[](1), 1, 0)
-      x = <assignTemp>$9.[](0)
-      <assignTemp>$9
+      forTemp$8 = self(<constant:<todo sym>>).puts(1)
+      if false.!()
+        break(forTemp$8)
+      else
+        <emptyTree>
+      end
     end
-    <assignTemp>$8
+  end
+
+  while true
+    begin
+      forTemp$9 = self(<constant:<todo sym>>).puts(1)
+      if true
+        break(forTemp$9)
+      else
+        <emptyTree>
+      end
+    end
+  end
+
+  begin
+    <assignTemp>$10 = ::<Magic>.<expand-splat>(1, 2, 0)
+    a = <assignTemp>$10.[](0)
+    begin
+      <assignTemp>$11 = ::<Magic>.<expand-splat>(<assignTemp>$10.[](1), 1, 0)
+      x = <assignTemp>$11.[](0)
+      <assignTemp>$11
+    end
+    <assignTemp>$10
   end
 
   4
@@ -163,9 +185,9 @@ rescue <emptyTree>::<constant:E> => x
   nil
 
   begin
-    <assignTemp>$10 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
-    x = <assignTemp>$10.slice(::Range.new(0, -1, false))
-    <assignTemp>$10
+    <assignTemp>$12 = ::<Magic>.<expand-splat>(y.to_a(), 0, 0)
+    x = <assignTemp>$12.slice(::Range.new(0, -1, false))
+    <assignTemp>$12
   end
 
   "foo".concat(self(<constant:<todo sym>>).bar().to_s()).intern()

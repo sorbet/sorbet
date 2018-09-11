@@ -359,6 +359,40 @@ Begin {
       body = Nil {
       }
     }
+    WhilePost {
+      cond = False {
+      }
+      body = Kwbegin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = puts
+            args = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+        ]
+      }
+    }
+    UntilPost {
+      cond = True {
+      }
+      body = Kwbegin {
+        stmts = [
+          Send {
+            receiver = NULL
+            method = puts
+            args = [
+              Integer {
+                val = "1"
+              }
+            ]
+          }
+        ]
+      }
+    }
     Masgn {
       lhs = Mlhs {
         exprs = [

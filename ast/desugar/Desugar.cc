@@ -689,11 +689,34 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
                 result.swap(res);
             },
+            // Most of the time a WhilePost is a normal while.
+            // But it might be a do-while, in which case we do this:
+            //
+            // while true
+            //   <temp> = <body>
+            //   if ! <cond>
+            //     break <temp>
+            //   end
+            // end
             [&](parser::WhilePost *wl) {
-                auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
+                bool isDoWhile = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
-                unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
-                result.swap(res);
+
+                if (isDoWhile) {
+                    auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
+
+                    auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
+                                                          ++uniqueCounter);
+                    auto withResult = MK::Assign(loc, temp, move(body));
+                    auto breaker = MK::If(loc, move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
+                    auto breakWithResult = MK::InsSeq1(loc, move(withResult), move(breaker));
+                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), move(breakWithResult));
+                    result.swap(res);
+                } else {
+                    auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
+                    unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                    result.swap(res);
+                }
             },
             [&](parser::Until *wl) {
                 auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
@@ -701,11 +724,26 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
                 result.swap(res);
             },
+            // This is the same as WhilePost, but the cond negation in the other branch.
             [&](parser::UntilPost *wl) {
-                auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
+                bool isDoUntil = parser::isa_node<parser::Kwbegin>(wl->body.get());
                 auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
-                unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
-                result.swap(res);
+
+                if (isDoUntil) {
+                    auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
+
+                    auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
+                                                          ++uniqueCounter);
+                    auto withResult = MK::Assign(loc, temp, move(body));
+                    auto breaker = MK::If(loc, move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
+                    auto breakWithResult = MK::InsSeq1(loc, move(withResult), move(breaker));
+                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), move(breakWithResult));
+                    result.swap(res);
+                } else {
+                    auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
+                    unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                    result.swap(res);
+                }
             },
             [&](parser::Nil *wl) {
                 unique_ptr<Expression> res = MK::Nil(loc);
