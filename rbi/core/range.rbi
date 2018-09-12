@@ -5,6 +5,13 @@ class Range < Object
   extend T::Generic
   Elem = type_member(:out)
 
+  type_parameters(:U).sig(
+    from: T.type_parameter(:U),
+    to: T.type_parameter(:U),
+    exclude_end: T.any(TrueClass, FalseClass)
+  ).returns(T::Range[T.type_parameter(:U)])
+  def self.new(from, to, exclude_end=false); end
+
   Sorbet.sig(
       obj: BasicObject,
   )

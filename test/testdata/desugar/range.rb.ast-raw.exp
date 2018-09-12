@@ -8,57 +8,129 @@ ClassDef{
       args = []
       rhs = InsSeq{
         stats = [
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Range>
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = a
             }
-            fun = new
-            block = nullptr
-            args = [
-              Literal{ value = 1 }
-              Literal{ value = 2 }
-            ]
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:Range>
+              }
+              fun = new
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+              ]
+            }
           }
-          Send{
-            recv = UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Range>
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = b
             }
-            fun = new
-            block = nullptr
-            args = [
-              Literal{ value = 1 }
-              Literal{ value = 2 }
-            ]
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:Range>
+              }
+              fun = new
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+              ]
+            }
           }
-          Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Range
-              typeAlias = nullptr
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = c
             }
-            fun = new
-            block = nullptr
-            args = [
-              Literal{ value = 1 }
-              Literal{ value = 2 }
-              Literal{ value = true }
-            ]
+            rhs = Send{
+              recv = ConstantLit{
+                orig = nullptr
+                symbol = ::Range
+                typeAlias = nullptr
+              }
+              fun = new
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+                Literal{ value = true }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = d
+            }
+            rhs = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:Range>
+              }
+              fun = new
+              block = nullptr
+              args = [
+                Literal{ value = 1 }
+                Literal{ value = 2 }
+                Literal{ value = true }
+              ]
+            }
+          }
+          Assign{
+            lhs = UnresolvedIdent{
+              kind = Local
+              name = e
+            }
+            rhs = Send{
+              recv = Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Range>
+                }
+                fun = new
+                block = nullptr
+                args = [
+                  Literal{ value = 1 }
+                  Literal{ value = 42 }
+                ]
+              }
+              fun = first
+              block = nullptr
+              args = [
+              ]
+            }
           }
         ],
-        expr = Send{
-          recv = UnresolvedConstantLit{
-            scope = EmptyTree
-            cnst = <constant:Range>
+        expr = Assign{
+          lhs = UnresolvedIdent{
+            kind = Local
+            name = f
           }
-          fun = new
-          block = nullptr
-          args = [
-            Literal{ value = 1 }
-            Literal{ value = 2 }
-            Literal{ value = true }
-          ]
+          rhs = Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:Range>
+              }
+              fun = new
+              block = nullptr
+              args = [
+                Literal{ value = "a" }
+                Literal{ value = "z" }
+              ]
+            }
+            fun = last
+            block = nullptr
+            args = [
+            ]
+          }
         }
       }
     }

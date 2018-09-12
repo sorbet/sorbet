@@ -1,0 +1,99 @@
+# typed: strict
+def foo
+    a = 1..2
+    b = Range.new(1, 2)
+    c = 1...2
+    d = Range.new(1, 2, true)
+    e = (1..42).first
+    f = ('a'..'z').last
+    # dead=1
+    # <statTemp>$5: <Class:Range>
+    #
+    # <statTemp>$6: Integer(1)
+    #
+    # <statTemp>$7: Integer(2)
+    #
+    # <statTemp>$9: <Class:Range>
+    #
+    # <statTemp>$10: Integer(1)
+    #
+    # <statTemp>$11: Integer(2)
+    #
+    # <statTemp>$13: <Class:Range>
+    #
+    # <statTemp>$14: Integer(1)
+    #
+    # <statTemp>$15: Integer(2)
+    #
+    # <statTemp>$16: TrueClass
+    #
+    # <statTemp>$18: <Class:Range>
+    #
+    # <statTemp>$19: Integer(1)
+    #
+    # <statTemp>$20: Integer(2)
+    #
+    # <statTemp>$21: TrueClass
+    #
+    # <statTemp>$23: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = Integer
+    #   ]
+    # }
+    #
+    # <statTemp>$24: <Class:Range>
+    #
+    # <statTemp>$25: Integer(1)
+    #
+    # <statTemp>$26: Integer(42)
+    #
+    # <statTemp>$27: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = String
+    #   ]
+    # }
+    #
+    # <statTemp>$28: <Class:Range>
+    #
+    # <statTemp>$29: String("a")
+    #
+    # <statTemp>$30: String("z")
+    #
+    # <returnMethodTemp>$2: String
+    #
+    # <finalReturn>: <impossible>
+    #
+    # c: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = Integer
+    #   ]
+    # }
+    #
+    # b: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = Integer
+    #   ]
+    # }
+    #
+    # d: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = Integer
+    #   ]
+    # }
+    #
+    # a: AppliedType {
+    #   klass = ::Range
+    #   targs = [
+    #     <constant:Elem> = Integer
+    #   ]
+    # }
+    #
+    # e: Integer
+    #
+    # f: String
+end

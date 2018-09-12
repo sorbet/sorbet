@@ -1,7 +1,9 @@
 # typed: strict
 def foo
-    1..2
-    Range.new(1, 2)
-    1...2
-    Range.new(1, 2, true)
+    a = 1..2
+    b = Range.new(1, 2)
+    c = 1...2
+    d = Range.new(1, 2, true)
+    e = (1..42).first
+    f = ('a'..'z').last
 end
