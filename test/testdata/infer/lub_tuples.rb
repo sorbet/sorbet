@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class Opus::CIBot::Tasks::NotifySlackBuildComplete 
   extend T::Helpers
 

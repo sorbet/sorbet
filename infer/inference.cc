@@ -24,6 +24,15 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             Error::raise("should never happen");
         }
     }
+
+    auto missingReturnType = cfg->symbol.data(ctx).resultType == nullptr;
+    auto shouldHaveReturnType = true;
+
+    if (cfg->symbol.data(ctx).name.data(ctx).kind != core::NameKind::UTF8 ||
+        cfg->symbol.data(ctx).name == core::Names::staticInit() || !cfg->symbol.data(ctx).loc().exists()) {
+        shouldHaveReturnType = false;
+    }
+
     vector<Environment> outEnvironments;
     outEnvironments.reserve(cfg->maxBasicBlockId);
     for (int i = 0; i < cfg->maxBasicBlockId; i++) {
@@ -114,8 +123,11 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                     totalSendCount++;
                     if (bind.tpe && !bind.tpe->isUntyped()) {
                         typedSendCount++;
-                    } else if (bind.tpe->isUntyped()) {
+                    } else if (bind.tpe->hasUntyped()) {
                         DEBUG_ONLY(core::histogramInc("untyped.sources", bind.tpe->untypedBlame()._id););
+                        if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
+                            e.setHeader("This code is untyped");
+                        }
                     }
                 }
                 ENFORCE(bind.tpe);
@@ -146,6 +158,12 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
     }
     if (startErrorCount == ctx.state.totalErrors()) {
         core::counterInc("infer.methods_typechecked.no_errors");
+    }
+
+    if (missingReturnType && shouldHaveReturnType) {
+        if (auto e = ctx.state.beginError(cfg->symbol.data(ctx).loc(), core::errors::Infer::UntypedMethod)) {
+            e.setHeader("This function does not have a `sig`");
+        }
     }
 
     core::prodCounterAdd("types.input.sends.typed", typedSendCount);

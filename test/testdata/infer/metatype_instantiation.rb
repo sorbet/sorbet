@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 a = T::Array[{foo: Integer}].new
 a << {foo: 1}

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module MixinA
   A = 1
 end

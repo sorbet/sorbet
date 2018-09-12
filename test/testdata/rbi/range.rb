@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 Range.new(1, 10, true)
 Range.new(1.0, 100.0, false)

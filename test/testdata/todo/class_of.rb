@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 module Mixin; end
 class Foo

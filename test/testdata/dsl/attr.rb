@@ -2,7 +2,7 @@
 class TestAttr
   extend T::Helpers
 
-  def initialize
+  def initialize  # error: does not have a `sig`
     @v1 = T.let(0, Integer)
     @v2 = T.let("", String)
   end
@@ -18,5 +18,5 @@ class TestAttr
   sig.returns(String)
   attr_reader :v3 # error: Use of undeclared variable
 
-  attr_writer :v4, :v5 # error: Use of undeclared variable
+  attr_writer :v4, :v5 # error: MULTI
 end

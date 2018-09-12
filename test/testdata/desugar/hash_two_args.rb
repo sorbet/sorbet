@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 extend T::Helpers
 
 sig(foo: T::Hash[Symbol, Integer]).void

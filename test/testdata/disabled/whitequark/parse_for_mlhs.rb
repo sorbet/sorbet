@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 for a, b in foo; p a, b; end

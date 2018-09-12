@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module Fake
 end
 class Test

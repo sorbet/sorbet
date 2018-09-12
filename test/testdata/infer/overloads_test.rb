@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # MutableContext::permitOverloadDefinitions is aware of this file name. Don't rename this file.
 class HasOverloads
   extend T::Helpers

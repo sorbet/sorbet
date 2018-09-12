@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module Mixin
   extend T::Helpers
 

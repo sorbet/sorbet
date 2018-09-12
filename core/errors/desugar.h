@@ -1,3 +1,5 @@
+#ifndef SORBET_CORE_ERRORS_DESUGAR_H
+#define SORBET_CORE_ERRORS_DESUGAR_H
 #include "core/Errors.h"
 
 namespace sorbet {
@@ -13,3 +15,5 @@ constexpr ErrorClass NoConstantReassignment{3005, StrictLevel::Typed};
 } // namespace errors
 } // namespace core
 } // namespace sorbet
+
+#endif

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class QueryProfile < Hash
   def explain_for(which)
     self["explain_#{which}"] || self[:"explain_#{which}"] # error: MULTI

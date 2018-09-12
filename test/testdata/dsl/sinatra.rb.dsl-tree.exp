@@ -6,6 +6,7 @@ module <emptyTree>::<constant:MyRoutes><<constant:<todo sym>>> < ()
   def <instance_registered><<constant:<todo sym>>>(app)
     app.get("/route/") do ||
       begin
+        self(<constant:<todo sym>>).my_helper()
         self(<constant:<todo sym>>).params()
         self(<constant:<todo sym>>).my_helper()
       end

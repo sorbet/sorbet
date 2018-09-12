@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def foo
     a = 1..2
     b = Range.new(1, 2)

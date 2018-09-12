@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class Main
   def initialize
     @s = T.let(nil, T.nilable(Integer))

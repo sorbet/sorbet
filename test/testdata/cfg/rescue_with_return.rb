@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def a
     begin
         return 1

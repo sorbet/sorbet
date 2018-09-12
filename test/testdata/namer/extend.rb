@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module Mixin1
   def say_hello
   end

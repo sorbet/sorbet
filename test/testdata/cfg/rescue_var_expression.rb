@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class MyClass
   def foo=(arg)
   end

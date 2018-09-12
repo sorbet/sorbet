@@ -1,23 +1,23 @@
 # typed: strict
 
 class A
-    def self.each
+    def self.each # error: does not have a `sig`
         yield 1,2,3,4,5
         yield 6,7,8,9,0
     end
 end
 
 class E
-    def self.e=(e)
+    def self.e=(e) # error: does not have a `sig`
         @e = e; # error: Use of undeclared variable `@e`
     end
-    def self.e
+    def self.e # error: does not have a `sig`
         @e
     end
 end
 
 class Main
-    def self.main
+    def self.main # error: does not have a `sig`
 
         for a in A do
             puts a.inspect

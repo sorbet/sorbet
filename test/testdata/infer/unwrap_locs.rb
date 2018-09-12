@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 A = 3
 B = 4

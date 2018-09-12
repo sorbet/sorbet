@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class T1
   extend T::Generic
 

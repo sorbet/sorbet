@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class MyProc1
   extend T::Generic
 

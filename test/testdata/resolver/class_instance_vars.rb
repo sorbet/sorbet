@@ -1,12 +1,12 @@
 # typed: strict
 class Parent
-  def initialize
+  def initialize # error: does not have a `sig`
     @ivar = T.let(1, Integer)
     @ivar2 = T.let(2, Integer)
   end
   @@class_var = T.let("hi", String)
 
-  def hi
+  def hi # error: does not have a `sig`
     @ivar = 1
     @ivar2
   end
@@ -24,7 +24,7 @@ class Child < Parent
   @@mixin_cvar
   @@undefined_cvar # error: Use of undeclared variable
 
-  def child_method
+  def child_method # error: does not have a `sig`
     @@class_var
     @@mixin_cvar
     @ivar2

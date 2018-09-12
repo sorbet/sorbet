@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class A
   def take_arguments(a, b=1, *c, d:, e:2, **f, &g)
     [a,b,c,d,e,f,g]

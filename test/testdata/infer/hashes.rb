@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class Foo
   def bar(cond)
    s = if (cond)

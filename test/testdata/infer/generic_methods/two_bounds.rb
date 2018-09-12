@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class A
   class Foo
     extend T::Helpers

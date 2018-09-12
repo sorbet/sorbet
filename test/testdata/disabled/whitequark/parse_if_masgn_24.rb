@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 if (a, b = foo); end

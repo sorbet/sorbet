@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 class Impl # error: Missing definition for abstract method
   include Interface

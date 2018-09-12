@@ -1,3 +1,5 @@
+#ifndef SORBET_CORE_ERRORS_DSL_H
+#define SORBET_CORE_ERRORS_DSL_H
 #include "core/Errors.h"
 
 namespace sorbet {
@@ -10,3 +12,4 @@ constexpr ErrorClass BadWrapInstance{3502, StrictLevel::Typed};
 } // namespace errors
 } // namespace core
 } // namespace sorbet
+#endif

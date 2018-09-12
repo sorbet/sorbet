@@ -1,6 +1,6 @@
 # typed: strict
 
-def test_must
+def test_must # error: does not have a `sig`
   x = T.cast(nil, T.nilable(String)) # error: Useless cast
   T.assert_type!(T.must(x), String)
 

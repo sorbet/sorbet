@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 Sorbet.sig.returns(String)
 def foo

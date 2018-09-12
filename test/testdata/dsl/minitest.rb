@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class MyTest
     def outside_method
     end

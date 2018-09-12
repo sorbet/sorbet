@@ -1,8 +1,8 @@
 # typed: strict
 class TestCasts
-  def untyped; end
+  def untyped; end # error: does not have a `sig`
 
-  def test_casts
+  def test_casts # error: does not have a `sig`
     t = T.assert_type!(untyped, Integer) # error: unable to infer the type
     t + 4
 

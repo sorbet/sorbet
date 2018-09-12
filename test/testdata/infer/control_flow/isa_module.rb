@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module Mod; end
 
 def isa_module(m)

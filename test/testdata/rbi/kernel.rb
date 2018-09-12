@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 T.assert_type!(Kernel.loop, Enumerator[T.untyped])
 

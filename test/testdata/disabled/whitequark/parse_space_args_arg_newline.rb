@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 fun (1
 )

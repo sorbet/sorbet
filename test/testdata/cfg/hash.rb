@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestHash
   def something; 17; end
   def test

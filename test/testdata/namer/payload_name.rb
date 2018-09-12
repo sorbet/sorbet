@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 # A facinating bug. Since `raise` in a method on Kernel, it is in the payload,
 # so it's Name will be entered into the table during payload. If the same name

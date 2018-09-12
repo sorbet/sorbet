@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 case foo; when 1, *baz; bar; when *foo; end

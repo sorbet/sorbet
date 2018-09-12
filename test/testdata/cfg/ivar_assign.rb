@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestIVar
   def initialize
     @foo = T.let(0, Integer)

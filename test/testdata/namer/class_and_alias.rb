@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 A = 91
 class A # error: Redefining constant `A`
 end

@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestConfigatron
   def configatron_test
       T.assert_type!(configatron.test_bool, T.any(TrueClass, FalseClass))

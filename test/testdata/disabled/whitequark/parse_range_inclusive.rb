@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 1..2

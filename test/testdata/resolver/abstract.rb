@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 class HasAbstract
   extend T::Helpers
@@ -37,6 +37,7 @@ module InterfaceModule
 
   interface!
 
+  sig.returns(T.untyped)
   def f # error: must be declared abstract
     0
   end

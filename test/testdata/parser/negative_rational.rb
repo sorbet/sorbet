@@ -1,2 +1,2 @@
-# typed: strict
+# typed: true
 -5r

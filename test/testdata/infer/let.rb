@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestLet
   def testit
     x = T.let(0, Integer)

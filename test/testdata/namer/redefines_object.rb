@@ -4,7 +4,7 @@ class Object
 end
 
 class Trigger
-  def trigger
+  def trigger # error: does not have a `sig`
     @__fake_logger # error: undeclared variable
   end
 end

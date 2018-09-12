@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 def f(foo=1, bar=2); end

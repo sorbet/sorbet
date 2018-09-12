@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def baz1
   a = "foo"
   b = a.getbyte(a) # error: `String("foo")` doesn't match `Integer` for argument `arg0`

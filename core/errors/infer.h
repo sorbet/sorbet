@@ -1,3 +1,5 @@
+#ifndef SORBET_CORE_ERRORS_INFER_H
+#define SORBET_CORE_ERRORS_INFER_H
 #include "core/Errors.h"
 
 namespace sorbet {
@@ -22,8 +24,11 @@ constexpr ErrorClass GenericMethodConstaintUnsolved{7013, StrictLevel::Typed};
 constexpr ErrorClass RevealType{7014, StrictLevel::Typed};
 constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::Typed};
+constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
+constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 
 } // namespace Infer
 } // namespace errors
 } // namespace core
 } // namespace sorbet
+#endif

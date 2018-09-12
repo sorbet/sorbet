@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 # This is baked in
 # M = Opus::DB::Model

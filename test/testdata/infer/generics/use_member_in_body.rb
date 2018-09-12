@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestGeneric
   extend T::Generic
   Elem = type_member

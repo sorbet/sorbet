@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class A < B # error: Unable to resolve constant `B`
   module C
   end

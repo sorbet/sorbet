@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class TestRescue
   def meth; 0; end
   def foo; 1; end

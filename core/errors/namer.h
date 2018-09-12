@@ -1,3 +1,5 @@
+#ifndef SORBET_CORE_ERRORS_NAMER_H
+#define SORBET_CORE_ERRORS_NAMER_H
 #include "core/Errors.h"
 
 namespace sorbet {
@@ -21,3 +23,5 @@ constexpr ErrorClass InterfaceClass{4013, StrictLevel::Stripe};
 } // namespace errors
 } // namespace core
 } // namespace sorbet
+
+#endif

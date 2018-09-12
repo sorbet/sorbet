@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 until foo do meth end

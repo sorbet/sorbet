@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def a(foo, bar)
     begin
         return 1

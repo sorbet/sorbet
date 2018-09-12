@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def foo
     /abc/
     Regexp.new('abc')

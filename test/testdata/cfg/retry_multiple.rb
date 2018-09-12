@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class A < Exception; end
 class B < Exception; end
 def main

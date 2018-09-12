@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 Hash.new
 Hash.new(0)

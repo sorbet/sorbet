@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 require_relative "../../t"
 
 module Foo

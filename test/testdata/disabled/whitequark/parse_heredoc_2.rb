@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 <<`HERE`
 foo

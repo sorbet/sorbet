@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 class CovariantNotAllowed
   Elem = type_member(:in) # error: can only have invariant type members

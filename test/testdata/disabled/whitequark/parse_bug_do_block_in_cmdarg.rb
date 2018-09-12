@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 tap (proc do end)

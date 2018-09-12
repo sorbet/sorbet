@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class Destructure
   def f((x,y), z)
     x + y

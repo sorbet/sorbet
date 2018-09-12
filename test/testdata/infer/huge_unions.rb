@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 class C1; end;
 class C2; end;
 class C3; end;

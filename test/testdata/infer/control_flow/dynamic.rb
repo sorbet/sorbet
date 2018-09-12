@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 def untyped; end
 
 def test_dynamic

@@ -1,3 +1,3 @@
-# typed: strict
+# typed: true
 
 if foo...bar; end

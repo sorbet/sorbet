@@ -1,5 +1,4 @@
-# typed: strict
-# typed: strict
+# typed: true
 class Examples
   def i_like_ifs()
     if true

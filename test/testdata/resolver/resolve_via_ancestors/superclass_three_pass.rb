@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 
 # This requires three passes: The first one resolves all the names
 # that don't use ancestors; The second one resolves the superclass of

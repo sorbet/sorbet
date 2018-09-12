@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 2.times do
   begin
     return 1

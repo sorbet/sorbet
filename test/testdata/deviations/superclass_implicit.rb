@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 # In vanilla Ruby, this would be an error.
 #
 # In Stripe Ruby, we statically analyze and determine that `A < B`,

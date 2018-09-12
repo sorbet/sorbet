@@ -1,4 +1,4 @@
-# typed: strict
+# typed: true
 module Funcs
   extend T::Helpers
 

@@ -1,2 +1,2 @@
-# typed: strict
+# typed: true
 __FILE__
