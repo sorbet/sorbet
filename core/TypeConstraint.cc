@@ -17,9 +17,9 @@ void TypeConstraint::defineDomain(Context ctx, const InlinedVector<SymbolRef, 4>
         ENFORCE(typ != nullptr);
 
         if (tp.data(ctx).isCovariant()) {
-            findLowerBound(typ->sym);
+            findLowerBound(typ->sym) = Types::bottom();
         } else {
-            findUpperBound(typ->sym);
+            findUpperBound(typ->sym) = Types::top();
         }
     }
 }
@@ -35,7 +35,7 @@ bool TypeConstraint::solve(Context ctx) {
     for (auto &k : upperBounds) {
         auto &tv = k.first;
         auto &bound = k.second;
-        if (!bound) {
+        if (bound == Types::top()) {
             continue;
         }
         auto approximation = bound->_approximate(ctx, *this);
@@ -54,15 +54,27 @@ bool TypeConstraint::solve(Context ctx) {
         if (sol) {
             continue;
         }
-        if (!bound) {
-            bound = Types::bottom();
-        }
         auto approximation = bound->_approximate(ctx, *this);
         if (approximation) {
             sol = approximation;
         } else {
             ENFORCE(bound->isFullyDefined());
             sol = bound;
+        }
+    }
+
+    for (auto &k : upperBounds) {
+        auto &tv = k.first;
+        auto &upperBound = k.second;
+        auto &sol = findSolution(tv);
+        if (!sol) {
+            sol = upperBound;
+        }
+        if (upperBound) {
+            cantSolve = !Types::isSubType(ctx, findSolution(tv), upperBound);
+            if (cantSolve) {
+                return false;
+            }
         }
     }
 
@@ -75,15 +87,7 @@ bool TypeConstraint::solve(Context ctx) {
             return false;
         }
     }
-    for (auto &k : upperBounds) {
-        auto &tv = k.first;
-        auto &upperBound = k.second;
 
-        cantSolve = !Types::isSubType(ctx, findSolution(tv), upperBound);
-        if (cantSolve) {
-            return false;
-        }
-    }
     wasSolved = true;
     return true;
 }
