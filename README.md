@@ -298,6 +298,9 @@ Once you have an optimized build and the file list generated, you can run
 sorbet/scripts/typecheck_devel
 ```
 
+If it crashes with a message about a "bus error," probably you forgot to build
+with optimizations. See step 1.
+
 If you're debugging a crash, you might also want to set `SORBET_RUN_UNDER`:
 
 ```
