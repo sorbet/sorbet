@@ -29,6 +29,7 @@ public:
                                         InlinedVector<const TypeAndOrigins *, 2> &args,
                                         const InlinedVector<Loc, 2> &argLocs, const std::shared_ptr<Type> &selfRef,
                                         const std::shared_ptr<Type> &fullType,
+                                        const std::shared_ptr<Type> &lastAndComponent,
                                         const std::shared_ptr<SendAndBlockLink> &linkType) const = 0;
 };
 

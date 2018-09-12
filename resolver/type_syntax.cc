@@ -521,7 +521,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
 
             auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));
             auto dispatched = ctype->dispatchCall(ctx, core::Names::squareBrackets(), s->loc, recvi->loc, targs,
-                                                  argLocs, ctype, ctype, nullptr);
+                                                  argLocs, ctype, ctype, ctype, nullptr);
             for (auto &comp : dispatched.components) {
                 for (auto &err : comp.errors) {
                     ctx.state._error(move(err));

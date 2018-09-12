@@ -643,17 +643,18 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, i
 DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                          InlinedVector<const TypeAndOrigins *, 2> &args,
                                          const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfType,
-                                         const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                         const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                         const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                            InlinedVector<const TypeAndOrigins *, 2> &args,
                                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfType,
-                                           const shared_ptr<Type> &fullType,
+                                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                                            const shared_ptr<SendAndBlockLink> &block) {
     return Types::untypedUntracked()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType,
-                                                   block);
+                                                   lastAndComponent, block);
 }
 
 void LambdaParam::_sanityCheck(Context ctx) {}
@@ -756,7 +757,8 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                       InlinedVector<const TypeAndOrigins *, 2> &args,
                                       const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                      const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &link) {
+                                      const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                      const shared_ptr<SendAndBlockLink> &link) {
     Error::raise("should never happen");
 }
 

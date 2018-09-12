@@ -7,6 +7,7 @@
 #include "core/errors/infer.h"
 #include <algorithm> // find_if, sort
 
+#include "../Types.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
@@ -19,10 +20,11 @@ namespace core {
 DispatchResult ProxyType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                        InlinedVector<const TypeAndOrigins *, 2> &args,
                                        const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                       const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                       const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                       const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "proxytype");
     auto und = underlying();
-    return und->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, und, fullType, block);
+    return und->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, und, fullType, lastAndComponent, block);
 }
 
 shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i) {
@@ -32,10 +34,11 @@ shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i
 DispatchResult OrType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                     InlinedVector<const TypeAndOrigins *, 2> &args,
                                     const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                    const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                    const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                    const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "ortype");
-    auto leftRet = left->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, left, fullType, block);
-    auto rightRet = right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, block);
+    auto leftRet = left->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, left, fullType, left, block);
+    auto rightRet = right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, right, block);
     DispatchResult::ComponentVec components = move(leftRet.components);
     components.insert(components.end(), make_move_iterator(rightRet.components.begin()),
                       make_move_iterator(rightRet.components.end()));
@@ -53,27 +56,32 @@ shared_ptr<Type> OrType::getCallArgumentType(Context ctx, NameRef name, int i) {
 DispatchResult AppliedType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                          InlinedVector<const TypeAndOrigins *, 2> &args,
                                          const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                         const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                         const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                         const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "appliedType");
     ClassType ct(this->klass);
-    return ct.dispatchCallWithTargs(ctx, name, callLoc, receiverLoc, args, argLocs, selfRef, fullType, this->targs,
-                                    block);
+    return ct.dispatchCallWithTargs(ctx, name, callLoc, receiverLoc, args, argLocs, selfRef, fullType, lastAndComponent,
+                                    this->targs, block);
 }
 
 DispatchResult TypeVar::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                      InlinedVector<const TypeAndOrigins *, 2> &args,
                                      const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                     const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                     const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                     const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("should never happen");
 }
 
 DispatchResult AndType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                      InlinedVector<const TypeAndOrigins *, 2> &args,
                                      const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                     const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                     const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                     const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "andtype");
-    auto leftRet = left->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, left, fullType, block);
-    auto rightRet = right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, block);
+    auto leftRet =
+        left->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, left, fullType, lastAndComponent, block);
+    auto rightRet =
+        right->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, right, fullType, lastAndComponent, block);
 
     // If either side is missing the method, dispatch to the other.
     auto leftOk = absl::c_all_of(leftRet.components, [&](auto &comp) { return comp.method.exists(); });
@@ -110,12 +118,13 @@ shared_ptr<Type> AndType::getCallArgumentType(Context ctx, NameRef name, int i) 
 DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
                                        InlinedVector<const TypeAndOrigins *, 2> &args,
                                        const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                       const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                       const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                       const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "shapetype");
     auto method = Symbols::Shape().data(ctx).findMember(ctx, fun);
     if (method.exists() && method.data(ctx).intrinsic != nullptr) {
-        auto result =
-            method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+        auto result = method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType,
+                                                        lastAndComponent, block);
         if (result != nullptr) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = selfRef;
@@ -123,18 +132,20 @@ DispatchResult ShapeType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Lo
             return DispatchResult{result, move(components)};
         }
     }
-    return ProxyType::dispatchCall(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+    return ProxyType::dispatchCall(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, lastAndComponent,
+                                   block);
 }
 
 DispatchResult TupleType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
                                        InlinedVector<const TypeAndOrigins *, 2> &args,
                                        const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                       const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                       const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                       const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "tupletype");
     auto method = Symbols::Tuple().data(ctx).findMember(ctx, fun);
     if (method.exists() && method.data(ctx).intrinsic != nullptr) {
-        auto result =
-            method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+        auto result = method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType,
+                                                        lastAndComponent, block);
         if (result != nullptr) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = selfRef;
@@ -142,7 +153,8 @@ DispatchResult TupleType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Lo
             return DispatchResult{result, move(components)};
         }
     }
-    return ProxyType::dispatchCall(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+    return ProxyType::dispatchCall(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, lastAndComponent,
+                                   block);
 }
 
 namespace {
@@ -156,16 +168,15 @@ bool isSetter(Context ctx, NameRef fun) {
 unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                     SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
                                     const Symbol &argSym, const shared_ptr<Type> &fullType,
-                                    vector<shared_ptr<Type>> &targs, Loc loc, bool mayBeSetter = false) {
+                                    const shared_ptr<Type> &lastAndComponent, vector<shared_ptr<Type>> &targs, Loc loc,
+                                    bool mayBeSetter = false) {
     auto ref = argSym.ref(ctx);
     shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(ctx, ref);
     }
 
-    expectedType = Types::replaceSelfType(
-        ctx, expectedType,
-        fullType); // TODO: fullType is actually not the best here. We want the last AND component of fullType
+    expectedType = Types::replaceSelfType(ctx, expectedType, lastAndComponent);
 
     if (Types::isSubTypeUnderConstraint(ctx, constr, argTpe.type, expectedType)) {
         return nullptr;
@@ -400,7 +411,9 @@ string prettyArity(Context ctx, SymbolRef method) {
 DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
                                                 InlinedVector<const TypeAndOrigins *, 2> &args,
                                                 const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                                const shared_ptr<Type> &fullType, vector<shared_ptr<Type>> &targs,
+                                                const shared_ptr<Type> &fullType,
+                                                const shared_ptr<Type> &lastAndComponent,
+                                                vector<shared_ptr<Type>> &targs,
                                                 const shared_ptr<SendAndBlockLink> &block) {
     categoryCounterInc("dispatch_call", "classtype");
     if (isUntyped()) {
@@ -519,8 +532,8 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
         }
 
         auto offset = ait - args.begin();
-        if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, *arg, spec, fullType, targs,
-                                  argLocs[offset], args.size() == 1)) {
+        if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, *arg, spec, fullType,
+                                  lastAndComponent, targs, argLocs[offset], args.size() == 1)) {
             result.components.front().errors.emplace_back(move(e));
         }
 
@@ -589,7 +602,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                         auto offset = it - hash->keys.begin();
                         tpe.type = hash->values[offset];
                         if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, tpe, spec,
-                                                  fullType, targs, Loc::none())) {
+                                                  fullType, lastAndComponent, targs, Loc::none())) {
                             result.components.front().errors.emplace_back(move(e));
                         }
                     }
@@ -615,7 +628,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
                 auto offset = arg - hash->keys.begin();
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(ctx, *constr, callLoc, receiverLoc, this->symbol, method, tpe, spec, fullType,
-                                          targs, Loc::none())) {
+                                          lastAndComponent, targs, Loc::none())) {
                     result.components.front().errors.emplace_back(move(e));
                 }
             }
@@ -667,8 +680,8 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     shared_ptr<Type> resultType = nullptr;
 
     if (method.data(ctx).intrinsic != nullptr) {
-        resultType =
-            method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+        resultType = method.data(ctx).intrinsic->apply(ctx, callLoc, receiverLoc, args, argLocs, selfRef, fullType,
+                                                       lastAndComponent, block);
     }
 
     if (resultType == nullptr) {
@@ -692,7 +705,7 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
     }
     resultType = Types::replaceSelfType(
         ctx, resultType,
-        fullType); // TODO: full type is not the best here. We actually want the last AND component of fulltype
+        lastAndComponent); // TODO: full type is not the best here. We actually want the last AND component of fulltype
 
     if (block != nullptr) {
         SymbolRef bspec;
@@ -722,9 +735,11 @@ DispatchResult ClassType::dispatchCallWithTargs(Context ctx, NameRef fun, Loc ca
 DispatchResult ClassType::dispatchCall(Context ctx, NameRef fun, Loc callLoc, Loc receiverLoc,
                                        InlinedVector<const TypeAndOrigins *, 2> &args,
                                        const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                       const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                       const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                       const shared_ptr<SendAndBlockLink> &block) {
     vector<shared_ptr<Type>> empty;
-    return dispatchCallWithTargs(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, empty, block);
+    return dispatchCallWithTargs(ctx, fun, callLoc, receiverLoc, args, argLocs, selfRef, fullType, lastAndComponent,
+                                 empty, block);
 }
 
 shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i) {
@@ -772,7 +787,8 @@ shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int
 DispatchResult AliasType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                        InlinedVector<const TypeAndOrigins *, 2> &args,
                                        const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                       const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                       const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                       const shared_ptr<SendAndBlockLink> &block) {
     Error::raise("AliasType::dispatchCall");
 }
 
@@ -783,18 +799,20 @@ shared_ptr<Type> AliasType::getCallArgumentType(Context ctx, NameRef name, int i
 DispatchResult MetaType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
                                       InlinedVector<const TypeAndOrigins *, 2> &args,
                                       const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                      const shared_ptr<Type> &fullType, const shared_ptr<SendAndBlockLink> &block) {
+                                      const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                                      const shared_ptr<SendAndBlockLink> &block) {
     switch (name._id) {
         case Names::new_()._id: {
             auto res = DispatchResult(wrapped, selfRef, Symbols::Class().data(ctx).findMember(ctx, Names::new_()));
             auto inner = wrapped->dispatchCall(ctx, Names::initialize(), callLoc, receiverLoc, args, argLocs, wrapped,
-                                               wrapped, block);
+                                               wrapped, wrapped, block);
             res.components.insert(res.components.end(), make_move_iterator(inner.components.begin()),
                                   make_move_iterator(inner.components.end()));
             return res;
         }
         default: {
-            return ProxyType::dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfRef, fullType, block);
+            return ProxyType::dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfRef, fullType,
+                                           lastAndComponent, block);
         }
     }
 }
@@ -821,7 +839,7 @@ class T_untyped : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         return Types::untypedUntracked();
     }
@@ -831,7 +849,7 @@ class T_must : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
             return nullptr;
@@ -856,7 +874,7 @@ class T_any : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
             return Types::untypedUntracked();
@@ -878,7 +896,7 @@ class T_all : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
             return Types::untypedUntracked();
@@ -900,7 +918,7 @@ class T_revealType : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.size() != 1) {
             return Types::untypedUntracked();
@@ -918,7 +936,7 @@ class T_nilable : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.size() != 1) {
             return Types::untypedUntracked();
@@ -932,7 +950,7 @@ class Object_class : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         SymbolRef self = unwrapSymbol(selfRef);
         auto singleton = self.data(ctx).lookupSingletonClass(ctx);
@@ -947,7 +965,7 @@ class Class_new : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         SymbolRef self = unwrapSymbol(selfRef);
 
@@ -963,7 +981,7 @@ public:
         }
         auto instanceTy = attachedClass.data(ctx).externalType(ctx);
         auto dispatched = instanceTy->dispatchCall(ctx, Names::initialize(), callLoc, receiverLoc, args, argLocs,
-                                                   instanceTy, instanceTy, linkType);
+                                                   instanceTy, instanceTy, instanceTy, linkType);
 
         // This dispatch call will set return type in linkType to result of initialize.
         // Need to override it
@@ -986,7 +1004,7 @@ class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         SymbolRef attachedClass;
 
@@ -1050,7 +1068,7 @@ class Magic_buildHash : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         ENFORCE(args.size() % 2 == 0);
 
@@ -1073,7 +1091,7 @@ class Magic_buildArray : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.empty()) {
             return Types::arrayOfUntyped();
@@ -1127,7 +1145,7 @@ class Magic_expandSplat : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (args.size() != 3) {
             return Types::arrayOfUntyped();
@@ -1149,7 +1167,7 @@ class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1176,7 +1194,7 @@ class Tuple_last : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1195,7 +1213,7 @@ class Tuple_first : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1214,7 +1232,7 @@ class Tuple_minMax : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         auto *tuple = cast_type<TupleType>(selfRef.get());
         ENFORCE(tuple);
@@ -1233,7 +1251,7 @@ class Shape_merge : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         auto *shape = cast_type<ShapeType>(selfRef.get());
         ENFORCE(shape);
@@ -1300,7 +1318,7 @@ class Array_flatten : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         shared_ptr<Type> element;
@@ -1347,7 +1365,7 @@ class Array_compact : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         shared_ptr<Type> element;
         if (auto *ap = cast_type<AppliedType>(selfRef.get())) {
@@ -1368,7 +1386,7 @@ class Kernel_proc : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
                            const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                           const shared_ptr<Type> &fullType,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
                            const shared_ptr<SendAndBlockLink> &linkType) const override {
         if (linkType == nullptr) {
             return core::Types::untypedUntracked();
