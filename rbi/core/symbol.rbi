@@ -107,6 +107,6 @@ class Symbol < Object
   Sorbet.sig.returns(String)
   def to_s(); end
 
-  Sorbet.sig.returns(Symbol)
+  Sorbet.sig.returns(T.self_type)
   def to_sym(); end
 end

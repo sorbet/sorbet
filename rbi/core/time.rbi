@@ -140,7 +140,7 @@ class Time < Object
   Sorbet.sig.returns(Integer)
   def gmt_offset(); end
 
-  Sorbet.sig.returns(T.self_type)
+  Sorbet.sig.returns(Time)
   def gmtime(); end
 
   Sorbet.sig.returns(Integer)
@@ -170,7 +170,7 @@ class Time < Object
   Sorbet.sig(
       utc_offset: String,
   )
-  .returns(T.self_type)
+  .returns(Time)
   def localtime(utc_offset=T.unsafe(nil)); end
 
   Sorbet.sig.returns(Integer)
@@ -248,7 +248,7 @@ class Time < Object
   Sorbet.sig.returns(Numeric)
   def usec(); end
 
-  Sorbet.sig.returns(T.self_type)
+  Sorbet.sig.returns(Time)
   def utc(); end
 
   Sorbet.sig.returns(T.any(TrueClass, FalseClass))
