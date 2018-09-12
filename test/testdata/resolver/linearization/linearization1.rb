@@ -17,6 +17,6 @@ class A # linearization: A, M3, M2, M1
 end
 A.new.foo # => 2
 
-class B 
+class B
   include M2, M3
 end

@@ -1,10 +1,10 @@
 # typed: true
 class Foo;
   def self.bar
-  end; 
+  end;
   def baz
   end
-end; 
+end;
 
 Foo.bar
 Foo.baz # error: does not exist on

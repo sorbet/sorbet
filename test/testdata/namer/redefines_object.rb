@@ -1,6 +1,6 @@
 # typed: strict
 
-class Object 
+class Object
 end
 
 class Trigger

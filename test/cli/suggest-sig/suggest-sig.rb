@@ -5,7 +5,7 @@ def hazTwoArgs(a, b); 1; end;
 def baz
   if foo
     []
-  else 
+  else
     "[]"
   end
 end

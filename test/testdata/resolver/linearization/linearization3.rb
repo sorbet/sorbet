@@ -1,7 +1,7 @@
 # typed: true
 module A3; end
 module C3 # C3, A3
-  include A3 
+  include A3
 end
 module D3 # D3, A3
   include A3

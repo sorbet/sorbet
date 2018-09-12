@@ -1,7 +1,7 @@
 # typed: true
-module A5; 
+module A5;
 end
-module B5; 
+module B5;
   def foo; super + "b"; end;
 end # B5
 class C5 # C5, A5

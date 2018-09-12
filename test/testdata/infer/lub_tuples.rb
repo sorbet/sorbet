@@ -1,5 +1,5 @@
 # typed: true
-class Opus::CIBot::Tasks::NotifySlackBuildComplete 
+class Opus::CIBot::Tasks::NotifySlackBuildComplete
   extend T::Helpers
 
   def initialize()
