@@ -22,10 +22,9 @@ Loc Loc::join(Loc other) const {
     return Loc(this->file(), min(this->beginPos(), other.beginPos()), max(this->endPos(), other.endPos()));
 }
 
-Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
+Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
     Loc::Detail pos;
 
-    const File &file = source.data(gs);
     ENFORCE(off <= file.source().size(), "file offset out of bounds");
     if (off >= file.source().size()) {
         // parser generate positions out of file \facepalm.
@@ -43,17 +42,15 @@ Loc::Detail Loc::offset2Pos(FileRef source, u4 off, const GlobalState &gs) {
     return pos;
 }
 
-u4 Loc::pos2Offset(FileRef source, Loc::Detail pos, const GlobalState &gs) {
-    const File &file = source.data(gs);
-
+u4 Loc::pos2Offset(const File &file, Loc::Detail pos) {
     auto l = pos.line - 1;
     auto lineOffset = file.line_breaks()[l];
     return lineOffset + pos.column;
 }
 
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
-    Loc::Detail begin(offset2Pos(this->file(), beginPos(), gs));
-    Loc::Detail end(offset2Pos(this->file(), endPos(), gs));
+    Loc::Detail begin(offset2Pos(this->file().data(gs), beginPos()));
+    Loc::Detail end(offset2Pos(this->file().data(gs), endPos()));
     return make_pair(begin, end);
 }
 namespace {

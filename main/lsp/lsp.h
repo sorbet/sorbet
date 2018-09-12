@@ -2,13 +2,11 @@
 #define RUBY_TYPER_LSPLOOP_H
 
 #include "ast/ast.h"
+#include "common/concurrency/WorkerPool.h"
+#include "common/kvstore/KeyValueStore.h"
 #include "core/core.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/options/options.h"
-#define RAPIDJSON_ASSERT(x) ENFORCE(x)
-#define RAPIDJSON_HAS_STDSTRING 1
-#include "common/concurrency/WorkerPool.h"
-#include "common/kvstore/KeyValueStore.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
@@ -106,9 +104,6 @@ struct LSPMethod {
     };
     static const inline LSPMethod TextDocumentSignatureHelp() {
         return LSPMethod{"textDocument/signatureHelp", false, LSPMethod::Kind::ClientInitiated};
-    };
-    static const inline LSPMethod ReadFile() {
-        return LSPMethod{"ruby-typer/ReadFile", false, LSPMethod::Kind::ServerInitiated};
     };
     static const inline LSPMethod WorkspaceSymbols() {
         return LSPMethod{"workspace/symbol", false, LSPMethod::Kind::ClientInitiated};

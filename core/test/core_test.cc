@@ -40,7 +40,7 @@ TEST(ASTTest, TestOffset2Pos) { // NOLINT
         SCOPED_TRACE(name);
         FileRef f = gs.enterFile(move(name), tc.src);
 
-        auto detail = Loc::offset2Pos(f, tc.off, gs);
+        auto detail = Loc::offset2Pos(f.data(gs), tc.off);
 
         EXPECT_EQ(tc.col, detail.column);
         EXPECT_EQ(tc.line, detail.line);

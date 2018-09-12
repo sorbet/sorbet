@@ -182,12 +182,17 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
                            current["params"]["textDocument"]["uri"].GetStringLength());
             auto nextIt = it + 1;
             if (nextIt != pendingRequests.end()) {
-                auto nextMethod =
-                    LSPMethod::getByName({(*nextIt)["method"].GetString(), (*nextIt)["method"].GetStringLength()});
+                auto &next = *nextIt;
+                auto nextMethod = LSPMethod::getByName({next["method"].GetString(), next["method"].GetStringLength()});
                 if (nextMethod == LSPMethod::TextDocumentDidChange()) {
-                    string nextURI((*nextIt)["params"]["textDocument"]["uri"].GetString(),
-                                   (*nextIt)["params"]["textDocument"]["uri"].GetStringLength());
+                    string nextURI(next["params"]["textDocument"]["uri"].GetString(),
+                                   next["params"]["textDocument"]["uri"].GetStringLength());
                     if (nextURI == thisURI) {
+                        auto currentUpdates = move(current["params"]["contentChanges"]);
+                        for (auto &newUpdate : next["params"]["contentChanges"].GetArray()) {
+                            currentUpdates.PushBack(move(newUpdate), current.GetAllocator());
+                        }
+                        next["params"]["contentChanges"] = move(currentUpdates);
                         it = pendingRequests.erase(it);
                         continue;
                     }
@@ -272,7 +277,7 @@ unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, rapidjson::Documen
     core::Loc::Detail reqPos;
     reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
     reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
-    auto offset = core::Loc::pos2Offset(fref, reqPos, *finalGs);
+    auto offset = core::Loc::pos2Offset(fref.data(*finalGs), reqPos);
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 

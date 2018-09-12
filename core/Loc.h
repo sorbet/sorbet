@@ -75,8 +75,8 @@ public:
     bool operator==(const Loc &rhs) const;
 
     bool operator!=(const Loc &rhs) const;
-    static u4 pos2Offset(FileRef source, Detail pos, const GlobalState &gs);
-    static Detail offset2Pos(FileRef source, u4 off, const GlobalState &gs);
+    static u4 pos2Offset(const File &source, Detail pos);
+    static Detail offset2Pos(const File &source, u4 off);
 };
 CheckSize(Loc, 8, 4);
 } // namespace core

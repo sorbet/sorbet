@@ -1,6 +1,7 @@
 #include "absl/strings/match.h"
 #include "common/Timer.h"
 #include "lsp.h"
+#include "spdlog/fmt/ostr.h"
 
 using namespace std;
 
@@ -18,28 +19,6 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
     }
     if (method.isNotification) {
         logger->debug("Processing notification {} ", (string)method.name);
-        if (method == LSPMethod::DidChangeWatchedFiles()) {
-            sendRequest(LSPMethod::ReadFile(), d["params"],
-                        [&](rapidjson::Value &edits) -> void {
-                            ENFORCE(edits.IsArray());
-                            Timer timeit(logger, "handle update");
-                            vector<shared_ptr<core::File>> files;
-
-                            for (auto it = edits.Begin(); it != edits.End(); ++it) {
-                                rapidjson::Value &change = *it;
-                                string uri(change["uri"].GetString(), change["uri"].GetStringLength());
-                                string content(change["content"].GetString(), change["content"].GetStringLength());
-                                if (absl::StartsWith(uri, rootUri)) {
-                                    files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(content),
-                                                                               core::File::Type::Normal));
-                                }
-                            }
-
-                            tryFastPath(files);
-                            pushErrors();
-                        },
-                        [](rapidjson::Value &error) -> void {});
-        }
         if (method == LSPMethod::TextDocumentDidChange()) {
             core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
             Timer timeit(logger, "handle update");
@@ -57,8 +36,42 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
             // taught about it too: it merges consecutive TextDocumentDidChange
             if (absl::StartsWith(uri, rootUri)) {
-                files.emplace_back(
-                    make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+                auto currentFileRef = initialGS->findFileByPath(remoteName2Local(uri));
+                unique_ptr<core::File> file;
+                if (currentFileRef.exists()) {
+                    file = make_unique<core::File>((string)currentFileRef.data(*initialGS).path(),
+                                                   (string)currentFileRef.data(*initialGS).source(),
+                                                   core::File::Type::Normal);
+                } else {
+                    file = make_unique<core::File>(remoteName2Local(uri), "", core::File::Type::Normal);
+                }
+
+                for (auto &change : edits["contentChanges"].GetArray()) {
+                    if (change.HasMember("range") && !change["range"].IsNull()) {
+                        // incremental update
+                        auto old = move(file);
+                        string oldContent = (string)old->source();
+                        core::Loc::Detail start, end;
+                        start.line = change["range"]["start"]["line"].GetInt() + 1;
+                        start.column = change["range"]["start"]["character"].GetInt() + 1;
+                        end.line = change["range"]["end"]["line"].GetInt() + 1;
+                        end.column = change["range"]["end"]["character"].GetInt() + 1;
+                        auto startOffset = core::Loc::pos2Offset(*old, start);
+                        auto endOffset = core::Loc::pos2Offset(*old, end);
+                        string delta(change["text"].GetString(), change["text"].GetStringLength());
+                        string newContent = oldContent.replace(startOffset, endOffset - startOffset, delta);
+                        file = make_unique<core::File>((string)old->path(), move(newContent), core::File::Type::Normal);
+                    } else {
+                        // replace
+                        auto old = move(file);
+                        string newContent(change["text"].GetString(), change["text"].GetStringLength());
+                        file = make_unique<core::File>((string)old->path(), move(newContent), core::File::Type::Normal);
+                    }
+                }
+
+                logger->trace("Updating {} to have the following contents: {}", remoteName2Local(uri), file->source());
+
+                files.emplace_back(move(file));
 
                 tryFastPath(files);
                 pushErrors();
@@ -118,7 +131,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
             string serverCap = "{\"capabilities\": "
                                "   {"
-                               "       \"textDocumentSync\": 1, "
+                               "       \"textDocumentSync\": 2, "
                                "       \"documentSymbolProvider\": true, "
                                "       \"workspaceSymbolProvider\": true, "
                                "       \"definitionProvider\": true, "
