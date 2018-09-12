@@ -1,9 +1,57 @@
+#include "core/Loc.h"
 #include "core/TypeConstraint.h"
-#include "environment.h"
-#include "infer.h"
+#include "core/errors/infer.h"
+#include "infer/environment.h"
+#include "infer/infer.h"
 
 using namespace std;
 namespace sorbet {
+
+namespace {
+void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
+                     const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
+    if (constr.solve(ctx)) {
+        auto guessedType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
+
+        if (guessedType->isFullyDefined() && !guessedType->isUntyped()) {
+            auto loc = methodSymbol.data(ctx).loc();
+            auto detailPair = loc.position(ctx);
+            if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) == "def") {
+                auto startPos = core::Loc::pos2Offset(
+                    loc.file().data(ctx), core::Loc::Detail{detailPair.first.line, detailPair.first.column});
+                core::Loc replacementLoc(loc.file(), startPos, startPos + 3);
+                stringstream ss;
+                bool first = true;
+
+                ss << "sig";
+                if (!methodSymbol.data(ctx).arguments().empty()) {
+                    ss << "(";
+                    for (auto &argSym : methodSymbol.data(ctx).arguments()) {
+                        if (!first) {
+                            ss << ", ";
+                        }
+                        first = false;
+                        ss << argSym.data(ctx).name.show(ctx) << ": " << core::Types::untypedUntracked()->show(ctx);
+                    }
+                    ss << ")";
+                }
+
+                string returnStr;
+                if (methodSymbol.data(ctx).name == core::Names::initialize() ||
+                    core::Types::isSubType(ctx, core::Types::void_(), guessedType)) {
+                    returnStr = "void";
+                } else {
+                    returnStr = fmt::format("returns({})", guessedType->show(ctx));
+                }
+                string spaces(detailPair.first.column - 1, ' ');
+
+                e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc,
+                                                             fmt::format("{}.{}\n{}def", ss.str(), returnStr, spaces)));
+            }
+        }
+    }
+}
+} // namespace
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     auto methodLoc = ctx.owner.data(ctx).loc();
@@ -25,12 +73,41 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         }
     }
 
-    auto missingReturnType = cfg->symbol.data(ctx).resultType == nullptr;
+    shared_ptr<core::Type> methodReturnType = cfg->symbol.data(ctx).resultType;
+    auto missingReturnType = methodReturnType == nullptr;
     auto shouldHaveReturnType = true;
 
     if (cfg->symbol.data(ctx).name.data(ctx).kind != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx).name == core::Names::staticInit() || !cfg->symbol.data(ctx).loc().exists()) {
         shouldHaveReturnType = false;
+    }
+    if (missingReturnType) {
+        if (shouldHaveReturnType) {
+            ENFORCE(constr->isSolved() && constr->isEmpty());
+            _constr = make_unique<core::TypeConstraint>();
+            constr = _constr.get();
+            auto returnTypeVar =
+                core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam();
+            InlinedVector<core::SymbolRef, 4> domainTemp;
+            domainTemp.emplace_back(returnTypeVar);
+            methodReturnType = returnTypeVar.data(ctx).resultType;
+
+            constr->defineDomain(ctx, domainTemp);
+        } else {
+            methodReturnType = core::Types::untyped(ctx, cfg->symbol);
+        }
+    } else {
+        auto enclosingClass = ctx.owner.data(ctx).enclosingClass(ctx);
+        methodReturnType =
+            core::Types::instantiate(ctx,
+                                     core::Types::resultTypeAsSeenFrom(ctx, ctx.owner, enclosingClass,
+                                                                       enclosingClass.data(ctx).selfTypeArgs(ctx)),
+                                     *constr);
+        methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx).selfType(ctx));
+
+        if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
+            methodReturnType = core::Types::untypedUntracked();
+        }
     }
 
     vector<Environment> outEnvironments;
@@ -118,7 +195,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
                 current.ensureGoodAssignTarget(ctx, bind.bind);
                 bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
-                                                  *constr);
+                                                  *constr, methodReturnType);
                 if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     totalSendCount++;
                     if (bind.tpe && !bind.tpe->isUntyped()) {
@@ -163,6 +240,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
     if (missingReturnType && shouldHaveReturnType) {
         if (auto e = ctx.state.beginError(cfg->symbol.data(ctx).loc(), core::errors::Infer::UntypedMethod)) {
             e.setHeader("This function does not have a `sig`");
+            maybeSuggestSig(ctx, e, cfg->symbol, methodReturnType, *constr);
         }
     }
 

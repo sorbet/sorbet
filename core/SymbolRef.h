@@ -281,6 +281,18 @@ public:
         return SymbolRef(nullptr, 57);
     }
 
+    static SymbolRef RubyTyper_ReturnTypeInference() {
+        return SymbolRef(nullptr, 58);
+    }
+
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder() {
+        return SymbolRef(nullptr, 59);
+    }
+
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam() {
+        return SymbolRef(nullptr, 60);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

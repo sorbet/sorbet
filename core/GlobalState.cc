@@ -75,7 +75,10 @@ const char *tuple_str = "Tuple";
 const char *shape_str = "Shape";
 const char *subclasses_str = "SUBCLASSES";
 const char *sorbet_str = "Sorbet";
+const char *return_type_inference_str = "ReturnTypeInference";
+const char *inferred_return_type_str = "INFERRED_RETURN_TYPE";
 const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
+const char *guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
@@ -245,6 +248,16 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet());
     id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(implicit_module_superclass_str));
     ENFORCE(id == Symbols::RubyTyper_ImplicitModuleSuperClass());
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(return_type_inference_str));
+    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference());
+    id = enterMethodSymbol(Loc::none(), Symbols::RubyTyper(), enterNameUTF8(guessed_type_type_parameter_holder_str));
+    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder());
+    id = enterTypeArgument(
+        Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
+        freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_return_type_str), 1),
+        core::Variance::ContraVariant);
+    id.data(*this).resultType = make_shared<core::TypeVar>(id);
+    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam());
 
     // Root members
     Symbols::root().data(*this, true).members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

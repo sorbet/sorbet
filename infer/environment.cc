@@ -746,7 +746,8 @@ shared_ptr<core::Type> flatmapHack(core::Context ctx, const shared_ptr<core::Sen
 
 shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount,
                                                    int bindMinLoops, KnowledgeFilter &knowledgeFilter,
-                                                   core::TypeConstraint &constr) {
+                                                   core::TypeConstraint &constr,
+                                                   shared_ptr<core::Type> &methodReturnType) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking =
@@ -874,7 +875,14 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 /* read type from info filled by define_method */
                 auto argType = getTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
                 ENFORCE(argType != nullptr);
-                tp.type = core::Types::instantiate(ctx, argType, constr);
+                if (ctx.owner.data(ctx).isGenericMethod()) {
+                    tp.type = core::Types::instantiate(ctx, argType, constr);
+                } else {
+                    // You might expect us to instantiate with the constr to be null for a non-generic method,
+                    // but you might have the constraint that is used to guess return type of
+                    // this method. It's not solved and you shouldn't try to instantiate types against itt
+                    tp.type = argType;
+                }
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::LoadYieldParams *insn) {
@@ -914,36 +922,19 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Return *i) {
-                auto expectedType = ctx.owner.data(ctx).resultType;
-                if (!expectedType) {
-                    expectedType = core::Types::untypedUntracked();
-                } else {
-                    expectedType = core::Types::instantiate(
-                        ctx,
-                        core::Types::resultTypeAsSeenFrom(
-                            ctx, ctx.owner, ctx.owner.data(ctx).enclosingClass(ctx),
-                            ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx)),
-                        constr);
-                    expectedType = core::Types::replaceSelfType(
-                        ctx, expectedType, ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfType(ctx));
-                }
-
-                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
-                    expectedType = core::Types::untypedUntracked();
-                }
-
                 tp.type = core::Types::bottom();
                 tp.origins.push_back(bind.loc);
 
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what);
-                if (!core::Types::isSubType(ctx, typeAndOrigin.type, expectedType)) {
+                if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to method result type");
                         e.addErrorSection(core::ErrorSection(
-                            "Expected " + expectedType->show(ctx),
+                            "Expected " + methodReturnType->show(ctx),
                             {
                                 core::ErrorLine::from(ctx.owner.data(ctx).loc(), "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx).name.toString(ctx), expectedType->show(ctx)),
+                                                      ctx.owner.data(ctx).name.toString(ctx),
+                                                      methodReturnType->show(ctx)),
                             }));
                         e.addErrorSection(
                             core::ErrorSection("Got " + typeAndOrigin.type->show(ctx) + " originating from:",

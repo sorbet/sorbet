@@ -138,6 +138,16 @@ end
 module RubyTyper::Void
 end
 
+class RubyTyper::ReturnTypeInference
+    extend T::Helpers
+
+    type_parameters(:INFERRED_RETURN_TYPE).sig().returns(T.type_parameter(:INFERRED_RETURN_TYPE))
+    def guessed_type_type_parameter_holder
+    # this method only exists to define the type parameter.
+    # it's used in infer for return type inference.
+    end
+end
+
 # Type alias for file-like objects. Many, but not all, file-like
 # types in the Ruby stdlib are descendants of IO. These include
 # pipes and sockets. These descendants are intentionally omitted

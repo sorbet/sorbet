@@ -762,5 +762,24 @@ DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Lo
 
 void SelfType::_sanityCheck(Context ctx) {}
 
+std::shared_ptr<Type> Types::widen(Context ctx, const std::shared_ptr<Type> &type) {
+    ENFORCE(type != nullptr);
+    std::shared_ptr<Type> ret;
+    typecase(type.get(),
+             [&](AndType *andType) { ret = all(ctx, widen(ctx, andType->left), widen(ctx, andType->right)); },
+             [&](OrType *orType) { ret = any(ctx, widen(ctx, orType->left), widen(ctx, orType->right)); },
+             [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
+             [&](AppliedType *appliedType) {
+                 std::vector<std::shared_ptr<Type>> newTargs;
+                 for (const auto &t : appliedType->targs) {
+                     newTargs.emplace_back(widen(ctx, t));
+                 }
+                 ret = make_shared<AppliedType>(appliedType->klass, newTargs);
+             },
+             [&](Type *tp) { ret = type; });
+    ENFORCE(ret);
+    return ret;
+}
+
 } // namespace core
 } // namespace sorbet
