@@ -6,7 +6,9 @@ namespace sorbet {
 namespace realmain {
 
 void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::BasicError> error) {
-    this->errorCount.fetch_add(1);
+    if (!error->isSilenced) {
+        this->nonSilencedErrorCount.fetch_add(1);
+    }
     core::ErrorQueueMessage msg;
     msg.kind = core::ErrorQueueMessage::Kind::Error;
     msg.whatFile = error->loc.file();

@@ -18,7 +18,7 @@ public:
     spdlog::logger &logger;
     spdlog::logger &tracer;
     std::atomic<bool> hadCritical{false};
-    std::atomic<int> errorCount{0};
+    std::atomic<int> nonSilencedErrorCount{0};
     bool ignoreFlushes{false};
 
     ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer);

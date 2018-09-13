@@ -1065,7 +1065,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
 }
 
 int GlobalState::totalErrors() const {
-    return errorQueue->errorCount.load();
+    return errorQueue->nonSilencedErrorCount.load();
 }
 
 void GlobalState::_error(unique_ptr<BasicError> error) const {
@@ -1076,9 +1076,8 @@ void GlobalState::_error(unique_ptr<BasicError> error) const {
     if (loc.file().exists()) {
         loc.file().data(*this).hadErrors_ = true;
     }
-    if (!error->isSilenced) {
-        errorQueue->pushError(*this, move(error));
-    }
+
+    errorQueue->pushError(*this, move(error));
 }
 
 bool GlobalState::hadCriticalError() const {

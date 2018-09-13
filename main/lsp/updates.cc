@@ -130,6 +130,8 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                     shared_ptr<core::GlobalState> lgs =
                         make_shared<core::GlobalState>((make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
+                    lgs->errorQueue->ignoreFlushes = true;
+                    lgs->silenceErrors = true;
                     core::FileRef fref;
                     {
                         core::UnfreezeFileTable fileTableAccess(*lgs);

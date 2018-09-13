@@ -462,6 +462,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     map<pair<sorbet::core::FileRef, int>, int> seenErrorLines;
     int unknownLocErrorLine = 1;
     for (auto &error : errors) {
+        if (error->isSilenced) {
+            continue;
+        }
         auto filePath = error->loc.file().data(gs).path();
         if (!error->loc.exists()) {
             // The convention is to put `error: Unknown Location Error` at

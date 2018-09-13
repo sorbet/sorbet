@@ -10,7 +10,9 @@ BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer)
 BufferedErrorQueue::~BufferedErrorQueue() = default;
 
 void BufferedErrorQueue::pushError(const GlobalState &gs, unique_ptr<BasicError> error) {
-    this->errorCount.fetch_add(1);
+    if (!error->isSilenced) {
+        this->nonSilencedErrorCount.fetch_add(1);
+    }
     auto msg = make_unique<ErrorQueueMessage>();
     msg->text = error->toString(gs);
     msg->error = move(error);

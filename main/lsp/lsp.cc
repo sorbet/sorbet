@@ -94,7 +94,7 @@ bool silenceError(core::ErrorClass what) {
 
 void LSPLoop::drainErrors() {
     for (auto &e : errorQueue->drainAllErrors()) {
-        if (silenceError(e->what)) {
+        if (e->isSilenced || silenceError(e->what)) {
             continue;
         }
         auto file = e->loc.file();

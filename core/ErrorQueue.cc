@@ -55,7 +55,7 @@ void ErrorQueue::flushErrors(bool all) {
 }
 
 void ErrorQueue::flushErrorCount() {
-    errorFlusher.flushErrorCount(logger, errorCount);
+    errorFlusher.flushErrorCount(logger, nonSilencedErrorCount);
 }
 
 void ErrorQueue::flushAutocorrects(const GlobalState &gs) {

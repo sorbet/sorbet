@@ -11,6 +11,9 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
     stringstream nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
+            if (error->error->isSilenced) {
+                continue;
+            }
             auto &out = error->error->isCritical ? critical : nonCritical;
             if (out.tellp() != 0) {
                 out << '\n';
