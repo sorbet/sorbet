@@ -206,6 +206,17 @@ Any folder `<name>` that is added to `test/cli/` becomes a test.
 This folder should have a file `<name>.sh` that is executable.
 When run, its output will be compared against `<name>.out` in that folder.
 
+Our bazel setup will produce two targets:
+
+- `bazel run run_<name>` will execute the `.sh` file
+- `bazel test test_<name>` will execute the `.sh` and check it against what's in
+  the `.out` file.
+
+The scripts are run insize Bazel, so they will be executed from the top of the
+workspace and have access to sources files and built targets using their path
+from the root. In particular, the compiled sorbet binary is available under
+`main/sorbet`.
+
 ### LSP tests
 
 Any folder `<name>` that is added to `test/lsp/` will become a test.
