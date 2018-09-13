@@ -92,7 +92,7 @@ std::unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     rapidjson::MemoryPoolAllocator<>
         inner_alloc; // we need objects created by inner thread to outlive the thread itself.
 
-    auto readerThread = runInAThread([&guardedState, &mtx, logger = this->logger, &inner_alloc] {
+    auto readerThread = runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc] {
         // Thread that executes this lambda is called reader thread.
         // This thread _intentionally_ does not capture `this`.
         NotifyOnDestruction notify(mtx, guardedState.terminate);

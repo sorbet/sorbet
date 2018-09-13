@@ -111,7 +111,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
     shared_ptr<BlockingBoundedQueue<vector<pair<int, unsigned int>>>> resultq =
         make_shared<BlockingBoundedQueue<vector<pair<int, unsigned int>>>>(files.size());
-    workers.multiplexJob([fileq, resultq, files, logger = this->logger]() {
+    workers.multiplexJob("lspStateHash", [fileq, resultq, files, logger = this->logger]() {
         vector<pair<int, unsigned int>> threadResult;
         int processedByThread = 0;
         int job;

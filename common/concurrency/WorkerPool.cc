@@ -8,10 +8,12 @@ WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : size(s
         threadQueues.emplace_back(make_unique<Queue>());
         auto &last = threadQueues.back();
         auto *ptr = last.get();
-        threads.emplace_back(runInAThread([ptr, logger]() {
+        auto threadIdleName = "idle" + to_string(i);
+        threads.emplace_back(runInAThread(threadIdleName, [ptr, logger, threadIdleName]() {
             bool repeat = true;
             while (repeat) {
                 Task_ task;
+                setCurrentThreadName(threadIdleName);
                 ptr->wait_dequeue(task);
                 logger->debug("Worker got task");
                 repeat = task();
@@ -30,8 +32,9 @@ WorkerPool::~WorkerPool() {
     // join will be called when destructing joinable;
 }
 
-void WorkerPool::multiplexJob(WorkerPool::Task t) {
-    multiplexJob_([t{move(t)}] {
+void WorkerPool::multiplexJob(const string &taskName, WorkerPool::Task t) {
+    multiplexJob_([t{move(t)}, taskName] {
+        setCurrentThreadName(taskName);
         t();
         return true;
     });

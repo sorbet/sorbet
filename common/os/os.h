@@ -3,16 +3,18 @@
 #include <functional>
 #include <memory>
 #include <pthread.h>
+#include <string>
 
 std::string addr2line(const std::string program_name, void const *const *addr, int count);
 
 std::string getProgramName();
 
 class Joinable {
-    friend std::unique_ptr<Joinable> runInAThread(std::function<void()> function);
+    friend std::unique_ptr<Joinable> runInAThread(const std::string &threadName, std::function<void()> function);
     pthread_t handle;
     pthread_attr_t attr;
     std::function<void()> realFunction;
+    std::string originalThreadName;
 
     static void *trampoline(void *);
 
@@ -29,7 +31,8 @@ public:
 };
 
 // run function in a thread. Return thread handle that you can join on
-std::unique_ptr<Joinable> runInAThread(std::function<void()> function);
+std::unique_ptr<Joinable> runInAThread(const std::string &threadName, std::function<void()> function);
+bool setCurrentThreadName(const std::string &name);
 
 /** The should trigger debugger breakpoint if the debugger is attached, if no debugger is attach, it should do nothing
  *  This allows to:

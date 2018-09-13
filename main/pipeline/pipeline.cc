@@ -216,7 +216,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
     {
         ProgressIndicator indexingProgress(opts.showProgress, "Indexing", frs.size());
 
-        workers.multiplexJob([cgs, &opts, fileq, resultq, &kvstore, logger]() {
+        workers.multiplexJob("index", [cgs, &opts, fileq, resultq, &kvstore, logger]() {
             logger->trace("worker deep copying global state");
             auto lgs = cgs->deepCopy();
             logger->trace("worker done deep copying global state");
@@ -524,7 +524,7 @@ vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
 
         {
             ProgressIndicator cfgInferProgress(opts.showProgress, "CFG+Inference", what.size());
-            workers.multiplexJob([ctx, &opts, fileq, resultq, logger]() {
+            workers.multiplexJob("typecheck", [ctx, &opts, fileq, resultq, logger]() {
                 typecheck_thread_result threadResult;
                 unique_ptr<ast::Expression> job;
                 int processedByThread = 0;

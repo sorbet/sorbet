@@ -101,6 +101,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
 void startHUPMonitor() {
     thread monitor([]() {
         struct pollfd pfd;
+        setCurrentThreadName("HUPMonitor");
         pfd.fd = 1; // STDOUT
         pfd.events = 0;
         pfd.revents = 0;

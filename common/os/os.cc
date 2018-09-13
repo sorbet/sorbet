@@ -9,17 +9,21 @@ using namespace std;
 constexpr int REQUIRED_STACK_SIZE = 16 * 1024 * 1024;
 
 void *Joinable::trampoline(void *ptr) {
-    static_cast<Joinable *>(ptr)->realFunction();
+    ENFORCE(ptr != nullptr);
+    Joinable &self = *static_cast<Joinable *>(ptr);
+    setCurrentThreadName(self.originalThreadName);
+    self.realFunction();
     return ptr;
 }
 
-unique_ptr<Joinable> runInAThread(function<void()> function) {
+unique_ptr<Joinable> runInAThread(const string &threadName, function<void()> function) {
     // AFAIK this should all be:
     //    - defined behaviour
     //    - available on all posix systems
 
     unique_ptr<Joinable> res = make_unique<Joinable>();
     res->realFunction = move(function);
+    res->originalThreadName = threadName;
 
     Joinable *joinablePTR = res.get();
 
@@ -69,4 +73,16 @@ bool stopInDebugger() {
         return true;
     }
     return false;
+}
+
+bool setCurrentThreadName(const std::string &name) {
+    const size_t maxLen = 16 - 1; // Pthreads limits it to 16 bytes including trailing '\0'
+    auto truncatedName = name.substr(0, maxLen);
+    auto retCode =
+#ifdef __APPLE__
+        ::pthread_setname_np(truncatedName.c_str());
+#else
+        ::pthread_setname_np(::pthread_self(), truncatedName.c_str());
+#endif
+    return retCode == 0;
 }
