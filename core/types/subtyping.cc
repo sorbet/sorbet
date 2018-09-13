@@ -99,11 +99,11 @@ shared_ptr<Type> glbDistributeAnd(Context ctx, const shared_ptr<Type> &t1, const
         return n1;
     }
     if (Types::isSubType(ctx, n1, n2)) {
-        categoryCounterInc("glbDistributeAnd.outcome", "ZZn2");
-        return n2;
-    } else if (Types::isSubType(ctx, n2, n1)) {
-        categoryCounterInc("glbDistributeAnd.outcome", "ZZZn1");
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZn1");
         return n1;
+    } else if (Types::isSubType(ctx, n2, n1)) {
+        categoryCounterInc("glbDistributeAnd.outcome", "ZZZn2");
+        return n2;
     }
 
     categoryCounterInc("glbDistributeAnd.outcome", "worst");
