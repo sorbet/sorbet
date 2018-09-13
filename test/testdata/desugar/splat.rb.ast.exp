@@ -25,7 +25,7 @@ class <emptyTree><<constant:<root>>> < ()
     def foo<<constant:<todo sym>>>()
       begin
         a = [1, 2]
-        self(<constant:<todo sym>>).super(::<Magic>.<splat>(a.to_a()))
+        ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"super", a.to_a())
       end
     end
   end
@@ -36,8 +36,8 @@ class <emptyTree><<constant:<root>>> < ()
       a.to_a().concat([2])
       [1].concat(a.to_a())
       [1].concat(a.to_a()).concat([2])
-      self(<constant:<todo sym>>).bar(::<Magic>.<splat>(a.to_a()))
-      self(<constant:<todo sym>>).bar(::<Magic>.<splat>(<emptyTree>::<constant:Splatable>.new().to_a()))
+      ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"bar", a.to_a())
+      ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>), :"bar", <emptyTree>::<constant:Splatable>.new().to_a())
       <emptyTree>::<constant:Child>.new().foo()
       b = <emptyTree>::<constant:Splatable>.new().to_a()
       begin

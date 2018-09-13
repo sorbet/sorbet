@@ -14,7 +14,7 @@ class A
     d: T.enum([]), # error: enum([]) is invalid
     e: T.enum([unsupported]), # error: Unsupported type literal
     f: 0, # error: Unsupported type syntax
-    g: T.any(*[1,2]), # error: Splats are unsupported by the static checker
+    g: T.any(*[Integer, String]), # error: Splats are unsupported by the static checker
     h: T.junk, # error: MULTI
                # ^ "method does not exist", and "unsupported syntax"
     i: T.class_of(T1, T2), # error: Too many arguments provided for method `T.class_of`

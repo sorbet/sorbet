@@ -29,3 +29,10 @@ empty << 4
 ["foo"] + ["bar"]
 
 [T::Array[Integer], 0] # error: Unsupported usage of literal type
+
+T.assert_type!([1].concat([:foo]), [Integer, Symbol])
+T.assert_type!([1].concat([:foo]).concat([3, 4]), [Integer, Symbol, Integer, Integer])
+T.assert_type!([1].
+                 concat(T::Array[Integer].new).
+                 concat(T::Array[String].new),
+               T::Array[T.any(Integer, String)])

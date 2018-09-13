@@ -44,11 +44,11 @@ NameDef names[] = {
     {"andAnd", "&&", Desugar},
     {"orOr", "||", Desugar},
     {"to_s", Desugar},
-    {"to_a", Desugar},
+    {"to_a", Desugar | Core},
     {"to_h", Core},
     {"to_hash", Desugar},
     {"to_proc", Desugar},
-    {"concat", Desugar},
+    {"concat", Desugar | Core},
     {"key_p", "key?", Core},
     {"intern", Desugar},
     {"call", Desugar | Namer | Infer},
@@ -269,6 +269,7 @@ NameDef names[] = {
     {"staticInit", "<static-init>", Resolver | Core},
 
     {"require", Resolver},
+    {"callWithSplat", "<call-with-splat>", Desugar | Core},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

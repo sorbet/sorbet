@@ -9,6 +9,8 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
+#include "absl/algorithm/container.h"
+
 namespace sorbet {
 namespace ast {
 namespace desugar {
@@ -237,21 +239,53 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     rec = MK::Self(loc);
                     flags |= Send::PRIVATE_OK;
                 }
-                Send::ARGS_store args;
-                unique_ptr<parser::Node> block;
-                args.reserve(send->args.size());
-                for (auto &stat : send->args) {
-                    if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
-                        ENFORCE(block == nullptr, "passing a block where there is no block");
+                if (absl::c_any_of(send->args, [](auto &arg) { return parser::isa_node<parser::Splat>(arg.get()); })) {
+                    // If we have a splat anywhere in the argument list, desugar
+                    // the argument list as a single Array node, and then
+                    // synthesize a call to
+                    //   Magic.callWithSplat(receiver, method, argArray, [&blk])
+                    // The callWithSplat implementation (in C++) will unpack a
+                    // tuple type and call into the normal call merchanism.
+                    unique_ptr<parser::Node> block;
+                    auto argnodes = move(send->args);
+                    auto it = absl::c_find_if(argnodes,
+                                              [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg.get()); });
+                    if (it != argnodes.end()) {
+                        auto *bp = parser::cast_node<parser::BlockPass>(it->get());
                         block = move(bp->block);
-                    } else {
-                        args.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        argnodes.erase(it);
                     }
-                };
 
-                auto res = MK::Send(loc, move(rec), send->method, move(args), flags,
-                                    node2Proc(ctx, move(block), uniqueCounter));
-                result.swap(res);
+                    auto array = make_unique<parser::Array>(loc, move(argnodes));
+                    auto args = node2TreeImpl(ctx, move(array), uniqueCounter);
+                    auto method =
+                        MK::Literal(loc, make_shared<core::LiteralType>(core::Symbols::Symbol(), send->method));
+
+                    Send::ARGS_store sendargs;
+                    sendargs.emplace_back(move(rec));
+                    sendargs.emplace_back(move(method));
+                    sendargs.emplace_back(move(args));
+
+                    auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
+                                        move(sendargs), 0, node2Proc(ctx, move(block), uniqueCounter));
+                    result.swap(res);
+                } else {
+                    Send::ARGS_store args;
+                    unique_ptr<parser::Node> block;
+                    args.reserve(send->args.size());
+                    for (auto &stat : send->args) {
+                        if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
+                            ENFORCE(block == nullptr, "passing a block where there is no block");
+                            block = move(bp->block);
+                        } else {
+                            args.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        }
+                    };
+
+                    auto res = MK::Send(loc, move(rec), send->method, move(args), flags,
+                                        node2Proc(ctx, move(block), uniqueCounter));
+                    result.swap(res);
+                }
             },
             [&](parser::Const *const_) {
                 auto scope = node2TreeImpl(ctx, move(const_->scope), uniqueCounter);
@@ -789,23 +823,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Super *super) {
+                // Desugar super into a call to a normal method named `super`;
+                // Do this by synthesizing a `Send` parse node and letting our
+                // Send desugar handle it.
                 auto method = core::Names::super();
-
-                Send::ARGS_store args;
-                unique_ptr<parser::Node> block;
-                args.reserve(super->args.size());
-                for (auto &stat : super->args) {
-                    if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
-                        ENFORCE(block == nullptr, "No Block in super blockpass");
-                        block = move(bp->block);
-                    } else {
-                        args.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
-                    }
-                };
-
-                unique_ptr<Expression> res =
-                    MK::Send(loc, MK::Self(loc), method, move(args), 0, node2Proc(ctx, move(block), uniqueCounter));
-
+                auto send = make_unique<parser::Send>(super->loc, nullptr, method, move(super->args));
+                auto res = node2TreeImpl(ctx, move(send), uniqueCounter);
                 result.swap(res);
             },
             [&](parser::ZSuper *zuper) {

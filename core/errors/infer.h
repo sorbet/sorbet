@@ -26,6 +26,7 @@ constexpr ErrorClass InvalidCast{7015, StrictLevel::Strict};
 constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::Typed};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
+constexpr ErrorClass UntypedSplat{7019, StrictLevel::Typed};
 
 } // namespace Infer
 } // namespace errors

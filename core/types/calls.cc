@@ -1163,6 +1163,59 @@ public:
     }
 } Magic_expandSplat;
 
+class Magic_callWithSplat : public IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
+                           const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                           const shared_ptr<SendAndBlockLink> &linkType) const override {
+        if (args.size() != 3) {
+            return core::Types::untypedUntracked();
+        }
+        auto &receiver = args[0];
+        if (receiver->type->isUntyped()) {
+            return receiver->type;
+        }
+
+        auto *lit = cast_type<LiteralType>(args[1]->type.get());
+        if (!lit || !lit->derivesFrom(ctx, Symbols::Symbol())) {
+            return core::Types::untypedUntracked();
+        }
+        NameRef fn(ctx.state, (u4)lit->value);
+        if (args[2]->type->isUntyped()) {
+            return args[2]->type;
+        }
+        auto *tuple = cast_type<TupleType>(args[2]->type.get());
+        if (tuple == nullptr) {
+            if (auto e = ctx.state.beginError(argLocs[2], core::errors::Infer::UntypedSplat)) {
+                e.setHeader("Splats are only supported where the size of the array is known statically");
+            }
+            return Types::untypedUntracked();
+        }
+
+        InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        for (auto &arg : tuple->elems) {
+            TypeAndOrigins tao;
+            tao.type = arg;
+            tao.origins.emplace_back(argLocs[2]);
+            sendArgStore.push_back(move(tao));
+        }
+        InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        for (auto &arg : sendArgStore) {
+            sendArgs.push_back(&arg);
+        }
+        InlinedVector<Loc, 2> sendArgLocs(tuple->elems.size(), argLocs[2]);
+        auto dispatched = receiver->type->dispatchCall(ctx, fn, callLoc, argLocs[0], sendArgs, sendArgLocs, selfRef,
+                                                       selfRef, selfRef, linkType);
+        for (auto &comp : dispatched.components) {
+            for (auto &err : comp.errors) {
+                ctx.state._error(move(err));
+            }
+        }
+        return dispatched.returnType;
+    }
+} Magic_callWithSplat;
+
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
@@ -1246,6 +1299,37 @@ public:
         return tuple->elementType();
     }
 } Tuple_minMax;
+
+class Tuple_to_a : public IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
+                           const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                           const shared_ptr<SendAndBlockLink> &linkType) const override {
+        return selfRef;
+    }
+} Tuple_to_a;
+
+class Tuple_concat : public IntrinsicMethod {
+public:
+    shared_ptr<Type> apply(Context ctx, Loc callLoc, Loc receiverLoc, InlinedVector<const TypeAndOrigins *, 2> &args,
+                           const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
+                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
+                           const shared_ptr<SendAndBlockLink> &linkType) const override {
+        std::vector<std::shared_ptr<Type>> elems;
+        auto *tuple = cast_type<TupleType>(selfRef.get());
+        ENFORCE(tuple);
+        elems = tuple->elems;
+        for (auto elem : args) {
+            if (auto *tuple = cast_type<TupleType>(elem->type.get())) {
+                elems.insert(elems.end(), tuple->elems.begin(), tuple->elems.end());
+            } else {
+                return nullptr;
+            }
+        }
+        return TupleType::build(ctx, move(elems));
+    }
+} Tuple_concat;
 
 class Shape_merge : public IntrinsicMethod {
 public:
@@ -1435,12 +1519,15 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Magic(), false, Names::buildHash(), &Magic_buildHash},
     {Symbols::Magic(), false, Names::buildArray(), &Magic_buildArray},
     {Symbols::Magic(), false, Names::expandSplat(), &Magic_expandSplat},
+    {Symbols::Magic(), false, Names::callWithSplat(), &Magic_callWithSplat},
 
     {Symbols::Tuple(), false, Names::squareBrackets(), &Tuple_squareBrackets},
     {Symbols::Tuple(), false, Names::first(), &Tuple_first},
     {Symbols::Tuple(), false, Names::last(), &Tuple_last},
     {Symbols::Tuple(), false, Names::min(), &Tuple_minMax},
     {Symbols::Tuple(), false, Names::max(), &Tuple_minMax},
+    {Symbols::Tuple(), false, Names::to_a(), &Tuple_to_a},
+    {Symbols::Tuple(), false, Names::concat(), &Tuple_concat},
 
     {Symbols::Shape(), false, Names::merge(), &Shape_merge},
 

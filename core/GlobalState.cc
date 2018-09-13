@@ -313,6 +313,14 @@ void GlobalState::initEmpty() {
     method.data(*this).arguments().push_back(arg);
     method.data(*this).resultType = Types::untyped(*this, method);
 
+    // Synthesize <Magic>#<call-with-splat>(args: *T.untyped) => T.untyped
+    method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::callWithSplat());
+    arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
+    arg.data(*this).resultType = Types::untyped(*this, method);
+    arg.data(*this).setRepeated();
+    method.data(*this).arguments().push_back(arg);
+    method.data(*this).resultType = Types::untyped(*this, method);
+
     // Some of these are Modules
     Symbols::T().data(*this).setIsModule(true);
     Symbols::StubModule().data(*this).setIsModule(true);

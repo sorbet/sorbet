@@ -122,11 +122,11 @@ class Array < Object
   Sorbet.sig.returns(T::Array[Elem])
   def compact!(); end
 
-  Sorbet.sig(
-      arg0: T::Array[Elem],
+  type_parameters(:T).sig(
+      arrays: T::Array[T.type_parameter(:T)],
   )
-  .returns(T::Array[Elem])
-  def concat(arg0); end
+  .returns(T::Array[T.any(Elem, T.type_parameter(:T))])
+  def concat(arrays); end
 
   Sorbet.sig.returns(Integer)
   Sorbet.sig(

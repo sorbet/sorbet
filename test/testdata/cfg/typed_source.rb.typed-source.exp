@@ -99,11 +99,11 @@ class Examples
             #
             # cond: T.untyped
             #   Being truthy entails:
-            #     a to be Integer(1)
             #     <debugEnvironmentTemp> to be NilClass
+            #     a to be Integer(1)
             #   Being falsy entails:
-            #     a to be Integer(1)
             #     <debugEnvironmentTemp> to be NilClass
+            #     a to be Integer(1)
       while true
             # <whileTemp>$7: TrueClass
             #

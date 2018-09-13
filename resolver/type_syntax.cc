@@ -464,7 +464,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 return;
             }
 
-            if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::splat()) {
+            if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
                 if (auto e = ctx.state.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                     e.setHeader("Splats are unsupported by the static checker and banned in typed code");

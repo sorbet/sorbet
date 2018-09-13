@@ -56,6 +56,8 @@ class RubyTyper::Tuple < Array
   def first(*args); end
   def min(*args); end
   def max(*args); end
+  def to_a; end
+  def concat(*arrays); end
 end
 
 class RubyTyper::Shape < Hash
