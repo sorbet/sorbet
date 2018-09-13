@@ -37,5 +37,6 @@ std::unique_ptr<Joinable> runInAThread(std::function<void()> function);
  *   - test the same executable outside of debugger without rebuilding.
  * */
 bool stopInDebugger();
+bool amIBeingDebugged();
 
 #endif // SORBET_OS_H

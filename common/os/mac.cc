@@ -32,7 +32,7 @@ string getProgramName() {
 }
 
 /** taken from https://developer.apple.com/library/content/qa/qa1361/_index.html */
-static bool amIBeingDebugged()
+bool amIBeingDebugged()
 // Returns true if the current process is being debugged (either
 // running under the debugger or has a debugger attached post facto).
 {
@@ -63,14 +63,6 @@ static bool amIBeingDebugged()
     // We're being debugged if the P_TRACED flag is set.
 
     return ((info.kp_proc.p_flag & P_TRACED) != 0);
-}
-
-bool stopInDebugger() {
-    if (amIBeingDebugged()) {
-        __asm__("int $3");
-        return true;
-    }
-    return false;
 }
 
 #endif

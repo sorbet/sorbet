@@ -62,3 +62,11 @@ unique_ptr<Joinable> runInAThread(function<void()> function) {
     }
     return res;
 }
+
+bool stopInDebugger() {
+    if (amIBeingDebugged()) {
+        __asm__("int $3");
+        return true;
+    }
+    return false;
+}
