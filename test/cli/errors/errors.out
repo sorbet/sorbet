@@ -40,7 +40,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:30:
     30 |          2
                   ^
-  Autocorrect: Use `-a` to autocorrect
+  Suggested fix
     test/cli/errors/errors.rb:32: Replace with `T.must(a)`
     32 |    bar(a)
                 ^
@@ -87,7 +87,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:30:
     30 |          2
                   ^
-  Autocorrect: Use `-a` to autocorrect
+  Suggested fix
     test/cli/errors/errors.rb:32: Replace with `T.must(a)`
     32 |    bar(a)
                 ^
@@ -134,7 +134,7 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     test/cli/errors/errors.rb:30:
     30 |          2
                   ^
-  Autocorrect: Use `-a` to autocorrect
+  Suggested fix
     test/cli/errors/errors.rb:32: Replace with `T.must(a)`
     32 |    bar(a)
                 ^
