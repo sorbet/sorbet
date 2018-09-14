@@ -18,7 +18,7 @@ subgraph "cluster_::Test#normalize_params" {
 
     "bb::Test#normalize_params_1" -> "bb::Test#normalize_params_1" [style="bold"];
     "bb::Test#normalize_params_2" [
-        label = "block[id=2](v)\l<statTemp>$8 = self : Test\l<statTemp>$9 = v.to_a() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = AppliedType {\l        klass = ::Array\l        targs = [\l          <constant:Elem> = T.untyped\l        ]\l      }\l  ]\l}\l<statTemp>$7 = <statTemp>$8.normalize_params(<statTemp>$9) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$7.sort() : T.untyped\l<unconditional>\l"
+        label = "block[id=2](v)\l<statTemp>$8 = self : Test\l<statTemp>$9 = v.to_a() : AppliedType {\l  klass = ::Array\l  targs = [\l    <constant:Elem> = TupleType {\l        0 = T.untyped\l        1 = T.untyped\l      }\l  ]\l}\l<statTemp>$7 = <statTemp>$8.normalize_params(<statTemp>$9) : T.untyped\l<returnMethodTemp>$2 = <statTemp>$7.sort() : T.untyped\l<unconditional>\l"
     ];
 
     "bb::Test#normalize_params_2" -> "bb::Test#normalize_params_10" [style="bold"];

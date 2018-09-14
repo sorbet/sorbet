@@ -866,6 +866,35 @@ bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
     return c1 == c2 || c1.data(ctx).derivesFrom(ctx, c2);
 }
 
+void compareToUntyped(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &ty, const shared_ptr<Type> &blame) {
+    ENFORCE(blame->isUntyped());
+    if (auto *p = cast_type<ProxyType>(ty.get())) {
+        compareToUntyped(ctx, constr, p->underlying(), blame);
+    }
+
+    if (auto *t = cast_type<AppliedType>(ty.get())) {
+        for (auto &targ : t->targs) {
+            compareToUntyped(ctx, constr, targ, blame);
+        }
+    } else if (auto *t = cast_type<ShapeType>(ty.get())) {
+        for (auto &val : t->values) {
+            compareToUntyped(ctx, constr, val, blame);
+        }
+    } else if (auto *t = cast_type<TupleType>(ty.get())) {
+        for (auto &val : t->elems) {
+            compareToUntyped(ctx, constr, val, blame);
+        }
+    } else if (auto *t = cast_type<OrType>(ty.get())) {
+        compareToUntyped(ctx, constr, t->left, blame);
+        compareToUntyped(ctx, constr, t->right, blame);
+    } else if (auto *t = cast_type<AndType>(ty.get())) {
+        compareToUntyped(ctx, constr, t->left, blame);
+        compareToUntyped(ctx, constr, t->right, blame);
+    } else if (auto *t = cast_type<TypeVar>(ty.get())) {
+        constr.rememberIsSubtype(ctx, ty, blame);
+    }
+}
+
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
 bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &t1,
@@ -884,6 +913,9 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
 
     if (auto *mayBeSpecial1 = cast_type<ClassType>(t1.get())) {
         if (mayBeSpecial1->symbol == Symbols::untyped()) {
+            if (!constr.isSolved()) {
+                compareToUntyped(ctx, constr, t2, t1);
+            }
             return true;
         }
         if (mayBeSpecial1->symbol == Symbols::bottom()) {
@@ -900,6 +932,9 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
 
     if (auto *mayBeSpecial2 = cast_type<ClassType>(t2.get())) {
         if (mayBeSpecial2->symbol == Symbols::untyped()) {
+            if (!constr.isSolved()) {
+                compareToUntyped(ctx, constr, t1, t2);
+            }
             return true;
         }
         if (mayBeSpecial2->symbol == Symbols::bottom()) {

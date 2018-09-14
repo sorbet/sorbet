@@ -7,10 +7,10 @@ class Hash < Object
   V = type_member(:out)
   Elem = type_member(:out)
 
-  type_parameters(:U).sig(
-      arg0: T.type_parameter(:U),
+  type_parameters(:U, :V).sig(
+    arg0: T::Array[[T.type_parameter(:U), T.type_parameter(:V)]],
   )
-  .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:U)])
+  .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
   def self.[](*arg0); end
 
   Sorbet.sig(
@@ -241,7 +241,7 @@ class Hash < Object
   .returns(V)
   def store(arg0, arg1); end
 
-  Sorbet.sig.returns(T::Array[T::Array[T.any(K, V)]])
+  Sorbet.sig.returns(T::Array[[K, V]])
   def to_a(); end
 
   Sorbet.sig.returns(T::Hash[K, V])

@@ -14,7 +14,7 @@ class Generics
  end
 
  def hit_me1
-    Hash[1 => 2]
+    Hash[[[1, 2]]]
  end
 
  def hit_me2
