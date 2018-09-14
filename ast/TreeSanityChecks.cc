@@ -179,7 +179,9 @@ void While::_sanityCheck() {
 }
 
 void Yield::_sanityCheck() {
-    ENFORCE(expr);
+    for (auto &node : args) {
+        ENFORCE(node);
+    }
 }
 
 void ZSuperArgs::_sanityCheck() {}

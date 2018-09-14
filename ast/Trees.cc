@@ -134,7 +134,7 @@ Return::Return(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), ex
     _sanityCheck();
 }
 
-Yield::Yield(core::Loc loc, unique_ptr<Expression> expr) : Expression(loc), expr(move(expr)) {
+Yield::Yield(core::Loc loc, Send::ARGS_store args) : Expression(loc), args(move(args)) {
     core::categoryCounterInc("trees", "yield");
     _sanityCheck();
 }
@@ -649,10 +649,6 @@ string Return::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
 
-string Yield::showRaw(const core::GlobalState &gs, int tabs) {
-    return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
-}
-
 string Next::showRaw(const core::GlobalState &gs, int tabs) {
     return nodeName() + "{ expr = " + this->expr->showRaw(gs, tabs + 1) + " }";
 }
@@ -670,7 +666,28 @@ string Return::toString(const core::GlobalState &gs, int tabs) {
 }
 
 string Yield::toString(const core::GlobalState &gs, int tabs) {
-    return "yield(" + this->expr->toString(gs, tabs + 1) + ")";
+    stringstream buf;
+    buf << "yield";
+    printArgs(gs, buf, this->args, tabs);
+
+    return buf.str();
+}
+
+string Yield::showRaw(const core::GlobalState &gs, int tabs) {
+    stringstream buf;
+    buf << nodeName() << "{" << '\n';
+    printTabs(buf, tabs + 1);
+    buf << "args = [" << '\n';
+    for (auto &a : args) {
+        printTabs(buf, tabs + 2);
+        buf << a->showRaw(gs, tabs + 2) << '\n';
+    }
+    printTabs(buf, tabs + 1);
+    buf << "]" << '\n';
+    printTabs(buf, tabs);
+    buf << "}";
+
+    return buf.str();
 }
 
 string Next::toString(const core::GlobalState &gs, int tabs) {

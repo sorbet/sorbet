@@ -1,0 +1,110 @@
+ClassDef{
+  name = EmptyTree<<constant:<root>>>
+  ancestors = []
+  rhs = [
+    Send{
+      recv = Self{ claz = ::<todo sym> }
+      fun = extend
+      block = nullptr
+      args = [
+        UnresolvedConstantLit{
+          scope = UnresolvedConstantLit{
+            scope = EmptyTree
+            cnst = <constant:T>
+          }
+          cnst = <constant:Helpers>
+        }
+      ]
+    }
+
+    Send{
+      recv = Send{
+        recv = Self{ claz = ::<todo sym> }
+        fun = sig
+        block = nullptr
+        args = [
+          Hash{
+            pairs = [
+              [
+                key = Literal{ value = :"blk" }
+                value = Send{
+                  recv = Send{
+                    recv = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    fun = proc
+                    block = nullptr
+                    args = [
+                      Hash{
+                        pairs = [
+                          [
+                            key = Literal{ value = :"x" }
+                            value = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Integer>
+                            }
+                          ]
+                          [
+                            key = Literal{ value = :"y" }
+                            value = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Symbol>
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  }
+                  fun = returns
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:Integer>
+                    }
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      }
+      fun = void
+      block = nullptr
+      args = [
+      ]
+    }
+
+    MethodDef{
+      flags = 0
+      name = yield_two<<constant:<todo sym>>>
+      args = [BlockArg{ expr = UnresolvedIdent{
+          kind = Local
+          name = blk
+        } }]
+      rhs = InsSeq{
+        stats = [
+          Send{
+            recv = UnresolvedIdent{
+              kind = Local
+              name = blk
+            }
+            fun = call
+            block = nullptr
+            args = [
+              Literal{ value = 1 }
+              Literal{ value = :"hi" }
+            ]
+          }
+        ],
+        expr = Yield{
+          args = [
+            Literal{ value = 1 }
+            Literal{ value = :"hi" }
+          ]
+        }
+      }
+    }
+  ]
+}

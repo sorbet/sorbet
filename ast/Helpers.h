@@ -42,8 +42,8 @@ public:
         return std::make_unique<ast::Next>(loc, move(expr));
     }
 
-    static std::unique_ptr<Expression> Yield(core::Loc loc, std::unique_ptr<Expression> expr) {
-        return std::make_unique<ast::Yield>(loc, move(expr));
+    static std::unique_ptr<Expression> Yield(core::Loc loc, Send::ARGS_store args) {
+        return std::make_unique<ast::Yield>(loc, move(args));
     }
 
     static std::unique_ptr<Expression> Break(core::Loc loc, std::unique_ptr<Expression> expr) {

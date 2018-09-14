@@ -865,7 +865,10 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
              },
              [&](ast::Yield *a) {
                  pickleAstHeader(p, 30, a);
-                 pickle(p, file, a->expr);
+                 p.putU4(a->args.size());
+                 for (auto &arg : a->args) {
+                     pickle(p, file, arg);
+                 }
              },
              [&](ast::ZSuperArgs *a) { pickleAstHeader(p, 31, a); },
              [&](ast::UnresolvedIdent *a) {
@@ -1102,8 +1105,13 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::OptionalArg>(loc, move(ref), move(default_));
         }
         case 30: {
-            auto expr = unpickleExpr(p, gs, file);
-            return ast::MK::Yield(loc, move(expr));
+            auto narg = p.getU4();
+            ast::Send::ARGS_store args(narg);
+            for (auto &arg : args) {
+                arg = unpickleExpr(p, gs, file);
+            }
+
+            return ast::MK::Yield(loc, move(args));
         }
         case 31: {
             return make_unique<ast::ZSuperArgs>(loc);

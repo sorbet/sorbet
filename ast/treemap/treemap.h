@@ -428,7 +428,9 @@ private:
                         ctx, move(v), func);
                 }
 
-                v->expr = mapIt(move(v->expr), ctx);
+                for (auto &arg : v->args) {
+                    arg = mapIt(move(arg), ctx);
+                }
 
                 if (HAS_MEMBER_postTransformYield<FUNC>::value) {
                     return PostPonePostTransform_Yield<FUNC, CTX, HAS_MEMBER_postTransformYield<FUNC>::value>::call(

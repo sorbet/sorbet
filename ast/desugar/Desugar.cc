@@ -1149,23 +1149,13 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Yield *ret) {
-                if (ret->exprs.size() > 1) {
-                    Array::ENTRY_store elems;
-                    elems.reserve(ret->exprs.size());
-                    for (auto &stat : ret->exprs) {
-                        elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
-                    };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, move(elems));
-                    unique_ptr<Expression> res = make_unique<Yield>(loc, move(arr));
-                    result.swap(res);
-                } else if (ret->exprs.size() == 1) {
-                    unique_ptr<Expression> res =
-                        make_unique<Yield>(loc, node2TreeImpl(ctx, move(ret->exprs[0]), uniqueCounter));
-                    result.swap(res);
-                } else {
-                    unique_ptr<Expression> res = make_unique<Yield>(loc, MK::EmptyTree(loc));
-                    result.swap(res);
-                }
+                Send::ARGS_store elems;
+                elems.reserve(ret->exprs.size());
+                for (auto &stat : ret->exprs) {
+                    elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                };
+                unique_ptr<Expression> res = make_unique<Yield>(loc, move(elems));
+                result.swap(res);
             },
             [&](parser::Rescue *rescue) {
                 Rescue::RESCUE_CASE_store cases;

@@ -781,10 +781,8 @@ public:
         core::LocalVariable local = enterLocal(ctx, name);
         scopeStack.back().locals[name] = local;
         auto recv = make_unique<ast::Local>(yield->loc, local);
-        ast::Send::ARGS_store nargs;
-        nargs.emplace_back(move(yield->expr));
 
-        return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(nargs));
+        return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(yield->args));
     }
 
 private:

@@ -2,8 +2,8 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
     def self.each<<constant:<todo sym>>>()
       begin
-        yield([1, 2, 3, 4, 5])
-        yield([6, 7, 8, 9, 0])
+        yield(1, 2, 3, 4, 5)
+        yield(6, 7, 8, 9, 0)
       end
     end
   end
