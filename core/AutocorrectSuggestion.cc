@@ -21,7 +21,7 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
 map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
                                                   map<FileRef, string> sources) {
     // Sort the locs backwards
-    auto compare = [](AutocorrectSuggestion &left, AutocorrectSuggestion &right) {
+    auto compare = [](const AutocorrectSuggestion &left, const AutocorrectSuggestion &right) {
         if (left.loc.file() != right.loc.file()) {
             return left.loc.file().id() > right.loc.file().id();
         }
