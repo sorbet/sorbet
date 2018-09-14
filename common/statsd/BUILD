@@ -18,7 +18,6 @@ cc_library(
     deps = [
         "//common",
         "//core",
-        "//core:counters_impl",
         "@statsd",
     ],
 )

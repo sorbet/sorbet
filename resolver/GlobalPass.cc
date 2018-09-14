@@ -262,8 +262,8 @@ void Resolver::finalizeAncestors(core::GlobalState &gs) {
         }
     }
 
-    core::prodCounterAdd("types.input.classes.total", classCount);
-    core::prodCounterAdd("types.input.methods.total", methodCount);
+    prodCounterAdd("types.input.classes.total", classCount);
+    prodCounterAdd("types.input.methods.total", methodCount);
 }
 
 struct ParentLinearizationInformation {

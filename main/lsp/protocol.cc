@@ -158,7 +158,7 @@ std::unique_ptr<core::GlobalState> LSPLoop::runLSP() {
             doc.CopyFrom(guardedState.pendingRequests.front(), alloc);
             guardedState.pendingRequests.pop_front();
         }
-        core::prodCounterInc("lsp.requests.received");
+        prodCounterInc("lsp.requests.received");
         if (!handleReplies(doc)) {
             processRequest(doc);
         }

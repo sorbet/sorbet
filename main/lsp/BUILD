@@ -13,10 +13,10 @@ cc_library(
     deps = [
         "//ast",
         "//common/kvstore",
+        "//common/statsd",
         "//core",
         "//core/proto",
         "//core/serialize",
-        "//core/statsd",
         "//main/errorqueue",
         "//main/options",
         "//main/pipeline",

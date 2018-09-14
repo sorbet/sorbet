@@ -58,7 +58,7 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRe
 }
 
 void LSPLoop::handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
+    prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
     result.SetArray();
     string searchString = d["params"]["query"].GetString();
 

@@ -7,7 +7,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
     result.SetObject();
 
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {

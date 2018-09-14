@@ -1,6 +1,6 @@
 #include "core/proto/proto.h"
+#include "common/Counters_impl.h"
 #include "common/Random.h"
-#include "core/Counters_impl.h"
 #include "core/Names/core.h"
 
 #include "absl/algorithm/container.h"
@@ -178,6 +178,30 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         metric->set_name(absl::StrCat(prefix, ".", e.first));
         metric->set_value(e.second);
     }
+
+    for (auto &e : counters.counters->timings) {
+        if (e.second.size() == 1) {
+            com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+            metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".value"));
+            metric->set_value(e.second[0]);
+            continue;
+        }
+        auto min = *absl::c_min_element(e.second);
+        auto max = *absl::c_max_element(e.second);
+        auto avg = absl::c_accumulate(e.second, 0) / e.second.size();
+        com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".min"));
+        metric->set_value(min);
+
+        metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".max"));
+        metric->set_value(max);
+
+        metric = metrics.add_metrics();
+        metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".avg"));
+        metric->set_value(avg);
+    }
+
     return metrics;
 }
 

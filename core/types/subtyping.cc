@@ -1254,7 +1254,7 @@ shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolR
 }
 
 MetaType::MetaType(const shared_ptr<Type> &wrapped) : ProxyType(), wrapped(move(wrapped)) {
-    core::categoryCounterInc("types.allocated", "metattype");
+    categoryCounterInc("types.allocated", "metattype");
 }
 
 shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {

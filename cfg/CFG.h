@@ -55,7 +55,7 @@ public:
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
     BasicBlock() {
-        core::counterInc("basicblocks");
+        counterInc("basicblocks");
     };
 
     std::string toString(core::Context ctx);

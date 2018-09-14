@@ -80,7 +80,7 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
 
         core::MutableContext ctx(gs, core::Symbols::root());
         {
-            Timer timeit(logger, "Incremental resolving");
+            Timer timeit(logger, "incremental_resolve");
             logger->trace("Resolving (incremental pass)...");
             core::ErrorRegion errs(gs, sorbet::core::FileRef());
             core::UnfreezeSymbolTable symbolTable(gs);
@@ -226,7 +226,7 @@ void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
 }
 
 void LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
-    core::prodCategoryCounterInc("lsp.updates", "slowpath");
+    prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
 
     invalidateAllErrors();
@@ -302,7 +302,7 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
         }
         invalidateErrorsFor(subset);
         logger->debug("Taking happy path");
-        core::prodCategoryCounterInc("lsp.updates", "fastpath");
+        prodCategoryCounterInc("lsp.updates", "fastpath");
 
         vector<unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {

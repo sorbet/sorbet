@@ -1,9 +1,13 @@
 #include "common/Timer.h"
 using namespace std;
-
-Timer::Timer(const shared_ptr<spdlog::logger> &log, string msg)
-    : log(log), msg(move(msg)), begin(chrono::steady_clock::now()) {}
+namespace sorbet {
+Timer::Timer(const shared_ptr<spdlog::logger> &log, ConstExprStr name)
+    : log(log), name(name), begin(chrono::steady_clock::now()) {}
 
 Timer::~Timer() {
-    log->debug("{}: {}ms", this->msg, chrono::duration<double, milli>(chrono::steady_clock::now() - begin).count());
+    auto timeNanos = chrono::duration<long, nano>(chrono::steady_clock::now() - begin).count();
+    log->debug("{}: {}ms", this->name.str, timeNanos * 1.0 / 1000000);
+    sorbet::timingAdd(this->name, timeNanos);
 }
+
+} // namespace sorbet

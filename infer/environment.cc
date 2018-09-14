@@ -782,7 +782,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         recvType.type->dispatchCall(ctx, send->fun, bind.loc, send->receiverLoc, args, send->argLocs,
                                                     recvType.type, recvType.type, recvType.type, send->link);
 
-                    core::histogramInc("dispatchCall.components", dispatched.components.size());
+                    histogramInc("dispatchCall.components", dispatched.components.size());
                     tp.type = dispatched.returnType;
                     for (auto &comp : dispatched.components) {
                         for (auto &err : comp.errors) {

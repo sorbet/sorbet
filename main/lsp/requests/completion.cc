@@ -163,7 +163,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
 }
 
 void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
     result.SetObject();
     result.AddMember("isIncomplete", "false", alloc);
     rapidjson::Value items;

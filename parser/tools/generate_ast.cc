@@ -257,7 +257,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
     }
     out << '\n';
     out << "{";
-    out << R"(    core::categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
+    out << R"(    categoryCounterInc("nodes", ")" << node.name << "\");" << '\n';
     out << "}" << '\n';
     out << '\n';
 

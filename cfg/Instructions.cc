@@ -12,7 +12,7 @@ namespace sorbet {
 namespace cfg {
 
 Return::Return(core::LocalVariable what) : what(what) {
-    core::categoryCounterInc("cfg", "return");
+    categoryCounterInc("cfg", "return");
 }
 
 string SolveConstraint::toString(core::Context ctx) {
@@ -25,7 +25,7 @@ string Return::toString(core::Context ctx) {
 
 BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what)
     : link(move(link)), what(what) {
-    core::categoryCounterInc("cfg", "blockreturn");
+    categoryCounterInc("cfg", "blockreturn");
 }
 
 string BlockReturn::toString(core::Context ctx) {
@@ -36,12 +36,12 @@ Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
            const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
            const shared_ptr<core::SendAndBlockLink> &link)
     : recv(recv), fun(fun), receiverLoc(receiverLoc), args(args), argLocs(argLocs), link(move(link)) {
-    core::categoryCounterInc("cfg", "send");
-    core::histogramInc("cfg.send.args", this->args.size());
+    categoryCounterInc("cfg", "send");
+    histogramInc("cfg.send.args", this->args.size());
 }
 
 Literal::Literal(const shared_ptr<core::Type> &value) : value(move(value)) {
-    core::categoryCounterInc("cfg", "literal");
+    categoryCounterInc("cfg", "literal");
 }
 
 string Literal::toString(core::Context ctx) {
@@ -63,11 +63,11 @@ string Literal::toString(core::Context ctx) {
 }
 
 Ident::Ident(core::LocalVariable what) : what(what) {
-    core::categoryCounterInc("cfg", "ident");
+    categoryCounterInc("cfg", "ident");
 }
 
 Alias::Alias(core::SymbolRef what) : what(what) {
-    core::categoryCounterInc("cfg", "alias");
+    categoryCounterInc("cfg", "alias");
 }
 
 string Ident::toString(core::Context ctx) {

@@ -1,8 +1,8 @@
 #ifndef SORBET_CORE_H
 #define SORBET_CORE_H
 
+#include "common/Counters.h"
 #include "core/Context.h"
-#include "core/Counters.h"
 #include "core/GlobalState.h"
 #include "core/Loc.h"
 #include "core/Names.h"

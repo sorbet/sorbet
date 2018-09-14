@@ -367,7 +367,7 @@ private:
         }
 
         if (resolveAncestorJob(ctx, job, typeAliases, false)) {
-            core::categoryCounterInc("resolve.constants.ancestor", "firstpass");
+            categoryCounterInc("resolve.constants.ancestor", "firstpass");
         } else {
             todo_ancestors_.emplace_back(move(job));
         }
@@ -392,7 +392,7 @@ public:
         auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), move(c), nullptr);
         ResolutionItem job{nesting_, out.get()};
         if (resolveJob(ctx, job, typeAliases, false)) {
-            core::categoryCounterInc("resolve.constants.nonancestor", "firstpass");
+            categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
             todo_.emplace_back(move(job));
         }
@@ -453,7 +453,7 @@ public:
         auto item = ClassAliasResolutionItem{id->symbol, rhs};
 
         if (resolveAliasJob(ctx, item)) {
-            core::categoryCounterInc("resolve.constants.aliases", "firstpass");
+            categoryCounterInc("resolve.constants.aliases", "firstpass");
         } else {
             // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
             // We may be able to get some perf by using this
@@ -501,7 +501,7 @@ public:
         bool progress = true;
 
         while (!(todo.empty() && todo_ancestors.empty()) && progress) {
-            core::counterInc("resolve.constants.retries");
+            counterInc("resolve.constants.retries");
             {
                 // This is an optimization. The order should not matter semantically
                 // We try to resolve most ancestors second because this makes us much more likely to resolve everything
@@ -513,7 +513,7 @@ public:
                                     });
                 todo_ancestors.erase(it, todo_ancestors.end());
                 progress = (orig_size != todo_ancestors.size());
-                core::categoryCounterAdd("resolve.constants.ancestor", "retry", orig_size - todo_ancestors.size());
+                categoryCounterAdd("resolve.constants.ancestor", "retry", orig_size - todo_ancestors.size());
             }
             {
                 int orig_size = todo.size();
@@ -522,7 +522,7 @@ public:
                 });
                 todo.erase(it, todo.end());
                 progress = progress || (orig_size != todo.size());
-                core::categoryCounterAdd("resolve.constants.nonancestor", "retry", orig_size - todo.size());
+                categoryCounterAdd("resolve.constants.nonancestor", "retry", orig_size - todo.size());
             }
             {
                 // This is an optimization. The order should not matter semantically
@@ -535,13 +535,13 @@ public:
                                     [ctx](ClassAliasResolutionItem &it) -> bool { return resolveAliasJob(ctx, it); });
                 todo_aliases.erase(it, todo_aliases.end());
                 progress = progress || (orig_size != todo_aliases.size());
-                core::categoryCounterAdd("resolve.constants.aliases", "retry", orig_size - todo_aliases.size());
+                categoryCounterAdd("resolve.constants.aliases", "retry", orig_size - todo_aliases.size());
             }
         }
         // We can no longer resolve new constants. All the code below reports errors
 
-        core::categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
-        core::categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
+        categoryCounterAdd("resolve.constants.nonancestor", "failure", todo.size());
+        categoryCounterAdd("resolve.constants.ancestor", "failure", todo_ancestors.size());
 
         /*
          * Sort errors so we choose a deterministic error to report for each
@@ -795,27 +795,27 @@ private:
                         bool DSL = mdef->isDSLSynthesized();
                         bool isRBI = mdef->loc.file().data(ctx).isRBI();
                         if (hasSig) {
-                            core::categoryCounterInc("method.sig", "true");
+                            categoryCounterInc("method.sig", "true");
                         } else {
-                            core::categoryCounterInc("method.sig", "false");
+                            categoryCounterInc("method.sig", "false");
                         }
                         if (DSL) {
-                            core::categoryCounterInc("method.dsl", "true");
+                            categoryCounterInc("method.dsl", "true");
                         } else {
-                            core::categoryCounterInc("method.dsl", "false");
+                            categoryCounterInc("method.dsl", "false");
                         }
                         if (isRBI) {
-                            core::categoryCounterInc("method.rbi", "true");
+                            categoryCounterInc("method.rbi", "true");
                         } else {
-                            core::categoryCounterInc("method.rbi", "false");
+                            categoryCounterInc("method.rbi", "false");
                         }
                         if (hasSig && !isRBI && !DSL) {
-                            core::counterInc("types.sig.human");
+                            counterInc("types.sig.human");
                         }
                     }
 
                     if (!lastSig.empty()) {
-                        core::prodCounterInc("types.sig.count");
+                        prodCounterInc("types.sig.count");
 
                         bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
 

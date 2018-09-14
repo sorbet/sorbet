@@ -1,8 +1,7 @@
-#include "core/Counters.h"
+#include "common/Counters.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
-#include "core/Counters_impl.h"
-#include "core/Names.h"
+#include "common/Counters_impl.h"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -15,7 +14,6 @@
 using namespace std;
 
 namespace sorbet {
-namespace core {
 CounterState::CounterState(unique_ptr<CounterImpl> counters) : counters(move(counters)) {}
 
 CounterState::CounterState() = default;
@@ -41,14 +39,14 @@ const char *CounterImpl::internKey(const char *str) {
     return str;
 }
 
-void CounterImpl::histogramAdd(const char *histogram, int key, unsigned int value) {
+void CounterImpl::histogramAdd(const char *histogram, int key, unsigned long value) {
     if (!enable_counters) {
         return;
     }
     this->histograms[histogram][key] += value;
 }
 
-void CounterImpl::categoryCounterAdd(const char *category, const char *counter, unsigned int value) {
+void CounterImpl::categoryCounterAdd(const char *category, const char *counter, unsigned long value) {
     if (!enable_counters) {
         return;
     }
@@ -56,19 +54,23 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
     prodCategoryCounterAdd(category, counter, value);
 }
 
-void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned int value) {
+void CounterImpl::prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value) {
     this->counters_by_category[category][counter] += value;
 }
 
-void CounterImpl::counterAdd(const char *counter, unsigned int value) {
+void CounterImpl::counterAdd(const char *counter, unsigned long value) {
     if (!enable_counters) {
         return;
     }
     prodCounterAdd(counter, value);
 }
 
-void CounterImpl::prodCounterAdd(const char *counter, unsigned int value) {
+void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
     this->counters[counter] += value;
+}
+
+void CounterImpl::timingAdd(const char *metric, unsigned long millis) {
+    this->timings[metric].emplace_back(millis);
 }
 
 thread_local CounterImpl counterState;
@@ -87,9 +89,9 @@ void CounterImpl::clear() {
     this->counters_by_category.clear();
 }
 
-map<int, int> getAndClearHistogram(ConstExprStr histogram) {
+map<long, long> getAndClearHistogram(ConstExprStr histogram) {
     counterState.canonicalize();
-    map<int, int> ret;
+    map<long, long> ret;
     auto fnd = counterState.histograms.find(counterState.internKey(histogram.str));
     if (fnd != counterState.histograms.end()) {
         for (auto e : fnd->second) {
@@ -120,7 +122,7 @@ void counterConsume(CounterState cs) {
     }
 }
 
-void counterAdd(ConstExprStr counter, unsigned int value) {
+void counterAdd(ConstExprStr counter, unsigned long value) {
     counterState.counterAdd(counter.str, value);
 }
 
@@ -128,7 +130,7 @@ void counterInc(ConstExprStr counter) {
     counterAdd(counter, 1);
 }
 
-void prodCounterAdd(ConstExprStr counter, unsigned int value) {
+void prodCounterAdd(ConstExprStr counter, unsigned long value) {
     counterState.prodCounterAdd(counter.str, value);
 }
 
@@ -144,11 +146,15 @@ void prodCategoryCounterInc(ConstExprStr category, ConstExprStr counter) {
     prodCategoryCounterAdd(category, counter, 1);
 }
 
-void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
+void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value) {
     counterState.categoryCounterAdd(category.str, counter.str, value);
 }
 
-void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value) {
+void timingAdd(ConstExprStr measure, unsigned long nanos) {
+    counterState.timingAdd(measure.str, nanos);
+}
+
+void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value) {
     counterState.prodCategoryCounterAdd(category.str, counter.str, value);
 }
 
@@ -156,7 +162,7 @@ void histogramInc(ConstExprStr histogram, int key) {
     counterState.histogramAdd(histogram.str, key, 1);
 }
 
-void histogramAdd(ConstExprStr histogram, int key, unsigned int value) {
+void histogramAdd(ConstExprStr histogram, int key, unsigned long value) {
     counterState.histogramAdd(histogram.str, key, value);
 }
 
@@ -193,9 +199,17 @@ void CounterImpl::canonicalize() {
     for (auto &e : this->counters) {
         out.prodCounterAdd(internKey(e.first), e.second);
     }
+
+    for (auto &e : this->timings) {
+        for (auto v : e.second) {
+            out.timingAdd(internKey(e.first), v);
+        }
+    }
+
     this->counters_by_category = move(out.counters_by_category);
     this->histograms = move(out.histograms);
     this->counters = move(out.counters);
+    this->timings = move(out.timings);
 }
 
 const vector<string> Counters::ALL_COUNTERS = {"<all>"};
@@ -230,7 +244,10 @@ string getCounterStatistics(vector<string> names) {
             sum = 1;
         }
         for (auto &e : sorted) {
-            string number = padOrLimit(to_string(e.first), 6);
+            string number = to_string(e.first);
+            if (number.size() < 6) {
+                number = padOrLimit(number, 6);
+            }
             string perc = padOrLimit(to_string(round(e.first * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
             buf << "  " << padOrLimit(e.second, PAD_LIMIT - 4) << " :" << number << ", " << perc << "% " << hashes
@@ -257,7 +274,10 @@ string getCounterStatistics(vector<string> names) {
             it++;
         }
         if (it != hist.second.begin()) {
-            string number = padOrLimit(to_string(header), 6);
+            string number = to_string(header);
+            if (number.size() < 6) {
+                number = padOrLimit(number, 6);
+            }
             string perc = padOrLimit(to_string(round(header * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
             buf << " <" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
@@ -266,7 +286,10 @@ string getCounterStatistics(vector<string> names) {
 
         while (it != hist.second.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
-            string number = padOrLimit(to_string(it->second), 6);
+            string number = to_string(it->second);
+            if (number.size() < 6) {
+                number = padOrLimit(number, 6);
+            }
             string perc = padOrLimit(to_string(round(it->second * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
             buf << "  " << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
@@ -274,7 +297,10 @@ string getCounterStatistics(vector<string> names) {
             it++;
         }
         if (it != hist.second.end()) {
-            string number = padOrLimit(to_string(sum - header), 6);
+            string number = to_string(sum - header);
+            if (number.size() < 6) {
+                number = padOrLimit(number, 6);
+            }
             string perc = padOrLimit(to_string(round((sum - header) * 1000.0 / sum) / 10.0), 3);
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
             buf << ">=" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
@@ -284,6 +310,48 @@ string getCounterStatistics(vector<string> names) {
     }
 
     {
+        buf << "Timings: " << '\n';
+        vector<pair<string, string>> sortedTimings;
+        for (auto &e : counterState.timings) {
+            if (!shouldShow(names, e.first)) {
+                continue;
+            }
+            if (e.second.size() == 1) {
+                string value = to_string(e.second[0]);
+                if (value.size() < 10) {
+                    value = padOrLimit(value, 10);
+                }
+                string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".value :" + value + "\n";
+                sortedTimings.emplace_back(e.first, line);
+                continue;
+            }
+
+            string min = to_string(*absl::c_min_element(e.second));
+            string max = to_string(*absl::c_max_element(e.second));
+            string avg = to_string(absl::c_accumulate(e.second, 0) / e.second.size());
+            if (min.size() < 10) {
+                min = padOrLimit(min, 10);
+            }
+            if (max.size() < 10) {
+                max = padOrLimit(max, 10);
+            }
+            if (avg.size() < 10) {
+                avg = padOrLimit(avg, 10);
+            }
+            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".min :" + min + "\n" + "  " +
+                          padOrLimit(e.first, PAD_LIMIT - 4) + ".max :" + max + "\n" + "  " +
+                          padOrLimit(e.first, PAD_LIMIT - 4) + ".avg :" + avg + "\n";
+            sortedTimings.emplace_back(e.first, line);
+        }
+        absl::c_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+
+        for (auto &e : sortedTimings) {
+            buf << e.second;
+        }
+    }
+
+    {
+        buf << "Counters: " << '\n';
         vector<pair<string, string>> sortedOther;
         for (auto &e : counterState.counters) {
             if (!shouldShow(names, e.first)) {
@@ -296,6 +364,7 @@ string getCounterStatistics(vector<string> names) {
             string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + "\n";
             sortedOther.emplace_back(e.first, line);
         }
+
         absl::c_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         for (auto &e : sortedOther) {
@@ -305,5 +374,4 @@ string getCounterStatistics(vector<string> names) {
     return buf.str();
 }
 
-} // namespace core
 }; // namespace sorbet

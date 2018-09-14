@@ -82,9 +82,9 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
             }
         }
     }
-    core::histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
+    histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
-    core::histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
+    histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
     absl::c_sort(aliasesPrefix, [](const Binding &l, const Binding &r) -> bool { return l.bind < r.bind; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
@@ -98,7 +98,7 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     removeDeadAssigns(ctx, RnW, *res);
     fillInBlockArguments(ctx, RnW, *res);
     simplify(ctx, *res);
-    core::histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
+    histogramInc("cfgbuilder.basicBlocksSimplified", basicBlockCreated - res->basicBlocks.size());
     markLoopHeaders(ctx, *res);
     sanityCheck(ctx, *res);
     res->sanityCheck(ctx);

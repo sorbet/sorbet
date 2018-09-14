@@ -1,13 +1,12 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
 #include "absl/strings/string_view.h"
-#include "core/Names.h"
+#include "common/common.h"
 #include <map>
 #include <string>
 #include <unordered_map>
 
 namespace sorbet {
-namespace core {
 
 constexpr bool enable_counters = debug_mode;
 
@@ -48,8 +47,10 @@ struct CounterImpl;
 
 // forward declarations for classes that need private access to the counter
 // implementation
-class Proto;
 class StatsD;
+namespace core {
+class Proto;
+}
 
 struct CounterState {
     CounterState();
@@ -62,7 +63,7 @@ struct CounterState {
 private:
     friend CounterState getAndClearThreadCounters();
     friend void counterConsume(CounterState cs);
-    friend class Proto;
+    friend class core::Proto;
     friend class StatsD;
 
     CounterState(std::unique_ptr<CounterImpl> counters);
@@ -77,17 +78,20 @@ CounterState getAndClearThreadCounters();
 void counterConsume(CounterState cs);
 
 void prodCounterInc(ConstExprStr counter);
-void prodCounterAdd(ConstExprStr counter, unsigned int value);
+void prodCounterAdd(ConstExprStr counter, unsigned long value);
 void counterInc(ConstExprStr counter);
-void counterAdd(ConstExprStr counter, unsigned int value);
+void counterAdd(ConstExprStr counter, unsigned long value);
 void categoryCounterInc(ConstExprStr category, ConstExprStr counter);
-void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value);
+void categoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value);
 void prodCategoryCounterInc(ConstExprStr category, ConstExprStr counter);
-void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned int value);
+void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value);
 void histogramInc(ConstExprStr histogram, int key);
-void histogramAdd(ConstExprStr histogram, int key, unsigned int value);
-std::map<int, int> getAndClearHistogram(ConstExprStr histogram);
+void histogramAdd(ConstExprStr histogram, int key, unsigned long value);
+/* Does not aggregate over measures, instead, reports them separately.
+ * Use with care, as it can make us report a LOT of data. */
+void timingAdd(ConstExprStr measure, unsigned long nanos);
+std::map<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
-} // namespace core
+
 } // namespace sorbet
 #endif // SORBET_COUNTERS_H

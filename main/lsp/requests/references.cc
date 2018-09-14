@@ -10,7 +10,7 @@ namespace realmain {
 namespace lsp {
 
 void LSPLoop::handleTextDocumentReferences(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
     // we're postponing setting the type of `result` because we want to return `null` in case we don't handle that
     // location yet.
 

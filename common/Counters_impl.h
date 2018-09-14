@@ -4,7 +4,6 @@
 #include "absl/strings/string_view.h"
 
 namespace sorbet {
-namespace core {
 struct CounterImpl {
     CounterImpl() = default;
     CounterImpl(CounterImpl const &) = delete;
@@ -17,13 +16,14 @@ struct CounterImpl {
 
     const char *internKey(const char *str);
 
-    void histogramAdd(const char *histogram, int key, unsigned int value);
+    void histogramAdd(const char *histogram, int key, unsigned long value);
 
-    void categoryCounterAdd(const char *category, const char *counter, unsigned int value);
-    void prodCategoryCounterAdd(const char *category, const char *counter, unsigned int value);
+    void categoryCounterAdd(const char *category, const char *counter, unsigned long value);
+    void prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value);
 
-    void counterAdd(const char *counter, unsigned int value);
-    void prodCounterAdd(const char *counter, unsigned int value);
+    void counterAdd(const char *counter, unsigned long value);
+    void prodCounterAdd(const char *counter, unsigned long value);
+    void timingAdd(const char *metring, unsigned long nanos);
 
     // absl::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.
@@ -32,9 +32,9 @@ struct CounterImpl {
 
     std::map<const char *, std::map<int, CounterType>> histograms;
     std::map<const char *, CounterType> counters;
+    std::map<const char *, std::vector<CounterType>> timings;
     std::map<const char *, std::map<const char *, CounterType>> counters_by_category;
 };
-} // namespace core
 } // namespace sorbet
 
 #endif

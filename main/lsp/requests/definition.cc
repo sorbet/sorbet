@@ -13,7 +13,7 @@ void LSPLoop::addLocIfExists(rapidjson::Value &result, core::Loc loc) {
 }
 
 void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.definition");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.definition");
     result.SetArray();
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentDefinition(), true)) {
         auto queryResponses = errorQueue->drainQueryResponses();

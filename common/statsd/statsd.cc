@@ -1,5 +1,5 @@
-#include "core/statsd/statsd.h"
-#include "core/Counters_impl.h"
+#include "common/statsd/statsd.h"
+#include "common/Counters_impl.h"
 
 extern "C" {
 #include "statsd-client.h"
@@ -13,7 +13,6 @@ extern "C" {
 using namespace std;
 
 namespace sorbet {
-namespace core {
 
 class StatsdClientWrapper {
     constexpr static int PKT_LEN = 512; // conservative bound for MTU
@@ -55,8 +54,8 @@ public:
     void gauge(const string &name, size_t value) { // type : g
         addMetric(name, value, "g");
     }
-    void timing(const string &name, size_t ms) { // type: ms
-        addMetric(name, ms, "ms");
+    void timing(const string &name, size_t ns) {    // type: ms
+        addMetric(name + ".duration_ns", ns, "ms"); // format suggested by #observability (@sjung and @an)
     }
 };
 
@@ -88,8 +87,13 @@ bool StatsD::submitCounters(const CounterState &counters, string host, int port,
         statsd.gauge(e.first, e.second);
     }
 
+    for (auto &e : counters.counters->timings) {
+        for (auto entry : e.second) {
+            statsd.timing(e.first, entry);
+        }
+    }
+
     return true;
 }
 
-} // namespace core
 } // namespace sorbet

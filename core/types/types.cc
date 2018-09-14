@@ -237,7 +237,7 @@ shared_ptr<Type> Types::arrayOf(Context ctx, const shared_ptr<Type> &elem) {
 }
 
 ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
-    core::categoryCounterInc("types.allocated", "classtype");
+    categoryCounterInc("types.allocated", "classtype");
     ENFORCE(symbol.exists());
 }
 
@@ -272,23 +272,23 @@ bool Type::isBottom() {
 }
 
 LiteralType::LiteralType(int64_t val) : ProxyType(), value(val), literalKind(LiteralTypeKind::Integer) {
-    core::categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype");
 }
 
 LiteralType::LiteralType(double val) : ProxyType(), floatval(val), literalKind(LiteralTypeKind::Float) {
-    core::categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype");
 }
 
 LiteralType::LiteralType(SymbolRef klass, NameRef val)
     : ProxyType(), value(val._id),
       literalKind(klass == Symbols::String() ? LiteralTypeKind::String : LiteralTypeKind::Symbol) {
-    core::categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype");
     ENFORCE(klass == Symbols::String() || klass == Symbols::Symbol());
 }
 
 LiteralType::LiteralType(bool val)
     : ProxyType(), value(val ? 1 : 0), literalKind(val ? LiteralTypeKind::True : LiteralTypeKind::False) {
-    core::categoryCounterInc("types.allocated", "literaltype");
+    categoryCounterInc("types.allocated", "literaltype");
 }
 
 shared_ptr<Type> LiteralType::underlying() const {
@@ -311,7 +311,7 @@ shared_ptr<Type> LiteralType::underlying() const {
 
 TupleType::TupleType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> elements)
     : ProxyType(), elems(move(elements)), underlying_(underlying) {
-    core::categoryCounterInc("types.allocated", "tupletype");
+    categoryCounterInc("types.allocated", "tupletype");
 }
 
 shared_ptr<Type> TupleType::build(Context ctx, vector<shared_ptr<Type>> elements) {
@@ -320,7 +320,7 @@ shared_ptr<Type> TupleType::build(Context ctx, vector<shared_ptr<Type>> elements
 }
 
 AndType::AndType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
-    core::categoryCounterInc("types.allocated", "andtype");
+    categoryCounterInc("types.allocated", "andtype");
 }
 
 bool LiteralType::equals(const shared_ptr<LiteralType> &rhs) const {
@@ -336,7 +336,7 @@ bool LiteralType::equals(const shared_ptr<LiteralType> &rhs) const {
 }
 
 OrType::OrType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
-    core::categoryCounterInc("types.allocated", "ortype");
+    categoryCounterInc("types.allocated", "ortype");
 }
 
 void TupleType::_sanityCheck(Context ctx) {
@@ -347,13 +347,13 @@ void TupleType::_sanityCheck(Context ctx) {
 }
 
 ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
-    core::categoryCounterInc("types.allocated", "shapetype");
+    categoryCounterInc("types.allocated", "shapetype");
 }
 
 ShapeType::ShapeType(const shared_ptr<Type> &underlying, vector<shared_ptr<LiteralType>> keys,
                      vector<shared_ptr<Type>> values)
     : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
-    core::categoryCounterInc("types.allocated", "shapetype");
+    categoryCounterInc("types.allocated", "shapetype");
 }
 
 shared_ptr<Type> ShapeType::underlying() const {
@@ -376,7 +376,7 @@ void ShapeType::_sanityCheck(Context ctx) {
 }
 
 AliasType::AliasType(SymbolRef other) : symbol(other) {
-    core::categoryCounterInc("types.allocated", "aliastype");
+    categoryCounterInc("types.allocated", "aliastype");
 }
 
 void AndType::_sanityCheck(Context ctx) {
@@ -581,7 +581,7 @@ bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 }
 
 TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
-    core::categoryCounterInc("types.allocated", "typevar");
+    categoryCounterInc("types.allocated", "typevar");
 }
 
 void TypeVar::_sanityCheck(Context ctx) {
@@ -617,11 +617,11 @@ bool AppliedType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 }
 
 LambdaParam::LambdaParam(const SymbolRef definition) : definition(definition) {
-    core::categoryCounterInc("types.allocated", "lambdatypeparam");
+    categoryCounterInc("types.allocated", "lambdatypeparam");
 }
 
 SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition) {
-    core::categoryCounterInc("types.allocated", "selftypeparam");
+    categoryCounterInc("types.allocated", "selftypeparam");
 }
 
 bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
@@ -732,10 +732,10 @@ shared_ptr<Type> TupleType::elementType() const {
 }
 
 SelfType::SelfType() {
-    core::categoryCounterInc("types.allocated", "selftype");
+    categoryCounterInc("types.allocated", "selftype");
 };
 AppliedType::AppliedType(SymbolRef klass, vector<shared_ptr<Type>> targs) : klass(klass), targs(targs) {
-    core::categoryCounterInc("types.allocated", "appliedtype");
+    categoryCounterInc("types.allocated", "appliedtype");
 }
 
 string SelfType::typeName() const {

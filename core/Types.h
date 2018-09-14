@@ -1,8 +1,8 @@
 #ifndef SORBET_TYPES_H
 #define SORBET_TYPES_H
 
+#include "common/Counters.h"
 #include "core/Context.h"
-#include "core/Counters.h"
 #include "core/Errors.h"
 #include "core/SymbolRef.h"
 #include <memory>

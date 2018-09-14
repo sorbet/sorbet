@@ -113,7 +113,7 @@ CheckSize(Literal, 32, 8);
 class Unanalyzable : public Instruction {
 public:
     Unanalyzable() {
-        core::categoryCounterInc("cfg", "unanalyzable");
+        categoryCounterInc("cfg", "unanalyzable");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -124,7 +124,7 @@ public:
     std::string why;
 
     NotSupported(std::string why) : why(why) {
-        core::categoryCounterInc("cfg", "notsupported");
+        categoryCounterInc("cfg", "notsupported");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -135,7 +135,7 @@ public:
     core::SymbolRef klass;
 
     Self(core::SymbolRef klass) : klass(klass) {
-        core::categoryCounterInc("cfg", "self");
+        categoryCounterInc("cfg", "self");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -148,7 +148,7 @@ public:
     u4 arg;
 
     LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
-        core::categoryCounterInc("cfg", "loadarg");
+        categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };
@@ -160,7 +160,7 @@ public:
     core::SymbolRef block;
 
     LoadYieldParams(const std::shared_ptr<core::SendAndBlockLink> &link, core::SymbolRef blk) : link(link), block(blk) {
-        core::categoryCounterInc("cfg", "loadarg");
+        categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);
 };

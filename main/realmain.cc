@@ -1,11 +1,11 @@
 #include "main/realmain.h"
 #include "absl/algorithm/container.h"
+#include "common/statsd/statsd.h"
 #include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
-#include "core/statsd/statsd.h"
 #include "main/autogen/autogen.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/lsp/lsp.h"
@@ -48,7 +48,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
-            Timer timeit(logger, "Read cached global state");
+            Timer timeit(logger, "read_global_state.kvstore");
             core::serialize::Serializer::loadGlobalState(*gs, maybeGsBytes);
             for (unsigned int i = 1; i < gs->filesUsed(); i++) {
                 core::FileRef fref(i);
@@ -67,7 +67,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
     const u1 *const nameTablePayload = getNameTablePayload;
     if (nameTablePayload == nullptr) {
         gs->initEmpty();
-        Timer timeit(logger, "Indexed payload");
+        Timer timeit(logger, "read_global_state.source");
 
         vector<core::FileRef> payloadFiles;
         {
@@ -85,7 +85,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
         auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);
         pipeline::resolve(*gs, move(indexed), emptyOpts, logger); // result is thrown away
     } else {
-        Timer timeit(logger, "Read serialized payload");
+        Timer timeit(logger, "read_global_state.binary");
         core::serialize::Serializer::loadGlobalState(*gs, nameTablePayload);
     }
 }
@@ -223,16 +223,15 @@ int realmain(int argc, char *argv[]) {
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
         gs = loop.runLSP();
     } else {
-        Timer timeall(logger, "Done in");
+        Timer timeall(logger, "wall_time");
         vector<core::FileRef> inputFiles;
         logger->trace("Files: ");
         {
-            Timer timeit(logger, "reading files");
             core::UnfreezeFileTable fileTableAccess(*gs);
             if (!opts.inlineInput.empty()) {
-                core::prodCounterAdd("types.input.bytes", opts.inlineInput.size());
-                core::prodCounterInc("types.input.lines");
-                core::prodCounterInc("types.input.files");
+                prodCounterAdd("types.input.bytes", opts.inlineInput.size());
+                prodCounterInc("types.input.lines");
+                prodCounterInc("types.input.files");
                 auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
                 inputFiles.push_back(file);
                 if (opts.forceMaxStrict < core::StrictLevel::Typed) {
@@ -249,7 +248,7 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (kvstore && gs->wasModified() && !gs->hadCriticalError()) {
-            Timer timeit(logger, "caching global state");
+            Timer timeit(logger, "write_global_state.kvstore");
             kvstore->write(GLOBAL_STATE_KEY, core::serialize::Serializer::storePayloadAndNameTable(*gs));
             KeyValueStore::commit(move(kvstore));
         }
@@ -265,7 +264,7 @@ int realmain(int argc, char *argv[]) {
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
             }
 
-            Timer timeit(logger, "emitting autogen");
+            Timer timeit(logger, "autogen");
             for (auto &tree : indexed) {
                 if (tree->loc.file().data(ctx).isRBI()) {
                     continue;
@@ -306,7 +305,7 @@ int realmain(int argc, char *argv[]) {
             for (auto &tree : indexed) {
                 auto f = tree->loc.file();
                 if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
-                    core::counterInc("types.input.files.suggest_typed");
+                    counterInc("types.input.files.suggest_typed");
                     logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
                 }
             }
@@ -317,7 +316,7 @@ int realmain(int argc, char *argv[]) {
             FileOps::write(opts.storeState.c_str(), core::serialize::Serializer::store(*gs));
         }
 
-        auto untypedSources = core::getAndClearHistogram("untyped.sources");
+        auto untypedSources = getAndClearHistogram("untyped.sources");
         if (opts.suggestSig) {
             ENFORCE(sorbet::debug_mode);
             vector<pair<string, int>> withNames;
@@ -339,19 +338,23 @@ int realmain(int argc, char *argv[]) {
             logger->error("Don't pass both --counters and --counter");
             return 1;
         }
-        logger->warn("" + core::getCounterStatistics(opts.someCounters));
+        logger->warn("" + getCounterStatistics(opts.someCounters));
     }
 
     if (opts.enableCounters) {
-        logger->warn("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
+        logger->warn("" + getCounterStatistics(Counters::ALL_COUNTERS));
     } else {
-        logger->debug("" + core::getCounterStatistics(core::Counters::ALL_COUNTERS));
+        logger->debug("" + getCounterStatistics(Counters::ALL_COUNTERS));
     }
 
-    auto counters = core::getAndClearThreadCounters();
+    auto counters = getAndClearThreadCounters();
 
     if (!opts.statsdHost.empty()) {
-        core::StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, opts.statsdPrefix + ".counters");
+        auto prefix = opts.statsdPrefix;
+        if (opts.runLSP) {
+            prefix += ".lsp";
+        }
+        StatsD::submitCounters(counters, opts.statsdHost, opts.statsdPort, prefix + ".counters");
     }
 
     if (!opts.metricsFile.empty()) {

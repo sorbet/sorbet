@@ -20,8 +20,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
     if (method.isNotification) {
         logger->debug("Processing notification {} ", (string)method.name);
         if (method == LSPMethod::TextDocumentDidChange()) {
-            core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
-            Timer timeit(logger, "handle update");
+            prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
+            Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
             auto &edits = d["params"];
             ENFORCE(edits.IsObject());
@@ -78,8 +78,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
-            core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.didOpen");
-            Timer timeit(logger, "handle open");
+            prodCategoryCounterInc("requests.processed", "textDocument.didOpen");
+            Timer timeit(logger, "text_document_did_open");
             vector<shared_ptr<core::File>> files;
             auto &edits = d["params"];
             ENFORCE(edits.IsObject());
@@ -99,10 +99,10 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             }
         }
         if (method == LSPMethod::Initialized()) {
-            core::prodCategoryCounterInc("lsp.requests.processed", "initialized");
+            prodCategoryCounterInc("requests.processed", "initialized");
             // initialize ourselves
             {
-                Timer timeit(logger, "index");
+                Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
                 runSlowPath(move(changedFiles));
@@ -121,12 +121,12 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         int errorCode = 0;
         string errorString;
         if (d.FindMember("cancelled") != d.MemberEnd()) {
-            core::prodCounterInc("lsp.requests.cancelled");
+            prodCounterInc("lsp.requests.cancelled");
             errorCode = (int)LSPErrorCodes::RequestCancelled;
             errorString = "Request was cancelled";
             sendError(d, errorCode, errorString);
         } else if (method == LSPMethod::Initialize()) {
-            core::prodCategoryCounterInc("lsp.requests.processed", "initialize");
+            prodCategoryCounterInc("lsp.requests.processed", "initialize");
             result.SetObject();
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
             string serverCap = "{\"capabilities\": "
@@ -151,7 +151,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             result.CopyFrom(temp, alloc);
             sendResult(d, result);
         } else if (method == LSPMethod::Shutdown()) {
-            core::prodCategoryCounterInc("lsp.requests.processed", "shutdown");
+            prodCategoryCounterInc("lsp.requests.processed", "shutdown");
             // return default value: null
             sendResult(d, result);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {

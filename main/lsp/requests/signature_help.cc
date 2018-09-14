@@ -9,7 +9,7 @@ namespace realmain {
 namespace lsp {
 void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method,
                                    const core::QueryResponse &resp, int activeParameter) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     // signature helps only exist for methods.
     if (!method.exists() || !method.data(*finalGs).isMethod() || hideSymbol(method)) {
         return;
@@ -57,7 +57,7 @@ void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef
 }
 
 void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d) {
-    core::prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
+    prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     result.SetObject();
     rapidjson::Value signatures;
     signatures.SetArray();

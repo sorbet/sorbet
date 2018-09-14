@@ -55,7 +55,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
 
 unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     auto methodLoc = ctx.owner.data(ctx).loc();
-    core::prodCounterInc("types.input.methods.typechecked");
+    prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
     int totalSendCount = 0;
     const int startErrorCount = ctx.state.totalErrors();
@@ -201,7 +201,7 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
                     if (bind.tpe && !bind.tpe->isUntyped()) {
                         typedSendCount++;
                     } else if (bind.tpe->hasUntyped()) {
-                        DEBUG_ONLY(core::histogramInc("untyped.sources", bind.tpe->untypedBlame()._id););
+                        DEBUG_ONLY(histogramInc("untyped.sources", bind.tpe->untypedBlame()._id););
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
                         }
@@ -224,17 +224,17 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         if (!current.isDead) {
             current.ensureGoodCondition(ctx, bb->bexit.cond);
         }
-        core::histogramInc("infer.environment.size", current.vars.size());
+        histogramInc("infer.environment.size", current.vars.size());
         for (auto &pair : current.vars) {
             auto &k = pair.second.knowledge;
-            core::histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
-            core::histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
-            core::histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());
-            core::histogramInc("infer.knowledge.falsy.no.size", k.falsy->noTypeTests.size());
+            histogramInc("infer.knowledge.truthy.yes.size", k.truthy->yesTypeTests.size());
+            histogramInc("infer.knowledge.truthy.no.size", k.truthy->noTypeTests.size());
+            histogramInc("infer.knowledge.falsy.yes.size", k.falsy->yesTypeTests.size());
+            histogramInc("infer.knowledge.falsy.no.size", k.falsy->noTypeTests.size());
         }
     }
     if (startErrorCount == ctx.state.totalErrors()) {
-        core::counterInc("infer.methods_typechecked.no_errors");
+        counterInc("infer.methods_typechecked.no_errors");
     }
 
     if (missingReturnType && shouldHaveReturnType) {
@@ -244,8 +244,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         }
     }
 
-    core::prodCounterAdd("types.input.sends.typed", typedSendCount);
-    core::prodCounterAdd("types.input.sends.total", totalSendCount);
+    prodCounterAdd("types.input.sends.typed", typedSendCount);
+    prodCounterAdd("types.input.sends.total", totalSendCount);
 
     return cfg;
 }
