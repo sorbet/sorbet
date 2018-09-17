@@ -778,9 +778,13 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     // TODO
                     tp.type = core::Types::untypedUntracked();
                 } else {
-                    auto dispatched =
-                        recvType.type->dispatchCall(ctx, send->fun, bind.loc, send->receiverLoc, args, send->argLocs,
-                                                    recvType.type, recvType.type, recvType.type, send->link);
+                    core::CallLocs locs{
+                        bind.loc,
+                        send->receiverLoc,
+                        send->argLocs,
+                    };
+                    core::DispatchArgs dispatchArgs{send->fun, locs, args, recvType.type, recvType.type, send->link};
+                    auto dispatched = recvType.type->dispatchCall(ctx, dispatchArgs);
 
                     histogramInc("dispatchCall.components", dispatched.components.size());
                     tp.type = dispatched.returnType;

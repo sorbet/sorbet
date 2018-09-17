@@ -247,12 +247,12 @@ void ProxyType::_sanityCheck(Context ctx) {
     this->underlying()->sanityCheck(ctx);
 }
 
-bool Type::isUntyped() {
+bool Type::isUntyped() const {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == Symbols::untyped();
 }
 
-core::SymbolRef Type::untypedBlame() {
+core::SymbolRef Type::untypedBlame() const {
     ENFORCE(isUntyped());
     auto *t = cast_type<BlamedUntyped>(this);
     if (t == nullptr) {
@@ -261,12 +261,12 @@ core::SymbolRef Type::untypedBlame() {
     return t->blame;
 }
 
-bool Type::isTop() {
+bool Type::isTop() const {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == Symbols::top();
 }
 
-bool Type::isBottom() {
+bool Type::isBottom() const {
     auto *t = cast_type<ClassType>(this);
     return t != nullptr && t->symbol == Symbols::bottom();
 }
@@ -640,21 +640,12 @@ shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, i
     return Types::untypedUntracked()->getCallArgumentType(ctx, name, i);
 }
 
-DispatchResult LambdaParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                         InlinedVector<const TypeAndOrigins *, 2> &args,
-                                         const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfType,
-                                         const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
-                                         const shared_ptr<SendAndBlockLink> &block) {
+DispatchResult LambdaParam::dispatchCall(Context ctx, DispatchArgs args) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-DispatchResult SelfTypeParam::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                           InlinedVector<const TypeAndOrigins *, 2> &args,
-                                           const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfType,
-                                           const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
-                                           const shared_ptr<SendAndBlockLink> &block) {
-    return Types::untypedUntracked()->dispatchCall(ctx, name, callLoc, receiverLoc, args, argLocs, selfType, fullType,
-                                                   lastAndComponent, block);
+DispatchResult SelfTypeParam::dispatchCall(Context ctx, DispatchArgs args) {
+    return Types::untypedUntracked()->dispatchCall(ctx, args);
 }
 
 void LambdaParam::_sanityCheck(Context ctx) {}
@@ -754,11 +745,7 @@ bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("should never happen");
 }
 
-DispatchResult SelfType::dispatchCall(Context ctx, NameRef name, Loc callLoc, Loc receiverLoc,
-                                      InlinedVector<const TypeAndOrigins *, 2> &args,
-                                      const InlinedVector<Loc, 2> &argLocs, const shared_ptr<Type> &selfRef,
-                                      const shared_ptr<Type> &fullType, const shared_ptr<Type> &lastAndComponent,
-                                      const shared_ptr<SendAndBlockLink> &link) {
+DispatchResult SelfType::dispatchCall(Context ctx, DispatchArgs args) {
     Error::raise("should never happen");
 }
 
@@ -781,6 +768,10 @@ std::shared_ptr<Type> Types::widen(Context ctx, const std::shared_ptr<Type> &typ
              [&](Type *tp) { ret = type; });
     ENFORCE(ret);
     return ret;
+}
+
+DispatchArgs DispatchArgs::withSelfRef(const std::shared_ptr<Type> &newSelfRef) {
+    return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
 
 } // namespace core
