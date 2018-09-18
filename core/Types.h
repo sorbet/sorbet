@@ -388,6 +388,7 @@ private:
                                             const std::shared_ptr<Type> &t2);
     friend std::shared_ptr<Type> Types::glb(Context ctx, const std::shared_ptr<Type> &t1,
                                             const std::shared_ptr<Type> &t2);
+    friend std::shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const std::shared_ptr<Type> &from, SymbolRef klass);
 
     static std::shared_ptr<Type> make_shared(const std::shared_ptr<Type> &left, const std::shared_ptr<Type> &right);
 };

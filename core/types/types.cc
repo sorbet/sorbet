@@ -142,10 +142,14 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from
              [&](OrType *o) {
                  auto lhs = dropSubtypesOf(ctx, o->left, klass);
                  auto rhs = dropSubtypesOf(ctx, o->right, klass);
-                 if (lhs != o->left || rhs != o->right) {
-                     result = Types::any(ctx, lhs, rhs);
-                 } else {
+                 if (lhs == o->left && rhs == o->right) {
                      result = from;
+                 } else if (lhs->isBottom()) {
+                     result = rhs;
+                 } else if (rhs->isBottom()) {
+                     result = lhs;
+                 } else {
+                     result = OrType::make_shared(lhs, rhs);
                  }
              },
              [&](AndType *a) {
