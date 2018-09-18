@@ -10,33 +10,6 @@ module T::Helpers
   def sig(**params); end
 end
 
-class Sorbet::Private::Builder
-  include T::Helpers
-  sig(type: T.untyped).returns(Sorbet::Private::Builder)
-  def returns(type); end;
-
-  sig.returns(Sorbet::Private::Builder)
-  def void; end;
-
-  sig(arg: T.untyped).returns(Sorbet::Private::Builder)
-  def checked(arg); end;
-
-  sig(params: T.untyped).returns(Sorbet::Private::Builder)
-  def soft(**params); end
-
-  sig.returns(Sorbet::Private::Builder)
-  def abstract; end;
-
-  sig.returns(Sorbet::Private::Builder)
-  def override; end;
-
-  sig.returns(Sorbet::Private::Builder)
-  def implementation; end;
-
-  sig.returns(Sorbet::Private::Builder)
-  def overridable; end;
-end
-
 module T
   extend T::Helpers
 
