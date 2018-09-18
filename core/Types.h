@@ -99,6 +99,7 @@ public:
 
     static std::shared_ptr<Type> lubAll(Context ctx, std::vector<std::shared_ptr<Type>> &elements);
     static std::shared_ptr<Type> arrayOf(Context ctx, const std::shared_ptr<Type> &elem);
+    static std::shared_ptr<Type> hashOf(Context ctx, const std::shared_ptr<Type> &elem);
 
     /** Recursively replaces proxies with their underlying types */
     static std::shared_ptr<Type> widen(Context ctx, const std::shared_ptr<Type> &type);

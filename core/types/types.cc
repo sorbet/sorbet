@@ -240,6 +240,12 @@ shared_ptr<Type> Types::arrayOf(Context ctx, const shared_ptr<Type> &elem) {
     return make_shared<AppliedType>(Symbols::Array(), targs);
 }
 
+shared_ptr<Type> Types::hashOf(Context ctx, const shared_ptr<Type> &elem) {
+    vector<shared_ptr<Type>> tupleArgs{Types::Symbol(), elem};
+    vector<shared_ptr<Type>> targs{Types::Symbol(), elem, TupleType::build(ctx, tupleArgs)};
+    return make_shared<AppliedType>(Symbols::Hash(), targs);
+}
+
 ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
     categoryCounterInc("types.allocated", "classtype");
     ENFORCE(symbol.exists());
@@ -641,7 +647,7 @@ shared_ptr<Type> LambdaParam::getCallArgumentType(Context ctx, NameRef name, int
 }
 
 shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, int i) {
-    return Types::untypedUntracked()->getCallArgumentType(ctx, name, i);
+    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, DispatchArgs args) {

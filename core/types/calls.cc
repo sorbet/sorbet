@@ -711,13 +711,25 @@ shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i
         return nullptr;
     }
 
-    shared_ptr<Type> resultType = data.arguments()[i].data(ctx).resultType;
+    const Symbol &arg = data.arguments()[i].data(ctx);
+    shared_ptr<Type> resultType = arg.resultType;
     if (!resultType) {
         resultType = Types::untyped(ctx, data.arguments()[i]);
     }
-    return resultType;
+
+    if (arg.isRepeated()) {
+        if (arg.isKeyword()) {
+            return Types::hashOf(ctx, resultType);
+        } else {
+            return Types::arrayOf(ctx, resultType);
+        }
+    } else {
+        return resultType;
+    }
 }
 
+// This duplicates a bunch of logic with ClassType. We might want to refactor this to be shared.
+// The only real extra work that AppliedType has to do is instantiate the targs (see resultTypeAsSeenFrom)
 shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int i) {
     SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
 
@@ -735,7 +747,17 @@ shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int
     if (!resultType) {
         resultType = Types::untyped(ctx, data.arguments()[i]);
     }
-    return resultType;
+
+    const Symbol &arg = data.arguments()[i].data(ctx);
+    if (arg.isRepeated()) {
+        if (arg.isKeyword()) {
+            return Types::hashOf(ctx, resultType);
+        } else {
+            return Types::arrayOf(ctx, resultType);
+        }
+    } else {
+        return resultType;
+    }
 }
 
 DispatchResult AliasType::dispatchCall(Context ctx, DispatchArgs args) {
