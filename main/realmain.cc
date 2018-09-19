@@ -187,7 +187,7 @@ int realmain(int argc, char *argv[]) {
             string argString(argv[i]);
             argsConcat = argsConcat + " " + argString;
         }
-        logger->debug("Running sorbet version {} with arguments: {}", Version::build_scm_revision, argsConcat);
+        logger->debug("Running sorbet version {} with arguments: {}", Version::full_version_string, argsConcat);
     }
     WorkerPool workers(opts.threads, logger);
 
@@ -198,7 +198,7 @@ int realmain(int argc, char *argv[]) {
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
     if (!opts.cacheDir.empty()) {
-        kvstore = make_unique<KeyValueStore>(Version::build_scm_revision, opts.cacheDir);
+        kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir);
     }
     createInitialGlobalState(gs, opts, kvstore);
     if (opts.silenceErrors) {
@@ -219,7 +219,7 @@ int realmain(int argc, char *argv[]) {
                       "More details at https://microsoft.github.io/language-server-protocol/specification."
                       "If you're developing an LSP extension to some editor, make sure to run sorbet with `-v` flag,"
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
-                      Version::build_scm_revision);
+                      Version::full_version_string);
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
         gs = loop.runLSP();
     } else {

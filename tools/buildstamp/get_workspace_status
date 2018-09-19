@@ -16,7 +16,9 @@ set -e
 
 # The code below presents an implementation that works for git repository
 git_rev=$(git rev-parse HEAD)
+git_commit_count=$(git rev-list --count HEAD)
 echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
+echo "STABLE_BUILD_SCM_COMMIT_COUNT ${git_commit_count}"
 
 # Check whether there are any uncommited changes
 set +e

@@ -17,11 +17,13 @@ namespace sorbet {
 #if BUILD_RELEASE
 const char *const build_scm_clean = STABLE_BUILD_SCM_CLEAN;
 const char *const build_scm_revision = STABLE_BUILD_SCM_REVISION;
+const char *const build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
 const long build_timestamp = BUILD_TIMESTAMP;
 constexpr bool is_release_build = true;
 #else
 const char *const build_scm_clean = "1";
 const char *const build_scm_revision = "master";
+const char *const build_scm_commit_count = "0";
 const long build_timestamp = 0;
 constexpr bool is_release_build = false;
 #endif
@@ -41,9 +43,14 @@ string makeScmRevision() {
 }
 const string Version::build_scm_revision = makeScmRevision();
 
+string makeScmCommitCount() {
+    return build_scm_commit_count;
+}
+const string Version::build_scm_commit_count = makeScmCommitCount();
+
 chrono::system_clock::time_point makeBuildTime() {
-    const long buildStampMsec = build_timestamp;
-    chrono::system_clock::time_point res((chrono::milliseconds(buildStampMsec)));
+    const long buildStampSec = build_timestamp;
+    chrono::system_clock::time_point res((chrono::seconds(buildStampSec)));
     return res;
 }
 const chrono::system_clock::time_point Version::build_timestamp = makeBuildTime();
@@ -56,6 +63,10 @@ string makeBuildTimeString() {
     buffer[written] = '\0';
     return buffer;
 }
-const string Version::build_timestamp_string = makeBuildTimeString(); // non-release build have 1970-01-01 00:00:00 GMT
+const string Version::build_timestamp_string = makeBuildTimeString(); // non-release builds have 1970-01-01 00:00:00 GMT
 
+const string Version::full_version_string =
+    Version::version + Version::codename + "rev " + Version::build_scm_commit_count +
+    (Version::isReleaseBuild ? "" : " (non-release)") + " git " + Version::build_scm_revision +
+    Version::build_scm_status + " built on " + Version::build_timestamp_string;
 } // namespace sorbet

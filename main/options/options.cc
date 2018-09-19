@@ -300,9 +300,7 @@ void readOptions(Options &opts, int argc, char *argv[], shared_ptr<spdlog::logge
             throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
-            cout << "Ruby Typer" << Version::version << Version::codename
-                 << (Version::isReleaseBuild ? "" : " (non-release)") << " git " << Version::build_scm_revision
-                 << Version::build_scm_status << " built on " << Version::build_timestamp_string << endl;
+            cout << "Ruby Typer " << Version::full_version_string << endl;
             throw EarlyReturnWithCode(0);
         }
 
