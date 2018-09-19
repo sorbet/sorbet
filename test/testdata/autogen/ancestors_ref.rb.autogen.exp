@@ -157,7 +157,7 @@ requires: []
  scope=[OneTwo]
  name=[FOO]
  nesting=[[OneTwo]]
- resolved=[One FOO]
+ resolved=[Two FOO]
  loc=test/testdata/autogen/ancestors_ref.rb:20
  is_defining_ref=0
 [ref id=14]
@@ -195,6 +195,6 @@ requires: []
  scope=[TwoOne]
  name=[FOO]
  nesting=[[TwoOne]]
- resolved=[Two FOO]
+ resolved=[One FOO]
  loc=test/testdata/autogen/ancestors_ref.rb:26
  is_defining_ref=0

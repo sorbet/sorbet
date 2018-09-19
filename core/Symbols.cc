@@ -191,21 +191,26 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             return result;
         }
     }
-    for (auto it = this->argumentsOrMixins.begin(); it != this->argumentsOrMixins.end(); ++it) {
-        ENFORCE(it->exists());
-        if (isClassLinearizationComputed()) {
-            result = it->data(gs).findMember(gs, name);
-            if (result.exists()) {
-                if (mask == 0 || (result.data(gs).flags & mask) == flags) {
-                    return result;
+    if (isClassLinearizationComputed()) {
+        for (auto it = this->argumentsOrMixins.begin(); it != this->argumentsOrMixins.end(); ++it) {
+            ENFORCE(it->exists());
+            if (isClassLinearizationComputed()) {
+                result = it->data(gs).findMember(gs, name);
+                if (result.exists()) {
+                    if (mask == 0 || (result.data(gs).flags & mask) == flags) {
+                        return result;
+                    }
                 }
+                result = core::Symbols::noSymbol();
             }
-            result = core::Symbols::noSymbol();
-        } else {
-            result = it->data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
         }
-        if (result.exists()) {
-            return result;
+    } else {
+        for (auto it = this->argumentsOrMixins.rbegin(); it != this->argumentsOrMixins.rend(); ++it) {
+            ENFORCE(it->exists());
+            result = it->data(gs).findMemberTransitiveInternal(gs, name, mask, flags, maxDepth - 1);
+            if (result.exists()) {
+                return result;
+            }
         }
     }
     if (this->superClass.exists()) {

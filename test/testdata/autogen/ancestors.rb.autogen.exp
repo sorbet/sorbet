@@ -106,6 +106,6 @@ requires: []
  scope=[D]
  name=[CONST]
  nesting=[[D]]
- resolved=[B CONST]
+ resolved=[A CONST]
  loc=test/testdata/autogen/ancestors.rb:18
  is_defining_ref=0
