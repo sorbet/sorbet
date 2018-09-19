@@ -221,6 +221,7 @@ NameDef names[] = {
     {"new_", "new", Core | Desugar},
     {"blockCall", "<block-call>", CFG | Infer | Core},
     {"blkArg", "<blk>", CFG | Namer},
+    {"blockGiven_p", "block_given?", Namer},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end

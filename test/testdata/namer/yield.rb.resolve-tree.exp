@@ -43,9 +43,9 @@ begin
       end
     end
 
-    def blockyield<blockyield>()
-      self(<constant:Main>).yielder() do |i$5, <blk>$5|
-        <blk>$5.call(i$5)
+    def blockyield<blockyield>(<blk>)
+      self(<constant:Main>).yielder() do |i$5|
+        <blk>.call(i$5)
       end
     end
 

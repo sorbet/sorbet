@@ -78,7 +78,7 @@ subgraph "cluster_::Main#blockyield" {
     "bb::Main#blockyield_1" [shape = parallelogram];
 
     "bb::Main#blockyield_0" [
-        label = "block[id=0]()\l<statTemp>$4: Main = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Main.yielder()\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Main = self\l<blk>: T.untyped = load_arg(<selfMethodTemp>$3: Main#blockyield, 0)\l<statTemp>$4: Main = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Main.yielder()\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_0" -> "bb::Main#blockyield_2" [style="bold"];
@@ -88,7 +88,7 @@ subgraph "cluster_::Main#blockyield" {
 
     "bb::Main#blockyield_1" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+        label = "block[id=2](<blk>: T.untyped)\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Main#blockyield_2" -> "bb::Main#blockyield_4" [style="bold"];
@@ -100,7 +100,7 @@ subgraph "cluster_::Main#blockyield" {
 
     "bb::Main#blockyield_3" -> "bb::Main#blockyield_1" [style="bold"];
     "bb::Main#blockyield_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$6: [T.untyped, T.untyped] = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<blk>$7: Integer(0) = 0\li$5: T.untyped = <blk>$6: [T.untyped, T.untyped].[](<blk>$7: Integer(0))\l<blk>$7: Integer(1) = 1\l<blk>$5: T.untyped = <blk>$6: [T.untyped, T.untyped].[](<blk>$7: Integer(1))\l<blockReturnTemp>$8: T.untyped = <blk>$5: T.untyped.call(i$5: T.untyped)\l<blockReturnTemp>$11: <impossible> = blockreturn<::Main#blockyield#<block>> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<blk>: T.untyped)\louterLoops: 1\l<blk>$6: [T.untyped] = load_yield_params(::Main#blockyield#<block>, Main#blockyield#<block>)\l<blk>$7: Integer(0) = 0\li$5: T.untyped = <blk>$6: [T.untyped].[](<blk>$7: Integer(0))\l<blockReturnTemp>$8: T.untyped = <blk>: T.untyped.call(i$5: T.untyped)\l<blockReturnTemp>$11: <impossible> = blockreturn<::Main#blockyield#<block>> <blockReturnTemp>$8: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Main#blockyield_4" -> "bb::Main#blockyield_2" [style="bold"];

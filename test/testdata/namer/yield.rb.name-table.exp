@@ -3,9 +3,9 @@ class ::<root> < ::Object () @ (test/testdata/namer/yield.rb:2, https://git.corp
   class ::Main < ::Object () @ test/testdata/namer/yield.rb:2
     method ::Main#blockpass (blk) @ test/testdata/namer/yield.rb:7
       argument ::Main#blockpass#blk<block> @ test/testdata/namer/yield.rb:7
-    method ::Main#blockyield () @ test/testdata/namer/yield.rb:15
-      method ::Main#blockyield#<block> (i, <blk>) @ test/testdata/namer/yield.rb:16
-        argument ::Main#blockyield#<block>#<blk><block> -> T.untyped @ test/testdata/namer/yield.rb:16
+    method ::Main#blockyield (<blk>) @ test/testdata/namer/yield.rb:15
+      argument ::Main#blockyield#<blk><block> -> T.untyped @ test/testdata/namer/yield.rb:16
+      method ::Main#blockyield#<block> (i) @ test/testdata/namer/yield.rb:16
         argument ::Main#blockyield#<block>#i<> @ test/testdata/namer/yield.rb:16
     method ::Main#main () @ test/testdata/namer/yield.rb:19
       method ::Main#main#<block> (x) @ test/testdata/namer/yield.rb:20
