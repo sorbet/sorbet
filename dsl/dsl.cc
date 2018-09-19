@@ -4,7 +4,6 @@
 #include "dsl/Command.h"
 #include "dsl/DSLBuilder.h"
 #include "dsl/InterfaceWrapper.h"
-#include "dsl/Minitest.h"
 #include "dsl/Sinatra.h"
 #include "dsl/Struct.h"
 #include "dsl/attr_reader.h"
@@ -35,12 +34,6 @@ public:
 
                      [&](ast::Send *send) {
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);
-                         if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
-                             return;
-                         }
-
-                         nodes = Minitest::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
                              replaceNodes[stat.get()] = move(nodes);
                              return;
