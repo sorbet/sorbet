@@ -37,7 +37,7 @@ requires: []
  defining_ref=[FOO]
 [def id=7]
  type=class
- defines_behavior=0
+ defines_behavior=1
  is_empty=0
  defining_ref=[Base]
 [def id=8]

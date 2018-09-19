@@ -27,7 +27,7 @@ requires: []
  defining_ref=[CONST]
 [def id=5]
  type=module
- defines_behavior=0
+ defines_behavior=1
  is_empty=1
  defining_ref=[C]
 [def id=6]

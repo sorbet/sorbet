@@ -312,7 +312,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         expectation = test.expectations.find("resolve-tree-raw");
         if (expectation != test.expectations.end()) {
-            got["resolve-tree-raw"].append(resolvedTree->showRaw(gs));
+            got["resolve-tree-raw"].append(resolvedTree->showRaw(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

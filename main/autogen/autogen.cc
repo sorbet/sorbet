@@ -120,9 +120,15 @@ public:
         }
         def.is_empty =
             all_of(original->rhs.begin(), original->rhs.end(), [](auto &tree) { return ignoreChild(tree.get()); });
-        if (original->kind == ast::Class) {
-            auto *super = ast::cast_tree<ast::ConstantLit>(original->ancestors.front().get());
-            if (super && super->original != nullptr) {
+        for (auto &ancst : original->ancestors) {
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+            if (cnst && cnst->original != nullptr) {
+                def.defines_behavior = true;
+            }
+        }
+        for (auto &ancst : original->singleton_ancestors) {
+            auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
+            if (cnst && cnst->original != nullptr) {
                 def.defines_behavior = true;
             }
         }
