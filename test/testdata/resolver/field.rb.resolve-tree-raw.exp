@@ -1,0 +1,21 @@
+ClassDef{
+  name = EmptyTree<<constant:<root>>>
+  ancestors = []
+  rhs = [
+    MethodDef{
+      flags = 0
+      name = foo<foo>
+      args = [Local{
+          localVariable = a
+        }]
+      rhs = Assign{
+        lhs = Field{
+          symbol = @a
+        }
+        rhs = Local{
+          localVariable = a
+        }
+      }
+    }
+  ]
+}

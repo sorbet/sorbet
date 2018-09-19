@@ -326,7 +326,7 @@ string ClassDef::toString(const core::GlobalState &gs, int tabs) {
 
 string ClassDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "ClassDef{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "name = " << name->showRaw(gs, tabs + 1) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs)
         << ">" << '\n';
@@ -432,7 +432,7 @@ string MethodDef::toString(const core::GlobalState &gs, int tabs) {
 
 string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "MethodDef{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
 
     buf << "flags =";
@@ -489,7 +489,7 @@ string If::toString(const core::GlobalState &gs, int tabs) {
 string If::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "If{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "cond = " << this->cond->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
@@ -504,7 +504,7 @@ string If::showRaw(const core::GlobalState &gs, int tabs) {
 string Assign::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "Assign{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "lhs = " << this->lhs->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
@@ -528,7 +528,7 @@ string While::toString(const core::GlobalState &gs, int tabs) {
 string While::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "While{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "cond = " << this->cond->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
@@ -549,7 +549,7 @@ string UnresolvedConstantLit::toString(const core::GlobalState &gs, int tabs) {
 string UnresolvedConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "UnresolvedConstantLit{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "scope = " << this->scope->showRaw(gs, tabs + 1) << '\n';
     printTabs(buf, tabs + 1);
@@ -569,7 +569,7 @@ string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
 
-    buf << "ConstantLit{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "orig = " << (this->original ? this->original->showRaw(gs, tabs + 1) : "nullptr") << '\n';
     printTabs(buf, tabs + 1);
@@ -595,7 +595,7 @@ string Local::nodeName() {
 
 string Field::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "Ident{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "symbol = " << this->symbol.data(gs, true).name.data(gs).toString(gs) << '\n';
     printTabs(buf, tabs);
@@ -605,7 +605,7 @@ string Field::showRaw(const core::GlobalState &gs, int tabs) {
 
 string Local::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "Local{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "localVariable = " << this->localVariable.toString(gs) << '\n';
     printTabs(buf, tabs);
@@ -619,7 +619,7 @@ string UnresolvedIdent::toString(const core::GlobalState &gs, int tabs) {
 
 string UnresolvedIdent::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "UnresolvedIdent{" << '\n';
+    buf << nodeName() << "{" << '\n';
     printTabs(buf, tabs + 1);
     buf << "kind = ";
     switch (this->kind) {
@@ -979,7 +979,7 @@ string Block::toString(const core::GlobalState &gs, int tabs) {
 
 string Block::showRaw(const core::GlobalState &gs, int tabs) {
     stringstream buf;
-    buf << "Block {" << '\n';
+    buf << nodeName() << " {" << '\n';
     printTabs(buf, tabs + 1);
     buf << "args = [" << '\n';
     for (auto &a : this->args) {

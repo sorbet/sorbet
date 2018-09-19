@@ -56,6 +56,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
 
 core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inWhat,
                                  UnorderedMap<core::SymbolRef, core::LocalVariable> &aliases) {
+    // Note: this will add an empty local to aliases if 'what' is not there
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
         const core::Symbol &data = what.data(cctx.ctx);
