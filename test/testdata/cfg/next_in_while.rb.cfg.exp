@@ -16,7 +16,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_1" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_2" [
-        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$4 = true : TrueClass\l<whileTemp>$4\l"
+        label = "block[id=2]()\louterLoops: 1\l<whileTemp>$4: TrueClass = true\l<whileTemp>$4: TrueClass\l"
     ];
 
     "bb::Object#foo_2" -> "bb::Object#foo_4" [style="bold"];
@@ -28,7 +28,7 @@ subgraph "cluster_::Object#foo" {
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$7 = self : Object\l<statTemp>$6 = <statTemp>$7.good() : T.untyped\l<statTemp>$10 = self : Object\l<nextTemp>$9 = <statTemp>$10.value() : T.untyped\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$7: Object = self\l<statTemp>$6: T.untyped = <statTemp>$7: Object.good()\l<statTemp>$10: Object = self\l<nextTemp>$9: T.untyped = <statTemp>$10: Object.value()\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];

@@ -85,7 +85,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
     histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
-    absl::c_sort(aliasesPrefix, [](const Binding &l, const Binding &r) -> bool { return l.bind < r.bind; });
+    absl::c_sort(aliasesPrefix,
+                 [](const Binding &l, const Binding &r) -> bool { return l.bind.variable < r.bind.variable; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));

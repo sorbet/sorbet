@@ -6,7 +6,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_1" [shape = parallelogram];
 
     "bb::Object#main_0" [
-        label = "block[id=0]()\l<rescueStartTemp>$4 = <unanalyzable> : T.untyped\l<rescueStartTemp>$4\l"
+        label = "block[id=0]()\l<rescueStartTemp>$4: T.untyped = <unanalyzable>\l<rescueStartTemp>$4: T.untyped\l"
     ];
 
     "bb::Object#main_0" -> "bb::Object#main_3" [style="bold"];
@@ -18,26 +18,26 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3](<returnMethodTemp>$2)\l<gotoDeadTemp>$7 = true : TrueClass(true)\l<unconditional>\l"
+        label = "block[id=3](<returnMethodTemp>$2: T.untyped)\l<gotoDeadTemp>$7: TrueClass(true) = true\l<unconditional>\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_4" [
-        label = "block[id=4]()\l<statTemp>$5 = self : Object\l<returnMethodTemp>$2 = <statTemp>$5.a() : T.untyped\l<rescueEndTemp>$6 = <unanalyzable> : T.untyped\l<rescueEndTemp>$6\l"
+        label = "block[id=4]()\l<statTemp>$5: Object = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$5: Object.a()\l<rescueEndTemp>$6: T.untyped = <unanalyzable>\l<rescueEndTemp>$6: T.untyped\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_3" [style="bold"];
     "bb::Object#main_4" -> "bb::Object#main_6" [style="tapered"];
 
     "bb::Object#main_6" [
-        label = "block[id=6](<returnMethodTemp>$2, <gotoDeadTemp>$7)\l<statTemp>$9 = self : Object\l<throwAwayTemp>$8 = <statTemp>$9.b() : T.untyped\l<gotoDeadTemp>$7\l"
+        label = "block[id=6](<returnMethodTemp>$2: T.untyped, <gotoDeadTemp>$7: T.nilable(TrueClass))\l<statTemp>$9: Object = self\l<throwAwayTemp>$8: T.untyped = <statTemp>$9: Object.b()\l<gotoDeadTemp>$7: T.nilable(TrueClass)\l"
     ];
 
     "bb::Object#main_6" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_6" -> "bb::Object#main_8" [style="tapered"];
 
     "bb::Object#main_8" [
-        label = "block[id=8](<returnMethodTemp>$2)\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=8](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#main_8" -> "bb::Object#main_1" [style="bold"];
@@ -50,7 +50,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_1" [shape = parallelogram];
 
     "bb::Object#a_0" [
-        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#a_0" -> "bb::Object#a_1" [style="bold"];
@@ -68,7 +68,7 @@ subgraph "cluster_::Object#b" {
     "bb::Object#b_1" [shape = parallelogram];
 
     "bb::Object#b_0" [
-        label = "block[id=0]()\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#b_0" -> "bb::Object#b_1" [style="bold"];
@@ -86,7 +86,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4 = self : <Class:<root>>\l<returnMethodTemp>$2 = <statTemp>$4.main() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: <Class:<root>> = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: <Class:<root>>.main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

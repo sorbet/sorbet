@@ -35,7 +35,13 @@ string BlockReturn::toString(core::Context ctx) {
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
            const InlinedVector<core::LocalVariable, 2> &args, const InlinedVector<core::Loc, 2> &argLocs,
            const shared_ptr<core::SendAndBlockLink> &link)
-    : recv(recv), fun(fun), receiverLoc(receiverLoc), args(args), argLocs(argLocs), link(move(link)) {
+    : recv(recv), fun(fun), receiverLoc(receiverLoc), argLocs(argLocs), link(move(link)) {
+    this->args.resize(args.size());
+    int i = 0;
+    for (const auto &e : args) {
+        this->args[i].variable = e;
+        i++;
+    }
     categoryCounterInc("cfg", "send");
     histogramInc("cfg.send.args", this->args.size());
 }
@@ -83,7 +89,7 @@ string Send::toString(core::Context ctx) {
 
     buf << this->recv.toString(ctx) << "." << this->fun.data(ctx).toString(ctx) << "(";
     bool isFirst = true;
-    for (auto arg : this->args) {
+    for (auto &arg : this->args) {
         if (!isFirst) {
             buf << ", ";
         }
@@ -140,6 +146,15 @@ string DebugEnvironment::toString(core::Context ctx) {
 
 DebugEnvironment::DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(pos) {
     isSynthetic = true;
+}
+
+std::string VariableUseSite::toString(core::Context ctx) const {
+    auto ret = this->variable.toString(ctx);
+    if (this->type) {
+        ret += ": ";
+        ret += this->type->show(ctx);
+    }
+    return ret;
 }
 } // namespace cfg
 } // namespace sorbet

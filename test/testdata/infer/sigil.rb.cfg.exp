@@ -6,7 +6,7 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_1" [shape = parallelogram];
 
     "bb::Object#foo_0" [
-        label = "block[id=0]()\l<statTemp>$4 = \"3\" : String(\"3\")\l<statTemp>$5 = 3 : Integer(3)\l<returnMethodTemp>$2 = <statTemp>$4.+(<statTemp>$5) : String\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: String(\"3\") = \"3\"\l<statTemp>$5: Integer(3) = 3\l<returnMethodTemp>$2: String = <statTemp>$4: String(\"3\").+(<statTemp>$5: Integer(3))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::Object#foo_0" -> "bb::Object#foo_1" [style="bold"];

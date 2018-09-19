@@ -131,8 +131,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         }
         Environment &current = outEnvironments[bb->id];
         current.vars.reserve(bb->args.size());
-        for (core::LocalVariable arg : bb->args) {
-            current.vars[arg].typeAndOrigins.type = nullptr;
+        for (cfg::VariableUseSite &arg : bb->args) {
+            current.vars[arg.variable].typeAndOrigins.type = nullptr;
         }
         if (bb->backEdges.size() == 1) {
             auto *parent = bb->backEdges[0];
@@ -173,6 +173,10 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             }
         }
 
+        for (auto &blockArg : bb->args) {
+            current.getAndFillTypeAndOrigin(ctx, blockArg);
+        }
+
         visited[bb->id] = true;
         if (current.isDead) {
             // this block is unreachable.
@@ -193,23 +197,23 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
         core::Loc madeBlockDead;
         for (cfg::Binding &bind : bb->exprs) {
             if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
-                current.ensureGoodAssignTarget(ctx, bind.bind);
-                bind.tpe = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind], knowledgeFilter,
-                                                  *constr, methodReturnType);
+                current.ensureGoodAssignTarget(ctx, bind.bind.variable);
+                bind.bind.type = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind.variable],
+                                                        knowledgeFilter, *constr, methodReturnType);
                 if (cfg::isa_instruction<cfg::Send>(bind.value.get())) {
                     totalSendCount++;
-                    if (bind.tpe && !bind.tpe->isUntyped()) {
+                    if (bind.bind.type && !bind.bind.type->isUntyped()) {
                         typedSendCount++;
-                    } else if (bind.tpe->hasUntyped()) {
-                        DEBUG_ONLY(histogramInc("untyped.sources", bind.tpe->untypedBlame()._id););
+                    } else if (bind.bind.type->hasUntyped()) {
+                        DEBUG_ONLY(histogramInc("untyped.sources", bind.bind.type->untypedBlame()._id););
                         if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::UntypedValue)) {
                             e.setHeader("This code is untyped");
                         }
                     }
                 }
-                ENFORCE(bind.tpe);
-                bind.tpe->sanityCheck(ctx);
-                if (bind.tpe->isBottom()) {
+                ENFORCE(bind.bind.type);
+                bind.bind.type->sanityCheck(ctx);
+                if (bind.bind.type->isBottom()) {
                     current.isDead = true;
                     madeBlockDead = bind.loc;
                 }
@@ -222,7 +226,8 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
             }
         }
         if (!current.isDead) {
-            current.ensureGoodCondition(ctx, bb->bexit.cond);
+            current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
+            current.ensureGoodCondition(ctx, bb->bexit.cond.variable);
         }
         histogramInc("infer.environment.size", current.vars.size());
         for (auto &pair : current.vars) {

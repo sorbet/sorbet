@@ -6,7 +6,7 @@ subgraph "cluster_::ControlFlow#orZero0" {
     "bb::ControlFlow#orZero0_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero0, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero0_0" -> "bb::ControlFlow#orZero0_2" [style="bold"];
@@ -18,12 +18,12 @@ subgraph "cluster_::ControlFlow#orZero0" {
 
     "bb::ControlFlow#orZero0_1" -> "bb::ControlFlow#orZero0_1" [style="bold"];
     "bb::ControlFlow#orZero0_2" [
-        label = "block[id=2](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=2](a: Integer)\l<returnMethodTemp>$2: <impossible> = return a: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero0_2" -> "bb::ControlFlow#orZero0_1" [style="bold"];
     "bb::ControlFlow#orZero0_3" [
-        label = "block[id=3]()\l<returnTemp>$6 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$6 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnTemp>$6: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$6: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero0_3" -> "bb::ControlFlow#orZero0_1" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::ControlFlow#orZero0a" {
     "bb::ControlFlow#orZero0a_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0a_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0a, 0) : Integer\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: Integer = load_arg(<selfMethodTemp>$3: ControlFlow#orZero0a, 0)\la: Integer\l"
     ];
 
     "bb::ControlFlow#orZero0a_0" -> "bb::ControlFlow#orZero0a_2" [style="bold"];
@@ -48,7 +48,7 @@ subgraph "cluster_::ControlFlow#orZero0a" {
 
     "bb::ControlFlow#orZero0a_1" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
     "bb::ControlFlow#orZero0a_2" [
-        label = "block[id=2](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=2](a: Integer)\l<returnMethodTemp>$2: <impossible> = return a: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero0a_2" -> "bb::ControlFlow#orZero0a_1" [style="bold"];
@@ -66,7 +66,7 @@ subgraph "cluster_::ControlFlow#orZero0n" {
     "bb::ControlFlow#orZero0n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero0n_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero0n, 0) : Integer | NilClass\lb = a.!() : TrueClass | FalseClass\lb\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero0n, 0)\lb: T.any(TrueClass, FalseClass) = a: T.nilable(Integer).!()\lb: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::ControlFlow#orZero0n_0" -> "bb::ControlFlow#orZero0n_2" [style="bold"];
@@ -78,12 +78,12 @@ subgraph "cluster_::ControlFlow#orZero0n" {
 
     "bb::ControlFlow#orZero0n_1" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
     "bb::ControlFlow#orZero0n_2" [
-        label = "block[id=2]()\l<returnTemp>$7 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$7: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$7: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero0n_2" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
     "bb::ControlFlow#orZero0n_3" [
-        label = "block[id=3](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=3](a: Integer)\l<returnMethodTemp>$2: <impossible> = return a: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero0n_3" -> "bb::ControlFlow#orZero0n_1" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::ControlFlow#orZero1n" {
     "bb::ControlFlow#orZero1n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero1n_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero1n, 0) : Integer | NilClass\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$5 = a.is_a?(<statTemp>$7) : TrueClass | FalseClass\lb = <statTemp>$5.!() : TrueClass | FalseClass\lb\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero1n, 0)\l<statTemp>$7: <Class:Integer> = alias <constant:Integer>\l<statTemp>$5: T.any(TrueClass, FalseClass) = a: T.nilable(Integer).is_a?(<statTemp>$7: <Class:Integer>)\lb: T.any(TrueClass, FalseClass) = <statTemp>$5: T.any(TrueClass, FalseClass).!()\lb: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::ControlFlow#orZero1n_0" -> "bb::ControlFlow#orZero1n_2" [style="bold"];
@@ -108,12 +108,12 @@ subgraph "cluster_::ControlFlow#orZero1n" {
 
     "bb::ControlFlow#orZero1n_1" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
     "bb::ControlFlow#orZero1n_2" [
-        label = "block[id=2]()\l<returnTemp>$9 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$9: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$9: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero1n_2" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
     "bb::ControlFlow#orZero1n_3" [
-        label = "block[id=3](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=3](a: Integer)\l<returnMethodTemp>$2: <impossible> = return a: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero1n_3" -> "bb::ControlFlow#orZero1n_1" [style="bold"];
@@ -126,7 +126,7 @@ subgraph "cluster_::ControlFlow#orZero2" {
     "bb::ControlFlow#orZero2_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero2_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero2, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero2, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero2_0" -> "bb::ControlFlow#orZero2_4" [style="bold"];
@@ -138,12 +138,12 @@ subgraph "cluster_::ControlFlow#orZero2" {
 
     "bb::ControlFlow#orZero2_1" -> "bb::ControlFlow#orZero2_1" [style="bold"];
     "bb::ControlFlow#orZero2_3" [
-        label = "block[id=3]()\la = 0 : Integer(0)\l<unconditional>\l"
+        label = "block[id=3]()\la: Integer(0) = 0\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_3" -> "bb::ControlFlow#orZero2_4" [style="bold"];
     "bb::ControlFlow#orZero2_4" [
-        label = "block[id=4](a)\l<returnMethodTemp>$2 = a : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=4](a: Integer)\l<returnMethodTemp>$2: Integer = a\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero2_4" -> "bb::ControlFlow#orZero2_1" [style="bold"];
@@ -156,7 +156,7 @@ subgraph "cluster_::ControlFlow#orZero3" {
     "bb::ControlFlow#orZero3_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero3_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero3, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero3, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero3_0" -> "bb::ControlFlow#orZero3_2" [style="bold"];
@@ -168,26 +168,26 @@ subgraph "cluster_::ControlFlow#orZero3" {
 
     "bb::ControlFlow#orZero3_1" -> "bb::ControlFlow#orZero3_1" [style="bold"];
     "bb::ControlFlow#orZero3_2" [
-        label = "block[id=2]()\l<statTemp>$6 = 1 : Integer(1)\l<statTemp>$7 = 2 : Integer(2)\l<ifTemp>$4 = <statTemp>$6.==(<statTemp>$7) : TrueClass | FalseClass\l<ifTemp>$4\l"
+        label = "block[id=2]()\l<statTemp>$6: Integer(1) = 1\l<statTemp>$7: Integer(2) = 2\l<ifTemp>$4: T.any(TrueClass, FalseClass) = <statTemp>$6: Integer(1).==(<statTemp>$7: Integer(2))\l<ifTemp>$4: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_5" [style="bold"];
     "bb::ControlFlow#orZero3_2" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
 
     "bb::ControlFlow#orZero3_3" [
-        label = "block[id=3](a)\l<ifTemp>$4 = a : NilClass\l<ifTemp>$4\l"
+        label = "block[id=3](a: NilClass)\l<ifTemp>$4: NilClass = a\l<ifTemp>$4: NilClass\l"
     ];
 
     "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_5" [style="bold"];
     "bb::ControlFlow#orZero3_3" -> "bb::ControlFlow#orZero3_6" [style="tapered"];
 
     "bb::ControlFlow#orZero3_5" [
-        label = "block[id=5]()\l<returnTemp>$8 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$8 : <impossible>\l<unconditional>\l"
+        label = "block[id=5]()\l<returnTemp>$8: Integer(1) = 1\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$8: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3_5" -> "bb::ControlFlow#orZero3_1" [style="bold"];
     "bb::ControlFlow#orZero3_6" [
-        label = "block[id=6]()\l<returnTemp>$9 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$9 : <impossible>\l<unconditional>\l"
+        label = "block[id=6]()\l<returnTemp>$9: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$9: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3_6" -> "bb::ControlFlow#orZero3_1" [style="bold"];
@@ -200,7 +200,7 @@ subgraph "cluster_::ControlFlow#orZero3n" {
     "bb::ControlFlow#orZero3n_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero3n_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero3n, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero3n, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero3n_0" -> "bb::ControlFlow#orZero3n_2" [style="bold"];
@@ -212,29 +212,29 @@ subgraph "cluster_::ControlFlow#orZero3n" {
 
     "bb::ControlFlow#orZero3n_1" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
     "bb::ControlFlow#orZero3n_2" [
-        label = "block[id=2]()\l<statTemp>$7 = 1 : Integer(1)\l<statTemp>$8 = 2 : Integer(2)\l<statTemp>$5 = <statTemp>$7.==(<statTemp>$8) : TrueClass | FalseClass\l<unconditional>\l"
+        label = "block[id=2]()\l<statTemp>$7: Integer(1) = 1\l<statTemp>$8: Integer(2) = 2\l<statTemp>$5: T.any(TrueClass, FalseClass) = <statTemp>$7: Integer(1).==(<statTemp>$8: Integer(2))\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3n_2" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
     "bb::ControlFlow#orZero3n_3" [
-        label = "block[id=3](a)\l<statTemp>$5 = a : NilClass\l<unconditional>\l"
+        label = "block[id=3](a: NilClass)\l<statTemp>$5: NilClass = a\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3n_3" -> "bb::ControlFlow#orZero3n_4" [style="bold"];
     "bb::ControlFlow#orZero3n_4" [
-        label = "block[id=4](<statTemp>$5)\lb = <statTemp>$5.!() : TrueClass | FalseClass\lb\l"
+        label = "block[id=4](<statTemp>$5: T.nilable(T.any(TrueClass, FalseClass)))\lb: T.any(TrueClass, FalseClass) = <statTemp>$5: T.nilable(T.any(TrueClass, FalseClass)).!()\lb: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_5" [style="bold"];
     "bb::ControlFlow#orZero3n_4" -> "bb::ControlFlow#orZero3n_6" [style="tapered"];
 
     "bb::ControlFlow#orZero3n_5" [
-        label = "block[id=5]()\l<returnTemp>$10 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$10 : <impossible>\l<unconditional>\l"
+        label = "block[id=5]()\l<returnTemp>$10: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$10: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3n_5" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
     "bb::ControlFlow#orZero3n_6" [
-        label = "block[id=6]()\l<returnTemp>$11 = 1 : Integer(1)\l<returnMethodTemp>$2 = return <returnTemp>$11 : <impossible>\l<unconditional>\l"
+        label = "block[id=6]()\l<returnTemp>$11: Integer(1) = 1\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$11: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero3n_6" -> "bb::ControlFlow#orZero3n_1" [style="bold"];
@@ -247,7 +247,7 @@ subgraph "cluster_::ControlFlow#orZero4" {
     "bb::ControlFlow#orZero4_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero4_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero4, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero4, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero4_0" -> "bb::ControlFlow#orZero4_2" [style="bold"];
@@ -259,21 +259,21 @@ subgraph "cluster_::ControlFlow#orZero4" {
 
     "bb::ControlFlow#orZero4_1" -> "bb::ControlFlow#orZero4_1" [style="bold"];
     "bb::ControlFlow#orZero4_2" [
-        label = "block[id=2](a)\l<ifTemp>$4 = a : Integer\l<ifTemp>$4\l"
+        label = "block[id=2](a: Integer)\l<ifTemp>$4: Integer = a\l<ifTemp>$4: Integer\l"
     ];
 
     "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_5" [style="bold"];
     "bb::ControlFlow#orZero4_2" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
 
     "bb::ControlFlow#orZero4_3" [
-        label = "block[id=3](a)\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+        label = "block[id=3](a: NilClass)\l<ifTemp>$4: TrueClass = true\l<ifTemp>$4: TrueClass\l"
     ];
 
     "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_5" [style="bold"];
     "bb::ControlFlow#orZero4_3" -> "bb::ControlFlow#orZero4_6" [style="tapered"];
 
     "bb::ControlFlow#orZero4_5" [
-        label = "block[id=5](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=5](a: T.nilable(Integer))\l<returnMethodTemp>$2: <impossible> = return a: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero4_5" -> "bb::ControlFlow#orZero4_1" [style="bold"];
@@ -291,7 +291,7 @@ subgraph "cluster_::ControlFlow#orZero5" {
     "bb::ControlFlow#orZero5_1" [shape = parallelogram];
 
     "bb::ControlFlow#orZero5_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : ControlFlow\la = load_arg(<selfMethodTemp>$3#orZero5, 0) : Integer | NilClass\la\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: ControlFlow = self\la: T.nilable(Integer) = load_arg(<selfMethodTemp>$3: ControlFlow#orZero5, 0)\la: T.nilable(Integer)\l"
     ];
 
     "bb::ControlFlow#orZero5_0" -> "bb::ControlFlow#orZero5_2" [style="bold"];
@@ -303,26 +303,26 @@ subgraph "cluster_::ControlFlow#orZero5" {
 
     "bb::ControlFlow#orZero5_1" -> "bb::ControlFlow#orZero5_1" [style="bold"];
     "bb::ControlFlow#orZero5_2" [
-        label = "block[id=2](a)\l<ifTemp>$4 = true : TrueClass\l<ifTemp>$4\l"
+        label = "block[id=2](a: Integer)\l<ifTemp>$4: TrueClass = true\l<ifTemp>$4: TrueClass\l"
     ];
 
     "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_5" [style="bold"];
     "bb::ControlFlow#orZero5_2" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
 
     "bb::ControlFlow#orZero5_3" [
-        label = "block[id=3](a)\l<ifTemp>$4 = a : NilClass\l<ifTemp>$4\l"
+        label = "block[id=3](a: NilClass)\l<ifTemp>$4: NilClass = a\l<ifTemp>$4: NilClass\l"
     ];
 
     "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_5" [style="bold"];
     "bb::ControlFlow#orZero5_3" -> "bb::ControlFlow#orZero5_6" [style="tapered"];
 
     "bb::ControlFlow#orZero5_5" [
-        label = "block[id=5](a)\l<returnMethodTemp>$2 = return a : <impossible>\l<unconditional>\l"
+        label = "block[id=5](a: Integer)\l<returnMethodTemp>$2: <impossible> = return a: Integer\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero5_5" -> "bb::ControlFlow#orZero5_1" [style="bold"];
     "bb::ControlFlow#orZero5_6" [
-        label = "block[id=6]()\l<returnTemp>$7 = 0 : Integer(0)\l<returnMethodTemp>$2 = return <returnTemp>$7 : <impossible>\l<unconditional>\l"
+        label = "block[id=6]()\l<returnTemp>$7: Integer(0) = 0\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$7: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#orZero5_6" -> "bb::ControlFlow#orZero5_1" [style="bold"];
@@ -335,7 +335,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_1" [shape = parallelogram];
 
     "bb::ControlFlow#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = self : <Class:ControlFlow>\l<hashTemp>$8 = :\"a\" : Symbol(:\"a\")\l<statTemp>$10 = alias <constant:T> : <Class:T>\l<statTemp>$11 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$12 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$9 = <statTemp>$10.any(<statTemp>$11, <statTemp>$12) : MetaType\l<magic>$13 = alias <constant:<Magic>> : <Magic>\l<statTemp>$7 = <magic>$13.<build-hash>(<hashTemp>$8, <hashTemp>$9) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$5 = <statTemp>$6.sig(<statTemp>$7) : Sorbet::Private::Builder\l<statTemp>$14 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$4 = <statTemp>$5.returns(<statTemp>$14) : Sorbet::Private::Builder\l<statTemp>$17 = self : <Class:ControlFlow>\l<hashTemp>$19 = :\"a\" : Symbol(:\"a\")\l<hashTemp>$20 = alias <constant:Integer> : <Class:Integer>\l<magic>$21 = alias <constant:<Magic>> : <Magic>\l<statTemp>$18 = <magic>$21.<build-hash>(<hashTemp>$19, <hashTemp>$20) : ShapeType {\l  Symbol(:\"a\") => <Class:Integer>\l}\l<statTemp>$16 = <statTemp>$17.sig(<statTemp>$18) : Sorbet::Private::Builder\l<statTemp>$22 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$15 = <statTemp>$16.returns(<statTemp>$22) : Sorbet::Private::Builder\l<statTemp>$25 = self : <Class:ControlFlow>\l<hashTemp>$27 = :\"a\" : Symbol(:\"a\")\l<statTemp>$29 = alias <constant:T> : <Class:T>\l<statTemp>$30 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$31 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$28 = <statTemp>$29.any(<statTemp>$30, <statTemp>$31) : MetaType\l<magic>$32 = alias <constant:<Magic>> : <Magic>\l<statTemp>$26 = <magic>$32.<build-hash>(<hashTemp>$27, <hashTemp>$28) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$24 = <statTemp>$25.sig(<statTemp>$26) : Sorbet::Private::Builder\l<statTemp>$33 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$23 = <statTemp>$24.returns(<statTemp>$33) : Sorbet::Private::Builder\l<statTemp>$36 = self : <Class:ControlFlow>\l<hashTemp>$38 = :\"a\" : Symbol(:\"a\")\l<statTemp>$40 = alias <constant:T> : <Class:T>\l<statTemp>$41 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$42 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$39 = <statTemp>$40.any(<statTemp>$41, <statTemp>$42) : MetaType\l<magic>$43 = alias <constant:<Magic>> : <Magic>\l<statTemp>$37 = <magic>$43.<build-hash>(<hashTemp>$38, <hashTemp>$39) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$35 = <statTemp>$36.sig(<statTemp>$37) : Sorbet::Private::Builder\l<statTemp>$44 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$34 = <statTemp>$35.returns(<statTemp>$44) : Sorbet::Private::Builder\l<statTemp>$47 = self : <Class:ControlFlow>\l<hashTemp>$49 = :\"a\" : Symbol(:\"a\")\l<statTemp>$51 = alias <constant:T> : <Class:T>\l<statTemp>$52 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$53 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$50 = <statTemp>$51.any(<statTemp>$52, <statTemp>$53) : MetaType\l<magic>$54 = alias <constant:<Magic>> : <Magic>\l<statTemp>$48 = <magic>$54.<build-hash>(<hashTemp>$49, <hashTemp>$50) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$46 = <statTemp>$47.sig(<statTemp>$48) : Sorbet::Private::Builder\l<statTemp>$55 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$45 = <statTemp>$46.returns(<statTemp>$55) : Sorbet::Private::Builder\l<statTemp>$58 = self : <Class:ControlFlow>\l<hashTemp>$60 = :\"a\" : Symbol(:\"a\")\l<statTemp>$62 = alias <constant:T> : <Class:T>\l<statTemp>$63 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$64 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$61 = <statTemp>$62.any(<statTemp>$63, <statTemp>$64) : MetaType\l<magic>$65 = alias <constant:<Magic>> : <Magic>\l<statTemp>$59 = <magic>$65.<build-hash>(<hashTemp>$60, <hashTemp>$61) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$57 = <statTemp>$58.sig(<statTemp>$59) : Sorbet::Private::Builder\l<statTemp>$66 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$56 = <statTemp>$57.returns(<statTemp>$66) : Sorbet::Private::Builder\l<statTemp>$69 = self : <Class:ControlFlow>\l<hashTemp>$71 = :\"a\" : Symbol(:\"a\")\l<statTemp>$73 = alias <constant:T> : <Class:T>\l<statTemp>$74 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$75 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$72 = <statTemp>$73.any(<statTemp>$74, <statTemp>$75) : MetaType\l<magic>$76 = alias <constant:<Magic>> : <Magic>\l<statTemp>$70 = <magic>$76.<build-hash>(<hashTemp>$71, <hashTemp>$72) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$68 = <statTemp>$69.sig(<statTemp>$70) : Sorbet::Private::Builder\l<statTemp>$77 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$67 = <statTemp>$68.returns(<statTemp>$77) : Sorbet::Private::Builder\l<statTemp>$80 = self : <Class:ControlFlow>\l<hashTemp>$82 = :\"a\" : Symbol(:\"a\")\l<statTemp>$84 = alias <constant:T> : <Class:T>\l<statTemp>$85 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$86 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$83 = <statTemp>$84.any(<statTemp>$85, <statTemp>$86) : MetaType\l<magic>$87 = alias <constant:<Magic>> : <Magic>\l<statTemp>$81 = <magic>$87.<build-hash>(<hashTemp>$82, <hashTemp>$83) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$79 = <statTemp>$80.sig(<statTemp>$81) : Sorbet::Private::Builder\l<statTemp>$88 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$78 = <statTemp>$79.returns(<statTemp>$88) : Sorbet::Private::Builder\l<statTemp>$91 = self : <Class:ControlFlow>\l<hashTemp>$93 = :\"a\" : Symbol(:\"a\")\l<statTemp>$95 = alias <constant:T> : <Class:T>\l<statTemp>$96 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$97 = alias <constant:NilClass> : <Class:NilClass>\l<hashTemp>$94 = <statTemp>$95.any(<statTemp>$96, <statTemp>$97) : MetaType\l<magic>$98 = alias <constant:<Magic>> : <Magic>\l<statTemp>$92 = <magic>$98.<build-hash>(<hashTemp>$93, <hashTemp>$94) : ShapeType {\l  Symbol(:\"a\") => MetaType\l}\l<statTemp>$90 = <statTemp>$91.sig(<statTemp>$92) : Sorbet::Private::Builder\l<statTemp>$99 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$89 = <statTemp>$90.returns(<statTemp>$99) : Sorbet::Private::Builder\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: <Class:ControlFlow> = self\l<hashTemp>$8: Symbol(:\"a\") = :\"a\"\l<statTemp>$10: <Class:T> = alias <constant:T>\l<statTemp>$11: <Class:Integer> = alias <constant:Integer>\l<statTemp>$12: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$9: <Type: T.nilable(Integer)> = <statTemp>$10: <Class:T>.any(<statTemp>$11: <Class:Integer>, <statTemp>$12: <Class:NilClass>)\l<magic>$13: <Magic> = alias <constant:<Magic>>\l<statTemp>$7: {a: <Type: T.nilable(Integer)>} = <magic>$13: <Magic>.<build-hash>(<hashTemp>$8: Symbol(:\"a\"), <hashTemp>$9: <Type: T.nilable(Integer)>)\l<statTemp>$5: Sorbet::Private::Builder = <statTemp>$6: <Class:ControlFlow>.sig(<statTemp>$7: {a: <Type: T.nilable(Integer)>})\l<statTemp>$14: <Class:Integer> = alias <constant:Integer>\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: Sorbet::Private::Builder.returns(<statTemp>$14: <Class:Integer>)\l<statTemp>$17: <Class:ControlFlow> = self\l<hashTemp>$19: Symbol(:\"a\") = :\"a\"\l<hashTemp>$20: <Class:Integer> = alias <constant:Integer>\l<magic>$21: <Magic> = alias <constant:<Magic>>\l<statTemp>$18: {a: <Class:Integer>} = <magic>$21: <Magic>.<build-hash>(<hashTemp>$19: Symbol(:\"a\"), <hashTemp>$20: <Class:Integer>)\l<statTemp>$16: Sorbet::Private::Builder = <statTemp>$17: <Class:ControlFlow>.sig(<statTemp>$18: {a: <Class:Integer>})\l<statTemp>$22: <Class:Integer> = alias <constant:Integer>\l<statTemp>$15: Sorbet::Private::Builder = <statTemp>$16: Sorbet::Private::Builder.returns(<statTemp>$22: <Class:Integer>)\l<statTemp>$25: <Class:ControlFlow> = self\l<hashTemp>$27: Symbol(:\"a\") = :\"a\"\l<statTemp>$29: <Class:T> = alias <constant:T>\l<statTemp>$30: <Class:Integer> = alias <constant:Integer>\l<statTemp>$31: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$28: <Type: T.nilable(Integer)> = <statTemp>$29: <Class:T>.any(<statTemp>$30: <Class:Integer>, <statTemp>$31: <Class:NilClass>)\l<magic>$32: <Magic> = alias <constant:<Magic>>\l<statTemp>$26: {a: <Type: T.nilable(Integer)>} = <magic>$32: <Magic>.<build-hash>(<hashTemp>$27: Symbol(:\"a\"), <hashTemp>$28: <Type: T.nilable(Integer)>)\l<statTemp>$24: Sorbet::Private::Builder = <statTemp>$25: <Class:ControlFlow>.sig(<statTemp>$26: {a: <Type: T.nilable(Integer)>})\l<statTemp>$33: <Class:Integer> = alias <constant:Integer>\l<statTemp>$23: Sorbet::Private::Builder = <statTemp>$24: Sorbet::Private::Builder.returns(<statTemp>$33: <Class:Integer>)\l<statTemp>$36: <Class:ControlFlow> = self\l<hashTemp>$38: Symbol(:\"a\") = :\"a\"\l<statTemp>$40: <Class:T> = alias <constant:T>\l<statTemp>$41: <Class:Integer> = alias <constant:Integer>\l<statTemp>$42: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$39: <Type: T.nilable(Integer)> = <statTemp>$40: <Class:T>.any(<statTemp>$41: <Class:Integer>, <statTemp>$42: <Class:NilClass>)\l<magic>$43: <Magic> = alias <constant:<Magic>>\l<statTemp>$37: {a: <Type: T.nilable(Integer)>} = <magic>$43: <Magic>.<build-hash>(<hashTemp>$38: Symbol(:\"a\"), <hashTemp>$39: <Type: T.nilable(Integer)>)\l<statTemp>$35: Sorbet::Private::Builder = <statTemp>$36: <Class:ControlFlow>.sig(<statTemp>$37: {a: <Type: T.nilable(Integer)>})\l<statTemp>$44: <Class:Integer> = alias <constant:Integer>\l<statTemp>$34: Sorbet::Private::Builder = <statTemp>$35: Sorbet::Private::Builder.returns(<statTemp>$44: <Class:Integer>)\l<statTemp>$47: <Class:ControlFlow> = self\l<hashTemp>$49: Symbol(:\"a\") = :\"a\"\l<statTemp>$51: <Class:T> = alias <constant:T>\l<statTemp>$52: <Class:Integer> = alias <constant:Integer>\l<statTemp>$53: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$50: <Type: T.nilable(Integer)> = <statTemp>$51: <Class:T>.any(<statTemp>$52: <Class:Integer>, <statTemp>$53: <Class:NilClass>)\l<magic>$54: <Magic> = alias <constant:<Magic>>\l<statTemp>$48: {a: <Type: T.nilable(Integer)>} = <magic>$54: <Magic>.<build-hash>(<hashTemp>$49: Symbol(:\"a\"), <hashTemp>$50: <Type: T.nilable(Integer)>)\l<statTemp>$46: Sorbet::Private::Builder = <statTemp>$47: <Class:ControlFlow>.sig(<statTemp>$48: {a: <Type: T.nilable(Integer)>})\l<statTemp>$55: <Class:Integer> = alias <constant:Integer>\l<statTemp>$45: Sorbet::Private::Builder = <statTemp>$46: Sorbet::Private::Builder.returns(<statTemp>$55: <Class:Integer>)\l<statTemp>$58: <Class:ControlFlow> = self\l<hashTemp>$60: Symbol(:\"a\") = :\"a\"\l<statTemp>$62: <Class:T> = alias <constant:T>\l<statTemp>$63: <Class:Integer> = alias <constant:Integer>\l<statTemp>$64: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$61: <Type: T.nilable(Integer)> = <statTemp>$62: <Class:T>.any(<statTemp>$63: <Class:Integer>, <statTemp>$64: <Class:NilClass>)\l<magic>$65: <Magic> = alias <constant:<Magic>>\l<statTemp>$59: {a: <Type: T.nilable(Integer)>} = <magic>$65: <Magic>.<build-hash>(<hashTemp>$60: Symbol(:\"a\"), <hashTemp>$61: <Type: T.nilable(Integer)>)\l<statTemp>$57: Sorbet::Private::Builder = <statTemp>$58: <Class:ControlFlow>.sig(<statTemp>$59: {a: <Type: T.nilable(Integer)>})\l<statTemp>$66: <Class:Integer> = alias <constant:Integer>\l<statTemp>$56: Sorbet::Private::Builder = <statTemp>$57: Sorbet::Private::Builder.returns(<statTemp>$66: <Class:Integer>)\l<statTemp>$69: <Class:ControlFlow> = self\l<hashTemp>$71: Symbol(:\"a\") = :\"a\"\l<statTemp>$73: <Class:T> = alias <constant:T>\l<statTemp>$74: <Class:Integer> = alias <constant:Integer>\l<statTemp>$75: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$72: <Type: T.nilable(Integer)> = <statTemp>$73: <Class:T>.any(<statTemp>$74: <Class:Integer>, <statTemp>$75: <Class:NilClass>)\l<magic>$76: <Magic> = alias <constant:<Magic>>\l<statTemp>$70: {a: <Type: T.nilable(Integer)>} = <magic>$76: <Magic>.<build-hash>(<hashTemp>$71: Symbol(:\"a\"), <hashTemp>$72: <Type: T.nilable(Integer)>)\l<statTemp>$68: Sorbet::Private::Builder = <statTemp>$69: <Class:ControlFlow>.sig(<statTemp>$70: {a: <Type: T.nilable(Integer)>})\l<statTemp>$77: <Class:Integer> = alias <constant:Integer>\l<statTemp>$67: Sorbet::Private::Builder = <statTemp>$68: Sorbet::Private::Builder.returns(<statTemp>$77: <Class:Integer>)\l<statTemp>$80: <Class:ControlFlow> = self\l<hashTemp>$82: Symbol(:\"a\") = :\"a\"\l<statTemp>$84: <Class:T> = alias <constant:T>\l<statTemp>$85: <Class:Integer> = alias <constant:Integer>\l<statTemp>$86: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$83: <Type: T.nilable(Integer)> = <statTemp>$84: <Class:T>.any(<statTemp>$85: <Class:Integer>, <statTemp>$86: <Class:NilClass>)\l<magic>$87: <Magic> = alias <constant:<Magic>>\l<statTemp>$81: {a: <Type: T.nilable(Integer)>} = <magic>$87: <Magic>.<build-hash>(<hashTemp>$82: Symbol(:\"a\"), <hashTemp>$83: <Type: T.nilable(Integer)>)\l<statTemp>$79: Sorbet::Private::Builder = <statTemp>$80: <Class:ControlFlow>.sig(<statTemp>$81: {a: <Type: T.nilable(Integer)>})\l<statTemp>$88: <Class:Integer> = alias <constant:Integer>\l<statTemp>$78: Sorbet::Private::Builder = <statTemp>$79: Sorbet::Private::Builder.returns(<statTemp>$88: <Class:Integer>)\l<statTemp>$91: <Class:ControlFlow> = self\l<hashTemp>$93: Symbol(:\"a\") = :\"a\"\l<statTemp>$95: <Class:T> = alias <constant:T>\l<statTemp>$96: <Class:Integer> = alias <constant:Integer>\l<statTemp>$97: <Class:NilClass> = alias <constant:NilClass>\l<hashTemp>$94: <Type: T.nilable(Integer)> = <statTemp>$95: <Class:T>.any(<statTemp>$96: <Class:Integer>, <statTemp>$97: <Class:NilClass>)\l<magic>$98: <Magic> = alias <constant:<Magic>>\l<statTemp>$92: {a: <Type: T.nilable(Integer)>} = <magic>$98: <Magic>.<build-hash>(<hashTemp>$93: Symbol(:\"a\"), <hashTemp>$94: <Type: T.nilable(Integer)>)\l<statTemp>$90: Sorbet::Private::Builder = <statTemp>$91: <Class:ControlFlow>.sig(<statTemp>$92: {a: <Type: T.nilable(Integer)>})\l<statTemp>$99: <Class:Integer> = alias <constant:Integer>\l<statTemp>$89: Sorbet::Private::Builder = <statTemp>$90: Sorbet::Private::Builder.returns(<statTemp>$99: <Class:Integer>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_0" -> "bb::ControlFlow#<static-init>_1" [style="bold"];

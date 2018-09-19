@@ -18,23 +18,22 @@ class BasicBlock;
 
 class BlockExit final {
 public:
-    core::LocalVariable cond;
+    VariableUseSite cond;
     BasicBlock *thenb;
     BasicBlock *elseb;
     core::Loc loc;
     bool isCondSet() {
-        return cond._name.id() >= 0;
+        return cond.variable._name.id() >= 0;
     }
     BlockExit() : cond(), thenb(nullptr), elseb(nullptr){};
 };
 
 class Binding final {
 public:
-    core::LocalVariable bind;
+    VariableUseSite bind;
     core::Loc loc;
 
     std::unique_ptr<Instruction> value;
-    std::shared_ptr<core::Type> tpe;
 
     Binding(core::LocalVariable bind, core::Loc loc, std::unique_ptr<Instruction> value);
     Binding(Binding &&other) = default;
@@ -45,7 +44,7 @@ public:
 
 class BasicBlock final {
 public:
-    std::vector<core::LocalVariable> args;
+    std::vector<VariableUseSite> args;
     int id = 0;
     int fwdId = -1;
     int bwdId = -1;

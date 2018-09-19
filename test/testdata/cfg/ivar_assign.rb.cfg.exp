@@ -6,7 +6,7 @@ subgraph "cluster_::TestIVar#initialize" {
     "bb::TestIVar#initialize_1" [shape = parallelogram];
 
     "bb::TestIVar#initialize_0" [
-        label = "block[id=0]()\l@foo$4 = alias @foo : Integer\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$5 = <statTemp>$6.keep_for_typechecking(<statTemp>$7) : RubyTyper::Void\l<castTemp>$8 = 0 : Integer(0)\l@foo$4 = cast(<castTemp>$8, Integer); : Integer\l<returnMethodTemp>$2 = @foo$4 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@foo$4: Integer = alias @foo\l<statTemp>$6: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$7: <Class:Integer> = alias <constant:Integer>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: <Class:RubyTyper>.keep_for_typechecking(<statTemp>$7: <Class:Integer>)\l<castTemp>$8: Integer(0) = 0\l@foo$4: Integer = cast(<castTemp>$8: Integer(0), Integer);\l<returnMethodTemp>$2: Integer = @foo$4\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#initialize_0" -> "bb::TestIVar#initialize_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::TestIVar#test" {
     "bb::TestIVar#test_1" [shape = parallelogram];
 
     "bb::TestIVar#test_0" [
-        label = "block[id=0]()\l@foo$4 = alias @foo : Integer\l@foo$4 = nil : Integer\l<returnMethodTemp>$2 = @foo$4 : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l@foo$4: Integer = alias @foo\l@foo$4: Integer = nil\l<returnMethodTemp>$2: Integer = @foo$4\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::TestIVar#test_0" -> "bb::TestIVar#test_1" [style="bold"];

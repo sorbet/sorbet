@@ -141,6 +141,7 @@ public:
     // NB: you can't call this function on vars in the first basic block since
     // their type will be nullptr
     const core::TypeAndOrigins &getTypeAndOrigin(core::Context ctx, core::LocalVariable symbol) const;
+    const core::TypeAndOrigins &getAndFillTypeAndOrigin(core::Context ctx, cfg::VariableUseSite &symbol) const;
     const TestedKnowledge &getKnowledge(core::LocalVariable symbol, bool shouldFail = true) const;
     bool getKnownTruthy(core::LocalVariable var) const;
 
@@ -156,7 +157,7 @@ public:
     void clearKnowledge(core::Context ctx, core::LocalVariable reassigned, KnowledgeFilter &knowledgeFilter);
 
     /* Special case sources of knowledge */
-    void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, cfg::Send *send,
+    void updateKnowledge(core::Context ctx, core::LocalVariable local, core::Loc loc, const cfg::Send *send,
                          KnowledgeFilter &knowledgeFilter);
 
     void setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins);

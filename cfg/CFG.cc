@@ -31,7 +31,7 @@ CFG::CFG() {
     freshBlock(0); // dead code;
     deadBlock()->bexit.elseb = deadBlock();
     deadBlock()->bexit.thenb = deadBlock();
-    deadBlock()->bexit.cond = core::LocalVariable::noVariable();
+    deadBlock()->bexit.cond.variable = core::LocalVariable::noVariable();
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
@@ -41,41 +41,41 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
-            writes[bind.bind].insert(bb.get());
+            writes[bind.bind.variable].insert(bb.get());
             /*
              * When we write to an alias, we rely on the type information being
              * propagated through block arguments from the point of
              * assignment. Treating every write as also reading from the
              * variable serves to represent this.
              */
-            if (bind.bind.isAliasForGlobal(ctx) && cast_instruction<Alias>(bind.value.get()) == nullptr) {
-                reads[bind.bind].insert(bb.get());
+            if (bind.bind.variable.isAliasForGlobal(ctx) && cast_instruction<Alias>(bind.value.get()) == nullptr) {
+                reads[bind.bind.variable].insert(bb.get());
             }
 
             if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                 reads[v->what].insert(bb.get());
             } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                reads[v->recv].insert(bb.get());
-                for (auto arg : v->args) {
-                    reads[arg].insert(bb.get());
+                reads[v->recv.variable].insert(bb.get());
+                for (auto &arg : v->args) {
+                    reads[arg.variable].insert(bb.get());
                 }
             } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
+                reads[v->what.variable].insert(bb.get());
             } else if (auto *v = cast_instruction<BlockReturn>(bind.value.get())) {
-                reads[v->what].insert(bb.get());
+                reads[v->what.variable].insert(bb.get());
             } else if (auto *v = cast_instruction<LoadArg>(bind.value.get())) {
-                reads[v->receiver].insert(bb.get());
+                reads[v->receiver.variable].insert(bb.get());
             } else if (auto *v = cast_instruction<Cast>(bind.value.get())) {
-                reads[v->value].insert(bb.get());
+                reads[v->value.variable].insert(bb.get());
             }
 
-            auto fnd = reads.find(bind.bind);
+            auto fnd = reads.find(bind.bind.variable);
             if (fnd == reads.end() || fnd->second.count(bb.get()) == 0) {
-                dead[bind.bind].insert(bb.get());
+                dead[bind.bind.variable].insert(bb.get());
             }
         }
-        if (bb->bexit.cond.exists()) {
-            reads[bb->bexit.cond].insert(bb.get());
+        if (bb->bexit.cond.variable.exists()) {
+            reads[bb->bexit.cond.variable].insert(bb.get());
         }
     }
     return CFG::ReadsAndWrites{move(reads), move(writes), move(dead)};
@@ -98,9 +98,9 @@ void CFG::sanityCheck(core::Context ctx) {
         ENFORCE(thenCount == 1, "bb id=", bb->id, "; then has ", thenCount, " back edges");
         ENFORCE(elseCount == 1, "bb id=", bb->id, "; else has ", elseCount, " back edges");
         if (bb->bexit.thenb == bb->bexit.elseb) {
-            ENFORCE(!bb->bexit.cond.exists());
+            ENFORCE(!bb->bexit.cond.variable.exists());
         } else {
-            ENFORCE(bb->bexit.cond.exists());
+            ENFORCE(bb->bexit.cond.variable.exists());
         }
     }
 
@@ -161,7 +161,7 @@ string BasicBlock::toString(core::Context ctx) {
     stringstream buf;
     buf << "block[id=" << this->id << "](";
     bool first = true;
-    for (core::LocalVariable arg : this->args) {
+    for (const cfg::VariableUseSite &arg : this->args) {
         if (!first) {
             buf << ", ";
         }
@@ -178,12 +178,9 @@ string BasicBlock::toString(core::Context ctx) {
             continue;
         }
         buf << exp.bind.toString(ctx) << " = " << exp.value->toString(ctx);
-        if (exp.tpe) {
-            buf << " : " << exp.tpe->toString(ctx);
-        }
         buf << '\n';
     }
-    if (this->bexit.cond.exists()) {
+    if (this->bexit.cond.variable.exists()) {
         buf << this->bexit.cond.toString(ctx);
     } else {
         buf << "<unconditional>";

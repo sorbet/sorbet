@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$7 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$5 = <statTemp>$6.keep_for_ide(<statTemp>$7) : RubyTyper::Void\l<statTemp>$10 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$11 = alias <constant:C> : <Class:C>\l<statTemp>$9 = <statTemp>$10.keep_for_ide(<statTemp>$11) : RubyTyper::Void\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$7: <Class:Funcs> = alias <constant:Funcs>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: <Class:RubyTyper>.keep_for_ide(<statTemp>$7: <Class:Funcs>)\l<statTemp>$10: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$11: <Class:C> = alias <constant:C>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: <Class:RubyTyper>.keep_for_ide(<statTemp>$11: <Class:C>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_1" [shape = parallelogram];
 
     "bb::Funcs#f_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\lx = load_arg(<selfMethodTemp>$3#f, 0) : Integer\l<returnMethodTemp>$2 = x : Integer\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\lx: Integer = load_arg(<selfMethodTemp>$3: Funcs#f, 0)\l<returnMethodTemp>$2: Integer = x\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Funcs#g" {
     "bb::Funcs#g_1" [shape = parallelogram];
 
     "bb::Funcs#g_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#g, 0) : Symbol\l<returnMethodTemp>$2 = s : Symbol\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: Symbol = load_arg(<selfMethodTemp>$3: Funcs#g, 0)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
     ];
 
     "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Funcs#h" {
     "bb::Funcs#h_1" [shape = parallelogram];
 
     "bb::Funcs#h_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Funcs\ls = load_arg(<selfMethodTemp>$3#h, 0) : String\l<returnMethodTemp>$2 = s : String\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: String = load_arg(<selfMethodTemp>$3: Funcs#h, 0)\l<returnMethodTemp>$2: String = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];
@@ -78,7 +78,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
     "bb::Funcs#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6 = self : <Class:Funcs>\l<hashTemp>$8 = :\"x\" : Symbol(:\"x\")\l<hashTemp>$9 = alias <constant:Integer> : <Class:Integer>\l<magic>$10 = alias <constant:<Magic>> : <Magic>\l<statTemp>$7 = <magic>$10.<build-hash>(<hashTemp>$8, <hashTemp>$9) : ShapeType {\l  Symbol(:\"x\") => <Class:Integer>\l}\l<statTemp>$5 = <statTemp>$6.sig(<statTemp>$7) : Sorbet::Private::Builder\l<statTemp>$11 = alias <constant:Integer> : <Class:Integer>\l<statTemp>$4 = <statTemp>$5.returns(<statTemp>$11) : Sorbet::Private::Builder\l<statTemp>$13 = self : <Class:Funcs>\l<statTemp>$14 = :\"f\" : Symbol(:\"f\")\l<statTemp>$12 = <statTemp>$13.module_function(<statTemp>$14) : <Class:Funcs>\l<statTemp>$17 = self : <Class:Funcs>\l<hashTemp>$19 = :\"s\" : Symbol(:\"s\")\l<hashTemp>$20 = alias <constant:Symbol> : <Class:Symbol>\l<magic>$21 = alias <constant:<Magic>> : <Magic>\l<statTemp>$18 = <magic>$21.<build-hash>(<hashTemp>$19, <hashTemp>$20) : ShapeType {\l  Symbol(:\"s\") => <Class:Symbol>\l}\l<statTemp>$16 = <statTemp>$17.sig(<statTemp>$18) : Sorbet::Private::Builder\l<statTemp>$22 = alias <constant:Symbol> : <Class:Symbol>\l<statTemp>$15 = <statTemp>$16.returns(<statTemp>$22) : Sorbet::Private::Builder\l<statTemp>$24 = self : <Class:Funcs>\l<statTemp>$23 = <statTemp>$24.module_function() : <Class:Funcs>\l<statTemp>$27 = self : <Class:Funcs>\l<hashTemp>$29 = :\"s\" : Symbol(:\"s\")\l<hashTemp>$30 = alias <constant:String> : <Class:String>\l<magic>$31 = alias <constant:<Magic>> : <Magic>\l<statTemp>$28 = <magic>$31.<build-hash>(<hashTemp>$29, <hashTemp>$30) : ShapeType {\l  Symbol(:\"s\") => <Class:String>\l}\l<statTemp>$26 = <statTemp>$27.sig(<statTemp>$28) : Sorbet::Private::Builder\l<statTemp>$32 = alias <constant:String> : <Class:String>\l<statTemp>$25 = <statTemp>$26.returns(<statTemp>$32) : Sorbet::Private::Builder\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: <Class:Funcs> = self\l<hashTemp>$8: Symbol(:\"x\") = :\"x\"\l<hashTemp>$9: <Class:Integer> = alias <constant:Integer>\l<magic>$10: <Magic> = alias <constant:<Magic>>\l<statTemp>$7: {x: <Class:Integer>} = <magic>$10: <Magic>.<build-hash>(<hashTemp>$8: Symbol(:\"x\"), <hashTemp>$9: <Class:Integer>)\l<statTemp>$5: Sorbet::Private::Builder = <statTemp>$6: <Class:Funcs>.sig(<statTemp>$7: {x: <Class:Integer>})\l<statTemp>$11: <Class:Integer> = alias <constant:Integer>\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: Sorbet::Private::Builder.returns(<statTemp>$11: <Class:Integer>)\l<statTemp>$13: <Class:Funcs> = self\l<statTemp>$14: Symbol(:\"f\") = :\"f\"\l<statTemp>$12: <Class:Funcs> = <statTemp>$13: <Class:Funcs>.module_function(<statTemp>$14: Symbol(:\"f\"))\l<statTemp>$17: <Class:Funcs> = self\l<hashTemp>$19: Symbol(:\"s\") = :\"s\"\l<hashTemp>$20: <Class:Symbol> = alias <constant:Symbol>\l<magic>$21: <Magic> = alias <constant:<Magic>>\l<statTemp>$18: {s: <Class:Symbol>} = <magic>$21: <Magic>.<build-hash>(<hashTemp>$19: Symbol(:\"s\"), <hashTemp>$20: <Class:Symbol>)\l<statTemp>$16: Sorbet::Private::Builder = <statTemp>$17: <Class:Funcs>.sig(<statTemp>$18: {s: <Class:Symbol>})\l<statTemp>$22: <Class:Symbol> = alias <constant:Symbol>\l<statTemp>$15: Sorbet::Private::Builder = <statTemp>$16: Sorbet::Private::Builder.returns(<statTemp>$22: <Class:Symbol>)\l<statTemp>$24: <Class:Funcs> = self\l<statTemp>$23: <Class:Funcs> = <statTemp>$24: <Class:Funcs>.module_function()\l<statTemp>$27: <Class:Funcs> = self\l<hashTemp>$29: Symbol(:\"s\") = :\"s\"\l<hashTemp>$30: <Class:String> = alias <constant:String>\l<magic>$31: <Magic> = alias <constant:<Magic>>\l<statTemp>$28: {s: <Class:String>} = <magic>$31: <Magic>.<build-hash>(<hashTemp>$29: Symbol(:\"s\"), <hashTemp>$30: <Class:String>)\l<statTemp>$26: Sorbet::Private::Builder = <statTemp>$27: <Class:Funcs>.sig(<statTemp>$28: {s: <Class:String>})\l<statTemp>$32: <Class:String> = alias <constant:String>\l<statTemp>$25: Sorbet::Private::Builder = <statTemp>$26: Sorbet::Private::Builder.returns(<statTemp>$32: <Class:String>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_1" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::C#test_calls" {
     "bb::C#test_calls_1" [shape = parallelogram];
 
     "bb::C#test_calls_0" [
-        label = "block[id=0]()\l<statTemp>$5 = self : C\l<statTemp>$6 = 0 : Integer(0)\l<statTemp>$4 = <statTemp>$5.f(<statTemp>$6) : Integer\l<statTemp>$8 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$9 = 0 : Integer(0)\l<statTemp>$7 = <statTemp>$8.f(<statTemp>$9) : Integer\l<statTemp>$11 = self : C\l<statTemp>$12 = :\"f\" : Symbol(:\"f\")\l<statTemp>$10 = <statTemp>$11.g(<statTemp>$12) : Symbol\l<statTemp>$14 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$15 = :\"f\" : Symbol(:\"f\")\l<statTemp>$13 = <statTemp>$14.g(<statTemp>$15) : Symbol\l<statTemp>$17 = self : C\l<statTemp>$18 = \"hello\" : String(\"hello\")\l<statTemp>$16 = <statTemp>$17.h(<statTemp>$18) : String\l<statTemp>$20 = alias <constant:Funcs> : <Class:Funcs>\l<statTemp>$21 = \"world\" : String(\"world\")\l<statTemp>$19 = <statTemp>$20.h(<statTemp>$21) : String\l<statTemp>$22 = alias <constant:C> : <Class:C>\l<returnMethodTemp>$2 = <statTemp>$22.f() : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: C = self\l<statTemp>$6: Integer(0) = 0\l<statTemp>$4: Integer = <statTemp>$5: C.f(<statTemp>$6: Integer(0))\l<statTemp>$8: <Class:Funcs> = alias <constant:Funcs>\l<statTemp>$9: Integer(0) = 0\l<statTemp>$7: Integer = <statTemp>$8: <Class:Funcs>.f(<statTemp>$9: Integer(0))\l<statTemp>$11: C = self\l<statTemp>$12: Symbol(:\"f\") = :\"f\"\l<statTemp>$10: Symbol = <statTemp>$11: C.g(<statTemp>$12: Symbol(:\"f\"))\l<statTemp>$14: <Class:Funcs> = alias <constant:Funcs>\l<statTemp>$15: Symbol(:\"f\") = :\"f\"\l<statTemp>$13: Symbol = <statTemp>$14: <Class:Funcs>.g(<statTemp>$15: Symbol(:\"f\"))\l<statTemp>$17: C = self\l<statTemp>$18: String(\"hello\") = \"hello\"\l<statTemp>$16: String = <statTemp>$17: C.h(<statTemp>$18: String(\"hello\"))\l<statTemp>$20: <Class:Funcs> = alias <constant:Funcs>\l<statTemp>$21: String(\"world\") = \"world\"\l<statTemp>$19: String = <statTemp>$20: <Class:Funcs>.h(<statTemp>$21: String(\"world\"))\l<statTemp>$22: <Class:C> = alias <constant:C>\l<returnMethodTemp>$2: T.untyped = <statTemp>$22: <Class:C>.f()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::C#test_calls_0" -> "bb::C#test_calls_1" [style="bold"];
@@ -114,7 +114,7 @@ subgraph "cluster_::C#<static-init>" {
     "bb::C#<static-init>_1" [shape = parallelogram];
 
     "bb::C#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4 = alias <constant:RubyTyper> : <Class:RubyTyper>\l<statTemp>$5 = alias <constant:Funcs> : <Class:Funcs>\l<returnMethodTemp>$2 = <statTemp>$4.keep_for_ide(<statTemp>$5) : RubyTyper::Void\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$5: <Class:Funcs> = alias <constant:Funcs>\l<returnMethodTemp>$2: RubyTyper::Void = <statTemp>$4: <Class:RubyTyper>.keep_for_ide(<statTemp>$5: <Class:Funcs>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::C#<static-init>_0" -> "bb::C#<static-init>_1" [style="bold"];

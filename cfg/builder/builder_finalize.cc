@@ -53,7 +53,9 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->exprs.insert(bb->exprs.end(), make_move_iterator(thenb->exprs.begin()),
                                      make_move_iterator(thenb->exprs.end()));
                     thenb->backEdges.clear();
-                    bb->bexit = thenb->bexit;
+                    bb->bexit.cond.variable = thenb->bexit.cond.variable;
+                    bb->bexit.thenb = thenb->bexit.thenb;
+                    bb->bexit.elseb = thenb->bexit.elseb;
                     bb->bexit.thenb->backEdges.push_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
                         bb->bexit.elseb->backEdges.push_back(bb);
@@ -61,9 +63,11 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     changed = true;
                     sanityCheck(ctx, cfg);
                     continue;
-                } else if (thenb->bexit.cond != core::LocalVariable::blockCall() && thenb->exprs.empty()) {
+                } else if (thenb->bexit.cond.variable != core::LocalVariable::blockCall() && thenb->exprs.empty()) {
                     // Don't remove block headers
-                    bb->bexit = thenb->bexit;
+                    bb->bexit.cond.variable = thenb->bexit.cond.variable;
+                    bb->bexit.thenb = thenb->bexit.thenb;
+                    bb->bexit.elseb = thenb->bexit.elseb;
                     thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
                     bb->bexit.thenb->backEdges.push_back(bb);
@@ -184,7 +188,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             }
             /* invalidate a stale record */
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
-                if (it->second == bind.bind) {
+                if (it->second == bind.bind.variable) {
                     it = current.erase(it);
                 } else {
                     ++it;
@@ -197,22 +201,22 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 if (auto *v = cast_instruction<Ident>(bind.value.get())) {
                     v->what = maybeDealias(ctx, v->what, current);
                 } else if (auto *v = cast_instruction<Send>(bind.value.get())) {
-                    v->recv = maybeDealias(ctx, v->recv, current);
+                    v->recv = maybeDealias(ctx, v->recv.variable, current);
                     for (auto &arg : v->args) {
-                        arg = maybeDealias(ctx, arg, current);
+                        arg = maybeDealias(ctx, arg.variable, current);
                     }
                 } else if (auto *v = cast_instruction<Return>(bind.value.get())) {
-                    v->what = maybeDealias(ctx, v->what, current);
+                    v->what = maybeDealias(ctx, v->what.variable, current);
                 }
             }
 
             // record new aliases
             if (auto *i = cast_instruction<Ident>(bind.value.get())) {
-                current[bind.bind] = i->what;
+                current[bind.bind.variable] = i->what;
             }
         }
-        if (bb->bexit.cond.exists()) {
-            bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond, current);
+        if (bb->bexit.cond.variable.exists()) {
+            bb->bexit.cond = maybeDealias(ctx, bb->bexit.cond.variable, current);
         }
     }
 }
@@ -235,12 +239,12 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
         /* remove dead variables */
         for (auto expIt = it->exprs.begin(); expIt != it->exprs.end(); /* nothing */) {
             Binding &bind = *expIt;
-            if (bind.bind.isAliasForGlobal(ctx)) {
+            if (bind.bind.variable.isAliasForGlobal(ctx)) {
                 ++expIt;
                 continue;
             }
 
-            auto fnd = RnW.reads.find(bind.bind);
+            auto fnd = RnW.reads.find(bind.bind.variable);
             if (fnd == RnW.reads.end()) {
                 // These are all instructions with no side effects, which can be
                 // deleted if the assignment is dead. It would be slightly
@@ -403,7 +407,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
                 it->args.push_back(el);
             }
         }
-        absl::c_sort(it->args);
+        absl::c_sort(it->args, [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable < rhs.variable; });
         histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
 }

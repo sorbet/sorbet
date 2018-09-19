@@ -14,6 +14,19 @@
 namespace sorbet {
 namespace cfg {
 
+class VariableUseSite {
+public:
+    core::LocalVariable variable;
+    std::shared_ptr<core::Type> type;
+    VariableUseSite() = default;
+    VariableUseSite(core::LocalVariable local) : variable(local){};
+    VariableUseSite(const VariableUseSite &) = delete;
+    const VariableUseSite &operator=(const VariableUseSite &rhs) = delete;
+    VariableUseSite(VariableUseSite &&) = default;
+    VariableUseSite &operator=(VariableUseSite &&rhs) = default;
+    std::string toString(core::Context ctx) const;
+};
+
 // TODO: convert it to implicitly numbered instead of explicitly bound
 // implicitly numbered: result of every instruction can be uniquely referenced
 // by its position in a linear array.
@@ -67,10 +80,10 @@ CheckSize(SolveConstraint, 32, 8);
 
 class Send final : public Instruction {
 public:
-    core::LocalVariable recv;
+    VariableUseSite recv;
     core::NameRef fun;
     core::Loc receiverLoc;
-    InlinedVector<core::LocalVariable, 2> args;
+    InlinedVector<VariableUseSite, 2> args;
     InlinedVector<core::Loc, 2> argLocs;
     std::shared_ptr<core::SendAndBlockLink> link;
 
@@ -80,26 +93,26 @@ public:
 
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(Send, 96, 8);
+CheckSize(Send, 152, 8);
 
 class Return final : public Instruction {
 public:
-    core::LocalVariable what;
+    VariableUseSite what;
 
     Return(core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(Return, 24, 8);
+CheckSize(Return, 40, 8);
 
 class BlockReturn final : public Instruction {
 public:
     std::shared_ptr<core::SendAndBlockLink> link;
-    core::LocalVariable what;
+    VariableUseSite what;
 
     BlockReturn(const std::shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what);
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(BlockReturn, 40, 8);
+CheckSize(BlockReturn, 56, 8);
 
 class Literal final : public Instruction {
 public:
@@ -143,7 +156,7 @@ CheckSize(Self, 16, 8);
 
 class LoadArg final : public Instruction {
 public:
-    core::LocalVariable receiver;
+    VariableUseSite receiver;
     core::NameRef method;
     u4 arg;
 
@@ -152,7 +165,7 @@ public:
     };
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(LoadArg, 32, 8);
+CheckSize(LoadArg, 48, 8);
 
 class LoadYieldParams final : public Instruction {
 public:
@@ -168,7 +181,7 @@ CheckSize(LoadYieldParams, 40, 8);
 
 class Cast final : public Instruction {
 public:
-    core::LocalVariable value;
+    VariableUseSite value;
     std::shared_ptr<core::Type> type;
     core::NameRef cast;
 
@@ -177,7 +190,7 @@ public:
 
     virtual std::string toString(core::Context ctx);
 };
-CheckSize(Cast, 48, 8);
+CheckSize(Cast, 64, 8);
 
 class DebugEnvironment final : public Instruction {
 public:

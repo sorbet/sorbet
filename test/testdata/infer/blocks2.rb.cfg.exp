@@ -6,7 +6,7 @@ subgraph "cluster_::Foo#bar" {
     "bb::Foo#bar_1" [shape = parallelogram];
 
     "bb::Foo#bar_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3 = self : Foo\l<blk> = load_arg(<selfMethodTemp>$3#bar, 0) : T.untyped\l<statTemp>$5 = 1 : Integer(1)\l<returnMethodTemp>$2 = <blk>.call(<statTemp>$5) : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Foo = self\l<blk>: T.untyped = load_arg(<selfMethodTemp>$3: Foo#bar, 0)\l<statTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: T.untyped = <blk>: T.untyped.call(<statTemp>$5: Integer(1))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_0" -> "bb::Foo#bar_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Foo#baz" {
     "bb::Foo#baz_1" [shape = parallelogram];
 
     "bb::Foo#baz_0" [
-        label = "block[id=0]()\l<statTemp>$4 = self : Foo\l<block-pre-call-temp>$5 = <statTemp>$4.bar() : T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: Foo = self\l<block-pre-call-temp>$5: T.untyped = <statTemp>$4: Foo.bar()\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_0" -> "bb::Foo#baz_2" [style="bold"];
@@ -34,19 +34,19 @@ subgraph "cluster_::Foo#baz" {
 
     "bb::Foo#baz_1" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_2" [
-        label = "block[id=2]()\louterLoops: 1\l<block-call>\l"
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
     ];
 
     "bb::Foo#baz_2" -> "bb::Foo#baz_4" [style="bold"];
     "bb::Foo#baz_2" -> "bb::Foo#baz_3" [style="tapered"];
 
     "bb::Foo#baz_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2 = Solve<::Foo#baz#<block>> : T.untyped\l<finalReturn> = return <returnMethodTemp>$2 : <impossible>\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::Foo#baz#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_3" -> "bb::Foo#baz_1" [style="bold"];
     "bb::Foo#baz_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$6 = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>) : TupleType {\l  0 = T.untyped\l}\l<blk>$7 = 0 : Integer(0)\lr$3 = <blk>$6.[](<blk>$7) : T.untyped\l<statTemp>$9 = self : Foo\l<blockReturnTemp>$8 = <statTemp>$9.puts(r$3) : NilClass\l<blockReturnTemp>$11 = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$8 : <impossible>\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$6: [T.untyped] = load_yield_params(::Foo#baz#<block>, Foo#baz#<block>)\l<blk>$7: Integer(0) = 0\lr$3: T.untyped = <blk>$6: [T.untyped].[](<blk>$7: Integer(0))\l<statTemp>$9: Foo = self\l<blockReturnTemp>$8: NilClass = <statTemp>$9: Foo.puts(r$3: T.untyped)\l<blockReturnTemp>$11: <impossible> = blockreturn<::Foo#baz#<block>> <blockReturnTemp>$8: NilClass\l<unconditional>\l"
     ];
 
     "bb::Foo#baz_4" -> "bb::Foo#baz_2" [style="bold"];
