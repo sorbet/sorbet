@@ -109,5 +109,10 @@ emcc $CXXFLAGS emscripten/main.cc \
      -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["ccall", "cwrap"]' \
      -o "$here"/sorbet.html
 
-echo "now run:"
-echo "  cp emscripten/sorbet.js emscripten/sorbet.wasm ../sorbet.run/docs/"
+set +x
+
+echo
+echo "Done! Now run these commands to copy the result into sorbet.run:"
+echo
+echo "    cp emscripten/sorbet.js emscripten/sorbet.wasm ../sorbet.run/docs/"
+echo "    git rev-parse HEAD > ../sorbet.run/docs/sha.html"

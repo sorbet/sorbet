@@ -65,4 +65,19 @@ bool amIBeingDebugged()
     return ((info.kp_proc.p_flag & P_TRACED) != 0);
 }
 
+bool stopInDebugger() {
+    if (amIBeingDebugged()) {
+        __asm__("int $3");
+        return true;
+    }
+    return false;
+}
+
+bool setCurrentThreadName(const std::string &name) {
+    const size_t maxLen = 16 - 1; // Pthreads limits it to 16 bytes including trailing '\0'
+    auto truncatedName = name.substr(0, maxLen);
+    auto retCode = ::pthread_setname_np(truncatedName.c_str());
+    return retCode == 0;
+}
+
 #endif

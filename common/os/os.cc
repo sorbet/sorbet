@@ -66,23 +66,3 @@ unique_ptr<Joinable> runInAThread(const string &threadName, function<void()> fun
     }
     return res;
 }
-
-bool stopInDebugger() {
-    if (amIBeingDebugged()) {
-        __asm__("int $3");
-        return true;
-    }
-    return false;
-}
-
-bool setCurrentThreadName(const std::string &name) {
-    const size_t maxLen = 16 - 1; // Pthreads limits it to 16 bytes including trailing '\0'
-    auto truncatedName = name.substr(0, maxLen);
-    auto retCode =
-#ifdef __APPLE__
-        ::pthread_setname_np(truncatedName.c_str());
-#else
-        ::pthread_setname_np(::pthread_self(), truncatedName.c_str());
-#endif
-    return retCode == 0;
-}

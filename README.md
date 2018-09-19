@@ -401,5 +401,35 @@ your files to be formatted automatically. There are two options:
     - Copying `clang-format` onto your PATH works around this detail, so that
       your editor can always run it.
 
-- - - - -
+
+## Updating sorbet.run
+
+We have an online REPL for Sorbet: <https://sorbet.run>. It's deployed as a
+GitHub pages site, and so the sources lives on github.com. Make sure you've
+cloned it locally:
+
+```
+git clone https://github.com/stripe/sorbet.run ~/stripe/sorbet.run
+```
+
+To build the WASM and asm.js assets, follow these steps (macOS-specific):
+
+1.  `brew install emscripten cmake`
+
+    We're not using `cmake` directly--it's used transitively by the `emcc`
+    command.
+
+1.  Take note of the caveats in `brew info emscripten`.
+
+    In particular, after your first build (successful or unsuccessful), you will
+    have to edit some variables `~/.emscripten` to point at the proper paths
+    according to Homebrew.
+
+1.  `emscripten/build.sh`
+
+    Once this command finishes and everything is built, it will print a manual
+    step with where to copy the files into the sorbet.run repo.
+
+Note that the emscripten build is not run in CI, so it frequently becomes broken
+with time. If you get stuck building it, please ask on Slack!
 

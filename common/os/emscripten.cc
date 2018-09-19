@@ -10,4 +10,9 @@ bool stopInDebugger() {
 string getProgramName() {
     return "sorbet";
 }
+
+bool setCurrentThreadName(const std::string &name) {
+    return false;
+}
+
 #endif
