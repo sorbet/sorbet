@@ -157,10 +157,9 @@ CheckSize(Self, 16, 8);
 class LoadArg final : public Instruction {
 public:
     VariableUseSite receiver;
-    core::NameRef method;
-    u4 arg;
+    core::SymbolRef arg;
 
-    LoadArg(core::LocalVariable receiver, core::NameRef method, u4 arg) : receiver(receiver), method(method), arg(arg) {
+    LoadArg(core::LocalVariable receiver, core::SymbolRef arg) : receiver(receiver), arg(arg) {
         categoryCounterInc("cfg", "loadarg");
     };
     virtual std::string toString(core::Context ctx);

@@ -108,9 +108,9 @@ string LoadArg::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_arg(";
     buf << this->receiver.toString(ctx);
-    buf << "#";
-    buf << this->method.data(ctx).toString(ctx);
-    buf << ", " << this->arg << ")";
+    buf << ", ";
+    buf << this->arg.data(ctx).show(ctx);
+    buf << ")";
     return buf.str();
 }
 

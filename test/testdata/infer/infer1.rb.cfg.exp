@@ -78,7 +78,7 @@ subgraph "cluster_::Object#baz5" {
     "bb::Object#baz5_1" [shape = parallelogram];
 
     "bb::Object#baz5_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3: Object#baz5, 0)\lcond: T.untyped\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Object#baz5#cond)\lcond: T.untyped\l"
     ];
 
     "bb::Object#baz5_0" -> "bb::Object#baz5_2" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::Object#baz6" {
     "bb::Object#baz6_1" [shape = parallelogram];
 
     "bb::Object#baz6_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3: Object#baz6, 0)\lcond: T.untyped\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Object#baz6#cond)\lcond: T.untyped\l"
     ];
 
     "bb::Object#baz6_0" -> "bb::Object#baz6_2" [style="bold"];
@@ -148,7 +148,7 @@ subgraph "cluster_::Object#baz7" {
     "bb::Object#baz7_1" [shape = parallelogram];
 
     "bb::Object#baz7_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3: Object#baz7, 0)\lcond: T.untyped\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Object = self\lcond: T.untyped = load_arg(<selfMethodTemp>$3, Object#baz7#cond)\lcond: T.untyped\l"
     ];
 
     "bb::Object#baz7_0" -> "bb::Object#baz7_2" [style="bold"];

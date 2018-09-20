@@ -23,8 +23,8 @@ DispatchResult ProxyType::dispatchCall(Context ctx, DispatchArgs args) {
     return und->dispatchCall(ctx, args);
 }
 
-shared_ptr<Type> ProxyType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    return underlying()->getCallArgumentType(ctx, name, i);
+shared_ptr<Type> ProxyType::getCallArguments(Context ctx, NameRef name) {
+    return underlying()->getCallArguments(ctx, name);
 }
 
 DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
@@ -41,8 +41,8 @@ DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
     return ret;
 }
 
-shared_ptr<Type> OrType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    return left->getCallArgumentType(ctx, name, i); // TODO: should glb with right
+shared_ptr<Type> OrType::getCallArguments(Context ctx, NameRef name) {
+    return left->getCallArguments(ctx, name); // TODO: should glb with right
 }
 
 DispatchResult TypeVar::dispatchCall(Context ctx, DispatchArgs args) {
@@ -74,9 +74,9 @@ DispatchResult AndType::dispatchCall(Context ctx, DispatchArgs args) {
     return ret;
 }
 
-shared_ptr<Type> AndType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    auto l = left->getCallArgumentType(ctx, name, i);
-    auto r = right->getCallArgumentType(ctx, name, i);
+shared_ptr<Type> AndType::getCallArguments(Context ctx, NameRef name) {
+    auto l = left->getCallArguments(ctx, name);
+    auto r = right->getCallArguments(ctx, name);
     if (l == nullptr) {
         return r;
     }
@@ -696,75 +696,46 @@ DispatchResult AppliedType::dispatchCall(Context ctx, DispatchArgs args) {
     return dispatchCallSymbol(ctx, args, this, this->klass, this->targs);
 }
 
-shared_ptr<Type> ClassType::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vector<shared_ptr<Type>> &targs) {
+    SymbolRef method = klass.data(ctx).findMemberTransitive(ctx, name);
+
+    if (!method.exists()) {
+        return nullptr;
+    }
+    const Symbol &data = method.data(ctx);
+
+    vector<shared_ptr<Type>> args;
+    for (auto arg : data.arguments()) {
+        if (arg.data(ctx).isRepeated()) {
+            ENFORCE(args.empty(),
+                    "getCallArguments with positional and repeated args is not supported: ", data.toString(ctx));
+            return Types::arrayOf(ctx, Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
+        }
+        ENFORCE(!arg.data(ctx).isKeyword(), "getCallArguments does not support kwargs: ", data.toString(ctx));
+        if (arg.data(ctx).isBlockArgument()) {
+            continue;
+        }
+        args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
+    }
+    return TupleType::build(ctx, args);
+}
+
+shared_ptr<Type> ClassType::getCallArguments(Context ctx, NameRef name) {
     if (isUntyped()) {
         return Types::untyped(ctx, untypedBlame());
     }
-    SymbolRef method = this->symbol.data(ctx).findMemberTransitive(ctx, name);
-
-    if (!method.exists()) {
-        return nullptr;
-    }
-    const Symbol &data = method.data(ctx);
-
-    if (i >= data.arguments().size()) { // todo: this should become actual argument matching
-        return nullptr;
-    }
-
-    const Symbol &arg = data.arguments()[i].data(ctx);
-    shared_ptr<Type> resultType = arg.resultType;
-    if (!resultType) {
-        resultType = Types::untyped(ctx, data.arguments()[i]);
-    }
-
-    if (arg.isRepeated()) {
-        if (arg.isKeyword()) {
-            return Types::hashOf(ctx, resultType);
-        } else {
-            return Types::arrayOf(ctx, resultType);
-        }
-    } else {
-        return resultType;
-    }
+    return getMethodArguments(ctx, symbol, name, vector<shared_ptr<Type>>{});
 }
 
-// This duplicates a bunch of logic with ClassType. We might want to refactor this to be shared.
-// The only real extra work that AppliedType has to do is instantiate the targs (see resultTypeAsSeenFrom)
-shared_ptr<Type> AppliedType::getCallArgumentType(Context ctx, NameRef name, int i) {
-    SymbolRef method = this->klass.data(ctx).findMemberTransitive(ctx, name);
-
-    if (!method.exists()) {
-        return nullptr;
-    }
-
-    const Symbol &data = method.data(ctx);
-
-    if (i >= data.arguments().size()) { // todo: this should become actual argument matching
-        return nullptr;
-    }
-
-    shared_ptr<Type> resultType = Types::resultTypeAsSeenFrom(ctx, data.arguments()[i], this->klass, this->targs);
-    if (!resultType) {
-        resultType = Types::untyped(ctx, data.arguments()[i]);
-    }
-
-    const Symbol &arg = data.arguments()[i].data(ctx);
-    if (arg.isRepeated()) {
-        if (arg.isKeyword()) {
-            return Types::hashOf(ctx, resultType);
-        } else {
-            return Types::arrayOf(ctx, resultType);
-        }
-    } else {
-        return resultType;
-    }
+shared_ptr<Type> AppliedType::getCallArguments(Context ctx, NameRef name) {
+    return getMethodArguments(ctx, klass, name, targs);
 }
 
 DispatchResult AliasType::dispatchCall(Context ctx, DispatchArgs args) {
     Error::raise("AliasType::dispatchCall");
 }
 
-shared_ptr<Type> AliasType::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> AliasType::getCallArguments(Context ctx, NameRef name) {
     Error::raise("AliasType::getCallArgumentType");
 }
 

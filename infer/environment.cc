@@ -883,39 +883,24 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
-                auto argType =
-                    getAndFillTypeAndOrigin(ctx, i->receiver).type->getCallArgumentType(ctx, i->method, i->arg);
-                ENFORCE(argType != nullptr);
-                if (ctx.owner.data(ctx).isGenericMethod()) {
-                    tp.type = core::Types::instantiate(ctx, argType, constr);
-                } else {
-                    // You might expect us to instantiate with the constr to be null for a non-generic method,
-                    // but you might have the constraint that is used to guess return type of
-                    // this method. It's not solved and you shouldn't try to instantiate types against itt
-                    tp.type = argType;
-                }
+                /*
+                 * TODO(nelhage): This should arguably use the klass and targs
+                 * off of i->receiver. Right now these should always be
+                 * identical, but if we ever typecheck methods on contexts
+                 * outside the context in which they are defined, we would want
+                 * to respect that.
+                 *
+                 * For now we can at least enforce a little consistency.
+                 */
+                ENFORCE(ctx.owner == i->arg.data(ctx).owner);
+
+                auto argType = i->arg.data(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
+                tp.type = move(argType);
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::LoadYieldParams *insn) {
                 auto &procType = insn->link->blockPreType;
-                vector<shared_ptr<core::Type>> types;
-                auto narg = insn->block.data(ctx).arguments().size();
-
-                int lastArg = 0;
-                for (int i = 0; i < narg; ++i) {
-                    shared_ptr<core::Type> arg;
-                    if (procType == nullptr) {
-                        arg = core::Types::untypedUntracked();
-                    } else {
-                        arg = procType->getCallArgumentType(ctx, core::Names::call(), i);
-                    }
-                    if (arg == nullptr) {
-                        arg = core::Types::untypedUntracked();
-                    } else {
-                        lastArg = i;
-                    }
-                    types.emplace_back(move(arg));
-                }
+                auto params = procType->getCallArguments(ctx, core::Names::call());
 
                 // A multi-arg proc, if provided a single arg which is an array,
                 // will implicitly splat it out.
@@ -923,13 +908,16 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                if (lastArg == 0 && narg > 1 && types.front()->derivesFrom(ctx, core::Symbols::Array()) &&
-                    !types.front()->isUntyped()) {
-                    tp.type = move(types.front());
+                auto &blkArgs = insn->block.data(ctx).arguments();
+                auto *tuple = core::cast_type<core::TupleType>(params.get());
+                if (blkArgs.size() > 1 && !blkArgs.front().data(ctx).isRepeated() && tuple &&
+                    tuple->elems.size() == 1 && tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
+                    tp.type = move(tuple->elems.front());
+                } else if (params == nullptr) {
+                    tp.type = core::Types::untypedUntracked();
                 } else {
-                    tp.type = make_shared<core::TupleType>(core::Types::arrayOfUntyped(), move(types));
+                    tp.type = params;
                 }
-
                 tp.origins.push_back(bind.loc);
             },
             [&](cfg::Return *i) {

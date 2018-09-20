@@ -443,6 +443,12 @@ public:
         return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
     }
 
+    /*
+     * Given a METHOD_ARGUMENT symbol, return its type as observed by the method
+     * body that defined that argument
+     */
+    std::shared_ptr<Type> argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
+
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberTransitive(const GlobalState &gs, NameRef name) const;

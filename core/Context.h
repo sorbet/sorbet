@@ -20,7 +20,7 @@ public:
         return state;
     }
 
-    Context(GlobalState &state, SymbolRef owner) noexcept : state(state), owner(owner) {}
+    Context(const GlobalState &state, SymbolRef owner) noexcept : state(state), owner(owner) {}
     Context(const Context &other) noexcept : state(other.state), owner(other.owner) {}
     Context(const MutableContext &other) noexcept;
 

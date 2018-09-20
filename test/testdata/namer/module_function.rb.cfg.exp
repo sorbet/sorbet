@@ -24,7 +24,7 @@ subgraph "cluster_::Funcs#f" {
     "bb::Funcs#f_1" [shape = parallelogram];
 
     "bb::Funcs#f_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\lx: Integer = load_arg(<selfMethodTemp>$3: Funcs#f, 0)\l<returnMethodTemp>$2: Integer = x\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\lx: Integer = load_arg(<selfMethodTemp>$3, Funcs#f#x)\l<returnMethodTemp>$2: Integer = x\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Funcs#f_0" -> "bb::Funcs#f_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Funcs#g" {
     "bb::Funcs#g_1" [shape = parallelogram];
 
     "bb::Funcs#g_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: Symbol = load_arg(<selfMethodTemp>$3: Funcs#g, 0)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: Symbol = load_arg(<selfMethodTemp>$3, Funcs#g#s)\l<returnMethodTemp>$2: Symbol = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Symbol\l<unconditional>\l"
     ];
 
     "bb::Funcs#g_0" -> "bb::Funcs#g_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Funcs#h" {
     "bb::Funcs#h_1" [shape = parallelogram];
 
     "bb::Funcs#h_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: String = load_arg(<selfMethodTemp>$3: Funcs#h, 0)\l<returnMethodTemp>$2: String = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: String\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Funcs = self\ls: String = load_arg(<selfMethodTemp>$3, Funcs#h#s)\l<returnMethodTemp>$2: String = s\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: String\l<unconditional>\l"
     ];
 
     "bb::Funcs#h_0" -> "bb::Funcs#h_1" [style="bold"];

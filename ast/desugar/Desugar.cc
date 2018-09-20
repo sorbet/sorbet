@@ -121,18 +121,18 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
         return make_unique<Block>(loc, move(args), move(body));
     }
 
-    // &foo => {|*args| foo.to_proc }
+    // &foo => {|*args| foo.to_proc.call(*args) }
+    // aka Magic.callWithSplat(foo.to_proc, :call, args)
 
-    // NOTE(nelhage): We don't currently implement splats properly, so
-    // `foo.to_proc.call(*args)` will only ever work by accident. For now, don't
-    // call the proc, just invoke `to_proc` so we get *some* typechecking.
     auto proc = MK::Send0(loc, move(expr), core::Names::to_proc());
     MethodDef::ARGS_store args;
     unique_ptr<Expression> rest = make_unique<RestArg>(loc, MK::Local(loc, temp));
     args.emplace_back(move(rest));
-    // unique_ptr<Expression> body = MK::Send1(loc, move(proc), core::Names::call(), MK::Splat(loc, MK::Local(loc,
-    // temp)));
-    return make_unique<Block>(loc, move(args), move(proc));
+    auto magic = MK::Constant(loc, core::Symbols::Magic());
+    auto callLiteral = MK::Literal(loc, make_unique<core::LiteralType>(core::Symbols::Symbol(), core::Names::call()));
+    unique_ptr<Expression> body =
+        MK::Send3(loc, move(magic), core::Names::callWithSplat(), move(proc), move(callLiteral), MK::Local(loc, temp));
+    return make_unique<Block>(loc, move(args), move(body));
 }
 
 unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {

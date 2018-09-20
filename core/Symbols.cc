@@ -133,6 +133,31 @@ string SymbolRef::show(const GlobalState &gs) const {
     return data(gs, true).show(gs);
 }
 
+shared_ptr<Type> Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+    ENFORCE(isMethodArgument());
+    auto klass = owner.data(ctx).owner;
+    ENFORCE(klass.data(ctx).isClass());
+    auto instantiated = Types::resultTypeAsSeenFrom(ctx, ref(ctx), klass, klass.data(ctx).selfTypeArgs(ctx));
+    if (instantiated == nullptr) {
+        instantiated = core::Types::untyped(ctx, this->owner);
+    }
+    if (owner.data(ctx).isGenericMethod()) {
+        instantiated = core::Types::instantiate(ctx, instantiated, constr);
+    } else {
+        // You might expect us to instantiate with the constr to be null for a non-generic method,
+        // but you might have the constraint that is used to guess return type of
+        // this method. It's not solved and you shouldn't try to instantiate types against itt
+    }
+
+    if (!isRepeated()) {
+        return instantiated;
+    }
+    if (isKeyword()) {
+        return Types::hashOf(ctx, instantiated);
+    }
+    return Types::arrayOf(ctx, instantiated);
+}
+
 SymbolRef Symbol::findMember(const GlobalState &gs, NameRef name) const {
     auto ret = findMemberNoDealias(gs, name);
     if (ret.exists()) {

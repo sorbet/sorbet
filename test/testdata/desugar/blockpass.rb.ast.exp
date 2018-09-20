@@ -23,7 +23,7 @@ class <emptyTree><<constant:<root>>> < ()
 
   def calls_with_object<<constant:<todo sym>>>(&blk)
     self(<constant:<todo sym>>).calls_arg_with_object(<emptyTree>::<constant:HasMeth>.new()) do |*<block-pass>$2|
-      blk.to_proc()
+      ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$2)
     end
   end
 
@@ -36,7 +36,7 @@ class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:CallsWithObjectChild><<constant:<todo sym>>> < (<emptyTree>::<constant:CallsWithObject>)
     def self.calls_with_object<<constant:<todo sym>>>(&blk)
       self(<constant:<todo sym>>).super() do |*<block-pass>$2|
-        blk.to_proc()
+        ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$2)
       end
     end
   end
@@ -56,13 +56,13 @@ class <emptyTree><<constant:<root>>> < ()
         x.meth()
       end
       self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$3|
-        blk.to_proc()
+        ::<Magic>.<call-with-splat>(blk.to_proc(), :"call", <block-pass>$3)
       end
       self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$4|
-        self(<constant:<todo sym>>).returns_lambda().to_proc()
+        ::<Magic>.<call-with-splat>(self(<constant:<todo sym>>).returns_lambda().to_proc(), :"call", <block-pass>$4)
       end
       self(<constant:<todo sym>>).calls_with_object() do |*<block-pass>$5|
-        <emptyTree>::<constant:HasToProc>.new().to_proc()
+        ::<Magic>.<call-with-splat>(<emptyTree>::<constant:HasToProc>.new().to_proc(), :"call", <block-pass>$5)
       end
       self(<constant:<todo sym>>).calls_with_object() do |*args|
         ::<Magic>.<call-with-splat>(<emptyTree>::<constant:HasToProc>.new().to_proc(), :"call", args.to_a())

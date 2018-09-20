@@ -58,16 +58,16 @@ begin
           end
         end
         self(<constant:Main>).yielder() do |*<block-pass>$2$8|
-          l.to_proc()
+          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$2$8)
         end
         self(<constant:Main>).blockpass() do |*<block-pass>$3$9|
-          l.to_proc()
+          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$3$9)
         end
         self(<constant:Main>).mixed() do |*<block-pass>$4$10|
-          l.to_proc()
+          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$4$10)
         end
         self(<constant:Main>).blockyield() do |*<block-pass>$5$11|
-          l.to_proc()
+          ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$5$11)
         end
       end
     end

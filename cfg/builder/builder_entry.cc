@@ -49,15 +49,15 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     BasicBlock *entry = res->entry();
 
     entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.data(ctx).owner));
-    auto methodName = md.symbol.data(ctx).name;
 
     int i = -1;
     for (auto &argExpr : md.args) {
         i++;
         auto *a = arg2Local(argExpr.get());
-        entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, methodName, i));
+        auto argSym = md.symbol.data(ctx).arguments()[i];
+        entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
         entry->exprs.back().value->isSynthetic = true;
-        aliases[md.symbol.data(ctx).arguments()[i]] = a->localVariable;
+        aliases[argSym] = a->localVariable;
     }
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn(), 0);

@@ -238,6 +238,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                         auto id = arg2Local(arg.get());
                         ENFORCE(id, "Should have been removed by namer");
                         core::LocalVariable argLoc = id->localVariable;
+
+                        if (data.arguments()[i].data(cctx.ctx).isRepeated()) {
+                            if (i != 0) {
+                                // Mixing positional and rest args in blocks is
+                                // not currently supported; drop in an untyped.
+                                bodyBlock->exprs.emplace_back(argLoc, id->loc,
+                                                              make_unique<Alias>(core::Symbols::untyped()));
+                            } else {
+                                bodyBlock->exprs.emplace_back(argLoc, id->loc, make_unique<Ident>(argTemp));
+                            }
+                            continue;
+                        }
+
                         bodyBlock->exprs.emplace_back(idxTmp, id->loc,
                                                       make_unique<Literal>(make_shared<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};

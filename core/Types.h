@@ -130,7 +130,7 @@ public:
     virtual std::shared_ptr<Type> _replaceSelfType(Context ctx, const std::shared_ptr<Type> &receiver);
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) = 0;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) = 0;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) = 0;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) = 0;
     virtual void _sanityCheck(Context ctx) = 0;
     void sanityCheck(Context ctx) {
@@ -176,7 +176,7 @@ public:
     ProxyType() = default;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) override;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) override;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) override;
 
     void _sanityCheck(Context ctx) override;
@@ -194,7 +194,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) override;
 
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
     void _sanityCheck(Context ctx) final;
     virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -216,7 +216,7 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -238,7 +238,7 @@ public:
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
 
@@ -255,7 +255,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     SymbolRef symbol;
@@ -288,7 +288,7 @@ public:
 
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 };
 CheckSize(SelfType, 8, 8);
@@ -332,7 +332,7 @@ public:
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
 
     virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
@@ -353,7 +353,7 @@ public:
     virtual std::string show(const GlobalState &gs) const final;
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -406,7 +406,7 @@ public:
     virtual std::string typeName() const final;
     virtual DispatchResult dispatchCall(Context ctx, DispatchArgs args) final;
 
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
     void _sanityCheck(Context ctx) final;
     virtual bool isFullyDefined() final;
@@ -516,7 +516,7 @@ public:
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
     virtual int kind() final;
 
-    virtual std::shared_ptr<Type> getCallArgumentType(Context ctx, NameRef name, int i) final;
+    virtual std::shared_ptr<Type> getCallArguments(Context ctx, NameRef name) final;
 
     virtual bool derivesFrom(const GlobalState &gs, SymbolRef klass) final;
     virtual bool hasUntyped() override;

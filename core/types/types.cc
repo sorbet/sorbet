@@ -582,7 +582,7 @@ bool TypeVar::isFullyDefined() {
     return false;
 }
 
-shared_ptr<Type> TypeVar::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> TypeVar::getCallArguments(Context ctx, NameRef name) {
     Error::raise("should never happen");
 }
 
@@ -642,11 +642,11 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> LambdaParam::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> LambdaParam::getCallArguments(Context ctx, NameRef name) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> SelfTypeParam::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> SelfTypeParam::getCallArguments(Context ctx, NameRef name) {
     Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
@@ -747,7 +747,7 @@ bool SelfType::isFullyDefined() {
     return false;
 }
 
-shared_ptr<Type> SelfType::getCallArgumentType(Context ctx, NameRef name, int i) {
+shared_ptr<Type> SelfType::getCallArguments(Context ctx, NameRef name) {
     Error::raise("should never happen");
 }
 
