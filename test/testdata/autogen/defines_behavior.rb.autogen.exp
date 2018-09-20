@@ -46,6 +46,16 @@ requires: []
  defines_behavior=1
  is_empty=0
  defining_ref=[HasDef]
+[def id=9]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[SelfClassDef]
+[def id=10]
+ type=class
+ defines_behavior=1
+ is_empty=0
+ defining_ref=[SelfClass]
 ## refs:
 [ref id=0]
  scope=[]
@@ -125,4 +135,18 @@ requires: []
  nesting=[]
  resolved=[HasDef]
  loc=test/testdata/autogen/defines_behavior.rb:25
+ is_defining_ref=1
+[ref id=11]
+ scope=[]
+ name=[SelfClassDef]
+ nesting=[]
+ resolved=[SelfClassDef]
+ loc=test/testdata/autogen/defines_behavior.rb:29
+ is_defining_ref=1
+[ref id=12]
+ scope=[]
+ name=[SelfClass]
+ nesting=[]
+ resolved=[SelfClass]
+ loc=test/testdata/autogen/defines_behavior.rb:36
  is_defining_ref=1

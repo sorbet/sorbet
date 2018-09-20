@@ -198,11 +198,15 @@ public:
         return SymbolRef(nullptr, 36);
     }
 
+    // Used as the superclass for symbols created to populate unresolvable ruby
+    // constants
     static SymbolRef StubClass() {
         return SymbolRef(nullptr, 37);
     }
 
-    static SymbolRef StubModule() {
+    // Used to mark the presence of an ancestor that we were unable to
+    // statically resolve to a class or module
+    static SymbolRef StubAncestor() {
         return SymbolRef(nullptr, 38);
     }
 

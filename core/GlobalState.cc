@@ -59,7 +59,7 @@ const char *struct_str = "Struct";
 const char *file_str = "File";
 const char *ruby_typer_str = "RubyTyper";
 const char *stubClass_str = "StubClass";
-const char *stubModule_str = "StubModule";
+const char *stubAncestor_str = "StubAncestor";
 const char *configatron_str = "Configatron";
 const char *store_str = "Store";
 const char *root_store_str = "RootStore";
@@ -208,8 +208,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::RubyTyper());
     id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(stubClass_str));
     ENFORCE(id == Symbols::StubClass());
-    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(stubModule_str));
-    ENFORCE(id == Symbols::StubModule());
+    id = enterClassSymbol(Loc::none(), Symbols::RubyTyper(), enterNameConstant(stubAncestor_str));
+    ENFORCE(id == Symbols::StubAncestor());
     id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(enumerable_str));
     ENFORCE(id == Symbols::T_Enumerable());
     id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(range_str));
@@ -323,7 +323,7 @@ void GlobalState::initEmpty() {
 
     // Some of these are Modules
     Symbols::T().data(*this).setIsModule(true);
-    Symbols::StubModule().data(*this).setIsModule(true);
+    Symbols::StubAncestor().data(*this).setIsModule(true);
 
     // Some of these are Classes
     Symbols::SinatraBase().data(*this).setIsModule(false);

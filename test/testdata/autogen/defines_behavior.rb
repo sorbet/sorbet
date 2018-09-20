@@ -25,3 +25,17 @@ end
 class HasDef # yes
   def a_method; end
 end
+
+class SelfClassDef # yes
+  class << self
+    def singleton_method
+    end
+  end
+end
+
+class SelfClass # yes
+  # Just having `class << self` is considered sufficient to define
+  # behavior.
+  class << self
+  end
+end

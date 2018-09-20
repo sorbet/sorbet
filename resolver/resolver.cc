@@ -299,7 +299,7 @@ private:
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins must be statically typeAlias to classes");
             }
-            resolved = core::Symbols::StubClass();
+            resolved = core::Symbols::StubAncestor();
         }
 
         if (resolved == job.klass || resolved.data(ctx).derivesFrom(ctx, job.klass)) {
@@ -307,7 +307,7 @@ private:
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
                             job.klass.data(ctx).show(ctx), resolved.data(ctx).show(ctx));
             }
-            resolved = core::Symbols::StubModule();
+            resolved = core::Symbols::StubAncestor();
         }
 
         if (job.isSuperclass) {

@@ -6,6 +6,8 @@
 #include "CRC.h"
 #include "msgpack.hpp"
 
+#include "absl/algorithm/container.h"
+
 using namespace std;
 namespace sorbet {
 namespace autogen {
@@ -52,7 +54,19 @@ class AutogenWalk {
 
         typecase(expr,
 
-                 [&](ast::ClassDef *klass) { result = false; },
+                 [&](ast::ClassDef *klass) {
+                     auto *id = ast::cast_tree<ast::UnresolvedIdent>(klass->name.get());
+                     if (id && id->name == core::Names::singleton()) {
+                         // class << self; We consider this
+                         // behavior-defining. We could opt to recurse inside
+                         // the inner class, but we consider there to be no
+                         // valid use of `class << self` solely for namespacing,
+                         // so there's no need to support that use case.
+                         result = true;
+                     } else {
+                         result = false;
+                     }
+                 },
 
                  [&](ast::Assign *asgn) {
                      if (ast::isa_tree<ast::ConstantLit>(asgn->lhs.get())) {
@@ -193,6 +207,16 @@ public:
         return original;
     }
 
+    bool isCBaseConstant(ast::ConstantLit *cnst) {
+        while (cnst != nullptr && cnst->original != nullptr) {
+            cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
+        }
+        if (cnst && cnst->symbol == core::Symbols::root()) {
+            return true;
+        }
+        return false;
+    }
+
     unique_ptr<ast::Expression> postTransformConstantLit(core::Context ctx, unique_ptr<ast::ConstantLit> original) {
         if (!ignoring.empty()) {
             return original;
@@ -204,17 +228,22 @@ public:
         refs.emplace_back();
         auto &ref = refs.back();
         ref.id = refs.size() - 1;
-        ref.nesting = nesting;
-        reverse(ref.nesting.begin(), ref.nesting.end());
-        ref.nesting.pop_back();
-        ref.scope = nesting.back();
+        if (isCBaseConstant(original.get())) {
+            ref.scope = nesting.front();
+        } else {
+            ref.nesting = nesting;
+            reverse(ref.nesting.begin(), ref.nesting.end());
+            ref.nesting.pop_back();
+            ref.scope = nesting.back();
+        }
         ref.loc = original->loc;
 
         // This will get overridden if this loc is_defining_ref at the point
         // where we set that flag.
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
-        if (original->symbol.data(ctx).superClass != core::Symbols::StubClass()) {
+        if (!original->symbol.data(ctx).isClass() ||
+            !original->symbol.data(ctx).derivesFrom(ctx, core::Symbols::StubClass())) {
             ref.resolved = symbolName(ctx, original->symbol);
         }
         ref.is_resolved_statically = true;
