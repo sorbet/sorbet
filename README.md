@@ -10,6 +10,7 @@ also want to see:
 
 - The Sorbet [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW)
 - The Sorbet [user guide](http://go/types)
+- The [Sorbet internals](https://stripe.exceedlms.com/student/activity/372979) talk
 
 ## Quickstart
 
