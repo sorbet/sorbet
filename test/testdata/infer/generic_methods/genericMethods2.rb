@@ -1,6 +1,6 @@
 # typed: true
 class Foo
-  extend T::Helpers
+  extend T::Generic
 
   type_parameters(:A).sig(
       blk: T.proc(arg0: Integer).returns(T.type_parameter(:A)),

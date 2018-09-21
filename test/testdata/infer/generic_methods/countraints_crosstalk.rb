@@ -12,7 +12,7 @@ class Test
 end
 
 class A
-  extend T::Helpers
+  extend T::Generic
 
   type_parameters(:U).sig(
         blk: T.proc(arg0: T.type_parameter(:U)).returns(T.type_parameter(:U)),
@@ -24,7 +24,7 @@ class A
 end
 
 class B
-  extend T::Helpers
+  extend T::Generic
 
   type_parameters(:U).sig(
         blk: T.proc(arg0: T.type_parameter(:U)).returns(T.type_parameter(:U)),

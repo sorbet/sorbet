@@ -1,6 +1,6 @@
 # typed: true
 class Foo
-  extend T::Helpers
+  extend T::Generic
 
   type_parameters(:A, :A).sig(a: T.type_parameter(:A)).returns(T.type_parameter(:A))  # error: Malformed signature
   def id0(a)

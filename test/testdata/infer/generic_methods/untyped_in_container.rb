@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Generic
 
 type_parameters(:T)
   .sig(arr: T::Array[T.type_parameter(:T)])

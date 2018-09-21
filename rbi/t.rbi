@@ -2,10 +2,6 @@
 module T::Helpers
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
-
-  sig(params: T.untyped).returns(Sorbet::Private::Builder)
-  def type_parameters(*params); end
-
   sig(params: T.untyped).returns(Sorbet::Private::Builder)
   def sig(**params); end
 end
@@ -67,6 +63,9 @@ end
 
 module T::Generic
   include T::Helpers
+
+  sig(params: T.untyped).returns(Sorbet::Private::Builder)
+  def type_parameters(*params); end
 
   def type_member(fixed: nil); end
   def type_template(fixed: nil); end
