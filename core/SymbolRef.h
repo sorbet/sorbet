@@ -19,13 +19,6 @@ public:
         return _id;
     }
 
-    inline SymbolRef orElse(SymbolRef other) const {
-        if (exists())
-            return *this;
-        else
-            return other;
-    }
-
     bool isSynthetic() const;
 
     Symbol &data(GlobalState &gs, bool allowNone = false) const;

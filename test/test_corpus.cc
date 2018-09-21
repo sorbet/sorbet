@@ -1,4 +1,5 @@
 #include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -541,17 +542,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
-bool endsWith(const string &a, const string &b) {
-    if (b.size() > a.size()) {
-        return false;
-    }
-    return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
-}
-
-static bool startsWith(const string &str, const string &prefix) {
-    return str.size() >= prefix.size() && 0 == str.compare(0, prefix.size(), prefix.c_str(), prefix.size());
-}
-
 bool compareNames(const string &left, const string &right) {
     auto lsplit = left.find("__");
     if (lsplit == string::npos) {
@@ -621,7 +611,7 @@ vector<Expectations> listDir(const char *name) {
 
     Expectations current;
     for (auto &s : names) {
-        if (endsWith(s, ".rb")) {
+        if (absl::EndsWith(s, ".rb")) {
             auto basename = rbFile2BaseTestName(s);
             if (basename != s) {
                 if (basename == current.basename) {
@@ -639,8 +629,8 @@ vector<Expectations> listDir(const char *name) {
             current.folder = name;
             current.folder += "/";
             current.testName = current.folder + current.basename;
-        } else if (endsWith(s, ".exp")) {
-            if (startsWith(s, current.basename)) {
+        } else if (absl::EndsWith(s, ".exp")) {
+            if (absl::StartsWith(s, current.basename)) {
                 auto kind_start = s.rfind(".", s.size() - strlen(".exp") - 1);
                 string kind = s.substr(kind_start + 1, s.size() - kind_start - strlen(".exp") - 1);
                 current.expectations[kind] = s;
