@@ -206,7 +206,21 @@ private:
                 scope = job.scope->scope;
             }
             auto customAutogenError = missingConstant->original->cnst == core::Symbols::Subclasses().data(ctx).name;
-            if (!scope.data(ctx).derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
+            if (scope.data(ctx).isStaticField()) {
+                // most likely an unresolved alias. Well, fill it in and emit an error
+                if (auto e =
+                        ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
+                    e.setHeader("Unable to resolve constant `{}`", missingConstant->original->cnst.show(ctx));
+                }
+                // as we're going to start adding definitions into it, we need some class to piggy back on
+                scope = ctx.state.enterClassSymbol(
+                    inner->loc, scope.data(ctx).owner,
+                    ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::ResolverMissingClass,
+                                                                          scope.data(ctx).name, 1)));
+                // as we've name-mangled the class, we have to manually create the next level of resolution
+                auto createdSym = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
+                missingConstant->symbol = createdSym;
+            } else if (!scope.data(ctx).derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
                 if (auto e =
                         ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
                     e.setHeader("Unable to resolve constant `{}`", missingConstant->original->cnst.show(ctx));
@@ -557,12 +571,15 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        absl::c_sort(todo,
-                     [ctx](auto &lhs, auto &rhs) -> bool { return compareLocs(ctx, lhs.out->loc, rhs.out->loc); });
+        absl::c_sort(todo, [ctx](const auto &lhs, const auto &rhs) -> bool {
+            return compareLocs(ctx, lhs.out->loc, rhs.out->loc);
+        });
 
-        absl::c_sort(todo_ancestors, [ctx](auto &lhs, auto &rhs) -> bool {
+        absl::c_sort(todo_ancestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
             return compareLocs(ctx, lhs.ancestor->loc, rhs.ancestor->loc);
         });
+
+        // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         for (auto &job : todo) {
             auto resolved = resolveJob(ctx, job, typeAliases, true);

@@ -139,7 +139,9 @@ bool Name::isClassName(const GlobalState &gs) const {
                    this->unique.original.data(gs).isClassName(gs);
         }
         case CONSTANT:
-            ENFORCE(this->cnst.original.data(gs).kind == UTF8);
+            ENFORCE(this->cnst.original.data(gs).kind == UTF8 ||
+                    this->cnst.original.data(gs).kind == UNIQUE &&
+                        this->cnst.original.data(gs).unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
             return true;
         default:
             Error::notImplemented();

@@ -236,7 +236,7 @@ public:
             klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
         } else {
             if (klass->symbol == core::Symbols::todo()) {
-                klass->symbol = squashNames(ctx, ctx.owner, klass->name);
+                klass->symbol = squashNames(ctx, ctx.owner.data(ctx).enclosingClass(ctx), klass->name);
             } else {
                 // Desugar populates a top-level root() ClassDef. Nothing else
                 // should have been typeAlias by now.

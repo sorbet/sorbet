@@ -1,0 +1,22 @@
+class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+  class ::O < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/stub_missing_class_alias.rb:4
+    class ::O::B < ::Object () @ test/testdata/resolver/stub_missing_class_alias.rb:4
+      method ::O::B#<static-init> () @ test/testdata/resolver/stub_missing_class_alias.rb:4
+      class ::O::B::<constant:Doc1>$1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/stub_missing_class_alias.rb:15
+        class ::O::B::<constant:Doc1>$1::J < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:15
+        class ::O::B::<constant:Doc1>$1::<Class:J> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/stub_missing_class_alias.rb:15
+      static-field ::O::B#Doc1 -> Integer(1) @ test/testdata/resolver/stub_missing_class_alias.rb:9
+      class ::O::B::<constant:Document>$1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/stub_missing_class_alias.rb:14
+        class ::O::B::<constant:Document>$1::J < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:14
+        class ::O::B::<constant:Document>$1::<Class:J> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/stub_missing_class_alias.rb:14
+      static-field ::O::B#Document -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:8
+      class ::O::B::J < ::Object () @ test/testdata/resolver/stub_missing_class_alias.rb:5
+      class ::O::B::<Class:J> < ::<Class:Object> () @ test/testdata/resolver/stub_missing_class_alias.rb:5
+    class ::O::<Class:B> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/stub_missing_class_alias.rb:4
+      method ::O::<Class:B>#foo (arg, arg1) -> RubyTyper::Void @ test/testdata/resolver/stub_missing_class_alias.rb:16
+        argument ::O::<Class:B>#foo#arg<> -> O::B::<constant:Document>$1::J @ test/testdata/resolver/stub_missing_class_alias.rb:14
+        argument ::O::<Class:B>#foo#arg1<> -> O::B::<constant:Doc1>$1::J @ test/testdata/resolver/stub_missing_class_alias.rb:15
+    class ::O::D < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/resolver/stub_missing_class_alias.rb:8
+    class ::O::<Class:D> < ::RubyTyper::<Class:StubClass> () @ test/testdata/resolver/stub_missing_class_alias.rb:8
+  class ::<Class:O> < ::Module () @ test/testdata/resolver/stub_missing_class_alias.rb:4
+

@@ -459,6 +459,8 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
 }
 
 SymbolRef GlobalState::enterClassSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    ENFORCE(!owner.exists() || // used when entering entirely syntehtic classes
+            owner.data(*this).isClass());
     ENFORCE(name.data(*this).isClassName(*this));
     return enterSymbol(loc, owner, name, Symbol::Flags::CLASS);
 }
@@ -529,6 +531,7 @@ SymbolRef GlobalState::enterFieldSymbol(Loc loc, SymbolRef owner, NameRef name) 
 }
 
 SymbolRef GlobalState::enterStaticFieldSymbol(Loc loc, SymbolRef owner, NameRef name) {
+    // ENFORCE(owner.data(*this).isClass()); // TODO: enable. This is violated by proto
     return enterSymbol(loc, owner, name, Symbol::Flags::STATIC_FIELD);
 }
 
@@ -615,7 +618,10 @@ NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
 
 NameRef GlobalState::enterNameConstant(NameRef original) {
     ENFORCE(original.exists(), "making a constant name over non-exiting name");
-    ENFORCE(original.data(*this).kind == UTF8, "making a constant name over wrong name kind");
+    ENFORCE(original.data(*this).kind == UTF8 ||
+                (original.data(*this).kind == UNIQUE &&
+                 original.data(*this).unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass),
+            "making a constant name over wrong name kind");
 
     const auto hs = _hash_mix_constant(CONSTANT, original.id());
     unsigned int hashTableSize = names_by_hash.size();

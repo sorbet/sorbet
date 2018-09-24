@@ -40,7 +40,16 @@ struct RawName final {
 };
 CheckSize(RawName, 16, 8);
 
-enum UniqueNameKind : u2 { Parser, Desugar, Namer, Singleton, Overload, TypeVarName };
+enum UniqueNameKind : u2 {
+    Parser,
+    Desugar,
+    Namer,
+    Singleton,
+    Overload,
+    TypeVarName,
+    ResolverMissingClass // used by resolver when we want to enter a stub class into a static field. see
+                         // test/resolver/stub_missing_class_alias.rb
+};
 
 struct UniqueName final {
     NameRef original;
