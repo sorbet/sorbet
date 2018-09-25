@@ -133,7 +133,7 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
         addErrorSection(ErrorSection(
             "Autocorrect: Done", {ErrorLine::from(autocorrect.loc, "Replaced with `{}`", autocorrect.replacement)}));
     } else {
-        addErrorSection(ErrorSection("Suggested fix",
+        addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect",
                                      {ErrorLine::from(autocorrect.loc, "Replace with `{}`", autocorrect.replacement)}));
     }
     this->autocorrects.emplace_back(move(autocorrect));

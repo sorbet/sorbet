@@ -1,7 +1,7 @@
 test/cli/suggest-sig/suggest-sig.rb:3: This function does not have a `sig` http://go/e/7017
      3 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:3: Replace with `sig(a: T.untyped, b: T.untyped).returns(Integer)
 def`
      3 |def hazTwoArgs(a, b); 1; end;
@@ -14,7 +14,7 @@ test/cli/suggest-sig/suggest-sig.rb:6: Method `foo` does not exist on `Object` h
 test/cli/suggest-sig/suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def baz
         ^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:5: Replace with `sig.returns(T.any(T::Array[T.untyped], String))
 def`
      5 |def baz
@@ -23,7 +23,7 @@ def`
 test/cli/suggest-sig/suggest-sig.rb:16: This function does not have a `sig` http://go/e/7017
     16 |def bla; give_me_void; end
         ^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:16: Replace with `sig.void
 def`
     16 |def bla; give_me_void; end
@@ -36,7 +36,7 @@ test/cli/suggest-sig/suggest-sig.rb:19: Method `foo` does not exist on `Object` 
 test/cli/suggest-sig/suggest-sig.rb:18: This function does not have a `sig` http://go/e/7017
     18 |def bbq
         ^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:18: Replace with `sig.void
 def`
     18 |def bbq
@@ -49,7 +49,7 @@ test/cli/suggest-sig/suggest-sig.rb:26: This function does not have a `sig` http
 test/cli/suggest-sig/suggest-sig.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:28: Replace with `sig.returns(Integer)
 def`
     28 |def give_me_literal; 1; end;
@@ -58,7 +58,7 @@ def`
 test/cli/suggest-sig/suggest-sig.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
-  Suggested fix
+  Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:30: Replace with `sig.returns(T::Array[T::Array[Integer]])
 def`
     30 |def give_me_literal_nested; [[1]]; end;
