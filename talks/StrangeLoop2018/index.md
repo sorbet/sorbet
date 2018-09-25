@@ -4,6 +4,7 @@ Note:
 - dmitry: PhD Compiler architecture & a bit of type theory @ next major version of Scala Compiler(3.0)
 - nelhage: MIT grad, One of the longest tenured engineers at Stripe
 - pt: Stanford grad, Previously at Facebook on HHVM and Hack
+- Jez: worked on Flow support at Stripe before, 
 
 pt starts talking here
 
@@ -53,7 +54,7 @@ Note:
 
 - Ruby is the primary programming language
     - No Rails
-    - Enforced subset of Ruby (thanks @bbatsov for Rubocop)
+    - Enforced subset of Ruby
 - Most product code is in a monorepo (intentionally!)
 - ~10 macroservices with a few microservices
 - New code mostly goes into an existing service
@@ -91,8 +92,6 @@ Note:
 
 - DRuby / PRuby / RubyDust / RTC / RDL by Jeff Foster
 - Unreleased GitHub experiment by @charliesom
-- Presentations tomorrow by @soutaro and @mametter
-- Contracts from JetBrains by @valich
 
 Note:
 - Diamondback Ruby
@@ -229,34 +228,6 @@ Expression passed as an argument `arg0` to method `+`
 ```
 
 <div/>
----
-
-## Usage: truthiness
-
-```ruby
-foo = array_of_strings[0]
-# foo is a T.nilable(String) now
-return true if foo.nil?
-# foo is a String now
-return foo.empty?
-```
-
-<br/>
-<div class="fragment">
-
-```ruby
-foo = array_of_strings[0]
-return foo.empty?
-```
-
-```console
-Method `empty?` does not exist on `NilClass`
-component of `T.nilable(String)`
-     5 |return foo.empty?
-               ^^^^^^^^^^
-```
-
-<div/>
 
 ---
 
@@ -295,7 +266,6 @@ Note:
   - We see that foo is assinged on both cases in first example
   - second example has a bug that could have been made by a C person.
 
-
 ---
 
 ## Usage: union types
@@ -322,61 +292,6 @@ Method `succ` does not exist on `Array` component of
 ```
 
 <div/>
-
----
-
-# Declaration Syntax
-
----
-
-## Declaration: Compatible syntax
-
-```ruby
-extend T::Helpers
-...
-sig(
-    # Both positional and named parameters are referred to by name.
-    # You must declare all parameters (and the return value below).
-    amount: Integer,
-    currency: String,
-)
-.returns(Stripe::Charge)
-def create_charge(amount, currency)
-    ...
-end
-```
-
-Note:
- here you can see the syntax used to declare types of arguments of the method.
- This syntax is a ruby dsl. As you can see (~read the slide)
-
----
-
-## Declaration: Runtime Typesystem
-
-```ruby
-sig(amount: Integer, currency: String)
-.returns(Stripe::Charge)
-def create_charge(amount, currency)
-    ...
-end
-
-create_charge(10_000, :jpy)
-```
-
-```console
-#<TypeError: Parameter currency:
-  Expected type String, got type Symbol>
-```
-
-Note:
-  Even before we've started building a static typechecker,
-  we have built a dynamic one.
-  This dynamic one uses data provided via same dsl
-  to perform runtime type checks in production.
-  If they fail, it raises an error that will include a complete
-  stacktrace as well as data that violated the type constraint.
-
 
 ---
 
@@ -410,7 +325,7 @@ Note:
 ```
 
 <div class="fragment">
-  
+
 ```ruby
 # typed: true
 # Enables type checking
@@ -419,75 +334,40 @@ Note:
 <div/>
 
 <div class="fragment">
-  
+
 ```ruby
 # typed: strict
-# Additionally requires ivars to be declared
+# Additionally requires all method definitions to be typed
 ```
 
 <div/>
 
 <div class="fragment">
-  
+
 ```ruby
 # typed: strong
 # The safest level: disallows calling untyped code
 ```
-  
+
 <div/>
 
 ---
-## Declaration: Generic classes
-
-
-```ruby
-class Box
-  extend T::Generic
-
-  Elem = type_member
-
-  sig.returns(Elem)
-  attr_reader :x
-
-  sig(x: Elem).returns(Elem)
-  attr_writer :x
-end
-
-int_box = Box[Integer].new
-```
-
-Note:
-
- Our typesystem also has minimal number of features to model Ruby code.
- One of such features is generics.
- In this example, we model a box that can store an element of a specific type.
- Box declaration does not know what it will store.
- I will be specified by use site.
-
- The most common use of this is to model various containers: arrays, sets, hashes
+## Features
+ 
+  - nominal typesystem
+  - generic classes & methods
+  - self types
+  - local type inference
+  - control-flow dependent typechecking
+  - static & runtime typechecking
 
 ---
-## Declaration: Generic methods
 
-```ruby
-class Array
-  Elem = type_member
+## Why have runtime typechecking?
 
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
-  )
-  .returns(T::Array[T.type_parameter(:U)])
-  def map(&blk); end
-end
-```
-
-Note:
-
-  We can also model methods with complex signatures such as Array map
-  that require generic methods. They are somewhat verbose,
-  but they are very descriptive and express the usecase well.
-
-  Hand of to Nelson
+- untyped code can call into typed code
+- untyped code can perform stores that are read by typed code
+- typed code cannot protect itself because we'll complain that the guard is dead
 
 ---
 # Practical experience
@@ -496,24 +376,6 @@ Note:
 
 Throwback to the title of our talk -- "a practical typechecker for
 Ruby" -- and I want to link this to our experience at Stripe
-
----
-
-## Internal rollout
-
-- Working on this since last year
-- Runtime types have been deployed for 6 months
-- Static checker in internal beta
- - engineers can opt in
-- Command-line tool
-
----
-
-## Early adoption
-
-- Human-authored signatures: 3k
-- Files annotated by users: 150+
-- Generated signatures: 240k
 
 ---
 
@@ -627,34 +489,6 @@ Note:
 
 ---
 
-## Instance variables from `self.`
-```ruby
-# typed: strict
-class ChargeCreator
-  def initialize
-    @request = …
-  end
-
-  def self.log_results
-    log.info("charge created request_id=#{@request&.trace_id}")
-  end
-end
-```
-
-```console
-charge.rb:9: Use of undeclared variable @request
-     9 |    log.info("charge created request_id=#{@request&.trace_id}")
-                                                  ^^^^^^^^
-```
-
-Note:
-
-Files can opt-in to require declaring instance and class
-variables. Here we found a bug in existing code where an instance
-variable was set and then attempted to be accessed from the wrong
-scope.
-
----
 ## Incorrect pattern matching
 
 ```ruby
@@ -700,7 +534,6 @@ Do a careful walk through
 > It’s really nice to get this kind of notification quickly rather than having to wait for potentially several minutes before the test job fails.
 > <!-- .element: class="smallquote"  -->
 
-
 ---
 
 ## Speed of our typer
@@ -725,89 +558,6 @@ Speed at Stripe
 |------|-------|-------------------|
 | Sorbet | seconds | 1 |
 | CI | 10 minutes | tens |
-
----
-
-## Implementation
-
-- C++
-- Don't depend on a Ruby VM
-- C++ port of `whitequark/parser` by GitHub
-- Extensive test suite
-- CI runs against Stripe codebase
-
----
-## Metaprogramming support
-
-- Minimal native support
-- Reflection-based signature generation
-
-Note:
-
-Hand off to pt after this slide
-
----
-
-# Can I use it?
-
----
-
-## Open source
-
-- Sneak peak: <a href="https://sorbet.run">https://sorbet.run</a>
-- Will open source, timeline TBD
-- When released we will support it
-- Will post on stripe.com/blog
-- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
-
-Note:
-
-- Try out the browser demo. 
-- core typechecker is done, most of the work for us is around how to roll it out to a big codebase. 
-- How do you deal with metaprogramming, or unannotated gems, or editor integrations. 
-- Please play with it and give us feedback.
-
----
-
-## Using it
-
-- Interested in your use cases
-- Large orgs scaling with Ruby
-- Will let you know when it's ready for beta
-- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
-
-Note:
-
-- Interested in your use cases
-- Two classes particularly interested in
-- Our dev productivity team existed for 2.5 years now and we've focussed largely on how to scale our Ruby for the needs of
-Stripe, so we have some tools to share. 
-- We've put a lot of effort into this space. 
-- Having said that, we also really want to use your tools and systems too!
-
----
-
-## Building it
-
-- There are multiple parties working to add types to Ruby
-- We'd love to chat and share
-- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
-
-Note:
-
-- if you are working on typechecking Ruby or scaling Ruby we would love to chat. 
-- Please email us or find us somehow. 
-
----
-
-## Take away
-
-- We have a typechecker
-- Fast, built thoughtfully 
-- Useful, not burdensome
-- Will open source
-- Reach out to us
-- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
 
 ---
 
@@ -1007,3 +757,13 @@ $ wc -l sorbet/shims/autogenerated/missing_methods/*
 <img class="logo" src="img/logo.png"></img>
 
 ---
+
+## Take away
+
+- We have a typechecker
+- Fast, built thoughtfully 
+- Useful, not burdensome
+- Will open source
+- Reach out to us
+- <a href="mailto:sorbet@stripe.com">sorbet@stripe.com</a>
+
