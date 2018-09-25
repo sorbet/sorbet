@@ -24,10 +24,7 @@ Don't say anything
 - 25 countries, 100,000 business worldwide
 - 60% of people in US have used it in the last year
 - If you're running an internet business, check us out
-- Have a Tokyo office
-  - Many in the audience
-  - Come chat!
-  - <a href="http://stripe.com/jobs">stripe.com/jobs</a>
+- <a href="http://stripe.com/jobs">stripe.com/jobs</a>
 
 Note:
 
@@ -143,23 +140,60 @@ system.
 - Scales
 - Can be adopted gradually
 
+---
+
+## Explicit
+
+```
+sig{params(a: Integer).returns(String)}
+def foo(a)
+  a.to_s
+end
+```
+
+
 Note:
-
-- Explicit
-
   We're willing to write annotations, and in fact see them as
   beneficial; They make code more readable and predictable. We're here
   to help readers as much as writers.
 
-- Feel useful, not burdensome
+---
 
-  While it is explicit, we are putting effort into making it concise.
-  This shows in multiple ways:
-   - error messages should be clear
-   - verbosity should be compensated with more safety
+## Feel useful, not burdensome: Local Inference
 
-- As simple as possible, but powerful enough
 
+```ruby
+sig.returns(String) # Optional but not inferred
+def foo
+    a = 5 # Integer
+    a = T.let("str", String) # String
+end
+```
+
+Note:
+ some people think that typesystems can be too verbose.
+ We agree. This is why we want our to be concise.
+ In particular here you don't need to specify type of variable a,
+ we can infer that it is integer.
+
+ If you do want to declare a type of variable, we you can do so with T.let.
+ In this example, you re-assign a to a string and you explicitly daclare
+ that you wanted a to become a string.
+
+---
+
+## As simple as possible, but powerful enough: Features
+ 
+  - nominal gradual typesystem
+  - generic classes & methods
+  - union and intersection types
+  - self types
+  - local type inference
+  - control-flow dependent typechecking
+  - static & runtime typechecking
+
+
+Note:
   Overall, we are not strong believers in super-complex type
   systems. They have their place, and we need a fair amount of
   expressive power to model (enough) real Ruby code, but all else
@@ -167,69 +201,110 @@ Note:
   scales better, and -- most importantly -- is easiest for users to
   learn+understand.
 
-- Compatible with Ruby
+---
+## Scales
 
+ - with team size
+ - with number of teams that have different needs
+ - with codebase size
+   - performance of the tool itself
+   - keeping codebase complexity isolated
+ - with time(not posponing hard decisions)
+
+Note:   On all axes: in speed, team size, codebase size and time (not
+  postponing hard decisions). We're already a large codebase, and will
+  only get larger.
+
+---
+
+## Compatible with Ruby
+
+  - Standard ruby syntax
+  - works with existing tools: editors, linlters & etc
+   
+Note: 
   In particular, we don't want new syntax. Existing Ruby syntax means
   we can leverage most of our existing tooling (editors, etc). Also,
   the whole point here is to improve an existing Ruby codebase, so we
   should be able to adopt it incrementally.
 
+---
 
-- Scales
+## Can be adopted gradually: strictness level
 
-  On all axes: in speed, team size, codebase size and time (not
-  postponing hard decisions). We're already a large codebase, and will
-  only get larger.
+```ruby
+#
+# Basic checks such as syntax errors are enabled by default
+```
 
-- Can be adopted gradually
+<div class="fragment">
 
+```ruby
+# typed: true
+# Enables type checking
+```
+
+<div/>
+
+<div class="fragment">
+
+```ruby
+# typed: strict
+# Additionally requires all method definitions to be typed
+```
+
+<div/>
+
+<div class="fragment">
+
+```ruby
+# typed: strong
+# The safest level: disallows calling untyped code
+```
+
+<div/>
+
+Note: 
     In order to make adoption possible at scale, we cannot require all
     the teams to adopt it at once, thus we need to support teams adopting it
     at different pace.
 
 ---
 
-# Demo (usage)
+## Can be adopted gradually: runtime typechecking
+
+---
+
+## Why have runtime typechecking?
+
+- untyped code can call into typed code
+- untyped code can perform stores that are read by typed code
+- typed code cannot protect itself because we'll complain that the guard is dead
+
+---
+# Practical experience
 
 Note:
-  One of the most areas where those principles can be seen is error messages.
-  The following slides show several examples of them.
+
+Throwback to the title of our talk -- "a practical typechecker for
+Ruby" -- and I want to link this to our experience at Stripe
 
 ---
 
-## Usage: Calls into stdlib
+# Some bugs we found
 
-```ruby
-# Integer
-([1, 2].count + 3).next
-```
+Note:
 
-<br/>
+These are some bugs we found in the process of rolling out the
+typechecker, that slipped through CI and code review. Fortunately our
+test coverage and processes are pretty good so none of these were
+critical, but they are pretty informative of the experience of using
+the tool and the kinds of issues we can catch.
 
-<div class="fragment">
-```ruby
-"str" + :sym
-```
-
-```console
-Expression passed as an argument `arg0` to method `+`
-      does not match expected type
-      github.com/stripe/sorbet/wiki/7002
-     1 |"str" + :sym
-        ^^^^^^^^^^^^
-    github.com/stripe/sorbet/tree/master/rbi/core/string.rbi#L18:
-    Method `+` has specified type of argument `arg0` as `String`
-    18 |      arg0: String,
-              ^^^^^
-  Got Symbol(:"sym") originating from:
-    -e:1:
-     1 |"str" + :sym
-                ^^^^
-```
-
-<div/>
+- Examples are simplified but based on real code.
 
 ---
+
 
 ## Usage: dead code
 
@@ -265,131 +340,6 @@ Note:
 
   - We see that foo is assinged on both cases in first example
   - second example has a bug that could have been made by a C person.
-
----
-
-## Usage: union types
-
-```ruby
-str_or_int = ["1", 2].sample
-hash = str_or_int.succ
-```
-
-<br/>
-
-<div class="fragment">
-
-```ruby
-str_or_int_or_array = ["1", 2, [3]].sample
-hash = str_or_int_or_array.succ
-```
-
-```console
-Method `succ` does not exist on `Array` component of
-`T.any(String, Integer, T::Array[Integer])`
-     4 |hash = str_or_int_or_array.succ
-                                  ^^^^^
-```
-
-<div/>
-
----
-
-## Declaration: Local Inference
-
-```ruby
-sig.returns(String) # Optional but not inferred
-def foo
-    a = 5 # Integer
-    a = T.let("str", String) # String
-end
-```
-
-Note:
- some people think that typesystems can be too verbose.
- We agree. This is why we want our to be concise.
- In particular here you don't need to specify type of variable a,
- we can infer that it is integer.
-
- If you do want to declare a type of variable, we you can do so with T.let.
- In this example, you re-assign a to a string and you explicitly daclare
- that you wanted a to become a string.
-
----
-
-## Declaration: strictness level
-
-```ruby
-#
-# Basic checks such as syntax errors are enabled by default
-```
-
-<div class="fragment">
-
-```ruby
-# typed: true
-# Enables type checking
-```
-
-<div/>
-
-<div class="fragment">
-
-```ruby
-# typed: strict
-# Additionally requires all method definitions to be typed
-```
-
-<div/>
-
-<div class="fragment">
-
-```ruby
-# typed: strong
-# The safest level: disallows calling untyped code
-```
-
-<div/>
-
----
-## Features
- 
-  - nominal typesystem
-  - generic classes & methods
-  - self types
-  - local type inference
-  - control-flow dependent typechecking
-  - static & runtime typechecking
-
----
-
-## Why have runtime typechecking?
-
-- untyped code can call into typed code
-- untyped code can perform stores that are read by typed code
-- typed code cannot protect itself because we'll complain that the guard is dead
-
----
-# Practical experience
-
-Note:
-
-Throwback to the title of our talk -- "a practical typechecker for
-Ruby" -- and I want to link this to our experience at Stripe
-
----
-
-# Some bugs we found
-
-Note:
-
-These are some bugs we found in the process of rolling out the
-typechecker, that slipped through CI and code review. Fortunately our
-test coverage and processes are pretty good so none of these were
-critical, but they are pretty informative of the experience of using
-the tool and the kinds of issues we can catch.
-
-- Examples are simplified but based on real code.
 
 ---
 
