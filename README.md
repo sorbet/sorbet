@@ -12,6 +12,51 @@ also want to see:
 - The Sorbet [user guide](http://go/types)
 - The [Sorbet internals](https://stripe.exceedlms.com/student/activity/372979) talk
 
+## Sorbet user-facing design principles
+
+Early in our project we've defiend some guidelines for how working with sorbet should feel like.
+
+1. **Explicit**
+  
+    We're willing to write annotations, and in fact see them as
+    beneficial; They make code more readable and predictable. We're here
+    to help readers as much as writers.
+
+2. **Feel useful, not burdensome**
+  
+    While it is explicit, we are putting effort into making it concise.
+    This shows in multiple ways:
+     - error messages should be clear
+     - verbosity should be compensated with more safety
+
+3. **As simple as possible, but powerful enough**
+
+    Overall, we are not strong believers in super-complex type
+    systems. They have their place, and we need a fair amount of
+    expressive power to model (enough) real Ruby code, but all else
+    being equal we want to be simpler. We believe that such a system
+    scales better, and -- most importantly -- is easiest for users to
+    learn+understand.
+
+4. **Compatible with Ruby**
+
+    In particular, we don't want new syntax. Existing Ruby syntax means
+    we can leverage most of our existing tooling (editors, etc). Also,
+    the whole point here is to improve an existing Ruby codebase, so we
+    should be able to adopt it incrementally.
+  
+5. **Scales**
+
+    On all axes: in speed, team size, codebase size and time (not
+    postponing hard decisions). We already work in large Ruby codebases, and it will
+    only get larger.
+
+6. **Can be adopted gradually**
+
+    In order to make adoption possible at scale, we cannot require all
+    the teams to adopt it at once, thus we need to support teams adopting it
+    at different pace.
+
 ## Quickstart
 
 1.  Install the dependencies
