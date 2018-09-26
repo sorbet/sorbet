@@ -2,9 +2,7 @@
 
 Note:
 - dmitry: PhD Compiler architecture & a bit of type theory @ next major version of Scala Compiler(3.0)
-- nelhage: MIT grad, One of the longest tenured engineers at Stripe
 - pt: Stanford grad, Previously at Facebook on HHVM and Hack
-- Jez: worked on Flow support at Stripe before, 
 
 PT starts talking here
 
@@ -59,7 +57,6 @@ Note:
 Note: 
 
 - Millions of lines of Ruby
-- Bozhidar Batsov
 
 ---
 
@@ -94,9 +91,6 @@ Note:
 - Diamondback Ruby
 - RDL Jeff Foster Maryland
 - Charlie Somerville at Github
-- Soutaro Matsumoto
-- Yusuke Endoh
-- Valentin Fondaratov
 
 ---
 
@@ -109,10 +103,10 @@ Note:
 Note:
 
 - Yes, we very much would like to open source this. 
-- today gather feedback and find folks who are interested in collaborating. 
+- Today gather feedback and find folks who are interested in collaborating. 
 - I hate throwing code over the wall. Instead we want to release when we can
 dedicate the time to helping the community use it.
-- But wait, this isn't just a vaporware announcement :) We have a browser demo.
+- But wait, this isn't just vaporware :) We have a browser demo.
 
 Now open: https://sorbet.run/#%221%22%20%2B%202
 
@@ -130,29 +124,28 @@ https://sorbet.run
 
 ---
 
-
 # Kickoff email
 
 <pre style="box-shadow: none; font-size: 18px">
 Why add typechecking? In short, confidence. 
 
-It eliminates a <b class="fragment highlight-blue">whole class of errors</b>. How many NoMethodErrors do you think we
+It eliminates a <b class="fragment highlight-green">whole class of errors</b>. How many NoMethodErrors do you think we
 have a day? The answer may surprise you.
 
-We've seen it be very <b class="fragment highlight-blue">successful in other langugages</b> and companies. TypeScript
+We've seen it be very <b class="fragment highlight-green">successful in other languages</b> and companies. TypeScript
 (Microsoft) and Flow (Facebook) for JavaScript. MyPy (Dropbox) for python. Hack
 (Facebook) for PHP. Ruby is underinvested in by the community because few large
 companies takes it as seriously as we do.
 
-<b class="fragment highlight-blue">Increased code mutability</b>. We’ll be able to be much more confident in our
-codemods, so that we will be able to keep our code a living, breathing, beast
+Increased code mutability. We’ll be able to be much more confident in our
+<b class="fragment highlight-green">codemods</b>, so that we will be able to keep our code a living, breathing, beast
 instead of having pieces rot away.
 
-It makes you <b class="fragment highlight-blue">think about your method interface</b> before writing. Do you take a
-`Map<String, String>` or a `Array<Array<String>>`? This usually leads to more
+It makes you <b class="fragment highlight-green">think about your method interface</b> before writing. Do you take a
+`Map&lt;String, String>` or a `Array&lt;Array&lt;String>>`? This usually leads to more
 composable code natively.
 
-It makes <b class="fragment highlight-blue">code more readable</b>. Is a parameter named "merchant" a String merchant
+It makes <b class="fragment highlight-green">code more readable</b>. Is a parameter named "merchant" a String merchant
 ID, or an `Merchant` object? With type annotations, you never need to wonder
 again. 
 </pre>
@@ -161,15 +154,15 @@ again.
 
 # Timeline ( 1/2 )
 
-1. Project kickoff
-1. Try other type systems
-1. Prototyping starts on C++
-1. <div class="fragment highlight-blue">Type Syntax work starts</div>
-1. Go/no-go date
-1. Typesystem design
-1. First code typed manually
-1. Prepare for rollout 
-
+| Oct 2017 | Project kickoff
+|-|-|
+|| Try other type systems
+|| Prototyping starts on C++
+| Nov 2017 | Go/no-go date
+||<div class="fragment highlight-green">Type Syntax</div>
+|| Type System
+| Feb 2018 | First code typed manually
+| Apr 2018 | Rollout 
 
 ---
 
@@ -192,7 +185,9 @@ sig(bar: Integer).returns(String)
 ```
 sig {params(bar: Integer).returns(String)}
 ```
-* Intentionally bad: `type_parameters`
+
+Note:
+This is only possible because of our monorepo
 
 ---
 
@@ -221,14 +216,15 @@ def String foo(Integer bar)
 
 # Timeline ( 1/2 )
 
-1. Project kickoff
-1. Try other type systems
-1. Prototyping starts on C++
-1. Type Syntax work starts
-1. Go/no-go date
-1. <div class="fragment highlight-blue">Typesystem design</div>
-1. First code typed manually
-1. Prepare for rollout
+| Oct 2017 | Project kickoff
+|-|-|
+|| Try other type systems
+|| Prototyping starts on C++
+| Nov 2017 | Go/no-go date
+|| Type Syntax
+|| <div class="fragment highlight-green">Type System</div>
+| Feb 2018 | First code typed manually
+| Apr 2018 | Rollout 
 
 Note:
   transition to Dmitry
@@ -248,8 +244,8 @@ Note:
 
 ## Explicit
 
-```
-sig{params(a: Integer).returns(String)}
+```ruby
+sig {params(a: Integer).returns(String)}
 def foo(a)
   a.to_s
 end
@@ -267,7 +263,7 @@ Note:
 
 
 ```ruby
-sig.returns(String) # Optional but not inferred
+sig {returns(String)} # Optional but not inferred
 def foo
     a = 5 # Integer
     a = T.let("str", String) # String
@@ -385,6 +381,7 @@ Note:
 - untyped code can perform stores that are read by typed code
 - typed code cannot protect itself because we'll complain that the guard is dead
 
+---
 
 # Scales: performance
 
@@ -416,18 +413,19 @@ Speed at Stripe
 
 # Timeline ( 1/2 )
 
-1. Project kickoff
-1. Try other type systems
-1. Prototyping starts on C++
-1. Type Syntax work starts
-1. Go/no-go date
-1. Typesystem design
-1. First code typed manually
-1. <div class="fragment highlight-blue">Prepare for rollout</div>
+| Oct 2017 | Project kickoff
+|-|-|
+|| Try other type systems
+|| Prototyping starts on C++
+| Nov 2017 | Go/no-go date
+|| Type Syntax
+|| Type System
+| Feb 2018 | First code typed manually
+| Apr 2018 | <div class="fragment highlight-green">Rollout </div>
 
 ---
 
-# Preparing for rollout. Tooling
+# Rollout: Tooling
 
 ---
 
@@ -496,18 +494,15 @@ Note:
 ---
 # Timeline ( 2/2 )
 
-<ol start=8>
-<li> First sister-team user</li>
-<li> First external user</li>
-<li> RELEASE!</li>
-<li> Type most impactful functions</li>
-<li> IDE </li>
-<li> Guessing of sigs <-- Now</li>
-<li> De-magic-ing</li>
-<li> Open source</li>
----
-
-# Rollout
+| Feb 2018 | First sister-team
+|-|-|
+| Mar 2018 | First external user
+| Apr 2018 | <div class="fragment highlight-green">Rollout</div>
+| Jun 2018| Type most impactful functions
+|| IDE
+| Sept 2018 | Guessing of `sig`s <- NOW
+| | De-magic-ing
+| 2019 | Open Source
 
 ---
 
@@ -531,16 +526,16 @@ http://go/types
 The ruby typechecker has found a possible error in your code.
 
 If you believe this error is a false positive or is confusing or not
-helpful, please let us know in <b class="fragment highlight-blue">#ruby-types</b> or at ruby-types@stripe.com.
+helpful, please let us know in <b class="fragment highlight-green">#ruby-types</b> or at ruby-types@stripe.com.
 
-To run the <b class="fragment highlight-blue">typechecker locally</b>, you can do any of:
+To run the <b class="fragment highlight-green">typechecker locally</b>, you can do any of:
 
 - run `pay exec ./scripts/bin/typecheck`
 - `pay start typecheck` then check your `pay up` window for errors
 - run `./scripts/bin/lint` before committing
 
 In addition, if you need to merge this code and don't want to or can't
-figure out the type error, you can use one of these <b class="fragment highlight-blue">workarounds</b> to
+figure out the type error, you can use one of these <b class="fragment highlight-green">workarounds</b> to
 quiet the typechecker:
 
 - Remove the `typed: true` comment from the files listed below.
@@ -589,21 +584,12 @@ quiet the typechecker:
 <img src="img/human-authored-sigs.png" />
 
 ---
-
-
----
 # Practical experience
 
 Note:
 
 Throwback to the title of our talk -- "a practical typechecker for
 Ruby" -- and I want to link this to our experience at Stripe
-
----
-
-# Some bugs we found
-
-Note:
 
 These are some bugs we found in the process of rolling out the
 typechecker, that slipped through CI and code review. Fortunately our
@@ -796,7 +782,25 @@ Do a careful walk through
 
 ---
 
-# Both timelines
+# Closing
+<style>
+.reveal table.two-column td,
+.reveal table.two-column th
+{
+   border-bottom: 0px; 
+}
+</style>
+
+| Project kickoff | First sister-team
+|-||-|
+| Try other type systems | First external user
+| Prototyping in C++ | Rollout
+| Go/no-go date | Type impactful functions
+| Type Syntax | IDE
+| Type System | Guessing of `sig`s
+| First code typed manually | De-magic-ing
+|| Open Source
+<!-- .element: class="two-column"  -->
 
 ---
 
