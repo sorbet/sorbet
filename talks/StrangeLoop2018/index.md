@@ -20,7 +20,7 @@ Don't say anything
 
 - Platform that developers use to accept payments
 - 25 countries, 100,000 business worldwide
-- 60% of people in US have used it in the last year
+- 84% of people in US have used it in the last year
 - If you're running an internet business, check us out
 - <a href="http://stripe.com/jobs">stripe.com/jobs</a>
 
