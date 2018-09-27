@@ -76,12 +76,11 @@ def externals():
         build_file = "//third_party:jemalloc.BUILD",
     )
 
-    new_git_repository(
+    native.new_local_repository(
         name="progressbar",
-        remote="https://github.com/doches/progressbar.git",
-        commit="c4c54f891ab05cfc411ec5c2ed147dd4cad1ccf3",
-        build_file = "//third_party:progressbar.BUILD",
-    )
+        path="third_party/progressbar",
+        build_file="//third_party:progressbar.BUILD",
+     )
 
     new_git_repository(
         name="concurrentqueue",

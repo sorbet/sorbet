@@ -8,7 +8,7 @@ RUN export JAVA_HOME
 
 RUN add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get update
 
-RUN apt-get update && apt-get install -y g++-7 libncurses5-dev build-essential realpath time libtinfo-dev
+RUN apt-get update && apt-get install -y g++-7 build-essential realpath time
 
 # Dependencies for the parser
 RUN apt-get update && apt-get install -y ragel bison ruby autoconf

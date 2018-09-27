@@ -1,0 +1,2 @@
+A modified version of https://github.com/doches/progressbar/tree/c4c54f891ab05cfc411ec5c2ed147dd4cad1ccf3
+with changes not to depend on ncurses & readline

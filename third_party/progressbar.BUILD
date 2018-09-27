@@ -1,11 +1,8 @@
 cc_library(
     name = "progressbar",
-    srcs = glob(["lib/*.c"]),
+    srcs = glob(["src/*.c"]),
     hdrs = glob([
-        "include/progressbar/*.h"
+        "progressbar/*.h"
     ]),
-    copts = ["-Iexternal/progressbar/include/progressbar/"],
-    linkopts = ["-lcurses", "-ltermcap"],
-    includes = ["include/"],
     visibility = ["//visibility:public"],
 )
