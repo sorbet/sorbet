@@ -284,7 +284,7 @@ private:
 
         try {
             // TODO: reorder by frequency
-            if (HAS_MEMBER_preTransformExpression<FUNC>::value) {
+            if constexpr (HAS_MEMBER_preTransformExpression<FUNC>::value) {
                 what = PostPonePreTransform_Expression<FUNC, CTX, HAS_MEMBER_preTransformExpression<FUNC>::value>::call(
                     ctx, move(what), func);
             }
@@ -296,7 +296,7 @@ private:
             if (ClassDef *u = cast_tree<ClassDef>(what.get())) {
                 unique_ptr<ClassDef> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformClassDef<FUNC>::value) {
                     v = PostPonePreTransform_ClassDef<FUNC, CTX, HAS_MEMBER_preTransformClassDef<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -305,7 +305,7 @@ private:
                     def = mapIt(move(def), ctx.withOwner(v->symbol));
                 }
 
-                if (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformClassDef<FUNC>::value) {
                     return PostPonePostTransform_ClassDef<FUNC, CTX,
                                                           HAS_MEMBER_postTransformClassDef<FUNC>::value>::call(ctx,
                                                                                                                move(v),
@@ -316,7 +316,7 @@ private:
             } else if (MethodDef *u = cast_tree<MethodDef>(what.get())) {
                 unique_ptr<MethodDef> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformMethodDef<FUNC>::value) {
                     v = PostPonePreTransform_MethodDef<FUNC, CTX, HAS_MEMBER_preTransformMethodDef<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -329,7 +329,7 @@ private:
                 }
                 v->rhs = mapIt(move(v->rhs), ctx.withOwner(v->symbol));
 
-                if (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformMethodDef<FUNC>::value) {
                     return PostPonePostTransform_MethodDef<
                         FUNC, CTX, HAS_MEMBER_postTransformMethodDef<FUNC>::value>::call(ctx, move(v), func);
                 }
@@ -338,7 +338,7 @@ private:
             } else if (If *u = cast_tree<If>(what.get())) {
                 unique_ptr<If> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformIf<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformIf<FUNC>::value) {
                     v = PostPonePreTransform_If<FUNC, CTX, HAS_MEMBER_preTransformIf<FUNC>::value>::call(ctx, move(v),
                                                                                                          func);
                 }
@@ -346,7 +346,7 @@ private:
                 v->thenp = mapIt(move(v->thenp), ctx);
                 v->elsep = mapIt(move(v->elsep), ctx);
 
-                if (HAS_MEMBER_postTransformIf<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformIf<FUNC>::value) {
                     return PostPonePostTransform_If<FUNC, CTX, HAS_MEMBER_postTransformIf<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -354,14 +354,14 @@ private:
             } else if (While *u = cast_tree<While>(what.get())) {
                 unique_ptr<While> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformWhile<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformWhile<FUNC>::value) {
                     v = PostPonePreTransform_While<FUNC, CTX, HAS_MEMBER_preTransformWhile<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
                 v->cond = mapIt(move(v->cond), ctx);
                 v->body = mapIt(move(v->body), ctx);
 
-                if (HAS_MEMBER_postTransformWhile<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformWhile<FUNC>::value) {
                     return PostPonePostTransform_While<FUNC, CTX, HAS_MEMBER_postTransformWhile<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -370,14 +370,14 @@ private:
             } else if (Break *u = cast_tree<Break>(what.get())) {
                 unique_ptr<Break> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformBreak<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformBreak<FUNC>::value) {
                     return PostPonePreTransform_Break<FUNC, CTX, HAS_MEMBER_preTransformBreak<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
 
                 v->expr = mapIt(move(v->expr), ctx);
 
-                if (HAS_MEMBER_postTransformBreak<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformBreak<FUNC>::value) {
                     return PostPonePostTransform_Break<FUNC, CTX, HAS_MEMBER_postTransformBreak<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -385,7 +385,7 @@ private:
             } else if (Retry *u = cast_tree<Retry>(what.get())) {
                 unique_ptr<Retry> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformRetry<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformRetry<FUNC>::value) {
                     return PostPonePostTransform_Retry<FUNC, CTX, HAS_MEMBER_postTransformRetry<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -393,14 +393,14 @@ private:
             } else if (Next *u = cast_tree<Next>(what.get())) {
                 unique_ptr<Next> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformNext<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformNext<FUNC>::value) {
                     return PostPonePreTransform_Next<FUNC, CTX, HAS_MEMBER_preTransformNext<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
 
                 v->expr = mapIt(move(v->expr), ctx);
 
-                if (HAS_MEMBER_postTransformNext<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformNext<FUNC>::value) {
                     return PostPonePostTransform_Next<FUNC, CTX, HAS_MEMBER_postTransformNext<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -408,13 +408,13 @@ private:
             } else if (Return *u = cast_tree<Return>(what.get())) {
                 unique_ptr<Return> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformReturn<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformReturn<FUNC>::value) {
                     v = PostPonePreTransform_Return<FUNC, CTX, HAS_MEMBER_preTransformReturn<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
                 v->expr = mapIt(move(v->expr), ctx);
 
-                if (HAS_MEMBER_postTransformReturn<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformReturn<FUNC>::value) {
                     return PostPonePostTransform_Return<FUNC, CTX, HAS_MEMBER_postTransformReturn<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -423,7 +423,7 @@ private:
             } else if (Yield *u = cast_tree<Yield>(what.get())) {
                 unique_ptr<Yield> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformYield<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformYield<FUNC>::value) {
                     v = PostPonePreTransform_Yield<FUNC, CTX, HAS_MEMBER_preTransformYield<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -432,7 +432,7 @@ private:
                     arg = mapIt(move(arg), ctx);
                 }
 
-                if (HAS_MEMBER_postTransformYield<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformYield<FUNC>::value) {
                     return PostPonePostTransform_Yield<FUNC, CTX, HAS_MEMBER_postTransformYield<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -441,7 +441,7 @@ private:
             } else if (RescueCase *u = cast_tree<RescueCase>(what.get())) {
                 unique_ptr<RescueCase> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformRescueCase<FUNC>::value) {
                     v = PostPonePreTransform_RescueCase<FUNC, CTX,
                                                         HAS_MEMBER_preTransformRescueCase<FUNC>::value>::call(ctx,
                                                                                                               move(v),
@@ -456,7 +456,7 @@ private:
 
                 v->body = mapIt(move(v->body), ctx);
 
-                if (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformRescueCase<FUNC>::value) {
                     return PostPonePostTransform_RescueCase<
                         FUNC, CTX, HAS_MEMBER_postTransformRescueCase<FUNC>::value>::call(ctx, move(v), func);
                 }
@@ -465,7 +465,7 @@ private:
             } else if (Rescue *u = cast_tree<Rescue>(what.get())) {
                 unique_ptr<Rescue> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformRescue<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformRescue<FUNC>::value) {
                     v = PostPonePreTransform_Rescue<FUNC, CTX, HAS_MEMBER_preTransformRescue<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -492,7 +492,7 @@ private:
                 v->else_ = mapIt(move(v->else_), ctx);
                 v->ensure = mapIt(move(v->ensure), ctx);
 
-                if (HAS_MEMBER_postTransformRescue<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformRescue<FUNC>::value) {
                     return PostPonePostTransform_Rescue<FUNC, CTX, HAS_MEMBER_postTransformRescue<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -501,7 +501,7 @@ private:
             } else if (Field *u = cast_tree<Field>(what.get())) {
                 unique_ptr<Field> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformField<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformField<FUNC>::value) {
                     return PostPonePostTransform_Field<FUNC, CTX, HAS_MEMBER_postTransformField<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -509,7 +509,7 @@ private:
             } else if (UnresolvedIdent *u = cast_tree<UnresolvedIdent>(what.get())) {
                 unique_ptr<UnresolvedIdent> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value) {
                     return PostPonePostTransform_UnresolvedIdent<
                         FUNC, CTX, HAS_MEMBER_postTransformUnresolvedIdent<FUNC>::value>::call(ctx, move(v), func);
                 }
@@ -517,7 +517,7 @@ private:
             } else if (Assign *u = cast_tree<Assign>(what.get())) {
                 unique_ptr<Assign> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformAssign<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformAssign<FUNC>::value) {
                     v = PostPonePreTransform_Assign<FUNC, CTX, HAS_MEMBER_preTransformAssign<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -525,7 +525,7 @@ private:
                 v->lhs = mapIt(move(v->lhs), ctx);
                 v->rhs = mapIt(move(v->rhs), ctx);
 
-                if (HAS_MEMBER_postTransformAssign<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformAssign<FUNC>::value) {
                     return PostPonePostTransform_Assign<FUNC, CTX, HAS_MEMBER_postTransformAssign<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -534,7 +534,7 @@ private:
             } else if (Send *u = cast_tree<Send>(what.get())) {
                 unique_ptr<Send> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformSend<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformSend<FUNC>::value) {
                     v = PostPonePreTransform_Send<FUNC, CTX, HAS_MEMBER_preTransformSend<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -550,7 +550,7 @@ private:
                     v->block.reset(cast_tree<Block>(nblock.release()));
                 }
 
-                if (HAS_MEMBER_postTransformSend<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformSend<FUNC>::value) {
                     return PostPonePostTransform_Send<FUNC, CTX, HAS_MEMBER_postTransformSend<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -559,7 +559,7 @@ private:
             } else if (Hash *u = cast_tree<Hash>(what.get())) {
                 unique_ptr<Hash> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformHash<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformHash<FUNC>::value) {
                     v = PostPonePreTransform_Hash<FUNC, CTX, HAS_MEMBER_preTransformHash<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -571,7 +571,7 @@ private:
                     value = mapIt(move(value), ctx);
                 }
 
-                if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
                     return PostPonePostTransform_Hash<FUNC, CTX, HAS_MEMBER_postTransformHash<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -579,7 +579,7 @@ private:
             } else if (Array *u = cast_tree<Array>(what.get())) {
                 unique_ptr<Array> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformArray<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformArray<FUNC>::value) {
                     v = PostPonePreTransform_Array<FUNC, CTX, HAS_MEMBER_preTransformArray<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -587,7 +587,7 @@ private:
                     elem = mapIt(move(elem), ctx);
                 }
 
-                if (HAS_MEMBER_postTransformArray<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformArray<FUNC>::value) {
                     return PostPonePostTransform_Array<FUNC, CTX, HAS_MEMBER_postTransformArray<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -595,7 +595,7 @@ private:
             } else if (Literal *u = cast_tree<Literal>(what.get())) {
                 unique_ptr<Literal> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformLiteral<FUNC>::value) {
                     return PostPonePostTransform_Literal<FUNC, CTX, HAS_MEMBER_postTransformLiteral<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -603,7 +603,7 @@ private:
             } else if (UnresolvedConstantLit *u = cast_tree<UnresolvedConstantLit>(what.get())) {
                 unique_ptr<UnresolvedConstantLit> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value) {
                     return PostPonePostTransform_UnresolvedConstantLit<
                         FUNC, CTX, HAS_MEMBER_postTransformUnresolvedConstantLit<FUNC>::value>::call(ctx, move(v),
                                                                                                      func);
@@ -615,7 +615,7 @@ private:
                 if (v->typeAlias) {
                     v->typeAlias = mapIt(move(v->typeAlias), ctx);
                 }
-                if (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformConstantLit<FUNC>::value) {
                     return PostPonePostTransform_ConstantLit<
                         FUNC, CTX, HAS_MEMBER_postTransformConstantLit<FUNC>::value>::call(ctx, move(v), func);
                 }
@@ -623,7 +623,7 @@ private:
             } else if (Self *u = cast_tree<Self>(what.get())) {
                 unique_ptr<Self> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformSelf<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformSelf<FUNC>::value) {
                     return PostPonePostTransform_Self<FUNC, CTX, HAS_MEMBER_postTransformSelf<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -631,7 +631,7 @@ private:
             } else if (Block *u = cast_tree<Block>(what.get())) {
                 unique_ptr<Block> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformBlock<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformBlock<FUNC>::value) {
                     v = PostPonePreTransform_Block<FUNC, CTX, HAS_MEMBER_preTransformBlock<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -644,7 +644,7 @@ private:
                 }
                 v->body = mapIt(move(v->body), ctx.withOwner(v->symbol));
 
-                if (HAS_MEMBER_postTransformBlock<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformBlock<FUNC>::value) {
                     return PostPonePostTransform_Block<FUNC, CTX, HAS_MEMBER_postTransformBlock<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -652,7 +652,7 @@ private:
             } else if (InsSeq *u = cast_tree<InsSeq>(what.get())) {
                 unique_ptr<InsSeq> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformInsSeq<FUNC>::value) {
                     v = PostPonePreTransform_InsSeq<FUNC, CTX, HAS_MEMBER_preTransformInsSeq<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -663,7 +663,7 @@ private:
 
                 v->expr = mapIt(move(v->expr), ctx);
 
-                if (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformInsSeq<FUNC>::value) {
                     return PostPonePostTransform_InsSeq<FUNC, CTX, HAS_MEMBER_postTransformInsSeq<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -672,7 +672,7 @@ private:
             } else if (Local *u = cast_tree<Local>(what.get())) {
                 unique_ptr<Local> v(u);
                 what.release();
-                if (HAS_MEMBER_postTransformLocal<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformLocal<FUNC>::value) {
                     return PostPonePostTransform_Local<FUNC, CTX, HAS_MEMBER_postTransformLocal<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
@@ -680,13 +680,13 @@ private:
             } else if (Cast *u = cast_tree<Cast>(what.get())) {
                 unique_ptr<Cast> v(u);
                 what.release();
-                if (HAS_MEMBER_preTransformCast<FUNC>::value) {
+                if constexpr (HAS_MEMBER_preTransformCast<FUNC>::value) {
                     v = PostPonePreTransform_Cast<FUNC, CTX, HAS_MEMBER_preTransformCast<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
                 v->arg = mapIt(move(v->arg), ctx);
 
-                if (HAS_MEMBER_postTransformCast<FUNC>::value) {
+                if constexpr (HAS_MEMBER_postTransformCast<FUNC>::value) {
                     return PostPonePostTransform_Cast<FUNC, CTX, HAS_MEMBER_postTransformCast<FUNC>::value>::call(
                         ctx, move(v), func);
                 }
