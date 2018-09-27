@@ -214,6 +214,7 @@ void handleFile(core::GlobalState &gs, string file, shared_ptr<Path> rootNode) {
                 auto key = child.first.as<string>();
                 recurse(gs, child.second, rootNode);
             }
+            break;
         default:
             break;
     }

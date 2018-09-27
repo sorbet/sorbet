@@ -14,8 +14,8 @@ build --cxxopt=-fno-omit-frame-pointer
 build --copt=-fstack-protector
 build --cxxopt=-fstack-protector
 
-build --copt=-Werror
-build --cxxopt=-Werror
+build --copt=-Werror --copt=-Wimplicit-fallthrough
+build --cxxopt=-Werror --cxxopt=-Wimplicit-fallthrough
 
 build --host_cxxopt=-O0
 build --host_copt=-O0
