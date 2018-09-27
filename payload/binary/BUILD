@@ -3,7 +3,10 @@ cc_library(
     hdrs = [
         "binary.h",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//common",
@@ -15,7 +18,10 @@ cc_library(
     srcs = [
         "empty.cc",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "binary",
@@ -30,7 +36,10 @@ cc_library(
     hdrs = [
         "binary.h",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//common",
@@ -42,7 +51,10 @@ cc_binary(
     srcs = [
         "tools/gen_state_payload.cc",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = ["//common"],
 )

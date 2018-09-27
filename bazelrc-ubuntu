@@ -1,4 +1,0 @@
-test --crosstool_top=//tools/cpp/ci:toolchain
-build --crosstool_top=//tools/cpp/ci:toolchain
-
-build:sanitize --linkopt=-lubsan

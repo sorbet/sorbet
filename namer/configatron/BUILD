@@ -10,7 +10,10 @@ cc_library(
     hdrs = [
         "configatron.h",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

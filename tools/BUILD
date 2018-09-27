@@ -47,6 +47,8 @@ compilation_database(
         "//core/serialize:serialize_test",
         "//core/serialize:serialize",
         "//core/proto:proto",
+        "//proto/pay-server:pay-server",
+        "//proto:proto",
         "//core:generate_names",
         "//core:core_test",
         "//common/statsd:statsd",

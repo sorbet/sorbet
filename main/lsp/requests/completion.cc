@@ -17,7 +17,7 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
         first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
                                   make_move_iterator(other.second.end()));
     }
-    return first;
+    return move(first);
 };
 
 UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(shared_ptr<core::Type> receiver,

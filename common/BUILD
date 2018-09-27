@@ -15,10 +15,13 @@ cc_library(
         "common.h",
         "typecase.h",
     ],
-    copts = ["--std=c++14"],
     linkopts = select({
         "//tools/config:linux": ["-lm"],
         "//conditions:default": [],
+    }),
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
     deps = [
@@ -36,7 +39,7 @@ cc_test(
     size = "small",
     srcs = glob(["test/*.cc"]),
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],

@@ -9,6 +9,10 @@ filegroup(
 cc_binary(
     name = "generate_procs",
     srcs = ["tools/generate_procs.cc"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
 )
 

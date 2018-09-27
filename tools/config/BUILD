@@ -26,12 +26,17 @@ config_setting(
 )
 
 config_setting(
-    name = "more-static",
+    name = "sanitized",
     values = {
-        "define": "more-static=true",
+        "define": "unsanitized=false",
+    },
+)
 
-        # more-static doesn't work on macOS. Limit it to Linux for
-        # now.
-        "host_cpu": "k8",
+config_setting(
+    name = "linkshared",
+    values = {
+        "define": "unsanitized=false",
+        "compilation_mode": "fastbuild",
+        "host_cpu": "darwin",
     },
 )

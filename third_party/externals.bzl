@@ -115,7 +115,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="29ff6d4860070bf8fcbd39c8805d0c32d56628a3"
+        commit="e01d95528ea2137a4a27a88d1f57c6cb260aafed"
     )
 
     new_git_repository(
@@ -135,33 +135,21 @@ package(default_visibility = ["//visibility:public"])
         build_file="//third_party:parser.BUILD",
     )
 
-    native.new_http_archive(
-        name="clang_6_0_0_darwin",
-        url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz",
-        build_file = "//third_party:clang.BUILD",
-        sha256="0ef8e99e9c9b262a53ab8f2821e2391d041615dd3f3ff36fdf5370916b0f4268",
-        type="tar.xz",
-        strip_prefix="clang+llvm-6.0.0-x86_64-apple-darwin/",
-    )
-
-    native.new_http_archive(
-        name="clang_6_0_0_linux",
-        url="http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz",
-        build_file = "//third_party:clang.BUILD",
-        sha256="114e78b2f6db61aaee314c572e07b0d635f653adc5d31bd1cd0bf31a3db4a6e5",
-        type="tar.xz",
-        strip_prefix="clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04/",
+    git_repository(
+        name = "com_grail_bazel_toolchain",
+        remote = "https://github.com/DarkDimius/bazel-toolchain.git",
+        commit="d11b0ecfee53387564be08172c8d7ce2199e06ee",
     )
 
     git_repository(
         name = "io_bazel_rules_go",
         remote = "https://github.com/bazelbuild/rules_go.git",
-        commit = "18835fe2e979043ddf39c46b130d2183470cabca",
+        commit = "cbc1e32fba771845305f15e341fa26595d4a136d",
     )
 
     git_repository(
         name = "com_github_bazelbuild_buildtools",
-        commit = "82b21607e00913b16fe1c51bec80232d9d6de31c",
+        commit = "8a1359dc25add12a6e724f6a2bded60fbc23d08a",
         remote = "https://github.com/bazelbuild/buildifier.git",
     )
 
@@ -174,7 +162,7 @@ package(default_visibility = ["//visibility:public"])
 
     new_git_repository(
         name = "com_github_msgpack_msgpack",
-        commit = "b6803a5fecbe321458faafd6a079dac466614ff9",
+        commit = "db54c78ed46e469ac86d57e168aa7bcdb4094749",
         remote = "https://github.com/msgpack/msgpack-c",
         build_file = "//third_party:msgpack.BUILD",
     )

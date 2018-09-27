@@ -48,6 +48,10 @@ cc_library(
         "include/ruby_parser",
     ],
     visibility = ["//visibility:public"],
+    linkstatic = select({
+            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+            "//conditions:default": 1,
+        }),
 )
 
 exports_files(["codegen/diagnostics.rb"])

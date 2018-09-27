@@ -1,6 +1,0 @@
-#!/bin/bash
-top="/$0"
-top="${top%/*/*/*/*/*}"
-[ "$top" ] || top=.
-
-exec "${top}/external/clang_6_0_0_linux/bin/llvm-objdump" "$@"

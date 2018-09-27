@@ -1,7 +1,9 @@
 startup --output_base=/cache/bazel --output_user_root=/cache/bazel_user
 common --color yes
 
-test --crosstool_top=//tools/cpp/ci:toolchain --experimental_multi_threaded_digest --jobs 30
-build --crosstool_top=//tools/cpp/ci:toolchain --experimental_multi_threaded_digest --jobs 30
+test --experimental_multi_threaded_digest --jobs 30
+build --experimental_multi_threaded_digest --jobs 30
 
-build:sanitize --linkopt=-lubsan
+# Bazel links C++ files with $CC, not $CXX, this breaks UBSan
+build:sanitize --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a
+test:sanitize --linkopt=external/llvm_toolchain/lib/clang/7.0.0/lib/linux/libclang_rt.asan_cxx-x86_64.a

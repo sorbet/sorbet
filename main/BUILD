@@ -11,13 +11,12 @@ cc_binary(
     srcs = [
         "main.cc",
     ],
-    copts = ["--std=c++14"],
-    linkopts = select({
-        "//tools/config:more-static": ["-static"],
+    features = select({
+        "//tools/config:linkshared": ["fully_static_link"],
         "//conditions:default": [],
     }),
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     malloc = select({
@@ -29,7 +28,6 @@ cc_binary(
         "realmain",
         "//payload/binary:some",
         "//payload/text:empty",
-        "@com_google_absl//absl/debugging:failure_signal_handler",
     ],
 )
 
@@ -38,9 +36,8 @@ cc_binary(
     srcs = [
         "main.cc",
     ],
-    copts = ["--std=c++14"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
@@ -48,7 +45,6 @@ cc_binary(
         "realmain",
         "//payload/binary:empty",
         "//payload/text:some",
-        "@com_google_absl//absl/debugging:failure_signal_handler",
     ],
 )
 
@@ -58,7 +54,10 @@ cc_library(
         "realmain.cc",
         "realmain.h",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//ast",

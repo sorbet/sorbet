@@ -13,10 +13,13 @@ cc_library(
         "ConcurrentQueue.h",
         "WorkerPool.h",
     ],
-    copts = ["--std=c++14"],
     linkopts = select({
         "//tools/config:linux": ["-lm"],
         "//conditions:default": [],
+    }),
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
     }),
     visibility = ["//visibility:public"],
     deps = [

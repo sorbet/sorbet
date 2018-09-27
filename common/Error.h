@@ -72,8 +72,7 @@ private:
     }
 };
 
-template <typename... TArgs>
-[[noreturn]] bool Error::raise(const TArgs &... args) {
+template <typename... TArgs>[[noreturn]] bool Error::raise(const TArgs &... args) {
     std::stringstream message;
     _raise(message, args...);
 

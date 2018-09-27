@@ -12,7 +12,10 @@ cc_library(
         ],
     ),
     hdrs = glob(["*.h"]),
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//cfg",
@@ -29,7 +32,7 @@ cc_test(
     ]),
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],

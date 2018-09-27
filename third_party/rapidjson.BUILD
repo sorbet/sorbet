@@ -9,5 +9,9 @@ cc_library(
         "RAPIDJSON_HAS_CXX11_RVALUE_REFS",
         "RAPIDJSON_HAS_CXX11_TYPETRAITS",
         "RAPIDJSON_ASSERT(x)=ENFORCE(x)",
-        ]
+        ],
+        linkstatic = select({
+                "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+                "//conditions:default": 1,
+            }),
 )

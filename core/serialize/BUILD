@@ -5,7 +5,10 @@ cc_library(
         "serialize.cc",
     ],
     hdrs = ["serialize.h"],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//ast",
@@ -20,7 +23,7 @@ cc_test(
     size = "small",
     srcs = glob(["test/*.cc"]) + ["pickler.h"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],

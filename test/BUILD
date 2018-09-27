@@ -6,7 +6,7 @@ cc_binary(
     ],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
@@ -34,6 +34,10 @@ cc_test(
     size = "small",
     srcs = ["hello-test.cc"],
     copts = ["-Iexternal/gtest/include"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "//ast",
@@ -55,7 +59,7 @@ cc_test(
     srcs = ["error-check-test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
@@ -76,7 +80,7 @@ cc_test(
     srcs = ["autocorrect-test.cc"],
     copts = ["-Iexternal/gtest/include"],
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
@@ -101,14 +105,20 @@ cc_test(
 cc_binary(
     name = "backtrace-test-raise",
     srcs = ["backtrace-test-raise.cc"],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
 )
 
 cc_binary(
     name = "backtrace-test-error",
     srcs = ["backtrace-test-error.cc"],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = ["//common"],
 )

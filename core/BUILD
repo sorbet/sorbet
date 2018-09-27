@@ -31,7 +31,10 @@ cc_library(
     hdrs = [
         "core.h",
     ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]) + NAME_HEADERS,
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//visibility:public"],
     deps = [
         "//common",
@@ -51,7 +54,7 @@ cc_test(
         ],
     ),
     linkstatic = select({
-        "//tools/config:fastbuild": 0,
+        "//tools/config:linkshared": 0,
         "//conditions:default": 1,
     }),
     visibility = ["//tools:__pkg__"],
@@ -67,7 +70,10 @@ cc_binary(
     srcs = [
         "tools/generate_names.cc",
     ],
-    copts = ["--std=c++14"],
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
     visibility = ["//tools:__pkg__"],
     deps = [
         "//common",

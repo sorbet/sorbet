@@ -9,10 +9,13 @@ cc_library(
     ]),
     copts = [
         "-Iexternal/yaml_cpp/include",
-        "--std=c++14"
     ],
     includes = [
         "include/",
     ],
     visibility = ["//visibility:public"],
+    linkstatic = select({
+            "@com_stripe_ruby_typer//tools/config:linkshared": 0,
+            "//conditions:default": 1,
+        }),
 )

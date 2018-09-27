@@ -1,6 +1,7 @@
 # C / C++ Options
-# build --copt=--std=c++14 # breaks c dependencies on mac
-build --cxxopt=--std=c++14
+# Don't depend on system compiler
+build --crosstool_top=@llvm_toolchain//:toolchain
+test --crosstool_top=@llvm_toolchain//:toolchain
 
 # Developer laptops run skylake, devboxes run skylake-avx512
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
@@ -43,7 +44,6 @@ build:release --compilation_mode=opt
 build:release --config=debugsymbols
 build:release --config=nopie
 build:release --config=lto
-build:release --config=more-static
 build:release --stamp
 
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
@@ -56,7 +56,6 @@ build:ci --copt=-O2
 build:ci --cxxopt=-O2
 build:ci --define jemalloc=true
 build:ci --config=debugsymbols
-build:ci --config=nopie
 
 # DEBUG_MODE is set by default for all builds except --config=release.
 # Use this flag to set DEBUG_MODE even for --config=release.
@@ -96,9 +95,6 @@ build:sanitize --define unsanitized=false
 build:size --linkopt=-Os
 build:size --copt=-Os
 build:size --cxxopt=-Os
-
-# Try to statically link as much as possible
-build:more-static --define more-static=true
 
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
