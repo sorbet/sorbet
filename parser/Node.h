@@ -29,7 +29,6 @@ protected:
     void printTabs(std::stringstream &to, int count);
     void printNode(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
     void printNodeJSON(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
-    std::string escapeJSON(std::string from);
 };
 
 template <class To> To *cast_node(Node *what) {

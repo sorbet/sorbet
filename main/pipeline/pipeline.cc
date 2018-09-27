@@ -79,8 +79,6 @@ struct thread_result {
     vector<unique_ptr<ast::Expression>> trees;
 };
 
-const char *HEX_CHARS = "0123456789ABCDEF";
-
 string fileKey(core::GlobalState &gs, core::FileRef file) {
     auto path = file.data(gs).path();
     string key(path.begin(), path.end());
