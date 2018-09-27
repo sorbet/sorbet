@@ -14,11 +14,11 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
         if (argv[i][0] == '@') {
             try {
                 string argsP = FileOps::read(argv[i] + 1);
-                absl::string_view argsPView = argsP;
+                string_view argsPView = argsP;
                 if (!argsPView.empty() && argsPView.back() == '\n') {
                     argsPView = argsPView.substr(0, argsPView.size() - 1);
                 }
-                for (absl::string_view arg : absl::StrSplit(argsPView, '\n')) {
+                for (string_view arg : absl::StrSplit(argsPView, '\n')) {
                     stringArgs.emplace_back((string)arg);
                 }
             } catch (FileNotFoundException e) {

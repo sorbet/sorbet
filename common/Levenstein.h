@@ -1,12 +1,12 @@
 #ifndef SORBET_LEVENSTEIN_H
 #define SORBET_LEVENSTEIN_H
-#include "absl/strings/string_view.h"
+#include <string_view>
 
 namespace sorbet {
 
 class Levenstein {
 public:
-    static int distance(absl::string_view s1, absl::string_view s2, int bound) noexcept;
+    static int distance(std::string_view s1, std::string_view s2, int bound) noexcept;
 };
 
 } // namespace sorbet

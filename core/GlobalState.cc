@@ -84,7 +84,7 @@ const char *guessed_type_type_parameter_holder_str = "guessed_type_type_paramete
 const char *reserved_str = "<<RESERVED>>";
 } // namespace
 
-SymbolRef GlobalState::synthesizeClass(absl::string_view name, u4 superclass, bool isModule) {
+SymbolRef GlobalState::synthesizeClass(string_view name, u4 superclass, bool isModule) {
     NameRef nameId = enterNameConstant(name);
 
     // This can't use enterClass since there is a chicken and egg problem.
@@ -128,7 +128,7 @@ void GlobalState::initEmpty() {
     UnfreezeSymbolTable symTableAccess(*this);
     names.emplace_back(); // first name is used in hashes to indicate empty cell
     names[0].kind = NameKind::UTF8;
-    names[0].raw.utf8 = absl::string_view();
+    names[0].raw.utf8 = string_view();
     Names::registerNames(*this);
 
     SymbolRef id;
@@ -540,7 +540,7 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
     return enterSymbol(loc, owner, name, Symbol::Flags::METHOD_ARGUMENT);
 }
 
-absl::string_view GlobalState::enterString(absl::string_view nm) {
+string_view GlobalState::enterString(string_view nm) {
     char *from = nullptr;
     if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
         strings.push_back(make_unique<vector<char>>(nm.size()));
@@ -560,10 +560,10 @@ absl::string_view GlobalState::enterString(absl::string_view nm) {
     counterInc("strings");
     memcpy(from, nm.data(), nm.size());
     strings_last_page_used += nm.size();
-    return absl::string_view(from, nm.size());
+    return string_view(from, nm.size());
 }
 
-NameRef GlobalState::enterNameUTF8(absl::string_view nm) {
+NameRef GlobalState::enterNameUTF8(string_view nm) {
     const auto hs = _hash(nm);
     unsigned int hashTableSize = names_by_hash.size();
     unsigned int mask = hashTableSize - 1;
@@ -676,7 +676,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
     return NameRef(*this, idx);
 }
 
-NameRef GlobalState::enterNameConstant(absl::string_view original) {
+NameRef GlobalState::enterNameConstant(string_view original) {
     return enterNameConstant(enterNameUTF8(original));
 }
 
@@ -811,12 +811,12 @@ FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
     return ret;
 }
 
-FileRef GlobalState::enterFile(absl::string_view path, absl::string_view source) {
+FileRef GlobalState::enterFile(string_view path, string_view source) {
     return GlobalState::enterFile(
         make_shared<File>(string(path.begin(), path.end()), string(source.begin(), source.end()), File::Type::Normal));
 }
 
-FileRef GlobalState::enterFileAt(absl::string_view path, absl::string_view source, FileRef id) {
+FileRef GlobalState::enterFileAt(string_view path, string_view source, FileRef id) {
     if (this->files[id.id()] && this->files[id.id()]->sourceType != File::Type::TombStone) {
         Error::raise("should never happen");
     }
@@ -1150,7 +1150,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
     return inWhat;
 }
 
-FileRef GlobalState::findFileByPath(absl::string_view path) {
+FileRef GlobalState::findFileByPath(string_view path) {
     auto fnd = fileRefByPath.find((string)path);
     if (fnd != fileRefByPath.end()) {
         return fnd->second;

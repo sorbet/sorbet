@@ -20,7 +20,7 @@ inline unsigned int _hash_mix_constant(NameKind nk, unsigned int id) {
     return id * HASH_MULT2 + _NameKind2Id_CONSTANT(nk);
 }
 
-inline unsigned int _hash(absl::string_view utf8) {
+inline unsigned int _hash(std::string_view utf8) {
     // TODO: replace with http://www.sanmayce.com/Fastest_Hash/, see https://www.strchr.com/hash_functions
     // and https://github.com/rurban/smhasher
     auto end = utf8.end();

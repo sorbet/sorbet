@@ -1,7 +1,7 @@
 #ifndef SORBET_COUNTERS_IMPL_H
 #define SORBET_COUNTERS_IMPL_H
 
-#include "absl/strings/string_view.h"
+#include <string_view>
 
 namespace sorbet {
 struct CounterImpl {
@@ -25,9 +25,9 @@ struct CounterImpl {
     void prodCounterAdd(const char *counter, unsigned long value);
     void timingAdd(const char *metring, unsigned long nanos);
 
-    // absl::string_view isn't hashable, so we use an unordered map. We could
+    // std::string_view isn't hashable, so we use an unordered map. We could
     // implement hash ourselves, but this is the slowpath anyways.
-    std::map<absl::string_view, const char *> strings_by_value;
+    std::map<std::string_view, const char *> strings_by_value;
     std::map<const char *, const char *> strings_by_ptr;
 
     std::map<const char *, std::map<int, CounterType>> histograms;

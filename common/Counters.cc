@@ -27,7 +27,7 @@ const char *CounterImpl::internKey(const char *str) {
         return it1->second;
     }
 
-    absl::string_view view(str);
+    string_view view(str);
     auto it2 = this->strings_by_value.find(view);
     if (it2 != this->strings_by_value.end()) {
         this->strings_by_ptr[str] = it2->second;

@@ -1,6 +1,5 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
-#include "absl/strings/string_view.h"
 #include "common/common.h"
 #include <map>
 #include <string>

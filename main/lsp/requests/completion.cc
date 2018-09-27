@@ -21,7 +21,7 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
 };
 
 UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(shared_ptr<core::Type> receiver,
-                                                                                   absl::string_view name) {
+                                                                                   string_view name) {
     UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
     typecase(receiver.get(),
              [&](core::ClassType *c) {
@@ -92,7 +92,7 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, ss.str(), "${0}");
 }
 
-unique_ptr<string> findDocumentation(absl::string_view sourceCode, int beginIndex) {
+unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // everything in the file before the method definition.
     auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 

@@ -551,8 +551,8 @@ bool compareNames(const string &left, const string &right) {
     if (rsplit == string::npos) {
         rsplit = right.find(".");
     }
-    absl::string_view lbase(left.data(), lsplit == string::npos ? left.size() : lsplit);
-    absl::string_view rbase(right.data(), rsplit == string::npos ? right.size() : rsplit);
+    string_view lbase(left.data(), lsplit == string::npos ? left.size() : lsplit);
+    string_view rbase(right.data(), rsplit == string::npos ? right.size() : rsplit);
     if (lbase != rbase) {
         return left < right;
     }

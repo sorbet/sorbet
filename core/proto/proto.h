@@ -26,7 +26,7 @@ public:
     static com::stripe::rubytyper::FileTable filesToProto(const GlobalState &gs);
 
     static com::stripe::payserver::events::cibot::SourceMetrics toProto(const CounterState &counters,
-                                                                        absl::string_view prefix);
+                                                                        std::string_view prefix);
 
     static std::string toJSON(const google::protobuf::Message &message);
     static void toJSON(const google::protobuf::Message &message, std::ostream &out);

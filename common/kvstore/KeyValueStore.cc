@@ -47,7 +47,7 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     return;
 }
 
-void KeyValueStore::write(const absl::string_view key, vector<u1> value) {
+void KeyValueStore::write(const string_view key, vector<u1> value) {
     if (writerId != this_thread::get_id()) {
         throw invalid_argument("KeyValueStore can only write from thread that created it");
     }
@@ -65,7 +65,7 @@ void KeyValueStore::write(const absl::string_view key, vector<u1> value) {
     }
 }
 
-u1 *KeyValueStore::read(const absl::string_view key) {
+u1 *KeyValueStore::read(const string_view key) {
     MDB_txn *txn;
     int rc = 0;
     {
@@ -112,18 +112,18 @@ fail:
     throw invalid_argument("failed to clear the database");
 }
 
-absl::string_view KeyValueStore::readString(const absl::string_view key) {
+string_view KeyValueStore::readString(const string_view key) {
     auto rawData = read(key);
     if (!rawData) {
-        return absl::string_view();
+        return string_view();
     }
     size_t sz;
     memcpy(&sz, rawData, sizeof(sz));
-    absl::string_view result(((const char *)rawData) + sizeof(sz), sz);
+    string_view result(((const char *)rawData) + sizeof(sz), sz);
     return result;
 }
 
-void KeyValueStore::writeString(const absl::string_view key, string value) {
+void KeyValueStore::writeString(const string_view key, string value) {
     vector<u1> rawData(value.size() + sizeof(size_t));
     size_t sz = value.size();
     memcpy(rawData.data(), &sz, sizeof(sz));

@@ -118,7 +118,7 @@ struct LSPMethod {
         return LSPMethod{"__RESUME__", true, LSPMethod::Kind::ClientInitiated};
     };
     static const std::vector<LSPMethod> ALL_METHODS;
-    static const LSPMethod getByName(const absl::string_view name);
+    static const LSPMethod getByName(const std::string_view name);
 };
 
 /** List of all LSP Methods that we are aware of */
@@ -214,12 +214,12 @@ class LSPLoop {
     void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
     bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d);
 
-    core::FileRef uri2FileRef(const absl::string_view uri);
+    core::FileRef uri2FileRef(const std::string_view uri);
     std::string fileRef2Uri(core::FileRef);
-    std::string remoteName2Local(const absl::string_view uri);
-    std::string localName2Remote(const absl::string_view uri);
+    std::string remoteName2Local(const std::string_view uri);
+    std::string localName2Remote(const std::string_view uri);
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
-    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, const absl::string_view &pattern);
+    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, const std::string_view &pattern);
     bool hideSymbol(core::SymbolRef sym);
 
     std::string methodDetail(core::SymbolRef method, std::shared_ptr<core::Type> receiver,
@@ -244,7 +244,7 @@ class LSPLoop {
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
     UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(std::shared_ptr<core::Type> receiver,
-                                                                                   absl::string_view name);
+                                                                                   std::string_view name);
     void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
     void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
@@ -267,7 +267,7 @@ public:
 
     void invalidateAllErrors();
 };
-std::unique_ptr<std::string> findDocumentation(absl::string_view sourceCode, int beginIndex);
+std::unique_ptr<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 } // namespace lsp
 
 } // namespace realmain

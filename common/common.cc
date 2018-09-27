@@ -25,7 +25,7 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
 } // namespace
 shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
-string sorbet::FileOps::read(const absl::string_view filename) {
+string sorbet::FileOps::read(const string_view filename) {
     string fileNameStr(filename.data(), filename.size());
     ifstream fin(fileNameStr, ios::in | ios::binary);
     if (!fin.good()) {
@@ -46,7 +46,7 @@ string sorbet::FileOps::read(const absl::string_view filename) {
     return src;
 }
 
-void sorbet::FileOps::write(const absl::string_view filename, const vector<sorbet::u1> &data) {
+void sorbet::FileOps::write(const string_view filename, const vector<sorbet::u1> &data) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr, ios::out | ios::binary);
     if (!fout.good()) {
@@ -55,7 +55,7 @@ void sorbet::FileOps::write(const absl::string_view filename, const vector<sorbe
     fout.write((const char *)data.data(), data.size());
 }
 
-void sorbet::FileOps::write(const absl::string_view filename, const absl::string_view text) {
+void sorbet::FileOps::write(const string_view filename, const string_view text) {
     string fileNameStr(filename.data(), filename.size());
     ofstream fout(fileNameStr);
     if (!fout.good()) {
@@ -64,15 +64,15 @@ void sorbet::FileOps::write(const absl::string_view filename, const absl::string
     fout << text;
 }
 
-absl::string_view sorbet::FileOps::getFileName(const absl::string_view path) {
+string_view sorbet::FileOps::getFileName(const string_view path) {
     size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }
 
-absl::string_view sorbet::FileOps::getExtension(const absl::string_view path) {
+string_view sorbet::FileOps::getExtension(const string_view path) {
     size_t found = path.find_last_of(".");
-    if (found == absl::string_view::npos) {
-        return absl::string_view();
+    if (found == string_view::npos) {
+        return string_view();
     }
     return path.substr(found + 1);
 }

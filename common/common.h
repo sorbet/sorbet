@@ -8,7 +8,7 @@
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
-#include "absl/strings/string_view.h"
+#include <string_view>
 #if !defined(EMSCRIPTEN)
 #include "absl/container/inlined_vector.h"
 #include "unordered_map.hpp"
@@ -125,11 +125,11 @@ template <class From, class To> To *fast_cast(From *what) {
 
 class FileOps final {
 public:
-    static std::string read(const absl::string_view filename);
-    static void write(const absl::string_view filename, const std::vector<sorbet::u1> &data);
-    static void write(const absl::string_view filename, const absl::string_view text);
-    static absl::string_view getFileName(const absl::string_view path);
-    static absl::string_view getExtension(const absl::string_view path);
+    static std::string read(const std::string_view filename);
+    static void write(const std::string_view filename, const std::vector<sorbet::u1> &data);
+    static void write(const std::string_view filename, const std::string_view text);
+    static std::string_view getFileName(const std::string_view path);
+    static std::string_view getExtension(const std::string_view path);
 };
 
 } // namespace sorbet

@@ -67,23 +67,23 @@ public:
     SymbolRef enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameRef name);
     SymbolRef staticInitForFile(FileRef file);
 
-    NameRef enterNameUTF8(absl::string_view nm);
+    NameRef enterNameUTF8(std::string_view nm);
 
     NameRef getNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) const;
     NameRef freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num);
 
     NameRef enterNameConstant(NameRef original);
-    NameRef enterNameConstant(absl::string_view original);
+    NameRef enterNameConstant(std::string_view original);
 
-    FileRef enterFile(absl::string_view path, absl::string_view source);
-    FileRef enterFileAt(absl::string_view path, absl::string_view source, FileRef id);
+    FileRef enterFile(std::string_view path, std::string_view source);
+    FileRef enterFileAt(std::string_view path, std::string_view source, FileRef id);
     FileRef enterFile(const std::shared_ptr<File> &file);
     FileRef enterNewFileAt(const std::shared_ptr<File> &file, FileRef id);
     FileRef reserveFileRef(std::string path);
     static std::unique_ptr<GlobalState> replaceFile(std::unique_ptr<GlobalState> inWhat, FileRef whatFile,
                                                     const std::shared_ptr<File> &withWhat);
     static std::unique_ptr<GlobalState> markFileAsTombStone(std::unique_ptr<GlobalState>, FileRef fref);
-    FileRef findFileByPath(absl::string_view path);
+    FileRef findFileByPath(std::string_view path);
 
     void mangleRenameSymbol(SymbolRef what, NameRef origName, UniqueNameKind kind);
 
@@ -138,7 +138,7 @@ private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
     std::vector<std::shared_ptr<std::vector<char>>> strings;
-    absl::string_view enterString(absl::string_view nm);
+    std::string_view enterString(std::string_view nm);
     u2 strings_last_page_used = STRINGS_PAGE_SIZE + 1;
     std::vector<Name> names;
     UnorderedMap<std::string, FileRef> fileRefByPath;
@@ -162,7 +162,7 @@ private:
 
     void expandNames(int growBy = 2);
 
-    SymbolRef synthesizeClass(absl::string_view name, u4 superclass = Symbols::todo()._id, bool isModule = false);
+    SymbolRef synthesizeClass(std::string_view name, u4 superclass = Symbols::todo()._id, bool isModule = false);
     SymbolRef enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 flags);
 
     SymbolRef getTopLevelClassSymbol(NameRef name);

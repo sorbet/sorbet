@@ -108,8 +108,7 @@ com::stripe::rubytyper::Loc Proto::toProto(const GlobalState &gs, Loc loc) {
     return protoLoc;
 }
 
-com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const CounterState &counters,
-                                                                    absl::string_view prefix) {
+com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const CounterState &counters, string_view prefix) {
     com::stripe::payserver::events::cibot::SourceMetrics metrics;
     auto unix_timestamp = chrono::seconds(time(nullptr));
     metrics.set_timestamp(unix_timestamp.count());

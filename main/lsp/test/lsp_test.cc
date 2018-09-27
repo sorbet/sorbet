@@ -41,7 +41,7 @@ const string file_string = "# typed: true\n"
                            "      1\n"
                            "    end\n"
                            "end\n";
-const absl::string_view file = absl::string_view(file_string);
+const string_view file = string_view(file_string);
 
 TEST(FindDocumentationTest, OneLineDocumentation) { // NOLINT
     int position = file.find("abcde");

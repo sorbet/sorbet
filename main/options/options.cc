@@ -54,7 +54,7 @@ StopAfterOptions stop_after_options[] = {
     {"cfg", Phase::CFG},   {"inferencer", Phase::INFERENCER},
 };
 
-core::StrictLevel text2StrictLevel(absl::string_view key, shared_ptr<spdlog::logger> logger) {
+core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> logger) {
     if (key == "ruby" || key == "stripe") {
         return core::StrictLevel::Stripe;
     } else if (key == "typed" || key == "true") {

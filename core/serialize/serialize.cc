@@ -50,7 +50,7 @@ private:
     static void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree);
 };
 
-void Pickler::putStr(const absl::string_view s) {
+void Pickler::putStr(const string_view s) {
     putU4(s.size());
 
     for (char c : s) {
@@ -103,9 +103,9 @@ UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
     }
 }
 
-absl::string_view UnPickler::getStr() {
+string_view UnPickler::getStr() {
     int sz = getU4();
-    absl::string_view result((char *)&data[pos], sz);
+    string_view result((char *)&data[pos], sz);
     pos += sz;
 
     return result;
@@ -581,7 +581,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
         if (i == 0) {
             names.emplace_back();
             names.back().kind = NameKind::UTF8;
-            names.back().raw.utf8 = absl::string_view();
+            names.back().raw.utf8 = string_view();
         } else {
             names.emplace_back(unpickleName(p, result));
         }

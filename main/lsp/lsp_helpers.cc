@@ -8,7 +8,7 @@ namespace sorbet {
 namespace realmain {
 namespace lsp {
 
-string LSPLoop::remoteName2Local(const absl::string_view uri) {
+string LSPLoop::remoteName2Local(const string_view uri) {
     ENFORCE(absl::StartsWith(uri, rootUri));
     const char *start = uri.data() + rootUri.length();
     if (*start == '/') {
@@ -17,12 +17,12 @@ string LSPLoop::remoteName2Local(const absl::string_view uri) {
     return string(start, uri.end());
 }
 
-string LSPLoop::localName2Remote(const absl::string_view uri) {
+string LSPLoop::localName2Remote(const string_view uri) {
     ENFORCE(!absl::StartsWith(uri, rootUri));
     return absl::StrCat(rootUri, "/", uri);
 }
 
-core::FileRef LSPLoop::uri2FileRef(const absl::string_view uri) {
+core::FileRef LSPLoop::uri2FileRef(const string_view uri) {
     if (!absl::StartsWith(uri, rootUri)) {
         return core::FileRef();
     }
@@ -137,10 +137,10 @@ bool LSPLoop::hideSymbol(core::SymbolRef sym) {
     return false;
 }
 
-bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, const absl::string_view &pattern) {
-    absl::string_view view = name.data(gs).shortName(gs);
+bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, const string_view &pattern) {
+    string_view view = name.data(gs).shortName(gs);
     auto fnd = view.find(pattern);
-    return fnd != absl::string_view::npos;
+    return fnd != string_view::npos;
 }
 
 string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> receiver, shared_ptr<core::Type> retType,

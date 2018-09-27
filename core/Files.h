@@ -1,7 +1,6 @@
 #ifndef SORBET_AST_FILES_H
 #define SORBET_AST_FILES_H
 
-#include "absl/strings/string_view.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include <string>
@@ -62,8 +61,8 @@ public:
 
     friend class GlobalState;
 
-    absl::string_view path() const;
-    absl::string_view source() const;
+    std::string_view path() const;
+    std::string_view source() const;
     Type sourceType;
 
     bool isPayload() const;

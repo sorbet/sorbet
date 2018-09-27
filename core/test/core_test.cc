@@ -68,9 +68,9 @@ TEST(ASTTest, SymbolRef) { // NOLINT
     EXPECT_EQ(ref, ref.data(gs).ref(gs));
 }
 
-extern StrictLevel fileSigil(absl::string_view source);
+extern StrictLevel fileSigil(string_view source);
 struct FileIsTypedCase {
-    absl::string_view src;
+    string_view src;
     StrictLevel strict;
 };
 

@@ -240,7 +240,7 @@ const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                Pause(),
                                                Resume()};
 
-const LSPMethod LSPMethod::getByName(const absl::string_view name) {
+const LSPMethod LSPMethod::getByName(const string_view name) {
     for (auto &candidate : ALL_METHODS) {
         if (candidate.name == name) {
             return candidate;

@@ -26,7 +26,7 @@ vector<int> findLineBreaks(const string &s) {
     return res;
 }
 
-StrictLevel fileSigil(absl::string_view source) {
+StrictLevel fileSigil(string_view source) {
     /*
      * StrictLevel::Stripe: <none> | # typed: false
      * StrictLevel::Typed: # typed: true
@@ -37,7 +37,7 @@ StrictLevel fileSigil(absl::string_view source) {
     size_t start = 0;
     while (true) {
         start = source.find("typed:", start);
-        if (start == absl::string_view::npos) {
+        if (start == string_view::npos) {
             return StrictLevel::Stripe;
         }
         start += 6;
@@ -53,7 +53,7 @@ StrictLevel fileSigil(absl::string_view source) {
             ++end;
         }
 
-        absl::string_view suffix = source.substr(start, end - start);
+        string_view suffix = source.substr(start, end - start);
         if (suffix == "false") {
             return StrictLevel::Stripe;
         } else if (suffix == "true") {
@@ -94,11 +94,11 @@ File &FileRef::data(GlobalState &gs, bool allowTombStones) const {
     return *(gs.files[_id]);
 }
 
-absl::string_view File::path() const {
+string_view File::path() const {
     return this->path_;
 }
 
-absl::string_view File::source() const {
+string_view File::source() const {
     ENFORCE(this->sourceType != Type::TombStone);
     return this->source_;
 }

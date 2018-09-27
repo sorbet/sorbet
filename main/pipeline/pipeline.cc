@@ -88,7 +88,7 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     auto src = file.data(gs).source();
     int err = blake2b((uint8_t *)&out[0], src.begin(), nullptr, sizeof(out), src.size(), 0);
     ENFORCE(err == 0);
-    key += absl::BytesToHexString(absl::string_view{&out[0], BLAKE2B_OUTBYTES});
+    key += absl::BytesToHexString(string_view{&out[0], BLAKE2B_OUTBYTES});
     return key;
 }
 

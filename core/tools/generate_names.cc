@@ -288,7 +288,7 @@ void emit_name_string(ostream &out, NameDef &name) {
     out << "const char *" << name.srcName << " = \"";
     out << absl::CEscape(name.val) << "\";" << '\n';
 
-    out << "absl::string_view " << name.srcName << "_DESC{(char*)";
+    out << "std::string_view " << name.srcName << "_DESC{(char*)";
     out << name.srcName << "," << name.val.size() << "};" << '\n';
     out << '\n';
 }
