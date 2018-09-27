@@ -506,7 +506,7 @@ Note:
 
 ---
 
-<img style="height: 512px" src="img/wheel-change.jpg"></img>
+<img style="height: 512px" src="img/wheel-change.gif"></img>
 
 ---
 
