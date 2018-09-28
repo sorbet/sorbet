@@ -59,6 +59,12 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
             markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
             result.AddMember("contents", markupContents, alloc);
             sendResult(d, result);
+        } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
+            result.SetNull();
+            // TODO: Actually send the type signature here. I'm skipping this for now
+            // since it's not a very useful feature for the end user (i.e., they should
+            // be able to see this right above the definition in ruby)
+            sendResult(d, result);
         } else {
             sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
         }

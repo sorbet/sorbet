@@ -23,3 +23,5 @@ Write: {"jsonrpc":"2.0","id":1,"result":{"contents":{"kind":"markdown","value":"
 Read: {"jsonrpc":"2.0","method":"textDocument/didChange","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/AAAAA.rb","version":3},"contentChanges":[{"text":"# typed: true\nclass A::B\n    def baz()\n        A::B\n        1\n    end\n\nend"}]}}
 Read: {"jsonrpc":"2.0","id":1,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/AAAAA.rb"},"position":{"line":3,"character":8}}}
 Write: {"jsonrpc":"2.0","id":1,"result":{"contents":{"kind":"markdown","value":"<Class:A>"}}}
+Read: {"jsonrpc":"2.0","id":42,"method":"textDocument/hover","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/commands/foo.rb"},"position":{"line":4,"character":10}}}
+Write: {"jsonrpc":"2.0","id":42,"result":null}
