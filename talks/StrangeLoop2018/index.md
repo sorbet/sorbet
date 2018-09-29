@@ -60,13 +60,7 @@ Note:
 
 ---
 
-## Stats
-
-|Language                        | lines |||Language                        | lines |
-|--------------------------------|------:|||--------------------------------|------:|
-|Ruby                            |   34% |||Scala                           |    7% |
-|Javascript                      |   16% |||HTML                            |    6% |
-|YAML                            |   10% |||Go                              |    6% |
+## Scale
 
 Millions of lines of code
 
@@ -205,13 +199,13 @@ again.
 
 ## Syntax changes are ok
 
-```
+```ruby
 standard_method({bar: Integer}, returns: String)
 ```
-```
+```ruby
 sig(bar: Integer).returns(String)
 ```
-```
+```ruby
 sig {params(bar: Integer).returns(String)}
 ```
 
@@ -222,22 +216,22 @@ This is only possible because of our monorepo
 
 ## Rejected syntax
 
-```
+```ruby
 Stripe::Declare.method
 ```
-```
+```ruby
 T::Any[Integer, String]
 ```
-```
+```ruby
 Integer | String
 ```
-```
+```ruby
 def foo(bar: T.(Integer)) T.(String)
 ```
-```
+```ruby
 def foo(bar: :T[Integer]) :T[String]
 ```
-```
+```ruby
 def String foo(Integer bar)
 ```
 
@@ -262,16 +256,16 @@ Note:
 
 ## Type System Design Principles
 
-- Explicit
-- Feel useful, not burdensome
-- As simple as possible, but no simpler
-- Compatible with Ruby
-- Scales
-- Can be adopted gradually
+1. Explicit
+2. Feel useful, not burdensome
+3. As simple as possible, but no simpler
+4. Compatible with Ruby
+5. Scales
+6. Adoptable gradually
 
 ---
 
-## Explicit
+## 1. Explicit
 
 ```ruby
 sig {params(a: Integer).returns(String)}
@@ -288,7 +282,7 @@ Note:
 
 ---
 
-## Not burdensome: local inference
+## 2. Not burdensome: local inference
 
 ```ruby
 sig {returns(String)} # Optional but not inferred
@@ -310,14 +304,14 @@ Note:
 
 ---
 
-## Simple but no simpler
+## 3. Simple but no simpler
 
   - Nominal gradual typesystem
-  - Generic classes & methods
   - Union and intersection types
-  - Self types
   - Local type inference
   - Control-flow dependent typechecking
+  - Generic classes & methods
+  - Self types
   - Static & runtime typechecking
 
 
@@ -331,7 +325,7 @@ Note:
 
 ---
 
-## Scales
+## 4. Scales
 
  - With team size
  - With number of teams that have different needs
@@ -346,7 +340,21 @@ Note:   On all axes: in speed, team size, codebase size and time (not
 
 ---
 
-## Compatible with Ruby
+## 4. Scales: performance
+
+100k lines/second/cpu core
+
+
+| Tool | Speed (lines/s/core) |
+|------|-------:|
+| `sorbet`  | 100,000 |
+| `javac`   | 10,000  |
+| `rubocop` | 1,000   |
+<!-- .element: class="fragment"  -->
+
+---
+
+## 5. Compatible with Ruby
 
   - Standard ruby syntax
   - Works with existing tools: editors, linters & etc
@@ -359,7 +367,7 @@ Note:
 
 ---
 
-## Gradually: strictness level
+## 6. Adoptable gradually: strictness level
 
 ```ruby
 #
@@ -394,49 +402,42 @@ Note:
 <div/>
 
 Note: 
-​    In order to make adoption possible at scale, we cannot require all
-​    the teams to adopt it at once, thus we need to support teams adopting it
-​    at different pace.
+-  In order to make adoption possible at scale, we cannot require all
+-    the teams to adopt it at once, thus we need to support teams adopting it
+-    at different pace.
 
 ---
 
-## Gradually: runtime typechecking
+## 6. Adoptable gradually: runtime typechecking
 
 ---
 
 ## Why have runtime typechecking?
 
+- `A.rb`:
+```ruby
+# typed: true
+sig {params(a: Integer).void}
+def foo(a)
+  ...
+  ...
+  ...
+  ...
+end
+```
+
+- `B.rb`:
+```ruby
+# typed: false
+foo("1")
+```
+
+---
+## Why have runtime typechecking?
+
 - Untyped code can call into typed code
 - Untyped code can perform stores that are read by typed code
-- Typed code cannot protect itself because we'll complain that the guard is dead
-
----
-
-# Scales: performance
-
----
-## Speed of our typer
-
-100k lines/second/cpu core
-
-
-| Tool | Speed (lines/s/core) |
-|------|-------:|
-| `sorbet`  | 100,000 |
-| `javac`   | 10,000  |
-| `rubocop` | 1,000   |
-<!-- .element: class="fragment"  -->
-
----
-
-## Versus CI
-
-Speed at Stripe
-
-| Tool | Speed | Parallel Machines |
-|------|-------|-------------------|
-| Sorbet | seconds | 1 |
-| CI | 10 minutes | tens |
+- Typed code cannot protect itself because we will complain that the guard is dead
 
 ---
 
@@ -453,51 +454,73 @@ Speed at Stripe
 | Apr 2018 | <div class="fragment highlight-green">Rollout </div>
 
 ---
+# What does the rollout mean?
 
-# Rollout: Tooling
+ - Getting more people to choose to use Sorbet
+ - Getting more files to `# typed: true`
+ - Getting more callsites to be checked
 
 ---
 
-## Gems
+<img src="img/type_all_the_things.jpg"></img>
+---
 
-* Generated shims for > 300 gems
-* All constants and methods are resolved
-* Untyped
+# Reality:
+
+- we are a small group of engineers
+- we can't manually do the changes necessary for code to become typed
+
+## We need tools<!-- .element: class="fragment"  -->
+---
+
+## Tools:
+ - Bridge the gap between static analysis and runtime metraprogramming
+ - Fix common bugs automatically
+ - Find what can be typechecked easily
+ - Find most impactful things to type
+ - Suggest types to user
+
+---
+
+## Background: metraprogramming in Ruby
+
+```ruby
+
+def inject_method(claz, name, value)
+  claz.define_method(name.to_sym) do
+    value
+  end
+end
+
+inject_method(Integer, "favorite_number", 42)
+
+1.favorite_number
 ```
-$ wc -l sorbet/shims/autogenerated/gems/*
+
+---
+
+## Making dynamic definitions static
+
+How do we make dynamic magic static:
+* Load everything in Ruby -> Serialize reflection
+* Load everything in Sorbet -> Serialize
+* Load both -> Serialize diff
+* For our code:
+```console
+$ wc -l sorbet/shims/autogenerated/missing_methods/*
+ 251105 total
+```
+* For 300+ libraries that we depend on  
+```console
+ $ wc -l sorbet/shims/autogenerated/gems/*
 677478 total
 ```
 
 ---
 
-## Ruby Magic
+##  Fix common bugs automatically
 
-* Load everything in Ruby -> Serialize reflection
-* Load everything in Sorbet -> Serialize
-* Load both -> Serialize diff
-```
-$ wc -l sorbet/shims/autogenerated/missing_methods/*
- 251105 total
-```
-
-
----
-
-## Suggest Typed
-
-```
-$ ./scripts/bin/typecheck --suggest-typed --typed=true
-...
-You could add `# typed: true` to: `foo/bar.rb`
-You could add `# typed: true` to: `foo/baz.rb`
-...
-```
-
----
-
-## Autofix
-
-```sh
+```console
 foo.rb:311: Method strip does not exist on NilClass component 
             of T.nilable(String)
      311 |        status = match[1].strip.to_sym
@@ -508,14 +531,47 @@ foo.rb:311: Method strip does not exist on NilClass component
                            ^^^^^^^^
 ```
 
+---
+
+## Find typecheckable files
+
+```console
+$ ./scripts/bin/typecheck --suggest-typed --typed=true
+...
+You could add `# typed: true` to: `foo/bar.rb`
+You could add `# typed: true` to: `foo/baz.rb`
+...
+```
 
 ---
 
-## Most impactful things to type
+## Find impactful things to type
+```ruby
+def foo
+ 1
+end
+
+foo.bar.baz
+```
+ - In order to check calls to both `bar` and `baz` we need to get result type of `foo`;
+ - we've build a tool that finds the most impactful methods to type
 
 ---
 
-## Guess sigs
+## Suggest type signatures
+```ruby
+def foo
+  1
+end
+```
+
+```console
+guess-sig.rb:3: This function does not have a `sig` http://go/e/7017
+    3 |def foo
+       ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    guess-sig.rb:3: Add `sig.returns(Integer)`
+```
 
 Note:
   transition to Paul
@@ -585,7 +641,6 @@ quiet the typechecker:
 |-|---------------------|
 | `checked(false)` | X | ✓ |
 | T.unsafe() | ✓ | X |
-
 
 ---
 
