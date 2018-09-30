@@ -69,6 +69,9 @@ void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
     }
 
     for (auto &err : errorQueue->drainAllErrors()) {
+        if (error->isSilenced) {
+            continue;
+        }
         logger->log(spdlog::level::err, "{}", err->toString(gs));
     }
 }
