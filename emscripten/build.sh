@@ -28,7 +28,7 @@ CFLAGS="$CFLAGS -I$root/external/lizard"
 CFLAGS="$CFLAGS -I$genfiles"
 CFLAGS="$CFLAGS -Oz"
 
-CXXFLAGS="$CFLAGS -std=c++14"
+CXXFLAGS="$CFLAGS -std=c++17"
 
 if ! [ "$EMSCRIPTEN" ]; then
     emscripten_root="$(brew --prefix emscripten)"
