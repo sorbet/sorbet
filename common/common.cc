@@ -77,23 +77,6 @@ string_view sorbet::FileOps::getExtension(const string_view path) {
     return path.substr(found + 1);
 }
 
-string strprintf(const char *format, va_list vlist) {
-    char *buf = nullptr;
-    int ret = vasprintf(&buf, format, vlist);
-    ENFORCE(ret >= 0, "vasprintf failed");
-    string str = buf;
-    free(buf);
-    return str;
-}
-
-string strprintf(const char *format, ...) {
-    va_list vlist;
-    va_start(vlist, format);
-    auto str = strprintf(format, vlist);
-    va_end(vlist);
-    return str;
-}
-
 class SetTerminateHandler {
 public:
     static void on_terminate() {

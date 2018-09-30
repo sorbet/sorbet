@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 
+#include "spdlog/fmt/ostr.h"
 #include <string>
 #include <sys/sysctl.h>
 #include <sys/types.h>
@@ -14,9 +15,9 @@ using namespace std;
 string exec(string cmd);
 
 string addr2line(const string program_name, void const *const *addr, int count) {
-    auto addr2line_cmd = strprintf("atos -o %.256s -p %d", program_name.c_str(), (int)getpid());
+    auto addr2line_cmd = fmt::format("atos -o {} -p {}", program_name, (int)getpid());
     for (int i = 3; i < count; ++i) {
-        addr2line_cmd = strprintf("%s %p", addr2line_cmd.c_str(), addr[i]);
+        addr2line_cmd = fmt::format("{} {}", addr2line_cmd, addr[i]);
     }
 
     //    printf("%s\n", addr2line_cmd.c_str());

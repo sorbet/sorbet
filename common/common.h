@@ -133,11 +133,6 @@ public:
 };
 
 } // namespace sorbet
-std::string strprintf(const char *__restrict, va_list) __attribute__((format(printf, 1, 0)));
-;
-
-std::string strprintf(const char *__restrict, ...) __attribute__((format(printf, 1, 2)));
-;
 
 std::string demangle(const char *mangled);
 

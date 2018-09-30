@@ -25,8 +25,7 @@ class StatsdClientWrapper {
 
     void addMetric(const string &name, size_t value, const string &type) {
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
-        auto newLine =
-            strprintf("%s%s:%zd|%s", link->ns ? link->ns : "", cleanMetricName(name).c_str(), value, type.c_str());
+        auto newLine = fmt::format("{}{}:{}|{}", link->ns ? link->ns : "", cleanMetricName(name), value, type);
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
             packet = packet + "\n" + newLine;
         } else {
