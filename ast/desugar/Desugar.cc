@@ -11,9 +11,7 @@
 
 #include "absl/algorithm/container.h"
 
-namespace sorbet {
-namespace ast {
-namespace desugar {
+namespace sorbet::ast::desugar {
 
 using namespace std;
 
@@ -1405,6 +1403,4 @@ unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::No
         throw;
     }
 }
-} // namespace desugar
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast::desugar

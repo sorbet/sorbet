@@ -27,9 +27,7 @@ extern "C" {
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace pipeline {
+namespace sorbet::realmain::pipeline {
 
 bool wantTypedSource(const options::Options &opts, core::Context ctx, core::FileRef file) {
     if (opts.print.TypedSource) {
@@ -576,6 +574,4 @@ vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
         return typecheck_result;
     }
 }
-} // namespace pipeline
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::pipeline

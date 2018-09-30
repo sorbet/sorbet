@@ -9,8 +9,7 @@
 #include <memory>
 #include <vector>
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 class Expression {
 public:
@@ -677,7 +676,6 @@ private:
  * Desugar string concatenation into series of .to_s calls and string concatenations
  */
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast
 
 #endif // SORBET_TREES_H

@@ -8,8 +8,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 bool isCommand(core::MutableContext ctx, ast::ClassDef *klass) {
     if (klass->kind != ast::Class || klass->ancestors.empty()) {
@@ -89,5 +88,4 @@ void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     klass->rhs.insert(klass->rhs.begin() + i + 2, move(selfCall));
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

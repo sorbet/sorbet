@@ -3,8 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer) : ErrorQueue(logger, tracer) {}
 
 BufferedErrorQueue::~BufferedErrorQueue() = default;
@@ -56,5 +55,4 @@ void BufferedErrorQueue::markFileForFlushing(FileRef file) {
         }));
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

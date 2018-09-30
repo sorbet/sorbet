@@ -8,8 +8,7 @@
 
 #include <memory>
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 class Node;
 
@@ -27,7 +26,6 @@ public:
 private:
     std::unique_ptr<Impl> impl_;
 };
-}; // namespace parser
-}; // namespace sorbet
+}; // namespace sorbet::parser
 
 #endif

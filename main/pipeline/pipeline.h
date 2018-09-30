@@ -7,9 +7,7 @@
 #include "common/kvstore/KeyValueStore.h"
 #include "main/options/options.h"
 
-namespace sorbet {
-namespace realmain {
-namespace pipeline {
+namespace sorbet::realmain::pipeline {
 constexpr std::chrono::milliseconds PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
 
 std::unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
@@ -37,7 +35,5 @@ std::vector<std::unique_ptr<ast::Expression>> typecheck(std::unique_ptr<core::Gl
 
 std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
                                               const options::Options &opts, std::shared_ptr<spdlog::logger> logger);
-} // namespace pipeline
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

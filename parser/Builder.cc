@@ -21,8 +21,7 @@ using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 string Dedenter::dedent(const string &str) {
     string out;
@@ -1137,8 +1136,7 @@ public:
 Builder::Builder(GlobalState &gs, core::FileRef file) : impl_(new Builder::Impl(gs, file)) {}
 Builder::~Builder() = default;
 
-}; // namespace parser
-}; // namespace sorbet
+}; // namespace sorbet::parser
 
 namespace {
 
@@ -1877,8 +1875,7 @@ foreign_ptr xstring_compose(self_ptr builder, const token *begin, const node_lis
 }
 }; // namespace
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 unique_ptr<Node> Builder::build(ruby_parser::base_driver *driver) {
     impl_->driver_ = driver;
@@ -2023,5 +2020,4 @@ struct ruby_parser::builder Builder::interface = {
     words_compose,
     xstring_compose,
 };
-} // namespace parser
-} // namespace sorbet
+} // namespace sorbet::parser

@@ -3,9 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 /**
  * Represents information about programming constructs like variables, classes,
@@ -73,6 +71,4 @@ void LSPLoop::handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Docume
     }
     sendResult(d, result);
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

@@ -1,7 +1,6 @@
 #include "Unfreeze.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 UnfreezeSymbolTable::UnfreezeSymbolTable(GlobalState &gs) : gs(gs) {
     auto oldState = gs.unfreezeSymbolTable();
@@ -30,5 +29,4 @@ UnfreezeFileTable::~UnfreezeFileTable() {
     gs.freezeFileTable();
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

@@ -6,8 +6,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 ast::Local *CFGBuilder::arg2Local(ast::Expression *arg) {
     while (true) {
@@ -176,5 +175,4 @@ unique_ptr<CFG> CFGBuilder::addDebugEnvironment(core::Context ctx, unique_ptr<CF
     return cfg;
 }
 
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg

@@ -17,8 +17,7 @@
 #include <utility>
 #include <vector>
 
-namespace sorbet {
-namespace infer {
+namespace sorbet::infer {
 
 class Environment;
 
@@ -202,7 +201,6 @@ private:
     Environment &operator=(const Environment &rhs) = default;
 };
 
-} // namespace infer
-} // namespace sorbet
+} // namespace sorbet::infer
 
 #endif // SORBET_ENVIRONMENT_H

@@ -10,8 +10,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 class DSLReplacer {
     friend class DSL;
@@ -101,5 +100,4 @@ unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::E
     return ast;
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

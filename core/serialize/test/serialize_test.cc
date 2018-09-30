@@ -4,9 +4,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
-namespace serialize {
+namespace sorbet::core::serialize {
 
 TEST(SerializeTest, U4) { // NOLINT
     Pickler p;
@@ -74,7 +72,4 @@ TEST(SerializeTest, Strings) { // NOLINT
     EXPECT_EQ(u.getStr(), "\0\0\0\t\n\f\rНЯЯЯЯЯ");
 }
 
-} // namespace serialize
-
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::serialize

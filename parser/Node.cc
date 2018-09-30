@@ -7,8 +7,7 @@ template class std::unique_ptr<sorbet::parser::Node>;
 
 using namespace std;
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 void Node::printTabs(stringstream &to, int count) {
     int i = 0;
@@ -34,5 +33,4 @@ void Node::printNodeJSON(stringstream &to, unique_ptr<Node> &node, const core::G
     }
 }
 
-}; // namespace parser
-} // namespace sorbet
+} // namespace sorbet::parser

@@ -1,8 +1,7 @@
 #ifndef SORBET_ERROR_QUEUE_MESSAGE_H
 #define SORBET_ERROR_QUEUE_MESSAGE_H
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class BasicError;
 struct QueryResponse;
@@ -16,7 +15,6 @@ struct ErrorQueueMessage {
     std::unique_ptr<QueryResponse> queryResponse;
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif

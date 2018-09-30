@@ -7,8 +7,7 @@
 #include <unordered_set>
 using namespace std;
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
     if (ctx.state.lspInfoQueryLoc.exists() || ctx.state.lspQuerySymbol.exists()) {
@@ -430,5 +429,4 @@ int CFGBuilder::topoSortFwd(vector<BasicBlock *> &target, int nextFree, BasicBlo
         return nextFree + 1;
     }
 }
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg

@@ -3,8 +3,7 @@
 
 #include "Files.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 namespace serialize {
 class SerializerImpl;
 }
@@ -79,8 +78,7 @@ public:
     static Detail offset2Pos(const File &source, u4 off);
 };
 CheckSize(Loc, 8, 4);
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 template <> struct std::hash<sorbet::core::Loc> {
     std::size_t operator()(const sorbet::core::Loc loc) const {

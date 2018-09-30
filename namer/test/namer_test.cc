@@ -14,9 +14,7 @@ namespace spd = spdlog;
 
 using namespace std;
 
-namespace sorbet {
-namespace namer {
-namespace test {
+namespace sorbet::namer::test {
 
 auto logger = spd::stderr_color_mt("namer_test");
 auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
@@ -129,6 +127,4 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
     ASSERT_EQ(fooSym, barSym.data(ctx).owner);
 }
 
-} // namespace test
-} // namespace namer
-} // namespace sorbet
+} // namespace sorbet::namer::test

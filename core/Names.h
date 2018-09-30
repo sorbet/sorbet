@@ -7,8 +7,7 @@
 
 #include "core/NameRef.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class GlobalState;
 class Name;
 enum NameKind : u1 {
@@ -105,7 +104,6 @@ private:
 };
 
 CheckSize(Name, 24, 8);
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif // SORBET_NAMES_H

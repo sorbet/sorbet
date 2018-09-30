@@ -9,8 +9,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 auto logger = spd::stderr_color_mt("parse");
 auto errorQueue = make_shared<BufferedErrorQueue>(*logger, *logger);
 
@@ -144,5 +143,4 @@ TEST(CoreTest, LocTest) { // NOLINT
     }
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

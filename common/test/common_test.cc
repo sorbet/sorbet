@@ -1,8 +1,7 @@
 #include "common/common.h"
 #include "gtest/gtest.h"
 
-namespace sorbet {
-namespace common {
+namespace sorbet::common {
 
 TEST(CommonTest, Levenstein) { // NOLINT
     EXPECT_EQ(2, Levenstein::distance("Mama", "Papa", 10));
@@ -11,5 +10,4 @@ TEST(CommonTest, Levenstein) { // NOLINT
     EXPECT_EQ(INT_MAX, Levenstein::distance("Java", "S", 1));
 }
 
-} // namespace common
-} // namespace sorbet
+} // namespace sorbet::common

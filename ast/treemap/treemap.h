@@ -12,8 +12,7 @@
 using std::make_unique;
 using std::unique_ptr;
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 class FUNC_EXAMPLE {
 public:
@@ -717,7 +716,6 @@ public:
     }
 };
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast
 
 #endif // SORBET_TREEMAP_H

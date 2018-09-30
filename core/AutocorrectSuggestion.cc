@@ -3,8 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     for (auto &seenLoc : seen) {
@@ -56,5 +55,4 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
     return ret;
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

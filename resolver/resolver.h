@@ -4,8 +4,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace sorbet {
-namespace resolver {
+namespace sorbet::resolver {
 
 class Resolver final {
 public:
@@ -30,7 +29,6 @@ private:
     static void sanityCheck(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> &trees);
 };
 
-} // namespace resolver
-} // namespace sorbet
+} // namespace sorbet::resolver
 
 #endif

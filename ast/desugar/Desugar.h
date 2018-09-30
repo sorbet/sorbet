@@ -5,13 +5,9 @@
 #include "parser/parser.h"
 #include <memory>
 
-namespace sorbet {
-namespace ast {
-namespace desugar {
+namespace sorbet::ast::desugar {
 
 std::unique_ptr<Expression> node2Tree(core::MutableContext ctx, std::unique_ptr<parser::Node> what);
-} // namespace desugar
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast::desugar
 
 #endif // SORBET_DESUGAR_H

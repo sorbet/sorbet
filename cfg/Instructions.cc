@@ -8,8 +8,7 @@ template class std::unique_ptr<sorbet::cfg::Instruction>;
 
 using namespace std;
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 Return::Return(core::LocalVariable what) : what(what) {
     categoryCounterInc("cfg", "return");
@@ -156,5 +155,4 @@ std::string VariableUseSite::toString(core::Context ctx) const {
     }
     return ret;
 }
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg

@@ -2,10 +2,7 @@
 #define SORBET_CORE_ERRORS_RESOLVER_H
 #include "core/Errors.h"
 
-namespace sorbet {
-namespace core {
-namespace errors {
-namespace Resolver {
+namespace sorbet::core::errors::Resolver {
 constexpr ErrorClass DynamicConstant{5001, StrictLevel::Typed};
 constexpr ErrorClass StubConstant{5002, StrictLevel::Stripe};
 constexpr ErrorClass InvalidMethodSignature{5003, StrictLevel::Stripe};
@@ -39,9 +36,6 @@ constexpr ErrorClass ConstantMissingTypeAnnotation{5028, StrictLevel::Strict};
 constexpr ErrorClass RecursiveClassAlias{5030, StrictLevel::Stripe};
 constexpr ErrorClass ConstantInTypeAlias{5031, StrictLevel::Stripe};
 constexpr ErrorClass IncludesNonModule{5032, StrictLevel::Stripe};
-} // namespace Resolver
-} // namespace errors
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::errors::Resolver
 
 #endif

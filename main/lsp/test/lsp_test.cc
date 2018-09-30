@@ -4,10 +4,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
-namespace test {
+namespace sorbet::realmain::lsp::test {
 
 const string file_string = "# typed: true\n"
                            "# this is a class.\n"
@@ -76,7 +73,4 @@ TEST(FindDocumentationTest, Constant) { // NOLINT
     ASSERT_EQ(*b, " This is the documentation for a constant.\n This is the second line for a constant.\n");
 }
 
-} // namespace test
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp::test

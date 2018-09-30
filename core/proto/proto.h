@@ -14,8 +14,7 @@
 
 #include "proto/pay-server/SourceMetrics.pb.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class Proto {
 public:
     Proto() = delete;
@@ -31,7 +30,6 @@ public:
     static std::string toJSON(const google::protobuf::Message &message);
     static void toJSON(const google::protobuf::Message &message, std::ostream &out);
 };
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif

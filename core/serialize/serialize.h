@@ -3,9 +3,7 @@
 #include "ast/ast.h"
 #include "core/core.h"
 
-namespace sorbet {
-namespace core {
-namespace serialize {
+namespace sorbet::core::serialize {
 class Serializer {
 public:
     static const u4 VERSION = 4;
@@ -29,8 +27,6 @@ public:
     static std::unique_ptr<ast::Expression> loadExpression(GlobalState &gs, const u1 *const p, u4 forceId = 0);
     static void loadGlobalState(GlobalState &gs, const u1 *const data);
 };
-} // namespace serialize
-} // namespace core
-}; // namespace sorbet
+}; // namespace sorbet::core::serialize
 
 #endif

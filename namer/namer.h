@@ -3,8 +3,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace sorbet {
-namespace namer {
+namespace sorbet::namer {
 
 class Namer final {
 public:
@@ -13,7 +12,6 @@ public:
     Namer() = delete;
 };
 
-} // namespace namer
-} // namespace sorbet
+} // namespace sorbet::namer
 
 #endif

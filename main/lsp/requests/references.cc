@@ -5,9 +5,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 void LSPLoop::handleTextDocumentReferences(rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
@@ -38,6 +36,4 @@ void LSPLoop::handleTextDocumentReferences(rapidjson::Value &result, rapidjson::
     }
 }
 
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

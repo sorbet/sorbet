@@ -9,8 +9,7 @@
 #include "absl/algorithm/container.h"
 
 using namespace std;
-namespace sorbet {
-namespace autogen {
+namespace sorbet::autogen {
 
 Definition &DefinitionRef::data(ParsedFile &pf) {
     return pf.defs[_id];
@@ -679,5 +678,4 @@ std::string ParsedFile::toMsgpack(core::Context ctx) {
     return write.pack(ctx, *this);
 }
 
-} // namespace autogen
-} // namespace sorbet
+} // namespace sorbet::autogen

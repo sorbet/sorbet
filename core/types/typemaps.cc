@@ -7,8 +7,7 @@
 #include "core/Types.h"
 
 using namespace std;
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 shared_ptr<Type> Types::instantiate(Context ctx, const shared_ptr<Type> &what,
                                     const InlinedVector<SymbolRef, 4> &params, const vector<shared_ptr<Type>> &targs) {
@@ -486,5 +485,5 @@ shared_ptr<Type> AndType::_replaceSelfType(Context ctx, const shared_ptr<Type> &
 unsigned int Type::hash(const GlobalState &gs) const {
     return _hash(this->toString(gs)); // TODO: make something better
 }
-} // namespace core
-} // namespace sorbet
+
+} // namespace sorbet::core

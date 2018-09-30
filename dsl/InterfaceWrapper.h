@@ -2,8 +2,7 @@
 #define SORBET_DSL_INTERFACE_WRAPPER_H
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 /**
  * This class desugars `wrap_interface` into a simple cast:
@@ -28,7 +27,6 @@ public:
     InterfaceWrapper() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

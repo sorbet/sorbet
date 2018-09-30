@@ -2,8 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/treemap/treemap.h"
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 namespace {
 class SubstWalk {
@@ -121,5 +120,4 @@ unique_ptr<Expression> Substitute::run(core::MutableContext ctx, const core::Glo
     return what;
 }
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast

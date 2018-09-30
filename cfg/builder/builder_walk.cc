@@ -6,8 +6,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *thenb, BasicBlock *elseb, CFG &inWhat,
                      core::Loc loc) {
@@ -505,5 +504,4 @@ core::LocalVariable CFGContext::newTemporary(core::NameRef name) {
     return core::LocalVariable{name, ++temporaryCounter};
 }
 
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg

@@ -3,8 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
     stringstream critical;
@@ -68,5 +67,4 @@ void ErrorFlusher::flushAutocorrects(const GlobalState &gs) {
     autocorrects.clear();
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

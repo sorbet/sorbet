@@ -3,8 +3,7 @@
 
 #include "core.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class UnfreezeSymbolTable {
     GlobalState &gs;
@@ -29,6 +28,5 @@ public:
     ~UnfreezeFileTable();
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 #endif // SORBET_UNFREEZING_H

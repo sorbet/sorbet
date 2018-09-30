@@ -17,9 +17,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace sorbet {
-namespace infer {
-namespace test {
+namespace sorbet::infer::test {
 
 auto logger = spd::stderr_color_mt("infer_test");
 auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
@@ -187,6 +185,4 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Orfoo2, foo2Orfoo1));
 }
 
-} // namespace test
-} // namespace infer
-} // namespace sorbet
+} // namespace sorbet::infer::test

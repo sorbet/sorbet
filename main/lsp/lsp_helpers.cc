@@ -4,9 +4,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 string LSPLoop::remoteName2Local(const string_view uri) {
     ENFORCE(absl::StartsWith(uri, rootUri));
@@ -259,7 +257,4 @@ int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
     }
     return 0;
 }
-
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

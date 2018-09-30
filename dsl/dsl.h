@@ -3,8 +3,7 @@
 #include "ast/ast.h"
 #include <memory>
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 class DSL final {
 public:
@@ -13,7 +12,6 @@ public:
     DSL() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

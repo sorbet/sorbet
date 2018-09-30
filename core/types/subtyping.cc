@@ -6,8 +6,7 @@
 #include <algorithm> // find_if
 #include <utility>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -1265,5 +1264,5 @@ shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
 std::shared_ptr<Type> MetaType::underlying() const {
     return Types::Object();
 }
-} // namespace core
-} // namespace sorbet
+
+} // namespace sorbet::core

@@ -4,8 +4,7 @@
 #include "../core/Symbols.h"
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace resolver {
+namespace sorbet::resolver {
 
 struct ParsedSig {
     struct ArgSpec {
@@ -52,5 +51,4 @@ public:
     TypeSyntax() = delete;
 };
 
-} // namespace resolver
-} // namespace sorbet
+} // namespace sorbet::resolver

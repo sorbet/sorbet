@@ -3,9 +3,7 @@
 #include "spdlog/spdlog.h"
 #include <vector>
 
-namespace sorbet {
-namespace realmain {
-namespace options {
+namespace sorbet::realmain::options {
 /** read @file arguments and put them explicitly
  *  Steals the original arguments and will put them back on destruction.
  * */
@@ -23,7 +21,5 @@ public:
 
     ~FileFlatMapper();
 };
-}; // namespace options
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::options
 #endif

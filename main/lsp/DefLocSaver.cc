@@ -1,9 +1,7 @@
 #include "DefLocSaver.h"
 
 using namespace std;
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx,
                                                                unique_ptr<ast::MethodDef> methodDef) {
     // This TypeAndOrigins object is currently unused so we just let the default constructor make tp.type
@@ -23,6 +21,4 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
 
     return methodDef;
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

@@ -4,9 +4,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 bool safeGetline(istream &is, string &t) {
     t.clear();
@@ -352,6 +350,4 @@ void LSPLoop::sendRequest(LSPMethod meth, rapidjson::Value &data, function<void(
     sendRaw(request);
 }
 
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

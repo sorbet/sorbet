@@ -11,8 +11,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name) {
     com::stripe::rubytyper::Name protoName;
@@ -275,5 +274,4 @@ void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
     }
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

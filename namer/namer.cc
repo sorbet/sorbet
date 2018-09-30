@@ -12,8 +12,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace namer {
+namespace sorbet::namer {
 
 /**
  * Used with TreeMap to insert all the class and method symbols into the symbol
@@ -837,5 +836,4 @@ unique_ptr<ast::Expression> Namer::run(core::MutableContext ctx, unique_ptr<ast:
     return ast::TreeMap::apply(ctx, nameInserter, move(tree));
 }
 
-} // namespace namer
-}; // namespace sorbet
+}; // namespace sorbet::namer

@@ -8,8 +8,7 @@
 #include <initializer_list>
 #include <memory>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 struct QueryResponse;
 
@@ -177,7 +176,6 @@ public:
     std::unique_ptr<BasicError> build();
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif

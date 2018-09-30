@@ -4,8 +4,7 @@
 #include "core/ErrorFlusher.h"
 #include "core/ErrorQueueMessage.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class ErrorQueue {
 private:
@@ -39,7 +38,6 @@ public:
     void flushAutocorrects(const GlobalState &gs);
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif

@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx, ast::MethodDef *mdef) {
     vector<unique_ptr<ast::Expression>> empty;
@@ -61,5 +60,4 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
     return ret;
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

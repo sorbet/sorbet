@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 namespace {
 
@@ -380,5 +379,5 @@ string SelfType::show(const GlobalState &gs) const {
 string SelfType::showValue(const GlobalState &gs) const {
     return show(gs);
 }
-} // namespace core
-} // namespace sorbet
+
+} // namespace sorbet::core

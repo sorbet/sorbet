@@ -10,8 +10,7 @@
 #include <tuple>
 #include <vector>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class Symbol;
 class GlobalState;
 class Type;
@@ -538,6 +537,5 @@ private:
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 #endif // SORBET_SYMBOLS_H

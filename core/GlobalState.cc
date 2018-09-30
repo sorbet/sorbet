@@ -19,8 +19,7 @@ template class std::unique_ptr<sorbet::core::GlobalState>;
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 namespace {
 const char *top_str = "<any>";
@@ -1196,5 +1195,4 @@ SymbolRef GlobalState::staticInitForFile(FileRef file) {
     return enterMethodSymbol(core::Loc::none(file), core::Symbols::root(), nm);
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

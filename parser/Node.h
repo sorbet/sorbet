@@ -5,8 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 using core::Loc;
 using core::NameRef;
@@ -51,5 +50,4 @@ template <class To> bool isa_node(Node *what) {
 typedef InlinedVector<std::unique_ptr<Node>, 4> NodeVec;
 
 #include "parser/Node_gen.h"
-}; // namespace parser
-}; // namespace sorbet
+}; // namespace sorbet::parser

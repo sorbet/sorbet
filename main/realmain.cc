@@ -27,8 +27,7 @@ namespace spd = spdlog;
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
+namespace sorbet::realmain {
 shared_ptr<spd::logger> logger;
 int returnCode;
 
@@ -404,5 +403,4 @@ int realmain(int argc, char *argv[]) {
     return returnCode;
 }
 
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain

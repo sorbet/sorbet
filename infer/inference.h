@@ -5,13 +5,11 @@
 #include <memory>
 #include <string>
 
-namespace sorbet {
-namespace infer {
+namespace sorbet::infer {
 class Inference final {
 public:
     static std::unique_ptr<cfg::CFG> run(core::Context ctx, std::unique_ptr<cfg::CFG> cfg);
 };
-} // namespace infer
-} // namespace sorbet
+} // namespace sorbet::infer
 
 #endif // SORBET_INFERENCE_H

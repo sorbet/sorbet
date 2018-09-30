@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 NameRef::NameRef(const GlobalState &gs, unsigned int id) : _id(id) {
 #ifdef DEBUG_MODE
@@ -224,5 +223,4 @@ Name Name::deepCopy(const GlobalState &to) const {
     return out;
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

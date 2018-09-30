@@ -2,10 +2,7 @@
 #define SORBET_CORE_ERRORS_INFER_H
 #include "core/Errors.h"
 
-namespace sorbet {
-namespace core {
-namespace errors {
-namespace Infer {
+namespace sorbet::core::errors::Infer {
 // N.B infer does not run for untyped call at all. Level::Ruby here would be meaningless
 constexpr ErrorClass PinnedVariableMismatch{7001, StrictLevel::Typed};
 constexpr ErrorClass MethodArgumentMismatch{7002, StrictLevel::Typed};
@@ -27,9 +24,5 @@ constexpr ErrorClass ExpectedLiteralType{7016, StrictLevel::Typed};
 constexpr ErrorClass UntypedMethod{7017, StrictLevel::Strict};
 constexpr ErrorClass UntypedValue{7018, StrictLevel::Strong};
 constexpr ErrorClass UntypedSplat{7019, StrictLevel::Typed};
-
-} // namespace Infer
-} // namespace errors
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::errors::Infer
 #endif

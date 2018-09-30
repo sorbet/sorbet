@@ -7,9 +7,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
                  WorkerPool &workers)
@@ -249,6 +247,4 @@ const LSPMethod LSPMethod::getByName(const string_view name) {
     return LSPMethod{(string)name, true, LSPMethod::Kind::ClientInitiated, false};
 }
 
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

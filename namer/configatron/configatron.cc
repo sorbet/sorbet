@@ -8,8 +8,7 @@
 #include <utility>
 
 using namespace std;
-namespace sorbet {
-namespace namer {
+namespace sorbet::namer {
 namespace {
 bool endsWith(const string &a, const string &b) {
     if (b.size() > a.size()) {
@@ -243,5 +242,4 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, vector<string> fol
 
     //    cout << configatron.toString(gs, 1, 1);
 }
-} // namespace namer
-} // namespace sorbet
+} // namespace sorbet::namer

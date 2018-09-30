@@ -8,8 +8,7 @@
 #include <memory>
 #include <string>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 /** Dmitry: unlike in Dotty, those types are always dealiased. For now */
 class Type;
 class IntrinsicMethod;
@@ -642,6 +641,5 @@ public:
     BlamedUntyped(SymbolRef whoToBlame) : ClassType(core::Symbols::untyped()), blame(whoToBlame){};
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 #endif // SORBET_TYPES_H

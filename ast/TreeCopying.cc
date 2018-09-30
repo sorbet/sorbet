@@ -3,8 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 template <class Elem = Expression, class T> T deepCopyVec(const Expression *avoid, const T &origin) {
     T copy;
@@ -266,5 +265,4 @@ unique_ptr<Expression> EmptyTree::_deepCopy(const Expression *avoid, bool root) 
     }
     return make_unique<EmptyTree>(loc);
 }
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast

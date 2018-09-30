@@ -5,8 +5,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 // https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
 string JSON::escape(string from) {
@@ -46,5 +45,4 @@ string JSON::escape(string from) {
     return ss.str();
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

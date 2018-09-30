@@ -11,8 +11,7 @@
 #include <unordered_map>
 #include <unordered_set>
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 class VariableUseSite {
 public:
@@ -201,7 +200,6 @@ public:
 };
 CheckSize(DebugEnvironment, 48, 8);
 
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H

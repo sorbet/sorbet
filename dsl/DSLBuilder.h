@@ -2,8 +2,7 @@
 #define SORBET_DSL_DSLBUILDER_H
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 /**
  * This class desugars DSLs created by DSLBuilder. Specifically it desugars
@@ -28,7 +27,6 @@ public:
     DSLBuilder() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

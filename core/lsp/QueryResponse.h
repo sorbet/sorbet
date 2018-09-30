@@ -3,8 +3,7 @@
 #include "core/Loc.h"
 #include "core/Types.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class TypeConstraint;
 struct QueryResponse {
     enum class Kind { SEND, IDENT, LITERAL, CONSTANT, DEFINITION };
@@ -23,6 +22,5 @@ struct QueryResponse {
                                  core::NameRef name, core::TypeAndOrigins receiver, core::TypeAndOrigins retType);
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 #endif

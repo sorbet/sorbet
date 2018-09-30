@@ -5,9 +5,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 void LSPLoop::processRequest(rapidjson::Document &d) {
     const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
@@ -174,6 +172,4 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         }
     }
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

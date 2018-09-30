@@ -4,8 +4,7 @@
 #include "core/NameRef.h"
 #include "core/Names/core.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class LocalVariable final {
 public:
@@ -56,8 +55,7 @@ public:
 };
 
 CheckSize(LocalVariable, 8, 4);
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 namespace std {
 template <> struct hash<sorbet::core::LocalVariable> {

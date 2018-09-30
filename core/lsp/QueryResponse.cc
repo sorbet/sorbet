@@ -3,8 +3,7 @@
 template class std::unique_ptr<sorbet::core::QueryResponse>;
 
 using namespace std;
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 void QueryResponse::setQueryResponse(core::Context ctx, core::QueryResponse::Kind kind,
                                      core::DispatchResult::ComponentVec dispatchComponents,
@@ -22,5 +21,4 @@ void QueryResponse::setQueryResponse(core::Context ctx, core::QueryResponse::Kin
     ctx.state.errorQueue->pushQueryResponse(move(queryResponse));
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

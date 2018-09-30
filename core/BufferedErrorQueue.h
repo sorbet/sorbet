@@ -5,8 +5,7 @@
 
 namespace spd = spdlog;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 struct ErrorQueueMessage;
 class BasicError;
 
@@ -29,7 +28,6 @@ public:
     virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) override;
     virtual void markFileForFlushing(FileRef file) override;
 };
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif // SORBET_ERRORQUEUE_H

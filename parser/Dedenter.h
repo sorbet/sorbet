@@ -1,7 +1,6 @@
 #include <string>
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 // This is defined in a Dedent.h only for testing, and is not a public API
 class Dedenter final {
@@ -15,5 +14,4 @@ private:
     unsigned int spacesToRemove;
 };
 
-} // namespace parser
-} // namespace sorbet
+} // namespace sorbet::parser

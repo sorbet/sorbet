@@ -1,8 +1,7 @@
 #include "core/TypeConstraint.h"
 #include "core/Symbols.h"
 using namespace std;
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 bool TypeConstraint::isEmpty() const {
     return upperBounds.empty() && lowerBounds.empty();
@@ -232,5 +231,4 @@ shared_ptr<Type> TypeConstraint::findSolution(SymbolRef forWhat) const {
     Error::raise("should never happen");
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

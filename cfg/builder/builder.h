@@ -4,8 +4,7 @@
 #include "ast/ast.h"
 #include "cfg/CFG.h"
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 class CFGBuilder final {
 public:
     static std::unique_ptr<CFG> buildFor(core::Context ctx, ast::MethodDef &md);
@@ -54,6 +53,5 @@ private:
         : ctx(ctx), inWhat(inWhat), target(target), loops(loops), nextScope(nextScope), breakScope(breakScope),
           rescueScope(rescueScope), aliases(aliases), temporaryCounter(temporaryCounter){};
 };
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg
 #endif // SORBET_BUILDER_H

@@ -2,10 +2,7 @@
 #define SORBET_CORE_ERRORS_NAMER_H
 #include "core/Errors.h"
 
-namespace sorbet {
-namespace core {
-namespace errors {
-namespace Namer {
+namespace sorbet::core::errors::Namer {
 constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::Stripe};
 constexpr ErrorClass IncludeNotConstant{4002, StrictLevel::Stripe};
 constexpr ErrorClass IncludePassedBlock{4003, StrictLevel::Stripe};
@@ -19,9 +16,6 @@ constexpr ErrorClass RedefinitionOfMethod{4010, StrictLevel::Typed};
 constexpr ErrorClass InvalidTypeDefinition{4011, StrictLevel::Typed};
 constexpr ErrorClass ModuleKindRedefinition{4012, StrictLevel::Stripe};
 constexpr ErrorClass InterfaceClass{4013, StrictLevel::Stripe};
-} // namespace Namer
-} // namespace errors
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::errors::Namer
 
 #endif

@@ -2,8 +2,7 @@
 #define SORBET_DSL_SINATRA_H
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 /**
  * This class desugars things of the form
@@ -43,7 +42,6 @@ public:
     Sinatra() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

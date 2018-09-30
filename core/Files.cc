@@ -9,8 +9,7 @@ template class std::vector<std::shared_ptr<sorbet::core::File>>;
 template class std::shared_ptr<sorbet::core::File>;
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 vector<int> findLineBreaks(const string &s) {
     vector<int> res;
@@ -131,5 +130,4 @@ int File::lineCount() const {
     return line_breaks().size() - 1;
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

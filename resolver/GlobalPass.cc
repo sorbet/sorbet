@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace resolver {
+namespace sorbet::resolver {
 
 namespace {
 core::SymbolRef dealiasAt(const core::GlobalState &gs, core::SymbolRef tparam, core::SymbolRef klass,
@@ -438,6 +437,5 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         }
     }
 }
-}; // namespace resolver
 
-} // namespace sorbet
+} // namespace sorbet::resolver

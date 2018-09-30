@@ -3,9 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out) {
     for (auto mem : sym.data(*finalGs).membersStableOrderSlow(*finalGs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
@@ -123,6 +121,4 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef s
     return make_unique<rapidjson::Value>(move(result));
 }
 
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

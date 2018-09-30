@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs) {
     return ast::MK::Method0(loc, loc, name, move(rhs), ast::MethodDef::DSLSynthesized);
@@ -251,5 +250,4 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     return stats;
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

@@ -4,9 +4,7 @@
 #include "options.h"
 
 using namespace std;
-namespace sorbet {
-namespace realmain {
-namespace options {
+namespace sorbet::realmain::options {
 
 FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logger> logger)
     : origArgc(argc), origArgv(argv), argc(argc), argv(argv) {
@@ -41,6 +39,4 @@ FileFlatMapper::~FileFlatMapper() {
     argc = origArgc;
     argv = origArgv;
 }
-} // namespace options
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::options

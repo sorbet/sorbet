@@ -13,9 +13,7 @@ template class std::vector<sorbet::u4>;
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
-namespace serialize {
+namespace sorbet::core::serialize {
 const u4 Serializer::VERSION;
 const u1 Serializer::GLOBAL_STATE_COMPRESSION_DEGREE;
 const u1 Serializer::FILE_COMPRESSION_DEGREE;
@@ -1151,7 +1149,5 @@ NameRef SerializerImpl::unpickleNameRef(UnPickler &p, GlobalState &gs) {
     ENFORCE(name.data(gs).ref(gs) == name);
     return name;
 }
-} // namespace serialize
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::serialize

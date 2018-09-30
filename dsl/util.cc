@@ -6,8 +6,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
     auto send = ast::cast_tree<ast::Send>(orig);
@@ -83,5 +82,4 @@ unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast:
     return nullptr;
 }
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl

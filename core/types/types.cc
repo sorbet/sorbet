@@ -15,8 +15,7 @@ template class std::shared_ptr<sorbet::core::TypeConstraint>;
 template class std::shared_ptr<sorbet::core::SendAndBlockLink>;
 template class std::vector<sorbet::core::Loc>;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -784,5 +783,4 @@ DispatchArgs DispatchArgs::withSelfRef(const std::shared_ptr<Type> &newSelfRef) 
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

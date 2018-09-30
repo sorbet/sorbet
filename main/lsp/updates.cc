@@ -20,9 +20,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 bool LSPLoop::isTestFile(const shared_ptr<core::File> &file) {
     if (file->path().find("/test/") != file->path().npos) {
@@ -319,6 +317,4 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
         runSlowPath(changedFiles);
     }
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

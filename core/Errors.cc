@@ -9,8 +9,7 @@
 #include <algorithm>
 
 template class std::unique_ptr<sorbet::core::BasicError>;
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -177,5 +176,4 @@ void ErrorColors::disableColors() {
     rang::setControlMode(rang::control::Off);
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

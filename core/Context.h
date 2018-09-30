@@ -6,8 +6,7 @@
 #include "core/SymbolRef.h"
 #include <vector>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class GlobalState;
 class MutableContext;
 
@@ -107,7 +106,6 @@ private:
     const int toGlobalStateId;
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif // SORBET_CONTEXT_H

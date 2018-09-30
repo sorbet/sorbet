@@ -1,7 +1,6 @@
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace autogen {
+namespace sorbet::autogen {
 
 const u4 NONE_ID = (u4)-1;
 
@@ -93,5 +92,4 @@ public:
     static ParsedFile generate(core::Context ctx, std::unique_ptr<ast::Expression> tree);
     Autogen() = delete;
 };
-} // namespace autogen
-} // namespace sorbet
+} // namespace sorbet::autogen

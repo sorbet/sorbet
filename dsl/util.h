@@ -5,8 +5,7 @@
 #include "core/Names.h"
 #include <memory>
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 class ASTUtil {
 public:
     static std::unique_ptr<ast::Expression> dupType(ast::Expression *orig);
@@ -14,6 +13,5 @@ public:
 
     ASTUtil() = delete;
 };
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 #endif

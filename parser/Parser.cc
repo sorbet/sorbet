@@ -9,8 +9,7 @@ template class std::unique_ptr<sorbet::parser::Node>;
 
 using namespace std;
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 extern const char *dclass_strings[];
 
@@ -78,5 +77,4 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, const string &path, 
     return run(gs, file);
 }
 
-}; // namespace parser
-}; // namespace sorbet
+}; // namespace sorbet::parser

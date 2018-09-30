@@ -3,8 +3,7 @@
 
 #include "Types.h"
 #include <unordered_map>
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class TypeConstraint {
     static TypeConstraint makeEmptyFrozenConstraint();
@@ -45,7 +44,6 @@ public:
     static TypeConstraint EmptyFrozenConstraint;
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif // SORBET_TYPECONSTRAINT_H

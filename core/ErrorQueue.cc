@@ -2,8 +2,7 @@
 #include "core/Errors.h"
 #include "lsp/QueryResponse.h"
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -62,5 +61,4 @@ void ErrorQueue::flushAutocorrects(const GlobalState &gs) {
     errorFlusher.flushAutocorrects(gs);
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

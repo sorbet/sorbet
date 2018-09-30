@@ -4,9 +4,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method,
                                    const core::QueryResponse &resp, int activeParameter) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
@@ -97,6 +95,4 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
     result.AddMember("signatures", move(signatures), alloc);
     sendResult(d, result);
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

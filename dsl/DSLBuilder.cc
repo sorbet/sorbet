@@ -17,8 +17,7 @@ using namespace std;
 // You might want to cross-reference that file when trying to understand or update this code.
 //
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext ctx, ast::Send *send) {
     vector<unique_ptr<ast::Expression>> empty;
 
@@ -97,5 +96,4 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
 
     return stats;
 }
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl

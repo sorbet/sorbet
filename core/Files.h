@@ -5,8 +5,7 @@
 #include "core/StrictLevel.h"
 #include <string>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class GlobalState;
 class File;
 
@@ -87,8 +86,7 @@ public:
     const StrictLevel sigil;
     StrictLevel strict;
 };
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 namespace std {
 template <> struct hash<sorbet::core::FileRef> {
     std::size_t operator()(const sorbet::core::FileRef k) const {

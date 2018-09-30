@@ -6,9 +6,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 UnorderedMap<core::NameRef, vector<core::SymbolRef>>
 mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
@@ -221,6 +219,4 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     sendResult(d, result);
 }
 
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

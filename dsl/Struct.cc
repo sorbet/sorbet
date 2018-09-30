@@ -8,8 +8,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 // TODO this isn't quite right since the scoping will change. This would
 // really all be easier if we could run after class naming :/
@@ -86,5 +85,4 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
     return stats;
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

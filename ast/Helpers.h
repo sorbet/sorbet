@@ -5,8 +5,7 @@
 #include "core/Names/desugar.h"
 #include "core/Names/dsl.h"
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 class MK {
 public:
@@ -307,7 +306,6 @@ public:
     }
 };
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast
 
 #endif // SORBET_TREES_H

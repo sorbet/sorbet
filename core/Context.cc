@@ -14,8 +14,7 @@ template class std::vector<sorbet::core::SymbolRef>;
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 SymbolRef MutableContext::selfClass() {
     Symbol &data = this->owner.data(this->state);
@@ -152,5 +151,4 @@ bool GlobalSubstitution::useFastPath() const {
     return fastPath;
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

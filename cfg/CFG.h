@@ -11,8 +11,7 @@
 
 #include "cfg/Instructions.h"
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 class BasicBlock;
 
@@ -123,7 +122,6 @@ private:
     BasicBlock *freshBlock(int outerLoops);
 };
 
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg
 
 #endif // SORBET_CFG_H

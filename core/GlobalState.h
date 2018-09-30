@@ -10,8 +10,7 @@
 #include <memory>
 #include <mutex>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 class Name;
 class NameRef;
@@ -170,7 +169,6 @@ private:
 // CheckSize(GlobalState, 152, 8);
 // Historically commented out because size of unordered_map was different between different versions of stdlib
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif // SORBET_GLOBAL_STATE_H

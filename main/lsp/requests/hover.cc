@@ -3,9 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
     result.SetObject();
@@ -70,6 +68,4 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
         }
     }
 }
-} // namespace lsp
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp

@@ -4,8 +4,7 @@
 #include "core/Loc.h"
 #include <map>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 struct AutocorrectSuggestion {
     core::Loc loc;
@@ -16,7 +15,6 @@ struct AutocorrectSuggestion {
                                                 std::map<FileRef, std::string> sources);
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 #endif

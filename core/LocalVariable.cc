@@ -5,8 +5,7 @@ template class std::vector<sorbet::core::LocalVariable>;
 
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 bool LocalVariable::exists() const {
     return _name._id > 0;
 }
@@ -45,5 +44,5 @@ string LocalVariable::toString(const GlobalState &gs) const {
     }
     return this->_name.toString(gs) + "$" + to_string(this->unique);
 }
-} // namespace core
-} // namespace sorbet
+
+} // namespace sorbet::core

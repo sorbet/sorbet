@@ -14,8 +14,7 @@ template class std::vector<sorbet::cfg::BasicBlock *>;
 
 using namespace std;
 
-namespace sorbet {
-namespace cfg {
+namespace sorbet::cfg {
 
 BasicBlock *CFG::freshBlock(int outerLoops) {
     int id = this->maxBasicBlockId++;
@@ -220,5 +219,4 @@ core::Loc BasicBlock::loc() const {
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
     : bind(bind), loc(loc), value(move(value)) {}
 
-} // namespace cfg
-} // namespace sorbet
+} // namespace sorbet::cfg

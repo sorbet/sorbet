@@ -3,9 +3,7 @@
 #include "common/common.h"
 #include "core/StrictLevel.h"
 #include "spdlog/spdlog.h"
-namespace sorbet {
-namespace realmain {
-namespace options {
+namespace sorbet::realmain::options {
 
 // Terminate execution of sorbet with specific return code
 class EarlyReturnWithCode : public SRubyException {
@@ -109,7 +107,5 @@ struct Options {
 
 void readOptions(Options &, int argc, char *argv[],
                  std::shared_ptr<spdlog::logger> logger) noexcept(false); // throw(EarlyReturnWithCode);
-} // namespace options
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::options
 #endif // RUBY_TYPER_OPTIONS_H

@@ -3,8 +3,7 @@
 
 #include "Node.h"
 
-namespace sorbet {
-namespace parser {
+namespace sorbet::parser {
 
 class Parser final {
 public:
@@ -12,7 +11,6 @@ public:
     static std::unique_ptr<Node> run(sorbet::core::GlobalState &gs, const std::string &path, const std::string &src);
 };
 
-} // namespace parser
-} // namespace sorbet
+} // namespace sorbet::parser
 
 #endif // SORBET_PARSER_PARSER_H

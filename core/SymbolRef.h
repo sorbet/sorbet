@@ -1,8 +1,7 @@
 #ifndef RUBY_TYPER_SYMBOLREF_H
 #define RUBY_TYPER_SYMBOLREF_H
 #include "common/common.h"
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class Symbol;
 class GlobalState;
 
@@ -323,8 +322,7 @@ public:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 namespace std {
 template <> struct hash<sorbet::core::SymbolRef> {

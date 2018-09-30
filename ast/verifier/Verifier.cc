@@ -2,8 +2,7 @@
 #include "ast/treemap/treemap.h"
 
 using namespace std;
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 class VerifierWalker {
 public:
@@ -26,5 +25,4 @@ unique_ptr<Expression> Verifier::run(core::MutableContext ctx, unique_ptr<Expres
     return TreeMap::apply(ctx, vw, move(node));
 }
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast

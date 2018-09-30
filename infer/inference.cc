@@ -5,7 +5,7 @@
 #include "infer/infer.h"
 
 using namespace std;
-namespace sorbet {
+namespace sorbet::infer {
 
 namespace {
 void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
@@ -56,7 +56,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
 }
 } // namespace
 
-unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
+unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg) {
     auto methodLoc = ctx.owner.data(ctx).loc();
     prodCounterInc("types.input.methods.typechecked");
     int typedSendCount = 0;
@@ -257,4 +257,4 @@ unique_ptr<cfg::CFG> infer::Inference::run(core::Context ctx, unique_ptr<cfg::CF
 
     return cfg;
 }
-} // namespace sorbet
+} // namespace sorbet::infer

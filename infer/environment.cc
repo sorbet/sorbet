@@ -8,8 +8,7 @@ template struct std::pair<sorbet::core::LocalVariable, std::shared_ptr<sorbet::c
 
 using namespace std;
 
-namespace sorbet {
-namespace infer {
+namespace sorbet::infer {
 
 shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
@@ -1160,6 +1159,4 @@ core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
 Environment::Environment(core::Loc ownerLoc) : uninitialized(nilTypesWithOriginWithLoc(ownerLoc)) {}
 
 TestedKnowledge TestedKnowledge::empty;
-
-} // namespace infer
-} // namespace sorbet
+} // namespace sorbet::infer

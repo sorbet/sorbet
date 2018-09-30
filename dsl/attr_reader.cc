@@ -9,8 +9,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 unique_ptr<ast::Expression> mkTUntyped(core::MutableContext ctx, core::Loc loc) {
     return ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
@@ -200,5 +199,4 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
     return stats;
 }
 
-} // namespace dsl
-}; // namespace sorbet
+}; // namespace sorbet::dsl

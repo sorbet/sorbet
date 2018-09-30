@@ -1,8 +1,7 @@
 #ifndef RUBY_TYPER_NAMEREF_H
 #define RUBY_TYPER_NAMEREF_H
 #include "common/common.h"
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 class GlobalState;
 class Name;
 
@@ -82,8 +81,7 @@ public:
 };
 
 CheckSize(NameRef, 4, 4);
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
 
 template <> struct std::hash<sorbet::core::NameRef> {
     size_t operator()(const sorbet::core::NameRef &x) const {

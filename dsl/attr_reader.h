@@ -2,8 +2,7 @@
 #define SORBET_DSL_ATTR_READER_H
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 /**
  * This class desugars things of the form
@@ -33,7 +32,6 @@ public:
     AttrReader() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

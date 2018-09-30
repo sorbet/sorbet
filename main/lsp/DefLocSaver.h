@@ -5,14 +5,10 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace lsp {
+namespace sorbet::realmain::lsp {
 
 class DefLocSaver {
 public:
     unique_ptr<ast::MethodDef> postTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> methodDef);
 };
-} // namespace lsp
-} // namespace realmain
-}; // namespace sorbet
+}; // namespace sorbet::realmain::lsp

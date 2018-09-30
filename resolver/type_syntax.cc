@@ -6,8 +6,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace resolver {
+namespace sorbet::resolver {
 
 shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
     shared_ptr<core::Type> result;
@@ -609,5 +608,4 @@ const ParsedSig::TypeArgSpec &ParsedSig::findTypeArgByName(core::NameRef name) c
     }
     return emptyTypeArgSpec;
 }
-} // namespace resolver
-} // namespace sorbet
+} // namespace sorbet::resolver

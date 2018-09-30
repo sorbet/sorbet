@@ -14,8 +14,7 @@ template class std::vector<sorbet::core::TypeAndOrigins>;
 template class std::vector<std::pair<sorbet::core::NameRef, sorbet::core::SymbolRef>>;
 template class std::vector<const sorbet::core::Symbol *>;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -837,5 +836,4 @@ std::vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const 
     return result;
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

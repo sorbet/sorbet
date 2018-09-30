@@ -41,8 +41,7 @@ template class std::unique_ptr<sorbet::ast::ConstantLit>;
 
 using namespace std;
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 /** https://git.corp.stripe.com/gist/nelhage/51564501674174da24822e60ad770f64
  *
@@ -1204,5 +1203,4 @@ core::SymbolRef ClassDef::parent(core::MutableContext ctx) const {
     return symbol.data(ctx).parent(ctx);
 }
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast

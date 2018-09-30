@@ -3,9 +3,7 @@
 
 #include "common/common.h"
 
-namespace sorbet {
-namespace core {
-namespace serialize {
+namespace sorbet::core::serialize {
 class Pickler {
     std::vector<u1> data;
     u1 zeroCounter = 0;
@@ -34,7 +32,5 @@ public:
     explicit UnPickler(const u1 *const compressed);
 };
 
-} // namespace serialize
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core::serialize
 #endif

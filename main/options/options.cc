@@ -11,9 +11,7 @@
 namespace spd = spdlog;
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
-namespace options {
+namespace sorbet::realmain::options {
 struct PrintOptions {
     string option;
     bool Printers::*flag;
@@ -386,7 +384,4 @@ void readOptions(Options &opts, int argc, char *argv[],
 EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
     : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 
-} // namespace options
-
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::options

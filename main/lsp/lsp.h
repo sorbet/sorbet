@@ -10,8 +10,6 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
-namespace sorbet {
-namespace realmain {
 
 //  _     ____  ____
 // | |   / ___||  _ _\
@@ -29,7 +27,8 @@ namespace realmain {
 // So far, we only handle changes via "textDocument/didChange" request.
 // This is the main request that is used by VSCode.
 // VI uses "textDocument/didSave" that is very similar and should be easy to support.
-namespace lsp {
+namespace sorbet::realmain::lsp {
+
 /** This structure represents a method defined by LSP.
  * It is used as an enum to indicate properties of method in common request handling code.
  */
@@ -268,8 +267,6 @@ public:
     void invalidateAllErrors();
 };
 std::unique_ptr<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
-} // namespace lsp
 
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

@@ -21,8 +21,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace resolver {
+namespace sorbet::resolver {
 namespace {
 
 /*
@@ -1442,5 +1441,4 @@ Resolver::runConstantResolution(core::MutableContext ctx, std::vector<std::uniqu
     return trees;
 }
 
-} // namespace resolver
-} // namespace sorbet
+} // namespace sorbet::resolver

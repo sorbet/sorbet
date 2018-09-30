@@ -2,8 +2,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace realmain {
+namespace sorbet::realmain {
 
 void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::BasicError> error) {
     if (!error->isSilenced) {
@@ -83,5 +82,4 @@ vector<unique_ptr<core::ErrorQueueMessage>> ConcurrentErrorQueue::drainAll() {
 
     return out;
 }
-} // namespace realmain
-} // namespace sorbet
+} // namespace sorbet::realmain

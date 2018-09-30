@@ -3,8 +3,7 @@
 
 using namespace std;
 
-namespace sorbet {
-namespace ast {
+namespace sorbet::ast {
 
 void Array::_sanityCheck() {
     for (auto &node : elems) {
@@ -186,5 +185,4 @@ void Yield::_sanityCheck() {
 
 void ZSuperArgs::_sanityCheck() {}
 
-} // namespace ast
-} // namespace sorbet
+} // namespace sorbet::ast

@@ -6,8 +6,7 @@
 #include <algorithm>
 #include <iterator>
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 using namespace std;
 
@@ -168,5 +167,4 @@ bool Loc::operator!=(const Loc &rhs) const {
     return !(rhs == *this);
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

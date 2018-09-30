@@ -2,8 +2,7 @@
 #define SRUBY_DSL_COMMAND_H
 #include "ast/ast.h"
 
-namespace sorbet {
-namespace dsl {
+namespace sorbet::dsl {
 
 /**
  * This class implements Opus::Command by taking
@@ -26,7 +25,6 @@ public:
     Command() = delete;
 };
 
-} // namespace dsl
-} // namespace sorbet
+} // namespace sorbet::dsl
 
 #endif

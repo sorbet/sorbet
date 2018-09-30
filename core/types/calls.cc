@@ -14,8 +14,7 @@
 template class std::vector<sorbet::core::SymbolRef>;
 using namespace std;
 
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 DispatchResult ProxyType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "proxytype");
@@ -1409,5 +1408,4 @@ const vector<Intrinsic> intrinsicMethods{
     {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
 };
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core

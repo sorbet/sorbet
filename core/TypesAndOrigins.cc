@@ -2,8 +2,7 @@
 #include "absl/algorithm/container.h"
 
 using namespace std;
-namespace sorbet {
-namespace core {
+namespace sorbet::core {
 
 // This sorts the underlying `origins`
 vector<ErrorLine> TypeAndOrigins::origins2Explanations(Context ctx) const {
@@ -37,5 +36,4 @@ TypeAndOrigins::~TypeAndOrigins() {
     histogramInc("TypeAndOrigins.origins.size", origins.size());
 }
 
-} // namespace core
-} // namespace sorbet
+} // namespace sorbet::core
