@@ -1,96 +1,128 @@
 class <emptyTree><<constant:<root>>> < ()
   class <emptyTree>::<constant:TestDSLBuilder><<constant:<todo sym>>> < (::<todo sym>)
-    ::Sorbet.sig({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"opt_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    end
 
     def self.opt_string<<constant:<todo sym>>>(opt_string)
       <emptyTree>
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def self.get_opt_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def opt_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"opt_int_defaulted" => <emptyTree>::<constant:Integer>}).returns(::NilClass)
+    end
 
     def self.opt_int_defaulted<<constant:<todo sym>>>(opt_int_defaulted)
       <emptyTree>
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:Integer>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Integer>)
+    end
 
     def self.get_opt_int_defaulted<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:Integer>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Integer>)
+    end
 
     def opt_int_defaulted<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"req_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    end
 
     def self.req_string<<constant:<todo sym>>>(req_string)
       <emptyTree>
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def self.get_req_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def req_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"implied_string" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    end
 
     def self.implied_string<<constant:<todo sym>>>(implied_string = ::T.untyped())
       <emptyTree>
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def self.get_implied_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig().returns(<emptyTree>::<constant:String>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+    end
 
     def implied_string<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig({:"no_getter" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"no_getter" => <emptyTree>::<constant:String>}).returns(::NilClass)
+    end
 
     def self.no_getter<<constant:<todo sym>>>(no_getter)
       <emptyTree>
     end
 
-    ::Sorbet.sig({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).params({:"root_const" => ::<root>::<constant:Integer>}).returns(::NilClass)
+    end
 
     def self.root_const<<constant:<todo sym>>>(root_const)
       <emptyTree>
     end
 
-    ::Sorbet.sig().returns(::<root>::<constant:Integer>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::<root>::<constant:Integer>)
+    end
 
     def self.get_root_const<<constant:<todo sym>>>()
       ::T.unsafe(nil)
     end
 
-    ::Sorbet.sig().returns(::<root>::<constant:Integer>)
+    ::Sorbet.sig() do ||
+      self(<constant:<todo sym>>).returns(::<root>::<constant:Integer>)
+    end
 
     def root_const<<constant:<todo sym>>>()
       ::T.unsafe(nil)

@@ -5,7 +5,7 @@ class Test
 
   # Simplest test case: We can remember that an `Object` variable is
   # known to be truthy
-  sig(x: Object).returns(T.untyped)
+  sig {params(x: Object).returns(T.untyped)}
   def test_simple(x)
     if x
       if x
@@ -17,19 +17,23 @@ class Test
   end
 
   # Minimized test case from real code
-  sig(
-    x: T.nilable(String),
-    y: Object,
-  ).returns(T.untyped)
+  sig do
+    params(
+      x: T.nilable(String),
+      y: Object,
+    ).returns(T.untyped)
+  end
   def test_flow(x, y)
     y || !x || x.empty?
   end
 
   # Approximately what the above desugars into
-  sig(
-    x: T.nilable(String),
-    y: Object,
-  ).returns(T.untyped)
+  sig do
+    params(
+      x: T.nilable(String),
+      y: Object,
+    ).returns(T.untyped)
+  end
   def test_desugared(x, y)
     t1 = if y
            y

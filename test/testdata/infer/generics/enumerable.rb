@@ -3,7 +3,7 @@
     extend T::Generic
 
     A = type_member
-    sig(a: MyEnumerable[A]).returns(MyEnumerable[A])
+    sig {params(a: MyEnumerable[A]).returns(MyEnumerable[A])}
     def -(a)
       self
     end

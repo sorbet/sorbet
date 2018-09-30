@@ -1,10 +1,12 @@
 # typed: true
 extend T::Helpers
 
-sig(
-  source: T.any(Integer, String, NilClass)
-)
-.returns(T.nilable(String))
+sig do
+  params(
+    source: T.any(Integer, String, NilClass)
+  )
+  .returns(T.nilable(String))
+end
 def m1(source:)
   if source.is_a?(Integer)
     nil
@@ -14,10 +16,12 @@ def m1(source:)
 end
 
 
-sig(
-  source: T.any(File, String, NilClass)
-)
-.returns(T.nilable(String))
+sig do
+  params(
+    source: T.any(File, String, NilClass)
+  )
+  .returns(T.nilable(String))
+end
 def m2(source:)
   if source.is_a?(Enumerable)
     nil
@@ -26,10 +30,12 @@ def m2(source:)
   end
 end
 
-sig(
- source: T.any([Integer], String, NilClass)
-)
-.returns(T.nilable(String))
+sig do
+  params(
+   source: T.any([Integer], String, NilClass)
+  )
+  .returns(T.nilable(String))
+end
 def m3(source:)
  if source.is_a?(Enumerable)
    nil
@@ -40,10 +46,12 @@ end
 
 module Mod; end;
 
-sig(
-    source: T.any(T.all(Integer, Mod), String, NilClass)
-)
-.returns(T.nilable(String))
+sig do
+  params(
+      source: T.any(T.all(Integer, Mod), String, NilClass)
+  )
+  .returns(T.nilable(String))
+end
 def m4(source:)
  if source.is_a?(Integer)
    nil

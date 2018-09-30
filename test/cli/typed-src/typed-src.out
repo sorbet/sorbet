@@ -1,38 +1,45 @@
 class A
   extend T::Helpers
 
-  sig(x: T.any(String, Integer), y: Integer).returns(Integer)
+  sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
   # dead=1
-  # <statTemp>$4: Sorbet::Private::Builder
+  # <returnMethodTemp>$2: T.untyped
   #
-  # <statTemp>$5: <Class:A>
+  # <finalReturn>: <impossible>
+  # <statTemp>$4: <Class:A>
   #
-  # <statTemp>$6: ShapeType {
+  # <block-pre-call-temp>$5: Sorbet::Private::Builder
+  # dead=1
+  # <statTemp>$9: Sorbet::Private::Builder
+  #
+  # <statTemp>$10: Sorbet::Private::Builder
+  #
+  # <statTemp>$11: ShapeType {
   #   Symbol(:"x") => MetaType
   #   Symbol(:"y") => <Class:Integer>
   # }
   #
-  # <statTemp>$9: <Class:T>
+  # <statTemp>$14: <Class:T>
   #
-  # <statTemp>$10: <Class:String>
+  # <statTemp>$15: <Class:String>
   #
-  # <statTemp>$11: <Class:Integer>
+  # <statTemp>$16: <Class:Integer>
   #
-  # <statTemp>$15: <Class:Integer>
+  # <statTemp>$20: <Class:Integer>
   #
-  # <returnMethodTemp>$2: Sorbet::Private::Builder
+  # <blockReturnTemp>$8: Sorbet::Private::Builder
   #
-  # <hashTemp>$7: Symbol(:"x")
+  # <blockReturnTemp>$21: <impossible>
   #
-  # <hashTemp>$8: MetaType
+  # <hashTemp>$12: Symbol(:"x")
   #
-  # <hashTemp>$12: Symbol(:"y")
+  # <hashTemp>$13: MetaType
   #
-  # <hashTemp>$13: <Class:Integer>
+  # <hashTemp>$17: Symbol(:"y")
   #
-  # <finalReturn>: <impossible>
+  # <hashTemp>$18: <Class:Integer>
   #
-  # <magic>$14: <Magic>
+  # <magic>$19: <Magic>
   def a_method(x, y)
     if x.is_a?(String)
        # <ifTemp>$5: TrueClass | FalseClass

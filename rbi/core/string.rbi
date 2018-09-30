@@ -2,680 +2,864 @@
 class String < Object
   include Comparable
 
-  Sorbet.sig(
-      arg0: Object,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Object,
+    )
+    .returns(String)
+  end
   def %(arg0); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(String)
+  end
   def *(arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def +(arg0); end
 
-  Sorbet.sig(
-      arg0: Object,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Object,
+    )
+    .returns(String)
+  end
   def <<(arg0); end
 
-  Sorbet.sig(
-      other: String,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        other: String,
+    )
+    .returns(T.nilable(Integer))
+  end
   def <=>(other); end
 
-  Sorbet.sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ==(arg0); end
 
-  Sorbet.sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ===(arg0); end
 
-  Sorbet.sig(
-      arg0: Object,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        arg0: Object,
+    )
+    .returns(T.nilable(Integer))
+  end
   def =~(arg0); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T.any(T::Range[Integer], Regexp),
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: Integer,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T.any(T::Range[Integer], Regexp),
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(String))
+  end
   def [](arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def ascii_only?(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def b(); end
 
-  Sorbet.sig.returns(Array)
+  sig {returns(Array)}
   def bytes(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def bytesize(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T::Range[Integer],
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: Integer,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T::Range[Integer],
+    )
+    .returns(T.nilable(String))
+  end
   def byteslice(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def capitalize(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def capitalize!(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(Integer))
+  end
   def casecmp(arg0); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Integer,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def center(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Array)
+  sig {returns(Array)}
   def chars(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def chomp(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(String))
+  end
   def chomp!(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def chop(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def chop!(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def chr(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def clear(); end
 
-  Sorbet.sig.returns(T::Array[Integer])
-  Sorbet.sig(
-      blk: BasicObject,
-  )
-  .returns(T::Array[Integer])
+  sig {returns(T::Array[Integer])}
+  sig do
+    params(
+        blk: BasicObject,
+    )
+    .returns(T::Array[Integer])
+  end
   def codepoints(&blk); end
 
-  Sorbet.sig(
-      arg0: T.any(Integer, Object),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(Integer, Object),
+    )
+    .returns(String)
+  end
   def concat(arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(Integer)
+  end
   def count(arg0, *arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def crypt(arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def delete(arg0, *arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
   def delete!(arg0, *arg1); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def downcase(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def downcase!(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def dump(); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(String)
-  Sorbet.sig.returns(Enumerator[Integer])
+  sig do
+    params(
+        blk: T.proc.params(arg0: Integer).returns(BasicObject),
+    )
+    .returns(String)
+  end
+  sig {returns(Enumerator[Integer])}
   def each_byte(&blk); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
-  Sorbet.sig.returns(Enumerator[String])
+  sig do
+    params(
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
+  sig {returns(Enumerator[String])}
   def each_char(&blk); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Integer).returns(BasicObject),
-  )
-  .returns(String)
-  Sorbet.sig.returns(Enumerator[Integer])
+  sig do
+    params(
+        blk: T.proc.params(arg0: Integer).returns(BasicObject),
+    )
+    .returns(String)
+  end
+  sig {returns(Enumerator[Integer])}
   def each_codepoint(&blk); end
 
-  Sorbet.sig(
-      arg0: String,
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(Enumerator[String])
+  sig do
+    params(
+        arg0: String,
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(Enumerator[String])
+  end
   def each_line(arg0=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def empty?(); end
 
-  Sorbet.sig.returns(Encoding)
+  sig {returns(Encoding)}
   def encoding(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def end_with?(*arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def eql?(arg0); end
 
-  Sorbet.sig(
-      arg0: T.any(String, Encoding),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(String, Encoding),
+    )
+    .returns(String)
+  end
   def force_encoding(arg0); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
   def getbyte(arg0); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: Hash,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(Enumerator[String])
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Hash,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(Enumerator[String])
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(String)
+  end
   def gsub(arg0, arg1=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(Enumerator[String])
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(Enumerator[String])
+  end
   def gsub!(arg0, arg1=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def hash(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def hex(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def include?(arg0); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
   def index(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      str: String,
-  )
-  .void
+  sig do
+    params(
+        str: String,
+    )
+    .void
+  end
   def initialize(str=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Integer,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def insert(arg0, arg1); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def intern(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def length(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T::Array[String])
+  end
   def lines(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Integer,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def ljust(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def lstrip(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def lstrip!(); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(MatchData)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(MatchData)
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(MatchData)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(MatchData)
+  end
   def match(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def next(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def next!(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def oct(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def ord(); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(T::Array[String])
+  end
   def partition(arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def prepend(arg0); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def replace(arg0); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def reverse(); end
 
-  Sorbet.sig(
-      arg0: T.any(String, Regexp),
-      arg1: Integer,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        arg0: T.any(String, Regexp),
+        arg1: Integer,
+    )
+    .returns(T.nilable(Integer))
+  end
   def rindex(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Integer,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def rjust(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: T.any(String, Regexp),
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: T.any(String, Regexp),
+    )
+    .returns(T::Array[String])
+  end
   def rpartition(arg0); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def rstrip(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def rstrip!(); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-  )
-  .returns(T::Array[T.any(String, T::Array[String])])
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      blk: BasicObject,
-  )
-  .returns(T::Array[T.any(String, T::Array[String])])
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+    )
+    .returns(T::Array[T.any(String, T::Array[String])])
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: BasicObject,
+    )
+    .returns(T::Array[T.any(String, T::Array[String])])
+  end
   def scan(arg0, &blk); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: String,
-      blk: T.proc(arg0: T.untyped).returns(BasicObject),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: String,
+        blk: T.proc.params(arg0: T.untyped).returns(BasicObject),
+    )
+    .returns(String)
+  end
   def scrub(arg0=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: String,
-      blk: T.proc(arg0: T.untyped).returns(BasicObject),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: String,
+        blk: T.proc.params(arg0: T.untyped).returns(BasicObject),
+    )
+    .returns(String)
+  end
   def scrub!(arg0=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: Integer,
+        arg1: Integer,
+    )
+    .returns(Integer)
+  end
   def setbyte(arg0, arg1); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def size(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T.any(T::Range[Integer], Regexp),
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: Integer,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T.any(T::Range[Integer], Regexp),
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(String))
+  end
   def slice!(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: Integer,
-  )
-  .returns(T::Array[String])
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: Integer,
+    )
+    .returns(T::Array[String])
+  end
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(T::Array[String])
+  end
   def split(arg0=T.unsafe(nil), arg1=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def squeeze(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
   def squeeze!(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def start_with?(*arg0); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def strip(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def strip!(); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: T.any(String, Hash),
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: T.any(String, Hash),
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
   def sub(arg0, arg1=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      arg1: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: T.any(Regexp, String),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        arg1: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: T.any(Regexp, String),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
   def sub!(arg0, arg1=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def succ(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(Integer)
+  end
   def sum(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def swapcase(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def swapcase!(); end
 
-  Sorbet.sig.returns(Complex)
+  sig {returns(Complex)}
   def to_c(); end
 
-  Sorbet.sig.returns(Float)
+  sig {returns(Float)}
   def to_f(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(Integer)
+  end
   def to_i(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Rational)
+  sig {returns(Rational)}
   def to_r(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_str(); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def to_sym(); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def tr(arg0, arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
   def tr!(arg0, arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(String)
+  end
   def tr_s(arg0, arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: String,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
   def tr_s!(arg0, arg1); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T::Array[String])
+  end
   def unpack(arg0); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def upcase(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def upcase!(); end
 
-  type_parameters(:Bool).sig(
-      arg0: String,
-      arg1: T.type_parameter(:Bool),
-  )
-  .returns(Enumerator[String])
-  type_parameters(:Bool).sig(
-      arg0: String,
-      arg1: T.type_parameter(:Bool),
-      blk: T.proc(arg0: String).returns(BasicObject),
-  )
-  .returns(String)
+  sig do
+    type_parameters(:Bool).params(
+        arg0: String,
+        arg1: T.type_parameter(:Bool),
+    )
+    .returns(Enumerator[String])
+  end
+  sig do
+    type_parameters(:Bool).params(
+        arg0: String,
+        arg1: T.type_parameter(:Bool),
+        blk: T.proc.params(arg0: String).returns(BasicObject),
+    )
+    .returns(String)
+  end
   def upto(arg0, arg1=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def valid_encoding?(); end
 
-  Sorbet.sig(
-      obj: Object,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        obj: Object,
+    )
+    .returns(T.nilable(String))
+  end
   def self.try_convert(obj); end
 
-  Sorbet.sig(
-      arg0: Integer,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: T.any(T::Range[Integer], Regexp),
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: Integer,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Regexp,
-      arg1: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        arg0: Integer,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: T.any(T::Range[Integer], Regexp),
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: Integer,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Regexp,
+        arg1: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(String))
+  end
   def slice(arg0, arg1=T.unsafe(nil)); end
 end

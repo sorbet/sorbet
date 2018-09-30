@@ -6,7 +6,7 @@ class MyProc1
   Arg0 = type_member
 
 
-  sig(arg0: Arg0).returns(Return)
+  sig {params(arg0: Arg0).returns(Return)}
   def call(arg0)
     _
   end
@@ -17,7 +17,7 @@ end
 class UseProc1
   extend T::Helpers
 
-  sig.returns(NilClass)
+  sig {returns(NilClass)}
   def callit
     p = MyProc1[String, Integer].new
 

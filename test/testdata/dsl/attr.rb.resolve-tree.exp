@@ -19,6 +19,10 @@ begin
 
     <emptyTree>
 
+    <emptyTree>
+
+    <emptyTree>
+
     def initialize<initialize>()
       begin
         ::TestAttr#@v1 = begin
@@ -26,6 +30,10 @@ begin
           T.let(0, Integer)
         end
         ::TestAttr#@v2 = begin
+          ::RubyTyper.keep_for_typechecking(::String)
+          T.let("", String)
+        end
+        ::TestAttr#@v6 = begin
           ::RubyTyper.keep_for_typechecking(::String)
           T.let("", String)
         end
@@ -60,13 +68,40 @@ begin
       ::TestAttr#@v5 = v5
     end
 
+    def v6<v6>()
+      ::TestAttr#@v6
+    end
+
+    def v6=<v6=>(v6)
+      ::TestAttr#@v6 = v6
+    end
+
     def self.<static-init><<static-init>>()
       begin
-        self(<singleton class:<constant:TestAttr>>).sig().returns(::Integer)
-        self(<singleton class:<constant:TestAttr>>).sig({:"v1" => ::Integer}).returns(::Integer)
-        self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
-        self(<singleton class:<constant:TestAttr>>).sig({:"v2" => ::String}).returns(::String)
-        self(<singleton class:<constant:TestAttr>>).sig().returns(::String)
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).void()
+        end
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).returns(::Integer)
+        end
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).params({:"v1" => ::Integer}).returns(::Integer)
+        end
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).returns(::String)
+        end
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).params({:"v2" => ::String}).returns(::String)
+        end
+        self(<singleton class:<constant:TestAttr>>).sig() do ||
+          self(<constant:Builder>).returns(::String)
+        end
+        ::Sorbet.sig() do ||
+          self(<constant:Builder>).returns(::String)
+        end
+        ::Sorbet.sig() do ||
+          self(<constant:Builder>).params({:"v6" => ::String}).returns(::String)
+        end
         <emptyTree>
       end
     end

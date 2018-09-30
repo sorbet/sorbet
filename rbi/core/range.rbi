@@ -5,145 +5,185 @@ class Range < Object
   extend T::Generic
   Elem = type_member(:out)
 
-  type_parameters(:U).sig(
-    from: T.type_parameter(:U),
-    to: T.type_parameter(:U),
-    exclude_end: T.any(TrueClass, FalseClass)
-  ).returns(T::Range[T.type_parameter(:U)])
+  sig do
+    type_parameters(:U).params(
+      from: T.type_parameter(:U),
+      to: T.type_parameter(:U),
+      exclude_end: T.any(TrueClass, FalseClass)
+    ).returns(T::Range[T.type_parameter(:U)])
+  end
   def self.new(from, to, exclude_end=false); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ==(obj); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ===(obj); end
 
-  Sorbet.sig.returns(Elem)
+  sig {returns(Elem)}
   def begin(); end
 
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
-  )
-  .returns(T.nilable(T.type_parameter(:U)))
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.any(TrueClass, FalseClass)),
+    )
+    .returns(T.nilable(T.type_parameter(:U)))
+  end
   def bsearch(&blk); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def cover?(obj); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.self_type)
-  Sorbet.sig.returns(Enumerator[Elem])
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
+  sig {returns(Enumerator[Elem])}
   def each(&blk); end
 
-  Sorbet.sig.returns(Elem)
+  sig {returns(Elem)}
   def end(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def exclude_end?(); end
 
-  Sorbet.sig.returns(Elem)
-  Sorbet.sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
+  sig {returns(Elem)}
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(T::Array[Elem])
+  end
   def first(n=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def hash(); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def include?(obj); end
 
-  Sorbet.sig(
-      _begin: Elem,
-      _end: Elem,
-      exclude_end: T.any(TrueClass, FalseClass),
-  )
-  .void
+  sig do
+    params(
+        _begin: Elem,
+        _end: Elem,
+        exclude_end: T.any(TrueClass, FalseClass),
+    )
+    .void
+  end
   def initialize(_begin, _end, exclude_end=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(Elem)
-  Sorbet.sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
+  sig {returns(Elem)}
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(T::Array[Elem])
+  end
   def last(n=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Elem)
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(Elem)
-  Sorbet.sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
-  Sorbet.sig(
-      n: Integer,
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(T::Array[Elem])
+  sig {returns(Elem)}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns(Elem)
+  end
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(T::Array[Elem])
+  end
+  sig do
+    params(
+        n: Integer,
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns(T::Array[Elem])
+  end
   def max(n=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(Elem)
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(Elem)
-  Sorbet.sig(
-      n: Integer,
-  )
-  .returns(T::Array[Elem])
-  Sorbet.sig(
-      n: Integer,
-      blk: T.proc(arg0: Elem, arg1: Elem).returns(Integer),
-  )
-  .returns(T::Array[Elem])
+  sig {returns(Elem)}
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns(Elem)
+  end
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(T::Array[Elem])
+  end
+  sig do
+    params(
+        n: Integer,
+        blk: T.proc.params(arg0: Elem, arg1: Elem).returns(Integer),
+    )
+    .returns(T::Array[Elem])
+  end
   def min(n=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def size(); end
 
-  Sorbet.sig(
-      n: Integer,
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.self_type)
-  Sorbet.sig(
-      n: Integer,
-  )
-  .returns(Enumerator[Elem])
+  sig do
+    params(
+        n: Integer,
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
+  sig do
+    params(
+        n: Integer,
+    )
+    .returns(Enumerator[Elem])
+  end
   def step(n=T.unsafe(nil), &blk); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def eql?(obj); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def member?(obj); end
 end

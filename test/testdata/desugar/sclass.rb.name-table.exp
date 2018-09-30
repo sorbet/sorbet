@@ -26,6 +26,7 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.c
       argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:55
     method ::<Class:F>#initialize () @ test/testdata/desugar/sclass.rb:49
   class ::<Class:<Class:F>> < ::<Class:<Class:Object>> (<constant:Helpers>) @ test/testdata/desugar/sclass.rb:47
+    method ::<Class:<Class:F>>#<block> () @ test/testdata/desugar/sclass.rb:55
   class ::G < ::Object () @ test/testdata/desugar/sclass.rb:60
     method ::G#wrapper () @ test/testdata/desugar/sclass.rb:61
   class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:62

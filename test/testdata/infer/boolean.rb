@@ -14,7 +14,7 @@ end
 class TestBoolean
   extend T::Helpers
 
-  sig(b: Boolean).returns(Boolean)
+  sig {params(b: Boolean).returns(Boolean)}
   def test_boolean(b)
     "b is: #{b}"
     !b

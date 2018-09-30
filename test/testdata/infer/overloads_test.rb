@@ -3,41 +3,53 @@
 class HasOverloads
   extend T::Helpers
 
-  sig
-  .returns(T.untyped())
+  sig do
+    returns(T.untyped())
+  end
   def make_untyped
   end
 
-  sig
-  .returns(Integer)
-  sig(
-    _: String,
-  )
-  .returns(String)
-  sig(
-      _: Exception,
+  sig do
+    returns(Integer)
+  end
+  sig do
+    params(
+      _: String,
     )
-  .returns(NilClass)
-  sig(
-    _: Class,
-    _1: String,
-    _2: T::Array[String],
-  )
-  .returns(Symbol)
+    .returns(String)
+  end
+  sig do
+    params(
+        _: Exception,
+      )
+    .returns(NilClass)
+  end
+  sig do
+    params(
+      _: Class,
+      _1: String,
+      _2: T::Array[String],
+    )
+    .returns(Symbol)
+  end
   def overloaded(_=_, _1=_, _2=_);
     make_untyped
   end
 
-  sig(
-    a: Class,  # error: Malformed `sig`
-    b: String, # error: Malformed `sig`
-  )
-  .returns(Integer)
-  sig(
-    b: Class,  # error: Malformed `sig`
-    a: String, # error: Malformed `sig`
-  )
-  .returns(Symbol)
+  sig do
+    params(
+      a: Class,  # error: Malformed `sig`
+      b: String, # error: Malformed `sig`
+    )
+    .returns(Integer)
+  end
+  sig do
+    params(
+      b: Class,  # error: Malformed `sig`
+      a: String, # error: Malformed `sig`
+    )
+    .returns(Symbol)
+  end
   def invalid_overloaded(a:, b:);
     make_untyped
   end
@@ -49,8 +61,8 @@ class OverloadAndGenerics
 
   def _; end
 
-  sig(x: Elem).returns(Elem)
-  sig(x: String).returns(String)
+  sig {params(x: Elem).returns(Elem)}
+  sig {params(x: String).returns(String)}
   def overloaded(x); _; end
 end
 

@@ -1,8 +1,10 @@
 # typed: true
 module Abbrev
-  Sorbet.sig(
-      words: T::Array[String],
-  )
-  .returns(T::Hash[String, String])
+  sig do
+    params(
+        words: T::Array[String],
+    )
+    .returns(T::Hash[String, String])
+  end
   def self.abbrev(words); end
 end

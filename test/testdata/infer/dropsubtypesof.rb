@@ -15,7 +15,7 @@ extend T::Helpers
 # and this is not a subtype of the input.
 
 # Right associative
-sig(x: T.any(NilClass, T.any(T::Array[Integer], T::Array[String]))).void
+sig {params(x: T.any(NilClass, T.any(T::Array[Integer], T::Array[String]))).void}
 def foo(x)
   if x.nil?
     puts "got nil"
@@ -26,7 +26,7 @@ def foo(x)
 end
 
 # Left associative
-sig(x: T.any(T.any(T::Array[Integer], T::Array[String]), NilClass)).void
+sig {params(x: T.any(T.any(T::Array[Integer], T::Array[String]), NilClass)).void}
 def bar(x)
   if x.nil?
     puts "got nil"
@@ -37,7 +37,7 @@ def bar(x)
 end
 
 # Whatever associativity Types::any happens to use
-sig(x: T.any(NilClass, T::Array[Integer], T::Array[String])).void
+sig {params(x: T.any(NilClass, T::Array[Integer], T::Array[String])).void}
 def qux(x)
   if x.nil?
     puts "got nil"

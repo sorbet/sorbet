@@ -1,21 +1,25 @@
 # typed: true
 class StringScanner < Object
-  Sorbet.sig(
-      arg0: String,
-      arg1: T.any(TrueClass, FalseClass),
-  )
-  .returns(StringScanner)
+  sig do
+    params(
+        arg0: String,
+        arg1: T.any(TrueClass, FalseClass),
+    )
+    .returns(StringScanner)
+  end
   def self.new(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def eos?(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def getch(); end
 
-  Sorbet.sig(
-      arg0: Regexp,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: Regexp,
+    )
+    .returns(String)
+  end
   def scan(arg0); end
 end

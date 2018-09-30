@@ -2,7 +2,7 @@
 class Main
     extend T::Helpers
 
-    sig.returns(Junk) # error: Unable to resolve constant
+    sig {returns(Junk)} # error: Unable to resolve constant
     def foo
         Junk.new
     end

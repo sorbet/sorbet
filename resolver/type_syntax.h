@@ -26,7 +26,7 @@ struct ParsedSig {
     struct {
         bool sig = false;
         bool proc = false;
-        bool args = false;
+        bool params = false;
         bool abstract = false;
         bool override_ = false;
         bool overridable = false;

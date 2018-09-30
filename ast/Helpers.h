@@ -14,11 +14,16 @@ public:
         return std::make_unique<ast::EmptyTree>(loc);
     }
 
-    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, core::SymbolRef symbol,
-                                        MethodDef::ARGS_store args) {
+    static std::unique_ptr<Block> Block(core::Loc loc, std::unique_ptr<Expression> body, MethodDef::ARGS_store args,
+                                        core::SymbolRef symbol = core::Symbols::noSymbol()) {
         auto blk = std::make_unique<ast::Block>(loc, move(args), move(body));
         blk->symbol = symbol;
         return blk;
+    }
+
+    static std::unique_ptr<ast::Block> Block0(core::Loc loc, std::unique_ptr<Expression> body) {
+        MethodDef::ARGS_store args;
+        return Block(loc, move(body), move(args));
     }
 
     static std::unique_ptr<Expression> Send(core::Loc loc, std::unique_ptr<Expression> recv, core::NameRef fun,
@@ -240,13 +245,20 @@ public:
 
     static std::unique_ptr<Expression> Sig(core::Loc loc, std::unique_ptr<Expression> hash,
                                            std::unique_ptr<Expression> ret) {
-        auto sig = Send1(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig(), move(hash));
-        return Send1(loc, move(sig), core::Names::returns(), move(ret));
+        auto params = Send1(loc, Self(loc), core::Names::params(), move(hash));
+        auto returns = Send1(loc, move(params), core::Names::returns(), move(ret));
+        auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
+        auto sigSend = ast::cast_tree<ast::Send>(sig.get());
+        sigSend->block = Block0(loc, move(returns));
+        return sig;
     }
 
     static std::unique_ptr<Expression> Sig0(core::Loc loc, std::unique_ptr<Expression> ret) {
+        auto returns = Send1(loc, Self(loc), core::Names::returns(), move(ret));
         auto sig = Send0(loc, Constant(loc, core::Symbols::Sorbet()), core::Names::sig());
-        return Send1(loc, move(sig), core::Names::returns(), move(ret));
+        auto sigSend = ast::cast_tree<ast::Send>(sig.get());
+        sigSend->block = Block0(loc, move(returns));
+        return sig;
     }
 
     static std::unique_ptr<Expression> Sig1(core::Loc loc, std::unique_ptr<Expression> key,

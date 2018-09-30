@@ -2,21 +2,21 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
   method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/resolver/sig_good.rb:7
     method ::A#<static-init> () @ test/testdata/resolver/sig_good.rb:8
-    method ::A#good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_good.rb:29
+    method ::A#good (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_good.rb:31
       argument ::A#good#a<> -> TupleType {
         0 = T1
         1 = T2
-      } @ test/testdata/resolver/sig_good.rb:9
-      argument ::A#good#b<> -> T1 @ test/testdata/resolver/sig_good.rb:10
-      argument ::A#good#c<> -> T1 | NilClass @ test/testdata/resolver/sig_good.rb:11
-      argument ::A#good#d<> -> T1 | T2 @ test/testdata/resolver/sig_good.rb:12
-      argument ::A#good#e<> -> T.untyped @ test/testdata/resolver/sig_good.rb:13
+      } @ test/testdata/resolver/sig_good.rb:10
+      argument ::A#good#b<> -> T1 @ test/testdata/resolver/sig_good.rb:11
+      argument ::A#good#c<> -> T1 | NilClass @ test/testdata/resolver/sig_good.rb:12
+      argument ::A#good#d<> -> T1 | T2 @ test/testdata/resolver/sig_good.rb:13
+      argument ::A#good#e<> -> T.untyped @ test/testdata/resolver/sig_good.rb:14
       argument ::A#good#f<> -> AppliedType {
         klass = ::Array
         targs = [
           <constant:Elem> = T1
         ]
-      } @ test/testdata/resolver/sig_good.rb:14
+      } @ test/testdata/resolver/sig_good.rb:15
       argument ::A#good#g<> -> AppliedType {
         klass = ::Hash
         targs = [
@@ -27,23 +27,24 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
               1 = T2
             }
         ]
-      } @ test/testdata/resolver/sig_good.rb:15
-      argument ::A#good#h<> -> FalseClass | Integer | Float | String | Symbol @ test/testdata/resolver/sig_good.rb:16
-      argument ::A#good#i<> -> T1 @ test/testdata/resolver/sig_good.rb:17
-      argument ::A#good#j<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:18
-      argument ::A#good#k<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:19
-      argument ::A#good#l<> -> <Class:M1> @ test/testdata/resolver/sig_good.rb:20
+      } @ test/testdata/resolver/sig_good.rb:16
+      argument ::A#good#h<> -> FalseClass | Integer | Float | String | Symbol @ test/testdata/resolver/sig_good.rb:17
+      argument ::A#good#i<> -> T1 @ test/testdata/resolver/sig_good.rb:18
+      argument ::A#good#j<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:19
+      argument ::A#good#k<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:20
+      argument ::A#good#l<> -> <Class:M1> @ test/testdata/resolver/sig_good.rb:21
       argument ::A#good#m<> -> ShapeType {
         Symbol(:"foo") => String
         Symbol(:"bar") => Integer | NilClass
-      } @ test/testdata/resolver/sig_good.rb:21
+      } @ test/testdata/resolver/sig_good.rb:22
       argument ::A#good#n<> -> ShapeType {
-      } @ test/testdata/resolver/sig_good.rb:25
+      } @ test/testdata/resolver/sig_good.rb:26
       argument ::A#good#o<> -> ShapeType {
         String("hi") => String
         Symbol(:"bye") => String
-      } @ test/testdata/resolver/sig_good.rb:26
+      } @ test/testdata/resolver/sig_good.rb:27
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/resolver/sig_good.rb:7
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_good.rb:8
   static-field #A1 -> AliasType { symbol = ::T1 } @ test/testdata/resolver/sig_good.rb:5
   class ::M1 < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/resolver/sig_good.rb:4
   class ::<Class:M1> < ::Module () @ test/testdata/resolver/sig_good.rb:4

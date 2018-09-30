@@ -2,26 +2,27 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_bad.rb:2, https://git
   method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/resolver/sig_bad.rb:5
     method ::A#<static-init> () @ test/testdata/resolver/sig_bad.rb:10
-    method ::A#bad (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_bad.rb:29
-      argument ::A#bad#a<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:11
-      argument ::A#bad#b<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:12
-      argument ::A#bad#c<> -> Object @ test/testdata/resolver/sig_bad.rb:13
-      argument ::A#bad#d<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:14
-      argument ::A#bad#e<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:15
-      argument ::A#bad#f<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:16
-      argument ::A#bad#g<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:17
-      argument ::A#bad#h<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:18
-      argument ::A#bad#i<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:20
-      argument ::A#bad#j<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:21
-      argument ::A#bad#k<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:22
+    method ::A#bad (a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) -> T2 @ test/testdata/resolver/sig_bad.rb:31
+      argument ::A#bad#a<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:12
+      argument ::A#bad#b<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:13
+      argument ::A#bad#c<> -> Object @ test/testdata/resolver/sig_bad.rb:14
+      argument ::A#bad#d<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:15
+      argument ::A#bad#e<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:16
+      argument ::A#bad#f<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:17
+      argument ::A#bad#g<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:18
+      argument ::A#bad#h<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:19
+      argument ::A#bad#i<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:21
+      argument ::A#bad#j<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:22
+      argument ::A#bad#k<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:23
       argument ::A#bad#l<> -> ShapeType {
-      } @ test/testdata/resolver/sig_bad.rb:23
+      } @ test/testdata/resolver/sig_bad.rb:24
       argument ::A#bad#m<> -> ShapeType {
         Symbol(:"foo") => T.untyped
-      } @ test/testdata/resolver/sig_bad.rb:24
-      argument ::A#bad#n<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:25
-      argument ::A#bad#o<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:26
+      } @ test/testdata/resolver/sig_bad.rb:25
+      argument ::A#bad#n<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:26
+      argument ::A#bad#o<> -> T.untyped @ test/testdata/resolver/sig_bad.rb:27
   class ::<Class:A> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/sig_bad.rb:5
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_bad.rb:10
     method ::<Class:A>#unsupported () @ test/testdata/resolver/sig_bad.rb:8
   class ::T1 < ::Object () @ test/testdata/resolver/sig_bad.rb:2
   class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_bad.rb:2

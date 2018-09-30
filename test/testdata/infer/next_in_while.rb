@@ -11,7 +11,7 @@ class TestNext
     end
   end
 
-  sig(blk: T.proc.returns(String)).returns(String)
+  sig {params(blk: T.proc.returns(String)).returns(String)}
   def yields(&blk)
     blk.call
   end

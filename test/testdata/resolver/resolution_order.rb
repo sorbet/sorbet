@@ -14,12 +14,12 @@ end
 class IsGood
   extend T::Helpers
 
-  sig(a: E::EC).returns(Integer)
+  sig {params(a: E::EC).returns(Integer)}
   def foo1(a)
     1
   end
 
-  sig(a: E::EA).returns(Integer)
+  sig {params(a: E::EA).returns(Integer)}
   def foo2(a)
     1
   end

@@ -2,17 +2,17 @@
 module Funcs
   extend T::Helpers
 
-  sig(x: Integer).returns(Integer)
+  sig {params(x: Integer).returns(Integer)}
   def f(x); x; end
 
   module_function :f
 
-  sig(s: Symbol).returns(Symbol)
+  sig {params(s: Symbol).returns(Symbol)}
   module_function def g(s); s; end
 
   module_function
 
-  sig(s: String).returns(String)
+  sig {params(s: String).returns(String)}
   def h(s); s; end
 end
 

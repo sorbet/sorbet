@@ -23,9 +23,9 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                 stringstream ss;
                 bool first = true;
 
-                ss << "sig";
+                ss << "sig {";
                 if (!methodSymbol.data(ctx).arguments().empty()) {
-                    ss << "(";
+                    ss << "params(";
                     for (auto &argSym : methodSymbol.data(ctx).arguments()) {
                         if (!first) {
                             ss << ", ";
@@ -33,7 +33,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                         first = false;
                         ss << argSym.data(ctx).name.show(ctx) << ": " << core::Types::untypedUntracked()->show(ctx);
                     }
-                    ss << ")";
+                    ss << ").";
                 }
 
                 string returnStr;
@@ -43,10 +43,13 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                 } else {
                     returnStr = fmt::format("returns({})", guessedType->show(ctx));
                 }
+                ss << returnStr;
+                ss << "}";
+
                 string spaces(detailPair.first.column - 1, ' ');
 
-                e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc,
-                                                             fmt::format("{}.{}\n{}def", ss.str(), returnStr, spaces)));
+                e.addAutocorrect(
+                    core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}def", ss.str(), spaces)));
             }
         }
     }

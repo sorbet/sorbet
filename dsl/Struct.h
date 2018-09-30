@@ -17,7 +17,7 @@ namespace dsl {
  *       def foo=(arg); arg; end
  *       def bar; end
  *       def bar=(arg); arg; end
- *       sig(foo: BasicObject, bar: BasicObject).returns(A)
+ *       sig {params(foo: BasicObject, bar: BasicObject).returns(A)}
  *       def self.new(foo=nil, bar=nil)
  *           T.cast(nil, A)
  *       end

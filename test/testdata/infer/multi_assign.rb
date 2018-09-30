@@ -26,7 +26,7 @@ T.assert_type!(d, T.nilable(T::Array[Integer]))
 
 extend T::Helpers
 
-sig(x: T.nilable([Integer, Integer])).void
+sig {params(x: T.nilable([Integer, Integer])).void}
 def test_nilable(x)
   a, b = x
 

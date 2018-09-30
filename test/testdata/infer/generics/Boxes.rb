@@ -11,13 +11,13 @@ class Box
     @value = T.let(_, A)
   end
 
-   sig(value: A).returns(NilClass)
+   sig {params(value: A).returns(NilClass)}
    def store(value)
      @value = value
      nil
    end
 
-   sig.returns(A)
+   sig {returns(A)}
    def read
      @value
    end
@@ -28,7 +28,7 @@ class BoxChild < Box
 
   A = type_member
 
-  sig(v: A).returns(A)
+  sig {params(v: A).returns(A)}
   def put(v)
     store(v)
     @value
@@ -38,7 +38,7 @@ end
 class Generics0
    extend T::Helpers
 
-   sig().returns(NilClass)
+   sig {params().returns(NilClass)}
    def create()
      s = Box[String].new
      s.store("foo")

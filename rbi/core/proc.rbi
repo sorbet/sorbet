@@ -1,41 +1,45 @@
 # typed: true
 class Proc < Object
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def arity(); end
 
-  Sorbet.sig.returns(Binding)
+  sig {returns(Binding)}
   def binding(); end
 
-  Sorbet.sig(
-      arg0: BasicObject,
-  )
-  .returns(T.untyped)
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(T.untyped)
+  end
   def call(*arg0); end
 
-  Sorbet.sig(
-      arity: Integer,
-  )
-  .returns(Proc)
+  sig do
+    params(
+        arity: Integer,
+    )
+    .returns(Proc)
+  end
   def curry(arity=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def hash(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def lambda(); end
 
-  Sorbet.sig.returns(T::Array[[Symbol, Symbol]])
+  sig {returns(T::Array[[Symbol, Symbol]])}
   def parameters(); end
 
-  Sorbet.sig.returns([String, Integer])
+  sig {returns([String, Integer])}
   def source_location(); end
 
-  Sorbet.sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def to_proc(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 end

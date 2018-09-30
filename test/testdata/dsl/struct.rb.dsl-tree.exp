@@ -31,7 +31,9 @@ class <emptyTree><<constant:<root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      end
 
       def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
@@ -57,7 +59,9 @@ class <emptyTree><<constant:<root>>> < ()
         arg0
       end
 
-      self(<constant:<todo sym>>).sig({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+      self(<constant:<todo sym>>).sig() do ||
+        self(<constant:<todo sym>>).params({:"foo" => <emptyTree>::<constant:BasicObject>, :"bar" => <emptyTree>::<constant:BasicObject>}).returns(<emptyTree>::<constant:A>)
+      end
 
       def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
         <emptyTree>::<constant:T>.cast(nil, <emptyTree>::<constant:A>)
@@ -75,7 +79,9 @@ class <emptyTree><<constant:<root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      end
 
       def self.new<<constant:<todo sym>>>(foo = nil)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)
@@ -91,7 +97,9 @@ class <emptyTree><<constant:<root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject}).returns(<emptyTree>::<constant:B>)
+      end
 
       def self.new<<constant:<todo sym>>>(foo = nil)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:B>)
@@ -121,7 +129,9 @@ class <emptyTree><<constant:<root>>> < ()
         arg0
       end
 
-      ::Sorbet.sig({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"foo" => ::BasicObject, :"bar" => ::BasicObject}).returns(<emptyTree>::<constant:A>)
+      end
 
       def self.new<<constant:<todo sym>>>(foo = nil, bar = nil)
         ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:A>)

@@ -921,7 +921,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             for (auto &arg : args) {
                 arg = unpickleExpr(p, gs, file);
             }
-            return ast::MK::Block(loc, move(body), sym, move(args));
+            return ast::MK::Block(loc, move(body), move(args), sym);
         }
         case 4: {
             auto tpe = unpickleType(p, &gs);

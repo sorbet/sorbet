@@ -2,7 +2,7 @@
 
 extend T::Helpers
 
-sig(blk: T.nilable(Proc)).void
+sig {params(blk: T.nilable(Proc)).void}
 def f(&blk)
   if block_given?
     yield

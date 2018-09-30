@@ -1,5 +1,5 @@
 extend T::Helpers
 
-sig.returns(Integer)
+sig {returns(Integer)}
 def no_type
 end

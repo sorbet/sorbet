@@ -9,7 +9,7 @@ class Opus::CIBot::Tasks::NotifySlackBuildComplete
 
   def cond; end;
 
-  sig.returns([T.any(TrueClass, FalseClass), T.nilable(String)])
+  sig {returns([T.any(TrueClass, FalseClass), T.nilable(String)])}
   private def determined_build_group_status_and_which
     @determined_build_group_status_and_which ||= [true, "fail"]
   end

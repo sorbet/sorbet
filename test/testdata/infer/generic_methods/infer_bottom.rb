@@ -2,9 +2,11 @@
 extend T::Helpers
 extend T::Generic
 
-type_parameters(:T)
-  .sig(blk: T.proc.returns(T.type_parameter(:T)))
+sig do
+  type_parameters(:T)
+  .params(blk: T.proc.returns(T.type_parameter(:T)))
   .returns(T.type_parameter(:T))
+end
 def callit(&blk)
   blk.call
 end

@@ -6,7 +6,7 @@ class C; end;
 
 extend T::Helpers
 
-sig(x: T.any(B, C)).void
+sig {params(x: T.any(B, C)).void}
 def baz(x)
   if x.is_a?(A)
     T.assert_type!(x, B)

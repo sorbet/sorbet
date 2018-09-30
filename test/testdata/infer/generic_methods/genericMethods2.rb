@@ -2,10 +2,12 @@
 class Foo
   extend T::Generic
 
-  type_parameters(:A).sig(
-      blk: T.proc(arg0: Integer).returns(T.type_parameter(:A)),
-  )
-  .returns(T::Array[T.type_parameter(:A)])
+  sig do
+    type_parameters(:A).params(
+        blk: T.proc.params(arg0: Integer).returns(T.type_parameter(:A)),
+    )
+    .returns(T::Array[T.type_parameter(:A)])
+  end
   def map(&blk);
     [blk.call(1)]
   end

@@ -8,7 +8,7 @@ end
 class ComplexError
   extend T::Helpers
 
-  sig(arg: Integer).returns(NilClass)
+  sig {params(arg: Integer).returns(NilClass)}
   def foo(arg)
     arg
     raise arg # raise is defined by stdlib
@@ -32,7 +32,7 @@ class ErrorLines
     bar(a)
   end
 
-  sig(a: Integer).returns(Integer)
+  sig {params(a: Integer).returns(Integer)}
   def bar(a)
     a
   end

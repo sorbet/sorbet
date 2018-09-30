@@ -3,16 +3,16 @@
 class Yielder
   extend T::Helpers
 
-  sig(blk: T.proc(x: Integer, y: Integer).returns(T.untyped)).void
+  sig {params(blk: T.proc.params(x: Integer, y: Integer).returns(T.untyped)).void}
   def yield_two_ints(&blk); end
 
-  sig(blk: T.proc(x: Integer, y: Integer, z: Integer).returns(T.untyped)).void
+  sig {params(blk: T.proc.params(x: Integer, y: Integer, z: Integer).returns(T.untyped)).void}
   def yield_three_ints(&blk); end
 
-  sig(blk: T.proc(xyz: [Integer, Integer, Integer]).returns(T.untyped)).void
+  sig {params(blk: T.proc.params(xyz: [Integer, Integer, Integer]).returns(T.untyped)).void}
   def yield_tuple(&blk); end
 
-  sig(blk: T.proc(xy: [Integer, Integer], z: Integer).returns(T.untyped)).void
+  sig {params(blk: T.proc.params(xy: [Integer, Integer], z: Integer).returns(T.untyped)).void}
   def yield_tuple_and_int(&blk); end
 end
 

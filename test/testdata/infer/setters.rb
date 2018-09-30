@@ -2,7 +2,7 @@
 class Foo
   extend T::Helpers
 
-  sig(a: String).returns(NilClass)
+  sig {params(a: String).returns(NilClass)}
   def foo=(a)
   end
 

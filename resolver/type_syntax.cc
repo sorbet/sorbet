@@ -37,33 +37,49 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
 }
 
 bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
-    bool sawSig = false;
-    while (send != nullptr) {
-        if (send->fun == core::Names::sig()) {
-            sawSig = true;
-
-            // self.sig
-            if (ast::isa_tree<ast::Self>(send->recv.get())) {
-                return true;
-            }
-
-            // Sorbet.sig
-            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
-            if (recv && recv->symbol == core::Symbols::Sorbet()) {
-                return true;
-            }
-        } else if (send->fun == core::Names::typeParameters() && sawSig && ast::isa_tree<ast::Self>(send->recv.get())) {
-            return true;
-        }
-
-        send = ast::cast_tree<ast::Send>(send->recv.get());
+    if (send->fun != core::Names::sig()) {
+        return false;
     }
+    if (send->block.get() == nullptr) {
+        return false;
+    }
+    if (send->args.size() != 0) {
+        return false;
+    }
+
+    // self.sig
+    if (ast::isa_tree<ast::Self>(send->recv.get())) {
+        return true;
+    }
+
+    // Sorbet.sig
+    auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
+    if (recv && recv->symbol == core::Symbols::Sorbet()) {
+        return true;
+    }
+
     return false;
 }
 
-ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType,
-                               core::SymbolRef untypedBlame) {
+ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, const ParsedSig *parent,
+                               bool allowSelfType, core::SymbolRef untypedBlame) {
     ParsedSig sig;
+
+    ast::Send *send;
+
+    if (isTProc(ctx, sigSend)) {
+        send = sigSend;
+    } else {
+        sig.seen.sig = true;
+        ENFORCE(sigSend->fun == core::Names::sig());
+        auto block = ast::cast_tree<ast::Block>(sigSend->block.get());
+        ENFORCE(block);
+        send = ast::cast_tree<ast::Send>(block->body.get());
+        if (!send) {
+            // The resolver will error out, I guess give them back an empty sig?
+            return sig;
+        }
+    }
 
     {
         ast::Send *tsend = send;
@@ -112,24 +128,21 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
 
     while (send != nullptr) {
         switch (send->fun._id) {
-            case core::Names::sig()._id:
-            case core::Names::proc()._id: {
-                if (sig.seen.sig || sig.seen.proc) {
+            case core::Names::proc()._id:
+                sig.seen.proc = true;
+                break;
+            case core::Names::params()._id: {
+                if (sig.seen.params) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Malformed `{}`: Found multiple argument lists", send->fun.toString(ctx));
+                        e.setHeader("Malformed `{}`: Multiple calls to `.params`", send->fun.toString(ctx));
                     }
                     sig.argTypes.clear();
                 }
-                if (send->fun == core::Names::sig()) {
-                    sig.seen.sig = true;
-                } else {
-                    sig.seen.proc = true;
-                }
+                sig.seen.params = true;
 
                 if (send->args.empty()) {
                     break;
                 }
-                sig.seen.args = true;
 
                 if (send->args.size() > 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
@@ -174,7 +187,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {
                     if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", 1, "sig.returns",
+                        e.setHeader("Wrong number of args to `{}`. Expected: `{}`, got: `{}`", 1, "returns",
                                     send->args.size());
                     }
                     break;
@@ -205,10 +218,22 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *send, const 
                 break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Unknown `sig` builder method `{}`", send->fun.toString(ctx));
+                    e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`", send->fun.toString(ctx));
                 }
         }
-        send = ast::cast_tree<ast::Send>(send->recv.get());
+        auto recv = ast::cast_tree<ast::Send>(send->recv.get());
+
+        if (!recv) {
+            auto self = ast::cast_tree<ast::Self>(send->recv.get());
+            if (self) {
+                self->claz = core::Symbols::Sorbet_Private_Builder();
+            } else {
+                ENFORCE(sig.seen.proc);
+            }
+            break;
+        }
+
+        send = recv;
     }
     ENFORCE(sig.seen.sig || sig.seen.proc);
 

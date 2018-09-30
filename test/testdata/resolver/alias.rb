@@ -3,14 +3,14 @@ class Foo
   extend T::Helpers
 
   A = T.type_alias(Integer)
-  sig(a: A).returns(Integer)
+  sig {params(a: A).returns(Integer)}
   def bar(a)
     a
   end
 
   Reactions = T.type_alias(T.enum(['+1', '-1', 'laugh', 'confused', 'heart', 'hooray']))
 
-  sig.returns(Reactions)
+  sig {returns(Reactions)}
   def react
     any
   end
@@ -24,7 +24,7 @@ class Foo
     country: T.nilable(String),
   ))
 
-  sig.returns(ADDRESS_TYPE)
+  sig {returns(ADDRESS_TYPE)}
   def address
     any
   end

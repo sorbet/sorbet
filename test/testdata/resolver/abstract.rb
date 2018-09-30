@@ -4,15 +4,15 @@ class HasAbstract
   extend T::Helpers
   abstract!
 
-  sig(x: Integer).abstract.returns(String)
+  sig {params(x: Integer).abstract.returns(String)}
   def abstract(x)
   end
 
-  sig.abstract
+  sig {abstract}
   def self.abstract_singleton
   end
 
-  sig(x: Integer).abstract.returns(String)
+  sig {params(x: Integer).abstract.returns(String)}
   def abstract_with_body(x)
     14 # error: Abstract methods must not contain any code in their body
   end
@@ -28,7 +28,7 @@ end
 class AbstractMethodNotClass
   extend T::Helpers
 
-  sig.returns(T.untyped).abstract
+  sig {returns(T.untyped).abstract}
   def f; end # error: you must mark your class/module as abstract
 end
 
@@ -37,7 +37,7 @@ module InterfaceModule
 
   interface!
 
-  sig.returns(T.untyped)
+  sig {returns(T.untyped)}
   def f # error: must be declared abstract
     0
   end

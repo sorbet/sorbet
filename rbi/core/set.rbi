@@ -5,253 +5,329 @@ class Set < Object
   extend T::Generic
   Elem = type_member(:out)
 
-  type_parameters(:U).sig(
-      ary: T.type_parameter(:U),
-  )
-  .returns(T::Set[T.type_parameter(:U)])
+  sig do
+    type_parameters(:U).params(
+        ary: T.type_parameter(:U),
+    )
+    .returns(T::Set[T.type_parameter(:U)])
+  end
   def self.[](*ary); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def +(enum); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def ^(enum); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.self_type)
+  end
   def add(o); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.nilable(T.self_type))
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.nilable(T.self_type))
+  end
   def add?(o); end
 
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: T.type_parameter(:U)).returns(Elem),
-  )
-  .returns(T::Hash[T.type_parameter(:U), T::Set[Elem]])
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: T.type_parameter(:U)).returns(Elem),
+    )
+    .returns(T::Hash[T.type_parameter(:U), T::Set[Elem]])
+  end
   def classify(&blk); end
 
-  Sorbet.sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def clear(); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.self_type)
+  end
   def delete(o); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.nilable(T.self_type))
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.nilable(T.self_type))
+  end
   def delete?(o); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
   def delete_if(&blk); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def difference(enum); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def disjoint?(set); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.self_type)
-  Sorbet.sig.returns(Enumerator[Elem])
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
+  sig {returns(Enumerator[Elem])}
   def each(&blk); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def empty?(); end
 
-  Sorbet.sig.returns(Set)
+  sig {returns(Set)}
   def flatten(); end
 
-  Sorbet.sig.returns(T.nilable(T.self_type))
+  sig {returns(T.nilable(T.self_type))}
   def flatten!(); end
 
-  type_parameters(:U).sig(
-      enum: T::Enumerable[T.type_parameter(:U)],
-  )
-  .void
+  sig do
+    type_parameters(:U).params(
+        enum: T::Enumerable[T.type_parameter(:U)],
+    )
+    .void
+  end
   def initialize(enum=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def intersect?(set); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def intersection(enum); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.self_type)
+  end
   def keep_if(&blk); end
 
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
-  )
-  .returns(T::Set[T.type_parameter(:U)])
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(T::Set[T.type_parameter(:U)])
+  end
   def map!(&blk); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def member?(o); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T.self_type)
+  end
   def merge(enum); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def proper_subset?(set); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def proper_superset?(set); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.nilable(T.self_type))
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(T.self_type))
+  end
   def reject!(&blk); end
 
-  type_parameters(:U).sig(
-      enum: T::Enumerable[T.type_parameter(:U)],
-  )
-  .returns(T::Set[T.type_parameter(:U)])
+  sig do
+    type_parameters(:U).params(
+        enum: T::Enumerable[T.type_parameter(:U)],
+    )
+    .returns(T::Set[T.type_parameter(:U)])
+  end
   def replace(enum); end
 
-  Sorbet.sig(
-      blk: T.proc(arg0: Elem).returns(BasicObject),
-  )
-  .returns(T.nilable(T.self_type))
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.nilable(T.self_type))
+  end
   def select!(&blk); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def size(); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def subset?(set); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T.self_type)
+  end
   def subtract(enum); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def superset?(set); end
 
-  Sorbet.sig.returns(T::Array[Elem])
+  sig {returns(T::Array[Elem])}
   def to_a(); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def &(enum); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def -(enum); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def <(set); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.self_type)
+  end
   def <<(o); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def <=(set); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def >(set); end
 
-  Sorbet.sig(
-      set: T::Set[Elem],
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        set: T::Set[Elem],
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def >=(set); end
 
-  type_parameters(:U).sig(
-      blk: T.proc(arg0: Elem).returns(T.type_parameter(:U)),
-  )
-  .returns(T::Set[T.type_parameter(:U)])
+  sig do
+    type_parameters(:U).params(
+        blk: T.proc.params(arg0: Elem).returns(T.type_parameter(:U)),
+    )
+    .returns(T::Set[T.type_parameter(:U)])
+  end
   def collect!(&blk); end
 
-  Sorbet.sig(
-      o: Elem,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        o: Elem,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def include?(o); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def length(); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def |(enum); end
 
-  Sorbet.sig(
-      enum: T::Enumerable[Elem],
-  )
-  .returns(T::Set[Elem])
+  sig do
+    params(
+        enum: T::Enumerable[Elem],
+    )
+    .returns(T::Set[Elem])
+  end
   def union(enum); end
 end

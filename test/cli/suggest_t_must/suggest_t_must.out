@@ -9,9 +9,9 @@ test/cli/suggest_t_must/suggest_t_must.rb:4: Method `[]` does not exist on `NilC
 test/cli/suggest_t_must/suggest_t_must.rb:6: `T.nilable(String)` doesn't match `String` for argument `arg0` http://go/e/7002
      6 |"hi" + foo
         ^^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/string.rbi#L18: Method `String#+` has specified `arg0` as `String`
-    18 |      arg0: String,
-              ^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/string.rbi#L23: Method `String#+` has specified `arg0` as `String`
+    23 |        arg0: String,
+                ^^^^^
   Got T.nilable(String) originating from:
     test/cli/suggest_t_must/suggest_t_must.rb:3:
      3 |foo = T.let(nil, T.nilable(String))

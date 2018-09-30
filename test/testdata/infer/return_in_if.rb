@@ -2,7 +2,7 @@
 
 extend T::Helpers
 
-sig(cond: T.any(TrueClass, FalseClass)).returns(Integer)
+sig {params(cond: T.any(TrueClass, FalseClass)).returns(Integer)}
 def foo(cond)
   if (cond)
     a = 1

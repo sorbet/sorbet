@@ -42,15 +42,32 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_1" [shape = parallelogram];
 
     "bb::A#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: <Class:A> = self\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: <Class:A>.sig()\l<statTemp>$6: <Class:Integer> = alias <constant:Integer>\l<returnMethodTemp>$2: Sorbet::Private::Builder = <statTemp>$4: Sorbet::Private::Builder.returns(<statTemp>$6: <Class:Integer>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: <Class:A> = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: <Class:A>.sig()\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_0" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_0" -> "bb::A#<static-init>_2" [style="bold"];
     "bb::A#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_1" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::A#<static-init>_2" -> "bb::A#<static-init>_4" [style="bold"];
+    "bb::A#<static-init>_2" -> "bb::A#<static-init>_3" [style="tapered"];
+
+    "bb::A#<static-init>_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:A>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$10: <Class:Integer> = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: <Class:Integer>)\l<blockReturnTemp>$11: <impossible> = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_4" -> "bb::A#<static-init>_2" [style="bold"];
 }
 
 subgraph "cluster_::Bar#baz" {
@@ -78,15 +95,32 @@ subgraph "cluster_::Bar#<static-init>" {
     "bb::Bar#<static-init>_1" [shape = parallelogram];
 
     "bb::Bar#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: <Class:Bar> = self\l<hashTemp>$7: Symbol(:\"arg\") = :\"arg\"\l<hashTemp>$8: <Class:Integer> = alias <constant:Integer>\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: {arg: <Class:Integer>} = <magic>$9: <Magic>.<build-hash>(<hashTemp>$7: Symbol(:\"arg\"), <hashTemp>$8: <Class:Integer>)\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: <Class:Bar>.sig(<statTemp>$6: {arg: <Class:Integer>})\l<statTemp>$10: <Class:Integer> = alias <constant:Integer>\l<returnMethodTemp>$2: Sorbet::Private::Builder = <statTemp>$4: Sorbet::Private::Builder.returns(<statTemp>$10: <Class:Integer>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: <Class:Bar> = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: <Class:Bar>.sig()\l<unconditional>\l"
     ];
 
-    "bb::Bar#<static-init>_0" -> "bb::Bar#<static-init>_1" [style="bold"];
+    "bb::Bar#<static-init>_0" -> "bb::Bar#<static-init>_2" [style="bold"];
     "bb::Bar#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb::Bar#<static-init>_1" -> "bb::Bar#<static-init>_1" [style="bold"];
+    "bb::Bar#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::Bar#<static-init>_2" -> "bb::Bar#<static-init>_4" [style="bold"];
+    "bb::Bar#<static-init>_2" -> "bb::Bar#<static-init>_3" [style="tapered"];
+
+    "bb::Bar#<static-init>_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Bar>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+    ];
+
+    "bb::Bar#<static-init>_3" -> "bb::Bar#<static-init>_1" [style="bold"];
+    "bb::Bar#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"arg\") = :\"arg\"\l<hashTemp>$13: <Class:Integer> = alias <constant:Integer>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {arg: <Class:Integer>} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"arg\"), <hashTemp>$13: <Class:Integer>)\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {arg: <Class:Integer>})\l<statTemp>$15: <Class:Integer> = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: <Class:Integer>)\l<blockReturnTemp>$16: <impossible> = blockreturn<::<Class:Bar>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::Bar#<static-init>_4" -> "bb::Bar#<static-init>_2" [style="bold"];
 }
 
 }

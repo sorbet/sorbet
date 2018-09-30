@@ -209,76 +209,90 @@ class Encoding < Object
   Windows_31J = T.let(T.unsafe(nil), Encoding)
   Windows_874 = T.let(T.unsafe(nil), Encoding)
 
-  Sorbet.sig.returns(T::Hash[String, String])
+  sig {returns(T::Hash[String, String])}
   def self.aliases(); end
 
-  Sorbet.sig(
-      obj1: BasicObject,
-      obj2: BasicObject,
-  )
-  .returns(T.nilable(Encoding))
+  sig do
+    params(
+        obj1: BasicObject,
+        obj2: BasicObject,
+    )
+    .returns(T.nilable(Encoding))
+  end
   def self.compatible?(obj1, obj2); end
 
-  Sorbet.sig.returns(Encoding)
+  sig {returns(Encoding)}
   def self.default_external(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: Encoding,
-  )
-  .returns(Encoding)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: Encoding,
+    )
+    .returns(Encoding)
+  end
   def self.default_external=(arg0); end
 
-  Sorbet.sig.returns(Encoding)
+  sig {returns(Encoding)}
   def self.default_internal(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      arg0: Encoding,
-  )
-  .returns(T.nilable(Encoding))
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        arg0: Encoding,
+    )
+    .returns(T.nilable(Encoding))
+  end
   def self.default_internal=(arg0); end
 
-  Sorbet.sig(
-      arg0: T.any(String, Encoding),
-  )
-  .returns(Encoding)
+  sig do
+    params(
+        arg0: T.any(String, Encoding),
+    )
+    .returns(Encoding)
+  end
   def self.find(arg0); end
 
-  Sorbet.sig.returns(T::Array[Encoding])
+  sig {returns(T::Array[Encoding])}
   def self.list(); end
 
-  Sorbet.sig.returns(T::Array[String])
+  sig {returns(T::Array[String])}
   def self.name_list(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def ascii_compatible?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def dummy?(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def name(); end
 
-  Sorbet.sig.returns(T::Array[String])
+  sig {returns(T::Array[String])}
   def names(); end
 
-  Sorbet.sig(
-      name: String,
-  )
-  .returns(Encoding)
+  sig do
+    params(
+        name: String,
+    )
+    .returns(Encoding)
+  end
   def replicate(name); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 end
 

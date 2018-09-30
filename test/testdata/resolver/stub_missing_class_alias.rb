@@ -11,7 +11,7 @@ class O::B
   extend T::Helpers
 
 
-  sig(arg: Document::J, # error: Unable to resolve constant `J`
+  sig.params(arg: Document::J, # error: Unable to resolve constant `J`
    arg1: Doc1::J).void  # error: Unable to resolve constant `J`
   def self.foo(arg, arg1); end
 end

@@ -38,43 +38,33 @@ core::NameRef getName(core::MutableContext ctx, ast::Expression *name) {
 //
 // There must be both a `sig` and a `returns` in order for isSig to be true.
 bool isSig(const ast::Send *send) {
-    if (send == nullptr || send->fun != core::Names::returns()) {
+    if (send->fun != core::Names::sig()) {
         return false;
     }
-    if (send->args.size() != 1) {
-        // They will already get an error about too many / not enough arguments later in the pipeline.
+    if (send->block.get() == nullptr) {
+        return false;
+    }
+    if (send->args.size() != 0) {
+        return false;
+    }
+    auto block = ast::cast_tree<ast::Block>(send->block.get());
+    ENFORCE(block);
+    auto body = ast::cast_tree<ast::Send>(block->body.get());
+    ENFORCE(body);
+    if (body->fun != core::Names::returns()) {
         return false;
     }
 
-    while (send != nullptr) {
-        if (send->fun == core::Names::sig()) {
-            // self.sig
-            if (ast::isa_tree<ast::Self>(send->recv.get())) {
-                return true;
-            }
-
-            // Sorbet.sig
-            auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
-            if (recv && recv->symbol == core::Symbols::Sorbet()) {
-                return true;
-            }
-        }
-
-        send = ast::cast_tree<ast::Send>(send->recv.get());
-    }
-    return false;
+    return true;
 }
 
 // To convert a sig into a writer sig with argument `name`, we copy the `returns(...)`
-// value into the `sig(...)` using whatever name we have for the setter.
+// value into the `sig {params(...)}` using whatever name we have for the setter.
 //
 // This change is done in place; it's assumed that the caller created a new sig for us.
-unique_ptr<ast::Send> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
-                                         const core::NameRef name) {
+unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const ast::Send *sharedSig,
+                                               const core::NameRef name) {
     ENFORCE(isSig(sharedSig), "We weren't given a send node that's a valid signature");
-    ENFORCE(sharedSig->fun == core::Names::returns(),
-            "Top-level sig->fun is not 'returns': ", sharedSig->fun.toString(ctx));
-    ENFORCE(sharedSig->args.size() == 1, "Return must have one arg, but has ", sharedSig->args.size());
 
     // There's a bit of work here because deepCopy gives us back an Expression when we know it's a Send.
     unique_ptr<ast::Expression> sigExp = sharedSig->deepCopy();
@@ -83,14 +73,21 @@ unique_ptr<ast::Send> toWriterSigForName(core::MutableContext ctx, const ast::Se
     unique_ptr<ast::Send> sig(sigSend);
     sigExp.release();
 
-    unique_ptr<ast::Expression> resultType = sig->args[0]->deepCopy();
-
     // Loop down the chain of recv's until we get to the inner 'sig' node.
-    ast::Send *cur = sig.get();
+    auto block = ast::cast_tree<ast::Block>(sig->block.get());
+    auto body = ast::cast_tree<ast::Send>(block->body.get());
+
+    ENFORCE(body->fun == core::Names::returns());
+    ENFORCE(body->args.size() == 1);
+    unique_ptr<ast::Expression> resultType = body->args[0]->deepCopy();
+    ast::Send *cur = body;
     while (cur != nullptr) {
-        if (cur->fun == core::Names::sig()) {
-            cur->args.clear();
-            cur->args.emplace_back(ast::MK::Hash1(cur->loc, ast::MK::Symbol(cur->loc, name), move(resultType)));
+        auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv.get());
+        if (ast::isa_tree<ast::Self>(cur->recv.get()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+            auto loc = resultType->loc;
+            auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(cur->loc, name), move(resultType));
+            auto params = ast::MK::Send1(loc, move(cur->recv), core::Names::params(), move(hash));
+            cur->recv = move(params);
             break;
         }
 
@@ -101,19 +98,19 @@ unique_ptr<ast::Send> toWriterSigForName(core::MutableContext ctx, const ast::Se
 
 // Converts something like
 //
-//     sig.returns(String)
+//     sig {returns(String)}
 //     attr_accessor :foo, :bar
 //
 // Into something like
 //
-//     sig.returns(String)                  (1)
+//     sig {returns(String)}                  (1)
 //     def foo; @foo; end
-//     sig(foo: String).returns(String)     (2)
+//     sig {params(foo: String).returns(String)}     (2)
 //     def foo=(foo); @foo = foo; end
 //
-//     sig.returns(String)                  (3)
+//     sig {returns(String)}                  (3)
 //     def bar; @bar; end
-//     sig(bar: String).returns(String)     (4)
+//     sig {params(bar: String).returns(String)}     (4)
 //     def bar=(bar); @bar = bar; end
 //
 // We have to do a bit of work, because the one `sig` we have will have to be
@@ -126,7 +123,7 @@ unique_ptr<ast::Send> toWriterSigForName(core::MutableContext ctx, const ast::Se
 // Also note that the burden is on the user to provide an accurate type signature.
 // All attr_accessor's should probably have `T.nilable(...)` to account for a
 // read-before-write.
-vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, const ast::Send *send,
+vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext ctx, ast::Send *send,
                                                            const ast::Expression *prevStat) {
     vector<unique_ptr<ast::Expression>> empty;
 
@@ -147,7 +144,7 @@ vector<unique_ptr<ast::Expression>> AttrReader::replaceDSL(core::MutableContext 
     vector<unique_ptr<ast::Expression>> stats;
 
     auto sig = ast::cast_tree_const<ast::Send>(prevStat);
-    bool hasSig = isSig(sig);
+    bool hasSig = sig && isSig(sig);
 
     bool usedPrevSig = false;
 

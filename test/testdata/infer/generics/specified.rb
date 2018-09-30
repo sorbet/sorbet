@@ -12,7 +12,7 @@ class Parent
 
   Elem = type_member
 
-  sig(a: Elem).returns(Elem)
+  sig {params(a: Elem).returns(Elem)}
   def foo(a)
     a
   end
@@ -31,7 +31,7 @@ module Mixin
   extend T::Generic
   Elem = type_member
 
-  sig(a: Elem).returns(Elem)
+  sig {params(a: Elem).returns(Elem)}
   def foo(a)
     a
   end
@@ -54,7 +54,7 @@ class ParentWithMultiple
   K = type_member
   V = type_member
 
-  sig(k: K, v: V).returns(K)
+  sig {params(k: K, v: V).returns(K)}
   def foo(k, v)
     k
   end
@@ -77,7 +77,7 @@ class FullChild < HalfChild
   K = type_member(fixed: Integer)
   V = type_member(fixed: String)
 
-  sig(f: FullChild).returns(FullChild[])
+  sig {params(f: FullChild).returns(FullChild[])}
   def f(f); f; end
 end
 

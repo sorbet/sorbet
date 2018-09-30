@@ -1,6 +1,6 @@
 # typed: true
 module Kernel
-  Sorbet.sig(uri: T.any(URI::Generic, String)).returns(URI::Generic)
+  sig {params(uri: T.any(URI::Generic, String)).returns(URI::Generic)}
   def URI(uri); end
 end
 
@@ -31,82 +31,106 @@ module URI
   VERSION_CODE = T.let(T.unsafe(nil), String)
   WEB_ENCODINGS_ = T.let(T.unsafe(nil), Hash)
 
-  Sorbet.sig(
-      str: String,
-      enc: Encoding,
-  )
-  .returns(T::Array[[String, String]])
+  sig do
+    params(
+        str: String,
+        enc: Encoding,
+    )
+    .returns(T::Array[[String, String]])
+  end
   def self.decode_www_form_component(str, enc=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg: String,
-      arg0: Regexp,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg: String,
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg: String,
+        arg0: Regexp,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg: String,
+        arg0: String,
+    )
+    .returns(String)
+  end
   def self.escape(arg, *arg0); end
 
-  Sorbet.sig(
-      str: String,
-      schemes: Array,
-      blk: BasicObject,
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        str: String,
+        schemes: Array,
+        blk: BasicObject,
+    )
+    .returns(T::Array[String])
+  end
   def self.extract(str, schemes=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      str: String,
-  )
-  .returns(URI::HTTP)
+  sig do
+    params(
+        str: String,
+    )
+    .returns(URI::HTTP)
+  end
   def self.join(*str); end
 
-  Sorbet.sig(
-      uri: String,
-  )
-  .returns(URI::HTTP)
+  sig do
+    params(
+        uri: String,
+    )
+    .returns(URI::HTTP)
+  end
   def self.parse(uri); end
 
-  Sorbet.sig(
-      schemes: Array,
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        schemes: Array,
+    )
+    .returns(T::Array[String])
+  end
   def self.regexp(schemes=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(T::Hash[String, Class])
+  sig {returns(T::Hash[String, Class])}
   def self.scheme_list(); end
 
-  Sorbet.sig(
-      uri: String,
-  )
-  .returns(T::Array[T.nilable(String)])
+  sig do
+    params(
+        uri: String,
+    )
+    .returns(T::Array[T.nilable(String)])
+  end
   def self.split(uri); end
 
-  Sorbet.sig(
-      arg: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg: String,
+    )
+    .returns(String)
+  end
   def self.unescape(*arg); end
 
-  Sorbet.sig(
-      arg: String,
-      arg0: Regexp,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg: String,
-      arg0: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg: String,
+        arg0: Regexp,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg: String,
+        arg0: String,
+    )
+    .returns(String)
+  end
   def self.encode(arg, *arg0); end
 
-  Sorbet.sig(
-      arg: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg: String,
+    )
+    .returns(String)
+  end
   def self.decode(*arg); end
 end
 

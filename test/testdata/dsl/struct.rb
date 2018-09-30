@@ -20,7 +20,7 @@ class RealStructDesugar
         def bar; end
         def foo=(arg0); arg0; end
         def bar=(arg0); arg0; end
-        sig(foo: BasicObject, bar: BasicObject).returns(A)
+        sig {params(foo: BasicObject, bar: BasicObject).returns(A)}
         def self.new(foo=nil, bar=nil)
             T.cast(nil, A)
         end

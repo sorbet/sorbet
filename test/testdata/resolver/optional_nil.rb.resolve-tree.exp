@@ -41,10 +41,18 @@ begin
 
     def self.<static-init><<static-init>>()
       begin
-        self(<singleton class:<constant:Test>>).sig({:"x" => ::String}).returns(::String)
-        self(<singleton class:<constant:Test>>).sig({:"y" => ::String}).returns(::String)
-        self(<singleton class:<constant:Test>>).sig({:"z" => ::String}).returns(::String)
-        self(<singleton class:<constant:Test>>).sig({:"w" => ::String}).returns(::String)
+        self(<singleton class:<constant:Test>>).sig() do ||
+          self(<constant:Builder>).params({:"x" => ::String}).returns(::String)
+        end
+        self(<singleton class:<constant:Test>>).sig() do ||
+          self(<constant:Builder>).params({:"y" => ::String}).returns(::String)
+        end
+        self(<singleton class:<constant:Test>>).sig() do ||
+          self(<constant:Builder>).params({:"z" => ::String}).returns(::String)
+        end
+        self(<singleton class:<constant:Test>>).sig() do ||
+          self(<constant:Builder>).params({:"w" => ::String}).returns(::String)
+        end
         <emptyTree>
       end
     end

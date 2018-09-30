@@ -2,8 +2,9 @@
 class A
   extend T::Helpers
 
-  sig
-  .returns(Integer)
+  sig do
+    returns(Integer)
+  end
   def foo # error: does not conform to method result type
   end
 end
@@ -11,10 +12,12 @@ end
 class Bar < A
   extend T::Helpers
 
-  sig(
-    arg: Integer
-  )
-  .returns(Integer)
+  sig do
+    params(
+      arg: Integer
+    )
+    .returns(Integer)
+  end
   def baz(arg)
     foo
   end

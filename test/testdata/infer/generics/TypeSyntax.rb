@@ -3,12 +3,12 @@
 class Generics
  extend T::Helpers
 
- sig(arr: T::Array[String]).returns(T.nilable(String))
+ sig {params(arr: T::Array[String]).returns(T.nilable(String))}
  def read(arr)
    T.assert_type!(arr[0], T.nilable(String))
  end
 
- sig().returns(T::Array[String])
+ sig {params().returns(T::Array[String])}
  def create()
    T.assert_type!(T::Array[String].new(), T::Array[String])
  end

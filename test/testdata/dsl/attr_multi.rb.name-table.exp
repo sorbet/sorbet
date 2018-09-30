@@ -29,4 +29,16 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::Test#i= (i) -> String @ test/testdata/dsl/attr_multi.rb:22
       argument ::Test#i=#i<> -> String @ test/testdata/dsl/attr_multi.rb:21
   class ::<Class:Test> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/dsl/attr_multi.rb:3
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:15
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:18
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:21
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:21
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:6
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:6
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:9
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:12
+    method ::<Class:Test>#<block> () @ test/testdata/dsl/attr_multi.rb:15
 

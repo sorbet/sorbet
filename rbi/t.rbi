@@ -2,21 +2,24 @@
 module T::Helpers
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
-  sig(params: T.untyped).returns(Sorbet::Private::Builder)
-  def sig(**params); end
+
+  sig {returns(Sorbet::Private::Builder)}
+  def sig; end
 end
 
 module T
   extend T::Helpers
 
-  Sorbet.sig(x: T.untyped).returns(T.untyped)
+  sig {params(x: T.untyped).returns(T.untyped)}
   def self.unsafe(x); end
 
   # Once we get generic methods, it should return T.nilable(<type>)
-  Sorbet.sig(
-    obj: T.untyped,
-    type: Class
-  ).returns(T.untyped)
+  sig do
+    params(
+      obj: T.untyped,
+      type: Class
+    ).returns(T.untyped)
+  end
   def self.dynamic_cast(obj, type); end
 
   # These are implemented in C++ when they appear in type context; We
@@ -26,16 +29,16 @@ module T
   # here still applies, but additional checking and/or analysis is
   # performed in C++ for that method.
 
-  sig(exp: T.untyped, type: T.untyped).returns(BasicObject)
+  sig {params(exp: T.untyped, type: T.untyped).returns(BasicObject)}
   def self.let(exp, type); end
 
-  sig(exp: T.untyped, type: T.untyped).returns(BasicObject)
+  sig {params(exp: T.untyped, type: T.untyped).returns(BasicObject)}
   def self.assert_type!(exp, type); end
 
-  sig(exp: T.untyped, type: T.untyped).returns(BasicObject)
+  sig {params(exp: T.untyped, type: T.untyped).returns(BasicObject)}
   def self.cast(exp, type); end
 
-  sig(type: T.untyped).returns(BasicObject)
+  sig {params(type: T.untyped).returns(BasicObject)}
   def self.nilable(type); end
 
   def self.proc(**args); end
@@ -44,10 +47,10 @@ module T
   def self.enum(values); end
   def self.untyped; end
 
-  sig(arg0: T.untyped, types: T.untyped).returns(BasicObject)
+  sig {params(arg0: T.untyped, types: T.untyped).returns(BasicObject)}
   def self.any(arg0, *types); end
 
-  sig(arg0: T.untyped, types: T.untyped).returns(BasicObject)
+  sig {params(arg0: T.untyped, types: T.untyped).returns(BasicObject)}
   def self.all(arg0, *types); end
 
   def self.reveal_type(value); end
@@ -55,7 +58,7 @@ module T
   def self.self_type; end
   def self.type_alias(other); end
 
-  Sorbet.sig(arg: T.untyped, error: String).returns(T.untyped)
+  sig {params(arg: T.untyped, error: String).returns(T.untyped)}
   def self.must(arg, error=""); end
 
   def self.coerce(type); end
@@ -64,7 +67,7 @@ end
 module T::Generic
   include T::Helpers
 
-  sig(params: T.untyped).returns(Sorbet::Private::Builder)
+  sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def type_parameters(*params); end
 
   def type_member(fixed: nil); end

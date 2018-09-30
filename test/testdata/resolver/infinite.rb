@@ -2,10 +2,10 @@
 extend T::Helpers
 
 S = S # error: Class alias aliases to itself
-sig(s: S).void; # error: Constant `S` is not a class or type alias
+sig {params(s: S).void}; # error: Constant `S` is not a class or type alias
 def f(s); end
 
-sig(s: U60).void # current resolution limit is 30, but because we're iterative we can resolve past it.
+sig {params(s: U60).void} # current resolution limit is 30, but because we're iterative we can resolve past it.
 def f_long(s); end
 
 U0 = Integer

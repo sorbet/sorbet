@@ -78,15 +78,66 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
     "bb::Funcs#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: <Class:Funcs> = self\l<hashTemp>$8: Symbol(:\"x\") = :\"x\"\l<hashTemp>$9: <Class:Integer> = alias <constant:Integer>\l<magic>$10: <Magic> = alias <constant:<Magic>>\l<statTemp>$7: {x: <Class:Integer>} = <magic>$10: <Magic>.<build-hash>(<hashTemp>$8: Symbol(:\"x\"), <hashTemp>$9: <Class:Integer>)\l<statTemp>$5: Sorbet::Private::Builder = <statTemp>$6: <Class:Funcs>.sig(<statTemp>$7: {x: <Class:Integer>})\l<statTemp>$11: <Class:Integer> = alias <constant:Integer>\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: Sorbet::Private::Builder.returns(<statTemp>$11: <Class:Integer>)\l<statTemp>$13: <Class:Funcs> = self\l<statTemp>$14: Symbol(:\"f\") = :\"f\"\l<statTemp>$12: <Class:Funcs> = <statTemp>$13: <Class:Funcs>.module_function(<statTemp>$14: Symbol(:\"f\"))\l<statTemp>$17: <Class:Funcs> = self\l<hashTemp>$19: Symbol(:\"s\") = :\"s\"\l<hashTemp>$20: <Class:Symbol> = alias <constant:Symbol>\l<magic>$21: <Magic> = alias <constant:<Magic>>\l<statTemp>$18: {s: <Class:Symbol>} = <magic>$21: <Magic>.<build-hash>(<hashTemp>$19: Symbol(:\"s\"), <hashTemp>$20: <Class:Symbol>)\l<statTemp>$16: Sorbet::Private::Builder = <statTemp>$17: <Class:Funcs>.sig(<statTemp>$18: {s: <Class:Symbol>})\l<statTemp>$22: <Class:Symbol> = alias <constant:Symbol>\l<statTemp>$15: Sorbet::Private::Builder = <statTemp>$16: Sorbet::Private::Builder.returns(<statTemp>$22: <Class:Symbol>)\l<statTemp>$24: <Class:Funcs> = self\l<statTemp>$23: <Class:Funcs> = <statTemp>$24: <Class:Funcs>.module_function()\l<statTemp>$27: <Class:Funcs> = self\l<hashTemp>$29: Symbol(:\"s\") = :\"s\"\l<hashTemp>$30: <Class:String> = alias <constant:String>\l<magic>$31: <Magic> = alias <constant:<Magic>>\l<statTemp>$28: {s: <Class:String>} = <magic>$31: <Magic>.<build-hash>(<hashTemp>$29: Symbol(:\"s\"), <hashTemp>$30: <Class:String>)\l<statTemp>$26: Sorbet::Private::Builder = <statTemp>$27: <Class:Funcs>.sig(<statTemp>$28: {s: <Class:String>})\l<statTemp>$32: <Class:String> = alias <constant:String>\l<statTemp>$25: Sorbet::Private::Builder = <statTemp>$26: Sorbet::Private::Builder.returns(<statTemp>$32: <Class:String>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: <Class:Funcs> = self\l<block-pre-call-temp>$6: Sorbet::Private::Builder = <statTemp>$5: <Class:Funcs>.sig()\l<unconditional>\l"
     ];
 
-    "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_1" [style="bold"];
+    "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_2" [style="bold"];
     "bb::Funcs#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_1" -> "bb::Funcs#<static-init>_1" [style="bold"];
+    "bb::Funcs#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::Funcs#<static-init>_2" -> "bb::Funcs#<static-init>_4" [style="bold"];
+    "bb::Funcs#<static-init>_2" -> "bb::Funcs#<static-init>_3" [style="tapered"];
+
+    "bb::Funcs#<static-init>_3" [
+        label = "block[id=3]()\l<statTemp>$4: T.untyped = Solve<::<Class:Funcs>#<block>>\l<statTemp>$19: <Class:Funcs> = self\l<statTemp>$20: Symbol(:\"f\") = :\"f\"\l<statTemp>$18: <Class:Funcs> = <statTemp>$19: <Class:Funcs>.module_function(<statTemp>$20: Symbol(:\"f\"))\l<statTemp>$22: <Class:Funcs> = self\l<block-pre-call-temp>$23: Sorbet::Private::Builder = <statTemp>$22: <Class:Funcs>.sig()\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_3" -> "bb::Funcs#<static-init>_5" [style="bold"];
+    "bb::Funcs#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$11: Sorbet::Private::Builder = self\l<hashTemp>$13: Symbol(:\"x\") = :\"x\"\l<hashTemp>$14: <Class:Integer> = alias <constant:Integer>\l<magic>$15: <Magic> = alias <constant:<Magic>>\l<statTemp>$12: {x: <Class:Integer>} = <magic>$15: <Magic>.<build-hash>(<hashTemp>$13: Symbol(:\"x\"), <hashTemp>$14: <Class:Integer>)\l<statTemp>$10: Sorbet::Private::Builder = <statTemp>$11: Sorbet::Private::Builder.params(<statTemp>$12: {x: <Class:Integer>})\l<statTemp>$16: <Class:Integer> = alias <constant:Integer>\l<blockReturnTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.returns(<statTemp>$16: <Class:Integer>)\l<blockReturnTemp>$17: <impossible> = blockreturn<::<Class:Funcs>#<block>> <blockReturnTemp>$9: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_4" -> "bb::Funcs#<static-init>_2" [style="bold"];
+    "bb::Funcs#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::Funcs#<static-init>_5" -> "bb::Funcs#<static-init>_7" [style="bold"];
+    "bb::Funcs#<static-init>_5" -> "bb::Funcs#<static-init>_6" [style="tapered"];
+
+    "bb::Funcs#<static-init>_6" [
+        label = "block[id=6]()\l<statTemp>$21: T.untyped = Solve<::<Class:Funcs>#<block>>\l<statTemp>$36: <Class:Funcs> = self\l<statTemp>$35: <Class:Funcs> = <statTemp>$36: <Class:Funcs>.module_function()\l<statTemp>$38: <Class:Funcs> = self\l<block-pre-call-temp>$39: Sorbet::Private::Builder = <statTemp>$38: <Class:Funcs>.sig()\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_6" -> "bb::Funcs#<static-init>_8" [style="bold"];
+    "bb::Funcs#<static-init>_7" [
+        label = "block[id=7]()\louterLoops: 1\l<statTemp>$28: Sorbet::Private::Builder = self\l<hashTemp>$30: Symbol(:\"s\") = :\"s\"\l<hashTemp>$31: <Class:Symbol> = alias <constant:Symbol>\l<magic>$32: <Magic> = alias <constant:<Magic>>\l<statTemp>$29: {s: <Class:Symbol>} = <magic>$32: <Magic>.<build-hash>(<hashTemp>$30: Symbol(:\"s\"), <hashTemp>$31: <Class:Symbol>)\l<statTemp>$27: Sorbet::Private::Builder = <statTemp>$28: Sorbet::Private::Builder.params(<statTemp>$29: {s: <Class:Symbol>})\l<statTemp>$33: <Class:Symbol> = alias <constant:Symbol>\l<blockReturnTemp>$26: Sorbet::Private::Builder = <statTemp>$27: Sorbet::Private::Builder.returns(<statTemp>$33: <Class:Symbol>)\l<blockReturnTemp>$34: <impossible> = blockreturn<::<Class:Funcs>#<block>> <blockReturnTemp>$26: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_7" -> "bb::Funcs#<static-init>_5" [style="bold"];
+    "bb::Funcs#<static-init>_8" [
+        label = "block[id=8]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::Funcs#<static-init>_8" -> "bb::Funcs#<static-init>_10" [style="bold"];
+    "bb::Funcs#<static-init>_8" -> "bb::Funcs#<static-init>_9" [style="tapered"];
+
+    "bb::Funcs#<static-init>_9" [
+        label = "block[id=9]()\l<statTemp>$37: T.untyped = Solve<::<Class:Funcs>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_9" -> "bb::Funcs#<static-init>_1" [style="bold"];
+    "bb::Funcs#<static-init>_10" [
+        label = "block[id=10]()\louterLoops: 1\l<statTemp>$44: Sorbet::Private::Builder = self\l<hashTemp>$46: Symbol(:\"s\") = :\"s\"\l<hashTemp>$47: <Class:String> = alias <constant:String>\l<magic>$48: <Magic> = alias <constant:<Magic>>\l<statTemp>$45: {s: <Class:String>} = <magic>$48: <Magic>.<build-hash>(<hashTemp>$46: Symbol(:\"s\"), <hashTemp>$47: <Class:String>)\l<statTemp>$43: Sorbet::Private::Builder = <statTemp>$44: Sorbet::Private::Builder.params(<statTemp>$45: {s: <Class:String>})\l<statTemp>$49: <Class:String> = alias <constant:String>\l<blockReturnTemp>$42: Sorbet::Private::Builder = <statTemp>$43: Sorbet::Private::Builder.returns(<statTemp>$49: <Class:String>)\l<blockReturnTemp>$50: <impossible> = blockreturn<::<Class:Funcs>#<block>> <blockReturnTemp>$42: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::Funcs#<static-init>_10" -> "bb::Funcs#<static-init>_8" [style="bold"];
 }
 
 subgraph "cluster_::C#test_calls" {

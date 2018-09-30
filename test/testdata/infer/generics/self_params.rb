@@ -4,12 +4,12 @@ class Foo
   Self_Type_Member = type_template()
   Not_A_Self_Type = type_member()
 
-  sig(arg: Self_Type_Member).returns(Self_Type_Member)
+  sig {params(arg: Self_Type_Member).returns(Self_Type_Member)}
   def self.bla(arg)
     arg
   end
 
-  sig(arg: Not_A_Self_Type).returns(Not_A_Self_Type)
+  sig {params(arg: Not_A_Self_Type).returns(Not_A_Self_Type)}
   def self.invalid(arg) # error: Expression does not have a fully-defined type
     arg
   end

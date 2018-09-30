@@ -12,15 +12,15 @@ class Main
     def one_required(foo, **args)
     end
 
-    sig(foo: Integer, args: String).returns(NilClass)
+    sig {params(foo: Integer, args: String).returns(NilClass)}
     def one_kwarg(foo:, **args)
     end
 
-    sig(args: Integer).returns(NilClass)
+    sig {params(args: Integer).returns(NilClass)}
     def with_type(**args)
     end
 
-    sig(x: String, y: Symbol).returns(NilClass)
+    sig {params(x: String, y: Symbol).returns(NilClass)}
     def opt_and_repeated_kw(x="hi", **y)
     end
 

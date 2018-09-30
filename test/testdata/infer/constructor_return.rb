@@ -2,7 +2,7 @@
 class A
   extend T::Helpers
 
-  sig.returns(Integer)
+  sig {returns(Integer)}
   def initialize()
     yield
     1

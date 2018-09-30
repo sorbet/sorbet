@@ -2,7 +2,7 @@
 class Parent
   extend T::Helpers
 
-  sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def returns_self
     self
   end
@@ -14,7 +14,7 @@ class Generic < Parent
   extend T::Generic
   TM = type_member()
 
-  sig.returns(Generic[T.self_type]) # error: Only top-level T.self_type is supported
+  sig {returns(Generic[T.self_type])} # error: Only top-level T.self_type is supported
   def bad
    Generic[T.untyped].new
   end
@@ -34,7 +34,7 @@ end
 class Array
     extend T::Helpers
 
-    sig.returns(T.self_type)
+    sig {returns(T.self_type)}
     def returns_self
       self
     end
@@ -48,7 +48,7 @@ end
 module B
   extend T::Helpers
 
-  sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def returns_self
      self
   end

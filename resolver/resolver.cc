@@ -606,7 +606,7 @@ private:
         auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true, method);
 
         if (!sig.seen.returns && !sig.seen.void_) {
-            if (sig.seen.args ||
+            if (sig.seen.params ||
                 !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation || sig.seen.overridable)) {
                 if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
@@ -653,7 +653,7 @@ private:
                 ++it;
             } else {
                 arg.data(ctx).resultType = core::Types::untyped(ctx, arg);
-                if (sig.seen.args || sig.seen.returns || sig.seen.void_) {
+                if (sig.seen.params || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
                     if (auto e =
                             ctx.state.beginError(arg.data(ctx).loc(), core::errors::Resolver::InvalidMethodSignature)) {
@@ -682,7 +682,7 @@ private:
 
     // In order to check a default argument that looks like
     //
-    //     sig(x: T)
+    //     sig {params(x: T)}
     //     def foo(x: <expr>)
     //       ...
     //     end
@@ -788,6 +788,10 @@ private:
                                 }
                             }
                         }
+
+                        // parsing the sig will transform the sig into a format we can use
+                        TypeSyntax::parseSig(ctx, send, nullptr, true, core::Symbols::untyped());
+
                         lastSig.emplace_back(stat.get());
                         return;
                     }

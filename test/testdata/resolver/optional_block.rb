@@ -4,7 +4,7 @@ module M
   class C
     # extend T::Helpers
 
-    # sig(x: String).returns(String)
+    # sig {params(x: String).returns(String)}
     def self.id(x)
       x
     end
@@ -16,7 +16,7 @@ class Test
 
   foo = T.let(
     lambda {|x: nil| 'hello, ' + x.to_s},
-    T.proc(x: T.nilable(String)).returns(String)
+    T.proc.params(x: T.nilable(String)).returns(String)
   ) # error: Argument does not have asserted type `Proc1[String, T.nilable(String)]`
 
   bar = lambda do |x = M::C.id('')|

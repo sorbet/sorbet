@@ -4,12 +4,12 @@ class A
 
   def _; end
 
-  sig(blk: T.proc(a: Integer, b: Float).returns(String)).returns(String)
+  sig {params(blk: T.proc.params(a: Integer, b: Float).returns(String)).returns(String)}
   def yields(&blk)
     blk.call(13, 1.0)
   end
 
-  sig.returns(String)
+  sig {returns(String)}
   def callit
     v = yields do |x, y|
       T.assert_type!(x, Integer)
@@ -19,7 +19,7 @@ class A
     T.assert_type!(v, String)
   end
 
-  sig.returns(NilClass)
+  sig {returns(NilClass)}
   def badnext
     yields do
       if _
@@ -32,11 +32,11 @@ class A
     nil
   end
 
-  sig.returns(NilClass)
+  sig {returns(NilClass)}
   def noblock
   end
 
-  sig.returns(NilClass)
+  sig {returns(NilClass)}
   def extra_block
     noblock do |x|
       x + 1 # Should be typed as untyped
@@ -49,7 +49,7 @@ class A
   class ConstructorBlock
     extend T::Helpers
 
-    sig(blk: T.proc(s: Symbol).returns(String)).returns(NilClass)
+    sig {params(blk: T.proc.params(s: Symbol).returns(String)).returns(NilClass)}
     def initialize(&blk)
     end
   end
@@ -76,7 +76,7 @@ class A
     end
   end
 
-  sig.returns(Integer)
+  sig {returns(Integer)}
   def return_from_block
     yields do # error: Returning value that does not conform to method result type
       if _

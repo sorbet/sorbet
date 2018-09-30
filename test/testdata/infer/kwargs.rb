@@ -4,7 +4,7 @@ class A
   extend T::Helpers
 
   # Repeated argument is typed using value type (key is always Symbol)
-  sig(kwargs: Integer).void
+  sig {params(kwargs: Integer).void}
   def self.foo(**kwargs)
     # loads of kwargs become Hash of value type
     T.reveal_type(kwargs) # error: Revealed type: `T::Hash[Symbol, Integer]`

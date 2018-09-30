@@ -2,7 +2,7 @@
 class Main
     extend T::Helpers
 
-    sig(a: Integer).returns(Integer)
+    sig {params(a: Integer).returns(Integer)}
     def foo(a)
         a
     end

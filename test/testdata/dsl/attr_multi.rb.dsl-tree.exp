@@ -1,73 +1,97 @@
 class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
   self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Helpers>)
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+  end
 
   def a<<constant:<todo sym>>>()
     @a
   end
 
-  self(<constant:<todo sym>>).sig({:"a" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"a" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+  end
 
   def a=<<constant:<todo sym>>>(a)
     @a = a
   end
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  end
 
   def b<<constant:<todo sym>>>()
     @b
   end
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  end
 
   def c<<constant:<todo sym>>>()
     @c
   end
 
-  self(<constant:<todo sym>>).sig({:"b" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"b" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  end
 
   def b=<<constant:<todo sym>>>(b)
     @b = b
   end
 
-  self(<constant:<todo sym>>).sig({:"c" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"c" => <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>)}).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:Integer>))
+  end
 
   def c=<<constant:<todo sym>>>(c)
     @c = c
   end
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+  end
 
   def d<<constant:<todo sym>>>()
     @d
   end
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+  end
 
   def e<<constant:<todo sym>>>()
     @e
   end
 
-  self(<constant:<todo sym>>).sig().returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+  end
 
   def f<<constant:<todo sym>>>()
     @f
   end
 
-  self(<constant:<todo sym>>).sig({:"g" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"g" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  end
 
   def g=<<constant:<todo sym>>>(g)
     @g = g
   end
 
-  self(<constant:<todo sym>>).sig({:"h" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"h" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  end
 
   def h=<<constant:<todo sym>>>(h)
     @h = h
   end
 
-  self(<constant:<todo sym>>).sig({:"i" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  self(<constant:<todo sym>>).sig() do ||
+    self(<constant:<todo sym>>).params({:"i" => <emptyTree>::<constant:String>}).params({:"h" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+  end
 
   def i=<<constant:<todo sym>>>(i)
     @i = i

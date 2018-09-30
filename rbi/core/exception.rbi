@@ -1,44 +1,52 @@
 # typed: true
 class Exception < Object
-  Sorbet.sig(
-      arg0: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ==(arg0); end
 
-  Sorbet.sig.returns(T::Array[String])
+  sig {returns(T::Array[String])}
   def backtrace(); end
 
-  Sorbet.sig.returns(T::Array[Thread::Backtrace::Location])
+  sig {returns(T::Array[Thread::Backtrace::Location])}
   def backtrace_locations(); end
 
-  Sorbet.sig.returns(NilClass)
+  sig {returns(NilClass)}
   def cause(); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(Exception)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(Exception)
+  end
   def exception(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .void
+  sig do
+    params(
+        arg0: String,
+    )
+    .void
+  end
   def initialize(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def message(); end
 
-  Sorbet.sig(
-      arg0: T.any(String, T::Array[String]),
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        arg0: T.any(String, T::Array[String]),
+    )
+    .returns(T::Array[String])
+  end
   def set_backtrace(arg0); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 end

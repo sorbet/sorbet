@@ -2,26 +2,32 @@
 # typed: strict
 
 class Struct
-  Sorbet.sig(
-      arg0: T.any(Symbol, String),
-      arg1: T.any(Symbol, String),
-  )
-  .returns(T.class_of(RubyTyper::DynamicStruct))
+  sig do
+    params(
+        arg0: T.any(Symbol, String),
+        arg1: T.any(Symbol, String),
+    )
+    .returns(T.class_of(RubyTyper::DynamicStruct))
+  end
   def self.new(arg0, *arg1); end
 end
 
 module RubyTyper
-  Sorbet.sig(
-      expr: T.untyped,
-  )
-  .void
+  sig do
+    params(
+        expr: T.untyped,
+    )
+    .void
+  end
   def self.keep_for_ide(expr)
   end
 
-  Sorbet.sig(
-      expr: T.untyped,
-  )
-  .void
+  sig do
+    params(
+        expr: T.untyped,
+    )
+    .void
+  end
   def self.keep_for_typechecking(expr)
   end
 end
@@ -29,10 +35,12 @@ end
 class RubyTyper::DynamicStruct < Struct
   Elem = type_member(:out, fixed: T.untyped)
 
-  Sorbet.sig(
-      args: BasicObject,
-  )
-  .returns(RubyTyper::DynamicStruct)
+  sig do
+    params(
+        args: BasicObject,
+    )
+    .returns(RubyTyper::DynamicStruct)
+  end
   def self.new(*args); end
 end
 
@@ -74,76 +82,96 @@ class RubyTyper::ENVClass
   include Enumerable
   Elem = type_member(:out, fixed: [String, T.nilable(String)])
 
-  Sorbet.sig(
-      key: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        key: String,
+    )
+    .returns(T.nilable(String))
+  end
   def [](key); end
 
-  Sorbet.sig(
-      key: String,
-      value: T.nilable(String),
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        key: String,
+        value: T.nilable(String),
+    )
+    .returns(T.nilable(String))
+  end
   def []=(key, value); end
 
-  Sorbet.sig.returns(RubyTyper::ENVClass)
+  sig {returns(RubyTyper::ENVClass)}
   def clear(); end
 
-  Sorbet.sig(
-      key: String,
-  )
-  .returns(T.nilable(String))
-  Sorbet.sig(
-      key: String,
-      blk: T.proc(key: String).returns(T.untyped)
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        key: String,
+    )
+    .returns(T.nilable(String))
+  end
+  sig do
+    params(
+        key: String,
+        blk: T.proc.params(key: String).returns(T.untyped)
+    )
+    .returns(T.nilable(String))
+  end
   def delete(key, &blk); end
 
-  Sorbet.sig(
-      key: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      key: String,
-      value: T.nilable(String),
-  )
-  .returns(String)
-  Sorbet.sig(
-      key: String,
-      blk: T.proc(key: String).returns(String),
-  )
-  .returns(String)
+  sig do
+    params(
+        key: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        key: String,
+        value: T.nilable(String),
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        key: String,
+        blk: T.proc.params(key: String).returns(String),
+    )
+    .returns(String)
+  end
   def fetch(key, value=T.unsafe(nil), &blk); end
 
-  Sorbet.sig(
-      key: String
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        key: String
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def key?(key); end
 
-  Sorbet.sig(
-      key: T::Hash[String, T.nilable(String)],
-  )
-  .returns(RubyTyper::ENVClass)
-  Sorbet.sig(
-      key: T::Hash[String, String],
-      blk: T.proc(key: String, old_value: T.nilable(String), new_value: T.nilable(String)).returns(T.nilable(String)),
-  )
-  .returns(T::Hash[String, T.nilable(String)])
+  sig do
+    params(
+        key: T::Hash[String, T.nilable(String)],
+    )
+    .returns(RubyTyper::ENVClass)
+  end
+  sig do
+    params(
+        key: T::Hash[String, String],
+        blk: T.proc.params(key: String, old_value: T.nilable(String), new_value: T.nilable(String)).returns(T.nilable(String)),
+    )
+    .returns(T::Hash[String, T.nilable(String)])
+  end
   def update(key, &blk); end
 end
 ::ENV = T.let(T.unsafe(nil), RubyTyper::ENVClass)
 
-# The magic type that sig.void returns
+# The magic type that sig {void} returns
 module RubyTyper::Void
 end
 
 class RubyTyper::ReturnTypeInference
     extend T::Helpers
 
-    type_parameters(:INFERRED_RETURN_TYPE).sig().returns(T.type_parameter(:INFERRED_RETURN_TYPE))
+    sig {type_parameters(:INFERRED_RETURN_TYPE).params().returns(T.type_parameter(:INFERRED_RETURN_TYPE))}
     def guessed_type_type_parameter_holder
     # this method only exists to define the type parameter.
     # it's used in infer for return type inference.

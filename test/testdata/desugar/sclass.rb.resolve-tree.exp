@@ -115,7 +115,9 @@ begin
     end
 
     def self.<static-init><<static-init>>()
-      self(<singleton class:<singleton class:<constant:F>>>).sig({:"f" => ::Integer}).returns(::Integer)
+      self(<singleton class:<singleton class:<constant:F>>>).sig() do ||
+        self(<constant:Builder>).params({:"f" => ::Integer}).returns(::Integer)
+      end
     end
   end
   class ::G<<constant:G>> < (::<todo sym>)

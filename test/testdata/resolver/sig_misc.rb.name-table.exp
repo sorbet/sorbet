@@ -2,38 +2,61 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
   method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/resolver/sig_misc.rb:5
     method ::A#<static-init> () @ test/testdata/resolver/sig_misc.rb:5
-    method ::A#f1 (x) -> T1 @ test/testdata/resolver/sig_misc.rb:24
-      argument ::A#f1#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:24
-    method ::A#f2 (x) -> T2 @ test/testdata/resolver/sig_misc.rb:29
-      argument ::A#f2#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:28
-    method ::A#f3 () -> T1 @ test/testdata/resolver/sig_misc.rb:34
-    method ::A#f4 (y) -> T1 @ test/testdata/resolver/sig_misc.rb:60
-      argument ::A#f4#y<> -> T1 @ test/testdata/resolver/sig_misc.rb:58
+    method ::A#f1 (x) -> T1 @ test/testdata/resolver/sig_misc.rb:26
+      argument ::A#f1#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:26
+    method ::A#f2 (x) @ test/testdata/resolver/sig_misc.rb:31
+      argument ::A#f2#x<> @ test/testdata/resolver/sig_misc.rb:31
+    method ::A#f3 () -> T1 @ test/testdata/resolver/sig_misc.rb:36
+    method ::A#f4 (y) -> T1 @ test/testdata/resolver/sig_misc.rb:62
+      argument ::A#f4#y<> -> T1 @ test/testdata/resolver/sig_misc.rb:60
     method ::A#no_params () -> T1 @ test/testdata/resolver/sig_misc.rb:13
     method ::A#noreturn () -> <impossible> @ test/testdata/resolver/sig_misc.rb:8
-    method ::A#private : private (x) -> T1 @ test/testdata/resolver/sig_misc.rb:39
-      argument ::A#private#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:38
-    method ::A#protected : protected (x) -> T1 @ test/testdata/resolver/sig_misc.rb:44
-      argument ::A#protected#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:43
-    method ::A#public (x) -> T1 @ test/testdata/resolver/sig_misc.rb:49
-      argument ::A#public#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:48
-    method ::A#test_abstract () -> T1 @ test/testdata/resolver/sig_misc.rb:72
-    method ::A#test_abstract_untyped () @ test/testdata/resolver/sig_misc.rb:94
-    method ::A#test_implementation (x, y) @ test/testdata/resolver/sig_misc.rb:77
-      argument ::A#test_implementation#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:77
-      argument ::A#test_implementation#y<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:77
-    method ::A#test_kwargs (returns) -> T2 @ test/testdata/resolver/sig_misc.rb:19
-      argument ::A#test_kwargs#returns<> -> T1 @ test/testdata/resolver/sig_misc.rb:17
-    method ::A#test_overridable () -> T1 @ test/testdata/resolver/sig_misc.rb:85
-    method ::A#test_overridable_implementation () -> T1 @ test/testdata/resolver/sig_misc.rb:90
-    method ::A#test_override () -> T1 @ test/testdata/resolver/sig_misc.rb:80
-    method ::A#test_standard_untyped () @ test/testdata/resolver/sig_misc.rb:95
-    method ::A#test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/resolver/sig_misc.rb:65
-      argument ::A#test_yield_no_block_type#<blk><block> -> T.untyped @ test/testdata/resolver/sig_misc.rb:66
-      argument ::A#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:64
+    method ::A#private : private (x) -> T1 @ test/testdata/resolver/sig_misc.rb:41
+      argument ::A#private#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:40
+    method ::A#protected : protected (x) -> T1 @ test/testdata/resolver/sig_misc.rb:46
+      argument ::A#protected#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:45
+    method ::A#public (x) -> T1 @ test/testdata/resolver/sig_misc.rb:51
+      argument ::A#public#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:50
+    method ::A#test_abstract () -> T1 @ test/testdata/resolver/sig_misc.rb:74
+    method ::A#test_abstract_untyped () @ test/testdata/resolver/sig_misc.rb:96
+    method ::A#test_implementation (x, y) @ test/testdata/resolver/sig_misc.rb:79
+      argument ::A#test_implementation#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:79
+      argument ::A#test_implementation#y<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:79
+    method ::A#test_junk_inside () -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:99
+    method ::A#test_kwargs (returns) -> T2 @ test/testdata/resolver/sig_misc.rb:21
+      argument ::A#test_kwargs#returns<> -> T1 @ test/testdata/resolver/sig_misc.rb:18
+    method ::A#test_overridable () -> T1 @ test/testdata/resolver/sig_misc.rb:87
+    method ::A#test_overridable_implementation () -> T1 @ test/testdata/resolver/sig_misc.rb:92
+    method ::A#test_override () -> T1 @ test/testdata/resolver/sig_misc.rb:82
+    method ::A#test_standard_untyped () @ test/testdata/resolver/sig_misc.rb:97
+    method ::A#test_yield_no_block_type (x, <blk>) -> Integer @ test/testdata/resolver/sig_misc.rb:67
+      argument ::A#test_yield_no_block_type#<blk><block> -> T.untyped @ test/testdata/resolver/sig_misc.rb:68
+      argument ::A#test_yield_no_block_type#x<> -> Integer @ test/testdata/resolver/sig_misc.rb:66
   class ::<Class:A> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/sig_misc.rb:5
-    method ::<Class:A>#static : private (x) -> T1 @ test/testdata/resolver/sig_misc.rb:54
-      argument ::<Class:A>#static#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:53
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:50
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:55
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:60
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:61
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:66
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:73
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:78
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:81
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:86
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:91
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:7
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:96
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:97
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:99
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:101
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:12
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:17
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:25
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:30
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:35
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:40
+    method ::<Class:A>#<block> () @ test/testdata/resolver/sig_misc.rb:45
+    method ::<Class:A>#static : private (x) -> T1 @ test/testdata/resolver/sig_misc.rb:56
+      argument ::<Class:A>#static#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:55
   class ::T1 < ::Object () @ test/testdata/resolver/sig_misc.rb:2
   class ::<Class:T1> < ::<Class:Object> () @ test/testdata/resolver/sig_misc.rb:2
   class ::T2 < ::Object () @ test/testdata/resolver/sig_misc.rb:3

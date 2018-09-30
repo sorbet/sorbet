@@ -4,7 +4,7 @@ class A
   E = type_member
 
   # Repeated argument is typed using element type
-  sig(xs: E).void
+  sig {params(xs: E).void}
   def foo(*xs)
     # loads of repeated args become Array of element type
     T.reveal_type(xs) # error: Revealed type: `T::Array[A#E]`

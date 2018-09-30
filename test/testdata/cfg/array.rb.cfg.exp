@@ -60,15 +60,49 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_1" [shape = parallelogram];
 
     "bb::TestArray#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: <Class:TestArray> = self\l<statTemp>$5: Sorbet::Private::Builder = <statTemp>$6: <Class:TestArray>.sig()\l<statTemp>$7: <Class:Integer> = alias <constant:Integer>\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: Sorbet::Private::Builder.returns(<statTemp>$7: <Class:Integer>)\l<statTemp>$10: <Class:TestArray> = self\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: <Class:TestArray>.sig()\l<statTemp>$11: <Class:String> = alias <constant:String>\l<statTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$11: <Class:String>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: <Class:TestArray> = self\l<block-pre-call-temp>$6: Sorbet::Private::Builder = <statTemp>$5: <Class:TestArray>.sig()\l<unconditional>\l"
     ];
 
-    "bb::TestArray#<static-init>_0" -> "bb::TestArray#<static-init>_1" [style="bold"];
+    "bb::TestArray#<static-init>_0" -> "bb::TestArray#<static-init>_2" [style="bold"];
     "bb::TestArray#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_1" -> "bb::TestArray#<static-init>_1" [style="bold"];
+    "bb::TestArray#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::TestArray#<static-init>_2" -> "bb::TestArray#<static-init>_4" [style="bold"];
+    "bb::TestArray#<static-init>_2" -> "bb::TestArray#<static-init>_3" [style="tapered"];
+
+    "bb::TestArray#<static-init>_3" [
+        label = "block[id=3]()\l<statTemp>$4: T.untyped = Solve<::<Class:TestArray>#<block>>\l<statTemp>$14: <Class:TestArray> = self\l<block-pre-call-temp>$15: Sorbet::Private::Builder = <statTemp>$14: <Class:TestArray>.sig()\l<unconditional>\l"
+    ];
+
+    "bb::TestArray#<static-init>_3" -> "bb::TestArray#<static-init>_5" [style="bold"];
+    "bb::TestArray#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<statTemp>$11: <Class:Integer> = alias <constant:Integer>\l<blockReturnTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.returns(<statTemp>$11: <Class:Integer>)\l<blockReturnTemp>$12: <impossible> = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$9: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::TestArray#<static-init>_4" -> "bb::TestArray#<static-init>_2" [style="bold"];
+    "bb::TestArray#<static-init>_5" [
+        label = "block[id=5]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_7" [style="bold"];
+    "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_6" [style="tapered"];
+
+    "bb::TestArray#<static-init>_6" [
+        label = "block[id=6]()\l<statTemp>$13: T.untyped = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+    ];
+
+    "bb::TestArray#<static-init>_6" -> "bb::TestArray#<static-init>_1" [style="bold"];
+    "bb::TestArray#<static-init>_7" [
+        label = "block[id=7]()\louterLoops: 1\l<statTemp>$19: Sorbet::Private::Builder = self\l<statTemp>$20: <Class:String> = alias <constant:String>\l<blockReturnTemp>$18: Sorbet::Private::Builder = <statTemp>$19: Sorbet::Private::Builder.returns(<statTemp>$20: <Class:String>)\l<blockReturnTemp>$21: <impossible> = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$18: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::TestArray#<static-init>_7" -> "bb::TestArray#<static-init>_5" [style="bold"];
 }
 
 }

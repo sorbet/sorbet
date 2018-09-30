@@ -4,19 +4,23 @@ module FileUtils
   METHODS = T.let(T.unsafe(nil), Array)
   OPT_TABLE = T.let(T.unsafe(nil), Hash)
 
-  Sorbet.sig(
-      src: T.any(String, Pathname),
-      dest: T.any(String, Pathname),
-      preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        src: T.any(String, Pathname),
+        dest: T.any(String, Pathname),
+        preserve: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
+    )
+    .returns(T::Array[String])
+  end
   def self.cp_r(src, dest, preserve=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      list: T.any(String, Pathname),
-      mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
-  )
-  .returns(T::Array[String])
+  sig do
+    params(
+        list: T.any(String, Pathname),
+        mode: T::Hash[Symbol, T.any(TrueClass, FalseClass)],
+    )
+    .returns(T::Array[String])
+  end
   def self.mkdir_p(list, mode=T.unsafe(nil)); end
 end
 

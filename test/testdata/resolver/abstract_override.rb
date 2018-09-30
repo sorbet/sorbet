@@ -5,7 +5,7 @@ module Interface
 
   interface!
 
-  sig.abstract.returns(T.untyped)
+  sig {abstract.returns(T.untyped)}
   def a_method; end
 end
 
@@ -60,7 +60,7 @@ class AbstractSingleton
 
   abstract!
 
-  sig.abstract
+  sig {abstract}
   def self.abstract_method; end
 end
 

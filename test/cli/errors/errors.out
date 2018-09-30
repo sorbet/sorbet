@@ -5,9 +5,9 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     579 |      arg0: String,
-                ^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L736: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     736 |        arg0: String,
+                  ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -17,8 +17,8 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    11 |  sig {params(arg: Integer).returns(NilClass)}
+                      ^^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -28,8 +28,8 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
-    35 |  sig(a: Integer).returns(Integer)
-              ^^
+    35 |  sig {params(a: Integer).returns(Integer)}
+                      ^^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)
@@ -52,9 +52,9 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     579 |      arg0: String,
-                ^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L736: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     736 |        arg0: String,
+                  ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -64,8 +64,8 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    11 |  sig {params(arg: Integer).returns(NilClass)}
+                      ^^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -75,8 +75,8 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
-    35 |  sig(a: Integer).returns(Integer)
-              ^^
+    35 |  sig {params(a: Integer).returns(Integer)}
+                      ^^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)
@@ -99,9 +99,9 @@ test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http:/
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib
             ^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L579: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
-     579 |      arg0: String,
-                ^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/kernel.rbi#L736: Method `Kernel#raise (overload.1)` has specified `arg0` as `String`
+     736 |        arg0: String,
+                  ^^^^^
   Got Integer originating from:
     test/cli/errors/errors.rb:12:
     12 |  def foo(arg)
@@ -111,8 +111,8 @@ test/cli/errors/errors.rb:18: `String("foo")` doesn't match `Integer` for argume
     18 |    foo("foo")
             ^^^^^^^^^^
     test/cli/errors/errors.rb:11: Method `ComplexError#foo` has specified `arg` as `Integer`
-    11 |  sig(arg: Integer).returns(NilClass)
-              ^^^^
+    11 |  sig {params(arg: Integer).returns(NilClass)}
+                      ^^^^
   Got String("foo") originating from:
     test/cli/errors/errors.rb:18:
     18 |    foo("foo")
@@ -122,8 +122,8 @@ test/cli/errors/errors.rb:32: `T.nilable(Integer)` doesn't match `Integer` for a
     32 |    bar(a)
             ^^^^^^
     test/cli/errors/errors.rb:35: Method `ErrorLines#bar` has specified `a` as `Integer`
-    35 |  sig(a: Integer).returns(Integer)
-              ^^
+    35 |  sig {params(a: Integer).returns(Integer)}
+                      ^^
   Got T.nilable(Integer) originating from:
     test/cli/errors/errors.rb:25:
     25 |  def main(foo)

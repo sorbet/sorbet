@@ -1,15 +1,17 @@
 # typed: true
 extend T::Helpers
 
-sig(
-  blk: T.proc(x: Integer, y: String).returns(Integer)
-).returns(Integer)
+sig do
+  params(
+    blk: T.proc.params(x: Integer, y: String).returns(Integer)
+  ).returns(Integer)
+end
 def f(&blk)
   blk.call(0, "hi")
 end
 
-p = T.let(proc {|x, y| x}, T.proc(x: Integer, y: String).returns(Integer))
+p = T.let(proc {|x, y| x}, T.proc.params(x: Integer, y: String).returns(Integer))
 f(&p)
 
-p = T.let(proc {|x, y| x}, T.proc(x: Integer, y: Integer).returns(Integer))
+p = T.let(proc {|x, y| x}, T.proc.params(x: Integer, y: Integer).returns(Integer))
 f(&p) # error: `String` doesn't match `Integer` for argument `arg1`

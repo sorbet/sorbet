@@ -290,6 +290,14 @@ public:
         return SymbolRef(nullptr, 60);
     }
 
+    static SymbolRef Sorbet_Private() {
+        return SymbolRef(nullptr, 61);
+    }
+
+    static SymbolRef Sorbet_Private_Builder() {
+        return SymbolRef(nullptr, 62);
+    }
+
     static constexpr int MAX_PROC_ARITY = 10;
     static SymbolRef Proc0() {
         return SymbolRef(nullptr, MAX_SYNTHETIC_SYMBOLS - MAX_PROC_ARITY * 2 - 2);

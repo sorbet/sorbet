@@ -250,39 +250,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -331,35 +341,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -400,30 +420,34 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            fun = sig
-            block = nullptr
+          recv = Self{ claz = ::<todo sym> }
+          fun = sig
+          block = Block {
             args = [
             ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <constant:T>
-              }
-              fun = nilable
+            body = Send{
+              recv = Self{ claz = ::<todo sym> }
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:T>
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -469,31 +493,41 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = Self{ claz = ::<todo sym> }
-            fun = sig
-            block = nullptr
+          recv = Self{ claz = ::<todo sym> }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -550,39 +584,49 @@ ClassDef{
         }]
       rhs = [
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -631,35 +675,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -700,28 +754,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -759,35 +823,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -828,39 +902,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -909,35 +993,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -978,28 +1072,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1037,35 +1141,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1106,40 +1220,50 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                ConstantLit{
-                  orig = nullptr
-                  symbol = ::Object
-                  typeAlias = nullptr
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::Object
+                      typeAlias = nullptr
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1189,37 +1313,47 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
-                      orig = nullptr
-                      symbol = ::Object
-                      typeAlias = nullptr
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          orig = nullptr
+                          symbol = ::Object
+                          typeAlias = nullptr
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::Object
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Object
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1261,28 +1395,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Array>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1320,35 +1464,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:Array>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:Array>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Array>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1389,39 +1543,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Array
-                typeAlias = nullptr
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T::Array
+                    typeAlias = nullptr
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1470,57 +1634,67 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T::Array
-                        typeAlias = nullptr
-                      }
-                      fun = []
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T::Array
+                            typeAlias = nullptr
+                          }
+                          fun = []
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:String>
+                            }
+                          ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T::Array
-                typeAlias = nullptr
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T::Array
+                    typeAlias = nullptr
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1572,28 +1746,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Array>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1631,35 +1815,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:Array>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:Array>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:Array>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:Array>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1700,41 +1894,51 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                cnst = <constant:Array>
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Array>
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1785,61 +1989,71 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:T>
-                        }
-                        cnst = <constant:Array>
-                      }
-                      fun = []
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:T>
+                            }
+                            cnst = <constant:Array>
+                          }
+                          fun = []
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:String>
+                            }
+                          ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                cnst = <constant:Array>
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Array>
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1893,45 +2107,55 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                cnst = <constant:Hash>
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:Symbol>
-                }
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Hash>
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:Symbol>
+                    }
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -1986,69 +2210,79 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = UnresolvedConstantLit{
-                        scope = UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:T>
-                        }
-                        cnst = <constant:Hash>
-                      }
-                      fun = []
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:Symbol>
-                        }
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:T>
+                            }
+                            cnst = <constant:Hash>
+                          }
+                          fun = []
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Symbol>
+                            }
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:String>
+                            }
+                          ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:T>
-                }
-                cnst = <constant:Hash>
-              }
-              fun = []
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:Symbol>
-                }
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:T>
+                    }
+                    cnst = <constant:Hash>
+                  }
+                  fun = []
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:Symbol>
+                    }
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2106,39 +2340,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2187,57 +2431,67 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = nilable
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = nilable
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:String>
+                            }
+                          ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2289,39 +2543,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2370,35 +2634,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2439,28 +2713,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2498,57 +2782,67 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = nilable
-                      block = nullptr
-                      args = [
-                        UnresolvedConstantLit{
-                          scope = EmptyTree
-                          cnst = <constant:String>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = nilable
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:String>
+                            }
+                          ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2600,38 +2894,48 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = UnresolvedConstantLit{
-                scope = EmptyTree
-                cnst = <constant:T>
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:T>
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2679,77 +2983,87 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = nilable
-                      block = nullptr
-                      args = [
-                        Send{
-                          recv = UnresolvedConstantLit{
-                            scope = EmptyTree
-                            cnst = <constant:T>
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
                           }
                           fun = nilable
                           block = nullptr
                           args = [
-                            UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <constant:String>
+                            Send{
+                              recv = UnresolvedConstantLit{
+                                scope = EmptyTree
+                                cnst = <constant:T>
+                              }
+                              fun = nilable
+                              block = nullptr
+                              args = [
+                                UnresolvedConstantLit{
+                                  scope = EmptyTree
+                                  cnst = <constant:String>
+                                }
+                              ]
                             }
                           ]
                         }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
                 Send{
-                  recv = UnresolvedConstantLit{
-                    scope = EmptyTree
-                    cnst = <constant:T>
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
                   }
                   fun = nilable
                   block = nullptr
                   args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
+                    Send{
+                      recv = UnresolvedConstantLit{
+                        scope = EmptyTree
+                        cnst = <constant:T>
+                      }
+                      fun = nilable
+                      block = nullptr
+                      args = [
+                        UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
                     }
                   ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2811,28 +3125,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2870,28 +3194,38 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -2929,39 +3263,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:Array>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:Array>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3010,35 +3354,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = untyped
+              fun = returns
               block = nullptr
               args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = untyped
+                  block = nullptr
+                  args = [
+                  ]
+                }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3061,39 +3415,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3142,35 +3506,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3211,53 +3585,63 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = untyped
-                      block = nullptr
-                      args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:ForeignClass>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3283,39 +3667,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3364,35 +3758,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3433,53 +3837,63 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = untyped
-                      block = nullptr
-                      args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:ForeignClass>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3505,39 +3919,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3586,35 +4010,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3655,53 +4089,63 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = untyped
-                      block = nullptr
-                      args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:ForeignClass>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:ForeignClass>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3727,39 +4171,49 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = nilable
+              fun = returns
               block = nullptr
               args = [
-                UnresolvedConstantLit{
-                  scope = EmptyTree
-                  cnst = <constant:String>
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = EmptyTree
+                      cnst = <constant:String>
+                    }
+                  ]
                 }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3808,35 +4262,45 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:String>
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:String>
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            UnresolvedConstantLit{
-              scope = EmptyTree
-              cnst = <constant:String>
+              fun = returns
+              block = nullptr
+              args = [
+                UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:String>
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3877,49 +4341,59 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"opts" }
-                    value = Send{
-                      recv = ConstantLit{
-                        orig = nullptr
-                        symbol = ::T
-                        typeAlias = nullptr
-                      }
-                      fun = untyped
-                      block = nullptr
-                      args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"opts" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = untyped
+                          block = nullptr
+                          args = [
+                          ]
+                        }
                       ]
-                    }
-                  ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            Send{
-              recv = ConstantLit{
-                orig = nullptr
-                symbol = ::T
-                typeAlias = nullptr
-              }
-              fun = untyped
+              fun = returns
               block = nullptr
               args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = untyped
+                  block = nullptr
+                  args = [
+                  ]
+                }
               ]
             }
+          }
+          args = [
           ]
         }
 
@@ -3958,29 +4432,39 @@ ClassDef{
         }]
       rhs = [
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::String
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::String
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4019,37 +4503,47 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
-                      orig = nullptr
-                      symbol = ::String
-                      typeAlias = nullptr
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          orig = nullptr
+                          symbol = ::String
+                          typeAlias = nullptr
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::String
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::String
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4091,29 +4585,39 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::Float
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Float
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4152,37 +4656,47 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
-                      orig = nullptr
-                      symbol = ::Float
-                      typeAlias = nullptr
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          orig = nullptr
+                          symbol = ::Float
+                          typeAlias = nullptr
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::Float
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Float
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4237,29 +4751,39 @@ ClassDef{
         }]
       rhs = [
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::String
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::String
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4298,37 +4822,47 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
-                  [
-                    key = Literal{ value = :"arg0" }
-                    value = ConstantLit{
-                      orig = nullptr
-                      symbol = ::String
-                      typeAlias = nullptr
-                    }
-                  ]
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = ConstantLit{
+                          orig = nullptr
+                          symbol = ::String
+                          typeAlias = nullptr
+                        }
+                      ]
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::String
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::String
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4370,29 +4904,39 @@ ClassDef{
         }
 
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::Float
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::Float
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 
@@ -4444,29 +4988,39 @@ ClassDef{
         }]
       rhs = [
         Send{
-          recv = Send{
-            recv = ConstantLit{
-              orig = nullptr
-              symbol = ::Sorbet
-              typeAlias = nullptr
-            }
-            fun = sig
-            block = nullptr
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
             args = [
-              Hash{
-                pairs = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
                 ]
               }
-            ]
-          }
-          fun = returns
-          block = nullptr
-          args = [
-            ConstantLit{
-              orig = nullptr
-              symbol = ::String
-              typeAlias = nullptr
+              fun = returns
+              block = nullptr
+              args = [
+                ConstantLit{
+                  orig = nullptr
+                  symbol = ::String
+                  typeAlias = nullptr
+                }
+              ]
             }
+          }
+          args = [
           ]
         }
 

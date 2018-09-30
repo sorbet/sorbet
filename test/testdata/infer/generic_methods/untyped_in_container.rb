@@ -1,9 +1,12 @@
 # typed: true
+extend T::Helpers
 extend T::Generic
 
-type_parameters(:T)
-  .sig(arr: T::Array[T.type_parameter(:T)])
+sig do
+  type_parameters(:T)
+  .params(arr: T::Array[T.type_parameter(:T)])
   .returns(T.type_parameter(:T))
+end
 def lub_elems(*arr)
   return arr.fetch(0).fetch(0)
 end

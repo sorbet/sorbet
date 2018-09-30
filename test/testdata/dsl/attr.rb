@@ -2,21 +2,26 @@
 class TestAttr
   extend T::Helpers
 
-  def initialize  # error: does not have a `sig`
+  sig {void}
+  def initialize
     @v1 = T.let(0, Integer)
     @v2 = T.let("", String)
+    @v6 = T.let("", String)
   end
 
-  sig.returns(Integer)
+  sig {returns(Integer)}
   attr :v1
-  sig(v1: Integer).returns(Integer)
+  sig {params(v1: Integer).returns(Integer)}
   attr_writer :v1
 
-  sig.returns(String)
+  sig {returns(String)}
   attr_accessor :v2
 
-  sig.returns(String)
+  sig {returns(String)}
   attr_reader :v3 # error: Use of undeclared variable
 
   attr_writer :v4, :v5 # error: MULTI
+
+  Sorbet.sig {returns(String)}
+  attr_accessor :v6
 end

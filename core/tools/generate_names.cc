@@ -107,10 +107,13 @@ NameDef names[] = {
     {"override_", "override", Resolver},
     {"overridable", Resolver},
 
+    // Sig builders
+    {"params", Resolver | DSL},
     {"returns", Resolver | DSL},
     {"void_", "void", Resolver},
     {"checked", Resolver},
     {"soft", Resolver},
+
     {"all", Resolver | Infer | Core},
     {"any", Resolver | Infer | Core},
     {"enum_", "enum", Resolver | DSL},

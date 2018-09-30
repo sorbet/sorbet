@@ -4,7 +4,7 @@ class A
     extend T::Helpers
 
     abstract!
-    sig.abstract.void
+    sig {abstract.void}
     def abstract
     end
 end

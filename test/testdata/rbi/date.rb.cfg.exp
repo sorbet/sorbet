@@ -24,15 +24,32 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_1" [shape = parallelogram];
 
     "bb::A#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: <Class:A> = self\l<hashTemp>$7: Symbol(:\"t\") = :\"t\"\l<hashTemp>$8: <Class:Time> = alias <constant:Time>\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: {t: <Class:Time>} = <magic>$9: <Magic>.<build-hash>(<hashTemp>$7: Symbol(:\"t\"), <hashTemp>$8: <Class:Time>)\l<statTemp>$4: Sorbet::Private::Builder = <statTemp>$5: <Class:A>.sig(<statTemp>$6: {t: <Class:Time>})\l<statTemp>$10: <Class:Time> = alias <constant:Time>\l<returnMethodTemp>$2: Sorbet::Private::Builder = <statTemp>$4: Sorbet::Private::Builder.returns(<statTemp>$10: <Class:Time>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: <Class:A> = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: <Class:A>.sig()\l<unconditional>\l"
     ];
 
-    "bb::A#<static-init>_0" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_0" -> "bb::A#<static-init>_2" [style="bold"];
     "bb::A#<static-init>_1" [
         label = "block[id=1]()\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_1" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_2" [
+        label = "block[id=2]()\louterLoops: 1\l<block-call>: NilClass\l"
+    ];
+
+    "bb::A#<static-init>_2" -> "bb::A#<static-init>_4" [style="bold"];
+    "bb::A#<static-init>_2" -> "bb::A#<static-init>_3" [style="tapered"];
+
+    "bb::A#<static-init>_3" [
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:A>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
+    "bb::A#<static-init>_4" [
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"t\") = :\"t\"\l<hashTemp>$13: <Class:Time> = alias <constant:Time>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {t: <Class:Time>} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"t\"), <hashTemp>$13: <Class:Time>)\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {t: <Class:Time>})\l<statTemp>$15: <Class:Time> = alias <constant:Time>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: <Class:Time>)\l<blockReturnTemp>$16: <impossible> = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+    ];
+
+    "bb::A#<static-init>_4" -> "bb::A#<static-init>_2" [style="bold"];
 }
 
 }

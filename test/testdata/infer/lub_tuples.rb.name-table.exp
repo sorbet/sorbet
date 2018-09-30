@@ -15,6 +15,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
           } @ test/testdata/infer/lub_tuples.rb:13
           method ::Opus::CIBot::Tasks::NotifySlackBuildComplete#initialize () @ test/testdata/infer/lub_tuples.rb:5
         class ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/infer/lub_tuples.rb:2
+          method ::Opus::CIBot::Tasks::<Class:NotifySlackBuildComplete>#<block> () @ test/testdata/infer/lub_tuples.rb:12
       class ::Opus::CIBot::<Class:Tasks> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
     class ::Opus::<Class:CIBot> < ::Module () @ test/testdata/infer/lub_tuples.rb:2
 

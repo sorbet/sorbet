@@ -42,443 +42,573 @@ class File < IO
   extend T::Generic
   Elem = type_member(:out, fixed: String)
 
-  Sorbet.sig(
-      file: String,
-      dir: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        file: String,
+        dir: String,
+    )
+    .returns(String)
+  end
   def self.absolute_path(file, dir=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(Time)
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(Time)
+  end
   def self.atime(file); end
 
-  Sorbet.sig(
-      file: String,
-      suffix: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        file: String,
+        suffix: String,
+    )
+    .returns(String)
+  end
   def self.basename(file, suffix=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: String,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: String,
-      arg1: Integer,
-  )
-  .returns(String)
-  Sorbet.sig(
-      arg0: String,
-      arg1: Integer,
-      arg2: Integer,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: String,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: String,
+        arg1: Integer,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        arg0: String,
+        arg1: Integer,
+        arg2: Integer,
+    )
+    .returns(String)
+  end
   def self.binread(arg0, arg1=T.unsafe(nil), arg2=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(Time)
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(Time)
+  end
   def self.birthtime(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.blockdev?(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.chardev?(file); end
 
-  Sorbet.sig(
-      mode: Integer,
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        mode: Integer,
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.chmod(mode, *files); end
 
-  Sorbet.sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        owner: Integer,
+        group: Integer,
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.chown(owner, group, *files); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(Time)
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(Time)
+  end
   def self.ctime(file); end
 
-  Sorbet.sig(
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.delete(*files); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.directory?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        file: String,
+    )
+    .returns(String)
+  end
   def self.dirname(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.executable?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.executable_real?(file); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.exist?(file); end
 
-  Sorbet.sig(
-      file: BasicObject,
-      dir: BasicObject,
-  )
-  .returns(String)
+  sig do
+    params(
+        file: BasicObject,
+        dir: BasicObject,
+    )
+    .returns(String)
+  end
   def self.expand_path(file, dir=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      path: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        path: String,
+    )
+    .returns(String)
+  end
   def self.extname(path); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.file?(file); end
 
-  Sorbet.sig(
-      pattern: String,
-      path: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        pattern: String,
+        path: String,
+        flags: Integer,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.fnmatch(pattern, path, flags=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        file: String,
+    )
+    .returns(String)
+  end
   def self.ftype(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.grpowned?(file); end
 
-  Sorbet.sig(
-      file_1: T.any(String, IO),
-      file_2: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file_1: T.any(String, IO),
+        file_2: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.identical?(file_1, file_2); end
 
-  Sorbet.sig(
-      arg0: BasicObject,
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: BasicObject,
+    )
+    .returns(String)
+  end
   def self.join(*arg0); end
 
-  Sorbet.sig(
-      mode: Integer,
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        mode: Integer,
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.lchmod(mode, *files); end
 
-  Sorbet.sig(
-      owner: Integer,
-      group: Integer,
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        owner: Integer,
+        group: Integer,
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.lchown(owner, group, *files); end
 
-  Sorbet.sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        old: String,
+        new: String,
+    )
+    .returns(Integer)
+  end
   def self.link(old, new); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(File::Stat)
+  sig do
+    params(
+        file: String,
+    )
+    .returns(File::Stat)
+  end
   def self.lstat(file); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(Time)
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(Time)
+  end
   def self.mtime(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.owned?(file); end
 
-  Sorbet.sig(
-      path: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        path: String,
+    )
+    .returns(String)
+  end
   def self.path(path); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.pipe?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.readable?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.readable_real?(file); end
 
-  Sorbet.sig(
-      link: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        link: String,
+    )
+    .returns(String)
+  end
   def self.readlink(link); end
 
-  Sorbet.sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        pathname: String,
+        dir: String,
+    )
+    .returns(String)
+  end
   def self.realdirpath(pathname, dir=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      pathname: String,
-      dir: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        pathname: String,
+        dir: String,
+    )
+    .returns(String)
+  end
   def self.realpath(pathname, dir=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        old: String,
+        new: String,
+    )
+    .returns(Integer)
+  end
   def self.rename(old, new); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.setgid?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.setuid?(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(Integer)
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(Integer)
+  end
   def self.size(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.size?(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.socket?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns([String, String])
+  sig do
+    params(
+        file: String,
+    )
+    .returns([String, String])
+  end
   def self.split(file); end
 
-  Sorbet.sig(
-      file: BasicObject,
-  )
-  .returns(File::Stat)
+  sig do
+    params(
+        file: BasicObject,
+    )
+    .returns(File::Stat)
+  end
   def self.stat(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.sticky?(file); end
 
-  Sorbet.sig(
-      old: String,
-      new: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        old: String,
+        new: String,
+    )
+    .returns(Integer)
+  end
   def self.symlink(old, new); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.symlink?(file); end
 
-  Sorbet.sig(
-      file: String,
-      arg0: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        file: String,
+        arg0: Integer,
+    )
+    .returns(Integer)
+  end
   def self.truncate(file, arg0); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(Integer)
+  end
   def self.umask(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      atime: Time,
-      mtime: Time,
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        atime: Time,
+        mtime: Time,
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.utime(atime, mtime, *files); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.world_readable?(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.world_writable?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.writable?(file); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: String,
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.writable_real?(file); end
 
-  Sorbet.sig(
-      file: T.any(String, IO),
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        file: T.any(String, IO),
+    )
+    .returns(T.nilable(Integer))
+  end
   def self.zero?(file); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def atime(); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def birthtime(); end
 
-  Sorbet.sig(
-      mode: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        mode: Integer,
+    )
+    .returns(Integer)
+  end
   def chmod(mode); end
 
-  Sorbet.sig(
-      owner: Integer,
-      group: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        owner: Integer,
+        group: Integer,
+    )
+    .returns(Integer)
+  end
   def chown(owner, group); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def ctime(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(T.any(Integer, TrueClass, FalseClass))
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(T.any(Integer, TrueClass, FalseClass))
+  end
   def flock(arg0); end
 
-  Sorbet.sig(
-      file: String,
-      mode: String,
-      perm: String,
-      opt: Integer,
-  )
-  .void
+  sig do
+    params(
+        file: String,
+        mode: String,
+        perm: String,
+        opt: Integer,
+    )
+    .void
+  end
   def initialize(file, mode=T.unsafe(nil), perm=T.unsafe(nil), opt=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(File::Stat)
+  sig {returns(File::Stat)}
   def lstat(); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def mtime(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def path(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def size(); end
 
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(Integer)
+  end
   def truncate(arg0); end
 
-  Sorbet.sig(
-      pattern: String,
-      path: String,
-      flags: Integer,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        pattern: String,
+        path: String,
+        flags: Integer,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def self.fnmatch?(pattern, path, flags=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      files: String,
-  )
-  .returns(Integer)
+  sig do
+    params(
+        files: String,
+    )
+    .returns(Integer)
+  end
   def self.unlink(*files); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_path(); end
 end
 
@@ -518,138 +648,142 @@ end
 class File::Stat < Object
   include Comparable
 
-  Sorbet.sig(
-      other: File::Stat,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        other: File::Stat,
+    )
+    .returns(T.nilable(Integer))
+  end
   def <=>(other); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def atime(); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def birthtime(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def blksize(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def blockdev?(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def blocks(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def chardev?(); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def ctime(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def dev(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def dev_major(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def dev_minor(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def directory?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def executable?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def executable_real?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def file?(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def ftype(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def gid(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def grpowned?(); end
 
-  Sorbet.sig(
-      file: String,
-  )
-  .returns(Object)
+  sig do
+    params(
+        file: String,
+    )
+    .returns(Object)
+  end
   def initialize(file); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def ino(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def mode(); end
 
-  Sorbet.sig.returns(Time)
+  sig {returns(Time)}
   def mtime(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def nlink(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def owned?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def pipe?(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def rdev(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def rdev_major(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def rdev_minor(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def readable?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def readable_real?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def setgid?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def setuid?(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def size(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def socket?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def sticky?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def symlink?(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def uid(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def world_readable?(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def world_writable?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def writable?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def writable_real?(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def zero?(); end
 end

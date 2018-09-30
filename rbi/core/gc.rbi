@@ -3,28 +3,32 @@ module GC
   INTERNAL_CONSTANTS = T.let(T.unsafe(nil), Hash)
   OPTS = T.let(T.unsafe(nil), Array)
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def self.count(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def self.disable(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def self.enable(); end
 
-  Sorbet.sig(
-      full_mark: T.any(TrueClass, FalseClass),
-      immediate_sweep: T.any(TrueClass, FalseClass),
-  )
-  .returns(NilClass)
+  sig do
+    params(
+        full_mark: T.any(TrueClass, FalseClass),
+        immediate_sweep: T.any(TrueClass, FalseClass),
+    )
+    .returns(NilClass)
+  end
   def self.start(full_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: T.any(Hash, Symbol),
-  )
-  .returns(T::Hash[Symbol, Integer])
+  sig do
+    params(
+        arg0: T.any(Hash, Symbol),
+    )
+    .returns(T::Hash[Symbol, Integer])
+  end
   def self.stat(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(T.any(Integer, TrueClass, FalseClass))
+  sig {returns(T.any(Integer, TrueClass, FalseClass))}
   def self.stress(); end
 end

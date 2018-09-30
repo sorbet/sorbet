@@ -2,111 +2,133 @@
 class Symbol < Object
   include Comparable
 
-  Sorbet.sig.returns(T::Array[Symbol])
+  sig {returns(T::Array[Symbol])}
   def self.all_symbols(); end
 
-  Sorbet.sig(
-      other: Symbol,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        other: Symbol,
+    )
+    .returns(T.nilable(Integer))
+  end
   def <=>(other); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ==(obj); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.nilable(Integer))
+  end
   def =~(obj); end
 
-  Sorbet.sig(
-      idx_or_range: Integer,
-  )
-  .returns(String)
-  Sorbet.sig(
-      idx_or_range: Integer,
-      n: Integer,
-  )
-  .returns(String)
-  Sorbet.sig(
-      idx_or_range: T::Range[Integer],
-  )
-  .returns(String)
+  sig do
+    params(
+        idx_or_range: Integer,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        idx_or_range: Integer,
+        n: Integer,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        idx_or_range: T::Range[Integer],
+    )
+    .returns(String)
+  end
   def [](idx_or_range, n=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def capitalize(); end
 
-  Sorbet.sig(
-      other: Symbol,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        other: Symbol,
+    )
+    .returns(T.nilable(Integer))
+  end
   def casecmp(other); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def downcase(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def empty?(); end
 
-  Sorbet.sig.returns(Encoding)
+  sig {returns(Encoding)}
   def encoding(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def id2name(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def intern(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def length(); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.nilable(Integer))
+  end
   def match(obj); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def succ(); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def swapcase(); end
 
-  Sorbet.sig.returns(Proc)
+  sig {returns(Proc)}
   def to_proc(); end
 
-  Sorbet.sig.returns(Symbol)
+  sig {returns(Symbol)}
   def upcase(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def size(); end
 
-  Sorbet.sig(
-      idx_or_range: Integer,
-  )
-  .returns(String)
-  Sorbet.sig(
-      idx_or_range: Integer,
-      n: Integer,
-  )
-  .returns(String)
-  Sorbet.sig(
-      idx_or_range: T::Range[Integer],
-  )
-  .returns(String)
+  sig do
+    params(
+        idx_or_range: Integer,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        idx_or_range: Integer,
+        n: Integer,
+    )
+    .returns(String)
+  end
+  sig do
+    params(
+        idx_or_range: T::Range[Integer],
+    )
+    .returns(String)
+  end
   def slice(idx_or_range, n=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 
-  Sorbet.sig.returns(T.self_type)
+  sig {returns(T.self_type)}
   def to_sym(); end
 end

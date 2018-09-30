@@ -3,10 +3,12 @@ module Mod
   extend T::Generic
 
   A = type_member
-   sig(
-      blk: T.proc(a: A).returns(A),
-  )
-  .returns(NilClass)
+   sig do
+     params(
+        blk: T.proc.params(a: A).returns(A),
+    )
+    .returns(NilClass)
+   end
   def foo(&blk)
   end
 end

@@ -73,7 +73,7 @@ void Command::patchDSL(core::MutableContext ctx, ast::ClassDef *klass) {
     // want to depend on the internals of the resolver, or accidentally rely on
     // passes that happen between here and the resolver.
     auto *sig = ast::cast_tree<ast::Send>(klass->rhs[i - 1].get());
-    if (sig == nullptr || !ast::isa_tree<ast::Send>(sig->recv.get())) {
+    if (sig == nullptr || sig->fun != core::Names::sig()) {
         return;
     }
 

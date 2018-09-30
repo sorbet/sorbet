@@ -7,4 +7,5 @@ class ::<root> < ::Object () @ (test/testdata/namer/alias_cross_file__02.rb:2, h
     method ::TestSig#<static-init> () @ test/testdata/namer/alias_cross_file__01.rb:3
     method ::TestSig#test_resolve () -> T1 @ test/testdata/namer/alias_cross_file__01.rb:4
   class ::<Class:TestSig> < ::<Class:Object> () @ test/testdata/namer/alias_cross_file__01.rb:2
+    method ::<Class:TestSig>#<block> () @ test/testdata/namer/alias_cross_file__01.rb:3
 

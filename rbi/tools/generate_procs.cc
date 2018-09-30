@@ -13,13 +13,13 @@ void emit_proc(ofstream &out, int arity) {
 
     out << '\n';
 
-    out << "  Sorbet.sig(" << '\n';
+    out << "  sig {params(" << '\n';
     for (int i = 0; i < arity; ++i) {
         out << "    arg" << i << ": "
             << "Arg" << i << "," << '\n';
     }
     out << "  )" << '\n';
-    out << "  .returns(Return)" << '\n';
+    out << "  .returns(Return)}" << '\n';
     out << "  def call(";
     for (int i = 0; i < arity; ++i) {
         if (i != 0) {

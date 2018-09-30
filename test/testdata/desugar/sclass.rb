@@ -52,7 +52,7 @@ class F
 
         extend T::Helpers
 
-        sig(f: Integer).returns(Integer)
+        sig {params(f: Integer).returns(Integer)}
         attr_writer :f
     end
 end

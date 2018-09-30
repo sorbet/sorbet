@@ -7,7 +7,7 @@ end
 
 extend T::Helpers
 
-sig(a: Class).void
+sig {params(a: Class).void}
 def simple(a)
   if a < A
     T.assert_type!(a, T.class_of(A))
@@ -15,7 +15,7 @@ def simple(a)
 end
 
 
-sig(a: T.any(T.class_of(Integer), T.class_of(A))).void
+sig {params(a: T.any(T.class_of(Integer), T.class_of(A))).void}
 def harder(a)
   if a < S
     T.assert_type!(a, T.class_of(A))

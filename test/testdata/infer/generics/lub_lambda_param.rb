@@ -11,7 +11,7 @@ class Box
     @value = T.let(_, A)
   end
 
-  sig.returns(T.any(A, Integer))
+  sig {returns(T.any(A, Integer))}
   def read
     @value
   end

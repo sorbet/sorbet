@@ -12,13 +12,13 @@ namespace dsl {
  *
  * into (approximately):
  *
- *   sig(prop: SomeClass).returns(NilClass)
+ *   sig {params(prop: SomeClass).returns(NilClass)}
  *   def self.prop(prop); end
  *
- *   sig.returns(SomeClass)
+ *   sig {returns(SomeClass)}
  *   def self.get_prop; end
  *
- *   sig.returns(SomeClass)
+ *   sig {returns(SomeClass)}
  *   def prop; end
  */
 class DSLBuilder final {

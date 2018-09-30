@@ -13,7 +13,7 @@ end
 class Main
     extend T::Helpers
 
-    sig(a: Integer).returns(NilClass)
+    sig {params(a: Integer).returns(NilClass)}
     def int(a)
         nil
     end

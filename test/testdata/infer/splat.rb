@@ -1,7 +1,7 @@
 # typed: true
 extend T::Helpers
 
-sig(x: Integer, y: Integer, z: Integer).returns(Integer)
+sig {params(x: Integer, y: Integer, z: Integer).returns(Integer)}
 def f(x, y, z)
   x + y + z
 end
@@ -13,7 +13,7 @@ T.assert_type!(f(1, *[2, 3]), Integer)
 
 T.reveal_type(f(*T.unsafe(nil))) # error: type: `T.untyped`
 
-sig(x: Integer, blk: T.proc(x: Integer).returns(Integer)).returns(Integer)
+sig {params(x: Integer, blk: T.proc.params(x: Integer).returns(Integer)).returns(Integer)}
 def yields(x, &blk)
   blk.call(x)
 end

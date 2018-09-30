@@ -3,7 +3,7 @@
 class NilClass
   extend T::Helpers
 
-  sig.returns(FalseClass)
+  sig {returns(FalseClass)}
   def present?
     false
   end
@@ -18,7 +18,7 @@ end
 class A
   extend T::Helpers
 
-  sig(s: T.nilable(String)).returns(NilClass)
+  sig {params(s: T.nilable(String)).returns(NilClass)}
   def test_return(s)
     if s.present?
       s.length
@@ -27,7 +27,7 @@ class A
     nil
   end
 
-  sig(s: String).returns(NilClass)
+  sig {params(s: String).returns(NilClass)}
   def test_unchanged(s)
     if s.present?
       s.length

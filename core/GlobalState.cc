@@ -79,6 +79,8 @@ const char *return_type_inference_str = "ReturnTypeInference";
 const char *inferred_return_type_str = "INFERRED_RETURN_TYPE";
 const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
 const char *guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder";
+const char *private_str = "Private";
+const char *builder_str = "Builder";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
@@ -258,6 +260,10 @@ void GlobalState::initEmpty() {
         core::Variance::ContraVariant);
     id.data(*this).resultType = make_shared<core::TypeVar>(id);
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(private_str));
+    ENFORCE(id == Symbols::Sorbet_Private());
+    id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), enterNameConstant(builder_str));
+    ENFORCE(id == Symbols::Sorbet_Private_Builder());
 
     // Root members
     Symbols::root().data(*this, true).members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

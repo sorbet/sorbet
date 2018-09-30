@@ -1,43 +1,53 @@
 # typed: true
 class Class < Module
-  Sorbet.sig.returns(T.untyped)
+  sig {returns(T.untyped)}
   def allocate(); end
 
-  Sorbet.sig(args: T.untyped).returns(T.untyped)
+  sig {params(args: T.untyped).returns(T.untyped)}
   def new(*args); end
 
-  Sorbet.sig(
-      arg0: Class,
-  )
-  .returns(T.untyped)
+  sig do
+    params(
+        arg0: Class,
+    )
+    .returns(T.untyped)
+  end
   def inherited(arg0); end
 
-  Sorbet.sig(
-      arg0: T.any(TrueClass, FalseClass),
-  )
-  .returns(T::Array[Symbol])
+  sig do
+    params(
+        arg0: T.any(TrueClass, FalseClass),
+    )
+    .returns(T::Array[Symbol])
+  end
   def instance_methods(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def name(); end
 
-  Sorbet.sig.returns(T.nilable(Class))
-  Sorbet.sig.returns(Class)
+  sig {returns(T.nilable(Class))}
+  sig {returns(Class)}
   def superclass(); end
 
-  Sorbet.sig.void
-  Sorbet.sig(
-      superclass: Class,
-  )
-  .void
-  Sorbet.sig(
-      blk: T.proc(arg0: Class).returns(BasicObject),
-  )
-  .void
-  Sorbet.sig(
-      superclass: Class,
-      blk: T.proc(arg0: Class).returns(BasicObject),
-  )
-  .void
+  sig {void}
+  sig do
+    params(
+        superclass: Class,
+    )
+    .void
+  end
+  sig do
+    params(
+        blk: T.proc.params(arg0: Class).returns(BasicObject),
+    )
+    .void
+  end
+  sig do
+    params(
+        superclass: Class,
+        blk: T.proc.params(arg0: Class).returns(BasicObject),
+    )
+    .void
+  end
   def initialize(superclass=_, &blk); end
 end

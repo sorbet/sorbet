@@ -4,7 +4,7 @@ class Opus::Command
 end
 
 class MyCommand < Opus::Command
-  sig(x: Integer).returns(String)
+  sig {params(x: Integer).returns(String)}
   def call(x)
     x.to_s
   end
@@ -13,7 +13,7 @@ end
 T.assert_type!(MyCommand.call(7), String)
 
 class OtherCommand < ::Opus::Command
-  sig(x: String).returns(Integer)
+  sig {params(x: String).returns(Integer)}
   def call(x)
     Integer(x)
   end
@@ -24,7 +24,7 @@ T.assert_type!(OtherCommand.call("8"), Integer)
 class NotACommand < Llamas::Opus::Command # error: Unable to resolve constant
   extend T::Helpers
 
-  sig(x: String).returns(Integer)
+  sig {params(x: String).returns(Integer)}
   def call(x)
     Integer(x)
   end

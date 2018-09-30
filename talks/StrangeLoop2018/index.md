@@ -203,7 +203,7 @@ again.
 standard_method({bar: Integer}, returns: String)
 ```
 ```ruby
-sig(bar: Integer).returns(String)
+sig {params(bar: Integer).returns(String)}
 ```
 ```ruby
 sig {params(bar: Integer).returns(String)}
@@ -570,7 +570,7 @@ guess-sig.rb:3: This function does not have a `sig` http://go/e/7017
     3 |def foo
        ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    guess-sig.rb:3: Add `sig.returns(Integer)`
+    guess-sig.rb:3: Add `sig {returns(Integer)}`
 ```
 
 Note:

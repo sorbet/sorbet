@@ -1,7 +1,7 @@
 # typed: true
 extend T::Helpers
 
-sig.returns(Integer)
+sig {returns(Integer)}
 def foo
   3
 end

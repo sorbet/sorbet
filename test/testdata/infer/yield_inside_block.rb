@@ -1,7 +1,7 @@
 # typed: true
 extend T::Helpers
 
-sig(blk: T.proc(x: Integer).returns(Integer)).void
+sig {params(blk: T.proc.params(x: Integer).returns(Integer)).void}
 def f(&blk)
   loop do
     # Ensure that this refers to the block argument to the method, not

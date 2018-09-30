@@ -9,7 +9,7 @@ namespace dsl {
  * This class implements Opus::Command by taking
  *
  *   class MyCommand < Opus::Command
- *     sig(...).returns(...)
+ *     sig {params(...).returns(...)}
  *     def call(...)
  *       ...
  *     end

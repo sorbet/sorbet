@@ -10,7 +10,7 @@ def baz
   end
 end
 
-Sorbet.sig.void
+sig {void}
 def give_me_void; end
 
 def bla; give_me_void; end

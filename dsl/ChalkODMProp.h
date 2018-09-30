@@ -12,9 +12,9 @@ namespace dsl {
  *
  * into
  *
- *   sig.returns(T.nilable(String))
+ *   sig {returns(T.nilable(String))}
  *   def foo; T.cast(nil, T.nilable(String)); end
- *   sig(arg0: String).returns(NilClass)
+ *   sig {params(arg0: String).returns(NilClass)}
  *   def foo=(arg0); end
  *
  * We try to implement a simple approximation of the functionality that

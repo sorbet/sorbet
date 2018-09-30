@@ -4,16 +4,16 @@ end
 class Test
   extend T::Helpers
 
-  sig.returns(T.untyped)
+  sig {returns(T.untyped)}
   def untyped
   end
 
-  sig.returns(T.all(T.any(Integer, Float), Fake))
+  sig {returns(T.all(T.any(Integer, Float), Fake))}
   def and_or
     untyped
   end
 
-  sig.returns(T.any(T.all(Integer, Fake), T.all(Float, Fake)))
+  sig {returns(T.any(T.all(Integer, Fake), T.all(Float, Fake)))}
   def or_and
     untyped
   end

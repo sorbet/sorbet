@@ -13,69 +13,77 @@ module Gem
   WIN_PATTERNS = T.let(T.unsafe(nil), Array)
   WRITE_BINARY_ERRORS = T.let(T.unsafe(nil), Array)
 
-  Sorbet.sig(
-      name: String,
-      args: String,
-      requirements: Gem::Requirement,
-  )
-  .returns(String)
+  sig do
+    params(
+        name: String,
+        args: String,
+        requirements: Gem::Requirement,
+    )
+    .returns(String)
+  end
   def self.bin_path(name, args=T.unsafe(nil), *requirements); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def self.binary_mode(); end
 
-  Sorbet.sig(
-      install_dir: String,
-  )
-  .returns(String)
+  sig do
+    params(
+        install_dir: String,
+    )
+    .returns(String)
+  end
   def self.bindir(install_dir=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(Hash)
+  sig {returns(Hash)}
   def self.clear_default_specs(); end
 
-  Sorbet.sig.returns(NilClass)
+  sig {returns(NilClass)}
   def self.clear_paths(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def self.config_file(); end
 
-  Sorbet.sig.returns(T.untyped)
+  sig {returns(T.untyped)}
   def self.configuration(); end
 
-  Sorbet.sig(
-      config: BasicObject,
-  )
-  .returns(T.untyped)
+  sig do
+    params(
+        config: BasicObject,
+    )
+    .returns(T.untyped)
+  end
   def self.configuration=(config); end
 
-  Sorbet.sig(
-      gem_name: String,
-  )
-  .returns(T.nilable(String))
+  sig do
+    params(
+        gem_name: String,
+    )
+    .returns(T.nilable(String))
+  end
   def self.datadir(gem_name); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_bindir(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_cert_path(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_dir(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_exec_format(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_key_path(); end
 
-  Sorbet.sig.returns(T.nilable(String))
+  sig {returns(T.nilable(String))}
   def self.default_path(); end
 
-  Sorbet.sig.returns(T.nilable(T::Array[String]))
+  sig {returns(T.nilable(T::Array[String]))}
   def self.default_rubygems_dirs(); end
 
-  Sorbet.sig.returns(T.nilable(T::Array[String]))
+  sig {returns(T.nilable(T::Array[String]))}
   def self.default_sources(); end
 end
 

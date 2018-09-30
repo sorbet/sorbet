@@ -6,7 +6,7 @@ T.cast("foo", String) # error: Useless cast
 T.unsafe(String)
 T.nilable(String)
 T.proc
-T.proc(arg0: String, arg1: Integer)
+T.proc.params(arg0: String, arg1: Integer)
 T.class_of(String)
 T.noreturn
 T.enum([:a, :b])

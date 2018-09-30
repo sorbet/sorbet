@@ -7,4 +7,5 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::A#f (x) -> NilClass @ test/testdata/namer/type_alias.rb:9
       argument ::A#f#x<> -> A::C1 @ test/testdata/namer/type_alias.rb:8
   class ::<Class:A> < ::Module (<constant:Helpers>) @ test/testdata/namer/type_alias.rb:2
+    method ::<Class:A>#<block> () @ test/testdata/namer/type_alias.rb:8
 

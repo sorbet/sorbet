@@ -6,116 +6,142 @@ class Regexp < Object
   MULTILINE = T.let(T.unsafe(nil), Integer)
   NOENCODING = T.let(T.unsafe(nil), Integer)
 
-  Sorbet.sig(
-      arg0: T.any(String, Symbol),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(String, Symbol),
+    )
+    .returns(String)
+  end
   def self.escape(arg0); end
 
-  Sorbet.sig.returns(MatchData)
-  Sorbet.sig(
-      arg0: Integer,
-  )
-  .returns(String)
+  sig {returns(MatchData)}
+  sig do
+    params(
+        arg0: Integer,
+    )
+    .returns(String)
+  end
   def self.last_match(arg0=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      obj: BasicObject,
-  )
-  .returns(T.nilable(Regexp))
+  sig do
+    params(
+        obj: BasicObject,
+    )
+    .returns(T.nilable(Regexp))
+  end
   def self.try_convert(obj); end
 
-  Sorbet.sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ==(other); end
 
-  Sorbet.sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def ===(other); end
 
-  Sorbet.sig(
-      str: String,
-  )
-  .returns(T.nilable(Integer))
+  sig do
+    params(
+        str: String,
+    )
+    .returns(T.nilable(Integer))
+  end
   def =~(str); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def casefold?(); end
 
-  Sorbet.sig.returns(Encoding)
+  sig {returns(Encoding)}
   def encoding(); end
 
-  Sorbet.sig.returns(T.any(TrueClass, FalseClass))
+  sig {returns(T.any(TrueClass, FalseClass))}
   def fixed_encoding?(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def hash(); end
 
-  Sorbet.sig(
-      arg0: String,
-      options: BasicObject,
-      kcode: String,
-  )
-  .returns(Object)
-  Sorbet.sig(
-      arg0: Regexp,
-  )
-  .void
+  sig do
+    params(
+        arg0: String,
+        options: BasicObject,
+        kcode: String,
+    )
+    .returns(Object)
+  end
+  sig do
+    params(
+        arg0: Regexp,
+    )
+    .void
+  end
   def initialize(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def inspect(); end
 
-  Sorbet.sig(
-      arg0: T.nilable(String),
-      arg1: Integer,
-  )
-  .returns(T.nilable(MatchData))
+  sig do
+    params(
+        arg0: T.nilable(String),
+        arg1: Integer,
+    )
+    .returns(T.nilable(MatchData))
+  end
   def match(arg0, arg1=T.unsafe(nil)); end
 
-  Sorbet.sig.returns(T::Hash[String, T::Array[Integer]])
+  sig {returns(T::Hash[String, T::Array[Integer]])}
   def named_captures(); end
 
-  Sorbet.sig.returns(T::Array[String])
+  sig {returns(T::Array[String])}
   def names(); end
 
-  Sorbet.sig.returns(Integer)
+  sig {returns(Integer)}
   def options(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def source(); end
 
-  Sorbet.sig.returns(String)
+  sig {returns(String)}
   def to_s(); end
 
-  Sorbet.sig.returns(T.nilable(Integer))
+  sig {returns(T.nilable(Integer))}
   def ~(); end
 
-  Sorbet.sig(
-      arg0: String,
-      options: BasicObject,
-      kcode: String,
-  )
-  .returns(T.self_type)
-  Sorbet.sig(
-      arg0: Regexp,
-  )
-  .returns(T.self_type)
+  sig do
+    params(
+        arg0: String,
+        options: BasicObject,
+        kcode: String,
+    )
+    .returns(T.self_type)
+  end
+  sig do
+    params(
+        arg0: Regexp,
+    )
+    .returns(T.self_type)
+  end
   def self.compile(arg0, options=T.unsafe(nil), kcode=T.unsafe(nil)); end
 
-  Sorbet.sig(
-      arg0: T.any(String, Symbol),
-  )
-  .returns(String)
+  sig do
+    params(
+        arg0: T.any(String, Symbol),
+    )
+    .returns(String)
+  end
   def self.quote(arg0); end
 
-  Sorbet.sig(
-      other: BasicObject,
-  )
-  .returns(T.any(TrueClass, FalseClass))
+  sig do
+    params(
+        other: BasicObject,
+    )
+    .returns(T.any(TrueClass, FalseClass))
+  end
   def eql?(other); end
 end

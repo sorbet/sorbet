@@ -4,7 +4,7 @@ class TestArgs
 
   def any; end
 
-  sig.returns(T::Hash[Integer, Integer])
+  sig {returns(T::Hash[Integer, Integer])}
   def a_hash; end # error: does not conform to method result type
 
   def required(a, b)
@@ -25,11 +25,13 @@ class TestArgs
     optional(1, 2, 3) # error: Expected: `1..2`, got: `3`
   end
 
-  sig(
-    a: Integer,
-    b: Integer,
-  )
-  .returns(NilClass)
+  sig do
+    params(
+      a: Integer,
+      b: Integer,
+    )
+    .returns(NilClass)
+  end
   def kwarg(a, b:)
   end
 
@@ -47,10 +49,12 @@ class TestArgs
     kwarg(1, a_hash) # error: Passing an untyped hash
   end
 
-  sig(
-    x: Integer
-  )
-  .returns(NilClass)
+  sig do
+    params(
+      x: Integer
+    )
+    .returns(NilClass)
+  end
   def repeated(*x)
   end
 
@@ -63,15 +67,17 @@ class TestArgs
     repeated("hi", "there") # error: MULTI
   end
 
-  sig(
-    x: Integer,
-    y: Integer,
-    z: T::Hash[Integer, Integer],
-    w: String,
-    u: Integer,
-    v: Integer
-  )
-  .returns(NilClass)
+  sig do
+    params(
+      x: Integer,
+      y: Integer,
+      z: T::Hash[Integer, Integer],
+      w: String,
+      u: Integer,
+      v: Integer
+    )
+    .returns(NilClass)
+  end
   def mixed(x, y=T.unsafe(nil), z=T.unsafe(nil), *w, u:, v: 0)
   end
 

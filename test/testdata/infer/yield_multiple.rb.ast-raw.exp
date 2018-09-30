@@ -18,60 +18,76 @@ ClassDef{
     }
 
     Send{
-      recv = Send{
-        recv = Self{ claz = ::<todo sym> }
-        fun = sig
-        block = nullptr
+      recv = Self{ claz = ::<todo sym> }
+      fun = sig
+      block = Block {
         args = [
-          Hash{
-            pairs = [
-              [
-                key = Literal{ value = :"blk" }
-                value = Send{
-                  recv = Send{
-                    recv = UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:T>
-                    }
-                    fun = proc
-                    block = nullptr
-                    args = [
-                      Hash{
-                        pairs = [
-                          [
-                            key = Literal{ value = :"x" }
-                            value = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <constant:Integer>
-                            }
+        ]
+        body = Send{
+          recv = Send{
+            recv = Self{ claz = ::<todo sym> }
+            fun = params
+            block = nullptr
+            args = [
+              Hash{
+                pairs = [
+                  [
+                    key = Literal{ value = :"blk" }
+                    value = Send{
+                      recv = Send{
+                        recv = Send{
+                          recv = UnresolvedConstantLit{
+                            scope = EmptyTree
+                            cnst = <constant:T>
+                          }
+                          fun = proc
+                          block = nullptr
+                          args = [
                           ]
-                          [
-                            key = Literal{ value = :"y" }
-                            value = UnresolvedConstantLit{
-                              scope = EmptyTree
-                              cnst = <constant:Symbol>
-                            }
-                          ]
+                        }
+                        fun = params
+                        block = nullptr
+                        args = [
+                          Hash{
+                            pairs = [
+                              [
+                                key = Literal{ value = :"x" }
+                                value = UnresolvedConstantLit{
+                                  scope = EmptyTree
+                                  cnst = <constant:Integer>
+                                }
+                              ]
+                              [
+                                key = Literal{ value = :"y" }
+                                value = UnresolvedConstantLit{
+                                  scope = EmptyTree
+                                  cnst = <constant:Symbol>
+                                }
+                              ]
+                            ]
+                          }
                         ]
                       }
-                    ]
-                  }
-                  fun = returns
-                  block = nullptr
-                  args = [
-                    UnresolvedConstantLit{
-                      scope = EmptyTree
-                      cnst = <constant:Integer>
+                      fun = returns
+                      block = nullptr
+                      args = [
+                        UnresolvedConstantLit{
+                          scope = EmptyTree
+                          cnst = <constant:Integer>
+                        }
+                      ]
                     }
                   ]
-                }
-              ]
+                ]
+              }
             ]
           }
-        ]
+          fun = void
+          block = nullptr
+          args = [
+          ]
+        }
       }
-      fun = void
-      block = nullptr
       args = [
       ]
     }

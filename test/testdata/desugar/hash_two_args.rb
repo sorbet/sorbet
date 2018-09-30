@@ -1,7 +1,7 @@
 # typed: true
 extend T::Helpers
 
-sig(foo: T::Hash[Symbol, Integer]).void
+sig {params(foo: T::Hash[Symbol, Integer]).void}
 def test_enumeration(foo)
     foo.each do |k, v|
         T.assert_type!(k, Symbol)
