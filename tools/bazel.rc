@@ -1,7 +1,7 @@
 # C / C++ Options
 # Don't depend on system compiler
-build --crosstool_top=@llvm_toolchain//:toolchain
-test --crosstool_top=@llvm_toolchain//:toolchain
+build --cxxopt=-std=c++17 --host_cxxopt=-std=c++17
+
 
 # Developer laptops run skylake, devboxes run skylake-avx512
 # however some AWS instances in our fleet still run Sandy Bridge (Skylake predecessor)
