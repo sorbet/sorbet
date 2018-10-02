@@ -107,10 +107,6 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                                                        enclosingClass.data(ctx).selfTypeArgs(ctx)),
                                      *constr);
         methodReturnType = core::Types::replaceSelfType(ctx, methodReturnType, enclosingClass.data(ctx).selfType(ctx));
-
-        if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
-            methodReturnType = core::Types::untypedUntracked();
-        }
     }
 
     vector<Environment> outEnvironments;

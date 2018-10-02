@@ -924,6 +924,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.push_back(bind.loc);
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
+                if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
+                    methodReturnType = core::Types::untypedUntracked();
+                }
                 if (!core::Types::isSubTypeUnderConstraint(ctx, constr, typeAndOrigin.type, methodReturnType)) {
                     if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::ReturnTypeMismatch)) {
                         e.setHeader("Returning value that does not conform to method result type");
@@ -946,6 +949,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
                 auto expectedType = i->link->returnTp;
+                if (core::Types::isSubType(ctx, core::Types::void_(), expectedType)) {
+                    expectedType = core::Types::untypedUntracked();
+                }
                 if (!core::Types::isSubTypeUnderConstraint(ctx, *i->link->constr, typeAndOrigin.type, expectedType)) {
                     // TODO(nelhage): We should somehow report location
                     // information about the `send` and/or the
