@@ -110,7 +110,7 @@ NameDef names[] = {
     // Sig builders
     {"params", Resolver | DSL},
     {"returns", Resolver | DSL},
-    {"void_", "void", Resolver},
+    {"void_", "void", Resolver | DSL},
     {"checked", Resolver},
     {"soft", Resolver},
 
@@ -120,8 +120,8 @@ NameDef names[] = {
     {"nilable", Resolver | Desugar | Infer | Core},
     {"proc", Core | Resolver | Desugar},
     {"untyped", Resolver | Infer | Core},
-    {"Array", Infer},
-    {"Hash", Infer},
+    {"Array", Infer | DSL},
+    {"Hash", Infer | DSL},
     {"noreturn", Resolver | DSL},
     {"singletonClass", "singleton_class", Core | Resolver},
     {"class_", "class", Core},
@@ -175,6 +175,13 @@ NameDef names[] = {
     {"created", DSL},
     {"merchant", DSL},
     {"foreign", DSL},
+    {"Chalk", DSL},
+    {"ODM", DSL},
+    {"Mutator", DSL},
+    {"Private", DSL},
+    {"HashMutator", DSL},
+    {"ArrayMutator", DSL},
+    {"DocumentMutator", DSL},
 
     {"describe", DSL},
     {"it", DSL},

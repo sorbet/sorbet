@@ -27,6 +27,24 @@ class <emptyTree><<constant:<root>>> < ()
     def foo_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
     end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foo<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
   end
 
   def test<<constant:<todo sym>>>()

@@ -19,7 +19,7 @@ begin
 end
 begin
   class <emptyTree><<constant:<root>>> < ()
-    def self.<static-init><<static-init>$76>()
+    def self.<static-init><<static-init>$77>()
       begin
         begin
           ::RubyTyper.keep_for_ide(::T1)

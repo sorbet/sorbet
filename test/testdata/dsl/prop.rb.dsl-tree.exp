@@ -44,6 +44,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foo=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foo<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     self(<constant:<todo sym>>).sig() do ||
       self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
     end
@@ -82,6 +100,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def default_without_optional_false=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def default_without_optional_false<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
@@ -96,6 +132,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def optional_false=<<constant:<todo sym>>>(arg0)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def optional_false=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def optional_false<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -114,6 +168,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def nodefault=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def nodefault<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
@@ -128,6 +200,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def type=<<constant:<todo sym>>>(arg0)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def type=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def type<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -162,6 +252,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
+      end
+
+      def array=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T::Array.[](<emptyTree>::<constant:String>))
     end
@@ -194,6 +302,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:Array>}).returns(<emptyTree>::<constant:Array>)
+      end
+
+      def array_of_explicit=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Array>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
+
+      def array_of_explicit<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
     end
@@ -208,6 +334,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def t_array=<<constant:<todo sym>>>(arg0)
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      end
+
+      def t_array=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Array>.[](<emptyTree>::<constant:String>))
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
+      end
+
+      def t_array<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -226,6 +370,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>)}).returns(<emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+      end
+
+      def hash_of=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:T>::<constant:Hash>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+      end
+
+      def hash_of<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
@@ -240,6 +402,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def optional_explicit=<<constant:<todo sym>>>(arg0)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      def optional_explicit=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def optional_explicit<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -258,6 +438,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def optional_existing=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def optional_existing<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
@@ -272,6 +470,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def optional=<<constant:<todo sym>>>(arg0)
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:String>)}).returns(::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      def optional=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:String>))
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def optional<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -298,6 +514,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def const_explicit=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def const_explicit<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(<emptyTree>::<constant:String>)
     end
@@ -306,12 +540,48 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def const=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def const<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:Array>))
     end
 
     def no_class_arg<<constant:<todo sym>>>()
       ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => ::T.nilable(<emptyTree>::<constant:Array>)}).returns(::T.nilable(<emptyTree>::<constant:Array>))
+      end
+
+      def no_class_arg=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), ::T.nilable(<emptyTree>::<constant:Array>))
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
+
+      def no_class_arg<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -346,6 +616,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.unsafe(nil)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foreign=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foreign<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
@@ -368,6 +656,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def foreign_lazy_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foreign_lazy=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foreign_lazy<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
 
     ::Sorbet.sig() do ||
@@ -394,6 +700,24 @@ class <emptyTree><<constant:<root>>> < ()
       ::T.unsafe(nil)
     end
 
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foreign_proc=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foreign_proc<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+    end
+
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
@@ -416,6 +740,24 @@ class <emptyTree><<constant:<root>>> < ()
 
     def foreign_invalid_<<constant:<todo sym>>>(*opts:)
       ::T.unsafe(nil)
+    end
+
+    class <emptyTree>::<constant:Mutator><<constant:<todo sym>>> < ()
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).params({:"arg0" => <emptyTree>::<constant:String>}).returns(<emptyTree>::<constant:String>)
+      end
+
+      def foreign_invalid=<<constant:<todo sym>>>(arg0)
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:String>)
+      end
+
+      ::Sorbet.sig() do ||
+        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
+
+      def foreign_invalid<<constant:<todo sym>>>()
+        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:DocumentMutator>)
+      end
     end
   end
 

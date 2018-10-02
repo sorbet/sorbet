@@ -15,6 +15,10 @@ namespace sorbet::dsl {
  *   def foo; T.cast(nil, T.nilable(String)); end
  *   sig {params(arg0: String).returns(NilClass)}
  *   def foo=(arg0); end
+ *   class Mutator < Chalk::ODM::Mutator
+ *     sig {params(arg0: String).returns(NilClass)}
+ *     def foo=(arg0); end
+ *   end
  *
  * We try to implement a simple approximation of the functionality that
  * Chalk::ODM::Document.prop has. This isn't full fidelity, but we're trying to

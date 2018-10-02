@@ -24,6 +24,16 @@ unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression>
     return ast::MK::Send1(loc, ast::MK::T(loc), core::Names::nilable(), move(type));
 }
 
+unique_ptr<ast::Expression> mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className) {
+    auto chalk =
+        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), ctx.state.enterNameConstant(core::Names::Chalk()));
+    auto odm = ast::MK::UnresolvedConstant(loc, move(chalk), ctx.state.enterNameConstant(core::Names::ODM()));
+    auto mutator = ast::MK::UnresolvedConstant(loc, move(odm), ctx.state.enterNameConstant(core::Names::Mutator()));
+    auto private_ =
+        ast::MK::UnresolvedConstant(loc, move(mutator), ctx.state.enterNameConstant(core::Names::Private()));
+    return ast::MK::UnresolvedConstant(loc, move(private_), ctx.state.enterNameConstant(className));
+}
+
 unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node) {
     auto send = ast::cast_tree<ast::Send>(node);
     if (send == nullptr) {
@@ -42,6 +52,28 @@ unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression 
         return nullptr;
     }
     return move(send->block->body);
+}
+
+bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym) {
+    auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(type);
+    if (cnst) {
+        if (cnst->cnst == sym.data(ctx).name && ast::isa_tree<ast::EmptyTree>(cnst->scope.get())) {
+            return true;
+        }
+
+        auto scope_cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
+        if (cnst->cnst == sym.data(ctx).name && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
+            scope_cnst->cnst == core::Symbols::T().data(ctx).name) {
+            return true;
+        }
+    }
+
+    auto send = ast::cast_tree<ast::Send>(type);
+    if (send && send->fun == core::Names::squareBrackets() && isProbablySymbol(ctx, send->recv.get(), sym)) {
+        return true;
+    }
+
+    return false;
 }
 
 vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContext ctx, ast::Send *send) {
@@ -209,10 +241,9 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
     stats.emplace_back(ast::MK::Sig(loc, ast::MK::Hash0(loc), ASTUtil::dupType(getType.get())));
     stats.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, move(getType))));
 
-    // Compute the setters
-
+    // Compute the setter
     if (!isImmutable) {
-        auto setType = move(type); // This is the last use so we can move() not dupType()
+        auto setType = ASTUtil::dupType(type.get());
         if (isOptional) {
             setType = mkNilable(loc, move(setType));
         }
@@ -245,6 +276,59 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
             ast::MK::RestArg(loc, ast::MK::KeywordArg(loc, ast::MK::Local(loc, core::Names::opts())));
         stats.emplace_back(ast::MK::Method1(loc, loc, fk_method, move(arg), ast::MK::Unsafe(loc, ast::MK::Nil(loc)),
                                             ast::MethodDef::DSLSynthesized));
+    }
+
+    // Compute the Mutator
+    {
+        // Compute a setter
+        auto setType = ASTUtil::dupType(type.get());
+        if (isOptional) {
+            setType = mkNilable(loc, move(setType));
+        }
+        ast::ClassDef::RHS_store rhs;
+        rhs.emplace_back(ast::MK::Sig(
+            loc, ast::MK::Hash1(loc, ast::MK::Symbol(loc, core::Names::arg0()), ASTUtil::dupType(setType.get())),
+            ASTUtil::dupType(setType.get())));
+        core::NameRef setName = name.addEq(ctx);
+        rhs.emplace_back(mkSet(loc, setName, ast::MK::Cast(loc, move(setType))));
+
+        // Maybe make a getter
+        unique_ptr<ast::Expression> mutator;
+        if (isProbablySymbol(ctx, type.get(), core::Symbols::Hash())) {
+            mutator = mkMutator(ctx, loc, core::Names::HashMutator());
+            auto send = ast::cast_tree<ast::Send>(type.get());
+            if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 2) {
+                mutator = ast::MK::Send2(loc, move(mutator), core::Names::squareBrackets(),
+                                         ASTUtil::dupType(send->args[0].get()), ASTUtil::dupType(send->args[1].get()));
+            } else {
+                mutator = ast::MK::Send2(loc, move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc),
+                                         ast::MK::Untyped(loc));
+            }
+        } else if (isProbablySymbol(ctx, type.get(), core::Symbols::Array())) {
+            mutator = mkMutator(ctx, loc, core::Names::ArrayMutator());
+            auto send = ast::cast_tree<ast::Send>(type.get());
+            if (send && send->fun == core::Names::squareBrackets() && send->args.size() == 1) {
+                mutator = ast::MK::Send1(loc, move(mutator), core::Names::squareBrackets(),
+                                         ASTUtil::dupType(send->args[0].get()));
+            } else {
+                mutator = ast::MK::Send1(loc, move(mutator), core::Names::squareBrackets(), ast::MK::Untyped(loc));
+            }
+        } else if (ast::isa_tree<ast::UnresolvedConstantLit>(type.get())) {
+            // In a perfect world we could know if there was a Mutator we could reference instead, like this:
+            // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()), core::Names::Mutator());
+            // but instead we make a generic one which doesn't have any methods on it
+            mutator = mkMutator(ctx, loc, core::Names::DocumentMutator());
+        }
+
+        if (mutator.get()) {
+            rhs.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(mutator.get())));
+            rhs.emplace_back(mkGet(loc, name, ast::MK::Cast(loc, move(mutator))));
+
+            ast::ClassDef::ANCESTORS_store ancestors;
+            auto name = ctx.state.enterNameConstant(core::Names::Mutator());
+            stats.emplace_back(ast::MK::Class(loc, loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), name),
+                                              move(ancestors), move(rhs), ast::ClassDefKind::Class));
+        }
     }
 
     return stats;
