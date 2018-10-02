@@ -3,6 +3,18 @@ module Enumerable
   extend T::Generic
   Elem = type_member(:out)
 
+  abstract!
+
+  sig do
+    abstract.
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.untyped)
+  end
+  sig {returns(T.self_type)}
+  def each(&blk); end
+
   sig {returns(T.any(TrueClass, FalseClass))}
   sig do
     params(

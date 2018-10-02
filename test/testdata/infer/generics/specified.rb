@@ -88,6 +88,8 @@ class ParentEnumerable
   K = type_member
   V = type_member
   Elem = type_member
+
+  def each; end
 end
 
 class ChildEnumerable < ParentEnumerable

@@ -10,6 +10,15 @@ class Struct
     .returns(T.class_of(RubyTyper::DynamicStruct))
   end
   def self.new(arg0, *arg1); end
+
+  sig do
+    params(
+        blk: T.proc.params(arg0: Elem).returns(BasicObject),
+    )
+    .returns(T.untyped)
+  end
+  sig {returns(T.self_type)}
+  def each(&blk); end
 end
 
 module RubyTyper

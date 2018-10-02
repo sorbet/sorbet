@@ -18,4 +18,6 @@ class Fixed
   extend T::Generic
 
   Elem = type_member(fixed: String)
+
+  def each; end
 end
