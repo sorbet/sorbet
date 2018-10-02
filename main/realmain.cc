@@ -237,7 +237,7 @@ int realmain(int argc, char *argv[]) {
                     logger->error("`-e` is incompatible with `--typed=ruby`");
                     return 1;
                 }
-                file.data(*gs).strict = core::StrictLevel::Strict;
+                file.data(*gs).strict = core::StrictLevel::Typed;
             }
         }
 

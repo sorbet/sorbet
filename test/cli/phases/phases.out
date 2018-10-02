@@ -446,7 +446,7 @@ ClassDef{
   },
   {
    "path": "-e",
-   "strict": "Strict"
+   "strict": "Typed"
   }
  ]
 }
