@@ -11,3 +11,10 @@ def f(&blk)
 
   T.assert_type!(block_given?, T.any(TrueClass, FalseClass))
 end
+
+
+if block_given? # used to crash us
+  puts("1")
+end
+
+yield 1 # used to crash us too

@@ -135,6 +135,7 @@ class NameInserter {
     vector<blockArgs> blockArgStack;
 
     core::LocalVariable findOrCreateBlockParameter(core::MutableContext ctx, core::Loc loc) {
+        ENFORCE(!blockArgStack.empty());
         auto &frame = blockArgStack.back();
         core::NameRef blockArg;
         if (frame.declared.exists()) {
@@ -502,11 +503,13 @@ public:
                     // - Typechecking the call to block_given?
                     // - Letting infer know the expression can only be
                     //   truthy if `blk` is truthy
-                    auto loc = original->loc;
-                    auto blockArg = findOrCreateBlockParameter(ctx, loc);
-                    auto iff =
-                        ast::MK::If(loc, make_unique<ast::Local>(loc, blockArg), move(original), ast::MK::False(loc));
-                    return iff;
+                    if (!blockArgStack.empty()) {
+                        auto loc = original->loc;
+                        auto blockArg = findOrCreateBlockParameter(ctx, loc);
+                        auto iff = ast::MK::If(loc, make_unique<ast::Local>(loc, blockArg), move(original),
+                                               ast::MK::False(loc));
+                        return iff;
+                    }
                 }
             }
         }
@@ -819,9 +822,13 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformYield(core::MutableContext ctx, unique_ptr<ast::Yield> yield) {
-        auto recv = make_unique<ast::Local>(yield->loc, findOrCreateBlockParameter(ctx, yield->loc));
-
-        return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(yield->args));
+        if (!blockArgStack.empty()) {
+            auto recv = make_unique<ast::Local>(yield->loc, findOrCreateBlockParameter(ctx, yield->loc));
+            return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(yield->args));
+        } else {
+            return make_unique<ast::Send>(yield->loc, ast::MK::Unsafe(yield->loc, ast::MK::Nil(yield->loc)),
+                                          core::Names::call(), move(yield->args));
+        }
     }
 
 private:
