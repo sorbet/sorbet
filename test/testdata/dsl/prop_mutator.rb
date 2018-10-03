@@ -10,7 +10,8 @@ class Foo
     prop :doc, Foo
 end
 
-Foo::Mutator.new.int = 3
+# Could work if we could figure out this was a class
+Foo::Mutator.new.int = 3 # error: Method `int=` does not exist on `Foo::Mutator`
 Foo::Mutator.new.hash[:a] = :b
 Foo::Mutator.new.t_hash[:a] = :b
 Foo::Mutator.new.t_hash['a'] = :b
@@ -23,4 +24,4 @@ Foo::Mutator.new.t_array << :a
 Foo::Mutator.new.t_array_type << 'a'
 Foo::Mutator.new.t_array_type << :a # error: `Symbol(:"a")` doesn't match `String` for argument `value`
 # Could work if we could figure out to return a `Foo::Mutator`
-Foo::Mutator.new.doc.int = 3 # error: Method `int=` does not exist on `Chalk::ODM::Mutator::Private::DocumentMutator`
+Foo::Mutator.new.doc.int = 3 # error: Method `doc` does not exist on `Foo::Mutator`

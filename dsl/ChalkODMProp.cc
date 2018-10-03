@@ -316,8 +316,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         } else if (ast::isa_tree<ast::UnresolvedConstantLit>(type.get())) {
             // In a perfect world we could know if there was a Mutator we could reference instead, like this:
             // mutator = ast::MK::UnresolvedConstant(loc, ASTUtil::dupType(type.get()), core::Names::Mutator());
-            // but instead we make a generic one which doesn't have any methods on it
-            mutator = mkMutator(ctx, loc, core::Names::DocumentMutator());
+            // For now we're just going to leave these in method_missing.rbi
         }
 
         if (mutator.get()) {
