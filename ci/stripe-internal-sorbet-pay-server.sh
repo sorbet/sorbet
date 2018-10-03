@@ -141,6 +141,7 @@ export LSAN_OPTIONS
     /usr/local/bin/junit-script-output \
         sanitized-build \
         bazel build main:sorbet --config=ci
+    cp bazel-bin/main/sorbet /build/bin/sorbet.san
 )
 
 TIMEFILE2=$(mktemp)

@@ -131,9 +131,6 @@ int realmain(int argc, char *argv[]) {
     options::readOptions(opts, argc, argv, logger);
     while (opts.waitForDebugger && !stopInDebugger()) {
         // spin
-        sigset_t mask;
-        sigemptyset(&mask);
-        sigsuspend(&mask);
     }
     if (opts.stdoutHUPHack) {
         startHUPMonitor();
