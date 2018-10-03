@@ -24,8 +24,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L650: Did you mean: `IO`?
-     650 |class IO::EAGAINWaitReadable < Errno::EAGAIN
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L783: Did you mean: `IO`?
+     783 |class IO::EAGAINWaitReadable < Errno::EAGAIN
                 ^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/set.rbi#L2: Did you mean: `Set`?
      2 |class Set < Object
