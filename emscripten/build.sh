@@ -20,6 +20,7 @@ genfiles="$(bazel info bazel-genfiles)"
 absl="$root/external/com_google_absl/"
 
 CFLAGS=""
+CFLAGS="$CFLAGS -DNDEBUG"
 CFLAGS="$CFLAGS -I$root"
 CFLAGS="$CFLAGS -I$absl"
 CFLAGS="$CFLAGS -I$root/external/spdlog/include"

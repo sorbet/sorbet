@@ -39,10 +39,12 @@ namespace sorbet {
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
 template <class K, class V> using UnorderedMap = ska::unordered_map<K, V>;
 template <class E> using UnorderedSet = ska::unordered_set<E>;
+constexpr bool emscripten_build = false;
 #else
 template <class T, size_t N> using InlinedVector = std::vector<T>;
 template <class K, class V> using UnorderedMap = std::unordered_map<K, V>;
 template <class E> using UnorderedSet = std::unordered_set<E>;
+constexpr bool emscripten_build = true;
 #endif
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
@@ -69,12 +71,14 @@ constexpr bool debug_mode = true;
         X;            \
     }
 
+constexpr bool skip_check_memory_layout = debug_mode || emscripten_build;
+
 template <typename ToCheck, std::size_t ExpectedSize, std::size_t RealSize = sizeof(ToCheck)> struct check_size {
-    static_assert(debug_mode || ExpectedSize == RealSize, "Size is off!");
+    static_assert(skip_check_memory_layout || ExpectedSize == RealSize, "Size is off!");
 };
 
 template <typename ToCheck, std::size_t ExpectedAlign, std::size_t RealAlign = alignof(ToCheck)> struct check_align {
-    static_assert(debug_mode || ExpectedAlign == RealAlign, "Align is off!");
+    static_assert(skip_check_memory_layout || ExpectedAlign == RealAlign, "Align is off!");
 };
 
 #ifdef UNUSED
