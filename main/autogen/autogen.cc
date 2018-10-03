@@ -160,7 +160,7 @@ public:
         refs[it->second.id()].definitionLoc = original->loc;
 
         auto ait = original->ancestors.begin();
-        if (original->kind == ast::Class) {
+        if (original->kind == ast::Class && !original->ancestors.empty()) {
             // Handle the superclass at outer scope
             *ait = ast::TreeMap::apply(ctx, *this, move(*ait));
             ++ait;

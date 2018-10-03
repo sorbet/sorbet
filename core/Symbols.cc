@@ -312,8 +312,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             }
             for (const auto scope : candidateScopes) {
                 for (auto member : scope.data(gs).membersStableOrderSlow(gs)) {
-                    if (member.first.data(gs).kind == NameKind::CONSTANT) {
-                        ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
+                    if (member.first.data(gs).kind == NameKind::CONSTANT &&
+                        member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8) {
                         auto thisDistance = Levenstein::distance(
                             currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
                         if (thisDistance <= best.distance) {
@@ -347,8 +347,8 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
             ENFORCE(thisIter.data(gs).isClass());
             for (auto member : thisIter.data(gs).membersStableOrderSlow(gs)) {
                 if (member.second.exists() && member.first.exists() &&
-                    member.first.data(gs).kind == NameKind::CONSTANT) {
-                    ENFORCE(member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8);
+                    member.first.data(gs).kind == NameKind::CONSTANT &&
+                    member.first.data(gs).cnst.original.data(gs).kind == NameKind::UTF8) {
                     auto thisDistance = Levenstein::distance(
                         currentName, member.first.data(gs).cnst.original.data(gs).raw.utf8, best.distance);
                     if (thisDistance <= globalBestDistance) {
