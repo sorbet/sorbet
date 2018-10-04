@@ -67,6 +67,7 @@ struct Options {
     bool noErrorCount = false;
     bool autocorrect = false;
     bool waitForDebugger = false;
+    bool skipDSLPasses = false;
     int threads = 0;
     int logLevel = 0; // number of time -v was passed
     std::string typedSource = "";

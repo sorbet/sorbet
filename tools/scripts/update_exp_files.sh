@@ -31,7 +31,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
             candidate="$basename.$pass.exp"
             args=()
             if [ "$pass" = "autogen" ]; then
-                args=("--stop-after=namer")
+                args=("--stop-after=namer --skip-dsl-passes")
             fi
             if [ -e "$candidate" ]; then
                 echo bazel-bin/main/sorbet  --suppress-non-critical --print "$pass" --max-threads 1 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"

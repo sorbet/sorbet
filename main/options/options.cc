@@ -155,6 +155,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("stop-after", all_stop_after.str(),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
+    options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
@@ -276,15 +277,25 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.stopAfterPhase = extractStopAfter(raw, logger);
 
         opts.autocorrect = raw["autocorrect"].as<bool>();
+        opts.skipDSLPasses = raw["skip-dsl-passes"].as<bool>();
+
         opts.runLSP = raw["lsp"].as<bool>();
         if (opts.runLSP && !opts.cacheDir.empty()) {
             logger->info("lsp mode does not yet support caching.");
             throw EarlyReturnWithCode(1);
         }
-        if ((opts.print.Autogen || opts.print.AutogenMsgPack) && opts.stopAfterPhase != Phase::NAMER) {
-            logger->info("-p autogen{} requires --stop-after=namer", opts.print.AutogenMsgPack ? "-msgpack" : "");
+        if ((opts.print.Autogen || opts.print.AutogenMsgPack) &&
+            (opts.stopAfterPhase != Phase::NAMER || !opts.skipDSLPasses)) {
+            logger->info("-p autogen{} requires --stop-after=namer --skip-dsl-passes",
+                         opts.print.AutogenMsgPack ? "-msgpack" : "");
             throw EarlyReturnWithCode(1);
         }
+
+        if (opts.skipDSLPasses && !opts.cacheDir.empty()) {
+            logger->info("--skip-dsl-passes does not support caching");
+            throw EarlyReturnWithCode(1);
+        }
+
         opts.noErrorCount = raw["no-error-count"].as<bool>();
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();

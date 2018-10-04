@@ -145,11 +145,13 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
             }
 
-            {
+            if (!opts.skipDSLPasses) {
                 logger->trace("Inlining DSLs: {}", file.data(lgs).path());
                 core::UnfreezeNameTable nameTableAccess(lgs); // creates temporaries during desugaring
                 core::ErrorRegion errs(lgs, file);
                 dslsInlined = dsl::DSL::run(ctx, move(ast));
+            } else {
+                dslsInlined = move(ast);
             }
         }
         if (print.DSLTree) {

@@ -223,27 +223,36 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
-
-        // DSL
         unique_ptr<sorbet::ast::Expression> dslUnwound;
-        {
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            dslUnwound = testSerialize(gs, sorbet::dsl::DSL::run(ctx, move(desugared)));
-        }
+        if (test.expectations.find("autogen") == test.expectations.end()) {
+            // DSL
+            {
+                sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-        expectation = test.expectations.find("dsl-tree");
-        if (expectation != test.expectations.end()) {
-            got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
-        }
+                dslUnwound = testSerialize(gs, sorbet::dsl::DSL::run(ctx, move(desugared)));
+            }
 
-        expectation = test.expectations.find("dsl-tree-raw");
-        if (expectation != test.expectations.end()) {
-            got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
-            auto newErrors = errorQueue->drainAllErrors();
-            errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            expectation = test.expectations.find("dsl-tree");
+            if (expectation != test.expectations.end()) {
+                got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            }
+
+            expectation = test.expectations.find("dsl-tree-raw");
+            if (expectation != test.expectations.end()) {
+                got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
+                auto newErrors = errorQueue->drainAllErrors();
+                errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
+            }
+        } else {
+            dslUnwound = move(desugared);
+            if (test.expectations.find("dsl-tree-raw") != test.expectations.end() ||
+
+                test.expectations.find("dsl-tree") != test.expectations.end()) {
+                ADD_FAILURE() << "Running DSL passes with autogen isn't supported";
+            }
         }
 
         // Namer
