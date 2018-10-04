@@ -292,6 +292,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             int i = -1;
                             vector<shared_ptr<LiteralType>> keys;
                             vector<shared_ptr<Type>> valueLubs;
+                            valueLubs.reserve(h2->keys.size());
                             bool differ1 = false;
                             bool differ2 = false;
                             for (auto &el2 : h2->keys) {
@@ -604,6 +605,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                          ENFORCE(a2 != nullptr);
                          if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                              vector<shared_ptr<Type>> elemGlbs;
+                             elemGlbs.reserve(a2->elems.size());
                              int i = -1;
                              for (auto &el2 : a2->elems) {
                                  ++i;
@@ -628,6 +630,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              int i = -1;
                              vector<shared_ptr<LiteralType>> keys;
                              vector<shared_ptr<Type>> valueLubs;
+                             valueLubs.reserve(h2->keys.size());
                              for (auto &el2 : h2->keys) {
                                  ++i;
                                  auto *u2 = cast_type<ClassType>(el2->underlying().get());

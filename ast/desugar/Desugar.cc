@@ -368,11 +368,15 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
+                    stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
                     stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
+                    readArgs.reserve(s->args.size());
+                    assgnArgs.reserve(s->args.size() + 1);
+
                     for (auto &arg : s->args) {
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
@@ -415,11 +419,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
+                    stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
                     stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
+                    readArgs.reserve(s->args.size());
+                    assgnArgs.reserve(s->args.size() + 1);
                     for (auto &arg : s->args) {
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
@@ -462,11 +469,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
+                    stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
                     stats.emplace_back(MK::Assign(loc, tempRecv, move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
+                    readArgs.reserve(s->args.size());
+                    assgnArgs.reserve(s->args.size() + 1);
                     for (auto &arg : s->args) {
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
@@ -1157,6 +1167,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::Rescue *rescue) {
                 Rescue::RESCUE_CASE_store cases;
+                cases.reserve(rescue->rescue.size());
                 for (auto &node : rescue->rescue) {
                     unique_ptr<Expression> rescueCaseExpr = node2TreeImpl(ctx, move(node), uniqueCounter);
                     auto rescueCase = cast_tree<ast::RescueCase>(rescueCaseExpr.get());
@@ -1379,6 +1390,7 @@ unique_ptr<Expression> liftTopLevel(core::MutableContext ctx, unique_ptr<Express
     ClassDef::RHS_store rhs;
     auto insSeq = cast_tree<InsSeq>(what.get());
     if (insSeq) {
+        rhs.reserve(insSeq->stats.size() + 1);
         for (auto &stat : insSeq->stats) {
             rhs.emplace_back(move(stat));
         }

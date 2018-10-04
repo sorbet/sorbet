@@ -315,12 +315,14 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
 
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
         vector<shared_ptr<Type>> unwrappedValues;
+        unwrappedValues.reserve(shapeType->values.size());
         for (auto value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(ctx, loc, value));
         }
         return make_shared<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
         vector<shared_ptr<Type>> unwrappedElems;
+        unwrappedElems.reserve(tupleType->elems.size());
         for (auto elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(ctx, loc, elem));
         }
@@ -418,6 +420,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 auto alternatives = symbol.data(ctx).findMemberFuzzyMatch(ctx, args.name);
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;
+                    lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
                         lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc(), "Did you mean: `{}`?",
                                                            alternative.symbol.show(ctx)));
@@ -704,6 +707,7 @@ shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, 
     const Symbol &data = method.data(ctx);
 
     vector<shared_ptr<Type>> args;
+    args.reserve(data.arguments().size());
     for (auto arg : data.arguments()) {
         if (arg.data(ctx).isRepeated()) {
             ENFORCE(args.empty(),
@@ -955,6 +959,7 @@ public:
         vector<shared_ptr<Type>> targs;
         auto it = args.args.begin();
         int i = -1;
+        targs.reserve(attachedClass.data(ctx).typeMembers().size());
         for (auto mem : attachedClass.data(ctx).typeMembers()) {
             ++i;
             if (mem.data(ctx).isFixed()) {
@@ -981,6 +986,8 @@ public:
 
         vector<shared_ptr<LiteralType>> keys;
         vector<shared_ptr<Type>> values;
+        keys.reserve(args.args.size() / 2);
+        values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
             auto *key = cast_type<LiteralType>(args.args[i]->type.get());
             if (key == nullptr) {
@@ -1001,6 +1008,7 @@ public:
             return Types::arrayOfUntyped();
         }
         vector<shared_ptr<Type>> elems;
+        elems.reserve(args.args.size());
         bool isType = absl::c_any_of(args.args, [ctx](auto ty) { return isa_type<MetaType>(ty->type.get()); });
         int i = -1;
         for (auto &elem : args.args) {
@@ -1092,6 +1100,7 @@ public:
         }
 
         InlinedVector<TypeAndOrigins, 2> sendArgStore;
+        sendArgStore.reserve(tuple->elems.size());
         for (auto &arg : tuple->elems) {
             TypeAndOrigins tao;
             tao.type = arg;
@@ -1099,6 +1108,7 @@ public:
             sendArgStore.emplace_back(move(tao));
         }
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
+        sendArgs.reserve(sendArgStore.size());
         for (auto &arg : sendArgStore) {
             sendArgs.emplace_back(&arg);
         }

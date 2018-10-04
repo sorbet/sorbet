@@ -527,6 +527,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
     if (what == asIf || (asIf.data(ctx).isClassClass() && what.data(ctx).isClassClass())) {
         currentAlignment = what.data(ctx).typeMembers();
     } else {
+        currentAlignment.reserve(asIf.data(ctx).typeMembers().size());
         for (auto originalTp : asIf.data(ctx).typeMembers()) {
             auto name = originalTp.data(ctx).name;
             SymbolRef align;
@@ -769,6 +770,7 @@ std::shared_ptr<Type> Types::widen(Context ctx, const std::shared_ptr<Type> &typ
              [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
              [&](AppliedType *appliedType) {
                  std::vector<std::shared_ptr<Type>> newTargs;
+                 newTargs.reserve(appliedType->targs.size());
                  for (const auto &t : appliedType->targs) {
                      newTargs.emplace_back(widen(ctx, t));
                  }

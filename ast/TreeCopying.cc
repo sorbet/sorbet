@@ -7,6 +7,7 @@ namespace sorbet::ast {
 
 template <class Elem = Expression, class T> T deepCopyVec(const Expression *avoid, const T &origin) {
     T copy;
+    copy.reserve(origin.size());
     for (const auto &memb : origin) {
         copy.emplace_back(cast_tree<Elem>(memb->_deepCopy(avoid).release()));
     };

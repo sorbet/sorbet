@@ -110,6 +110,7 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
         bool seenEmpty = false;
         {
             UnfreezeNameTable unfreezeNames(to);
+            nameSubstitution.reserve(from.names.size());
             int i = -1;
             for (const Name &nm : from.names) {
                 i++;

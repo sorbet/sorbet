@@ -76,6 +76,7 @@ shared_ptr<Type> TupleType::_instantiate(Context ctx, const InlinedVector<Symbol
                                          const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
+    newElems.reserve(this->elems.size());
     for (auto &a : this->elems) {
         auto t = a->_instantiate(ctx, params, targs);
         if (changed || t) {
@@ -102,6 +103,7 @@ shared_ptr<Type> TupleType::_instantiate(Context ctx, const InlinedVector<Symbol
 shared_ptr<Type> TupleType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
+    newElems.reserve(this->elems.size());
     for (auto &a : this->elems) {
         auto t = a->_instantiate(ctx, tc);
         if (changed || t) {
@@ -128,6 +130,7 @@ shared_ptr<Type> TupleType::_instantiate(Context ctx, const TypeConstraint &tc) 
 shared_ptr<Type> TupleType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newElems;
+    newElems.reserve(this->elems.size());
     for (auto &a : this->elems) {
         auto t = a->_approximate(ctx, tc);
         if (changed || t) {
@@ -155,6 +158,7 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const InlinedVector<Symbol
                                          const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
+    newValues.reserve(this->values.size());
     for (auto &a : this->values) {
         auto t = a->_instantiate(ctx, params, targs);
         if (changed || t) {
@@ -181,6 +185,7 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const InlinedVector<Symbol
 shared_ptr<Type> ShapeType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
+    newValues.reserve(this->values.size());
     for (auto &a : this->values) {
         auto t = a->_instantiate(ctx, tc);
         if (changed || t) {
@@ -207,6 +212,7 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const TypeConstraint &tc) 
 shared_ptr<Type> ShapeType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newValues;
+    newValues.reserve(this->values.size());
     for (auto &a : this->values) {
         auto t = a->_approximate(ctx, tc);
         if (changed || t) {
@@ -326,6 +332,7 @@ shared_ptr<Type> AppliedType::_instantiate(Context ctx, const InlinedVector<Symb
                                            const vector<shared_ptr<Type>> &targs) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
+    newTargs.reserve(this->targs.size());
     // TODO: make it not allocate if returns nullptr
     for (auto &a : this->targs) {
         auto t = a->_instantiate(ctx, params, targs);
@@ -354,6 +361,7 @@ shared_ptr<Type> AppliedType::_instantiate(Context ctx, const InlinedVector<Symb
 shared_ptr<Type> AppliedType::_instantiate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
+    newTargs.reserve(this->targs.size());
     // TODO: make it not allocate if returns nullptr
     for (auto &a : this->targs) {
         auto t = a->_instantiate(ctx, tc);
@@ -382,6 +390,7 @@ shared_ptr<Type> AppliedType::_instantiate(Context ctx, const TypeConstraint &tc
 shared_ptr<Type> AppliedType::_approximate(Context ctx, const TypeConstraint &tc) {
     bool changed = false;
     vector<shared_ptr<Type>> newTargs;
+    newTargs.reserve(this->targs.size());
     // TODO: make it not allocate if returns nullptr
     for (auto &a : this->targs) {
         auto t = a->_approximate(ctx, tc);

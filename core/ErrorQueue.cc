@@ -16,6 +16,7 @@ vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
 
     auto collected = drainAll();
 
+    out.reserve(collected.size());
     for (auto &msg : collected) {
         if (msg->kind == ErrorQueueMessage::Kind::QueryResponse) {
             out.emplace_back(move(msg->queryResponse));
@@ -30,6 +31,7 @@ vector<unique_ptr<core::BasicError>> ErrorQueue::drainAllErrors() {
     vector<unique_ptr<core::BasicError>> out;
     auto collected = drainAll();
 
+    out.reserve(collected.size());
     for (auto &msg : collected) {
         if (msg->kind == ErrorQueueMessage::Kind::Error) {
             out.emplace_back(move(msg->error));

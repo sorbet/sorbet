@@ -70,6 +70,7 @@ public:
 
         auto oldRHS = move(classDef->rhs);
         classDef->rhs.clear();
+        classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
             if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
