@@ -526,9 +526,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
 
                 unique_ptr<Expression> nil = MK::Nil(loc);
                 auto iff = MK::If(loc, move(cond), move(nil), move(send));
-                InsSeq::STATS_store stats;
-                stats.emplace_back(move(assgn));
-                auto res = MK::InsSeq(loc, move(stats), move(iff));
+                auto res = MK::InsSeq1(loc, move(assgn), move(iff));
                 result.swap(res);
             },
             [&](parser::Self *self) {
