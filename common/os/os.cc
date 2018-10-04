@@ -2,6 +2,9 @@
 #include "common/common.h"
 #include <climits>
 #include <pthread.h>
+#if __has_feature(address_sanitizer)
+#include <sanitizer/lsan_interface.h>
+#endif
 
 using namespace std;
 
@@ -65,4 +68,10 @@ unique_ptr<Joinable> runInAThread(const string &threadName, function<void()> fun
         sorbet::Error::raise("Failed create thread");
     }
     return res;
+}
+
+void intentionallyLeakMemory(void *ptr) {
+#if __has_feature(address_sanitizer)
+    __lsan_ignore_object(ptr);
+#endif
 }

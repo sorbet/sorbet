@@ -391,9 +391,9 @@ int realmain(int argc, char *argv[]) {
 
     // Let it go: leak memory so that we don't need to call destructors
     for (auto &e : indexed) {
-        e.release();
+        intentionallyLeakMemory(e.release());
     }
-    gs.release();
+    intentionallyLeakMemory(gs.release());
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
 

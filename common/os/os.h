@@ -42,4 +42,5 @@ bool setCurrentThreadName(const std::string &name);
 bool stopInDebugger();
 bool amIBeingDebugged();
 
+void intentionallyLeakMemory(void *ptr);
 #endif // SORBET_OS_H
