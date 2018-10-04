@@ -18,7 +18,7 @@ subgraph "cluster_::Object#a" {
 
     "bb::Object#a_1" -> "bb::Object#a_1" [style="bold"];
     "bb::Object#a_3" [
-        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: <Class:StandardError> = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: <Class:StandardError>)\l<isaCheckTemp>$8: T.untyped\l"
+        label = "block[id=3]()\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::Object#a_3" -> "bb::Object#a_6" [style="bold"];

@@ -6,7 +6,7 @@ class A
   # <returnMethodTemp>$2: T.untyped
   #
   # <finalReturn>: <impossible>
-  # <statTemp>$4: <Class:A>
+  # <statTemp>$4: T.class_of(A)
   #
   # <block-pre-call-temp>$5: Sorbet::Private::Builder
   # dead=1
@@ -16,16 +16,16 @@ class A
   #
   # <statTemp>$11: ShapeType {
   #   Symbol(:"x") => MetaType
-  #   Symbol(:"y") => <Class:Integer>
+  #   Symbol(:"y") => T.class_of(Integer)
   # }
   #
-  # <statTemp>$14: <Class:T>
+  # <statTemp>$14: T.class_of(T)
   #
-  # <statTemp>$15: <Class:String>
+  # <statTemp>$15: T.class_of(String)
   #
-  # <statTemp>$16: <Class:Integer>
+  # <statTemp>$16: T.class_of(Integer)
   #
-  # <statTemp>$20: <Class:Integer>
+  # <statTemp>$20: T.class_of(Integer)
   #
   # <blockReturnTemp>$8: Sorbet::Private::Builder
   #
@@ -37,7 +37,7 @@ class A
   #
   # <hashTemp>$17: Symbol(:"y")
   #
-  # <hashTemp>$18: <Class:Integer>
+  # <hashTemp>$18: T.class_of(Integer)
   #
   # <magic>$19: <Magic>
   def a_method(x, y)
@@ -48,7 +48,7 @@ class A
        #   Being falsy entails:
        #     x NOT to be String
        #
-       # <statTemp>$7: <Class:String>
+       # <statTemp>$7: T.class_of(String)
        #
        # <selfMethodTemp>$3: A
        #

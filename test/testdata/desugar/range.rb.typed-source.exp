@@ -7,19 +7,19 @@ def foo
     e = (1..42).first
     f = ('a'..'z').last
     # dead=1
-    # <statTemp>$5: <Class:Range>
+    # <statTemp>$5: T.class_of(Range)
     #
     # <statTemp>$6: Integer(1)
     #
     # <statTemp>$7: Integer(2)
     #
-    # <statTemp>$9: <Class:Range>
+    # <statTemp>$9: T.class_of(Range)
     #
     # <statTemp>$10: Integer(1)
     #
     # <statTemp>$11: Integer(2)
     #
-    # <statTemp>$13: <Class:Range>
+    # <statTemp>$13: T.class_of(Range)
     #
     # <statTemp>$14: Integer(1)
     #
@@ -27,7 +27,7 @@ def foo
     #
     # <statTemp>$16: TrueClass
     #
-    # <statTemp>$18: <Class:Range>
+    # <statTemp>$18: T.class_of(Range)
     #
     # <statTemp>$19: Integer(1)
     #
@@ -42,7 +42,7 @@ def foo
     #   ]
     # }
     #
-    # <statTemp>$24: <Class:Range>
+    # <statTemp>$24: T.class_of(Range)
     #
     # <statTemp>$25: Integer(1)
     #
@@ -55,7 +55,7 @@ def foo
     #   ]
     # }
     #
-    # <statTemp>$28: <Class:Range>
+    # <statTemp>$28: T.class_of(Range)
     #
     # <statTemp>$29: String("a")
     #

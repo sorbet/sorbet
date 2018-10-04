@@ -27,7 +27,7 @@ class A
     T1.new
   end
 
-  sig {params(x: T1).returns(T2)}.hithere # error: Method `params` does not exist on `<Class:A>`
+  sig {params(x: T1).returns(T2)}.hithere # error: Method `params` does not exist on `T.class_of(A)`
   def f2(x)
     T2.new
   end

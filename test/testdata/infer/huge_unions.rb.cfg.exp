@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$7: <Class:C1> = alias <constant:C1>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: <Class:RubyTyper>.keep_for_ide(<statTemp>$7: <Class:C1>)\l<statTemp>$10: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$11: <Class:C2> = alias <constant:C2>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: <Class:RubyTyper>.keep_for_ide(<statTemp>$11: <Class:C2>)\l<statTemp>$14: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$15: <Class:C3> = alias <constant:C3>\l<statTemp>$13: RubyTyper::Void = <statTemp>$14: <Class:RubyTyper>.keep_for_ide(<statTemp>$15: <Class:C3>)\l<statTemp>$18: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$19: <Class:C4> = alias <constant:C4>\l<statTemp>$17: RubyTyper::Void = <statTemp>$18: <Class:RubyTyper>.keep_for_ide(<statTemp>$19: <Class:C4>)\l<statTemp>$22: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$23: <Class:C5> = alias <constant:C5>\l<statTemp>$21: RubyTyper::Void = <statTemp>$22: <Class:RubyTyper>.keep_for_ide(<statTemp>$23: <Class:C5>)\l<statTemp>$26: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$27: <Class:C6> = alias <constant:C6>\l<statTemp>$25: RubyTyper::Void = <statTemp>$26: <Class:RubyTyper>.keep_for_ide(<statTemp>$27: <Class:C6>)\l<statTemp>$30: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$31: <Class:C7> = alias <constant:C7>\l<statTemp>$29: RubyTyper::Void = <statTemp>$30: <Class:RubyTyper>.keep_for_ide(<statTemp>$31: <Class:C7>)\l<statTemp>$34: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$35: <Class:C8> = alias <constant:C8>\l<statTemp>$33: RubyTyper::Void = <statTemp>$34: <Class:RubyTyper>.keep_for_ide(<statTemp>$35: <Class:C8>)\l<statTemp>$38: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$39: <Class:C9> = alias <constant:C9>\l<statTemp>$37: RubyTyper::Void = <statTemp>$38: <Class:RubyTyper>.keep_for_ide(<statTemp>$39: <Class:C9>)\l<statTemp>$42: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$43: <Class:C10> = alias <constant:C10>\l<statTemp>$41: RubyTyper::Void = <statTemp>$42: <Class:RubyTyper>.keep_for_ide(<statTemp>$43: <Class:C10>)\l<statTemp>$46: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$47: <Class:C11> = alias <constant:C11>\l<statTemp>$45: RubyTyper::Void = <statTemp>$46: <Class:RubyTyper>.keep_for_ide(<statTemp>$47: <Class:C11>)\l<statTemp>$50: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$51: <Class:C12> = alias <constant:C12>\l<statTemp>$49: RubyTyper::Void = <statTemp>$50: <Class:RubyTyper>.keep_for_ide(<statTemp>$51: <Class:C12>)\l<statTemp>$54: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$55: <Class:C13> = alias <constant:C13>\l<statTemp>$53: RubyTyper::Void = <statTemp>$54: <Class:RubyTyper>.keep_for_ide(<statTemp>$55: <Class:C13>)\l<statTemp>$58: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$59: <Class:C13> = alias <constant:C13>\l<statTemp>$57: RubyTyper::Void = <statTemp>$58: <Class:RubyTyper>.keep_for_ide(<statTemp>$59: <Class:C13>)\l<statTemp>$62: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$63: <Class:C13> = alias <constant:C13>\l<statTemp>$61: RubyTyper::Void = <statTemp>$62: <Class:RubyTyper>.keep_for_ide(<statTemp>$63: <Class:C13>)\l<statTemp>$66: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$67: <Class:C13> = alias <constant:C13>\l<statTemp>$65: RubyTyper::Void = <statTemp>$66: <Class:RubyTyper>.keep_for_ide(<statTemp>$67: <Class:C13>)\l<statTemp>$70: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$71: <Class:C13> = alias <constant:C13>\l<statTemp>$69: RubyTyper::Void = <statTemp>$70: <Class:RubyTyper>.keep_for_ide(<statTemp>$71: <Class:C13>)\l<statTemp>$74: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$75: <Class:C13> = alias <constant:C13>\l<statTemp>$73: RubyTyper::Void = <statTemp>$74: <Class:RubyTyper>.keep_for_ide(<statTemp>$75: <Class:C13>)\l<statTemp>$78: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$79: <Class:C13> = alias <constant:C13>\l<statTemp>$77: RubyTyper::Void = <statTemp>$78: <Class:RubyTyper>.keep_for_ide(<statTemp>$79: <Class:C13>)\l<statTemp>$82: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$83: <Class:C14> = alias <constant:C14>\l<statTemp>$81: RubyTyper::Void = <statTemp>$82: <Class:RubyTyper>.keep_for_ide(<statTemp>$83: <Class:C14>)\l<statTemp>$86: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$87: <Class:C15> = alias <constant:C15>\l<statTemp>$85: RubyTyper::Void = <statTemp>$86: <Class:RubyTyper>.keep_for_ide(<statTemp>$87: <Class:C15>)\l<statTemp>$90: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$91: <Class:C16> = alias <constant:C16>\l<statTemp>$89: RubyTyper::Void = <statTemp>$90: <Class:RubyTyper>.keep_for_ide(<statTemp>$91: <Class:C16>)\l<statTemp>$94: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$95: <Class:C17> = alias <constant:C17>\l<statTemp>$93: RubyTyper::Void = <statTemp>$94: <Class:RubyTyper>.keep_for_ide(<statTemp>$95: <Class:C17>)\l<statTemp>$98: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$99: <Class:C18> = alias <constant:C18>\l<statTemp>$97: RubyTyper::Void = <statTemp>$98: <Class:RubyTyper>.keep_for_ide(<statTemp>$99: <Class:C18>)\l<statTemp>$102: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$103: <Class:C19> = alias <constant:C19>\l<statTemp>$101: RubyTyper::Void = <statTemp>$102: <Class:RubyTyper>.keep_for_ide(<statTemp>$103: <Class:C19>)\l<statTemp>$106: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$107: <Class:C20> = alias <constant:C20>\l<statTemp>$105: RubyTyper::Void = <statTemp>$106: <Class:RubyTyper>.keep_for_ide(<statTemp>$107: <Class:C20>)\l<statTemp>$110: <Class:RubyTyper> = alias <constant:RubyTyper>\l<statTemp>$111: <Class:A> = alias <constant:A>\l<statTemp>$109: RubyTyper::Void = <statTemp>$110: <Class:RubyTyper>.keep_for_ide(<statTemp>$111: <Class:A>)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(C1) = alias <constant:C1>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(C1))\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(C2) = alias <constant:C2>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(C2))\l<statTemp>$14: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$15: T.class_of(C3) = alias <constant:C3>\l<statTemp>$13: RubyTyper::Void = <statTemp>$14: T.class_of(RubyTyper).keep_for_ide(<statTemp>$15: T.class_of(C3))\l<statTemp>$18: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$19: T.class_of(C4) = alias <constant:C4>\l<statTemp>$17: RubyTyper::Void = <statTemp>$18: T.class_of(RubyTyper).keep_for_ide(<statTemp>$19: T.class_of(C4))\l<statTemp>$22: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$23: T.class_of(C5) = alias <constant:C5>\l<statTemp>$21: RubyTyper::Void = <statTemp>$22: T.class_of(RubyTyper).keep_for_ide(<statTemp>$23: T.class_of(C5))\l<statTemp>$26: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$27: T.class_of(C6) = alias <constant:C6>\l<statTemp>$25: RubyTyper::Void = <statTemp>$26: T.class_of(RubyTyper).keep_for_ide(<statTemp>$27: T.class_of(C6))\l<statTemp>$30: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$31: T.class_of(C7) = alias <constant:C7>\l<statTemp>$29: RubyTyper::Void = <statTemp>$30: T.class_of(RubyTyper).keep_for_ide(<statTemp>$31: T.class_of(C7))\l<statTemp>$34: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$35: T.class_of(C8) = alias <constant:C8>\l<statTemp>$33: RubyTyper::Void = <statTemp>$34: T.class_of(RubyTyper).keep_for_ide(<statTemp>$35: T.class_of(C8))\l<statTemp>$38: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$39: T.class_of(C9) = alias <constant:C9>\l<statTemp>$37: RubyTyper::Void = <statTemp>$38: T.class_of(RubyTyper).keep_for_ide(<statTemp>$39: T.class_of(C9))\l<statTemp>$42: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$43: T.class_of(C10) = alias <constant:C10>\l<statTemp>$41: RubyTyper::Void = <statTemp>$42: T.class_of(RubyTyper).keep_for_ide(<statTemp>$43: T.class_of(C10))\l<statTemp>$46: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$47: T.class_of(C11) = alias <constant:C11>\l<statTemp>$45: RubyTyper::Void = <statTemp>$46: T.class_of(RubyTyper).keep_for_ide(<statTemp>$47: T.class_of(C11))\l<statTemp>$50: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$51: T.class_of(C12) = alias <constant:C12>\l<statTemp>$49: RubyTyper::Void = <statTemp>$50: T.class_of(RubyTyper).keep_for_ide(<statTemp>$51: T.class_of(C12))\l<statTemp>$54: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$55: T.class_of(C13) = alias <constant:C13>\l<statTemp>$53: RubyTyper::Void = <statTemp>$54: T.class_of(RubyTyper).keep_for_ide(<statTemp>$55: T.class_of(C13))\l<statTemp>$58: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$59: T.class_of(C13) = alias <constant:C13>\l<statTemp>$57: RubyTyper::Void = <statTemp>$58: T.class_of(RubyTyper).keep_for_ide(<statTemp>$59: T.class_of(C13))\l<statTemp>$62: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$63: T.class_of(C13) = alias <constant:C13>\l<statTemp>$61: RubyTyper::Void = <statTemp>$62: T.class_of(RubyTyper).keep_for_ide(<statTemp>$63: T.class_of(C13))\l<statTemp>$66: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$67: T.class_of(C13) = alias <constant:C13>\l<statTemp>$65: RubyTyper::Void = <statTemp>$66: T.class_of(RubyTyper).keep_for_ide(<statTemp>$67: T.class_of(C13))\l<statTemp>$70: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$71: T.class_of(C13) = alias <constant:C13>\l<statTemp>$69: RubyTyper::Void = <statTemp>$70: T.class_of(RubyTyper).keep_for_ide(<statTemp>$71: T.class_of(C13))\l<statTemp>$74: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$75: T.class_of(C13) = alias <constant:C13>\l<statTemp>$73: RubyTyper::Void = <statTemp>$74: T.class_of(RubyTyper).keep_for_ide(<statTemp>$75: T.class_of(C13))\l<statTemp>$78: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$79: T.class_of(C13) = alias <constant:C13>\l<statTemp>$77: RubyTyper::Void = <statTemp>$78: T.class_of(RubyTyper).keep_for_ide(<statTemp>$79: T.class_of(C13))\l<statTemp>$82: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$83: T.class_of(C14) = alias <constant:C14>\l<statTemp>$81: RubyTyper::Void = <statTemp>$82: T.class_of(RubyTyper).keep_for_ide(<statTemp>$83: T.class_of(C14))\l<statTemp>$86: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$87: T.class_of(C15) = alias <constant:C15>\l<statTemp>$85: RubyTyper::Void = <statTemp>$86: T.class_of(RubyTyper).keep_for_ide(<statTemp>$87: T.class_of(C15))\l<statTemp>$90: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$91: T.class_of(C16) = alias <constant:C16>\l<statTemp>$89: RubyTyper::Void = <statTemp>$90: T.class_of(RubyTyper).keep_for_ide(<statTemp>$91: T.class_of(C16))\l<statTemp>$94: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$95: T.class_of(C17) = alias <constant:C17>\l<statTemp>$93: RubyTyper::Void = <statTemp>$94: T.class_of(RubyTyper).keep_for_ide(<statTemp>$95: T.class_of(C17))\l<statTemp>$98: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$99: T.class_of(C18) = alias <constant:C18>\l<statTemp>$97: RubyTyper::Void = <statTemp>$98: T.class_of(RubyTyper).keep_for_ide(<statTemp>$99: T.class_of(C18))\l<statTemp>$102: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$103: T.class_of(C19) = alias <constant:C19>\l<statTemp>$101: RubyTyper::Void = <statTemp>$102: T.class_of(RubyTyper).keep_for_ide(<statTemp>$103: T.class_of(C19))\l<statTemp>$106: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$107: T.class_of(C20) = alias <constant:C20>\l<statTemp>$105: RubyTyper::Void = <statTemp>$106: T.class_of(RubyTyper).keep_for_ide(<statTemp>$107: T.class_of(C20))\l<statTemp>$110: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$111: T.class_of(A) = alias <constant:A>\l<statTemp>$109: RubyTyper::Void = <statTemp>$110: T.class_of(RubyTyper).keep_for_ide(<statTemp>$111: T.class_of(A))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_1" [shape = parallelogram];
 
     "bb::<Class:A>#send_beta_invitation_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: <Class:A> = self\linvite: T.untyped = load_arg(<selfMethodTemp>$3, A.send_beta_invitation#invite)\l<statTemp>$7: Integer(1) = 1\l<ifTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: Integer(1).===(invite: T.untyped)\l<ifTemp>$6: T.any(TrueClass, FalseClass)\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: T.class_of(A) = self\linvite: T.untyped = load_arg(<selfMethodTemp>$3, A.send_beta_invitation#invite)\l<statTemp>$7: Integer(1) = 1\l<ifTemp>$6: T.any(TrueClass, FalseClass) = <statTemp>$7: Integer(1).===(invite: T.untyped)\l<ifTemp>$6: T.any(TrueClass, FalseClass)\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_0" -> "bb::<Class:A>#send_beta_invitation_2" [style="bold"];
@@ -36,7 +36,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
 
     "bb::<Class:A>#send_beta_invitation_1" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_2" [
-        label = "block[id=2]()\lr: <Class:C1> = alias <constant:C1>\l<unconditional>\l"
+        label = "block[id=2]()\lr: T.class_of(C1) = alias <constant:C1>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_2" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -48,7 +48,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_3" -> "bb::<Class:A>#send_beta_invitation_5" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_4" [
-        label = "block[id=4]()\lr: <Class:C2> = alias <constant:C2>\l<unconditional>\l"
+        label = "block[id=4]()\lr: T.class_of(C2) = alias <constant:C2>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_4" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_5" -> "bb::<Class:A>#send_beta_invitation_7" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_6" [
-        label = "block[id=6]()\lr: <Class:C3> = alias <constant:C3>\l<unconditional>\l"
+        label = "block[id=6]()\lr: T.class_of(C3) = alias <constant:C3>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_6" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -72,7 +72,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_7" -> "bb::<Class:A>#send_beta_invitation_9" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_8" [
-        label = "block[id=8]()\lr: <Class:C4> = alias <constant:C4>\l<unconditional>\l"
+        label = "block[id=8]()\lr: T.class_of(C4) = alias <constant:C4>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_8" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -84,7 +84,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_9" -> "bb::<Class:A>#send_beta_invitation_11" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_10" [
-        label = "block[id=10]()\lr: <Class:C5> = alias <constant:C5>\l<unconditional>\l"
+        label = "block[id=10]()\lr: T.class_of(C5) = alias <constant:C5>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_10" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -96,7 +96,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_11" -> "bb::<Class:A>#send_beta_invitation_13" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_12" [
-        label = "block[id=12]()\lr: <Class:C6> = alias <constant:C6>\l<unconditional>\l"
+        label = "block[id=12]()\lr: T.class_of(C6) = alias <constant:C6>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_12" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -108,7 +108,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_13" -> "bb::<Class:A>#send_beta_invitation_15" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_14" [
-        label = "block[id=14]()\lr: <Class:C7> = alias <constant:C7>\l<unconditional>\l"
+        label = "block[id=14]()\lr: T.class_of(C7) = alias <constant:C7>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_14" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -120,7 +120,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_15" -> "bb::<Class:A>#send_beta_invitation_17" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_16" [
-        label = "block[id=16]()\lr: <Class:C8> = alias <constant:C8>\l<unconditional>\l"
+        label = "block[id=16]()\lr: T.class_of(C8) = alias <constant:C8>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_16" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -132,7 +132,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_17" -> "bb::<Class:A>#send_beta_invitation_19" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_18" [
-        label = "block[id=18]()\lr: <Class:C9> = alias <constant:C9>\l<unconditional>\l"
+        label = "block[id=18]()\lr: T.class_of(C9) = alias <constant:C9>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_18" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -144,7 +144,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_19" -> "bb::<Class:A>#send_beta_invitation_21" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_20" [
-        label = "block[id=20]()\lr: <Class:C10> = alias <constant:C10>\l<unconditional>\l"
+        label = "block[id=20]()\lr: T.class_of(C10) = alias <constant:C10>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_20" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -156,7 +156,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_21" -> "bb::<Class:A>#send_beta_invitation_23" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_22" [
-        label = "block[id=22]()\lr: <Class:C11> = alias <constant:C11>\l<unconditional>\l"
+        label = "block[id=22]()\lr: T.class_of(C11) = alias <constant:C11>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_22" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -168,7 +168,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_23" -> "bb::<Class:A>#send_beta_invitation_25" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_24" [
-        label = "block[id=24]()\lr: <Class:C12> = alias <constant:C12>\l<unconditional>\l"
+        label = "block[id=24]()\lr: T.class_of(C12) = alias <constant:C12>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_24" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -180,7 +180,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_25" -> "bb::<Class:A>#send_beta_invitation_27" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_26" [
-        label = "block[id=26]()\lr: <Class:C13> = alias <constant:C13>\l<unconditional>\l"
+        label = "block[id=26]()\lr: T.class_of(C13) = alias <constant:C13>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_26" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -192,7 +192,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_27" -> "bb::<Class:A>#send_beta_invitation_29" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_28" [
-        label = "block[id=28]()\lr: <Class:C14> = alias <constant:C14>\l<unconditional>\l"
+        label = "block[id=28]()\lr: T.class_of(C14) = alias <constant:C14>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_28" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -204,7 +204,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_29" -> "bb::<Class:A>#send_beta_invitation_31" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_30" [
-        label = "block[id=30]()\lr: <Class:C15> = alias <constant:C15>\l<unconditional>\l"
+        label = "block[id=30]()\lr: T.class_of(C15) = alias <constant:C15>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_30" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -216,7 +216,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_31" -> "bb::<Class:A>#send_beta_invitation_33" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_32" [
-        label = "block[id=32]()\lr: <Class:C16> = alias <constant:C16>\l<unconditional>\l"
+        label = "block[id=32]()\lr: T.class_of(C16) = alias <constant:C16>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_32" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -228,7 +228,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_33" -> "bb::<Class:A>#send_beta_invitation_35" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_34" [
-        label = "block[id=34]()\lr: <Class:C17> = alias <constant:C17>\l<unconditional>\l"
+        label = "block[id=34]()\lr: T.class_of(C17) = alias <constant:C17>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_34" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -240,7 +240,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_35" -> "bb::<Class:A>#send_beta_invitation_37" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_36" [
-        label = "block[id=36]()\lr: <Class:C18> = alias <constant:C18>\l<unconditional>\l"
+        label = "block[id=36]()\lr: T.class_of(C18) = alias <constant:C18>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_36" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -252,7 +252,7 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_37" -> "bb::<Class:A>#send_beta_invitation_39" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_38" [
-        label = "block[id=38]()\lr: <Class:C19> = alias <constant:C19>\l<unconditional>\l"
+        label = "block[id=38]()\lr: T.class_of(C19) = alias <constant:C19>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_38" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
@@ -264,17 +264,17 @@ subgraph "cluster_::<Class:A>#send_beta_invitation" {
     "bb::<Class:A>#send_beta_invitation_39" -> "bb::<Class:A>#send_beta_invitation_41" [style="tapered"];
 
     "bb::<Class:A>#send_beta_invitation_40" [
-        label = "block[id=40]()\lr: <Class:C20> = alias <constant:C20>\l<unconditional>\l"
+        label = "block[id=40]()\lr: T.class_of(C20) = alias <constant:C20>\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_40" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_41" [
-        label = "block[id=41]()\l<statTemp>$66: <Class:A> = self\l<statTemp>$67: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$4: <impossible> = <statTemp>$66: <Class:A>.raise(<statTemp>$67: String(\"Bla bla bla\"))\l<unconditional>\l"
+        label = "block[id=41]()\l<statTemp>$66: T.class_of(A) = self\l<statTemp>$67: String(\"Bla bla bla\") = \"Bla bla bla\"\l<statTemp>$4: <impossible> = <statTemp>$66: T.class_of(A).raise(<statTemp>$67: String(\"Bla bla bla\"))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_41" -> "bb::<Class:A>#send_beta_invitation_61" [style="bold"];
     "bb::<Class:A>#send_beta_invitation_61" [
-        label = "block[id=61](r: T.any(<Class:C1>, <Class:C2>, <Class:C3>, <Class:C4>, <Class:C5>, <Class:C6>, <Class:C7>, <Class:C8>, <Class:C9>, <Class:C10>, <Class:C11>, <Class:C12>, <Class:C13>, <Class:C14>, <Class:C15>, <Class:C16>, <Class:C17>, <Class:C18>, <Class:C19>, <Class:C20>))\ls: T.any(<Class:C1>, <Class:C2>, <Class:C3>, <Class:C4>, <Class:C5>, <Class:C6>, <Class:C7>, <Class:C8>, <Class:C9>, <Class:C10>, <Class:C11>, <Class:C12>, <Class:C13>, <Class:C14>, <Class:C15>, <Class:C16>, <Class:C17>, <Class:C18>, <Class:C19>, <Class:C20>) = r\l<returnMethodTemp>$2: <impossible> = return s: T.any(<Class:C1>, <Class:C2>, <Class:C3>, <Class:C4>, <Class:C5>, <Class:C6>, <Class:C7>, <Class:C8>, <Class:C9>, <Class:C10>, <Class:C11>, <Class:C12>, <Class:C13>, <Class:C14>, <Class:C15>, <Class:C16>, <Class:C17>, <Class:C18>, <Class:C19>, <Class:C20>)\l<unconditional>\l"
+        label = "block[id=61](r: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)))\ls: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20)) = r\l<returnMethodTemp>$2: <impossible> = return s: T.any(T.class_of(C1), T.class_of(C2), T.class_of(C3), T.class_of(C4), T.class_of(C5), T.class_of(C6), T.class_of(C7), T.class_of(C8), T.class_of(C9), T.class_of(C10), T.class_of(C11), T.class_of(C12), T.class_of(C13), T.class_of(C14), T.class_of(C15), T.class_of(C16), T.class_of(C17), T.class_of(C18), T.class_of(C19), T.class_of(C20))\l<unconditional>\l"
     ];
 
     "bb::<Class:A>#send_beta_invitation_61" -> "bb::<Class:A>#send_beta_invitation_1" [style="bold"];

@@ -86,7 +86,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: <Class:<root>> = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: <Class:<root>>.main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: T.class_of(<root>).main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

@@ -61,7 +61,7 @@ class G
     def wrapper
         class << self
             def inner
-                T.reveal_type(self) # error: type: `<Class:G>`
+                T.reveal_type(self) # error: type: `T.class_of(G)`
             end
         end
         inner # error: Method `inner` does not exist on `G`
@@ -82,7 +82,7 @@ class H
 end
 
 def main
-    puts A.a # error: Method `a` does not exist on `<Class:A>`
+    puts A.a # error: Method `a` does not exist on `T.class_of(A)`
     puts B.b
     puts $c.c
     puts D.singleton_class.d

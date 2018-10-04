@@ -15,7 +15,7 @@ class Main
 
     def main
         bar(Mixin)
-        bar(Foo) # error: `<Class:Foo>` doesn't match `<Class:Mixin>` for argument `a`
+        bar(Foo) # error: `T.class_of(Foo)` doesn't match `T.class_of(Mixin)` for argument `a`
                  # TODO: RUBYPLAT-504
     end
 end

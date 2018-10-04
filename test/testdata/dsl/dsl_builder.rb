@@ -17,7 +17,7 @@ class TestChild < TestDSLBuilder
   opt_int_defaulted 17
   implied_string
   no_getter "I'm setting the value"
-  get_no_getter # error: Method `get_no_getter` does not exist on `<Class:TestChild>`
+  get_no_getter # error: Method `get_no_getter` does not exist on `T.class_of(TestChild)`
 
   T.assert_type!(get_opt_string, T.nilable(String))
   T.assert_type!(get_opt_int_defaulted, Integer)

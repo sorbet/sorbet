@@ -18,5 +18,5 @@ class OneTwo < Base
   include One
   include Two
   puts("FOO=#{FOO}") # Should resolve to Two::FOO
-  T.reveal_type(FOO) # error: `<Class:Two>`
+  T.reveal_type(FOO) # error: `T.class_of(Two)`
 end

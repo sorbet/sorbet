@@ -18,7 +18,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_1" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];
     "bb::ModuleMethods#instrumented_request_3" [
-        label = "block[id=3](final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: <Class:StandardError> = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$7: <Class:StandardError>)\l<isaCheckTemp>$8: T.untyped\l"
+        label = "block[id=3](final_attempt: T.untyped, foo: T.untyped)\le: T.untyped = <unanalyzable>\l<exceptionClassTemp>$7: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$8: T.untyped = e: T.untyped.is_a?(<exceptionClassTemp>$7: T.class_of(StandardError))\l<isaCheckTemp>$8: T.untyped\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_3" -> "bb::ModuleMethods#instrumented_request_8" [style="bold"];

@@ -1,4 +1,4 @@
--e:2: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
+-e:2: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
      2 | foo(1 +
      3 |  2 +
      4 |  3 +
@@ -11,7 +11,7 @@
     14 |  13 + 
     15 |  14)
 
--e:17: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
+-e:17: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
     17 | foo(1 +
     18 |  2 +
     19 |  3 +
@@ -22,7 +22,7 @@
     24 |  8 +
     25 |  9)
 
--e:27: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
+-e:27: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
     27 | foo(1 +
     28 |  2 +
     29 |  3 +
@@ -34,7 +34,7 @@
     35 |  9 +
     36 |  10)
 
--e:38: Method `foo` does not exist on `<Class:<root>>` http://go/e/7003
+-e:38: Method `foo` does not exist on `T.class_of(<root>)` http://go/e/7003
     38 | foo(1 +
     39 |  2 +
     40 |  3 +

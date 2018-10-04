@@ -35,7 +35,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_5" -> "bb::A#initialize_7" [style="tapered"];
 
     "bb::A#initialize_6" [
-        label = "block[id=6](<blockReturnTemp>$9: T.nilable(Integer), <gotoDeadTemp>$14: NilClass)\louterLoops: 1\lse$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$12: <Class:StandardError> = alias <constant:StandardError>\l<isaCheckTemp>$13: T.untyped = se$2: T.untyped.is_a?(<exceptionClassTemp>$12: <Class:StandardError>)\l<isaCheckTemp>$13: T.untyped\l"
+        label = "block[id=6](<blockReturnTemp>$9: T.nilable(Integer), <gotoDeadTemp>$14: NilClass)\louterLoops: 1\lse$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$12: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$13: T.untyped = se$2: T.untyped.is_a?(<exceptionClassTemp>$12: T.class_of(StandardError))\l<isaCheckTemp>$13: T.untyped\l"
     ];
 
     "bb::A#initialize_6" -> "bb::A#initialize_11" [style="bold"];

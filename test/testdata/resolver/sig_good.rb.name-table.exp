@@ -30,9 +30,9 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_good.rb:2, https://gi
       } @ test/testdata/resolver/sig_good.rb:16
       argument ::A#good#h<> -> FalseClass | Integer | Float | String | Symbol @ test/testdata/resolver/sig_good.rb:17
       argument ::A#good#i<> -> T1 @ test/testdata/resolver/sig_good.rb:18
-      argument ::A#good#j<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:19
-      argument ::A#good#k<> -> <Class:T1> @ test/testdata/resolver/sig_good.rb:20
-      argument ::A#good#l<> -> <Class:M1> @ test/testdata/resolver/sig_good.rb:21
+      argument ::A#good#j<> -> T.class_of(T1) @ test/testdata/resolver/sig_good.rb:19
+      argument ::A#good#k<> -> T.class_of(T1) @ test/testdata/resolver/sig_good.rb:20
+      argument ::A#good#l<> -> T.class_of(M1) @ test/testdata/resolver/sig_good.rb:21
       argument ::A#good#m<> -> ShapeType {
         Symbol(:"foo") => String
         Symbol(:"bar") => Integer | NilClass

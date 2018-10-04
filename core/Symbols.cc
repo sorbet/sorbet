@@ -609,7 +609,7 @@ string Symbol::show(const GlobalState &gs) const {
     if (isSingleton(gs, ref(gs))) {
         auto attached = this->attachedClass(gs);
         if (attached.exists()) {
-            return "<Class:" + attached.data(gs).show(gs) + ">";
+            return "T.class_of(" + attached.data(gs).show(gs) + ")";
         }
     }
 

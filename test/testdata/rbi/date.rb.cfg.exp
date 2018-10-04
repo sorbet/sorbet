@@ -24,7 +24,7 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_1" [shape = parallelogram];
 
     "bb::A#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: <Class:A> = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: <Class:A>.sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(A) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(A).sig()\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_0" -> "bb::A#<static-init>_2" [style="bold"];
@@ -46,7 +46,7 @@ subgraph "cluster_::A#<static-init>" {
 
     "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
     "bb::A#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"t\") = :\"t\"\l<hashTemp>$13: <Class:Time> = alias <constant:Time>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {t: <Class:Time>} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"t\"), <hashTemp>$13: <Class:Time>)\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {t: <Class:Time>})\l<statTemp>$15: <Class:Time> = alias <constant:Time>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: <Class:Time>)\l<blockReturnTemp>$16: <impossible> = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"t\") = :\"t\"\l<hashTemp>$13: T.class_of(Time) = alias <constant:Time>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {t: T.class_of(Time)} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"t\"), <hashTemp>$13: T.class_of(Time))\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {t: T.class_of(Time)})\l<statTemp>$15: T.class_of(Time) = alias <constant:Time>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: T.class_of(Time))\l<blockReturnTemp>$16: <impossible> = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_4" -> "bb::A#<static-init>_2" [style="bold"];

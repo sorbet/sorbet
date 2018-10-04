@@ -23,7 +23,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_2" -> "bb::Object#main_4" [style="tapered"];
 
     "bb::Object#main_3" [
-        label = "block[id=3](<returnMethodTemp>$2: NilClass, try: Integer(0))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$15: <Class:StandardError> = alias <constant:StandardError>\l<isaCheckTemp>$16: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$15: <Class:StandardError>)\l<isaCheckTemp>$16: T.untyped\l"
+        label = "block[id=3](<returnMethodTemp>$2: NilClass, try: Integer(0))\l<rescueTemp>$2: T.untyped = <unanalyzable>\l<exceptionClassTemp>$15: T.class_of(StandardError) = alias <constant:StandardError>\l<isaCheckTemp>$16: T.untyped = <rescueTemp>$2: T.untyped.is_a?(<exceptionClassTemp>$15: T.class_of(StandardError))\l<isaCheckTemp>$16: T.untyped\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_11" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: <Class:<root>> = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: <Class:<root>>.main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: T.class_of(<root>).main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

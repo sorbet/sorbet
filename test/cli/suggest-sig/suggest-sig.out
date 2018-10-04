@@ -64,7 +64,7 @@ def`
     30 |def give_me_literal_nested; [[1]]; end;
         ^^^
 
-test/cli/suggest-sig/suggest-sig.rb:13: Method `sig` does not exist on `<Class:<root>>` http://go/e/7003
+test/cli/suggest-sig/suggest-sig.rb:13: Method `sig` does not exist on `T.class_of(<root>)` http://go/e/7003
     13 |sig {void}
         ^^^^^^^^^^
 Errors: 10
