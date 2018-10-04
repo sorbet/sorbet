@@ -54,16 +54,16 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
         i++;
         auto *a = arg2Local(argExpr.get());
         auto argSym = md.symbol.data(ctx).arguments()[i];
-        entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
-        entry->exprs.back().value->isSynthetic = true;
+        auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
+        inserted.value->isSynthetic = true;
         aliases[argSym] = a->localVariable;
     }
     auto cont = walk(cctx.withTarget(retSym), md.rhs.get(), entry);
     core::LocalVariable retSym1(core::Names::finalReturn(), 0);
 
     auto rvLoc = cont->exprs.empty() ? md.rhs->loc : cont->exprs.back().loc;
-    cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
-    cont->exprs.back().value->isSynthetic = true;
+    auto &inserted = cont->exprs.emplace_back(retSym1, rvLoc, make_unique<Return>(retSym)); // dead assign.
+    inserted.value->isSynthetic = true;
     jumpToDead(cont, *res.get(), rvLoc);
 
     vector<Binding> aliasesPrefix;

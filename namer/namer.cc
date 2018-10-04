@@ -621,11 +621,10 @@ public:
                                                                   ++(owner.data(ctx).uniqueCounter)));
 
         auto outerArgs = scopeStack.back().args;
-        scopeStack.emplace_back();
-        scopeStack.back().args = move(outerArgs);
+        auto &frame = scopeStack.emplace_back();
+        frame.args = move(outerArgs);
         ++scopeId;
         auto &parent = *(scopeStack.end() - 2);
-        auto &frame = scopeStack.back();
 
         // We inherit our parent's locals
         for (auto &binding : parent.locals) {

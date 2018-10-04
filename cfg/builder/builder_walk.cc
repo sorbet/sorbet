@@ -65,8 +65,8 @@ core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inW
 }
 
 void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, std::unique_ptr<Instruction> inst) {
-    bb->exprs.emplace_back(var, loc, move(inst));
-    bb->exprs.back().value->isSynthetic = true;
+    auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
+    inserted.value->isSynthetic = true;
 }
 
 /** Convert `what` into a cfg, by starting to evaluate it in `current` inside method defined by `inWhat`.

@@ -177,9 +177,9 @@ shared_ptr<Type> &TypeConstraint::findUpperBound(SymbolRef forWhat) {
             return entry.second;
         }
     }
-    this->upperBounds.emplace_back();
-    this->upperBounds.back().first = forWhat;
-    return this->upperBounds.back().second;
+    auto &inserted = this->upperBounds.emplace_back();
+    inserted.first = forWhat;
+    return inserted.second;
 }
 
 shared_ptr<Type> &TypeConstraint::findLowerBound(SymbolRef forWhat) {
@@ -188,9 +188,9 @@ shared_ptr<Type> &TypeConstraint::findLowerBound(SymbolRef forWhat) {
             return entry.second;
         }
     }
-    this->lowerBounds.emplace_back();
-    this->lowerBounds.back().first = forWhat;
-    return this->lowerBounds.back().second;
+    auto &inserted = this->lowerBounds.emplace_back();
+    inserted.first = forWhat;
+    return inserted.second;
 }
 
 shared_ptr<Type> &TypeConstraint::findSolution(SymbolRef forWhat) {
@@ -199,9 +199,9 @@ shared_ptr<Type> &TypeConstraint::findSolution(SymbolRef forWhat) {
             return entry.second;
         }
     }
-    this->solution.emplace_back();
-    this->solution.back().first = forWhat;
-    return this->solution.back().second;
+    auto &inserted = this->solution.emplace_back();
+    inserted.first = forWhat;
+    return inserted.second;
 }
 
 shared_ptr<Type> TypeConstraint::findUpperBound(SymbolRef forWhat) const {

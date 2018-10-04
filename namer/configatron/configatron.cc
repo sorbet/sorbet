@@ -127,8 +127,7 @@ struct Path {
                 return child;
             }
         }
-        children.emplace_back(make_shared<Path>(this, name));
-        return children.back();
+        return children.emplace_back(make_shared<Path>(this, name));
     }
 
     void setType(core::GlobalState &gs, shared_ptr<core::Type> tp) {

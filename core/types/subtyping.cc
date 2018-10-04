@@ -267,9 +267,9 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             bool differ2 = false;
                             for (auto &el2 : a2->elems) {
                                 ++i;
-                                elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
-                                differ1 = differ1 || elemLubs.back() != a1->elems[i];
-                                differ2 = differ2 || elemLubs.back() != el2;
+                                auto &inserted = elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
+                                differ1 = differ1 || inserted != a1->elems[i];
+                                differ2 = differ2 || inserted != el2;
                             }
                             if (!differ1) {
                                 result = t1;
@@ -304,9 +304,10 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                                 });
                                 if (fnd != h1->keys.end()) {
                                     keys.emplace_back(el2);
-                                    valueLubs.emplace_back(lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
-                                    differ1 = differ1 || valueLubs.back() != h1->values[fnd - h1->keys.begin()];
-                                    differ2 = differ2 || valueLubs.back() != h2->values[i];
+                                    auto &inserted = valueLubs.emplace_back(
+                                        lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
+                                    differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
+                                    differ2 = differ2 || inserted != h2->values[i];
                                 } else {
                                     result = Types::hashOfUntyped();
                                     return;

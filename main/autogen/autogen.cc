@@ -107,13 +107,12 @@ class AutogenWalk {
 
 public:
     AutogenWalk() {
-        defs.emplace_back();
-        auto &def = defs.back();
+        auto &def = defs.emplace_back();
         def.id = 0;
         def.type = Definition::Module;
         def.defines_behavior = false;
         def.is_empty = false;
-        nesting.push_back(def.id);
+        nesting.emplace_back(def.id);
     }
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::Context ctx, unique_ptr<ast::ClassDef> original) {
@@ -123,8 +122,7 @@ public:
 
         // cerr << "preTransformClassDef(" << original->toString(ctx) << ")\n";
 
-        defs.emplace_back();
-        auto &def = defs.back();
+        auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
         if (original->kind == ast::Class) {
             def.type = Definition::Class;
@@ -224,8 +222,7 @@ public:
             return original;
         }
 
-        refs.emplace_back();
-        auto &ref = refs.back();
+        auto &ref = refs.emplace_back();
         ref.id = refs.size() - 1;
         if (isCBaseConstant(original.get())) {
             ref.scope = nesting.front();
@@ -257,8 +254,7 @@ public:
             return original;
         }
 
-        defs.emplace_back();
-        auto &def = defs.back();
+        auto &def = defs.emplace_back();
         def.id = defs.size() - 1;
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
         if (rhs && !rhs->typeAlias && rhs->constantSymbol().exists()) {

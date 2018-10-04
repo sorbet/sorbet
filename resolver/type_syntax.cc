@@ -597,9 +597,9 @@ ParsedSig::TypeArgSpec &ParsedSig::enterTypeArgByName(core::NameRef name) {
             return current;
         }
     }
-    typeArgs.emplace_back();
-    typeArgs.back().name = name;
-    return typeArgs.back();
+    auto &inserted = typeArgs.emplace_back();
+    inserted.name = name;
+    return inserted;
 }
 
 const ParsedSig::TypeArgSpec emptyTypeArgSpec;

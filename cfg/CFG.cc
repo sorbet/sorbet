@@ -18,11 +18,10 @@ namespace sorbet::cfg {
 
 BasicBlock *CFG::freshBlock(int outerLoops) {
     int id = this->maxBasicBlockId++;
-    this->basicBlocks.emplace_back(make_unique<BasicBlock>());
-    BasicBlock *r = this->basicBlocks.back().get();
+    auto &r = this->basicBlocks.emplace_back(make_unique<BasicBlock>());
     r->id = id;
     r->outerLoops = outerLoops;
-    return r;
+    return r.get();
 }
 
 CFG::CFG() {

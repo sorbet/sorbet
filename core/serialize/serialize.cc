@@ -577,9 +577,9 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     names.reserve(nearestPowerOf2(namesSize));
     for (int i = 0; i < namesSize; i++) {
         if (i == 0) {
-            names.emplace_back();
-            names.back().kind = NameKind::UTF8;
-            names.back().raw.utf8 = string_view();
+            auto &inserted = names.emplace_back();
+            inserted.kind = NameKind::UTF8;
+            inserted.raw.utf8 = string_view();
         } else {
             names.emplace_back(unpickleName(p, result));
         }

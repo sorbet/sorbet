@@ -548,9 +548,10 @@ SymbolRef GlobalState::enterMethodArgumentSymbol(Loc loc, SymbolRef owner, NameR
 string_view GlobalState::enterString(string_view nm) {
     char *from = nullptr;
     if (nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
-        strings.push_back(make_unique<vector<char>>(nm.size()));
-        from = strings.back()->data();
+        auto &inserted = strings.emplace_back(make_unique<vector<char>>(nm.size()));
+        from = inserted->data();
         if (strings.size() > 1) {
+            // last page wasn't full, keep it in the end
             swap(*(strings.end() - 1), *(strings.end() - 2));
         }
     } else {

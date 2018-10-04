@@ -5,8 +5,7 @@ using namespace std;
 WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : size(size), logger(logger) {
     logger->debug("Creating {} worker threads", size);
     for (int i = 0; i < size; i++) {
-        threadQueues.emplace_back(make_unique<Queue>());
-        auto &last = threadQueues.back();
+        auto &last = threadQueues.emplace_back(make_unique<Queue>());
         auto *ptr = last.get();
         auto threadIdleName = "idle" + to_string(i);
         threads.emplace_back(runInAThread(threadIdleName, [ptr, logger, threadIdleName]() {
