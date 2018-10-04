@@ -17,7 +17,7 @@ using self_ptr = const void *;
 struct node_list {
 	node_list() = default;
 	node_list(foreign_ptr node) {
-		nodes.push_back(node);
+		nodes.emplace_back(node);
 	}
 
 	node_list& operator=(const foreign_ptr &other) = delete;
@@ -27,8 +27,8 @@ struct node_list {
 		return nodes.size();
 	}
 
-	inline void push_back(const foreign_ptr &ptr) {
-		nodes.push_back(ptr);
+	inline void emplace_back(const foreign_ptr &ptr) {
+		nodes.emplace_back(ptr);
 	}
 
 	inline void push_front(const foreign_ptr &ptr) {

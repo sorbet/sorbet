@@ -605,7 +605,7 @@ void Environment::mergeWith(core::Context ctx, const Environment &other, core::L
             thisTO.type->sanityCheck(ctx);
             for (auto origin : otherTO.origins) {
                 if (!absl::c_linear_search(thisTO.origins, origin)) {
-                    thisTO.origins.push_back(origin);
+                    thisTO.origins.emplace_back(origin);
                 }
             }
             pair.second.knownTruthy = pair.second.knownTruthy && other.getKnownTruthy(var);
@@ -673,7 +673,7 @@ void Environment::computePins(core::Context ctx, const vector<Environment> &envs
                     tp.type = core::Types::any(ctx, tp.type, otherPin->second.type);
                     for (auto origin : otherPin->second.origins) {
                         if (!absl::c_linear_search(tp.origins, origin)) {
-                            tp.origins.push_back(origin);
+                            tp.origins.emplace_back(origin);
                         }
                     }
                     tp.type->sanityCheck(ctx);
@@ -808,7 +808,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     }
                 }
 
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Ident *i) {
                 const core::TypeAndOrigins &typeAndOrigin = getTypeAndOrigin(ctx, i->what);
@@ -833,7 +833,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     } else {
                         tp.type = data.resultType;
                     }
-                    tp.origins.push_back(symbol.data(ctx).loc());
+                    tp.origins.emplace_back(symbol.data(ctx).loc());
                 } else if (data.isField() || data.isStaticField() || data.isMethodArgument() || data.isTypeMember()) {
                     if (data.resultType.get() != nullptr) {
                         if (data.isField()) {
@@ -843,9 +843,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         } else {
                             tp.type = data.resultType;
                         }
-                        tp.origins.push_back(data.loc());
+                        tp.origins.emplace_back(data.loc());
                     } else {
-                        tp.origins.push_back(core::Loc::none());
+                        tp.origins.emplace_back(core::Loc::none());
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
                 } else {
@@ -857,7 +857,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     dealiasedReceiver.type = data.lookupSingletonClass(ctx).data(ctx).externalType(ctx);
                     dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
-                    components.push_back(core::DispatchComponent{tp.type, symbol, {}});
+                    components.emplace_back(core::DispatchComponent{tp.type, symbol, {}});
                     core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, move(components),
                                                           nullptr, bind.loc, symbol.data(ctx).name, dealiasedReceiver,
                                                           tp);
@@ -874,11 +874,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 auto type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
                 type = flatmapHack(ctx, i->link, type);
                 tp.type = move(type);
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Self *i) {
                 tp.type = i->klass.data(ctx).selfType(ctx);
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadArg *i) {
                 /* read type from info filled by define_method */
@@ -895,7 +895,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 auto argType = i->arg.data(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = move(argType);
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadYieldParams *insn) {
                 auto &procType = insn->link->blockPreType;
@@ -917,11 +917,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 } else {
                     tp.type = params;
                 }
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Return *i) {
                 tp.type = core::Types::bottom();
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
 
                 const core::TypeAndOrigins &typeAndOrigin = getAndFillTypeAndOrigin(ctx, i->what);
                 if (core::Types::isSubType(ctx, core::Types::void_(), methodReturnType)) {
@@ -967,11 +967,11 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 }
 
                 tp.type = core::Types::bottom();
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Literal *i) {
                 tp.type = i->value;
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
 
                 if (lspQueryMatch) {
                     core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::LITERAL, {}, nullptr,
@@ -980,7 +980,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             },
             [&](cfg::Unanalyzable *i) {
                 tp.type = core::Types::untypedUntracked();
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Cast *c) {
                 auto klass = ctx.owner.data(ctx).enclosingClass(ctx);
@@ -988,7 +988,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                                                          klass.data(ctx).selfTypeArgs(ctx));
 
                 tp.type = castType;
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
 
                 if (!hasType(ctx, bind.bind.variable)) {
                     noLoopChecking = true;
@@ -1029,7 +1029,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
             [&](cfg::DebugEnvironment *d) {
                 d->str = toString(ctx);
                 tp.type = core::Types::nilClass();
-                tp.origins.push_back(bind.loc);
+                tp.origins.emplace_back(bind.loc);
             });
 
         ENFORCE(tp.type.get() != nullptr, "Inferencer did not assign type: ", bind.value->toString(ctx));
@@ -1158,7 +1158,7 @@ const TestedKnowledge &Environment::getKnowledge(core::LocalVariable symbol, boo
 core::TypeAndOrigins nilTypesWithOriginWithLoc(core::Loc loc) {
     core::TypeAndOrigins ret;
     ret.type = core::Types::nilClass();
-    ret.origins.push_back(loc);
+    ret.origins.emplace_back(loc);
     return ret;
 }
 

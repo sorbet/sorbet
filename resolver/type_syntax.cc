@@ -459,7 +459,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
 
                 for (auto &arg : sig.argTypes) {
-                    targs.push_back(arg.type);
+                    targs.emplace_back(arg.type);
                 }
 
                 auto arity = targs.size() - 1;

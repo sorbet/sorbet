@@ -111,10 +111,10 @@ string_view UnPickler::getStr() {
 
 void Pickler::putU1(u1 u) {
     if (zeroCounter != 0) {
-        data.push_back(zeroCounter);
+        data.emplace_back(zeroCounter);
         zeroCounter = 0;
     }
-    data.push_back(u);
+    data.emplace_back(u);
 }
 void Pickler::putU2(u2 u) {
     putU1(u >> 8);
@@ -136,7 +136,7 @@ void Pickler::putU4(u4 u) {
     if (u == 0) {
         if (zeroCounter != 0) {
             if (zeroCounter == UCHAR_MAX) {
-                data.push_back(UCHAR_MAX);
+                data.emplace_back(UCHAR_MAX);
                 zeroCounter = 0;
                 putU4(u);
                 return;
@@ -144,19 +144,19 @@ void Pickler::putU4(u4 u) {
             zeroCounter++;
             return;
         } else {
-            data.push_back(0);
+            data.emplace_back(0);
             zeroCounter = 1;
         }
     } else {
         if (zeroCounter != 0) {
-            data.push_back(zeroCounter);
+            data.emplace_back(zeroCounter);
             zeroCounter = 0;
         }
         while (u > 127) {
-            data.push_back(128 | (u & 127));
+            data.emplace_back(128 | (u & 127));
             u = u >> 7;
         }
-        data.push_back(u & 127);
+        data.emplace_back(u & 127);
     }
 }
 
@@ -486,7 +486,7 @@ Symbol SerializerImpl::unpickleSymbol(UnPickler &p, GlobalState *gs) {
         core::Loc loc;
         loc.storage.high = p.getU4();
         loc.storage.low = p.getU4();
-        result.locs_.push_back(loc);
+        result.locs_.emplace_back(loc);
     }
     return result;
 }

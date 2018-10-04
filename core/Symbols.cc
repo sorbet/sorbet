@@ -320,7 +320,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
                             best.distance = thisDistance;
                             best.symbol = member.second;
                             best.name = member.first;
-                            result.push_back(best);
+                            result.emplace_back(best);
                         }
                     }
                 }
@@ -466,7 +466,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
         auto str = pair.second.toString(gs, tabs + 1, showHidden);
         if (!str.empty()) {
-            children.push_back(str);
+            children.emplace_back(str);
         }
     }
 
@@ -817,7 +817,7 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     if (loc.file().data(gs).sourceType == core::File::Type::Normal) {
         locs_.insert(locs_.begin(), loc);
     } else {
-        locs_.push_back(loc);
+        locs_.emplace_back(loc);
     }
 }
 

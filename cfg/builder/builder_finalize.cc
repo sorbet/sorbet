@@ -55,9 +55,9 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->bexit.cond.variable = thenb->bexit.cond.variable;
                     bb->bexit.thenb = thenb->bexit.thenb;
                     bb->bexit.elseb = thenb->bexit.elseb;
-                    bb->bexit.thenb->backEdges.push_back(bb);
+                    bb->bexit.thenb->backEdges.emplace_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
-                        bb->bexit.elseb->backEdges.push_back(bb);
+                        bb->bexit.elseb->backEdges.emplace_back(bb);
                     }
                     changed = true;
                     sanityCheck(ctx, cfg);
@@ -69,9 +69,9 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     bb->bexit.elseb = thenb->bexit.elseb;
                     thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                            thenb->backEdges.end());
-                    bb->bexit.thenb->backEdges.push_back(bb);
+                    bb->bexit.thenb->backEdges.emplace_back(bb);
                     if (bb->bexit.thenb != bb->bexit.elseb) {
-                        bb->bexit.elseb->backEdges.push_back(bb);
+                        bb->bexit.elseb->backEdges.emplace_back(bb);
                     }
                     changed = true;
                     sanityCheck(ctx, cfg);
@@ -82,7 +82,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 bb->bexit.thenb != thenb->bexit.thenb) {
                 // shortcut then
                 bb->bexit.thenb = thenb->bexit.thenb;
-                thenb->bexit.thenb->backEdges.push_back(bb);
+                thenb->bexit.thenb->backEdges.emplace_back(bb);
                 thenb->backEdges.erase(remove(thenb->backEdges.begin(), thenb->backEdges.end(), bb),
                                        thenb->backEdges.end());
                 changed = true;
@@ -94,7 +94,7 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                 // shortcut else
                 sanityCheck(ctx, cfg);
                 bb->bexit.elseb = elseb->bexit.elseb;
-                bb->bexit.elseb->backEdges.push_back(bb);
+                bb->bexit.elseb->backEdges.emplace_back(bb);
                 elseb->backEdges.erase(remove(elseb->backEdges.begin(), elseb->backEdges.end(), bb),
                                        elseb->backEdges.end());
                 changed = true;
@@ -403,7 +403,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         it->args.reserve(set1Sz > set2Sz ? set2Sz : set1Sz);
         for (auto el : upper_bounds1[it->id]) {
             if (set2.find(el) != set2.end()) {
-                it->args.push_back(el);
+                it->args.emplace_back(el);
             }
         }
         absl::c_sort(it->args, [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable < rhs.variable; });

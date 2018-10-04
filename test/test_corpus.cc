@@ -112,7 +112,7 @@ public:
             cfg->recordAnnotations(ctx);
         }
 
-        cfgs.push_back(cfg->toString(ctx));
+        cfgs.emplace_back(cfg->toString(ctx));
         return m;
     }
 };
@@ -164,7 +164,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         for (auto &srcPath : test.sourceFiles) {
             auto path = test.folder + srcPath;
             auto src = sorbet::FileOps::read(path.c_str());
-            files.push_back(gs.enterFile(path, src));
+            files.emplace_back(gs.enterFile(path, src));
         }
     }
     vector<unique_ptr<sorbet::ast::Expression>> trees;
@@ -622,17 +622,17 @@ vector<Expectations> listDir(const char *name) {
             auto basename = rbFile2BaseTestName(s);
             if (basename != s) {
                 if (basename == current.basename) {
-                    current.sourceFiles.push_back(s);
+                    current.sourceFiles.emplace_back(s);
                     continue;
                 }
             }
 
             if (!current.basename.empty()) {
-                result.push_back(current);
+                result.emplace_back(current);
                 current = Expectations();
             }
             current.basename = basename;
-            current.sourceFiles.push_back(s);
+            current.sourceFiles.emplace_back(s);
             current.folder = name;
             current.folder += "/";
             current.testName = current.folder + current.basename;
@@ -646,7 +646,7 @@ vector<Expectations> listDir(const char *name) {
         }
     }
     if (!current.basename.empty()) {
-        result.push_back(current);
+        result.emplace_back(current);
         current = Expectations();
     }
 
@@ -674,7 +674,7 @@ vector<Expectations> getInputs(string singleTest) {
     cout << lookingFor;
     for (Expectations &f : scan) {
         if (f.testName == lookingFor) {
-            result.push_back(f);
+            result.emplace_back(f);
         }
     }
 

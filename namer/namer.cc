@@ -380,7 +380,7 @@ public:
                     if (i < ctx.owner.data(ctx).arguments().size()) {
                         ENFORCE(ctx.owner.data(ctx).arguments()[i] == sym);
                     } else {
-                        ctx.owner.data(ctx).arguments().push_back(sym);
+                        ctx.owner.data(ctx).arguments().emplace_back(sym);
                     }
                 } else {
                     Error::raise("Must be a reference!");
@@ -470,7 +470,7 @@ public:
                         }
                         core::NameRef name = lit->asSymbol(ctx);
 
-                        args.push_back(name);
+                        args.emplace_back(name);
                     }
                     if (original->args.size() != 2) {
                         if (auto e = ctx.state.beginError(original->loc, core::errors::Namer::InvalidAlias)) {
@@ -586,7 +586,7 @@ public:
             auto blockArg = ctx.state.enterMethodArgumentSymbol(frame.discoveredLoc, method->symbol, frame.discovered);
             blockArg.data(ctx).setBlockArgument();
             blockArg.data(ctx).resultType = core::Types::untyped(ctx, blockArg);
-            method->symbol.data(ctx).arguments().push_back(blockArg);
+            method->symbol.data(ctx).arguments().emplace_back(blockArg);
 
             core::LocalVariable local{frame.discovered, 0};
             method->args.emplace_back(make_unique<ast::Local>(frame.discoveredLoc, local));

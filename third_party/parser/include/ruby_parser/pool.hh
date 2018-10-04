@@ -59,7 +59,7 @@ protected:
 
 	void push_slab() {
 		slab *newb = new(slab);
-		_history.push_back(_slab);
+		_history.emplace_back(_slab);
 		_slab = newb;
 	}
 };

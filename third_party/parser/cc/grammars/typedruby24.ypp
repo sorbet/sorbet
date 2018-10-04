@@ -443,7 +443,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     }
                 | top_stmts terms top_stmt
                     {
-                      $1->push_back($3);
+                      $1->emplace_back($3);
                       $$ = $1;
                     }
                 | error top_stmt
@@ -490,7 +490,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     }
                 | stmts terms stmt_or_begin
                     {
-                      $1->push_back($3);
+                      $1->emplace_back($3);
                       $$ = $1;
                     }
                 | error stmt
@@ -755,32 +755,32 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | mlhs_head mlhs_item
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
                 | mlhs_head tSTAR mlhs_node
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat_mlhs(self, $2, $3));
+                      list->emplace_back(driver.build.splat_mlhs(self, $2, $3));
                       $$ = list;
                     }
                 | mlhs_head tSTAR mlhs_node tCOMMA mlhs_post
                     {
                       auto &head = $1;
-                      head->push_back(driver.build.splat_mlhs(self, $2, $3));
+                      head->emplace_back(driver.build.splat_mlhs(self, $2, $3));
                       head->concat($5);
                       $$ = head;
                     }
                 | mlhs_head tSTAR
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat_mlhs(self, $2, nullptr));
+                      list->emplace_back(driver.build.splat_mlhs(self, $2, nullptr));
                       $$ = list;
                     }
                 | mlhs_head tSTAR tCOMMA mlhs_post
                     {
                       auto &head = $1;
-                      head->push_back(driver.build.splat_mlhs(self, $2, nullptr));
+                      head->emplace_back(driver.build.splat_mlhs(self, $2, nullptr));
                       head->concat($4);
                       $$ = head;
                     }
@@ -818,7 +818,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | mlhs_head mlhs_item tCOMMA
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -829,7 +829,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | mlhs_post tCOMMA mlhs_item
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -965,7 +965,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     fitem
                     {
                       auto &list = $1;
-                      list->push_back($4);
+                      list->emplace_back($4);
                       $$ = list;
                     }
 
@@ -1174,7 +1174,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | args tCOMMA assocs trailer
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      list->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
                       $$ = list;
                     }
                 | assocs trailer
@@ -1209,7 +1209,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | args tCOMMA assocs tCOMMA
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      list->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
                       $$ = list;
                     }
                 | assocs tCOMMA
@@ -1236,7 +1236,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | args tCOMMA assocs opt_block_arg
                     {
                       auto &args = $1;
-                      args->push_back(driver.build.associate(self, nullptr, $3, nullptr));
+                      args->emplace_back(driver.build.associate(self, nullptr, $3, nullptr));
                       args->concat($4);
                       $$ = args;
                     }
@@ -1280,13 +1280,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | args tCOMMA arg_value
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
                 | args tCOMMA tSTAR arg_value
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat(self, $3, $4));
+                      list->emplace_back(driver.build.splat(self, $3, $4));
                       $$ = list;
                     }
 
@@ -1299,13 +1299,13 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
             mrhs: args tCOMMA arg_value
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
                 | args tCOMMA tSTAR arg_value
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.splat(self, $3, $4));
+                      list->emplace_back(driver.build.splat(self, $3, $4));
                       $$ = list;
                     }
                 | tSTAR arg_value
@@ -1682,7 +1682,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | f_marg_list tCOMMA f_marg
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -1690,26 +1690,26 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | f_marg_list tCOMMA tSTAR f_norm_arg
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.restarg(self, $3, $4));
+                      list->emplace_back(driver.build.restarg(self, $3, $4));
                       $$ = list;
                     }
                 | f_marg_list tCOMMA tSTAR f_norm_arg tCOMMA f_marg_list
                     {
                       auto &args = $1;
-                      args->push_back(driver.build.restarg(self, $3, $4));
+                      args->emplace_back(driver.build.restarg(self, $3, $4));
                       args->concat($6);
                       $$ = args;
                     }
                 | f_marg_list tCOMMA tSTAR
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.restarg(self, $3, nullptr));
+                      list->emplace_back(driver.build.restarg(self, $3, nullptr));
                       $$ = list;
                     }
                 | f_marg_list tCOMMA tSTAR            tCOMMA f_marg_list
                     {
                       auto &args = $1;
-                      args->push_back(driver.build.restarg(self, $3, nullptr));
+                      args->emplace_back(driver.build.restarg(self, $3, nullptr));
                       args->concat($5);
                       $$ = args;
                     }
@@ -1926,7 +1926,7 @@ opt_block_args_tail:
                 | bv_decls tCOMMA bvar
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -2217,7 +2217,7 @@ opt_block_args_tail:
                 | string string1
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -2261,7 +2261,7 @@ opt_block_args_tail:
                 | word_list word tSPACE
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.word(self, $2));
+                      list->emplace_back(driver.build.word(self, $2));
                       $$ = list;
                     }
 
@@ -2272,7 +2272,7 @@ opt_block_args_tail:
                 | word string_content
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -2288,7 +2288,7 @@ opt_block_args_tail:
                 | symbol_list word tSPACE
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.word(self, $2));
+                      list->emplace_back(driver.build.word(self, $2));
                       $$ = list;
                     }
 
@@ -2309,7 +2309,7 @@ opt_block_args_tail:
                 | qword_list tSTRING_CONTENT tSPACE
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.string_internal(self, $2));
+                      list->emplace_back(driver.build.string_internal(self, $2));
                       $$ = list;
                     }
 
@@ -2320,7 +2320,7 @@ opt_block_args_tail:
                 | qsym_list tSTRING_CONTENT tSPACE
                     {
                       auto &list = $1;
-                      list->push_back(driver.build.symbol_internal(self, $2));
+                      list->emplace_back(driver.build.symbol_internal(self, $2));
                       $$ = list;
                     }
 
@@ -2331,7 +2331,7 @@ opt_block_args_tail:
                 | string_contents string_content
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -2342,7 +2342,7 @@ xstring_contents: // nothing
                 | xstring_contents string_content
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -2353,7 +2353,7 @@ regexp_contents: // nothing
                 | regexp_contents string_content
                     {
                       auto &list = $1;
-                      list->push_back($2);
+                      list->emplace_back($2);
                       $$ = list;
                     }
 
@@ -2772,7 +2772,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | f_arg tCOMMA f_arg_item
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -2838,7 +2838,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | f_block_kwarg tCOMMA f_block_kw
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -2849,7 +2849,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | f_kwarg tCOMMA f_kw
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -2911,7 +2911,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | f_block_optarg tCOMMA f_block_opt
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -2922,7 +2922,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | f_optarg tCOMMA f_opt
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -3012,7 +3012,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                 | assocs tCOMMA assoc
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
 
@@ -3096,7 +3096,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
        tr_types: tr_types tCOMMA tr_type
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
                | tr_type
@@ -3211,7 +3211,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
   tr_constraints: tr_constraints tSEMI tr_constraint
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
                 |
@@ -3223,7 +3223,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
   tr_gendeclargs: tr_gendeclargs tCOMMA tr_gendeclarg
                     {
                       auto &list = $1;
-                      list->push_back($3);
+                      list->emplace_back($3);
                       $$ = list;
                     }
                 | tr_gendeclarg

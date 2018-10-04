@@ -20,8 +20,8 @@ void conditionalJump(BasicBlock *from, core::LocalVariable cond, BasicBlock *the
         from->bexit.thenb = thenb;
         from->bexit.elseb = elseb;
         from->bexit.loc = loc;
-        thenb->backEdges.push_back(from);
-        elseb->backEdges.push_back(from);
+        thenb->backEdges.emplace_back(from);
+        elseb->backEdges.emplace_back(from);
     }
 }
 
@@ -35,7 +35,7 @@ void unconditionalJump(BasicBlock *from, BasicBlock *to, CFG &inWhat, core::Loc 
         from->bexit.elseb = to;
         from->bexit.thenb = to;
         from->bexit.loc = loc;
-        to->backEdges.push_back(from);
+        to->backEdges.emplace_back(from);
     }
 }
 
@@ -49,7 +49,7 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc) {
         from->bexit.elseb = db;
         from->bexit.thenb = db;
         from->bexit.loc = loc;
-        db->backEdges.push_back(from);
+        db->backEdges.emplace_back(from);
     }
 }
 
@@ -206,7 +206,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     temp = cctx.newTemporary(core::Names::statTemp());
                     current = walk(cctx.withTarget(temp), exp.get(), current);
 
-                    args.push_back(temp);
+                    args.emplace_back(temp);
                     argLocs.emplace_back(exp->loc);
                 }
 
@@ -441,8 +441,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     core::LocalVariable valTmp = cctx.newTemporary(core::Names::hashTemp());
                     current = walk(cctx.withTarget(keyTmp), h->keys[i].get(), current);
                     current = walk(cctx.withTarget(valTmp), h->values[i].get(), current);
-                    vars.push_back(keyTmp);
-                    vars.push_back(valTmp);
+                    vars.emplace_back(keyTmp);
+                    vars.emplace_back(valTmp);
                     locs.emplace_back(h->keys[i]->loc);
                     locs.emplace_back(h->values[i]->loc);
                 }
@@ -460,7 +460,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 for (auto &elem : a->elems) {
                     core::LocalVariable tmp = cctx.newTemporary(core::Names::arrayTemp());
                     current = walk(cctx.withTarget(tmp), elem.get(), current);
-                    vars.push_back(tmp);
+                    vars.emplace_back(tmp);
                     locs.emplace_back(a->loc);
                 }
                 core::LocalVariable magic = cctx.newTemporary(core::Names::magic());

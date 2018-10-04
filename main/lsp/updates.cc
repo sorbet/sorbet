@@ -196,7 +196,7 @@ void LSPLoop::reIndexFromFileSystem() {
 void LSPLoop::invalidateAllErrors() {
     updatedErrors.clear();
     for (auto &e : errorsAccumulated) {
-        updatedErrors.push_back(e.first);
+        updatedErrors.emplace_back(e.first);
     }
     errorsAccumulated.clear();
 }
@@ -206,7 +206,7 @@ void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
         auto fnd = errorsAccumulated.find(f);
         if (fnd != errorsAccumulated.end()) {
             errorsAccumulated.erase(fnd);
-            updatedErrors.push_back(f);
+            updatedErrors.emplace_back(f);
         }
     }
 }

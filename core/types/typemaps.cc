@@ -83,9 +83,9 @@ shared_ptr<Type> TupleType::_instantiate(Context ctx, const InlinedVector<Symbol
             if (!t) {
                 t = a;
             }
-            newElems.push_back(t);
+            newElems.emplace_back(t);
         } else {
-            newElems.push_back(nullptr);
+            newElems.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -109,9 +109,9 @@ shared_ptr<Type> TupleType::_instantiate(Context ctx, const TypeConstraint &tc) 
             if (!t) {
                 t = a;
             }
-            newElems.push_back(t);
+            newElems.emplace_back(t);
         } else {
-            newElems.push_back(nullptr);
+            newElems.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -135,9 +135,9 @@ shared_ptr<Type> TupleType::_approximate(Context ctx, const TypeConstraint &tc) 
             if (!t) {
                 t = a;
             }
-            newElems.push_back(t);
+            newElems.emplace_back(t);
         } else {
-            newElems.push_back(nullptr);
+            newElems.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -162,9 +162,9 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const InlinedVector<Symbol
             if (!t) {
                 t = a;
             }
-            newValues.push_back(t);
+            newValues.emplace_back(t);
         } else {
-            newValues.push_back(nullptr);
+            newValues.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -188,9 +188,9 @@ shared_ptr<Type> ShapeType::_instantiate(Context ctx, const TypeConstraint &tc) 
             if (!t) {
                 t = a;
             }
-            newValues.push_back(t);
+            newValues.emplace_back(t);
         } else {
-            newValues.push_back(nullptr);
+            newValues.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -214,9 +214,9 @@ shared_ptr<Type> ShapeType::_approximate(Context ctx, const TypeConstraint &tc) 
             if (!t) {
                 t = a;
             }
-            newValues.push_back(t);
+            newValues.emplace_back(t);
         } else {
-            newValues.push_back(nullptr);
+            newValues.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -334,9 +334,9 @@ shared_ptr<Type> AppliedType::_instantiate(Context ctx, const InlinedVector<Symb
             if (!t) {
                 t = a;
             }
-            newTargs.push_back(t);
+            newTargs.emplace_back(t);
         } else {
-            newTargs.push_back(nullptr);
+            newTargs.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -362,9 +362,9 @@ shared_ptr<Type> AppliedType::_instantiate(Context ctx, const TypeConstraint &tc
             if (!t) {
                 t = a;
             }
-            newTargs.push_back(t);
+            newTargs.emplace_back(t);
         } else {
-            newTargs.push_back(nullptr);
+            newTargs.emplace_back(nullptr);
         }
     }
     if (changed) {
@@ -390,9 +390,9 @@ shared_ptr<Type> AppliedType::_approximate(Context ctx, const TypeConstraint &tc
             if (!t) {
                 t = a;
             }
-            newTargs.push_back(t);
+            newTargs.emplace_back(t);
         } else {
-            newTargs.push_back(nullptr);
+            newTargs.emplace_back(nullptr);
         }
     }
     if (changed) {

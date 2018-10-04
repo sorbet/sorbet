@@ -226,19 +226,19 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
             }
             ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
             if (idx.data(ctx).isCovariant()) {
-                newTargs.push_back(Types::any(ctx, a1->targs[i], a2->targs[j]));
+                newTargs.emplace_back(Types::any(ctx, a1->targs[i], a2->targs[j]));
             } else if (idx.data(ctx).isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
                 if (a1->targs[i]->isUntyped()) {
-                    newTargs.push_back(a1->targs[i]);
+                    newTargs.emplace_back(a1->targs[i]);
                 } else {
-                    newTargs.push_back(a2->targs[j]);
+                    newTargs.emplace_back(a2->targs[j]);
                 }
 
             } else if (idx.data(ctx).isContravariant()) {
-                newTargs.push_back(Types::all(ctx, a1->targs[i], a2->targs[j]));
+                newTargs.emplace_back(Types::all(ctx, a1->targs[i], a2->targs[j]));
             }
             changed = changed || newTargs.back() != a2->targs[j];
             j++;
@@ -806,21 +806,21 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                 i++;
             }
             if (i >= a2->klass.data(ctx).typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
-                newTargs.push_back(a1->targs[j]);
+                newTargs.emplace_back(a1->targs[j]);
             } else {
                 if (idx.data(ctx).isCovariant()) {
-                    newTargs.push_back(Types::all(ctx, a1->targs[j], a2->targs[i]));
+                    newTargs.emplace_back(Types::all(ctx, a1->targs[j], a2->targs[i]));
                 } else if (idx.data(ctx).isInvariant()) {
                     if (!Types::equiv(ctx, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
                     if (a1->targs[j]->isUntyped()) {
-                        newTargs.push_back(a2->targs[i]);
+                        newTargs.emplace_back(a2->targs[i]);
                     } else {
-                        newTargs.push_back(a1->targs[j]);
+                        newTargs.emplace_back(a1->targs[j]);
                     }
                 } else if (idx.data(ctx).isContravariant()) {
-                    newTargs.push_back(Types::any(ctx, a1->targs[j], a2->targs[i]));
+                    newTargs.emplace_back(Types::any(ctx, a1->targs[j], a2->targs[i]));
                 }
             }
             j++;

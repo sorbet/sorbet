@@ -167,10 +167,10 @@ public:
         Loc loc = lhs->loc.join(rhs->loc);
 
         if (auto *s = parser::cast_node<Send>(lhs.get())) {
-            s->args.push_back(move(rhs));
+            s->args.emplace_back(move(rhs));
             return make_unique<Send>(loc, move(s->receiver), s->method, move(s->args));
         } else if (auto *s = parser::cast_node<CSend>(lhs.get())) {
-            s->args.push_back(move(rhs));
+            s->args.emplace_back(move(rhs));
             return make_unique<CSend>(loc, move(s->receiver), s->method, move(s->args));
         } else {
             return make_unique<Assign>(loc, move(lhs), move(rhs));
@@ -234,7 +234,7 @@ public:
             return body;
         }
         sorbet::parser::NodeVec stmts;
-        stmts.push_back(move(body));
+        stmts.emplace_back(move(body));
         return make_unique<Begin>(loc, move(stmts));
     }
 
@@ -253,9 +253,9 @@ public:
             // `else` here.
             sorbet::parser::NodeVec stmts;
             if (body != nullptr) {
-                stmts.push_back(move(body));
+                stmts.emplace_back(move(body));
             }
-            stmts.push_back(move(else_));
+            stmts.emplace_back(move(else_));
             body = make_unique<Begin>(collection_loc(stmts), move(stmts));
         }
 
@@ -280,7 +280,7 @@ public:
                 return make_unique<Kwbegin>(loc, move(b->stmts));
             } else {
                 sorbet::parser::NodeVec nodes;
-                nodes.push_back(move(body));
+                nodes.emplace_back(move(body));
                 return make_unique<Kwbegin>(loc, move(nodes));
             }
         }
@@ -291,7 +291,7 @@ public:
         Loc loc = receiver->loc.join(arg->loc);
 
         sorbet::parser::NodeVec args;
-        args.push_back(move(arg));
+        args.emplace_back(move(arg));
 
         return make_unique<Send>(loc, move(receiver), gs_.enterNameUTF8(oper->string()), move(args));
     }
@@ -927,7 +927,7 @@ public:
             } else if (auto *d = parser::cast_node<DString>(p.get())) {
                 out_parts.emplace_back(make_unique<DSymbol>(d->loc, move(d->nodes)));
             } else {
-                out_parts.push_back(move(p));
+                out_parts.emplace_back(move(p));
             }
         }
         return make_unique<Array>(loc, move(out_parts));
@@ -1127,7 +1127,7 @@ public:
         auto *args = const_cast<node_list *>(cargs);
         out.reserve(args->size());
         for (int i = 0; i < args->size(); i++) {
-            out.push_back(cast_node(args->at(i)));
+            out.emplace_back(cast_node(args->at(i)));
         }
         return out;
     }

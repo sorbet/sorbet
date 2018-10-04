@@ -164,7 +164,7 @@ const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
     if (isAbstract) {
         for (auto mem : klass.data(gs).members) {
             if (mem.second.data(gs).isMethod() && mem.second.data(gs).isAbstract()) {
-                abstract.push_back(mem.second);
+                abstract.emplace_back(mem.second);
             }
         }
     }

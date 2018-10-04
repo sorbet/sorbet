@@ -194,7 +194,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     SymbolRef fallback = primary;
     vector<SymbolRef> allCandidates;
 
-    allCandidates.push_back(primary);
+    allCandidates.emplace_back(primary);
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
         SymbolRef current = primary;
@@ -205,7 +205,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
             } else {
-                allCandidates.push_back(overload);
+                allCandidates.emplace_back(overload);
                 current = overload;
             }
         }
@@ -987,8 +987,8 @@ public:
                 return Types::hashOfUntyped();
             }
 
-            keys.push_back(shared_ptr<LiteralType>(args.args[i]->type, key));
-            values.push_back(args.args[i + 1]->type);
+            keys.emplace_back(shared_ptr<LiteralType>(args.args[i]->type, key));
+            values.emplace_back(args.args[i + 1]->type);
         }
         return make_unique<ShapeType>(Types::hashOfUntyped(), keys, values);
     }
@@ -1006,9 +1006,9 @@ public:
         for (auto &elem : args.args) {
             ++i;
             if (isType) {
-                elems.push_back(unwrapType(ctx, args.locs.args[i], elem->type));
+                elems.emplace_back(unwrapType(ctx, args.locs.args[i], elem->type));
             } else {
-                elems.push_back(elem->type);
+                elems.emplace_back(elem->type);
             }
         }
 
@@ -1037,7 +1037,7 @@ class Magic_expandSplat : public IntrinsicMethod {
         if (tuple) {
             types.insert(types.end(), tuple->elems.begin(), tuple->elems.end());
         } else {
-            types.push_back(type);
+            types.emplace_back(type);
         }
         if (types.size() < expandTo) {
             types.resize(expandTo, Types::nilClass());
@@ -1096,11 +1096,11 @@ public:
             TypeAndOrigins tao;
             tao.type = arg;
             tao.origins.emplace_back(args.locs.args[2]);
-            sendArgStore.push_back(move(tao));
+            sendArgStore.emplace_back(move(tao));
         }
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         for (auto &arg : sendArgStore) {
-            sendArgs.push_back(&arg);
+            sendArgs.emplace_back(&arg);
         }
         InlinedVector<Loc, 2> sendArgLocs(tuple->elems.size(), args.locs.args[2]);
         CallLocs sendLocs{args.locs.call, args.locs.args[0], sendArgLocs};

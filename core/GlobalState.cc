@@ -280,7 +280,7 @@ void GlobalState::initEmpty() {
     SymbolRef arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
     arg.data(*this).resultType = Types::untyped(*this, arg);
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::hashOfUntyped();
 
     // Synthesize <Magic>#build_array(*vs : T.untyped) => Array
@@ -288,34 +288,34 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).setRepeated();
     arg.data(*this).resultType = Types::untyped(*this, arg);
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::arrayOfUntyped();
 
     // Synthesize <Magic>#<splat>(a: Array) => Untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::splat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = Types::arrayOfUntyped();
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::untyped(*this, method);
 
     // Synthesize <Magic>#<defined>(arg0: Object) => Boolean
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::defined_p());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = Types::Object();
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::Boolean();
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = Types::untyped(*this, method);
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg1());
     arg.data(*this).resultType = Types::Integer();
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg2());
     arg.data(*this).resultType = Types::Integer();
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::untyped(*this, method);
 
     // Synthesize <Magic>#<call-with-splat>(args: *T.untyped) => T.untyped
@@ -323,7 +323,7 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this).resultType = Types::untyped(*this, method);
     arg.data(*this).setRepeated();
-    method.data(*this).arguments().push_back(arg);
+    method.data(*this).arguments().emplace_back(arg);
     method.data(*this).resultType = Types::untyped(*this, method);
 
     // Some of these are Modules
@@ -525,7 +525,7 @@ SymbolRef GlobalState::enterNewMethodOverload(Loc loc, SymbolRef original, u2 nu
         NameRef nm = arg.data(*this).name;
         SymbolRef newArg = enterMethodArgumentSymbol(loc, res, nm);
         newArg.data(*this).flags = arg.data(*this).flags;
-        res.data(*this).arguments().push_back(newArg);
+        res.data(*this).arguments().emplace_back(newArg);
     }
     return res;
 }
@@ -556,7 +556,7 @@ string_view GlobalState::enterString(string_view nm) {
         }
     } else {
         if (strings_last_page_used + nm.size() > GlobalState::STRINGS_PAGE_SIZE) {
-            strings.push_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
+            strings.emplace_back(make_unique<vector<char>>(GlobalState::STRINGS_PAGE_SIZE));
             // printf("Wasted %i space\n", STRINGS_PAGE_SIZE - strings_last_page_used);
             strings_last_page_used = 0;
         }

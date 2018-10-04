@@ -74,7 +74,7 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
             for (auto &p : rbi::all()) {
                 auto file = gs->enterFile(p.first, p.second);
                 file.data(*gs).sourceType = core::File::PayloadGeneration;
-                payloadFiles.push_back(move(file));
+                payloadFiles.emplace_back(move(file));
             }
         }
         options::Options emptyOpts;
@@ -229,7 +229,7 @@ int realmain(int argc, char *argv[]) {
                 prodCounterInc("types.input.lines");
                 prodCounterInc("types.input.files");
                 auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
-                inputFiles.push_back(file);
+                inputFiles.emplace_back(file);
                 if (opts.forceMaxStrict < core::StrictLevel::Typed) {
                     logger->error("`-e` is incompatible with `--typed=ruby`");
                     return 1;

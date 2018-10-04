@@ -534,13 +534,13 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
             for (auto x : what.data(ctx).typeMembers()) {
                 if (x.data(ctx).name == name) {
                     align = x;
-                    currentAlignment.push_back(x);
+                    currentAlignment.emplace_back(x);
                     break;
                 }
                 i++;
             }
             if (!align.exists()) {
-                currentAlignment.push_back(Symbols::noSymbol());
+                currentAlignment.emplace_back(Symbols::noSymbol());
             }
         }
     }

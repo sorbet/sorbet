@@ -166,7 +166,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         for (auto &uninitialized : current.vars) {
             if (uninitialized.second.typeAndOrigins.type.get() == nullptr) {
                 uninitialized.second.typeAndOrigins.type = core::Types::nilClass();
-                uninitialized.second.typeAndOrigins.origins.push_back(ctx.owner.data(ctx).loc());
+                uninitialized.second.typeAndOrigins.origins.emplace_back(ctx.owner.data(ctx).loc());
             } else {
                 uninitialized.second.typeAndOrigins.type->sanityCheck(ctx);
             }

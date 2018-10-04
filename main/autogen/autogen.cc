@@ -88,7 +88,7 @@ class AutogenWalk {
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
         while (sym.exists() && sym != core::Symbols::root()) {
-            out.push_back(sym.data(ctx).name);
+            out.emplace_back(sym.data(ctx).name);
             sym = sym.data(ctx).owner;
         }
         reverse(out.begin(), out.end());
@@ -98,7 +98,7 @@ class AutogenWalk {
     vector<core::NameRef> constantName(core::Context ctx, ast::ConstantLit *cnst) {
         vector<core::NameRef> out;
         while (cnst != nullptr && cnst->original != nullptr) {
-            out.push_back(cnst->original->cnst);
+            out.emplace_back(cnst->original->cnst);
             cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
         }
         reverse(out.begin(), out.end());
@@ -278,7 +278,7 @@ public:
 
     unique_ptr<ast::Send> preTransformSend(core::Context ctx, unique_ptr<ast::Send> original) {
         if (original->fun == core::Names::keepForIde()) {
-            ignoring.push_back(original.get());
+            ignoring.emplace_back(original.get());
         }
         if ((original->flags & ast::Send::PRIVATE_OK) != 0 && original->fun == core::Names::require() &&
             original->args.size() == 1) {

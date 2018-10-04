@@ -75,7 +75,7 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
                 s += (string)argSym.data(gs).name.data(gs).shortName(gs) + ": ";
             }
             s += "${" + to_string(i++) + "}";
-            typeAndArgNames.push_back(s);
+            typeAndArgNames.emplace_back(s);
         }
     }
 

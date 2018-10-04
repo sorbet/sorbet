@@ -158,8 +158,8 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
 
     if (method.data(*finalGs).isMethod()) {
         for (auto &argSym : method.data(*finalGs).arguments()) {
-            typeAndArgNames.push_back(argSym.data(*finalGs).name.show(*finalGs) + ": " +
-                                      getResultType(argSym, receiver, constraint)->show(*finalGs));
+            typeAndArgNames.emplace_back(argSym.data(*finalGs).name.show(*finalGs) + ": " +
+                                         getResultType(argSym, receiver, constraint)->show(*finalGs));
         }
     }
 

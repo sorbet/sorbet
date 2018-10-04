@@ -14,14 +14,14 @@ namespace sorbet::core {
 vector<int> findLineBreaks(const string &s) {
     vector<int> res;
     int i = -1;
-    res.push_back(-1);
+    res.emplace_back(-1);
     for (auto c : s) {
         i++;
         if (c == '\n') {
-            res.push_back(i);
+            res.emplace_back(i);
         }
     }
-    res.push_back(i);
+    res.emplace_back(i);
     return res;
 }
 

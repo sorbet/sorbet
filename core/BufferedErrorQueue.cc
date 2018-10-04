@@ -16,14 +16,14 @@ void BufferedErrorQueue::pushError(const GlobalState &gs, unique_ptr<BasicError>
     msg->text = error->toString(gs);
     msg->error = move(error);
     msg->kind = ErrorQueueMessage::Kind::Error;
-    errors.push_back(move(msg));
+    errors.emplace_back(move(msg));
 }
 
 void BufferedErrorQueue::pushQueryResponse(unique_ptr<QueryResponse> response) {
     auto msg = make_unique<ErrorQueueMessage>();
     msg->queryResponse = move(response);
     msg->kind = ErrorQueueMessage::Kind::QueryResponse;
-    errors.push_back(move(msg));
+    errors.emplace_back(move(msg));
 }
 
 vector<unique_ptr<ErrorQueueMessage>> BufferedErrorQueue::drainFlushed() {

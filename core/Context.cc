@@ -117,14 +117,14 @@ GlobalSubstitution::GlobalSubstitution(const GlobalState &from, GlobalState &to,
                 if (seenEmpty) {
                     switch (nm.kind) {
                         case NameKind::UNIQUE:
-                            nameSubstitution.push_back(to.freshNameUnique(
+                            nameSubstitution.emplace_back(to.freshNameUnique(
                                 nm.unique.uniqueNameKind, substitute(nm.unique.original), nm.unique.num));
                             break;
                         case NameKind::UTF8:
-                            nameSubstitution.push_back(to.enterNameUTF8(nm.raw.utf8));
+                            nameSubstitution.emplace_back(to.enterNameUTF8(nm.raw.utf8));
                             break;
                         case NameKind::CONSTANT:
-                            nameSubstitution.push_back(to.enterNameConstant(substitute(nm.cnst.original)));
+                            nameSubstitution.emplace_back(to.enterNameConstant(substitute(nm.cnst.original)));
                             break;
                         default:
                             ENFORCE(false, "NameKind missing");
