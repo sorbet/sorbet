@@ -1,5 +1,7 @@
 #include "main/realmain.h"
 #include "absl/algorithm/container.h"
+#include "absl/debugging/symbolize.h"
+#include "absl/strings/str_cat.h"
 #include "common/statsd/statsd.h"
 #include "core/Errors.h"
 #include "core/Files.h"
@@ -15,8 +17,6 @@
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
 #include "version/version.h"
-
-#include "absl/strings/str_cat.h"
 
 #include <algorithm> // find
 #include <csignal>
@@ -119,6 +119,7 @@ void startHUPMonitor() {
 }
 
 int realmain(int argc, char *argv[]) {
+    absl::InitializeSymbolizer(argv[0]);
     returnCode = 0;
     logger = spd::details::registry::instance().create("console", stderr_color_sink);
     logger->set_level(spd::level::trace); // pass through everything, let the sinks decide

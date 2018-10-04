@@ -157,6 +157,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
+    options.add_options("dev")("simulate-crash", "Crash on start");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -265,6 +266,9 @@ void readOptions(Options &opts, int argc, char *argv[],
     cxxopts::Options options = buildOptions();
     try {
         cxxopts::ParseResult raw = options.parse(argc, argv);
+        if (raw["simulate-crash"].as<bool>()) {
+            Error::raise("simulated crash");
+        }
 
         if (raw.count("files") > 0) {
             opts.inputFileNames = raw["files"].as<vector<string>>();

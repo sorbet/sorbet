@@ -21,7 +21,7 @@ maxrss: %M
 
 # Validate the build
 VERSION=$(./bazel-bin/main/sorbet --version)
-EXPECTED_VERSION='Ruby Typer rev [0-9]* git [0-9a-f]{40} built on 201.* GMT'
+EXPECTED_VERSION='Ruby Typer rev [0-9]* git [0-9a-f]{40} built on 201.* GMT with debug symbols'
 if ! [[ $VERSION =~ $EXPECTED_VERSION ]]; then
     git status
     echo "Bad Version: $VERSION"

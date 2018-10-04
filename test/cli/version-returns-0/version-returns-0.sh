@@ -1,1 +1,1 @@
-main/sorbet --version || echo "failed"
+main/sorbet --version &> /dev/null || echo "failed"

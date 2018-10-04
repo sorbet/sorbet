@@ -16,6 +16,7 @@ public:
     static const std::string build_timestamp_string;
     static const std::string full_version_string;
     static const bool isReleaseBuild;
+    static const bool withDebugSymbols;
 };
 } // namespace sorbet
 
