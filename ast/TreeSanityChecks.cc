@@ -53,14 +53,7 @@ void UnresolvedConstantLit::_sanityCheck() {
     ENFORCE(cnst.exists());
 }
 
-void ConstantLit::_sanityCheck() {
-    if (symbol.exists()) {
-        ENFORCE(!typeAlias);
-    }
-    if (typeAlias) {
-        ENFORCE(!symbol.exists());
-    }
-}
+void ConstantLit::_sanityCheck() {}
 
 void EmptyTree::_sanityCheck() {}
 

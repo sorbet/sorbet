@@ -210,7 +210,7 @@ public:
         while (cnst != nullptr && cnst->original != nullptr) {
             cnst = ast::cast_tree<ast::ConstantLit>(cnst->original->scope.get());
         }
-        if (cnst && cnst->symbol == core::Symbols::root()) {
+        if (cnst && cnst->typeAliasOrConstantSymbol() == core::Symbols::root()) {
             return true;
         }
         return false;
@@ -241,9 +241,9 @@ public:
         // where we set that flag.
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
-        if (!original->symbol.data(ctx).isClass() ||
-            !original->symbol.data(ctx).derivesFrom(ctx, core::Symbols::StubClass())) {
-            ref.resolved = symbolName(ctx, original->symbol);
+        auto sym = original->typeAliasOrConstantSymbol();
+        if (!sym.data(ctx).isClass() || !sym.data(ctx).derivesFrom(ctx, core::Symbols::StubClass())) {
+            ref.resolved = symbolName(ctx, sym);
         }
         ref.is_resolved_statically = true;
         ref.is_defining_ref = false;
@@ -261,7 +261,7 @@ public:
         auto &def = defs.back();
         def.id = defs.size() - 1;
         auto *rhs = ast::cast_tree<ast::ConstantLit>(original->rhs.get());
-        if (rhs && rhs->symbol.exists()) {
+        if (rhs && !rhs->typeAlias && rhs->constantSymbol().exists()) {
             def.type = Definition::Alias;
             ENFORCE(ref_map.count(rhs));
             def.aliased_ref = ref_map[rhs];

@@ -27,7 +27,7 @@ bool isTProc(core::MutableContext ctx, ast::Send *send) {
         if (send->fun == core::Names::proc()) {
             auto recv = send->recv.get();
             if (auto *rcv = ast::cast_tree<ast::ConstantLit>(recv)) {
-                return rcv->symbol == core::Symbols::T();
+                return rcv->typeAliasOrConstantSymbol() == core::Symbols::T();
             }
         }
         send = ast::cast_tree<ast::Send>(send->recv.get());
@@ -53,7 +53,7 @@ bool TypeSyntax::isSig(core::MutableContext ctx, ast::Send *send) {
 
     // Sorbet.sig
     auto recv = ast::cast_tree<ast::ConstantLit>(send->recv.get());
-    if (recv && recv->symbol == core::Symbols::Sorbet()) {
+    if (recv && recv->typeAliasOrConstantSymbol() == core::Symbols::Sorbet()) {
         return true;
     }
 
@@ -341,7 +341,7 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::untypedUntracked();
             }
-            auto sym = obj->symbol.data(ctx).dealias(ctx);
+            auto sym = obj->constantSymbol().data(ctx).dealias(ctx);
             auto singleton = sym.data(ctx).singletonClass(ctx);
             if (!singleton.exists()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -411,16 +411,18 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = getResultType(ctx, i->typeAlias, sigBeingParsed, allowSelfType, untypedBlame);
                 return;
             }
-            bool silenceGenericError = i->symbol == core::Symbols::Hash() || i->symbol == core::Symbols::Array() ||
-                                       i->symbol == core::Symbols::Set() || i->symbol == core::Symbols::Struct() ||
-                                       i->symbol == core::Symbols::File();
+            bool silenceGenericError = i->typeAliasOrConstantSymbol() == core::Symbols::Hash() ||
+                                       i->typeAliasOrConstantSymbol() == core::Symbols::Array() ||
+                                       i->typeAliasOrConstantSymbol() == core::Symbols::Set() ||
+                                       i->typeAliasOrConstantSymbol() == core::Symbols::Struct() ||
+                                       i->typeAliasOrConstantSymbol() == core::Symbols::File();
             // TODO: reduce this^^^ set.
-            auto sym = i->symbol.data(ctx).dealias(ctx);
+            auto sym = i->constantSymbol().data(ctx).dealias(ctx);
             if (sym.data(ctx).isClass()) {
                 if (sym.data(ctx).typeArity(ctx) > 0 && !silenceGenericError) {
                     if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
-                                    i->symbol.show(ctx));
+                                    i->constantSymbol().show(ctx));
                     }
                 }
                 result = sym.data(ctx).externalType(ctx);
@@ -428,7 +430,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = make_shared<core::LambdaParam>(sym);
             } else if (sym.data(ctx).isStaticField()) {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Constant `{}` is not a class or type alias", i->symbol.show(ctx));
+                    e.setHeader("Constant `{}` is not a class or type alias", i->constantSymbol().show(ctx));
                     e.addErrorLine(sym.data(ctx).loc(),
                                    "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
@@ -436,7 +438,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = core::Types::untypedUntracked();
             } else {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
-                    e.setHeader("Malformed type declaration. Not a class type `{}`", i->symbol.show(ctx));
+                    e.setHeader("Malformed type declaration. Not a class type `{}`", i->constantSymbol().show(ctx));
                 }
                 result = core::Types::untypedUntracked();
             }
@@ -483,12 +485,13 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 result = core::Types::untypedUntracked();
                 return;
             }
-            if (recvi->symbol == core::Symbols::T()) {
+            if (recvi->typeAliasOrConstantSymbol() == core::Symbols::T()) {
                 result = interpretTCombinator(ctx, s, sigBeingParsed, allowSelfType, untypedBlame);
                 return;
             }
 
-            if (recvi->symbol == core::Symbols::Magic() && s->fun == core::Names::callWithSplat()) {
+            if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Magic() &&
+                s->fun == core::Names::callWithSplat()) {
                 // TODO(pay-server) remove this block
                 if (auto e = ctx.state.beginError(recvi->loc, core::errors::Resolver::InvalidTypeDeclarationTyped)) {
                     e.setHeader("Splats are unsupported by the static checker and banned in typed code");
@@ -520,27 +523,28 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
 
             core::SymbolRef corrected;
-            if (recvi->symbol == core::Symbols::Array()) {
+            if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Array()) {
                 corrected = core::Symbols::T_Array();
-            } else if (recvi->symbol == core::Symbols::Hash()) {
+            } else if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Hash()) {
                 corrected = core::Symbols::T_Hash();
-            } else if (recvi->symbol == core::Symbols::Enumerable()) {
+            } else if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Enumerable()) {
                 corrected = core::Symbols::T_Enumerable();
-            } else if (recvi->symbol == core::Symbols::Range()) {
+            } else if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Range()) {
                 corrected = core::Symbols::T_Range();
-            } else if (recvi->symbol == core::Symbols::Set()) {
+            } else if (recvi->typeAliasOrConstantSymbol() == core::Symbols::Set()) {
                 corrected = core::Symbols::T_Set();
             }
             if (corrected.exists()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
                     e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx).show(ctx) + "[...]",
-                                recvi->symbol.data(ctx).show(ctx) + "[...]", recvi->symbol.data(ctx).show(ctx));
-                    e.addErrorSection(
-                        core::ErrorSection(core::ErrorColors::format("`{}` will not work in the runtime type system.",
-                                                                     recvi->symbol.data(ctx).show(ctx) + "[...]")));
+                                recvi->constantSymbol().data(ctx).show(ctx) + "[...]",
+                                recvi->constantSymbol().data(ctx).show(ctx));
+                    e.addErrorSection(core::ErrorSection(
+                        core::ErrorColors::format("`{}` will not work in the runtime type system.",
+                                                  recvi->constantSymbol().data(ctx).show(ctx) + "[...]")));
                 }
             } else {
-                corrected = recvi->symbol;
+                corrected = recvi->constantSymbol();
             }
 
             auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));

@@ -82,7 +82,8 @@ unique_ptr<ast::Expression> toWriterSigForName(core::MutableContext ctx, const a
     ast::Send *cur = body;
     while (cur != nullptr) {
         auto recv = ast::cast_tree<ast::ConstantLit>(cur->recv.get());
-        if (ast::isa_tree<ast::Self>(cur->recv.get()) || (recv && recv->symbol == core::Symbols::Sorbet())) {
+        if (ast::isa_tree<ast::Self>(cur->recv.get()) ||
+            (recv && recv->typeAliasOrConstantSymbol() == core::Symbols::Sorbet())) {
             auto loc = resultType->loc;
             auto hash = ast::MK::Hash1(cur->loc, ast::MK::Symbol(cur->loc, name), move(resultType));
             auto params = ast::MK::Send1(loc, move(cur->recv), core::Names::params(), move(hash));

@@ -25,7 +25,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get());
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
-                return id->symbol.data(ctx).dealias(ctx);
+                return id->constantSymbol().data(ctx).dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
                 // emitted via `class << self` blocks
@@ -301,7 +301,7 @@ public:
             return false;
         }
         auto rcl = ast::cast_tree<ast::ConstantLit>(anc.get());
-        if (rcl && rcl->symbol == core::Symbols::todo()) {
+        if (rcl && rcl->typeAliasOrConstantSymbol() == core::Symbols::todo()) {
             return false;
         }
         return true;
@@ -794,7 +794,7 @@ public:
             if (send->fun == core::Names::typeAlias()) {
                 core::SymbolRef sym;
                 if (auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get())) {
-                    sym = id->symbol;
+                    sym = id->constantSymbol();
                 }
                 if (sym.exists() && sym.data(ctx).isStaticField()) {
                     sym.data(ctx).setStaticTypeAlias();
