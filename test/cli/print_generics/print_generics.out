@@ -1,0 +1,45 @@
+test/cli/print_generics/print_generics.rb:5: This function does not have a `sig` http://go/e/7017
+     5 |def foo(x)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/print_generics/print_generics.rb:5: Replace with `sig {params(x: T.untyped).returns(T::Array[Integer])}
+def`
+     5 |def foo(x)
+        ^^^
+
+test/cli/print_generics/print_generics.rb:9: This function does not have a `sig` http://go/e/7017
+     9 |def bar(x)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/print_generics/print_generics.rb:9: Replace with `sig {params(x: T.untyped).returns(T::Hash[Symbol, Integer])}
+def`
+     9 |def bar(x)
+        ^^^
+
+test/cli/print_generics/print_generics.rb:13: This function does not have a `sig` http://go/e/7017
+    13 |def qux(x)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/print_generics/print_generics.rb:13: Replace with `sig {params(x: T.untyped).returns(T::Enumerable[Integer])}
+def`
+    13 |def qux(x)
+        ^^^
+
+test/cli/print_generics/print_generics.rb:17: This function does not have a `sig` http://go/e/7017
+    17 |def wub(x)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/print_generics/print_generics.rb:17: Replace with `sig {params(x: T.untyped).returns(T::Range[Integer])}
+def`
+    17 |def wub(x)
+        ^^^
+
+test/cli/print_generics/print_generics.rb:21: This function does not have a `sig` http://go/e/7017
+    21 |def zan(x)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/print_generics/print_generics.rb:21: Replace with `sig {params(x: T.untyped).returns(T::Set[Integer])}
+def`
+    21 |def zan(x)
+        ^^^
+Errors: 5

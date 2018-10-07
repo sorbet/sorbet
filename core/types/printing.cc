@@ -318,6 +318,12 @@ string AppliedType::show(const GlobalState &gs) const {
         buf << "T::Array";
     } else if (this->klass == Symbols::Hash()) {
         buf << "T::Hash";
+    } else if (this->klass == Symbols::Enumerable()) {
+        buf << "T::Enumerable";
+    } else if (this->klass == Symbols::Range()) {
+        buf << "T::Range";
+    } else if (this->klass == Symbols::Set()) {
+        buf << "T::Set";
     } else {
         buf << this->klass.data(gs).show(gs);
     }
