@@ -766,6 +766,7 @@ private:
         if (existing.exists()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx).show(ctx));
+                e.addErrorLine(ctx.owner.data(ctx).loc(), "Previous definition in this class");
             }
             return;
         }
