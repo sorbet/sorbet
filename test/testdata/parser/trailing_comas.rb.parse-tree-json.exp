@@ -1,0 +1,78 @@
+{
+  "type" : "Begin",
+  "stmts" : [
+    {
+      "type" : "DefMethod",
+      "name" : "foo",
+      "args" : null,
+      "body" : {
+        "type" : "Begin",
+        "stmts" : [
+          {
+            "type" : "Send",
+            "receiver" : null,
+            "method" : "puts",
+            "args" : [
+              {
+                "type" : "DString",
+                "nodes" : [
+                  {
+                    "type" : "String",
+                    "val" : "hi"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type" : "DString",
+            "nodes" : [
+              {
+                "type" : "String",
+                "val" : "bar"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type" : "DefMethod",
+      "name" : "bar",
+      "args" : null,
+      "body" : null
+    },
+    {
+      "type" : "DefMethod",
+      "name" : "baz",
+      "args" : {
+        "type" : "Args",
+        "args" : [
+          {
+            "type" : "Arg",
+            "name" : "a"
+          },
+          {
+            "type" : "Arg",
+            "name" : "b"
+          }
+        ]
+      },
+      "body" : {
+        "type" : "Send",
+        "receiver" : null,
+        "method" : "puts",
+        "args" : [
+          {
+            "type" : "LVar",
+            "name" : "a"
+          },
+          {
+            "type" : "LVar",
+            "name" : "b"
+          }
+        ]
+      }
+    }
+  ]
+}

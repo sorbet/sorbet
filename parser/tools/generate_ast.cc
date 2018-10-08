@@ -336,12 +336,16 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
     int i = -1;
     // Generate fields
     for (auto &arg : node.fields) {
+        i++;
         if (arg.type == Loc) {
             continue;
         }
         maybeComma = "";
-        if (++i + 1 < node.fields.size()) {
-            maybeComma = ",";
+        for (int j = i + 1; j < node.fields.size(); j++) {
+            if (node.fields[j].type != Loc) {
+                maybeComma = ",";
+                break;
+            }
         }
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
