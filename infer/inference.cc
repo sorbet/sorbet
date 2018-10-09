@@ -8,6 +8,27 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
+struct OffsetAndPadding {
+    u4 startOffset;
+    u4 startPadding;
+};
+
+// TODO(jez) Might want to factor this out if we add more autocorrects that are "inject a line above this line"
+OffsetAndPadding getStartOffset(core::Context ctx, core::Loc loc) {
+    core::Loc::Detail startDetail = loc.position(ctx).first;
+    u4 lineStart = core::Loc::pos2Offset(loc.file().data(ctx), {startDetail.line, 1});
+
+    // This isn't the entire line, it's just the line up until the end of the method def:
+    //     private def foo; end
+    //             ^^^^^^^
+    // but that's enough for us to find the initial padding on this line.
+    std::string_view lineView = loc.file().data(ctx).source().substr(lineStart, startDetail.column);
+
+    u4 startPadding = lineView.find_first_not_of(" \t");
+    u4 startOffset = lineStart + startPadding;
+    return {startOffset, startPadding};
+}
+
 void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
                      const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
     if (constr.solve(ctx)) {
@@ -15,11 +36,9 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
 
         if (guessedType->isFullyDefined() && !guessedType->isUntyped()) {
             auto loc = methodSymbol.data(ctx).loc();
-            auto detailPair = loc.position(ctx);
             if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) == "def") {
-                auto startPos = core::Loc::pos2Offset(
-                    loc.file().data(ctx), core::Loc::Detail{detailPair.first.line, detailPair.first.column});
-                core::Loc replacementLoc(loc.file(), startPos, startPos + 3);
+                auto [startOffset, startPadding] = getStartOffset(ctx, loc);
+                core::Loc replacementLoc(loc.file(), startOffset, startOffset);
                 stringstream ss;
                 bool first = true;
 
@@ -46,10 +65,9 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                 ss << returnStr;
                 ss << "}";
 
-                string spaces(detailPair.first.column - 1, ' ');
+                string spaces(startPadding, ' ');
 
-                e.addAutocorrect(
-                    core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}def", ss.str(), spaces)));
+                e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
             }
         }
     }

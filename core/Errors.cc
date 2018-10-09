@@ -132,8 +132,10 @@ void ErrorBuilder::addAutocorrect(AutocorrectSuggestion &&autocorrect) {
         addErrorSection(ErrorSection(
             "Autocorrect: Done", {ErrorLine::from(autocorrect.loc, "Replaced with `{}`", autocorrect.replacement)}));
     } else {
+        u4 n = autocorrect.loc.endPos() - autocorrect.loc.beginPos();
+        auto verb = n == 0 ? "Insert" : "Replace with";
         addErrorSection(ErrorSection("Autocorrect: Use `-a` to autocorrect",
-                                     {ErrorLine::from(autocorrect.loc, "Replace with `{}`", autocorrect.replacement)}));
+                                     {ErrorLine::from(autocorrect.loc, "{} `{}`", verb, autocorrect.replacement)}));
     }
     this->autocorrects.emplace_back(move(autocorrect));
 }

@@ -29,3 +29,12 @@ def give_me_literal; 1; end;
 
 def give_me_literal_nested; [[1]]; end;
 
+private def root_private; end
+
+protected def root_protected; end
+
+class A
+  private def a_private; end
+
+  protected def a_protected; end
+end

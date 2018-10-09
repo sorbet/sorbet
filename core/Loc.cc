@@ -123,7 +123,12 @@ string Loc::toString(const GlobalState &gs, int tabs) const {
             buf << ' ';
         }
         buf << rang::fg::cyan;
-        for (; p < pos.second.column; p++) {
+        if (pos.second.column - pos.first.column > 0) {
+            for (; p < pos.second.column; p++) {
+                buf << '^';
+            }
+        } else {
+            // If zero-width loc, at least show something.
             buf << '^';
         }
         buf << endl << rang::fg::reset;
