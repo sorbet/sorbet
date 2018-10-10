@@ -38,3 +38,8 @@ class A
 
   protected def a_protected; end
 end
+
+def with_block
+  yield
+  nil
+end

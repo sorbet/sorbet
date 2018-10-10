@@ -82,6 +82,10 @@ test/cli/suggest-sig/suggest-sig.rb:34: This function does not have a `sig` http
     34 |protected def root_protected; end
         ^
 
+test/cli/suggest-sig/suggest-sig.rb:42: This function does not have a `sig` http://go/e/7017
+    42 |def with_block
+        ^^^^^^^^^^^^^^
+
 test/cli/suggest-sig/suggest-sig.rb:13: Method `sig` does not exist on `T.class_of(<root>)` http://go/e/7003
     13 |sig {void}
         ^^^^^^^^^^
@@ -103,4 +107,4 @@ test/cli/suggest-sig/suggest-sig.rb:39: This function does not have a `sig` http
   `
     39 |  protected def a_protected; end
           ^
-Errors: 14
+Errors: 15

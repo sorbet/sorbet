@@ -4,6 +4,8 @@
 #include "infer/environment.h"
 #include "infer/infer.h"
 
+#include "absl/algorithm/container.h"
+
 using namespace std;
 namespace sorbet::infer {
 
@@ -34,41 +36,48 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     if (constr.solve(ctx)) {
         auto guessedType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
-        if (guessedType->isFullyDefined() && !guessedType->isUntyped()) {
+        bool isFullyDefined = guessedType->isFullyDefined();
+        bool isUntyped = guessedType->isUntyped();
+
+        // We don't want to suggest a sig when the method has a block argument because
+        // - Sometimes we synthesize a block arg, and name it `<blk>` which is not a valid identifier name.
+        // - We're not attempting to infer types for them, and we don't want people to think that procs can't be typed.
+        auto isBlockArg = [&](const core::SymbolRef &arg) { return arg.data(ctx).isBlockArgument(); };
+        bool hasBlockArg = absl::c_any_of(methodSymbol.data(ctx).arguments(), isBlockArg);
+
+        if (isFullyDefined && !isUntyped && !hasBlockArg) {
             auto loc = methodSymbol.data(ctx).loc();
-            if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) == "def") {
-                auto [startOffset, startPadding] = getStartOffset(ctx, loc);
-                core::Loc replacementLoc(loc.file(), startOffset, startOffset);
-                stringstream ss;
-                bool first = true;
+            auto [startOffset, startPadding] = getStartOffset(ctx, loc);
+            core::Loc replacementLoc(loc.file(), startOffset, startOffset);
+            stringstream ss;
+            bool first = true;
 
-                ss << "sig {";
-                if (!methodSymbol.data(ctx).arguments().empty()) {
-                    ss << "params(";
-                    for (auto &argSym : methodSymbol.data(ctx).arguments()) {
-                        if (!first) {
-                            ss << ", ";
-                        }
-                        first = false;
-                        ss << argSym.data(ctx).name.show(ctx) << ": " << core::Types::untypedUntracked()->show(ctx);
+            ss << "sig {";
+            if (!methodSymbol.data(ctx).arguments().empty()) {
+                ss << "params(";
+                for (auto &argSym : methodSymbol.data(ctx).arguments()) {
+                    if (!first) {
+                        ss << ", ";
                     }
-                    ss << ").";
+                    first = false;
+                    ss << argSym.data(ctx).name.show(ctx) << ": " << core::Types::untypedUntracked()->show(ctx);
                 }
-
-                string returnStr;
-                if (methodSymbol.data(ctx).name == core::Names::initialize() ||
-                    core::Types::isSubType(ctx, core::Types::void_(), guessedType)) {
-                    returnStr = "void";
-                } else {
-                    returnStr = fmt::format("returns({})", guessedType->show(ctx));
-                }
-                ss << returnStr;
-                ss << "}";
-
-                string spaces(startPadding, ' ');
-
-                e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
+                ss << ").";
             }
+
+            string returnStr;
+            if (methodSymbol.data(ctx).name == core::Names::initialize() ||
+                core::Types::isSubType(ctx, core::Types::void_(), guessedType)) {
+                returnStr = "void";
+            } else {
+                returnStr = fmt::format("returns({})", guessedType->show(ctx));
+            }
+            ss << returnStr;
+            ss << "}";
+
+            string spaces(startPadding, ' ');
+
+            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
         }
     }
 }
