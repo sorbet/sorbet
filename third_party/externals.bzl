@@ -58,7 +58,7 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="73063f5002612c6bf64fe24f851cd5cc0d83eef9",
+        commit="67fac85e96220f69076121d569abd15471abb6bf",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
@@ -115,7 +115,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="e01d95528ea2137a4a27a88d1f57c6cb260aafed"
+        commit="445998d7ac4e5d3c50411d377e3b50e960d2d6c2"
     )
 
     new_git_repository(
