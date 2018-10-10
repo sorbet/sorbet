@@ -36,7 +36,7 @@ string addr2line(const string program_name, void const *const *addr, int count) 
     for (int i = 3; i < count; ++i) {
         char buf[4096];
         symbolize_pc(const_cast<void *>(addr[i]), "%p in %f %s:%l:%c", buf, sizeof(buf));
-        os << "  #" << i << " " << buf << "\n";
+        os << "  #" << i << " " << buf << '\n';
     }
     return os.str();
 }

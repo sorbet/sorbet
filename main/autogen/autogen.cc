@@ -345,7 +345,7 @@ std::string namesToString(core::Context ctx, std::vector<core::NameRef> names) {
 
 std::string ParsedFile::toString(core::Context ctx) {
     stringstream buf;
-    buf << "# ParsedFile: " << path << "\n";
+    buf << "# ParsedFile: " << path << '\n';
     buf << "requires: [";
     {
         bool first = true;
@@ -358,8 +358,7 @@ std::string ParsedFile::toString(core::Context ctx) {
         }
         buf << "]\n";
     }
-    buf << "## defs:"
-        << "\n";
+    buf << "## defs:" << '\n';
     for (auto &def : defs) {
         buf << "[def id=" << def.id.id() << "]\n";
         buf << " type=";
@@ -377,29 +376,28 @@ std::string ParsedFile::toString(core::Context ctx) {
                 buf << "alias";
                 break;
         }
-        buf << "\n";
-        buf << " defines_behavior=" << def.defines_behavior << "\n";
-        buf << " is_empty=" << def.is_empty << "\n";
+        buf << '\n';
+        buf << " defines_behavior=" << def.defines_behavior << '\n';
+        buf << " is_empty=" << def.is_empty << '\n';
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
-            buf << " defining_ref=" << namesToString(ctx, ref.name) << "\n";
+            buf << " defining_ref=" << namesToString(ctx, ref.name) << '\n';
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            buf << " parent_ref=" << namesToString(ctx, ref.name) << "\n";
+            buf << " parent_ref=" << namesToString(ctx, ref.name) << '\n';
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            buf << " aliased_ref=" << namesToString(ctx, ref.name) << "\n";
+            buf << " aliased_ref=" << namesToString(ctx, ref.name) << '\n';
         }
     }
-    buf << "## refs:"
-        << "\n";
+    buf << "## refs:" << '\n';
     for (auto &ref : refs) {
         buf << "[ref id=" << ref.id.id() << "]\n";
-        buf << " scope=" << namesToString(ctx, fullName(ctx, ref.scope)) << "\n";
+        buf << " scope=" << namesToString(ctx, fullName(ctx, ref.scope)) << '\n';
 
-        buf << " name=" << namesToString(ctx, ref.name) << "\n";
+        buf << " name=" << namesToString(ctx, ref.name) << '\n';
         buf << " nesting=[";
         for (auto &scope : ref.nesting) {
             if (&scope != &ref.nesting.front()) {
@@ -417,10 +415,10 @@ std::string ParsedFile::toString(core::Context ctx) {
             buf << nm.show(ctx);
         }
         buf << "]\n";
-        buf << " loc=" << ref.loc.filePosToString(ctx) << "\n";
-        buf << " is_defining_ref=" << ref.is_defining_ref << "\n";
+        buf << " loc=" << ref.loc.filePosToString(ctx) << '\n';
+        buf << " is_defining_ref=" << ref.is_defining_ref << '\n';
         if (ref.parent_of.exists()) {
-            buf << " parent_of=" << namesToString(ctx, fullName(ctx, ref.parent_of)) << "\n";
+            buf << " parent_of=" << namesToString(ctx, fullName(ctx, ref.parent_of)) << '\n';
         }
     }
     return buf.str();

@@ -321,7 +321,7 @@ string getCounterStatistics(vector<string> names) {
                 if (value.size() < 10) {
                     value = padOrLimit(value, 10);
                 }
-                string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".value :" + value + "\n";
+                string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".value :" + value + '\n';
                 sortedTimings.emplace_back(e.first, line);
                 continue;
             }
@@ -338,9 +338,9 @@ string getCounterStatistics(vector<string> names) {
             if (avg.size() < 10) {
                 avg = padOrLimit(avg, 10);
             }
-            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".min :" + min + "\n" + "  " +
-                          padOrLimit(e.first, PAD_LIMIT - 4) + ".max :" + max + "\n" + "  " +
-                          padOrLimit(e.first, PAD_LIMIT - 4) + ".avg :" + avg + "\n";
+            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".min :" + min + '\n' + "  " +
+                          padOrLimit(e.first, PAD_LIMIT - 4) + ".max :" + max + '\n' + "  " +
+                          padOrLimit(e.first, PAD_LIMIT - 4) + ".avg :" + avg + '\n';
             sortedTimings.emplace_back(e.first, line);
         }
         absl::c_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
@@ -361,7 +361,7 @@ string getCounterStatistics(vector<string> names) {
             if (number.size() < 6) {
                 number = padOrLimit(number, 6);
             }
-            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + "\n";
+            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + '\n';
             sortedOther.emplace_back(e.first, line);
         }
 

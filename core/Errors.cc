@@ -46,7 +46,7 @@ string ErrorColors::replaceAll(const string &inWhat, const string &from, const s
 BasicError::BasicError(Loc loc, ErrorClass what, string formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
     ENFORCE(formatted.back() != '.');
-    ENFORCE(formatted.find("\n") == string::npos, formatted, " has a newline in it");
+    ENFORCE(formatted.find('\n') == string::npos, formatted, " has a newline in it");
 }
 
 string restoreColors(const string &formatted, rang::fg color) {

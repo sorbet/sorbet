@@ -27,7 +27,7 @@ class StatsdClientWrapper {
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
         auto newLine = fmt::format("{}{}:{}|{}", link->ns ? link->ns : "", cleanMetricName(name), value, type);
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
-            packet = packet + "\n" + newLine;
+            packet = packet + '\n' + newLine;
         } else {
             if (packet.size() > 0) {
                 statsd_send(link, packet.c_str());

@@ -1032,7 +1032,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         stringstream buf;
 
         auto pos = annotation.loc.position(*this);
-        vector<string> lines = absl::StrSplit(annotation.str, "\n");
+        vector<string> lines = absl::StrSplit(annotation.str, '\n');
         while (!lines.empty() && lines.back().empty()) {
             lines.pop_back();
         }

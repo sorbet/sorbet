@@ -269,7 +269,7 @@ void Proto::toJSON(const google::protobuf::Message &message, ostream &out) {
     string url = absl::StrCat(kTypeUrlPrefix, "/", message.GetDescriptor()->full_name());
     auto status = google::protobuf::util::BinaryToJsonStream(resolver.get(), url, &istream, &ostream, options);
     if (!status.ok()) {
-        cerr << "error converting to proto json: " << status.error_message() << "\n";
+        cerr << "error converting to proto json: " << status.error_message() << '\n';
         abort();
     }
 }

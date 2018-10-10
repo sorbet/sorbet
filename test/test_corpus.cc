@@ -305,7 +305,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
-        got["name-table"] = gs.toString() + "\n";
+        got["name-table"] = gs.toString() + '\n';
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
@@ -421,7 +421,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     expectation = test.expectations.find("name-table");
     if (expectation != test.expectations.end()) {
-        string table = gs.toString() + "\n";
+        string table = gs.toString() + '\n';
         EXPECT_EQ(got["name-table"], table) << " name-table should not be mutated by CFG+inference";
     }
 

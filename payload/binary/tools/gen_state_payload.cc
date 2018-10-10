@@ -25,9 +25,7 @@ int main(int argc, char **argv) {
 
     ofstream classfile(argv[2], ios::trunc);
 
-    classfile << "#include \"common/common.h\"\n"
-              << "\n"
-              << "const sorbet::u1 nameTablePayload[] = {\n";
+    classfile << "#include \"common/common.h\"\n" << '\n' << "const sorbet::u1 nameTablePayload[] = {\n";
     int i = -1;
     bool first = true;
     for (auto c : data) {

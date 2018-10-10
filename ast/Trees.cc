@@ -447,7 +447,7 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     if (this->flags == 0) {
         buf << " 0";
     }
-    buf << "\n";
+    buf << '\n';
 
     printTabs(buf, tabs + 1);
     buf << "name = " << name.data(gs).toString(gs) << "<" << this->symbol.data(gs, true).name.data(gs).toString(gs)

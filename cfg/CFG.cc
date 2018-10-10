@@ -122,7 +122,7 @@ string CFG::toString(core::Context ctx) {
     buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << '\n' << '\n';
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->toString(ctx);
-        auto lines = absl::StrSplit(text, "\n");
+        auto lines = absl::StrSplit(text, '\n');
         stringstream escaped;
         bool first = true;
         for (auto &line : lines) {
@@ -134,7 +134,7 @@ string CFG::toString(core::Context ctx) {
         }
         string label = escaped.str();
         size_t start_pos = 0;
-        while ((start_pos = label.find("\n", start_pos)) != string::npos) {
+        while ((start_pos = label.find('\n', start_pos)) != string::npos) {
             label.replace(start_pos, 1, "\\l");
             start_pos += 2;
         }
