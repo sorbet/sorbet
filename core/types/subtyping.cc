@@ -290,7 +290,6 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                         if (h2->keys.size() == h1->keys.size()) {
                             // have enough keys.
                             int i = -1;
-                            vector<shared_ptr<LiteralType>> keys;
                             vector<shared_ptr<Type>> valueLubs;
                             valueLubs.reserve(h2->keys.size());
                             bool differ1 = false;
@@ -304,7 +303,6 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                                     return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                 });
                                 if (fnd != h1->keys.end()) {
-                                    keys.emplace_back(el2);
                                     auto &inserted = valueLubs.emplace_back(
                                         lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
                                     differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
@@ -319,7 +317,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                             } else if (!differ2) {
                                 result = t2;
                             } else {
-                                result = make_shared<ShapeType>(Types::hashOfUntyped(), keys, valueLubs);
+                                result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
                             }
                         } else {
                             result = Types::hashOfUntyped();
@@ -628,7 +626,6 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                          if (h2->keys.size() == h1->keys.size()) {
                              // have enough keys.
                              int i = -1;
-                             vector<shared_ptr<LiteralType>> keys;
                              vector<shared_ptr<Type>> valueLubs;
                              valueLubs.reserve(h2->keys.size());
                              for (auto &el2 : h2->keys) {
@@ -640,7 +637,6 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                                      return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                  });
                                  if (fnd != h1->keys.end()) {
-                                     keys.emplace_back(el2);
                                      auto glbe = glb(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
                                      if (glbe->isBottom()) {
                                          result = Types::bottom();
@@ -652,7 +648,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                                      return;
                                  }
                              }
-                             result = make_shared<ShapeType>(Types::hashOfUntyped(), keys, valueLubs);
+                             result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
                          } else {
                              result = Types::bottom();
                          }
