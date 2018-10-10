@@ -44,6 +44,15 @@ module Kernel
 
   sig do
     params(
+        tag: Object,
+        blk: T.proc.params(arg0: Object).returns(BasicObject),
+    )
+    .returns(BasicObject)
+  end
+  def catch(tag=Object.new, &blk); end
+
+  sig do
+    params(
         arg0: String,
         arg1: Binding,
         filename: String,
@@ -459,7 +468,7 @@ module Kernel
 
   sig do
     params(
-        blk: T.proc.params().returns(BasicObject),
+        blk: T.proc.params.returns(BasicObject),
     )
     .returns(Proc)
   end
@@ -561,7 +570,7 @@ module Kernel
 
   sig do
     params(
-        blk: T.proc.params().returns(T.untyped)
+        blk: T.proc.params.returns(T.untyped)
     )
     .returns(NilClass)
   end
@@ -721,6 +730,15 @@ module Kernel
     .returns(T.any(TrueClass, FalseClass, Time))
   end
   def test(cmd, file1, file2=T.unsafe(nil)); end
+
+  sig do
+    params(
+        tag: Object,
+        obj: BasicObject,
+    )
+    .returns(T.noreturn)
+  end
+  def throw(tag, obj=nil); end
 
   sig do
     params(
