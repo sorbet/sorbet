@@ -177,15 +177,25 @@ void KnowledgeFact::sanityCheck() const {
 }
 
 string KnowledgeFact::toString(core::Context ctx) const {
-    stringstream buf;
+    vector<string> buf1, buf2;
 
     for (auto &el : yesTypeTests) {
-        buf << "    " << el.first.toString(ctx) << " to be " << el.second->toString(ctx, 0) << '\n';
+        buf1.emplace_back(fmt::format("    {} to be {}\n", el.first.toString(ctx), el.second->toString(ctx, 0)));
     }
     for (auto &el : noTypeTests) {
-        buf << "    " << el.first.toString(ctx) << " NOT to be " << el.second->toString(ctx, 0) << '\n';
+        buf2.emplace_back(fmt::format("    {} NOT to be {}\n", el.first.toString(ctx), el.second->toString(ctx, 0)));
     }
-    return buf.str();
+    absl::c_sort(buf1);
+    absl::c_sort(buf2);
+    stringstream out;
+    for (auto &e : buf1) {
+        out << move(e);
+    }
+    for (auto &e : buf2) {
+        out << move(e);
+    }
+
+    return out.str();
 }
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
