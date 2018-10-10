@@ -5,6 +5,7 @@
 #include "core/Errors.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>

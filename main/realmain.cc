@@ -16,6 +16,8 @@
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
 #include "spdlog/fmt/ostr.h"
+#include "spdlog/sinks/basic_file_sink.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
 #include <algorithm> // find
@@ -121,12 +123,13 @@ void startHUPMonitor() {
 int realmain(int argc, char *argv[]) {
     absl::InitializeSymbolizer(argv[0]);
     returnCode = 0;
-    logger = spd::details::registry::instance().create("console", stderr_color_sink);
+    logger = make_shared<spd::logger>("console", stderr_color_sink);
     logger->set_level(spd::level::trace); // pass through everything, let the sinks decide
     logger->set_pattern("%v");
     fatalLogger = logger;
 
-    auto typeErrorsConsole = spd::details::registry::instance().create("typeErrors", stderr_color_sink);
+    auto typeErrorsConsole = make_shared<spd::logger>("typeErrors", stderr_color_sink);
+    typeErrorsConsole->set_pattern("%v");
 
     options::Options opts;
     options::readOptions(opts, argc, argv, logger);
@@ -137,7 +140,7 @@ int realmain(int argc, char *argv[]) {
         startHUPMonitor();
     }
     if (!opts.debugLogFile.empty()) {
-        auto fileSink = make_shared<spd::sinks::simple_file_sink_mt>(opts.debugLogFile);
+        auto fileSink = make_shared<spdlog::sinks::basic_file_sink_mt>(opts.debugLogFile);
         fileSink->set_level(spd::level::debug);
         { // replace console & fatal loggers
             vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
@@ -157,10 +160,7 @@ int realmain(int argc, char *argv[]) {
             typeErrorsConsole = combinedLogger;
         }
     }
-    logger->set_pattern("%v");
     // Use a custom formatter so we don't get a default newline
-    auto formatter = make_shared<spd::pattern_formatter>("%v", spd::pattern_time_type::local, "");
-    typeErrorsConsole->set_formatter(formatter);
 
     switch (opts.logLevel) {
         case 0:
@@ -229,7 +229,7 @@ int realmain(int argc, char *argv[]) {
                 prodCounterAdd("types.input.bytes", opts.inlineInput.size());
                 prodCounterInc("types.input.lines");
                 prodCounterInc("types.input.files");
-                auto file = gs->enterFile(string("-e"), opts.inlineInput + "\n");
+                auto file = gs->enterFile(string("-e"), opts.inlineInput + '\n');
                 inputFiles.emplace_back(file);
                 if (opts.forceMaxStrict < core::StrictLevel::Typed) {
                     logger->error("`-e` is incompatible with `--typed=ruby`");
@@ -287,7 +287,7 @@ int realmain(int argc, char *argv[]) {
             for (auto &tree : indexed) {
                 auto f = tree->loc.file();
                 if (f.data(*gs).hadErrors()) {
-                    cout << f.data(*gs).path() << "\n";
+                    cout << f.data(*gs).path() << '\n';
                 }
             }
         } else if (!opts.noErrorCount) {

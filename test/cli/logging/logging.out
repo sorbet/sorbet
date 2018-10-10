@@ -1,9 +1,12 @@
 LOG BEGINS
-Creating 1 worker threads
-Worker threads created
-Multiplexing job
-Worker got task
-Multiplexing job
-Worker got task
-No errors! Great job.
-Counters and Histograms: 
+TIMESTAMP [consoleAndFile] [debug] Creating 1 worker threads
+TIMESTAMP [consoleAndFile] [debug] Worker threads created
+TIMESTAMP [consoleAndFile] [debug] Multiplexing job
+TIMESTAMP [consoleAndFile] [debug] Worker got task
+TIMESTAMP [consoleAndFile] [debug] Multiplexing job
+TIMESTAMP [consoleAndFile] [debug] Worker got task
+TIMESTAMP [typeErrorsAndFile] [error] No errors! Great job.
+TIMESTAMP [consoleAndFile] [debug] Counters and Histograms: 
+TIMESTAMP [consoleAndFile] [debug] Multiplexing job
+TIMESTAMP [consoleAndFile] [debug] Worker got task
+TIMESTAMP [consoleAndFile] [debug] Killing worker thread

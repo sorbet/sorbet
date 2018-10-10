@@ -8,6 +8,7 @@
 #include "core/serialize/serialize.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <cxxopts.hpp>

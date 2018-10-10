@@ -10,6 +10,7 @@
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
+#include <deque>
 
 //  _     ____  ____
 // | |   / ___||  _ _\

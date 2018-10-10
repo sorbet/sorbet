@@ -1,6 +1,7 @@
 #include "common/common.h"
 #include "common/Error.h"
 #include "os/os.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <array>
 #include <csignal>
 #include <cstdarg>

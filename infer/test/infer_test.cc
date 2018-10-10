@@ -9,6 +9,7 @@
 #include "infer/infer.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>

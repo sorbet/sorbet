@@ -15,7 +15,7 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
             }
             auto &out = error->error->isCritical ? critical : nonCritical;
             if (out.tellp() != 0) {
-                out << '\n';
+                out << "\n\n";
             }
             out << error->text;
 
@@ -35,7 +35,8 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
     }
     if (nonCritical.tellp() != 0) {
         if (!printedAtLeastOneError) {
-            logger.log(spdlog::level::err, "{}", nonCritical.str());
+            auto strOut = nonCritical.str();
+            logger.log(spdlog::level::err, "{}", strOut);
             printedAtLeastOneError = true;
         } else {
             logger.log(spdlog::level::err, "\n{}", nonCritical.str());
@@ -45,9 +46,9 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
 
 void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
     if (count == 0) {
-        logger.log(spdlog::level::err, "No errors! Great job.\n", count);
+        logger.log(spdlog::level::err, "No errors! Great job.", count);
     } else {
-        logger.log(spdlog::level::err, "Errors: {}\n", count);
+        logger.log(spdlog::level::err, "Errors: {}", count);
     }
 }
 

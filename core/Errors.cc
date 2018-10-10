@@ -59,9 +59,9 @@ string BasicError::toString(const GlobalState &gs) {
     stringstream buf;
     buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
         << restoreColors(formatted, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
-        << RESET_COLOR << '\n';
+        << RESET_COLOR;
     if (loc.exists()) {
-        buf << loc.toString(gs, 2);
+        buf << '\n' << loc.toString(gs, 2);
     }
     return buf.str();
 }
@@ -78,9 +78,9 @@ string ErrorLine::toString(const GlobalState &gs, bool color) {
             buf << restoreColors(formattedMessage, RESET_COLOR);
         }
     }
-    buf << '\n';
+
     if (loc.exists()) {
-        buf << loc.toString(gs, 2);
+        buf << '\n' << loc.toString(gs, 2);
     }
     return buf.str();
 }
@@ -89,11 +89,18 @@ string ErrorSection::toString(const GlobalState &gs) {
     stringstream buf;
     string indent = "  ";
     bool coloredLineHeaders = true;
+    bool skipEOL = false;
     if (!this->header.empty()) {
         coloredLineHeaders = false;
-        buf << indent << DETAIL_COLOR << restoreColors(this->header, DETAIL_COLOR) << RESET_COLOR << endl;
+        buf << indent << DETAIL_COLOR << restoreColors(this->header, DETAIL_COLOR) << RESET_COLOR;
+    } else {
+        skipEOL = true;
     }
     for (auto &line : this->messages) {
+        if (!skipEOL) {
+            buf << '\n';
+        }
+        skipEOL = false;
         buf << indent << line.toString(gs, coloredLineHeaders);
     }
     return buf.str();
@@ -104,7 +111,7 @@ string ComplexError::toString(const GlobalState &gs) {
     buf << BasicError::toString(gs);
 
     for (auto &section : this->sections) {
-        buf << section.toString(gs);
+        buf << '\n' << section.toString(gs);
     }
     return buf.str();
 }

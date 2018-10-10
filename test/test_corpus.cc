@@ -17,6 +17,7 @@
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
 #include "resolver/resolver.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <algorithm>
@@ -31,6 +32,7 @@
 #include <sys/types.h>
 #include <unordered_set>
 #include <vector>
+
 namespace spd = spdlog;
 using namespace std;
 

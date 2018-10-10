@@ -83,7 +83,6 @@ void addLocLine(stringstream &buf, int line, const File &filed, int tabs, int po
         endPos -= 1;
     }
     buf.write(filed.source().data() + filed.line_breaks()[line] + 1, endPos - filed.line_breaks()[line]);
-    buf << endl;
 }
 } // namespace
 
@@ -95,24 +94,31 @@ string Loc::toString(const GlobalState &gs, int tabs) const {
 
     const auto firstLine = pos.first.line - 1;
     auto lineIt = firstLine;
+    bool first = true;
     while (lineIt != pos.second.line && lineIt - firstLine < WINDOW_HALF_SIZE) {
+        if (!first) {
+            buf << '\n';
+        }
+        first = false;
         addLocLine(buf, lineIt, filed, tabs, posWidth);
         lineIt++;
     }
     if (lineIt != pos.second.line && lineIt < pos.second.line - WINDOW_HALF_SIZE) {
+        buf << '\n';
         printTabs(buf, tabs);
         string space(posWidth, ' ');
-        buf << space << " |"
-            << "...\n";
+        buf << space << rang::fgB::black << " |" << rang::style::reset << "...";
         lineIt = pos.second.line - WINDOW_HALF_SIZE;
     }
     while (lineIt != pos.second.line) {
+        buf << '\n';
         addLocLine(buf, lineIt, filed, tabs, posWidth);
         lineIt++;
     }
 
     if (pos.second.line == pos.first.line) {
         // add squigly
+        buf << '\n';
         printTabs(buf, tabs);
         for (int i = 0; i <= posWidth; i++) {
             buf << ' ';
@@ -131,7 +137,7 @@ string Loc::toString(const GlobalState &gs, int tabs) const {
             // If zero-width loc, at least show something.
             buf << '^';
         }
-        buf << endl << rang::fg::reset;
+        buf << rang::fg::reset;
     }
     return buf.str();
 }

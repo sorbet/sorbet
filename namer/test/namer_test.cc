@@ -6,6 +6,7 @@
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
 #include "namer/namer.h"
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
 #include <fstream>
