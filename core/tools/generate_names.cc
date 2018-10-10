@@ -9,278 +9,261 @@
 
 using namespace std;
 
-enum Phase {
-    Core = (1 << 0),
-    Parser = (1 << 1),
-    Desugar = (1 << 2),
-    DSL = (1 << 3),
-    Namer = (1 << 4),
-    Resolver = (1 << 5),
-    CFG = (1 << 6),
-    Infer = (1 << 7),
-};
-
-const map<string, int> phaseNames = {
-    {"core", Core},   {"parser", Parser},     {"desugar", Desugar}, {"dsl", DSL},
-    {"namer", Namer}, {"resolver", Resolver}, {"cfg", CFG},         {"infer", Infer},
-};
-
 struct NameDef {
     int id;
     string srcName;
     string val;
-    int phases;
 
-    NameDef(const char *srcName, const char *val, int phases) : srcName(srcName), val(val), phases(phases) {
+    NameDef(const char *srcName, const char *val) : srcName(srcName), val(val) {
         if (strcmp(srcName, val) == 0) {
             sorbet::Error::raise("Only pass one arg for '", val, "'");
         }
     }
-    NameDef(const char *srcName, int phases) : srcName(srcName), val(srcName), phases(phases) {}
+    NameDef(const char *srcName) : srcName(srcName), val(srcName) {}
 };
 
 NameDef names[] = {
-    {"initialize", Core | DSL},
-    {"andAnd", "&&", Desugar},
-    {"orOr", "||", Desugar},
-    {"to_s", Desugar},
-    {"to_a", Desugar | Core},
-    {"to_h", Core},
-    {"to_hash", Desugar},
-    {"to_proc", Desugar},
-    {"concat", Desugar | Core},
-    {"key_p", "key?", Core},
-    {"intern", Desugar},
-    {"call", Desugar | Namer | Infer},
-    {"bang", "!", Desugar | Infer | Parser},
-    {"squareBrackets", "[]", Core | Desugar | DSL | Parser | Infer | Resolver},
-    {"squareBracketsEq", "[]=", Parser},
-    {"unaryPlus", "+@", Parser | Namer},
-    {"unaryMinus", "-@", Parser | Namer},
-    {"star", "*", Parser},
-    {"starStar", "**", Parser},
-    {"ampersand", "&", Parser},
-    {"tripleEq", "===", Desugar | Infer},
-    {"orOp", "|", Desugar},
-    {"backtick", "`", Desugar},
-    {"slice", Desugar},
-    {"defined_p", "defined?", Core | Desugar},
-    {"each", Desugar},
+    {"initialize"},
+    {"andAnd", "&&"},
+    {"orOr", "||"},
+    {"to_s"},
+    {"to_a"},
+    {"to_h"},
+    {"to_hash"},
+    {"to_proc"},
+    {"concat"},
+    {"key_p", "key?"},
+    {"intern"},
+    {"call"},
+    {"bang", "!"},
+    {"squareBrackets", "[]"},
+    {"squareBracketsEq", "[]="},
+    {"unaryPlus", "+@"},
+    {"unaryMinus", "-@"},
+    {"star", "*"},
+    {"starStar", "**"},
+    {"ampersand", "&"},
+    {"tripleEq", "==="},
+    {"orOp", "|"},
+    {"backtick", "`"},
+    {"slice"},
+    {"defined_p", "defined?"},
+    {"each"},
 
     // used in CFG for temporaries
-    {"whileTemp", "<whileTemp>", CFG | Core},
-    {"ifTemp", "<ifTemp>", CFG | Core},
-    {"returnTemp", "<returnTemp>", CFG | Core},
-    {"statTemp", "<statTemp>", CFG | Core},
-    {"assignTemp", "<assignTemp>", Desugar | Infer | Core},
-    {"returnMethodTemp", "<returnMethodTemp>", CFG | Core},
-    {"debugEnvironmentTemp", "<debugEnvironmentTemp>", CFG | Infer | Core},
-    {"blockReturnTemp", "<blockReturnTemp>", CFG | Core},
-    {"nextTemp", "<nextTemp>", CFG | Core},
-    {"selfMethodTemp", "<selfMethodTemp>", CFG | Core},
-    {"hashTemp", "<hashTemp>", CFG | Core},
-    {"arrayTemp", "<arrayTemp>", CFG | Core},
-    {"rescueTemp", "<rescueTemp>", Desugar | CFG | Core},
-    {"rescueStartTemp", "<rescueStartTemp>", CFG | Core},
-    {"rescueEndTemp", "<rescueEndTemp>", CFG | Core},
-    {"gotoDeadTemp", "<gotoDeadTemp>", CFG | Core},
-    {"exceptionClassTemp", "<exceptionClassTemp>", CFG | Core},
-    {"isaCheckTemp", "<isaCheckTemp>", CFG | Core},
-    {"throwAwayTemp", "<throwAwayTemp>", CFG | Core},
-    {"castTemp", "<castTemp>", Resolver | CFG | Core},
-    {"finalReturn", "<finalReturn>", CFG | Infer | Core},
-    {"cfgAlias", "<cfgAlias>", CFG | Infer | Core},
-    {"magic", "<magic>", CFG},
+    {"whileTemp", "<whileTemp>"},
+    {"ifTemp", "<ifTemp>"},
+    {"returnTemp", "<returnTemp>"},
+    {"statTemp", "<statTemp>"},
+    {"assignTemp", "<assignTemp>"},
+    {"returnMethodTemp", "<returnMethodTemp>"},
+    {"debugEnvironmentTemp", "<debugEnvironmentTemp>"},
+    {"blockReturnTemp", "<blockReturnTemp>"},
+    {"nextTemp", "<nextTemp>"},
+    {"selfMethodTemp", "<selfMethodTemp>"},
+    {"hashTemp", "<hashTemp>"},
+    {"arrayTemp", "<arrayTemp>"},
+    {"rescueTemp", "<rescueTemp>"},
+    {"rescueStartTemp", "<rescueStartTemp>"},
+    {"rescueEndTemp", "<rescueEndTemp>"},
+    {"gotoDeadTemp", "<gotoDeadTemp>"},
+    {"exceptionClassTemp", "<exceptionClassTemp>"},
+    {"isaCheckTemp", "<isaCheckTemp>"},
+    {"throwAwayTemp", "<throwAwayTemp>"},
+    {"castTemp", "<castTemp>"},
+    {"finalReturn", "<finalReturn>"},
+    {"cfgAlias", "<cfgAlias>"},
+    {"magic", "<magic>"},
     // end CFG temporaries
 
-    {"include", Namer | Resolver | DSL},
-    {"extend", Namer | Resolver},
-    {"currentFile", "__FILE__", Desugar},
-    {"merge", Core | Desugar},
+    {"include"},
+    {"extend"},
+    {"currentFile", "__FILE__"},
+    {"merge"},
 
     // T keywords
-    {"sig", Resolver | DSL | Core},
-    {"typeParameters", "type_parameters", Resolver | DSL},
-    {"typeParameter", "type_parameter", Resolver | DSL},
-    {"abstract", Resolver},
-    {"implementation", Resolver},
-    {"override_", "override", Resolver},
-    {"overridable", Resolver},
+    {"sig"},
+    {"typeParameters", "type_parameters"},
+    {"typeParameter", "type_parameter"},
+    {"abstract"},
+    {"implementation"},
+    {"override_", "override"},
+    {"overridable"},
 
     // Sig builders
-    {"params", Resolver | DSL},
-    {"returns", Resolver | DSL},
-    {"void_", "void", Resolver | DSL},
-    {"checked", Resolver},
-    {"soft", Resolver},
+    {"params"},
+    {"returns"},
+    {"void_", "void"},
+    {"checked"},
+    {"soft"},
 
-    {"all", Resolver | Infer | Core},
-    {"any", Resolver | Infer | Core},
-    {"enum_", "enum", Resolver | DSL},
-    {"nilable", Resolver | Desugar | Infer | Core},
-    {"proc", Core | Resolver | Desugar},
-    {"untyped", Resolver | Infer | Core},
-    {"Array", Infer | DSL},
-    {"Hash", Infer | DSL},
-    {"noreturn", Resolver | DSL},
-    {"singletonClass", "singleton_class", Core | Resolver},
-    {"class_", "class", Core},
-    {"classOf", "class_of", Resolver},
-    {"selfType", "self_type", Resolver},
-    {"coerce", DSL},
+    {"all"},
+    {"any"},
+    {"enum_", "enum"},
+    {"nilable"},
+    {"proc"},
+    {"untyped"},
+    {"Array"},
+    {"Hash"},
+    {"noreturn"},
+    {"singletonClass", "singleton_class"},
+    {"class_", "class"},
+    {"classOf", "class_of"},
+    {"selfType", "self_type"},
+    {"coerce"},
 
-    {"assertType", "assert_type!", Resolver | CFG | Infer},
-    {"cast", DSL | Resolver | CFG | Infer},
-    {"let", DSL | Resolver | CFG | Infer},
-    {"unsafe", DSL},
-    {"must", Core},
-    {"declareInterface", "interface!", Namer},
-    {"declareAbstract", "abstract!", Namer},
-    {"revealType", "reveal_type", Core},
+    {"assertType", "assert_type!"},
+    {"cast"},
+    {"let"},
+    {"unsafe"},
+    {"must"},
+    {"declareInterface", "interface!"},
+    {"declareAbstract", "abstract!"},
+    {"revealType", "reveal_type"},
     // end T keywords
 
     // Ruby DSL methods which we understand
-    {"attr", DSL},
-    {"attrAccessor", "attr_accessor", Desugar | DSL},
-    {"attrWriter", "attr_writer", DSL},
-    {"attrReader", "attr_reader", DSL},
-    {"private_", "private", Namer | Resolver},
-    {"protected_", "protected", Namer | Resolver},
-    {"public_", "public", Namer | Resolver},
-    {"privateClassMethod", "private_class_method", Namer | Resolver},
-    {"moduleFunction", "module_function", Namer | Resolver},
-    {"aliasMethod", "alias_method", Desugar | Namer | Resolver},
-    {"typeAlias", "type_alias", Namer | Resolver},
-    {"typeMember", "type_member", DSL | Namer | Resolver},
-    {"typeTemplate", "type_template", DSL | Namer | Resolver},
-    {"T", DSL | Namer},
-    {"covariant", "out", Namer},
-    {"contravariant", "in", Namer},
-    {"invariant", "<invariant>", Namer},
-    {"fixed", Namer | Resolver},
+    {"attr"},
+    {"attrAccessor", "attr_accessor"},
+    {"attrWriter", "attr_writer"},
+    {"attrReader", "attr_reader"},
+    {"private_", "private"},
+    {"protected_", "protected"},
+    {"public_", "public"},
+    {"privateClassMethod", "private_class_method"},
+    {"moduleFunction", "module_function"},
+    {"aliasMethod", "alias_method"},
+    {"typeAlias", "type_alias"},
+    {"typeMember", "type_member"},
+    {"typeTemplate", "type_template"},
+    {"T"},
+    {"covariant", "out"},
+    {"contravariant", "in"},
+    {"invariant", "<invariant>"},
+    {"fixed"},
 
-    {"prop", DSL},
-    {"token_prop", DSL},
-    {"timestamped_token_prop", DSL},
-    {"created_prop", DSL},
-    {"merchant_prop", DSL},
-    {"array", DSL},
-    {"type", DSL},
-    {"optional", DSL},
-    {"immutable", DSL},
-    {"migrate", DSL},
-    {"default_", "default", DSL},
-    {"const_", "const", DSL},
-    {"token", DSL},
-    {"created", DSL},
-    {"merchant", DSL},
-    {"foreign", DSL},
-    {"Chalk", DSL},
-    {"ODM", DSL},
-    {"Mutator", DSL},
-    {"Private", DSL},
-    {"HashMutator", DSL},
-    {"ArrayMutator", DSL},
-    {"DocumentMutator", DSL},
+    {"prop"},
+    {"token_prop"},
+    {"timestamped_token_prop"},
+    {"created_prop"},
+    {"merchant_prop"},
+    {"array"},
+    {"type"},
+    {"optional"},
+    {"immutable"},
+    {"migrate"},
+    {"default_", "default"},
+    {"const_", "const"},
+    {"token"},
+    {"created"},
+    {"merchant"},
+    {"foreign"},
+    {"Chalk"},
+    {"ODM"},
+    {"Mutator"},
+    {"Private"},
+    {"HashMutator"},
+    {"ArrayMutator"},
+    {"DocumentMutator"},
 
-    {"describe", DSL},
-    {"it", DSL},
-    {"before", DSL},
+    {"describe"},
+    {"it"},
+    {"before"},
 
-    {"dslOptional", "dsl_optional", DSL},
-    {"dslRequired", "dsl_required", DSL},
-    {"implied", DSL},
-    {"skipGetter", "skip_getter", DSL},
+    {"dslOptional", "dsl_optional"},
+    {"dslRequired", "dsl_required"},
+    {"implied"},
+    {"skipGetter", "skip_getter"},
 
-    {"wrapInstance", "wrap_instance", DSL},
+    {"wrapInstance", "wrap_instance"},
 
-    {"registered", DSL},
-    {"instanceRegistered", "<instance_registered>", DSL},
-    {"helpers", DSL},
+    {"registered"},
+    {"instanceRegistered", "<instance_registered>"},
+    {"helpers"},
 
-    {"Opus", DSL},
-    {"Command", DSL},
+    {"Opus"},
+    {"Command"},
     // end DSL methods
 
     // Our own special methods which have special meaning
-    {"hardAssert", "hard_assert", Infer}, // Kernel.hard_assert
+    {"hardAssert", "hard_assert"}, // Kernel.hard_assert
     // end special methods
 
     // The next two names are used as keys in SymbolInfo::members to store
     // pointers up and down the singleton-class hierarchy. If A's singleton
-    // class is B, then A will have a `singletonClass` entry in its membe|CFG|Infer|Corers
-    // table which references B, and B will have an `attachedClass` ent|Corery
+    // class is B, then A will have a `singletonClass` entry in its members
+    // table which references B, and B will have an `attachedClass` entry
     // pointing at A.
     //
     // The "attached class" terminology is borrowed from MRI, which refers
     // to the unique instance attached to a singleton class as the "attached
     // object"
-    {"singleton", "<singleton class>", Core | Desugar | Namer},
-    {"attached", "<attached class>", Core},
+    {"singleton", "<singleton class>"},
+    {"attached", "<attached class>"},
 
     // This name is used as a key in SymbolInfo::members to store the module
     // registered via the `mixes_in_class_method` name.
-    {"classMethods", "<class methods>", Core | Resolver},
-    {"mixesInClassMethods", "mixes_in_class_methods", Resolver},
+    {"classMethods", "<class methods>"},
+    {"mixesInClassMethods", "mixes_in_class_methods"},
 
-    {"blockTemp", "<block>", Core | Namer | Resolver},
-    {"blockRetrunType", "<block-return-type>", Core},
-    {"blockPreCallTemp", "<block-pre-call-temp>", CFG},
-    {"blockPassTemp", "<block-pass>", Desugar},
-    {"forTemp", Desugar},
-    {"new_", "new", Core | Desugar},
-    {"blockCall", "<block-call>", CFG | Infer | Core},
-    {"blkArg", "<blk>", CFG | Namer},
-    {"blockGiven_p", "block_given?", Namer},
+    {"blockTemp", "<block>"},
+    {"blockRetrunType", "<block-return-type>"},
+    {"blockPreCallTemp", "<block-pre-call-temp>"},
+    {"blockPassTemp", "<block-pass>"},
+    {"forTemp"},
+    {"new_", "new"},
+    {"blockCall", "<block-call>"},
+    {"blkArg", "<blk>"},
+    {"blockGiven_p", "block_given?"},
 
     // Used to generate temporary names for destructuring arguments ala proc do
     //  |(x,y)|; end
-    {"destructureArg", "<destructure>", Desugar},
+    {"destructureArg", "<destructure>"},
 
-    {"lambda", Core | Parser | DSL},
-    {"nil_p", "nil?", Desugar | Infer},
-    {"present_p", "present?", Infer},
-    {"nil", DSL | Infer},
-    {"NilClass", DSL},
-    {"super", Desugar | Infer},
-    {"empty", "", Desugar},
+    {"lambda"},
+    {"nil_p", "nil?"},
+    {"present_p", "present?"},
+    {"nil"},
+    {"NilClass"},
+    {"super"},
+    {"empty", ""},
 
-    {"buildHash", "<build-hash>", CFG | Core},
-    {"buildArray", "<build-array>", CFG | Core},
-    {"splat", "<splat>", Desugar | Core | Resolver},
-    {"expandSplat", "<expand-splat>", Desugar | Core},
-    {"arg0", Core | Resolver | DSL},
-    {"arg1", Core},
-    {"arg2", Core},
-    {"opts", DSL},
-    {"Struct", DSL},
-    {"keepForIde", "keep_for_ide", Core},
-    {"keepForTypechecking", "keep_for_typechecking", Core},
+    {"buildHash", "<build-hash>"},
+    {"buildArray", "<build-array>"},
+    {"splat", "<splat>"},
+    {"expandSplat", "<expand-splat>"},
+    {"arg0"},
+    {"arg1"},
+    {"arg2"},
+    {"opts"},
+    {"Struct"},
+    {"keepForIde", "keep_for_ide"},
+    {"keepForTypechecking", "keep_for_typechecking"},
 
-    {"is_a_p", "is_a?", Infer | CFG},
-    {"kind_of", "kind_of?", Infer},
-    {"lessThan", "<", Infer},
-    {"eqeq", "==", Infer},
-    {"neq", "!=", Infer},
+    {"is_a_p", "is_a?"},
+    {"kind_of", "kind_of?"},
+    {"lessThan", "<"},
+    {"eqeq", "=="},
+    {"neq", "!="},
 
     // methods that are known by tuple and\or shape types
-    {"freeze", Core},
-    {"last", Core},
-    {"first", Core},
-    {"min", Core},
-    {"max", Core},
+    {"freeze"},
+    {"last"},
+    {"first"},
+    {"min"},
+    {"max"},
 
     // Enumerable#flat_map has special-case logic in Infer
-    {"flatMap", "flat_map", Infer},
+    {"flatMap", "flat_map"},
 
     // Array#flatten and #compact are also custom-implemented
-    {"flatten", Core},
-    {"compact", Core},
+    {"flatten"},
+    {"compact"},
 
-    {"staticInit", "<static-init>", Resolver | Core},
+    {"staticInit", "<static-init>"},
 
-    {"require", Resolver},
-    {"callWithSplat", "<call-with-splat>", Desugar | Core},
+    {"require"},
+    {"callWithSplat", "<call-with-splat>"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {
@@ -331,10 +314,21 @@ int main(int argc, char **argv) {
             cerr << "unable to open " << argv[1] << '\n';
             return 1;
         }
+        header << "#include \"core/NameRef.h\"" << '\n' << '\n';
         header << "namespace sorbet {" << '\n';
         header << "namespace core {" << '\n';
         header << "class GlobalState;" << '\n';
         header << "namespace Names {" << '\n';
+
+        for (auto &name : names) {
+            emit_name_header(header, name);
+        }
+
+        header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
+        header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
+        header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
+        header << "#endif" << '\n';
+
         header << "    void registerNames(GlobalState &gs);" << '\n';
         header << "}" << '\n';
         header << "}" << '\n';
@@ -366,49 +360,5 @@ int main(int argc, char **argv) {
         classfile << "}" << '\n';
     }
 
-    // Emit per-phase name definitions
-    for (int i = 3; i < argc; i++) {
-        string arg = argv[i];
-        auto eq = arg.find('=');
-        if (arg.substr(0, 2) != "--" || eq == string::npos) {
-            cerr << "bad arg: " << arg << '\n';
-            return 1;
-        }
-        auto phase = arg.substr(2, eq - 2);
-        auto path = arg.substr(eq + 1);
-        auto it = phaseNames.find(phase);
-        if (it == phaseNames.end()) {
-            cerr << "unknown phase: " << phase << '\n';
-            return 1;
-        }
-
-        ofstream header(path, ios::trunc);
-        if (!header.good()) {
-            cerr << "unable to open " << path << '\n';
-            return 1;
-        }
-
-        header << "#include \"core/NameRef.h\"" << '\n' << '\n';
-        header << "namespace sorbet {" << '\n';
-        header << "namespace core {" << '\n';
-        header << "namespace Names {" << '\n';
-
-        for (auto &name : names) {
-            if ((name.phases & it->second) != 0) {
-                emit_name_header(header, name);
-            }
-        }
-
-        if (phase == "core") {
-            header << "#ifndef NAME_LAST_WELL_KNOWN_NAME" << '\n';
-            header << "#define NAME_LAST_WELL_KNOWN_NAME" << '\n';
-            header << "constexpr int LAST_WELL_KNOWN_NAME = " << lastId << ";" << '\n';
-            header << "#endif" << '\n';
-        }
-
-        header << "};" << '\n';
-        header << "};" << '\n';
-        header << "};" << '\n';
-    }
     return 0;
 }

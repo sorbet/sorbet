@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "core/NameRef.h"
+#include "core/Names_gen.h"
 
 namespace sorbet::core {
 class GlobalState;

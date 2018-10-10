@@ -5,7 +5,7 @@
 #include "cfg/CFG.h"
 #include "core/Context.h"
 #include "core/Errors.h"
-#include "core/Names/infer.h"
+#include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"
 #include "core/errors/internal.h"

@@ -1,6 +1,6 @@
 #include "absl/algorithm/container.h"
 #include "cfg/builder/builder.h"
-#include "core/Names/cfg.h"
+#include "core/Names.h"
 
 #include <algorithm> // sort
 

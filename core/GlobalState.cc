@@ -1,7 +1,7 @@
 #include "GlobalState.h"
 
 #include "core/Errors.h"
-#include "core/Names/core.h"
+#include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"
 #include "core/Unfreeze.h"

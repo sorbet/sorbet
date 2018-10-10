@@ -5,7 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
 #include "core/Context.h"
-#include "core/Names/namer.h"
+#include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/core.h"
 #include "core/errors/namer.h"

@@ -2,8 +2,7 @@
 #define SORBET_AST_HELPERSS_H
 
 #include "ast/ast.h"
-#include "core/Names/desugar.h"
-#include "core/Names/dsl.h"
+#include "core/Names.h"
 
 namespace sorbet::ast {
 

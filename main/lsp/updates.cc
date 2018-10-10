@@ -3,7 +3,7 @@
 #include "core/Errors.h"
 #include "core/Files.h"
 #include "core/GlobalState.h"
-#include "core/Names/resolver.h"
+#include "core/Names.h"
 #include "core/Unfreeze.h"
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"

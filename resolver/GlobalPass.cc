@@ -1,5 +1,5 @@
 #include "absl/algorithm/container.h"
-#include "core/Names/resolver.h"
+#include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 #include "resolver/resolver.h"

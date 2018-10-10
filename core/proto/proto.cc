@@ -1,7 +1,7 @@
 #include "core/proto/proto.h"
 #include "common/Counters_impl.h"
 #include "common/Random.h"
-#include "core/Names/core.h"
+#include "core/Names.h"
 
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"

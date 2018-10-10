@@ -1,16 +1,3 @@
-NAME_PHASES = [
-    "core",
-    "parser",
-    "desugar",
-    "dsl",
-    "namer",
-    "resolver",
-    "cfg",
-    "infer",
-]
-
-NAME_HEADERS = ["Names/%s.h" % (phase,) for phase in NAME_PHASES]
-
 cc_library(
     name = "core",
     srcs = glob(
@@ -30,7 +17,7 @@ cc_library(
     ],
     hdrs = [
         "core.h",
-    ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]) + NAME_HEADERS,
+    ] + glob(["errors/*.h"]) + glob(["lsp/*.h"]),
     linkstatic = select({
         "//tools/config:linkshared": 0,
         "//conditions:default": 1,
@@ -85,8 +72,7 @@ genrule(
     outs = [
         "Names_gen.h",
         "Names_gen.cc",
-    ] + NAME_HEADERS,
-    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc) " +
-          " ".join(["--%s=$(location %s)" % e for e in zip(NAME_PHASES, NAME_HEADERS)]),
+    ],
+    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc)",
     tools = [":generate_names"],
 )

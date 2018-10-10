@@ -1,6 +1,6 @@
 #include "core/LocalVariable.h"
 #include "core/Names.h"
-#include "core/Names/core.h"
+
 template class std::vector<sorbet::core::LocalVariable>;
 
 using namespace std;

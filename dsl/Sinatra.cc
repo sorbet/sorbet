@@ -2,7 +2,7 @@
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "core/Context.h"
-#include "core/Names/dsl.h"
+#include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/dsl.h"
 #include "dsl/dsl.h"

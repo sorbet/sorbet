@@ -2,7 +2,7 @@
 #define RUBY_TYPER_LOCALVARIABLE_H
 
 #include "core/NameRef.h"
-#include "core/Names/core.h"
+#include "core/Names.h"
 
 namespace sorbet::core {
 

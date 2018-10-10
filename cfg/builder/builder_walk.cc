@@ -1,6 +1,6 @@
 #include "ast/Helpers.h"
 #include "cfg/builder/builder.h"
-#include "core/Names/cfg.h"
+#include "core/Names.h"
 #include "core/errors/cfg.h"
 #include "core/errors/internal.h"
 

@@ -1,6 +1,6 @@
 #include "resolver/type_syntax.h"
 #include "../core/Symbols.h"
-#include "core/Names/resolver.h"
+#include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
 

@@ -4,7 +4,7 @@
 #include "core/Context.h"
 #include "core/GlobalState.h"
 #include "core/Hashing.h"
-#include "core/Names/core.h"
+#include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
 #include <sstream>

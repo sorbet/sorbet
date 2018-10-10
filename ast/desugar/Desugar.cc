@@ -5,7 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "ast/verifier/verifier.h"
 #include "common/common.h"
-#include "core/Names/desugar.h"
+#include "core/Names.h"
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 

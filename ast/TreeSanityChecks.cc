@@ -1,5 +1,5 @@
 #include "Trees.h"
-#include "core/Names/resolver.h"
+#include "core/Names.h"
 
 using namespace std;
 

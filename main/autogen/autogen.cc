@@ -1,7 +1,7 @@
 #include "main/autogen/autogen.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "core/Names/resolver.h"
+#include "core/Names.h"
 
 #include "CRC.h"
 #include "msgpack.hpp"
