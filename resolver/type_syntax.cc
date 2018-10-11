@@ -215,6 +215,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                 break;
             case core::Names::soft()._id:
                 break;
+            case core::Names::generated()._id:
+                break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Method `{}` does not exist on `Sorbet::Private::Builder`", send->fun.toString(ctx));

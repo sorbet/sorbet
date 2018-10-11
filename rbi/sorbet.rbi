@@ -24,6 +24,9 @@ class Sorbet::Private::Builder
   sig {returns(Sorbet::Private::Builder)}
   def void; end;
 
+  sig {returns(Sorbet::Private::Builder)}
+  def generated; end;
+
   sig {params(arg: T.untyped).returns(Sorbet::Private::Builder)}
   def checked(arg); end;
 
