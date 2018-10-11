@@ -69,8 +69,8 @@ void CounterImpl::prodCounterAdd(const char *counter, unsigned long value) {
     this->counters[counter] += value;
 }
 
-void CounterImpl::timingAdd(const char *metric, unsigned long millis) {
-    this->timings[metric].emplace_back(millis);
+void CounterImpl::timingAdd(const char *metric, unsigned long nanos) {
+    this->timings[metric].emplace_back(nanos);
 }
 
 thread_local CounterImpl counterState;
