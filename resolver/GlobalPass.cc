@@ -42,18 +42,17 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
                        core::SymbolRef sym, vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
     core::NameRef name = parentTypeMember.data(gs).name;
     auto parentVariance = parentTypeMember.data(gs).variance();
-    auto &inSym = sym.data(gs);
-    core::SymbolRef my = inSym.findMember(gs, name);
+    core::SymbolRef my = sym.data(gs).findMember(gs, name);
     bool ok = true;
     if (!my.exists()) {
         if (!(parent == core::Symbols::Enumerable() || parent.data(gs).derivesFrom(gs, core::Symbols::Enumerable()))) {
-            if (auto e = gs.beginError(inSym.loc(), core::errors::Resolver::ParentTypeNotDeclared)) {
+            if (auto e = gs.beginError(sym.data(gs).loc(), core::errors::Resolver::ParentTypeNotDeclared)) {
                 e.setHeader("Type `{}` declared by parent `{}` should be declared again", name.show(gs),
                             parent.data(gs).show(gs));
             }
             ok = false;
         }
-        my = gs.enterTypeMember(inSym.loc(), sym, name, core::Variance::Invariant);
+        my = gs.enterTypeMember(sym.data(gs).loc(), sym, name, core::Variance::Invariant);
     }
     if (!ok) {
         return false;
@@ -66,7 +65,7 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
         return false;
     }
     auto myVariance = data.variance();
-    if (!inSym.derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
+    if (!sym.data(gs).derivesFrom(gs, core::Symbols::Class()) && myVariance != parentVariance &&
         myVariance != core::Variance::Invariant) {
         if (auto e = gs.beginError(data.loc(), core::errors::Resolver::ParentVarianceMismatch)) {
             e.setHeader("Type variance mismatch with parent `{}`", parent.data(gs).show(gs));
@@ -79,11 +78,10 @@ bool resolveTypeMember(core::GlobalState &gs, core::SymbolRef parent, core::Symb
 
 void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
                         vector<vector<pair<core::SymbolRef, core::SymbolRef>>> &typeAliases) {
-    auto &inSym = sym.data(gs);
-    ENFORCE(inSym.isClass());
+    ENFORCE(sym.data(gs).isClass());
 
-    if (inSym.superClass.exists()) {
-        auto parent = inSym.superClass;
+    if (sym.data(gs).superClass.exists()) {
+        auto parent = sym.data(gs).superClass;
         auto tps = parent.data(gs).typeMembers();
         bool foundAll = true;
         for (core::SymbolRef tp : tps) {
@@ -96,31 +94,31 @@ void resolveTypeMembers(core::GlobalState &gs, core::SymbolRef sym,
             for (core::SymbolRef tp : tps) {
                 core::SymbolRef my = dealiasAt(gs, tp, sym, typeAliases);
                 ENFORCE(my.exists(), "resolver failed to register type member aliases");
-                if (inSym.typeMembers()[i] != my) {
+                if (sym.data(gs).typeMembers()[i] != my) {
                     if (auto e = gs.beginError(my.data(gs).loc(), core::errors::Resolver::TypeMembersInWrongOrder)) {
                         e.setHeader("Type members in wrong order");
                     }
                     int foundIdx = 0;
-                    while (foundIdx < inSym.typeMembers().size() && inSym.typeMembers()[foundIdx] != my) {
+                    while (foundIdx < sym.data(gs).typeMembers().size() && sym.data(gs).typeMembers()[foundIdx] != my) {
                         foundIdx++;
                     }
-                    ENFORCE(foundIdx < inSym.typeMembers().size());
+                    ENFORCE(foundIdx < sym.data(gs).typeMembers().size());
                     // quadratic
-                    swap(inSym.typeMembers()[foundIdx], inSym.typeMembers()[i]);
+                    swap(sym.data(gs).typeMembers()[foundIdx], sym.data(gs).typeMembers()[i]);
                 }
                 i++;
             }
         }
     }
 
-    for (core::SymbolRef mixin : inSym.mixins()) {
+    for (core::SymbolRef mixin : sym.data(gs).mixins()) {
         for (core::SymbolRef tp : mixin.data(gs).typeMembers()) {
             resolveTypeMember(gs, mixin, tp, sym, typeAliases);
         }
     }
 
-    if (inSym.isClassClass()) {
-        for (core::SymbolRef tp : inSym.typeMembers()) {
+    if (sym.data(gs).isClassClass()) {
+        for (core::SymbolRef tp : sym.data(gs).typeMembers()) {
             auto myVariance = tp.data(gs).variance();
             if (myVariance != core::Variance::Invariant) {
                 auto loc = tp.data(gs).loc();
