@@ -123,7 +123,7 @@ module Enumerable
     params(
         n: Integer,
     )
-    .returns(Enumerator[Elem])
+    .returns(Enumerator[T::Array[Elem]])
   end
   def each_cons(n, &blk); end
 
