@@ -1,9 +1,33 @@
 #ifndef RUBY_TYPER_SYMBOLREF_H
 #define RUBY_TYPER_SYMBOLREF_H
+
 #include "common/common.h"
+#include "core/DebugOnlyCheck.h"
+
 namespace sorbet::core {
 class Symbol;
 class GlobalState;
+struct SymbolDataDebugCheck {
+    const GlobalState &gs;
+    const unsigned int symbolCountAtCreation;
+
+    SymbolDataDebugCheck(const GlobalState &gs);
+    void check() const;
+};
+
+/** This class is indended to be a safe way to pass `Symbol &` around.
+ *  Entering new symbols can invalidate `Symbol &`s and thus they are generally unsafe.
+ *  This class ensures that all accesses are safe in debug builds and effectively is a `Symbol &` in optimized builds.
+ */
+class SymbolData : private DebugOnlyCheck<SymbolDataDebugCheck> {
+    Symbol &symbol;
+
+public:
+    SymbolData(Symbol &ref, const GlobalState &gs);
+    Symbol *operator->();
+    const Symbol *operator->() const;
+};
+CheckSize(SymbolData, 8, 8);
 
 class SymbolRef final {
     friend class GlobalState;
@@ -20,8 +44,8 @@ public:
 
     bool isSynthetic() const;
 
-    Symbol &data(GlobalState &gs, bool allowNone = false) const;
-    const Symbol &data(const GlobalState &gs, bool allowNone = false) const;
+    SymbolData data(GlobalState &gs, bool allowNone = false) const;
+    const SymbolData data(const GlobalState &gs, bool allowNone = false) const;
 
     bool operator==(const SymbolRef &rhs) const;
 

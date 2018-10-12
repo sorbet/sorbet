@@ -11,11 +11,11 @@ void TypeConstraint::defineDomain(Context ctx, const InlinedVector<SymbolRef, 4>
     // ENFORCE(isEmpty()); // unfortunately this is false. See
     // test/testdata/infer/generic_methods/countraints_crosstalk.rb
     for (const auto &tp : typeParams) {
-        ENFORCE(tp.data(ctx).isTypeArgument());
-        auto typ = cast_type<TypeVar>(tp.data(ctx).resultType.get());
+        ENFORCE(tp.data(ctx)->isTypeArgument());
+        auto typ = cast_type<TypeVar>(tp.data(ctx)->resultType.get());
         ENFORCE(typ != nullptr);
 
-        if (tp.data(ctx).isCovariant()) {
+        if (tp.data(ctx)->isCovariant()) {
             findLowerBound(typ->sym) = Types::bottom();
         } else {
             findUpperBound(typ->sym) = Types::top();

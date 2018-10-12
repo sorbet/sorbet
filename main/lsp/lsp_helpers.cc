@@ -114,29 +114,29 @@ bool LSPLoop::hideSymbol(core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
     }
-    auto &data = sym.data(*finalGs);
-    if (data.isClass() && data.attachedClass(*finalGs).exists()) {
+    auto data = sym.data(*finalGs);
+    if (data->isClass() && data->attachedClass(*finalGs).exists()) {
         return true;
     }
-    if (data.isClass() && data.superClass == core::Symbols::StubClass()) {
+    if (data->isClass() && data->superClass == core::Symbols::StubClass()) {
         return true;
     }
-    if (data.isMethodArgument() && data.isBlockArgument()) {
+    if (data->isMethodArgument() && data->isBlockArgument()) {
         return true;
     }
-    if (data.name.data(*finalGs).kind == core::NameKind::UNIQUE &&
-        data.name.data(*finalGs).unique.original == core::Names::staticInit()) {
+    if (data->name.data(*finalGs)->kind == core::NameKind::UNIQUE &&
+        data->name.data(*finalGs)->unique.original == core::Names::staticInit()) {
         return true;
     }
-    if (data.name.data(*finalGs).kind == core::NameKind::UNIQUE &&
-        data.name.data(*finalGs).unique.original == core::Names::blockTemp()) {
+    if (data->name.data(*finalGs)->kind == core::NameKind::UNIQUE &&
+        data->name.data(*finalGs)->unique.original == core::Names::blockTemp()) {
         return true;
     }
     return false;
 }
 
 bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, const string_view &pattern) {
-    string_view view = name.data(gs).shortName(gs);
+    string_view view = name.data(gs)->shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;
 }
@@ -156,9 +156,9 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
     string methodReturnType = (retType == core::Types::void_()) ? "void" : "returns(" + retType->show(*finalGs) + ")";
     vector<string> typeAndArgNames;
 
-    if (method.data(*finalGs).isMethod()) {
-        for (auto &argSym : method.data(*finalGs).arguments()) {
-            typeAndArgNames.emplace_back(argSym.data(*finalGs).name.show(*finalGs) + ": " +
+    if (method.data(*finalGs)->isMethod()) {
+        for (auto &argSym : method.data(*finalGs)->arguments()) {
+            typeAndArgNames.emplace_back(argSym.data(*finalGs)->name.show(*finalGs) + ": " +
                                          getResultType(argSym, receiver, constraint)->show(*finalGs));
         }
     }
@@ -178,7 +178,7 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
 shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,
                                               shared_ptr<core::TypeConstraint> constr) {
     core::Context ctx(*finalGs, core::Symbols::root());
-    auto resultType = ofWhat.data(*finalGs).resultType;
+    auto resultType = ofWhat.data(*finalGs)->resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
         receiver = proxy->underlying();
     }
@@ -198,7 +198,7 @@ shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr
 }
 
 int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
-    auto &sym = symbol.data(*finalGs);
+    auto sym = symbol.data(*finalGs);
     /**
      * A symbol kind.
      *
@@ -231,28 +231,28 @@ int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
      *          export const TypeParameter = 26;
      *      }
      **/
-    if (sym.isClass()) {
-        if (sym.isClassModule()) {
+    if (sym->isClass()) {
+        if (sym->isClassModule()) {
             return 2;
         }
-        if (sym.isClassClass()) {
+        if (sym->isClassClass()) {
             return 5;
         }
-    } else if (sym.isMethod()) {
-        if (sym.name == core::Names::initialize()) {
+    } else if (sym->isMethod()) {
+        if (sym->name == core::Names::initialize()) {
             return 9;
         } else {
             return 6;
         }
-    } else if (sym.isField()) {
+    } else if (sym->isField()) {
         return 8;
-    } else if (sym.isStaticField()) {
+    } else if (sym->isStaticField()) {
         return 14;
-    } else if (sym.isMethodArgument()) {
+    } else if (sym->isMethodArgument()) {
         return 13;
-    } else if (sym.isTypeMember()) {
+    } else if (sym->isTypeMember()) {
         return 26;
-    } else if (sym.isTypeArgument()) {
+    } else if (sym->isTypeArgument()) {
         return 26;
     }
     return 0;

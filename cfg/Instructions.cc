@@ -15,7 +15,7 @@ Return::Return(core::LocalVariable what) : what(what) {
 }
 
 string SolveConstraint::toString(core::Context ctx) {
-    return "Solve<" + this->link->block.data(ctx).fullName(ctx) + ">";
+    return "Solve<" + this->link->block.data(ctx)->fullName(ctx) + ">";
 }
 
 string Return::toString(core::Context ctx) {
@@ -28,7 +28,7 @@ BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::L
 }
 
 string BlockReturn::toString(core::Context ctx) {
-    return "blockreturn<" + this->link->block.data(ctx).fullName(ctx) + "> " + this->what.toString(ctx);
+    return "blockreturn<" + this->link->block.data(ctx)->fullName(ctx) + "> " + this->what.toString(ctx);
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
@@ -80,13 +80,13 @@ string Ident::toString(core::Context ctx) {
 }
 
 string Alias::toString(core::Context ctx) {
-    return "alias " + this->what.data(ctx).name.data(ctx).toString(ctx);
+    return "alias " + this->what.data(ctx)->name.data(ctx)->toString(ctx);
 }
 
 string Send::toString(core::Context ctx) {
     stringstream buf;
 
-    buf << this->recv.toString(ctx) << "." << this->fun.data(ctx).toString(ctx) << "(";
+    buf << this->recv.toString(ctx) << "." << this->fun.data(ctx)->toString(ctx) << "(";
     bool isFirst = true;
     for (auto &arg : this->args) {
         if (!isFirst) {
@@ -108,7 +108,7 @@ string LoadArg::toString(core::Context ctx) {
     buf << "load_arg(";
     buf << this->receiver.toString(ctx);
     buf << ", ";
-    buf << this->arg.data(ctx).show(ctx);
+    buf << this->arg.data(ctx)->show(ctx);
     buf << ")";
     return buf.str();
 }
@@ -116,7 +116,7 @@ string LoadArg::toString(core::Context ctx) {
 string LoadYieldParams::toString(core::Context ctx) {
     stringstream buf;
     buf << "load_yield_params(";
-    buf << this->link->block.data(ctx).fullName(ctx);
+    buf << this->link->block.data(ctx)->fullName(ctx);
     buf << ", " << this->block.show(ctx) << ")";
     return buf.str();
 }

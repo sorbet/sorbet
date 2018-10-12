@@ -11,7 +11,7 @@ bool LocalVariable::exists() const {
 }
 
 bool LocalVariable::isSyntheticTemporary(const GlobalState &gs) const {
-    if (_name.data(gs).kind == NameKind::UNIQUE) {
+    if (_name.data(gs)->kind == NameKind::UNIQUE) {
         return true;
     }
     if (unique == 0) {

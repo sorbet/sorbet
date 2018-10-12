@@ -201,8 +201,8 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
             return OrType::make_shared(t1, t2);
         }
 
-        bool ltr = a1->klass == a2->klass || a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
-        bool rtl = !ltr && a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
+        bool ltr = a1->klass == a2->klass || a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
+        bool rtl = !ltr && a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
         if (!rtl && !ltr) {
             return OrType::make_shared(t1, t2);
         }
@@ -219,15 +219,15 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         // code below inverts permutation of type params
         int j = 0;
         bool changed = false;
-        for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
+        for (SymbolRef idx : a2->klass.data(ctx)->typeMembers()) {
             int i = 0;
-            while (indexes[j] != a1->klass.data(ctx).typeMembers()[i]) {
+            while (indexes[j] != a1->klass.data(ctx)->typeMembers()[i]) {
                 i++;
             }
-            ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
-            if (idx.data(ctx).isCovariant()) {
+            ENFORCE(i < a1->klass.data(ctx)->typeMembers().size());
+            if (idx.data(ctx)->isCovariant()) {
                 newTargs.emplace_back(Types::any(ctx, a1->targs[i], a2->targs[j]));
-            } else if (idx.data(ctx).isInvariant()) {
+            } else if (idx.data(ctx)->isInvariant()) {
                 if (!Types::equiv(ctx, a1->targs[i], a2->targs[j])) {
                     return OrType::make_shared(t1s, t2s);
                 }
@@ -237,7 +237,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                     newTargs.emplace_back(a2->targs[j]);
                 }
 
-            } else if (idx.data(ctx).isContravariant()) {
+            } else if (idx.data(ctx)->isContravariant()) {
                 newTargs.emplace_back(Types::all(ctx, a1->targs[i], a2->targs[j]));
             }
             changed = changed || newTargs.back() != a2->targs[j];
@@ -458,10 +458,10 @@ shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared
 
     SymbolRef sym1 = c1->symbol;
     SymbolRef sym2 = c2->symbol;
-    if (sym1 == sym2 || sym2.data(ctx).derivesFrom(ctx, sym1)) {
+    if (sym1 == sym2 || sym2.data(ctx)->derivesFrom(ctx, sym1)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t1;
-    } else if (sym1.data(ctx).derivesFrom(ctx, sym2)) {
+    } else if (sym1.data(ctx)->derivesFrom(ctx, sym2)) {
         categoryCounterInc("lub.<class>.collapsed", "yes");
         return t2;
     } else {
@@ -504,14 +504,14 @@ shared_ptr<Type> glbGround(Context ctx, const shared_ptr<Type> &t1, const shared
 
     SymbolRef sym1 = c1->symbol;
     SymbolRef sym2 = c2->symbol;
-    if (sym1 == sym2 || sym1.data(ctx).derivesFrom(ctx, sym2)) {
+    if (sym1 == sym2 || sym1.data(ctx)->derivesFrom(ctx, sym2)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t1;
-    } else if (sym2.data(ctx).derivesFrom(ctx, sym1)) {
+    } else if (sym2.data(ctx)->derivesFrom(ctx, sym1)) {
         categoryCounterInc("glb.<class>.collapsed", "yes");
         return t2;
     } else {
-        if (sym1.data(ctx).isClassClass() && sym2.data(ctx).isClassClass()) {
+        if (sym1.data(ctx)->isClassClass() && sym2.data(ctx)->isClassClass()) {
             categoryCounterInc("glb.<class>.collapsed", "bottom");
             return Types::bottom();
         }
@@ -768,19 +768,19 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
         auto *a2 = cast_type<AppliedType>(t2.get());
         if (a2 == nullptr) {
             auto *c2 = cast_type<ClassType>(t2.get());
-            if (a1->klass.data(ctx).isClassModule() || c2 == nullptr) {
+            if (a1->klass.data(ctx)->isClassModule() || c2 == nullptr) {
                 return AndType::make_shared(t1, t2);
             }
-            if (a1->klass.data(ctx).derivesFrom(ctx, c2->symbol)) {
+            if (a1->klass.data(ctx)->derivesFrom(ctx, c2->symbol)) {
                 return t1;
             }
-            if (c2->symbol.data(ctx).isClassModule()) {
+            if (c2->symbol.data(ctx)->isClassModule()) {
                 return AndType::make_shared(t1, t2);
             }
             return Types::bottom();
         }
-        bool rtl = a1->klass == a2->klass || a1->klass.data(ctx).derivesFrom(ctx, a2->klass);
-        bool ltr = !rtl && a2->klass.data(ctx).derivesFrom(ctx, a1->klass);
+        bool rtl = a1->klass == a2->klass || a1->klass.data(ctx)->derivesFrom(ctx, a2->klass);
+        bool ltr = !rtl && a2->klass.data(ctx)->derivesFrom(ctx, a1->klass);
         if (!rtl && !ltr) {
             return AndType::make_shared(t1, t2); // we can as well return nothing here?
         }
@@ -794,22 +794,23 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
         // code below inverts permutation of type params
 
         vector<shared_ptr<Type>> newTargs;
-        newTargs.reserve(a1->klass.data(ctx).typeMembers().size());
+        newTargs.reserve(a1->klass.data(ctx)->typeMembers().size());
         int j = 0;
-        for (SymbolRef idx : a1->klass.data(ctx).typeMembers()) {
+        for (SymbolRef idx : a1->klass.data(ctx)->typeMembers()) {
             int i = 0;
             if (j >= indexes.size()) {
                 i = INT_MAX;
             }
-            while (i < a2->klass.data(ctx).typeMembers().size() && indexes[j] != a2->klass.data(ctx).typeMembers()[i]) {
+            while (i < a2->klass.data(ctx)->typeMembers().size() &&
+                   indexes[j] != a2->klass.data(ctx)->typeMembers()[i]) {
                 i++;
             }
-            if (i >= a2->klass.data(ctx).typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
+            if (i >= a2->klass.data(ctx)->typeMembers().size()) { // a1 has more tparams, this is fine, it's a child
                 newTargs.emplace_back(a1->targs[j]);
             } else {
-                if (idx.data(ctx).isCovariant()) {
+                if (idx.data(ctx)->isCovariant()) {
                     newTargs.emplace_back(Types::all(ctx, a1->targs[j], a2->targs[i]));
-                } else if (idx.data(ctx).isInvariant()) {
+                } else if (idx.data(ctx)->isInvariant()) {
                     if (!Types::equiv(ctx, a1->targs[j], a2->targs[i])) {
                         return AndType::make_shared(t1, t2);
                     }
@@ -818,7 +819,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                     } else {
                         newTargs.emplace_back(a1->targs[j]);
                     }
-                } else if (idx.data(ctx).isContravariant()) {
+                } else if (idx.data(ctx)->isContravariant()) {
                     newTargs.emplace_back(Types::any(ctx, a1->targs[j], a2->targs[i]));
                 }
             }
@@ -860,9 +861,9 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
 }
 
 bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
-    ENFORCE(c1.data(ctx).isClass());
-    ENFORCE(c2.data(ctx).isClass());
-    return c1 == c2 || c1.data(ctx).derivesFrom(ctx, c2);
+    ENFORCE(c1.data(ctx)->isClass());
+    ENFORCE(c2.data(ctx)->isClass());
+    return c1 == c2 || c1.data(ctx)->derivesFrom(ctx, c2);
 }
 
 void compareToUntyped(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &ty, const shared_ptr<Type> &blame) {
@@ -995,19 +996,19 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
             // code below inverts permutation of type params
             int j = 0;
-            for (SymbolRef idx : a2->klass.data(ctx).typeMembers()) {
+            for (SymbolRef idx : a2->klass.data(ctx)->typeMembers()) {
                 int i = 0;
-                while (indexes[j] != a1->klass.data(ctx).typeMembers()[i]) {
+                while (indexes[j] != a1->klass.data(ctx)->typeMembers()[i]) {
                     i++;
                 }
 
-                ENFORCE(i < a1->klass.data(ctx).typeMembers().size());
+                ENFORCE(i < a1->klass.data(ctx)->typeMembers().size());
 
-                if (idx.data(ctx).isCovariant()) {
+                if (idx.data(ctx)->isCovariant()) {
                     result = Types::isSubTypeUnderConstraint(ctx, constr, a1->targs[i], a2->targs[j]);
-                } else if (idx.data(ctx).isInvariant()) {
+                } else if (idx.data(ctx)->isInvariant()) {
                     result = Types::equiv(ctx, a1->targs[i], a2->targs[j]);
-                } else if (idx.data(ctx).isContravariant()) {
+                } else if (idx.data(ctx)->isContravariant()) {
                     result = Types::isSubTypeUnderConstraint(ctx, constr, a2->targs[j], a1->targs[i]);
                 }
                 if (!result) {
@@ -1198,7 +1199,7 @@ bool ClassType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     if (symbol == Symbols::untyped() || symbol == klass) {
         return true;
     }
-    return symbol.data(gs).derivesFrom(gs, klass);
+    return symbol.data(gs)->derivesFrom(gs, klass);
 }
 
 bool OrType::derivesFrom(const GlobalState &gs, SymbolRef klass) {

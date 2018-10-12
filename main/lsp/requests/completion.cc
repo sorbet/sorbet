@@ -23,19 +23,19 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
     UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
     typecase(receiver.get(),
              [&](core::ClassType *c) {
-                 auto &owner = c->symbol.data(*finalGs);
-                 for (auto member : owner.membersStableOrderSlow(*finalGs)) {
+                 const auto &owner = c->symbol.data(*finalGs);
+                 for (auto member : owner->membersStableOrderSlow(*finalGs)) {
                      auto sym = member.second;
-                     if (sym.data(*finalGs).isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs).name, name)) {
-                         result[sym.data(*finalGs).name].emplace_back(sym);
+                     if (sym.data(*finalGs)->isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs)->name, name)) {
+                         result[sym.data(*finalGs)->name].emplace_back(sym);
                      }
                  }
-                 for (auto mixin : owner.mixins()) {
+                 for (auto mixin : owner->mixins()) {
                      result = mergeMaps(move(result), findSimilarMethodsIn(make_shared<core::ClassType>(mixin), name));
                  }
-                 if (owner.superClass.exists()) {
+                 if (owner->superClass.exists()) {
                      result = mergeMaps(move(result),
-                                        findSimilarMethodsIn(make_shared<core::ClassType>(owner.superClass), name));
+                                        findSimilarMethodsIn(make_shared<core::ClassType>(owner->superClass), name));
                  }
              },
              [&](core::AndType *c) {
@@ -64,15 +64,15 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
 string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
     string ret;
 
-    auto shortName = method.data(gs).name.data(gs).shortName(gs);
+    auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 
     int i = 1;
-    if (method.data(gs).isMethod()) {
-        for (auto &argSym : method.data(gs).arguments()) {
+    if (method.data(gs)->isMethod()) {
+        for (auto &argSym : method.data(gs)->arguments()) {
             string s;
-            if (argSym.data(gs).isKeyword()) {
-                s += (string)argSym.data(gs).name.data(gs).shortName(gs) + ": ";
+            if (argSym.data(gs)->isKeyword()) {
+                s += (string)argSym.data(gs)->name.data(gs)->shortName(gs) + ": ";
             }
             s += "${" + to_string(i++) + "}";
             typeAndArgNames.emplace_back(s);
@@ -126,12 +126,12 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
     ENFORCE(what.exists());
     rapidjson::Value item;
     item.SetObject();
-    item.AddMember("label", (string)what.data(*finalGs).name.data(*finalGs).shortName(*finalGs), alloc);
-    auto resultType = what.data(*finalGs).resultType;
+    item.AddMember("label", (string)what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs), alloc);
+    auto resultType = what.data(*finalGs)->resultType;
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
-    if (what.data(*finalGs).isMethod()) {
+    if (what.data(*finalGs)->isMethod()) {
         item.AddMember("kind", 3, alloc); // Function
         if (what.exists()) {
             item.AddMember("detail", methodDetail(what, resp.receiver.type, nullptr, resp.constraint), alloc);
@@ -140,9 +140,9 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
         item.AddMember("insertText", methodSnippet(*finalGs, what), alloc);
 
         unique_ptr<string> documentation = nullptr;
-        if (what.data(*finalGs).loc().file().exists()) {
-            documentation = findDocumentation(what.data(*finalGs).loc().file().data(*finalGs).source(),
-                                              what.data(*finalGs).loc().beginPos());
+        if (what.data(*finalGs)->loc().file().exists()) {
+            documentation = findDocumentation(what.data(*finalGs)->loc().file().data(*finalGs).source(),
+                                              what.data(*finalGs)->loc().beginPos());
         }
         if (documentation) {
             if (documentation->find("@deprecated") != documentation->npos) {
@@ -151,10 +151,10 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
             item.AddMember("documentation", move(*documentation), alloc);
         }
 
-    } else if (what.data(*finalGs).isStaticField()) {
+    } else if (what.data(*finalGs)->isStaticField()) {
         item.AddMember("kind", 21, alloc); // Constant
         item.AddMember("detail", resultType->show(*finalGs), alloc);
-    } else if (what.data(*finalGs).isClass()) {
+    } else if (what.data(*finalGs)->isClass()) {
         item.AddMember("kind", 7, alloc); // Class
     }
     items.PushBack(move(item), alloc);
@@ -174,7 +174,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
 
             auto receiverType = resp->receiver.type;
             if (resp->kind == core::QueryResponse::Kind::SEND) {
-                auto pattern = resp->name.data(*finalGs).shortName(*finalGs);
+                auto pattern = resp->name.data(*finalGs)->shortName(*finalGs);
                 logger->debug("Looking for method similar to {}", pattern);
                 UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
                     findSimilarMethodsIn(receiverType, pattern);
@@ -182,8 +182,8 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                 methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
                                      make_move_iterator(methods.end()));
                 absl::c_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    return leftPair.first.data(*finalGs).shortName(*finalGs) <
-                           rightPair.first.data(*finalGs).shortName(*finalGs);
+                    return leftPair.first.data(*finalGs)->shortName(*finalGs) <
+                           rightPair.first.data(*finalGs)->shortName(*finalGs);
                 });
                 for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
@@ -194,18 +194,19 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
             } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
                        resp->kind == core::QueryResponse::Kind::CONSTANT) {
                 if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
-                    auto pattern = c->symbol.data(*finalGs).name.data(*finalGs).shortName(*finalGs);
+                    auto pattern = c->symbol.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs);
                     logger->debug("Looking for constant similar to {}", pattern);
                     core::SymbolRef owner = c->symbol;
                     do {
-                        owner = owner.data(*finalGs).owner;
-                        for (auto member : owner.data(*finalGs).membersStableOrderSlow(*finalGs)) {
+                        owner = owner.data(*finalGs)->owner;
+                        for (auto member : owner.data(*finalGs)->membersStableOrderSlow(*finalGs)) {
                             auto sym = member.second;
-                            if (sym.exists() && (sym.data(*finalGs).isClass() || sym.data(*finalGs).isStaticField()) &&
-                                sym.data(*finalGs).name.data(*finalGs).kind == core::NameKind::CONSTANT &&
+                            if (sym.exists() &&
+                                (sym.data(*finalGs)->isClass() || sym.data(*finalGs)->isStaticField()) &&
+                                sym.data(*finalGs)->name.data(*finalGs)->kind == core::NameKind::CONSTANT &&
                                 // hide singletons
-                                hasSimilarName(*finalGs, sym.data(*finalGs).name, pattern) &&
-                                !sym.data(*finalGs).derivesFrom(*finalGs, core::Symbols::StubClass())) {
+                                hasSimilarName(*finalGs, sym.data(*finalGs)->name, pattern) &&
+                                !sym.data(*finalGs)->derivesFrom(*finalGs, core::Symbols::StubClass())) {
                                 addCompletionItem(items, sym, *resp);
                             }
                         }

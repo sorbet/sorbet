@@ -185,7 +185,7 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from
              },
              [&](Type *) { result = from; });
     ENFORCE(Types::isSubType(ctx, result, from), "dropSubtypesOf(" + from->toString(ctx) + "," +
-                                                     klass.data(ctx).fullName(ctx) + ") returned " +
+                                                     klass.data(ctx)->fullName(ctx) + ") returned " +
                                                      result->toString(ctx) + ", which is not a subtype of the input");
     return result;
 }
@@ -515,25 +515,25 @@ bool OrType::isFullyDefined() {
  * */
 InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<shared_ptr<Type>> &targs,
                                                      SymbolRef asIf) {
-    ENFORCE(asIf.data(ctx).isClass());
-    ENFORCE(what.data(ctx).isClass());
-    ENFORCE(what == asIf || what.data(ctx).derivesFrom(ctx, asIf) || asIf.data(ctx).derivesFrom(ctx, what),
-            what.data(ctx).name.toString(ctx), asIf.data(ctx).name.toString(ctx));
+    ENFORCE(asIf.data(ctx)->isClass());
+    ENFORCE(what.data(ctx)->isClass());
+    ENFORCE(what == asIf || what.data(ctx)->derivesFrom(ctx, asIf) || asIf.data(ctx)->derivesFrom(ctx, what),
+            what.data(ctx)->name.toString(ctx), asIf.data(ctx)->name.toString(ctx));
     InlinedVector<SymbolRef, 4> currentAlignment;
     if (targs.empty()) {
         return currentAlignment;
     }
 
-    if (what == asIf || (asIf.data(ctx).isClassClass() && what.data(ctx).isClassClass())) {
-        currentAlignment = what.data(ctx).typeMembers();
+    if (what == asIf || (asIf.data(ctx)->isClassClass() && what.data(ctx)->isClassClass())) {
+        currentAlignment = what.data(ctx)->typeMembers();
     } else {
-        currentAlignment.reserve(asIf.data(ctx).typeMembers().size());
-        for (auto originalTp : asIf.data(ctx).typeMembers()) {
-            auto name = originalTp.data(ctx).name;
+        currentAlignment.reserve(asIf.data(ctx)->typeMembers().size());
+        for (auto originalTp : asIf.data(ctx)->typeMembers()) {
+            auto name = originalTp.data(ctx)->name;
             SymbolRef align;
             int i = 0;
-            for (auto x : what.data(ctx).typeMembers()) {
-                if (x.data(ctx).name == name) {
+            for (auto x : what.data(ctx)->typeMembers()) {
+                if (x.data(ctx)->name == name) {
                     align = x;
                     currentAlignment.emplace_back(x);
                     break;
@@ -550,16 +550,16 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
 
 shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat,
                                              const vector<shared_ptr<Type>> &targs) {
-    const sorbet::core::Symbol &original = what.data(ctx);
-    SymbolRef originalOwner = what.data(ctx).enclosingClass(ctx);
+    const sorbet::core::SymbolData original = what.data(ctx);
+    SymbolRef originalOwner = what.data(ctx)->enclosingClass(ctx);
 
-    if (originalOwner.data(ctx).typeMembers().empty() || (original.resultType == nullptr)) {
-        return original.resultType;
+    if (originalOwner.data(ctx)->typeMembers().empty() || (original->resultType == nullptr)) {
+        return original->resultType;
     }
 
     auto currentAlignment = alignBaseTypeArgs(ctx, originalOwner, targs, inWhat);
 
-    return instantiate(ctx, original.resultType, currentAlignment, targs);
+    return instantiate(ctx, original->resultType, currentAlignment, targs);
 }
 
 shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &procType) {
@@ -608,14 +608,14 @@ bool AppliedType::isFullyDefined() {
 }
 
 void AppliedType::_sanityCheck(Context ctx) {
-    ENFORCE(this->klass.data(ctx).isClass());
+    ENFORCE(this->klass.data(ctx)->isClass());
     ENFORCE(this->klass != Symbols::untyped());
 
-    ENFORCE(this->klass.data(ctx).typeMembers().size() == this->targs.size() ||
+    ENFORCE(this->klass.data(ctx)->typeMembers().size() == this->targs.size() ||
                 (this->klass == Symbols::Array() && (this->targs.size() == 1)) ||
                 (this->klass == Symbols::Hash() && (this->targs.size() == 3)) ||
                 this->klass._id >= Symbols::Proc0()._id && this->klass._id <= Symbols::last_proc()._id,
-            this->klass.data(ctx).name.toString(ctx));
+            this->klass.data(ctx)->name.toString(ctx));
     for (auto &targ : this->targs) {
         targ->sanityCheck(ctx);
     }

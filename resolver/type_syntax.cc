@@ -343,8 +343,8 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::untypedUntracked();
             }
-            auto sym = obj->constantSymbol().data(ctx).dealias(ctx);
-            auto singleton = sym.data(ctx).singletonClass(ctx);
+            auto sym = obj->constantSymbol().data(ctx)->dealias(ctx);
+            auto singleton = sym.data(ctx)->singletonClass(ctx);
             if (!singleton.exists()) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Unknown class");
@@ -419,21 +419,21 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                                        i->typeAliasOrConstantSymbol() == core::Symbols::Struct() ||
                                        i->typeAliasOrConstantSymbol() == core::Symbols::File();
             // TODO: reduce this^^^ set.
-            auto sym = i->constantSymbol().data(ctx).dealias(ctx);
-            if (sym.data(ctx).isClass()) {
-                if (sym.data(ctx).typeArity(ctx) > 0 && !silenceGenericError) {
+            auto sym = i->constantSymbol().data(ctx)->dealias(ctx);
+            if (sym.data(ctx)->isClass()) {
+                if (sym.data(ctx)->typeArity(ctx) > 0 && !silenceGenericError) {
                     if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                         e.setHeader("Malformed type declaration. Generic class without type arguments `{}`",
                                     i->constantSymbol().show(ctx));
                     }
                 }
-                result = sym.data(ctx).externalType(ctx);
-            } else if (sym.data(ctx).isTypeMember()) {
+                result = sym.data(ctx)->externalType(ctx);
+            } else if (sym.data(ctx)->isTypeMember()) {
                 result = make_shared<core::LambdaParam>(sym);
-            } else if (sym.data(ctx).isStaticField()) {
+            } else if (sym.data(ctx)->isStaticField()) {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", i->constantSymbol().show(ctx));
-                    e.addErrorLine(sym.data(ctx).loc(),
+                    e.addErrorLine(sym.data(ctx)->loc(),
                                    "If you are trying to define a type alias, you should use `{}` here",
                                    "T.type_alias");
                 }
@@ -538,18 +538,18 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             }
             if (corrected.exists()) {
                 if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::BadStdlibGeneric)) {
-                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx).show(ctx) + "[...]",
-                                recvi->constantSymbol().data(ctx).show(ctx) + "[...]",
-                                recvi->constantSymbol().data(ctx).show(ctx));
+                    e.setHeader("Use `{}`, not `{}` to declare a typed `{}`", corrected.data(ctx)->show(ctx) + "[...]",
+                                recvi->constantSymbol().data(ctx)->show(ctx) + "[...]",
+                                recvi->constantSymbol().data(ctx)->show(ctx));
                     e.addErrorSection(core::ErrorSection(
                         core::ErrorColors::format("`{}` will not work in the runtime type system.",
-                                                  recvi->constantSymbol().data(ctx).show(ctx) + "[...]")));
+                                                  recvi->constantSymbol().data(ctx)->show(ctx) + "[...]")));
                 }
             } else {
                 corrected = recvi->constantSymbol();
             }
 
-            auto ctype = make_shared<core::ClassType>(corrected.data(ctx).singletonClass(ctx));
+            auto ctype = make_shared<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
             core::CallLocs locs{
                 s->loc,
                 recvi->loc,
@@ -579,8 +579,8 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             result = core::Types::untypedUntracked();
         },
         [&](ast::Self *slf) {
-            core::SymbolRef klass = ctx.owner.data(ctx).enclosingClass(ctx);
-            result = klass.data(ctx).selfType(ctx);
+            core::SymbolRef klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+            result = klass.data(ctx)->selfType(ctx);
         },
         [&](ast::Expression *expr) {
             if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {

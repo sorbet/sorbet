@@ -1146,7 +1146,7 @@ vector<u1> Serializer::storeExpression(GlobalState &gs, unique_ptr<ast::Expressi
 
 NameRef SerializerImpl::unpickleNameRef(UnPickler &p, GlobalState &gs) {
     NameRef name(NameRef::WellKnown{}, p.getU4());
-    ENFORCE(name.data(gs).ref(gs) == name);
+    ENFORCE(name.data(gs)->ref(gs) == name);
     return name;
 }
 

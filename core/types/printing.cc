@@ -23,11 +23,11 @@ void printTabs(stringstream &to, int count) {
 } // namespace
 
 string ClassType::toString(const GlobalState &gs, int tabs) const {
-    return this->symbol.data(gs).show(gs);
+    return this->symbol.data(gs)->show(gs);
 }
 
 string ClassType::show(const GlobalState &gs) const {
-    return this->symbol.data(gs).show(gs);
+    return this->symbol.data(gs)->show(gs);
 }
 
 string ClassType::typeName() const {
@@ -157,13 +157,13 @@ string ShapeType::show(const GlobalState &gs) const {
 
 string AliasType::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
-    buf << "AliasType { symbol = " << this->symbol.data(gs).fullName(gs) << " }";
+    buf << "AliasType { symbol = " << this->symbol.data(gs)->fullName(gs) << " }";
     return buf.str();
 }
 
 string AliasType::show(const GlobalState &gs) const {
     stringstream buf;
-    buf << "<Alias:" << this->symbol.data(gs).fullName(gs) << ">";
+    buf << "<Alias:" << this->symbol.data(gs)->fullName(gs) << ">";
     return buf.str();
 }
 
@@ -273,11 +273,11 @@ string OrType::show(const GlobalState &gs) const {
 }
 
 string TypeVar::toString(const GlobalState &gs, int tabs) const {
-    return "TypeVar(" + sym.data(gs).name.toString(gs) + ")";
+    return "TypeVar(" + sym.data(gs)->name.toString(gs) + ")";
 }
 
 string TypeVar::show(const GlobalState &gs) const {
-    return sym.data(gs).name.toString(gs);
+    return sym.data(gs)->name.toString(gs);
 }
 
 string TypeVar::typeName() const {
@@ -288,7 +288,7 @@ string AppliedType::toString(const GlobalState &gs, int tabs) const {
     stringstream buf;
     buf << "AppliedType {" << '\n';
     printTabs(buf, tabs + 1);
-    buf << "klass = " << this->klass.data(gs).fullName(gs) << '\n';
+    buf << "klass = " << this->klass.data(gs)->fullName(gs) << '\n';
 
     printTabs(buf, tabs + 1);
     buf << "targs = [" << '\n';
@@ -296,9 +296,9 @@ string AppliedType::toString(const GlobalState &gs, int tabs) const {
     for (auto &targ : this->targs) {
         ++i;
         printTabs(buf, tabs + 2);
-        if (i < this->klass.data(gs).typeMembers().size()) {
-            auto tyMem = this->klass.data(gs).typeMembers()[i];
-            buf << tyMem.data(gs).name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << '\n';
+        if (i < this->klass.data(gs)->typeMembers().size()) {
+            auto tyMem = this->klass.data(gs)->typeMembers()[i];
+            buf << tyMem.data(gs)->name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << '\n';
         } else {
             // this happens if we try to print type before resolver has processed stdlib
             buf << "EARLY_TYPE_MEMBER\n";
@@ -325,7 +325,7 @@ string AppliedType::show(const GlobalState &gs) const {
     } else if (this->klass == Symbols::Set()) {
         buf << "T::Set";
     } else {
-        buf << this->klass.data(gs).show(gs);
+        buf << this->klass.data(gs)->show(gs);
     }
     buf << "[";
 
@@ -351,19 +351,19 @@ string AppliedType::typeName() const {
 }
 
 string LambdaParam::toString(const GlobalState &gs, int tabs) const {
-    return "LambdaParam(" + this->definition.data(gs).fullName(gs) + ")";
+    return "LambdaParam(" + this->definition.data(gs)->fullName(gs) + ")";
 }
 
 string LambdaParam::show(const GlobalState &gs) const {
-    return this->definition.data(gs).show(gs);
+    return this->definition.data(gs)->show(gs);
 }
 
 string SelfTypeParam::toString(const GlobalState &gs, int tabs) const {
-    return "SelfTypeParam(" + this->definition.data(gs).fullName(gs) + ")";
+    return "SelfTypeParam(" + this->definition.data(gs)->fullName(gs) + ")";
 }
 
 string SelfTypeParam::show(const GlobalState &gs) const {
-    return this->definition.data(gs).show(gs);
+    return this->definition.data(gs)->show(gs);
 }
 
 string LambdaParam::typeName() const {

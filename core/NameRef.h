@@ -1,9 +1,31 @@
 #ifndef RUBY_TYPER_NAMEREF_H
 #define RUBY_TYPER_NAMEREF_H
 #include "common/common.h"
+#include "core/DebugOnlyCheck.h"
 namespace sorbet::core {
 class GlobalState;
 class Name;
+
+struct NameDataDebugCheck {
+    const GlobalState &gs;
+    const unsigned int nameCountAtCreation;
+
+    NameDataDebugCheck(const GlobalState &gs);
+    void check() const;
+};
+
+/** This is to `NameRef &` what SymbolData is to `SymbolRef &`. Read docs on SymbolData */
+class NameData : private DebugOnlyCheck<NameDataDebugCheck> {
+    Name &name;
+
+public:
+    NameData(Name &ref, const GlobalState &gs);
+    Name *operator->();
+    const Name *operator->() const;
+};
+constexpr size_t sizeof__Name = sizeof(Name *);
+constexpr size_t alignof__Name = alignof(Name *);
+CheckSize(NameData, sizeof__Name, alignof__Name);
 
 class NameRef final {
 public:
@@ -46,9 +68,9 @@ public:
         return _id;
     }
 
-    Name &data(GlobalState &gs) const;
+    NameData data(GlobalState &gs) const;
 
-    const Name &data(const GlobalState &gs) const;
+    const NameData data(const GlobalState &gs) const;
 
     // Returns the `0` NameRef, used to indicate non-existence of a name
     static NameRef noName() {

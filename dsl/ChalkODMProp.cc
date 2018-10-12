@@ -57,13 +57,13 @@ unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression 
 bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym) {
     auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(type);
     if (cnst) {
-        if (cnst->cnst == sym.data(ctx).name && ast::isa_tree<ast::EmptyTree>(cnst->scope.get())) {
+        if (cnst->cnst == sym.data(ctx)->name && ast::isa_tree<ast::EmptyTree>(cnst->scope.get())) {
             return true;
         }
 
         auto scope_cnst = ast::cast_tree<ast::UnresolvedConstantLit>(cnst->scope.get());
-        if (cnst->cnst == sym.data(ctx).name && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
-            scope_cnst->cnst == core::Symbols::T().data(ctx).name) {
+        if (cnst->cnst == sym.data(ctx)->name && ast::isa_tree<ast::EmptyTree>(scope_cnst->scope.get()) &&
+            scope_cnst->cnst == core::Symbols::T().data(ctx)->name) {
             return true;
         }
     }
@@ -196,7 +196,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         // A heuristic for detecting the API Param Spec
         if (isOptional && send->fun != core::Names::squareBrackets()) {
             auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(send->recv.get());
-            if (cnst->cnst != core::Symbols::T().data(ctx).name) {
+            if (cnst->cnst != core::Symbols::T().data(ctx)->name) {
                 return empty;
             }
         }
@@ -264,7 +264,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
         } else {
             type = ast::MK::Nilable(loc, move(foreign));
         }
-        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx).toString(ctx) + "_");
+        auto fk_method = ctx.state.enterNameUTF8(name.data(ctx)->toString(ctx) + "_");
         // sig {params(opts: T.untyped).returns(T.nilable($foreign))}
         // def $fk_method(**opts)
         //  T.unsafe(nil)

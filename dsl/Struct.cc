@@ -42,7 +42,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         return empty;
     }
 
-    if (!ast::isa_tree<ast::EmptyTree>(recv->scope.get()) || recv->cnst != core::Symbols::Struct().data(ctx).name ||
+    if (!ast::isa_tree<ast::EmptyTree>(recv->scope.get()) || recv->cnst != core::Symbols::Struct().data(ctx)->name ||
         send->fun != core::Names::new_() || send->args.empty()) {
         return empty;
     }

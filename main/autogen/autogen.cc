@@ -88,8 +88,8 @@ class AutogenWalk {
     vector<core::NameRef> symbolName(core::Context ctx, core::SymbolRef sym) {
         vector<core::NameRef> out;
         while (sym.exists() && sym != core::Symbols::root()) {
-            out.emplace_back(sym.data(ctx).name);
-            sym = sym.data(ctx).owner;
+            out.emplace_back(sym.data(ctx)->name);
+            sym = sym.data(ctx)->owner;
         }
         reverse(out.begin(), out.end());
         return out;
@@ -239,7 +239,7 @@ public:
         ref.definitionLoc = original->loc;
         ref.name = constantName(ctx, original.get());
         auto sym = original->typeAliasOrConstantSymbol();
-        if (!sym.data(ctx).isClass() || !sym.data(ctx).derivesFrom(ctx, core::Symbols::StubClass())) {
+        if (!sym.data(ctx)->isClass() || !sym.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass())) {
             ref.resolved = symbolName(ctx, sym);
         }
         ref.is_resolved_statically = true;
@@ -337,7 +337,7 @@ std::string namesToString(core::Context ctx, std::vector<core::NameRef> names) {
         } else {
             buf << " ";
         }
-        buf << nm.data(ctx).show(ctx);
+        buf << nm.data(ctx)->show(ctx);
     }
     buf << "]";
     return buf.str();
@@ -354,7 +354,7 @@ std::string ParsedFile::toString(core::Context ctx) {
                 buf << ", ";
             }
             first = false;
-            buf << nm.data(ctx).show(ctx);
+            buf << nm.data(ctx)->show(ctx);
         }
         buf << "]\n";
     }
@@ -577,7 +577,7 @@ public:
         // requires
         packer.pack_array(pf.requires.size());
         for (auto nm : pf.requires) {
-            packString(nm.data(ctx).show(ctx));
+            packString(nm.data(ctx)->show(ctx));
         }
 
         packer.pack_array(pf.defs.size());
@@ -613,7 +613,7 @@ public:
                     str = "alias";
                     break;
                 default:
-                    str = sym.data(ctx).show(ctx);
+                    str = sym.data(ctx)->show(ctx);
             }
             packString(header, str);
         }

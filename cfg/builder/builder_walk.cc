@@ -58,8 +58,8 @@ core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inW
     // Note: this will add an empty local to aliases if 'what' is not there
     core::LocalVariable &alias = aliases[what];
     if (!alias.exists()) {
-        const core::Symbol &data = what.data(cctx.ctx);
-        alias = cctx.newTemporary(data.name);
+        const core::SymbolData data = what.data(cctx.ctx);
+        alias = cctx.newTemporary(data->name);
     }
     return alias;
 }
@@ -226,19 +226,19 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     auto postBlock = cctx.inWhat.freshBlock(cctx.loops);
                     auto bodyBlock = cctx.inWhat.freshBlock(cctx.loops + 1);
 
-                    const core::Symbol &data = sym.data(cctx.ctx);
+                    const core::SymbolData data = sym.data(cctx.ctx);
 
                     core::LocalVariable argTemp = cctx.newTemporary(core::Names::blkArg());
                     core::LocalVariable idxTmp = cctx.newTemporary(core::Names::blkArg());
-                    bodyBlock->exprs.emplace_back(argTemp, data.loc(), make_unique<LoadYieldParams>(link, sym));
+                    bodyBlock->exprs.emplace_back(argTemp, data->loc(), make_unique<LoadYieldParams>(link, sym));
 
-                    for (int i = 0; i < data.arguments().size(); ++i) {
+                    for (int i = 0; i < data->arguments().size(); ++i) {
                         auto &arg = s->block->args[i];
                         auto id = arg2Local(arg.get());
                         ENFORCE(id, "Should have been removed by namer");
                         core::LocalVariable argLoc = id->localVariable;
 
-                        if (data.arguments()[i].data(cctx.ctx).isRepeated()) {
+                        if (data->arguments()[i].data(cctx.ctx)->isRepeated()) {
                             if (i != 0) {
                                 // Mixing positional and rest args in blocks is
                                 // not currently supported; drop in an untyped.

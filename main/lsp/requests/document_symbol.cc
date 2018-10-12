@@ -5,10 +5,10 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out) {
-    for (auto mem : sym.data(*finalGs).membersStableOrderSlow(*finalGs)) {
+    for (auto mem : sym.data(*finalGs)->membersStableOrderSlow(*finalGs)) {
         if (mem.first != core::Names::attached() && mem.first != core::Names::singleton()) {
             bool foundThisFile = false;
-            for (auto loc : mem.second.data(*finalGs).locs()) {
+            for (auto loc : mem.second.data(*finalGs)->locs()) {
                 foundThisFile = foundThisFile || loc.file() == filter;
             }
             if (!foundThisFile) {
@@ -30,9 +30,9 @@ void LSPLoop::handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjs
     auto fref = uri2FileRef(uri);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
         core::SymbolRef ref(finalGs.get(), idx);
-        if (!hideSymbol(ref) && (ref.data(*finalGs).owner.data(*finalGs).loc().file() != fref ||
-                                 ref.data(*finalGs).owner == core::Symbols::root())) {
-            for (auto definitionLocation : ref.data(*finalGs).locs()) {
+        if (!hideSymbol(ref) && (ref.data(*finalGs)->owner.data(*finalGs)->loc().file() != fref ||
+                                 ref.data(*finalGs)->owner == core::Symbols::root())) {
+            for (auto definitionLocation : ref.data(*finalGs)->locs()) {
                 if (definitionLocation.file() == fref) {
                     auto data = symbolRef2DocumentSymbol(ref, fref);
                     if (data) {
@@ -85,33 +85,34 @@ unique_ptr<rapidjson::Value> LSPLoop::symbolRef2DocumentSymbol(core::SymbolRef s
     if (!symRef.exists()) {
         return nullptr;
     }
-    auto &sym = symRef.data(*finalGs);
-    if (!sym.loc().file().exists() || hideSymbol(symRef)) {
+    auto sym = symRef.data(*finalGs);
+    if (!sym->loc().file().exists() || hideSymbol(symRef)) {
         return nullptr;
     }
     rapidjson::Value result;
     result.SetObject();
     string prefix = "";
-    if (sym.owner.exists() && sym.owner.data(*finalGs).isClass() &&
-        sym.owner.data(*finalGs).attachedClass(*finalGs).exists()) {
+    if (sym->owner.exists() && sym->owner.data(*finalGs)->isClass() &&
+        sym->owner.data(*finalGs)->attachedClass(*finalGs).exists()) {
         prefix = "self.";
     }
-    result.AddMember("name", prefix + sym.name.show(*finalGs), alloc);
-    if (sym.isMethod()) {
+    result.AddMember("name", prefix + sym->name.show(*finalGs), alloc);
+    if (sym->isMethod()) {
         result.AddMember("detail", methodDetail(symRef, nullptr, nullptr, nullptr), alloc);
     } else {
         // Currently released version of VSCode has a bug that requires this non-optional field to be present
         result.AddMember("detail", "", alloc);
     }
     result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
-    result.AddMember("range", loc2Range(sym.loc()), alloc); // TODO: this range should cover body. Currently it doesn't.
-    result.AddMember("selectionRange", loc2Range(sym.loc()), alloc);
+    result.AddMember("range", loc2Range(sym->loc()),
+                     alloc); // TODO: this range should cover body. Currently it doesn't.
+    result.AddMember("selectionRange", loc2Range(sym->loc()), alloc);
 
     rapidjson::Value children;
     children.SetArray();
     symbolRef2DocumentSymbolWalkMembers(symRef, filter, children);
-    if (sym.isClass()) {
-        auto singleton = sym.lookupSingletonClass(*finalGs);
+    if (sym->isClass()) {
+        auto singleton = sym->lookupSingletonClass(*finalGs);
         if (singleton.exists()) {
             symbolRef2DocumentSymbolWalkMembers(singleton, filter, children);
         }

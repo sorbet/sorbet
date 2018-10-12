@@ -41,15 +41,15 @@ namespace sorbet::realmain::lsp {
  *        }
  **/
 unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
-    auto &sym = symRef.data(*finalGs);
-    if (!sym.loc().file().exists() || hideSymbol(symRef)) {
+    auto sym = symRef.data(*finalGs);
+    if (!sym->loc().file().exists() || hideSymbol(symRef)) {
         return nullptr;
     }
     rapidjson::Value result;
     result.SetObject();
-    result.AddMember("name", sym.name.show(*finalGs), alloc);
-    result.AddMember("location", loc2Location(sym.loc()), alloc);
-    result.AddMember("containerName", sym.owner.data(*finalGs).fullName(*finalGs), alloc);
+    result.AddMember("name", sym->name.show(*finalGs), alloc);
+    result.AddMember("location", loc2Location(sym->loc()), alloc);
+    result.AddMember("containerName", sym->owner.data(*finalGs)->fullName(*finalGs), alloc);
     result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
 
     return make_unique<rapidjson::Value>(move(result));
@@ -62,7 +62,7 @@ void LSPLoop::handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Docume
 
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
         core::SymbolRef ref(finalGs.get(), idx);
-        if (hasSimilarName(*finalGs, ref.data(*finalGs).name, searchString)) {
+        if (hasSimilarName(*finalGs, ref.data(*finalGs)->name, searchString)) {
             auto data = symbolRef2SymbolInformation(ref);
             if (data) {
                 result.PushBack(move(*data), alloc);

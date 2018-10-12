@@ -60,14 +60,14 @@ TEST_F(NamerFixture, HelloWorld) { // NOLINT
         namer::Namer::run(ctx, move(tree));
     }
 
-    auto &objectScope = core::Symbols::Object().data(ctx);
-    ASSERT_EQ(core::Symbols::root(), objectScope.owner);
+    const auto &objectScope = core::Symbols::Object().data(ctx);
+    ASSERT_EQ(core::Symbols::root(), objectScope->owner);
 
-    ASSERT_EQ(4, objectScope.members.size());
-    auto methodSym = objectScope.members[ctx.state.enterNameUTF8("hello_world")];
-    auto &symbol = methodSym.data(ctx);
-    ASSERT_EQ(core::Symbols::Object(), symbol.owner);
-    ASSERT_EQ(0, symbol.arguments().size());
+    ASSERT_EQ(4, objectScope->members.size());
+    auto methodSym = objectScope->members.at(ctx.state.enterNameUTF8("hello_world"));
+    const auto &symbol = methodSym.data(ctx);
+    ASSERT_EQ(core::Symbols::Object(), symbol->owner);
+    ASSERT_EQ(0, symbol->arguments().size());
 }
 
 TEST_F(NamerFixture, Idempotent) { // NOLINT
@@ -99,13 +99,13 @@ TEST_F(NamerFixture, NameClass) { // NOLINT
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
         namer::Namer::run(ctx, move(tree));
     }
-    auto &rootScope =
-        core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
+    const auto &rootScope =
+        core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
-    ASSERT_EQ(3, rootScope.members.size());
-    auto fooSym = rootScope.members[ctx.state.enterNameConstant("Foo")];
-    auto &fooInfo = fooSym.data(ctx);
-    ASSERT_EQ(1, fooInfo.members.size());
+    ASSERT_EQ(3, rootScope->members.size());
+    auto fooSym = rootScope->members.at(ctx.state.enterNameConstant("Foo"));
+    const auto &fooInfo = fooSym.data(ctx);
+    ASSERT_EQ(1, fooInfo->members.size());
 }
 
 TEST_F(NamerFixture, InsideClass) { // NOLINT
@@ -116,16 +116,16 @@ TEST_F(NamerFixture, InsideClass) { // NOLINT
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols
         namer::Namer::run(ctx, move(tree));
     }
-    auto &rootScope =
-        core::Symbols::root().data(ctx).findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
+    const auto &rootScope =
+        core::Symbols::root().data(ctx)->findMember(ctx, ctx.state.enterNameConstant(testClass_str)).data(ctx);
 
-    ASSERT_EQ(3, rootScope.members.size());
-    auto fooSym = rootScope.members[ctx.state.enterNameConstant("Foo")];
-    auto &fooInfo = fooSym.data(ctx);
-    ASSERT_EQ(2, fooInfo.members.size());
+    ASSERT_EQ(3, rootScope->members.size());
+    auto fooSym = rootScope->members.at(ctx.state.enterNameConstant("Foo"));
+    const auto &fooInfo = fooSym.data(ctx);
+    ASSERT_EQ(2, fooInfo->members.size());
 
-    auto barSym = fooInfo.members[ctx.state.enterNameUTF8("bar")];
-    ASSERT_EQ(fooSym, barSym.data(ctx).owner);
+    auto barSym = fooInfo->members.at(ctx.state.enterNameUTF8("bar"));
+    ASSERT_EQ(fooSym, barSym.data(ctx)->owner);
 }
 
 } // namespace sorbet::namer::test

@@ -409,9 +409,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             if (s == nullptr) {
                 return;
             }
-            core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
+            core::SymbolRef attachedClass = s->symbol.data(ctx)->attachedClass(ctx);
             if (attachedClass.exists()) {
-                auto ty = attachedClass.data(ctx).externalType(ctx);
+                auto ty = attachedClass.data(ctx)->externalType(ctx);
                 if (!ty->isUntyped()) {
                     whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->recv.variable, ty);
                     whoKnows.falsy.mutate().noTypeTests.emplace_back(send->recv.variable, ty);
@@ -468,9 +468,9 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
             return;
         }
 
-        core::SymbolRef attachedClass = s->symbol.data(ctx).attachedClass(ctx);
+        core::SymbolRef attachedClass = s->symbol.data(ctx)->attachedClass(ctx);
         if (attachedClass.exists()) {
-            auto ty = attachedClass.data(ctx).externalType(ctx);
+            auto ty = attachedClass.data(ctx)->externalType(ctx);
             if (!ty->isUntyped()) {
                 whoKnows.truthy.mutate().yesTypeTests.emplace_back(send->args[0].variable, ty);
                 whoKnows.falsy.mutate().noTypeTests.emplace_back(send->args[0].variable, ty);
@@ -495,7 +495,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
         const auto &argType = send->args[0].type;
         auto *argClass = core::cast_type<core::ClassType>(argType.get());
         if (!argClass || !recvKlass->derivesFrom(ctx, core::Symbols::Class()) ||
-            !argClass->symbol.data(ctx).derivesFrom(ctx, core::Symbols::Class())) {
+            !argClass->symbol.data(ctx)->derivesFrom(ctx, core::Symbols::Class())) {
             return;
         }
         auto &whoKnows = getKnowledge(local);
@@ -833,27 +833,28 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 ENFORCE(!tp.origins.empty(), "Inferencer did not assign location");
             },
             [&](cfg::Alias *a) {
-                core::SymbolRef symbol = a->what.data(ctx).dealias(ctx);
+                core::SymbolRef symbol = a->what.data(ctx)->dealias(ctx);
                 lspQueryMatch =
                     lspQueryMatch || (ctx.state.lspQuerySymbol.exists() && symbol == ctx.state.lspQuerySymbol);
-                const core::Symbol &data = symbol.data(ctx);
-                if (data.isClass()) {
-                    if (!data.resultType) { // common case
-                        tp.type = data.lookupSingletonClass(ctx).data(ctx).externalType(ctx);
+                const auto &data = symbol.data(ctx);
+                if (data->isClass()) {
+                    if (!data->resultType) { // common case
+                        tp.type = data->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
                     } else {
-                        tp.type = data.resultType;
+                        tp.type = data->resultType;
                     }
-                    tp.origins.emplace_back(symbol.data(ctx).loc());
-                } else if (data.isField() || data.isStaticField() || data.isMethodArgument() || data.isTypeMember()) {
-                    if (data.resultType.get() != nullptr) {
-                        if (data.isField()) {
+                    tp.origins.emplace_back(symbol.data(ctx)->loc());
+                } else if (data->isField() || data->isStaticField() || data->isMethodArgument() ||
+                           data->isTypeMember()) {
+                    if (data->resultType.get() != nullptr) {
+                        if (data->isField()) {
                             tp.type = core::Types::resultTypeAsSeenFrom(
-                                ctx, symbol, ctx.owner.data(ctx).enclosingClass(ctx),
-                                ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).selfTypeArgs(ctx));
+                                ctx, symbol, ctx.owner.data(ctx)->enclosingClass(ctx),
+                                ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->selfTypeArgs(ctx));
                         } else {
-                            tp.type = data.resultType;
+                            tp.type = data->resultType;
                         }
-                        tp.origins.emplace_back(data.loc());
+                        tp.origins.emplace_back(data->loc());
                     } else {
                         tp.origins.emplace_back(core::Loc::none());
                         tp.type = core::Types::untyped(ctx, symbol);
@@ -864,12 +865,12 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 if (lspQueryMatch) {
                     core::TypeAndOrigins dealiasedReceiver;
-                    dealiasedReceiver.type = data.lookupSingletonClass(ctx).data(ctx).externalType(ctx);
+                    dealiasedReceiver.type = data->lookupSingletonClass(ctx).data(ctx)->externalType(ctx);
                     dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
                     components.emplace_back(core::DispatchComponent{tp.type, symbol, {}});
                     core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, move(components),
-                                                          nullptr, bind.loc, symbol.data(ctx).name, dealiasedReceiver,
+                                                          nullptr, bind.loc, symbol.data(ctx)->name, dealiasedReceiver,
                                                           tp);
                 }
                 pinnedTypes[bind.bind.variable] = tp;
@@ -887,7 +888,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Self *i) {
-                tp.type = i->klass.data(ctx).selfType(ctx);
+                tp.type = i->klass.data(ctx)->selfType(ctx);
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadArg *i) {
@@ -901,9 +902,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                  *
                  * For now we can at least enforce a little consistency.
                  */
-                ENFORCE(ctx.owner == i->arg.data(ctx).owner);
+                ENFORCE(ctx.owner == i->arg.data(ctx)->owner);
 
-                auto argType = i->arg.data(ctx).argumentTypeAsSeenByImplementation(ctx, constr);
+                auto argType = i->arg.data(ctx)->argumentTypeAsSeenByImplementation(ctx, constr);
                 tp.type = move(argType);
                 tp.origins.emplace_back(bind.loc);
             },
@@ -917,9 +918,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 // TODO(nelhage): If this block is a lambda, not a proc, this
                 // rule doesn't apply. We don't model the distinction accurately
                 // yet.
-                auto &blkArgs = insn->block.data(ctx).arguments();
+                auto &blkArgs = insn->block.data(ctx)->arguments();
                 auto *tuple = core::cast_type<core::TupleType>(params.get());
-                if (blkArgs.size() > 1 && !blkArgs.front().data(ctx).isRepeated() && tuple &&
+                if (blkArgs.size() > 1 && !blkArgs.front().data(ctx)->isRepeated() && tuple &&
                     tuple->elems.size() == 1 && tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
                     tp.type = move(tuple->elems.front());
                 } else if (params == nullptr) {
@@ -943,8 +944,8 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         e.addErrorSection(core::ErrorSection(
                             "Expected " + methodReturnType->show(ctx),
                             {
-                                core::ErrorLine::from(ctx.owner.data(ctx).loc(), "Method `{}` has return type `{}`",
-                                                      ctx.owner.data(ctx).name.toString(ctx),
+                                core::ErrorLine::from(ctx.owner.data(ctx)->loc(), "Method `{}` has return type `{}`",
+                                                      ctx.owner.data(ctx)->name.toString(ctx),
                                                       methodReturnType->show(ctx)),
                             }));
                         e.addErrorSection(
@@ -993,9 +994,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Cast *c) {
-                auto klass = ctx.owner.data(ctx).enclosingClass(ctx);
-                auto castType = core::Types::instantiate(ctx, c->type, klass.data(ctx).typeMembers(),
-                                                         klass.data(ctx).selfTypeArgs(ctx));
+                auto klass = ctx.owner.data(ctx)->enclosingClass(ctx);
+                auto castType = core::Types::instantiate(ctx, c->type, klass.data(ctx)->typeMembers(),
+                                                         klass.data(ctx)->selfTypeArgs(ctx));
 
                 tp.type = castType;
                 tp.origins.emplace_back(bind.loc);

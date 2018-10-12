@@ -25,7 +25,7 @@ class NameInserter {
         auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(node.get());
         if (constLit == nullptr) {
             if (auto *id = ast::cast_tree<ast::ConstantLit>(node.get())) {
-                return id->constantSymbol().data(ctx).dealias(ctx);
+                return id->constantSymbol().data(ctx)->dealias(ctx);
             }
             if (auto *uid = ast::cast_tree<ast::UnresolvedIdent>(node.get())) {
                 // emitted via `class << self` blocks
@@ -39,10 +39,10 @@ class NameInserter {
         }
 
         auto newOwner = squashNames(ctx, owner, constLit->scope);
-        core::SymbolRef existing = newOwner.data(ctx).findMember(ctx, constLit->cnst);
+        core::SymbolRef existing = newOwner.data(ctx)->findMember(ctx, constLit->cnst);
         if (!existing.exists()) {
             existing = ctx.state.enterClassSymbol(constLit->loc, newOwner, constLit->cnst);
-            existing.data(ctx).singletonClass(ctx); // force singleton class into existance
+            existing.data(ctx)->singletonClass(ctx); // force singleton class into existance
         }
 
         node.release();
@@ -55,27 +55,27 @@ class NameInserter {
                                                           int pos, bool optional, bool keyword, bool block,
                                                           bool repeated) {
         if (auto *nm = ast::cast_tree<ast::UnresolvedIdent>(arg.get())) {
-            if (pos < ctx.owner.data(ctx).arguments().size()) {
+            if (pos < ctx.owner.data(ctx)->arguments().size()) {
                 // TODO: check that flags match;
-                core::SymbolRef sym = ctx.owner.data(ctx).arguments()[pos];
+                core::SymbolRef sym = ctx.owner.data(ctx)->arguments()[pos];
                 core::LocalVariable localVariable = enterLocal(ctx, nm->name);
                 unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
                 arg.swap(localExpr);
                 return make_pair(sym, localVariable);
             }
             core::SymbolRef sym = ctx.state.enterMethodArgumentSymbol(arg->loc, ctx.owner, nm->name);
-            core::Symbol &data = sym.data(ctx);
+            core::SymbolData data = sym.data(ctx);
             if (optional) {
-                data.setOptional();
+                data->setOptional();
             }
             if (keyword) {
-                data.setKeyword();
+                data->setKeyword();
             }
             if (block) {
-                data.setBlockArgument();
+                data->setBlockArgument();
             }
             if (repeated) {
-                data.setRepeated();
+                data->setRepeated();
             }
             core::LocalVariable localVariable = enterLocal(ctx, nm->name);
             unique_ptr<ast::Reference> localExpr = make_unique<ast::Local>(arg->loc, localVariable);
@@ -139,7 +139,7 @@ class NameInserter {
         auto &frame = blockArgStack.back();
         core::NameRef blockArg;
         if (frame.declared.exists()) {
-            blockArg = frame.declared.data(ctx).name;
+            blockArg = frame.declared.data(ctx)->name;
         } else {
             // Found yield, and method doesn't have a blk arg, so let's make one.
             if (!frame.discovered.exists()) {
@@ -180,14 +180,14 @@ class NameInserter {
 
         if (send->args.empty()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludeMutipleParam)) {
-                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` requires at least one argument", send->fun.data(ctx)->show(ctx));
             }
             return false;
         }
 
         if (send->block != nullptr) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::IncludePassedBlock)) {
-                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` can not be passed a block", send->fun.data(ctx)->show(ctx));
             }
             return false;
         }
@@ -198,7 +198,7 @@ class NameInserter {
             auto constLit = ast::cast_tree<ast::UnresolvedConstantLit>(arg.get());
             if (constLit == nullptr) {
                 if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::IncludeNotConstant)) {
-                    e.setHeader("`{}` must be passed a constant literal", send->fun.data(ctx).show(ctx));
+                    e.setHeader("`{}` must be passed a constant literal", send->fun.data(ctx)->show(ctx));
                 }
                 return false;
             }
@@ -209,17 +209,17 @@ class NameInserter {
     }
 
     void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
-        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx).loc(), owner, newName);
-        alias.data(ctx).resultType = make_shared<core::AliasType>(method);
+        core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx)->loc(), owner, newName);
+        alias.data(ctx)->resultType = make_shared<core::AliasType>(method);
     }
 
     void aliasModuleFunction(core::MutableContext ctx, core::SymbolRef method) {
-        core::SymbolRef owner = method.data(ctx).owner;
-        aliasMethod(ctx, owner.data(ctx).singletonClass(ctx), method.data(ctx).name, method);
+        core::SymbolRef owner = method.data(ctx)->owner;
+        aliasMethod(ctx, owner.data(ctx)->singletonClass(ctx), method.data(ctx)->name, method);
     }
 
     core::SymbolRef methodOwner(core::MutableContext ctx) {
-        core::SymbolRef owner = ctx.owner.data(ctx).enclosingClass(ctx);
+        core::SymbolRef owner = ctx.owner.data(ctx)->enclosingClass(ctx);
         if (owner == core::Symbols::root()) {
             // Root methods end up going on object
             owner = core::Symbols::Object();
@@ -233,32 +233,32 @@ public:
 
         if ((ident != nullptr) && ident->name == core::Names::singleton()) {
             ENFORCE(ident->kind == ast::UnresolvedIdent::Class);
-            klass->symbol = ctx.contextClass().data(ctx).singletonClass(ctx);
+            klass->symbol = ctx.contextClass().data(ctx)->singletonClass(ctx);
         } else {
             if (klass->symbol == core::Symbols::todo()) {
-                klass->symbol = squashNames(ctx, ctx.owner.data(ctx).enclosingClass(ctx), klass->name);
+                klass->symbol = squashNames(ctx, ctx.owner.data(ctx)->enclosingClass(ctx), klass->name);
             } else {
                 // Desugar populates a top-level root() ClassDef. Nothing else
                 // should have been typeAlias by now.
                 ENFORCE(klass->symbol == core::Symbols::root());
             }
             bool isModule = klass->kind == ast::ClassDefKind::Module;
-            if (!klass->symbol.data(ctx).isClass()) {
+            if (!klass->symbol.data(ctx)->isClass()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx).show(ctx));
-                    e.addErrorLine(klass->symbol.data(ctx).loc(), "Previous definition");
+                    e.setHeader("Redefining constant `{}`", klass->symbol.data(ctx)->show(ctx));
+                    e.addErrorLine(klass->symbol.data(ctx)->loc(), "Previous definition");
                 }
-                auto origName = klass->symbol.data(ctx).name;
-                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx).name, core::UniqueNameKind::Namer);
-                klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx).owner, origName);
-            } else if (klass->symbol.data(ctx).isClassModuleSet() &&
-                       isModule != klass->symbol.data(ctx).isClassModule()) {
+                auto origName = klass->symbol.data(ctx)->name;
+                ctx.state.mangleRenameSymbol(klass->symbol, klass->symbol.data(ctx)->name, core::UniqueNameKind::Namer);
+                klass->symbol = ctx.state.enterClassSymbol(klass->declLoc, klass->symbol.data(ctx)->owner, origName);
+            } else if (klass->symbol.data(ctx)->isClassModuleSet() &&
+                       isModule != klass->symbol.data(ctx)->isClassModule()) {
                 if (auto e = ctx.state.beginError(klass->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                    e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx).show(ctx),
-                                klass->symbol.data(ctx).isClassModule() ? "module" : "class");
+                    e.setHeader("`{}` was previously defined as a `{}`", klass->symbol.data(ctx)->show(ctx),
+                                klass->symbol.data(ctx)->isClassModule() ? "module" : "class");
                 }
             } else {
-                klass->symbol.data(ctx).setIsModule(isModule);
+                klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
         scopeStack.emplace_back();
@@ -279,11 +279,11 @@ public:
             return false;
         }
 
-        klass->symbol.data(ctx).setClassAbstract();
-        klass->symbol.data(ctx).singletonClass(ctx).data(ctx).setClassAbstract();
+        klass->symbol.data(ctx)->setClassAbstract();
+        klass->symbol.data(ctx)->singletonClass(ctx).data(ctx)->setClassAbstract();
 
         if (send->fun == core::Names::declareInterface()) {
-            klass->symbol.data(ctx).setClassInterface();
+            klass->symbol.data(ctx)->setClassInterface();
 
             if (klass->kind == ast::Class) {
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InterfaceClass)) {
@@ -309,13 +309,13 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
         scopeStack.pop_back();
-        if (klass->kind == ast::Class && !klass->symbol.data(ctx).superClass.exists() &&
+        if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass.exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
-            klass->symbol.data(ctx).superClass = core::Symbols::todo();
+            klass->symbol.data(ctx)->superClass = core::Symbols::todo();
         }
 
-        klass->symbol.data(ctx).addLoc(ctx, klass->declLoc);
-        klass->symbol.data(ctx).singletonClass(ctx); // force singleton class into existance
+        klass->symbol.data(ctx)->addLoc(ctx, klass->declLoc);
+        klass->symbol.data(ctx)->singletonClass(ctx); // force singleton class into existance
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [&](unique_ptr<ast::Expression> &line) { return handleNamerDSL(ctx, klass, line); });
@@ -341,7 +341,7 @@ public:
     }
 
     core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
-        if (!ctx.owner.data(ctx).isBlockSymbol(ctx)) {
+        if (!ctx.owner.data(ctx)->isBlockSymbol(ctx)) {
             return core::LocalVariable(name, 0);
         }
         return core::LocalVariable(name, scopeId);
@@ -377,10 +377,10 @@ public:
                     core::SymbolRef sym = pair.first;
                     localVariable = pair.second;
                     name = localVariable._name;
-                    if (i < ctx.owner.data(ctx).arguments().size()) {
-                        ENFORCE(ctx.owner.data(ctx).arguments()[i] == sym);
+                    if (i < ctx.owner.data(ctx)->arguments().size()) {
+                        ENFORCE(ctx.owner.data(ctx)->arguments()[i] == sym);
                     } else {
-                        ctx.owner.data(ctx).arguments().emplace_back(sym);
+                        ctx.owner.data(ctx)->arguments().emplace_back(sym);
                     }
                 } else {
                     Error::raise("Must be a reference!");
@@ -395,8 +395,8 @@ public:
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> original) {
         if (original->args.size() == 1 && ast::isa_tree<ast::ZSuperArgs>(original->args[0].get())) {
             original->args.clear();
-            core::SymbolRef method = ctx.owner.data(ctx).enclosingMethod(ctx);
-            if (method.data(ctx).isMethod()) {
+            core::SymbolRef method = ctx.owner.data(ctx)->enclosingMethod(ctx);
+            if (method.data(ctx)->isMethod()) {
                 for (auto arg : scopeStack.back().args) {
                     original->args.emplace_back(make_unique<ast::Local>(original->loc, arg));
                 }
@@ -411,13 +411,13 @@ public:
             switch (original->fun._id) {
                 case core::Names::private_()._id:
                 case core::Names::privateClassMethod()._id:
-                    mdef->symbol.data(ctx).setPrivate();
+                    mdef->symbol.data(ctx)->setPrivate();
                     break;
                 case core::Names::protected_()._id:
-                    mdef->symbol.data(ctx).setProtected();
+                    mdef->symbol.data(ctx)->setProtected();
                     break;
                 case core::Names::public_()._id:
-                    mdef->symbol.data(ctx).setPublic();
+                    mdef->symbol.data(ctx)->setPublic();
                     break;
                 case core::Names::moduleFunction()._id:
                     aliasModuleFunction(ctx, mdef->symbol);
@@ -445,7 +445,7 @@ public:
                         }
                         core::NameRef name = lit->asSymbol(ctx);
 
-                        core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, name);
+                        core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, name);
                         if (!meth.exists()) {
                             if (auto e = ctx.state.beginError(arg->loc, core::errors::Namer::MethodNotFound)) {
                                 e.setHeader("`{}`: no such method: `{}`", original->fun.toString(ctx),
@@ -482,7 +482,7 @@ public:
                     if (args.size() != 2) {
                         break;
                     }
-                    core::SymbolRef meth = methodOwner(ctx).data(ctx).findMember(ctx, args[1]);
+                    core::SymbolRef meth = methodOwner(ctx).data(ctx)->findMember(ctx, args[1]);
                     if (!meth.exists()) {
                         if (auto e =
                                 ctx.state.beginError(original->args[1]->loc, core::errors::Namer::MethodNotFound)) {
@@ -520,15 +520,15 @@ public:
     // Allow stub symbols created to hold intrinsics to be filled in
     // with real types from code
     bool redefinitionOk(core::Context ctx, core::SymbolRef sym) {
-        auto &data = sym.data(ctx);
-        return data.intrinsic != nullptr && data.arguments().empty() && data.resultType == nullptr;
+        auto data = sym.data(ctx);
+        return data->intrinsic != nullptr && data->arguments().empty() && data->resultType == nullptr;
     }
 
     void pushBlockArg(core::MutableContext ctx, core::SymbolRef method) {
         core::SymbolRef blockArgSym;
-        auto block =
-            absl::c_find_if(method.data(ctx).arguments(), [ctx](auto arg) { return arg.data(ctx).isBlockArgument(); });
-        if (block != method.data(ctx).arguments().end()) {
+        auto block = absl::c_find_if(method.data(ctx)->arguments(),
+                                     [ctx](auto arg) { return arg.data(ctx)->isBlockArgument(); });
+        if (block != method.data(ctx)->arguments().end()) {
             blockArgSym = *block;
         }
         blockArgStack.emplace_back(blockArgs{blockArgSym, core::NameRef::noName()});
@@ -540,15 +540,15 @@ public:
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf()) {
-            if (owner.data(ctx).isClass()) {
-                owner = owner.data(ctx).singletonClass(ctx);
+            if (owner.data(ctx)->isClass()) {
+                owner = owner.data(ctx)->singletonClass(ctx);
             }
         }
-        ENFORCE(owner.data(ctx).isClass());
+        ENFORCE(owner.data(ctx)->isClass());
 
-        auto sym = owner.data(ctx).findMember(ctx, method->name);
+        auto sym = owner.data(ctx)->findMember(ctx, method->name);
         if (sym.exists()) {
-            if (method->declLoc == sym.data(ctx).loc()) {
+            if (method->declLoc == sym.data(ctx)->loc()) {
                 // Reparsing the same file
                 method->symbol = sym;
                 fillInArgs(ctx.withOwner(method->symbol), method->args);
@@ -556,12 +556,12 @@ public:
                 return method;
             }
             if (redefinitionOk(ctx, sym)) {
-                sym.data(ctx).addLoc(ctx, method->declLoc);
+                sym.data(ctx)->addLoc(ctx, method->declLoc);
             } else {
                 if (!method->loc.file().data(ctx).isRBI()) {
                     if (auto e = ctx.state.beginError(method->declLoc, core::errors::Namer::RedefinitionOfMethod)) {
                         e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
-                        e.addErrorLine(sym.data(ctx).loc(), "Previous definition");
+                        e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
                     }
                 }
                 // TODO Check that the previous args match the new ones instead of
@@ -571,9 +571,9 @@ public:
         }
         method->symbol = ctx.state.enterMethodSymbol(method->declLoc, owner, method->name);
         fillInArgs(ctx.withOwner(method->symbol), method->args);
-        method->symbol.data(ctx).addLoc(ctx, method->declLoc);
+        method->symbol.data(ctx)->addLoc(ctx, method->declLoc);
         if (method->isDSLSynthesized()) {
-            method->symbol.data(ctx).setDSLSynthesized();
+            method->symbol.data(ctx)->setDSLSynthesized();
         }
         pushBlockArg(ctx, method->symbol);
         return method;
@@ -584,21 +584,21 @@ public:
         blockArgStack.pop_back();
         if (frame.discovered.exists()) {
             auto blockArg = ctx.state.enterMethodArgumentSymbol(frame.discoveredLoc, method->symbol, frame.discovered);
-            blockArg.data(ctx).setBlockArgument();
-            blockArg.data(ctx).resultType = core::Types::untyped(ctx, blockArg);
-            method->symbol.data(ctx).arguments().emplace_back(blockArg);
+            blockArg.data(ctx)->setBlockArgument();
+            blockArg.data(ctx)->resultType = core::Types::untyped(ctx, blockArg);
+            method->symbol.data(ctx)->arguments().emplace_back(blockArg);
 
             core::LocalVariable local{frame.discovered, 0};
             method->args.emplace_back(make_unique<ast::Local>(frame.discoveredLoc, local));
         }
 
-        ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size());
+        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
         scopeStack.pop_back();
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
         }
-        ENFORCE(method->args.size() == method->symbol.data(ctx).arguments().size(), method->name.toString(ctx), ": ",
-                method->args.size(), " != ", method->symbol.data(ctx).arguments().size());
+        ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size(), method->name.toString(ctx), ": ",
+                method->args.size(), " != ", method->symbol.data(ctx)->arguments().size());
         // Not all information is unfortunately available in the symbol. Original argument names aren't.
         // method->args.clear();
         return method;
@@ -610,15 +610,15 @@ public:
             // Introduce intermediate host for block.
             ENFORCE(blk->loc.exists());
             owner = ctx.state.staticInitForFile(blk->loc.file());
-        } else if (owner.data(ctx).isClass()) {
+        } else if (owner.data(ctx)->isClass()) {
             // If we're at class scope, we're actually in the context of the
             // singleton class.
-            owner = owner.data(ctx).singletonClass(ctx);
+            owner = owner.data(ctx)->singletonClass(ctx);
         }
         blk->symbol =
             ctx.state.enterMethodSymbol(blk->loc, owner,
                                         ctx.state.freshNameUnique(core::UniqueNameKind::Namer, core::Names::blockTemp(),
-                                                                  ++(owner.data(ctx).uniqueCounter)));
+                                                                  ++(owner.data(ctx)->uniqueCounter)));
 
         auto outerArgs = scopeStack.back().args;
         auto &frame = scopeStack.emplace_back();
@@ -656,8 +656,8 @@ public:
                 return make_unique<ast::Local>(nm->loc, cur);
             }
             case ast::UnresolvedIdent::Global: {
-                core::Symbol &root = core::Symbols::root().data(ctx);
-                core::SymbolRef sym = root.findMember(ctx, nm->name);
+                core::SymbolData root = core::Symbols::root().data(ctx);
+                core::SymbolRef sym = root->findMember(ctx, nm->name);
                 if (!sym.exists()) {
                     sym = ctx.state.enterFieldSymbol(nm->loc, core::Symbols::root(), nm->name);
                 }
@@ -678,13 +678,13 @@ public:
         auto lhs = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         ENFORCE(lhs);
         core::SymbolRef scope = squashNames(ctx, ctx.contextClass(), lhs->scope);
-        auto sym = scope.data(ctx).findMemberNoDealias(ctx, lhs->cnst);
-        if (sym.exists() && !sym.data(ctx).isStaticField()) {
+        auto sym = scope.data(ctx)->findMemberNoDealias(ctx, lhs->cnst);
+        if (sym.exists() && !sym.data(ctx)->isStaticField()) {
             if (auto e = ctx.state.beginError(asgn->loc, core::errors::Namer::ModuleKindRedefinition)) {
-                e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx).show(ctx));
-                e.addErrorLine(sym.data(ctx).loc(), "Previous definition");
+                e.setHeader("Redefining constant `{}`", lhs->cnst.data(ctx)->show(ctx));
+                e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");
             }
-            ctx.state.mangleRenameSymbol(sym, sym.data(ctx).name, core::UniqueNameKind::Namer);
+            ctx.state.mangleRenameSymbol(sym, sym.data(ctx)->name, core::UniqueNameKind::Namer);
         }
         core::SymbolRef cnst = ctx.state.enterStaticFieldSymbol(lhs->loc, scope, lhs->cnst);
         auto loc = lhs->loc;
@@ -734,19 +734,19 @@ public:
             }
         }
 
-        auto members = onSymbol.data(ctx).typeMembers();
-        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx).name == typeName->cnst; });
+        auto members = onSymbol.data(ctx)->typeMembers();
+        auto it = absl::c_find_if(members, [&](auto mem) { return mem.data(ctx)->name == typeName->cnst; });
         if (it != members.end()) {
             if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
-                e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx).show(ctx));
+                e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
             }
             return make_unique<ast::EmptyTree>(asgn->loc);
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
         if (makeAlias) {
             auto alias =
-                ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx).enclosingClass(ctx), typeName->cnst);
-            alias.data(ctx).resultType = make_shared<core::AliasType>(sym);
+                ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx)->enclosingClass(ctx), typeName->cnst);
+            alias.data(ctx)->resultType = make_shared<core::AliasType>(sym);
         }
 
         if (!send->args.empty()) {
@@ -759,11 +759,11 @@ public:
                     core::NameRef name;
                     if (key != nullptr && key->isSymbol(ctx) && key->asSymbol(ctx) == core::Names::fixed()) {
                         // Leave it in the tree for the resolver to chew on.
-                        sym.data(ctx).setFixed();
+                        sym.data(ctx)->setFixed();
 
                         // TODO(nelhage): This creates an order
                         // dependency in the resolver. See RUBYPLAT-520
-                        sym.data(ctx).resultType = core::Types::untyped(ctx, sym);
+                        sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
 
                         asgn->lhs = ast::MK::Constant(asgn->lhs->loc, sym);
                         return asgn;
@@ -795,8 +795,8 @@ public:
                 if (auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get())) {
                     sym = id->constantSymbol();
                 }
-                if (sym.exists() && sym.data(ctx).isStaticField()) {
-                    sym.data(ctx).setStaticTypeAlias();
+                if (sym.exists() && sym.data(ctx)->isStaticField()) {
+                    sym.data(ctx)->setStaticTypeAlias();
                 }
             }
             return ret;
@@ -809,12 +809,12 @@ public:
 
         switch (send->fun._id) {
             case core::Names::typeTemplate()._id:
-                return handleTypeMemberDefinition(ctx, true,
-                                                  ctx.owner.data(ctx).enclosingClass(ctx).data(ctx).singletonClass(ctx),
-                                                  send, move(asgn), typeName);
+                return handleTypeMemberDefinition(
+                    ctx, true, ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx), send,
+                    move(asgn), typeName);
             case core::Names::typeMember()._id:
-                return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx).enclosingClass(ctx), send, move(asgn),
-                                                  typeName);
+                return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx)->enclosingClass(ctx), send,
+                                                  move(asgn), typeName);
             default:
                 return fillAssign(ctx, move(asgn));
         }

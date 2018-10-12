@@ -9,31 +9,31 @@ void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef
                                    const core::QueryResponse &resp, int activeParameter) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     // signature helps only exist for methods.
-    if (!method.exists() || !method.data(*finalGs).isMethod() || hideSymbol(method)) {
+    if (!method.exists() || !method.data(*finalGs)->isMethod() || hideSymbol(method)) {
         return;
     }
     rapidjson::Value sig;
     sig.SetObject();
     // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting
     // wtih respect to activeParameter here.
-    sig.AddMember("label", (string)method.data(*finalGs).show(*finalGs), alloc);
+    sig.AddMember("label", (string)method.data(*finalGs)->show(*finalGs), alloc);
     rapidjson::Value parameters;
     parameters.SetArray();
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
     string methodDocumentation = "(";
-    auto args = method.data(*finalGs).arguments();
+    auto args = method.data(*finalGs)->arguments();
     int i = 0;
     for (auto arg : args) {
         rapidjson::Value parameter;
         parameter.SetObject();
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        parameter.AddMember("label", (string)arg.data(*finalGs).name.show(*finalGs), alloc);
+        parameter.AddMember("label", (string)arg.data(*finalGs)->name.show(*finalGs), alloc);
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
-            methodDocumentation += "**_" + (string)arg.data(*finalGs).name.show(*finalGs) + "_**";
+            methodDocumentation += "**_" + (string)arg.data(*finalGs)->name.show(*finalGs) + "_**";
         } else {
-            methodDocumentation += (string)arg.data(*finalGs).name.show(*finalGs);
+            methodDocumentation += (string)arg.data(*finalGs)->name.show(*finalGs);
         }
         if (i != args.size() - 1) {
             methodDocumentation += ", ";

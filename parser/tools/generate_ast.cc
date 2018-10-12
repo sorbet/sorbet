@@ -290,7 +290,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         out << "    printTabs(buf, tabs + 1);" << '\n';
         switch (arg.type) {
             case Name:
-                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".data(gs).toString(gs) << '\\n';"
+                out << "    buf << \"" << arg.name << " = \" << " << arg.name << ".data(gs)->toString(gs) << '\\n';"
                     << '\n';
                 break;
             case Node:
@@ -351,7 +351,7 @@ void emit_node_classfile(ostream &out, NodeDef &node) {
         switch (arg.type) {
             case Name:
                 out << R"(    buf << "\")" << arg.name << R"(\" : \"" << core::JSON::escape()" << arg.name
-                    << R"(.data(gs).show(gs)) << "\")" << maybeComma << "\" << '\\n';" << '\n';
+                    << R"(.data(gs)->show(gs)) << "\")" << maybeComma << "\" << '\\n';" << '\n';
                 break;
             case Node:
                 out << R"(    buf << "\")" << arg.name << R"(\" : ";)" << '\n';

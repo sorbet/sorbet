@@ -114,13 +114,13 @@ private:
     static core::SymbolRef resolveLhs(core::MutableContext ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
-            auto lookup = scope->scope.data(ctx).findMember(ctx, name);
+            auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
             if (lookup.exists()) {
                 return lookup;
             }
             scope = scope->parent.get();
         }
-        return nesting->scope.data(ctx).findMemberTransitive(ctx, name);
+        return nesting->scope.data(ctx)->findMemberTransitive(ctx, name);
     }
 
     class ResolutionChecker {
@@ -162,8 +162,8 @@ private:
                 // TODO: try to resolve if not resolved.
                 return core::Symbols::noSymbol();
             }
-            core::SymbolRef resolved = id->constantSymbol().data(ctx).dealias(ctx);
-            core::SymbolRef result = resolved.data(ctx).findMember(ctx, c->cnst);
+            core::SymbolRef resolved = id->constantSymbol().data(ctx)->dealias(ctx);
+            core::SymbolRef result = resolved.data(ctx)->findMember(ctx, c->cnst);
             return result;
         } else {
             if (auto e = ctx.state.beginError(c->loc, core::errors::Resolver::DynamicConstant)) {
@@ -198,14 +198,14 @@ private:
             }
             core::SymbolRef scope;
             if (inner->constantSymbol().exists()) {
-                scope = inner->constantSymbol().data(ctx).dealias(ctx);
+                scope = inner->constantSymbol().data(ctx)->dealias(ctx);
             } else if (auto *id = ast::cast_tree<ast::ConstantLit>(inner->original->scope.get())) {
-                scope = id->constantSymbol().data(ctx).dealias(ctx);
+                scope = id->constantSymbol().data(ctx)->dealias(ctx);
             } else {
                 scope = job.scope->scope;
             }
-            auto customAutogenError = missingConstant->original->cnst == core::Symbols::Subclasses().data(ctx).name;
-            if (scope.data(ctx).isStaticField()) {
+            auto customAutogenError = missingConstant->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
+            if (scope.data(ctx)->isStaticField()) {
                 // most likely an unresolved alias. Well, fill it in and emit an error
                 if (auto e =
                         ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
@@ -213,13 +213,13 @@ private:
                 }
                 // as we're going to start adding definitions into it, we need some class to piggy back on
                 scope = ctx.state.enterClassSymbol(
-                    inner->loc, scope.data(ctx).owner,
+                    inner->loc, scope.data(ctx)->owner,
                     ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::ResolverMissingClass,
-                                                                          scope.data(ctx).name, 1)));
+                                                                          scope.data(ctx)->name, 1)));
                 // as we've name-mangled the class, we have to manually create the next level of resolution
                 auto createdSym = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
                 missingConstant->setConstantSymbol(createdSym);
-            } else if (!scope.data(ctx).derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
+            } else if (!scope.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
                 if (auto e =
                         ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
                     e.setHeader("Unable to resolve constant `{}`", missingConstant->original->cnst.show(ctx));
@@ -230,14 +230,14 @@ private:
                                                "may need to re-generate the .rbi. Try running:\n"
                                                "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
                     } else {
-                        auto suggested = scope.data(ctx).findMemberFuzzyMatch(ctx, missingConstant->original->cnst);
+                        auto suggested = scope.data(ctx)->findMemberFuzzyMatch(ctx, missingConstant->original->cnst);
                         if (suggested.size() > 3) {
                             suggested.resize(3);
                         }
                         if (!suggested.empty()) {
                             vector<core::ErrorLine> lines;
                             for (auto suggestion : suggested) {
-                                lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx).loc(),
+                                lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx)->loc(),
                                                                          "Did you mean: `{}`?",
                                                                          suggestion.symbol.show(ctx)));
                             }
@@ -248,14 +248,14 @@ private:
             }
 
             core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
-            stub.data(ctx).superClass = core::Symbols::StubClass();
-            stub.data(ctx).resultType = core::Types::untypedUntracked();
-            stub.data(ctx).setIsModule(false);
-            stub.data(ctx).singletonClass(ctx); // force singleton class into existence.
+            stub.data(ctx)->superClass = core::Symbols::StubClass();
+            stub.data(ctx)->resultType = core::Types::untypedUntracked();
+            stub.data(ctx)->setIsModule(false);
+            stub.data(ctx)->singletonClass(ctx); // force singleton class into existence.
             bool resolved = resolveJob(ctx, job, typeAliases, true);
             return resolved;
         }
-        if (resolved.data(ctx).isStaticField() && resolved.data(ctx).isStaticTypeAlias()) {
+        if (resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
             auto fnd = typeAliases.find(resolved);
             if (fnd != typeAliases.end()) {
                 if (isFullyResolved(ctx, fnd->second)) {
@@ -267,7 +267,7 @@ private:
                     }
                 }
                 if (lastRun) {
-                    if (auto e = ctx.state.beginError(resolved.data(ctx).loc(),
+                    if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(),
                                                       core::errors::Resolver::RecursiveTypeAlias)) {
                         e.setHeader("Type alias expands to to an infinite type");
                     }
@@ -285,14 +285,14 @@ private:
 
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
         if (it.rhs->constantSymbol().exists()) {
-            if (it.rhs->constantSymbol().data(ctx).dealias(ctx) != it.lhs) {
-                it.lhs.data(ctx).resultType = make_unique<core::AliasType>(it.rhs->constantSymbol());
+            if (it.rhs->constantSymbol().data(ctx)->dealias(ctx) != it.lhs) {
+                it.lhs.data(ctx)->resultType = make_unique<core::AliasType>(it.rhs->constantSymbol());
             } else {
                 if (auto e =
-                        ctx.state.beginError(it.lhs.data(ctx).loc(), core::errors::Resolver::RecursiveClassAlias)) {
+                        ctx.state.beginError(it.lhs.data(ctx)->loc(), core::errors::Resolver::RecursiveClassAlias)) {
                     e.setHeader("Class alias aliases to itself");
                 }
-                it.lhs.data(ctx).resultType = core::Types::untypedUntracked();
+                it.lhs.data(ctx)->resultType = core::Types::untypedUntracked();
             }
             return true;
         }
@@ -305,9 +305,9 @@ private:
             return false;
         }
 
-        core::SymbolRef resolved = job.ancestor->constantSymbol().data(ctx).dealias(ctx);
+        core::SymbolRef resolved = job.ancestor->constantSymbol().data(ctx)->dealias(ctx);
 
-        if (!resolved.data(ctx).isClass()) {
+        if (!resolved.data(ctx)->isClass()) {
             if (!lastRun) {
                 return false;
             }
@@ -317,10 +317,10 @@ private:
             resolved = core::Symbols::StubAncestor();
         }
 
-        if (resolved == job.klass || resolved.data(ctx).derivesFrom(ctx, job.klass)) {
+        if (resolved == job.klass || resolved.data(ctx)->derivesFrom(ctx, job.klass)) {
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::CircularDependency)) {
                 e.setHeader("Circular dependency: `{}` and `{}` are declared as parents of each other",
-                            job.klass.data(ctx).show(ctx), resolved.data(ctx).show(ctx));
+                            job.klass.data(ctx)->show(ctx), resolved.data(ctx)->show(ctx));
             }
             resolved = core::Symbols::StubAncestor();
         }
@@ -328,18 +328,18 @@ private:
         if (job.isSuperclass) {
             if (resolved == core::Symbols::todo()) {
                 // No superclass specified
-            } else if (!job.klass.data(ctx).superClass.exists() ||
-                       job.klass.data(ctx).superClass == core::Symbols::todo() ||
-                       job.klass.data(ctx).superClass == resolved) {
-                job.klass.data(ctx).superClass = resolved;
+            } else if (!job.klass.data(ctx)->superClass.exists() ||
+                       job.klass.data(ctx)->superClass == core::Symbols::todo() ||
+                       job.klass.data(ctx)->superClass == resolved) {
+                job.klass.data(ctx)->superClass = resolved;
             } else {
                 if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::RedefinitionOfParents)) {
-                    e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx).show(ctx));
+                    e.setHeader("Class parents redefined for class `{}`", job.klass.data(ctx)->show(ctx));
                 }
             }
         } else {
-            ENFORCE(resolved.data(ctx).isClass());
-            job.klass.data(ctx).mixins().emplace_back(resolved);
+            ENFORCE(resolved.data(ctx)->isClass());
+            job.klass.data(ctx)->mixins().emplace_back(resolved);
         }
 
         return true;
@@ -370,7 +370,7 @@ private:
             job.ancestor = cnst;
         } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             auto loc = ancestor->loc;
-            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, move(ancestor), ctx.contextClass().data(ctx).name);
+            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, move(ancestor), ctx.contextClass().data(ctx)->name);
             auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), move(nw), nullptr);
             job.ancestor = out.get();
             ancestor = move(out);
@@ -422,7 +422,7 @@ public:
             transformAncestor(ctx, klass, ancst, isSuperclass);
         }
 
-        auto singleton = klass.data(ctx).singletonClass(ctx);
+        auto singleton = klass.data(ctx)->singletonClass(ctx);
         for (auto &ancst : original->singleton_ancestors) {
             transformAncestor(ctx, singleton, ancst);
         }
@@ -433,26 +433,26 @@ public:
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
         auto *id = ast::cast_tree<ast::ConstantLit>(asgn->lhs.get());
-        if (id == nullptr || !id->typeAliasOrConstantSymbol().data(ctx, true).isStaticField()) {
+        if (id == nullptr || !id->typeAliasOrConstantSymbol().data(ctx, true)->isStaticField()) {
             return asgn;
         }
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send != nullptr && send->fun == core::Names::typeAlias() && send->args.size() == 1) {
             core::SymbolRef enclosingTypeMember;
-            core::SymbolRef enclosingClass = ctx.owner.data(ctx).enclosingClass(ctx);
+            core::SymbolRef enclosingClass = ctx.owner.data(ctx)->enclosingClass(ctx);
             while (enclosingClass != core::Symbols::root()) {
-                auto typeMembers = enclosingClass.data(ctx).typeMembers();
+                auto typeMembers = enclosingClass.data(ctx)->typeMembers();
                 if (!typeMembers.empty()) {
                     enclosingTypeMember = typeMembers[0];
                     break;
                 }
-                enclosingClass = enclosingClass.data(ctx).owner.data(ctx).enclosingClass(ctx);
+                enclosingClass = enclosingClass.data(ctx)->owner.data(ctx)->enclosingClass(ctx);
             }
             if (enclosingTypeMember.exists()) {
                 if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::TypeAliasInGenericClass)) {
                     e.setHeader("Type aliases are not allowed in generic classes");
-                    e.addErrorLine(enclosingTypeMember.data(ctx).loc(), "Here is enclosing generic member");
+                    e.addErrorLine(enclosingTypeMember.data(ctx)->loc(), "Here is enclosing generic member");
                 }
             } else {
                 typeAliases[id->constantSymbol()] = send->args[0].get();
@@ -621,55 +621,55 @@ private:
         }
 
         if (sig.seen.abstract) {
-            method.data(ctx).setAbstract();
+            method.data(ctx)->setAbstract();
         }
         if (!sig.typeArgs.empty()) {
-            method.data(ctx).setGenericMethod();
+            method.data(ctx)->setGenericMethod();
             for (auto &typeSpec : sig.typeArgs) {
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym = ctx.state.enterTypeArgument(typeSpec.loc, method, name, core::Variance::CoVariant);
                     typeSpec.type->sym = sym;
-                    sym.data(ctx).resultType = typeSpec.type;
+                    sym.data(ctx)->resultType = typeSpec.type;
                 }
             }
         }
-        auto &methodInfo = method.data(ctx);
+        auto methodInfo = method.data(ctx);
 
-        methodInfo.resultType = sig.returns;
+        methodInfo->resultType = sig.returns;
 
-        for (auto it = methodInfo.arguments().begin(); it != methodInfo.arguments().end(); /* nothing */) {
+        for (auto it = methodInfo->arguments().begin(); it != methodInfo->arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
             auto spec = find_if(sig.argTypes.begin(), sig.argTypes.end(),
-                                [&](auto &spec) { return spec.name == arg.data(ctx).name; });
+                                [&](auto &spec) { return spec.name == arg.data(ctx)->name; });
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
-                arg.data(ctx).resultType = spec->type;
-                arg.data(ctx).addLoc(ctx, spec->loc);
+                arg.data(ctx)->resultType = spec->type;
+                arg.data(ctx)->addLoc(ctx, spec->loc);
                 sig.argTypes.erase(spec);
                 ++it;
             } else if (isOverloaded) {
-                it = methodInfo.arguments().erase(it);
-            } else if (arg.data(ctx).resultType != nullptr) {
+                it = methodInfo->arguments().erase(it);
+            } else if (arg.data(ctx)->resultType != nullptr) {
                 ++it;
             } else {
-                arg.data(ctx).resultType = core::Types::untyped(ctx, arg);
+                arg.data(ctx)->resultType = core::Types::untyped(ctx, arg);
                 if (sig.seen.params || sig.seen.returns || sig.seen.void_) {
                     // Only error if we have any types
-                    if (auto e =
-                            ctx.state.beginError(arg.data(ctx).loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                    if (auto e = ctx.state.beginError(arg.data(ctx)->loc(),
+                                                      core::errors::Resolver::InvalidMethodSignature)) {
                         e.setHeader("Malformed `{}`. Type not specified for argument `{}`", "sig",
-                                    arg.data(ctx).name.toString(ctx));
+                                    arg.data(ctx)->name.toString(ctx));
                     }
                 }
                 ++it;
             }
 
-            if (isOverloaded && arg.data(ctx).isKeyword()) {
+            if (isOverloaded && arg.data(ctx)->isKeyword()) {
                 if (auto e =
-                        ctx.state.beginError(arg.data(ctx).loc(), core::errors::Resolver::InvalidMethodSignature)) {
+                        ctx.state.beginError(arg.data(ctx)->loc(), core::errors::Resolver::InvalidMethodSignature)) {
                     e.setHeader("Malformed `{}`. Overloaded functions cannot have keyword arguments:  `{}`", "sig",
-                                arg.data(ctx).name.toString(ctx));
+                                arg.data(ctx)->name.toString(ctx));
                 }
             }
         }
@@ -699,17 +699,17 @@ private:
     void injectOptionalArgs(core::MutableContext ctx, ast::MethodDef *mdef) {
         ast::InsSeq::STATS_store lets;
 
-        if (mdef->symbol.data(ctx).isAbstract()) {
+        if (mdef->symbol.data(ctx)->isAbstract()) {
             // TODO(jez) Check that abstract methods don't have defined bodies earlier (currently done in infer)
             // so that we can unblock checking default arguments of abstract methods
             return;
         }
 
         int i = -1;
-        for (auto argSym : mdef->symbol.data(ctx).arguments()) {
+        for (auto argSym : mdef->symbol.data(ctx)->arguments()) {
             i++;
             auto &argExp = mdef->args[i];
-            auto argType = argSym.data(ctx).resultType;
+            auto argType = argSym.data(ctx)->resultType;
 
             if (auto *optArgExp = ast::cast_tree<ast::OptionalArg>(argExp.get())) {
                 // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the body.
@@ -726,9 +726,9 @@ private:
     }
 
     void processMixesInClassMethods(core::MutableContext ctx, ast::Send *send) {
-        if (!ctx.owner.data(ctx).isClassModule()) {
+        if (!ctx.owner.data(ctx)->isClassModule()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx).show(ctx));
+                e.setHeader("`{}` can only be declared inside a module, not a class", send->fun.data(ctx)->show(ctx));
             }
             // Keep processing it anyways
         }
@@ -736,41 +736,41 @@ private:
         if (send->args.size() != 1) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Wrong number of arguments to `{}`: Expected: `{}`, got: `{}`",
-                            send->fun.data(ctx).show(ctx), 1, send->args.size());
+                            send->fun.data(ctx)->show(ctx), 1, send->args.size());
             }
             return;
         }
         auto *front = send->args.front().get();
         auto *id = ast::cast_tree<ast::ConstantLit>(front);
-        if (id == nullptr || !id->constantSymbol().exists() || !id->constantSymbol().data(ctx).isClass()) {
+        if (id == nullptr || !id->constantSymbol().exists() || !id->constantSymbol().data(ctx)->isClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("Argument to `{}` must be statically resolvable to a module",
-                            send->fun.data(ctx).show(ctx));
+                            send->fun.data(ctx)->show(ctx));
             }
             return;
         }
-        if (id->constantSymbol().data(ctx).isClassClass()) {
+        if (id->constantSymbol().data(ctx)->isClassClass()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
                 e.setHeader("`{}` is a class, not a module; Only modules may be mixins",
-                            id->constantSymbol().data(ctx).show(ctx));
+                            id->constantSymbol().data(ctx)->show(ctx));
             }
             return;
         }
         if (id->constantSymbol() == ctx.owner) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("Must not pass your self to `{}`", send->fun.data(ctx).show(ctx));
+                e.setHeader("Must not pass your self to `{}`", send->fun.data(ctx)->show(ctx));
             }
             return;
         }
-        auto existing = ctx.owner.data(ctx).findMember(ctx, core::Names::classMethods());
+        auto existing = ctx.owner.data(ctx)->findMember(ctx, core::Names::classMethods());
         if (existing.exists()) {
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMixinDeclaration)) {
-                e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx).show(ctx));
-                e.addErrorLine(ctx.owner.data(ctx).loc(), "Previous definition in this class");
+                e.setHeader("`{}` can only be declared once per module", send->fun.data(ctx)->show(ctx));
+                e.addErrorLine(ctx.owner.data(ctx)->loc(), "Previous definition in this class");
             }
             return;
         }
-        ctx.owner.data(ctx).members[core::Names::classMethods()] = id->constantSymbol();
+        ctx.owner.data(ctx)->members[core::Names::classMethods()] = id->constantSymbol();
     }
 
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
@@ -843,14 +843,14 @@ private:
                         bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
 
                         if (isOverloaded) {
-                            mdef->symbol.data(ctx).setOverloaded();
+                            mdef->symbol.data(ctx)->setOverloaded();
                             int i = 1;
 
                             while (i < lastSig.size()) {
                                 auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
                                 fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded);
                                 if (i + 1 < lastSig.size()) {
-                                    overload.data(ctx).setOverloaded();
+                                    overload.data(ctx)->setOverloaded();
                                 }
                                 i++;
                             }
@@ -867,7 +867,7 @@ private:
                         lastSig.clear();
                     }
 
-                    if (mdef->symbol.data(ctx).isAbstract()) {
+                    if (mdef->symbol.data(ctx)->isAbstract()) {
                         if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
                             if (auto e = ctx.state.beginError(mdef->rhs->loc,
                                                               core::errors::Resolver::AbstractMethodWithBody)) {
@@ -876,14 +876,14 @@ private:
 
                             mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
                         }
-                        if (!mdef->symbol.data(ctx).enclosingClass(ctx).data(ctx).isClassAbstract()) {
+                        if (!mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassAbstract()) {
                             if (auto e = ctx.state.beginError(mdef->loc,
                                                               core::errors::Resolver::AbstractMethodOutsideAbstract)) {
                                 e.setHeader("Before declaring an abstract method, you must mark your class/module "
                                             "as abstract using `abstract!` or `interface!`");
                             }
                         }
-                    } else if (mdef->symbol.data(ctx).enclosingClass(ctx).data(ctx).isClassInterface()) {
+                    } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassInterface()) {
                         if (auto e =
                                 ctx.state.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
                             e.setHeader("All methods in an interface must be declared abstract");
@@ -970,7 +970,7 @@ private:
 
         core::SymbolRef scope;
         if (uid->kind == ast::UnresolvedIdent::Class) {
-            if (!ctx.owner.data(ctx).isClass()) {
+            if (!ctx.owner.data(ctx)->isClass()) {
                 if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                     e.setHeader("Class variables must be declared at class scope");
                 }
@@ -978,11 +978,11 @@ private:
 
             scope = ctx.contextClass();
         } else {
-            if (ctx.owner.data(ctx).isClass()) {
+            if (ctx.owner.data(ctx)->isClass()) {
                 // Declaring a class instance variable
             } else {
                 // Inside a method; declaring a normal instance variable
-                if (ctx.owner.data(ctx).name != core::Names::initialize()) {
+                if (ctx.owner.data(ctx)->name != core::Names::initialize()) {
                     if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::InvalidDeclareVariables)) {
                         e.setHeader("Instance variables must be declared inside `initialize`");
                     }
@@ -991,11 +991,11 @@ private:
             scope = ctx.selfClass();
         }
 
-        auto prior = scope.data(ctx).findMember(ctx, uid->name);
+        auto prior = scope.data(ctx)->findMember(ctx, uid->name);
         if (prior.exists()) {
             if (auto e = ctx.state.beginError(uid->loc, core::errors::Resolver::DuplicateVariableDeclaration)) {
                 e.setHeader("Illegal variable redeclaration");
-                e.addErrorLine(prior.data(ctx).loc(), "Previous declaration is here:");
+                e.addErrorLine(prior.data(ctx)->loc(), "Previous declaration is here:");
             }
             return false;
         }
@@ -1007,7 +1007,7 @@ private:
             var = ctx.state.enterFieldSymbol(uid->loc, scope, uid->name);
         }
 
-        var.data(ctx).resultType = cast->type;
+        var.data(ctx)->resultType = cast->type;
         return true;
     }
 
@@ -1024,9 +1024,9 @@ public:
             return asgn;
         }
 
-        auto &data = id->constantSymbol().data(ctx);
-        if (data.isTypeMember()) {
-            ENFORCE(data.isFixed());
+        auto data = id->constantSymbol().data(ctx);
+        if (data->isTypeMember()) {
+            ENFORCE(data->isFixed());
             auto send = ast::cast_tree<ast::Send>(asgn->rhs.get());
             auto recv = ast::cast_tree<ast::Self>(send->recv.get());
             ENFORCE(recv);
@@ -1048,16 +1048,16 @@ public:
                     auto lit = ast::cast_tree<ast::Literal>(keyExpr.get());
                     if (lit && lit->isSymbol(ctx) && lit->asSymbol(ctx) == core::Names::fixed()) {
                         ParsedSig emptySig;
-                        data.resultType =
+                        data->resultType =
                             TypeSyntax::getResultType(ctx, hash->values[i], emptySig, false, id->constantSymbol());
                     }
                 }
             }
-        } else if (data.isStaticField()) {
-            if (data.resultType != nullptr) {
+        } else if (data->isStaticField()) {
+            if (data->resultType != nullptr) {
                 return asgn;
             }
-            data.resultType = resolveConstantType(ctx, asgn->rhs, id->constantSymbol());
+            data->resultType = resolveConstantType(ctx, asgn->rhs, id->constantSymbol());
         }
 
         return asgn;
@@ -1337,7 +1337,7 @@ public:
                 Error::notImplemented();
         }
 
-        core::SymbolRef sym = klass.data(ctx).findMemberTransitive(ctx, id->name);
+        core::SymbolRef sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);
         if (!sym.exists()) {
             if (auto e = ctx.state.beginError(id->loc, core::errors::Resolver::UndeclaredVariable)) {
                 e.setHeader("Use of undeclared variable `{}`", id->name.toString(ctx));
@@ -1347,7 +1347,7 @@ public:
             } else {
                 sym = ctx.state.enterFieldSymbol(id->loc, klass, id->name);
             }
-            sym.data(ctx).resultType = core::Types::untyped(ctx, sym);
+            sym.data(ctx)->resultType = core::Types::untyped(ctx, sym);
         }
 
         return make_unique<ast::Field>(id->loc, sym);

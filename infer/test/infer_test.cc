@@ -79,12 +79,12 @@ TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo < Bar; end");
-    auto &rootScope = core::Symbols::root().data(ctx);
+    const auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto fooSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo"));
-    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo>", fooSymbol.data(ctx).name.data(ctx).toString(ctx));
+    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto fooSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<constant:Foo>", fooSymbol.data(ctx)->name.data(ctx)->toString(ctx));
 
     auto barType = make_shared<core::ClassType>(barSymbol);
     auto fooType = make_shared<core::ClassType>(fooSymbol);
@@ -98,14 +98,14 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
 TEST_F(InferFixture, ClassesLubs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::Symbols::root().data(ctx);
+    const auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto foo1Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo1"));
-    auto foo2Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx).name.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx).name.data(ctx).toString(ctx));
+    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
+    auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
 
     auto barType = make_shared<core::ClassType>(barSymbol);
     auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
@@ -148,14 +148,14 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
 TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     auto ctx = getCtx();
     processSource(ctx, "class Bar; end; class Foo1 < Bar; end; class Foo2 < Bar;  end");
-    auto &rootScope = core::Symbols::root().data(ctx);
+    const auto &rootScope = core::Symbols::root().data(ctx);
 
-    auto barSymbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Bar"));
-    auto foo1Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo1"));
-    auto foo2Symbol = rootScope.findMember(ctx, ctx.state.enterNameConstant("Foo2"));
-    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx).name.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx).name.data(ctx).toString(ctx));
-    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx).name.data(ctx).toString(ctx));
+    auto barSymbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Bar"));
+    auto foo1Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo1"));
+    auto foo2Symbol = rootScope->findMember(ctx, ctx.state.enterNameConstant("Foo2"));
+    ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
+    ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
 
     auto barType = make_shared<core::ClassType>(barSymbol);
     auto foo1Type = make_shared<core::ClassType>(foo1Symbol);

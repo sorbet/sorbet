@@ -114,7 +114,7 @@ void CFG::sanityCheck(core::Context ctx) {
 
 string CFG::toString(core::Context ctx) {
     stringstream buf;
-    string symbolName = this->symbol.data(ctx).fullName(ctx);
+    string symbolName = this->symbol.data(ctx)->fullName(ctx);
     buf << "subgraph \"cluster_" << symbolName << "\" {" << '\n';
     buf << "    label = \"" << symbolName << "\";" << '\n';
     buf << "    color = blue;" << '\n';

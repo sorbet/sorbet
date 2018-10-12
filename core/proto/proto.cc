@@ -16,7 +16,7 @@ namespace sorbet::core {
 com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name) {
     com::stripe::rubytyper::Name protoName;
     protoName.set_name(name.show(gs));
-    switch (name.data(gs).kind) {
+    switch (name.data(gs)->kind) {
         case UTF8:
             protoName.set_kind(com::stripe::rubytyper::Name::UTF8);
             break;
@@ -32,44 +32,44 @@ com::stripe::rubytyper::Name Proto::toProto(const GlobalState &gs, NameRef name)
 
 com::stripe::rubytyper::Symbol Proto::toProto(const GlobalState &gs, SymbolRef sym) {
     com::stripe::rubytyper::Symbol symbolProto;
-    const auto &data = sym.data(gs);
+    const auto data = sym.data(gs);
 
     symbolProto.set_id(sym._id);
-    *symbolProto.mutable_name() = toProto(gs, data.name);
+    *symbolProto.mutable_name() = toProto(gs, data->name);
 
-    if (data.isClass()) {
+    if (data->isClass()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::CLASS);
-    } else if (data.isStaticField()) {
+    } else if (data->isStaticField()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::STATIC_FIELD);
-    } else if (data.isField()) {
+    } else if (data->isField()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::FIELD);
-    } else if (data.isMethod()) {
+    } else if (data->isMethod()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::METHOD);
-    } else if (data.isMethodArgument()) {
+    } else if (data->isMethodArgument()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::ARGUMENT);
-    } else if (data.isTypeMember()) {
+    } else if (data->isTypeMember()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_MEMBER);
-    } else if (data.isTypeArgument()) {
+    } else if (data->isTypeArgument()) {
         symbolProto.set_kind(com::stripe::rubytyper::Symbol::TYPE_ARGUMENT);
     }
 
-    if (data.isClass() || data.isMethod()) {
-        if (data.isClass()) {
-            for (auto thing : data.mixins()) {
+    if (data->isClass() || data->isMethod()) {
+        if (data->isClass()) {
+            for (auto thing : data->mixins()) {
                 symbolProto.add_mixins(thing._id);
             }
         } else {
-            for (auto thing : data.arguments()) {
+            for (auto thing : data->arguments()) {
                 symbolProto.add_arguments(thing._id);
             }
         }
 
-        if (data.superClass.exists()) {
-            symbolProto.set_superclass(data.superClass._id);
+        if (data->superClass.exists()) {
+            symbolProto.set_superclass(data->superClass._id);
         }
     }
 
-    for (auto pair : data.membersStableOrderSlow(gs)) {
+    for (auto pair : data->membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
             continue;

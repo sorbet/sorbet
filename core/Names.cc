@@ -53,12 +53,12 @@ string Name::toString(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return "<singleton class:" + this->unique.original.data(gs).toString(gs) + ">";
+                return "<singleton class:" + this->unique.original.data(gs)->toString(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return "<overload N." + to_string(this->unique.num) + " : " +
-                       this->unique.original.data(gs).toString(gs) + ">";
+                       this->unique.original.data(gs)->toString(gs) + ">";
             }
-            return this->unique.original.data(gs).toString(gs) + "$" + to_string(this->unique.num);
+            return this->unique.original.data(gs)->toString(gs) + "$" + to_string(this->unique.num);
         case CONSTANT:
             return "<constant:" + this->cnst.original.toString(gs) + ">";
         default:
@@ -72,11 +72,11 @@ string Name::show(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return "<Class:" + this->unique.original.data(gs).show(gs) + ">";
+                return "<Class:" + this->unique.original.data(gs)->show(gs) + ">";
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return absl::StrCat(this->unique.original.data(gs).toString(gs), " (overload.", this->unique.num, ")");
+                return absl::StrCat(this->unique.original.data(gs)->toString(gs), " (overload.", this->unique.num, ")");
             }
-            return this->unique.original.data(gs).toString(gs);
+            return this->unique.original.data(gs)->toString(gs);
         case CONSTANT:
             return this->cnst.original.toString(gs);
         default:
@@ -88,9 +88,9 @@ string_view Name::shortName(const GlobalState &gs) const {
         case UTF8:
             return string_view(raw.utf8.begin(), raw.utf8.end() - raw.utf8.begin());
         case UNIQUE:
-            return this->unique.original.data(gs).shortName(gs);
+            return this->unique.original.data(gs)->shortName(gs);
         case CONSTANT:
-            return this->cnst.original.data(gs).shortName(gs);
+            return this->cnst.original.data(gs)->shortName(gs);
         default:
             Error::notImplemented();
     }
@@ -135,12 +135,12 @@ bool Name::isClassName(const GlobalState &gs) const {
             return false;
         case UNIQUE: {
             return (this->unique.uniqueNameKind == Singleton || this->unique.uniqueNameKind == Namer) &&
-                   this->unique.original.data(gs).isClassName(gs);
+                   this->unique.original.data(gs)->isClassName(gs);
         }
         case CONSTANT:
-            ENFORCE(this->cnst.original.data(gs).kind == UTF8 ||
-                    this->cnst.original.data(gs).kind == UNIQUE &&
-                        this->cnst.original.data(gs).unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
+            ENFORCE(this->cnst.original.data(gs)->kind == UTF8 ||
+                    this->cnst.original.data(gs)->kind == UNIQUE &&
+                        this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
             return true;
         default:
             Error::notImplemented();
@@ -163,37 +163,37 @@ void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
 #endif
 }
 
-Name &NameRef::data(GlobalState &gs) const {
+NameData NameRef::data(GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
-    return gs.names[_id];
+    return NameData(gs.names[_id], gs);
 }
 
-const Name &NameRef::data(const GlobalState &gs) const {
+const NameData NameRef::data(const GlobalState &gs) const {
     ENFORCE(_id < gs.names.size(), "name id out of bounds");
     ENFORCE(exists(), "non existing name");
     enforceCorrectGlobalState(gs);
-    return gs.names[_id];
+    return NameData(const_cast<Name &>(gs.names[_id]), gs);
 }
 string NameRef::toString(const GlobalState &gs) const {
-    return data(gs).toString(gs);
+    return data(gs)->toString(gs);
 }
 string NameRef::show(const GlobalState &gs) const {
-    return data(gs).show(gs);
+    return data(gs)->show(gs);
 }
 
 NameRef NameRef::addEq(GlobalState &gs) const {
-    Name &name = this->data(gs);
-    ENFORCE(name.kind == UTF8, "addEq over non-utf8 name");
-    string nameEq = string(name.raw.utf8.begin(), name.raw.utf8.end()) + "=";
+    auto name = this->data(gs);
+    ENFORCE(name->kind == UTF8, "addEq over non-utf8 name");
+    string nameEq = string(name->raw.utf8.begin(), name->raw.utf8.end()) + "=";
     return gs.enterNameUTF8(nameEq);
 }
 
 NameRef NameRef::addAt(GlobalState &gs) const {
-    Name &name = this->data(gs);
-    ENFORCE(name.kind == UTF8, "addAt over non-utf8 name");
-    string nameEq = "@" + string(name.raw.utf8.begin(), name.raw.utf8.end());
+    auto name = this->data(gs);
+    ENFORCE(name->kind == UTF8, "addAt over non-utf8 name");
+    string nameEq = "@" + string(name->raw.utf8.begin(), name->raw.utf8.end());
     return gs.enterNameUTF8(nameEq);
 }
 
@@ -222,5 +222,23 @@ Name Name::deepCopy(const GlobalState &to) const {
 
     return out;
 }
+
+NameData::NameData(Name &ref, const GlobalState &gs) : DebugOnlyCheck(gs), name(ref) {}
+
+NameDataDebugCheck::NameDataDebugCheck(const GlobalState &gs) : gs(gs), nameCountAtCreation(gs.namesUsed()) {}
+
+void NameDataDebugCheck::check() const {
+    ENFORCE(nameCountAtCreation == gs.namesUsed());
+}
+
+Name *NameData::operator->() {
+    runDebugOnlyCheck();
+    return &name;
+};
+
+const Name *NameData::operator->() const {
+    runDebugOnlyCheck();
+    return &name;
+};
 
 } // namespace sorbet::core

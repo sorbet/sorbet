@@ -31,10 +31,10 @@ void jumpToDead(BasicBlock *from, CFG &inWhat, core::Loc loc);
 
 unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     ENFORCE(md.symbol.exists());
-    ENFORCE(!md.symbol.data(ctx).isOverloaded());
+    ENFORCE(!md.symbol.data(ctx)->isOverloaded());
     unique_ptr<CFG> res(new CFG); // private constructor
     res->symbol = md.symbol;
-    if (res->symbol.data(ctx).isAbstract()) {
+    if (res->symbol.data(ctx)->isAbstract()) {
         res->basicBlocks.clear();
         return res;
     }
@@ -47,13 +47,13 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
 
     BasicBlock *entry = res->entry();
 
-    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.data(ctx).owner));
+    entry->exprs.emplace_back(selfSym, md.loc, make_unique<Self>(md.symbol.data(ctx)->owner));
 
     int i = -1;
     for (auto &argExpr : md.args) {
         i++;
         auto *a = arg2Local(argExpr.get());
-        auto argSym = md.symbol.data(ctx).arguments()[i];
+        auto argSym = md.symbol.data(ctx)->arguments()[i];
         auto &inserted = entry->exprs.emplace_back(a->localVariable, a->loc, make_unique<LoadArg>(selfSym, argSym));
         inserted.value->isSynthetic = true;
         aliases[argSym] = a->localVariable;
@@ -70,11 +70,11 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     for (auto kv : aliases) {
         core::SymbolRef global = kv.first;
         core::LocalVariable local = kv.second;
-        if (global.data(ctx).isMethodArgument()) {
+        if (global.data(ctx)->isMethodArgument()) {
             res->minLoops[local] = 0; // method arguments are pinned only in loops
         } else {
-            aliasesPrefix.emplace_back(local, global.data(ctx).loc(), make_unique<Alias>(global));
-            if (global.data(ctx).isField() || global.data(ctx).isStaticField()) {
+            aliasesPrefix.emplace_back(local, global.data(ctx)->loc(), make_unique<Alias>(global));
+            if (global.data(ctx)->isField() || global.data(ctx)->isStaticField()) {
                 res->minLoops[local] = CFG::MIN_LOOP_FIELD;
             } else {
                 res->minLoops[local] = CFG::MIN_LOOP_GLOBAL;

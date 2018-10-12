@@ -27,7 +27,7 @@ void LSPLoop::handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::
             } else {
                 for (auto &component : resp->dispatchComponents) {
                     if (component.method.exists()) {
-                        addLocIfExists(result, component.method.data(*finalGs).loc());
+                        addLocIfExists(result, component.method.data(*finalGs)->loc());
                     }
                 }
             }

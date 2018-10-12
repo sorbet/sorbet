@@ -914,14 +914,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::Complex *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Symbols::Complex().data(ctx).name;
+                core::NameRef complex_name = core::Symbols::Complex().data(ctx)->name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
                 auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
-                core::NameRef complex_name = core::Symbols::Rational().data(ctx).name;
+                core::NameRef complex_name = core::Symbols::Rational().data(ctx)->name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
                 auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
@@ -1041,7 +1041,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::IRange *ret) {
-                core::NameRef range_name = core::Symbols::Range().data(ctx).name;
+                core::NameRef range_name = core::Symbols::Range().data(ctx)->name;
                 unique_ptr<Expression> range = MK::UnresolvedConstant(loc, MK::EmptyTree(loc), range_name);
                 auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
                 auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);

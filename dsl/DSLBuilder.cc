@@ -82,7 +82,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
 
     if (!skipGetter) {
         // def self.get_<prop>
-        core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx).toString(ctx));
+        core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->toString(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));
         stats.emplace_back(ast::MK::Method(loc, loc, getName, ast::MethodDef::ARGS_store(),
                                            ast::MK::Unsafe(loc, ast::MK::Nil(loc)),

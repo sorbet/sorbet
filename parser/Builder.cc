@@ -133,9 +133,9 @@ public:
 
     unique_ptr<Node> accessible(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
-            core::Name &name = id->name.data(gs_);
-            ENFORCE(name.kind == core::UTF8);
-            if (driver_->lex.is_declared(name.toString(gs_))) {
+            auto name = id->name.data(gs_);
+            ENFORCE(name->kind == core::UTF8);
+            if (driver_->lex.is_declared(name->toString(gs_))) {
                 return make_unique<LVar>(node->loc, id->name);
             } else {
                 return make_unique<Send>(node->loc, nullptr, id->name, sorbet::parser::NodeVec());
@@ -179,8 +179,8 @@ public:
 
     unique_ptr<Node> assignable(unique_ptr<Node> node) {
         if (auto *id = parser::cast_node<Ident>(node.get())) {
-            core::Name &name = id->name.data(gs_);
-            driver_->lex.declare(name.toString(gs_));
+            auto name = id->name.data(gs_);
+            driver_->lex.declare(name->toString(gs_));
             return make_unique<LVarLhs>(id->loc, id->name);
         } else if (auto *iv = parser::cast_node<IVar>(node.get())) {
             return make_unique<IVarLhs>(iv->loc, iv->name);
@@ -487,14 +487,14 @@ public:
         typecase(node.get(),
 
                  [&](String *s) {
-                     std::string dedented = dedenter.dedent(s->val.data(gs_).toString(gs_));
+                     std::string dedented = dedenter.dedent(s->val.data(gs_)->toString(gs_));
                      result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                  },
 
                  [&](DString *d) {
                      for (auto &p : d->nodes) {
                          if (auto *s = parser::cast_node<String>(p.get())) {
-                             std::string dedented = dedenter.dedent(s->val.data(gs_).toString(gs_));
+                             std::string dedented = dedenter.dedent(s->val.data(gs_)->toString(gs_));
                              unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                              p.swap(newstr);
                          }

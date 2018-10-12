@@ -87,9 +87,9 @@ shared_ptr<Type> AndType::getCallArguments(Context ctx, NameRef name) {
 
 DispatchResult ShapeType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "shapetype");
-    auto method = Symbols::Shape().data(ctx).findMember(ctx, args.name);
-    if (method.exists() && method.data(ctx).intrinsic != nullptr) {
-        auto result = method.data(ctx).intrinsic->apply(ctx, args, this);
+    auto method = Symbols::Shape().data(ctx)->findMember(ctx, args.name);
+    if (method.exists() && method.data(ctx)->intrinsic != nullptr) {
+        auto result = method.data(ctx)->intrinsic->apply(ctx, args, this);
         if (result != nullptr) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = args.selfType;
@@ -102,9 +102,9 @@ DispatchResult ShapeType::dispatchCall(Context ctx, DispatchArgs args) {
 
 DispatchResult TupleType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "tupletype");
-    auto method = Symbols::Tuple().data(ctx).findMember(ctx, args.name);
-    if (method.exists() && method.data(ctx).intrinsic != nullptr) {
-        auto result = method.data(ctx).intrinsic->apply(ctx, args, this);
+    auto method = Symbols::Tuple().data(ctx)->findMember(ctx, args.name);
+    if (method.exists() && method.data(ctx)->intrinsic != nullptr) {
+        auto result = method.data(ctx)->intrinsic->apply(ctx, args, this);
         if (result != nullptr) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = args.selfType;
@@ -117,17 +117,17 @@ DispatchResult TupleType::dispatchCall(Context ctx, DispatchArgs args) {
 
 namespace {
 bool isSetter(Context ctx, NameRef fun) {
-    if (fun.data(ctx).kind != NameKind::UTF8) {
+    if (fun.data(ctx)->kind != NameKind::UTF8) {
         return false;
     }
-    return fun.data(ctx).raw.utf8.back() == '=';
+    return fun.data(ctx)->raw.utf8.back() == '=';
 }
 
 unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
                                     SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
-                                    const Symbol &argSym, const shared_ptr<Type> &selfType,
+                                    const SymbolData argSym, const shared_ptr<Type> &selfType,
                                     vector<shared_ptr<Type>> &targs, Loc loc, bool mayBeSetter = false) {
-    auto ref = argSym.ref(ctx);
+    auto ref = argSym->ref(ctx);
     shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(ctx, ref);
@@ -139,15 +139,15 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
         return nullptr;
     }
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentMismatch)) {
-        if (mayBeSetter && isSetter(ctx, method.data(ctx).name)) {
-            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym.name.toString(ctx),
+        if (mayBeSetter && isSetter(ctx, method.data(ctx)->name)) {
+            e.setHeader("Assigning a value to `{}` that does not match expected type `{}`", argSym->name.toString(ctx),
                         expectedType->show(ctx));
         } else {
             e.setHeader("`{}` doesn't match `{}` for argument `{}`", argTpe.type->show(ctx), expectedType->show(ctx),
-                        argSym.name.toString(ctx));
+                        argSym->name.toString(ctx));
             e.addErrorSection(ErrorSection({
-                ErrorLine::from(argSym.loc(), "Method `{}` has specified `{}` as `{}`", method.data(ctx).show(ctx),
-                                argSym.name.toString(ctx), expectedType->show(ctx)),
+                ErrorLine::from(argSym->loc(), "Method `{}` has specified `{}` as `{}`", method.data(ctx)->show(ctx),
+                                argSym->name.toString(ctx), expectedType->show(ctx)),
             }));
         }
         e.addErrorSection(
@@ -165,8 +165,8 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
 
 unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
-        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx).name.toString(ctx),
-                    method.data(ctx).show(ctx));
+        e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx)->name.toString(ctx),
+                    method.data(ctx)->show(ctx));
         return e.build();
     }
     return nullptr;
@@ -174,11 +174,11 @@ unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, Sym
 }; // namespace
 
 int getArity(Context ctx, SymbolRef method) {
-    int arity = method.data(ctx).arguments().size();
+    int arity = method.data(ctx)->arguments().size();
     if (arity == 0) {
         return 0;
     }
-    if (method.data(ctx).arguments().back().data(ctx).isBlockArgument()) {
+    if (method.data(ctx)->arguments().back().data(ctx)->isBlockArgument()) {
         --arity;
     }
     return arity;
@@ -198,10 +198,10 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     { // create candidates and sort them by number of arguments(stable by symbol id)
         int i = 0;
         SymbolRef current = primary;
-        while (current.data(ctx).isOverloaded()) {
+        while (current.data(ctx)->isOverloaded()) {
             i++;
-            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx).name, i);
-            SymbolRef overload = primary.data(ctx).owner.data(ctx).findMember(ctx, overloadName);
+            NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
+            SymbolRef overload = primary.data(ctx)->owner.data(ctx)->findMember(ctx, overloadName);
             if (!overload.exists()) {
                 Error::raise("Corruption of overloads?");
             } else {
@@ -235,7 +235,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
                     continue;
                 }
 
-                auto argType = Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx).arguments()[i], inClass, targs);
+                auto argType = Types::resultTypeAsSeenFrom(ctx, candidate.data(ctx)->arguments()[i], inClass, targs);
                 if (argType->isFullyDefined() && !Types::isSubType(ctx, arg->type, argType)) {
                     it = leftCandidates.erase(it);
                     continue;
@@ -253,15 +253,15 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     { // keep only candidates that have a block iff we are passing one
         for (auto it = leftCandidates.begin(); it != leftCandidates.end(); /* nothing*/) {
             SymbolRef candidate = *it;
-            auto args = candidate.data(ctx).arguments();
+            auto args = candidate.data(ctx)->arguments();
             if (args.empty()) {
                 if (hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
             } else {
-                auto &lastArg = args.back().data(ctx);
-                if (lastArg.isBlockArgument() != hasBlock) {
+                auto lastArg = args.back().data(ctx);
+                if (lastArg->isBlockArgument() != hasBlock) {
                     it = leftCandidates.erase(it);
                     continue;
                 }
@@ -302,7 +302,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
         return metaType->wrapped;
     }
     if (auto *classType = cast_type<ClassType>(tp.get())) {
-        SymbolRef attachedClass = classType->symbol.data(ctx).attachedClass(ctx);
+        SymbolRef attachedClass = classType->symbol.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (auto e = ctx.state.beginError(loc, errors::Infer::BareTypeUsage)) {
                 e.setHeader("Unsupported usage of bare type");
@@ -310,7 +310,7 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
             return Types::untypedUntracked();
         }
 
-        return attachedClass.data(ctx).externalType(ctx);
+        return attachedClass.data(ctx)->externalType(ctx);
     }
 
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
@@ -339,12 +339,12 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
 string prettyArity(Context ctx, SymbolRef method) {
     int required = 0, optional = 0;
     bool repeated = false;
-    for (auto arg : method.data(ctx).arguments()) {
-        if (arg.data(ctx).isKeyword() || arg.data(ctx).isBlockArgument()) {
+    for (auto arg : method.data(ctx)->arguments()) {
+        if (arg.data(ctx)->isKeyword() || arg.data(ctx)->isBlockArgument()) {
             // ignore
-        } else if (arg.data(ctx).isOptional()) {
+        } else if (arg.data(ctx)->isOptional()) {
             ++optional;
-        } else if (arg.data(ctx).isRepeated()) {
+        } else if (arg.data(ctx)->isRepeated()) {
             repeated = true;
         } else {
             ++required;
@@ -374,12 +374,12 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         return DispatchResult(Types::untyped(ctx, thisType->untypedBlame()), move(args.selfType), Symbols::untyped());
     } else if (symbol == Symbols::void_()) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
-            e.setHeader("Can not call method `{}` on void type", args.name.data(ctx).toString(ctx));
+            e.setHeader("Can not call method `{}` on void type", args.name.data(ctx)->toString(ctx));
         }
         return DispatchResult(Types::untypedUntracked(), move(args.selfType), Symbols::noSymbol());
     }
 
-    SymbolRef mayBeOverloaded = symbol.data(ctx).findMemberTransitive(ctx, args.name);
+    SymbolRef mayBeOverloaded = symbol.data(ctx)->findMemberTransitive(ctx, args.name);
 
     if (!mayBeOverloaded.exists()) {
         if (args.name == Names::initialize()) {
@@ -400,41 +400,41 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         auto result = DispatchResult(Types::untypedUntracked(), move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
             if (args.fullType.get() != thisType) {
-                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx).toString(ctx),
+                e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->toString(ctx),
                             thisType->show(ctx), args.fullType->show(ctx));
             } else {
-                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx).toString(ctx),
+                e.setHeader("Method `{}` does not exist on `{}`", args.name.data(ctx)->toString(ctx),
                             thisType->show(ctx));
             }
             if (args.fullType.get() != thisType && symbol == Symbols::NilClass()) {
                 e.replaceWith(args.locs.receiver, "T.must({})", args.locs.receiver.source(ctx));
             } else {
-                if (symbol.data(ctx).isClassModule()) {
-                    auto objMeth = core::Symbols::Object().data(ctx).findMemberTransitive(ctx, args.name);
+                if (symbol.data(ctx)->isClassModule()) {
+                    auto objMeth = core::Symbols::Object().data(ctx)->findMemberTransitive(ctx, args.name);
                     if (objMeth.exists()) {
                         e.addErrorSection(
                             ErrorSection(ErrorColors::format("Did you mean to `include {}` in this module?",
-                                                             objMeth.data(ctx).owner.data(ctx).name.show(ctx))));
+                                                             objMeth.data(ctx)->owner.data(ctx)->name.show(ctx))));
                     }
                 }
-                auto alternatives = symbol.data(ctx).findMemberFuzzyMatch(ctx, args.name);
+                auto alternatives = symbol.data(ctx)->findMemberFuzzyMatch(ctx, args.name);
                 if (!alternatives.empty()) {
                     vector<ErrorLine> lines;
                     lines.reserve(alternatives.size());
                     for (auto alternative : alternatives) {
-                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx).loc(), "Did you mean: `{}`?",
+                        lines.emplace_back(ErrorLine::from(alternative.symbol.data(ctx)->loc(), "Did you mean: `{}`?",
                                                            alternative.symbol.show(ctx)));
                     }
                     e.addErrorSection(ErrorSection(lines));
                 }
 
-                auto attached = symbol.data(ctx).attachedClass(ctx);
-                if (attached.exists() && symbol.data(ctx).derivesFrom(ctx, Symbols::Chalk_Tools_Accessible())) {
+                auto attached = symbol.data(ctx)->attachedClass(ctx);
+                if (attached.exists() && symbol.data(ctx)->derivesFrom(ctx, Symbols::Chalk_Tools_Accessible())) {
                     e.addErrorSection(ErrorSection(
                         "If this method is generated by Chalk::Tools::Accessible, you "
                         "may need to re-generate the .rbi. Try running:\n" +
                         ErrorColors::format("  scripts/bin/remote-script sorbet/shim_generation/make_accessible.rb {}",
-                                            attached.data(ctx).fullName(ctx))));
+                                            attached.data(ctx)->fullName(ctx))));
                 }
             }
             result.components.front().errors.emplace_back(e.build());
@@ -442,7 +442,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         return result;
     }
 
-    SymbolRef method = mayBeOverloaded.data(ctx).isOverloaded()
+    SymbolRef method = mayBeOverloaded.data(ctx)->isOverloaded()
                            ? guessOverload(ctx.withOwner(mayBeOverloaded), symbol, mayBeOverloaded, args.args,
                                            args.fullType, targs, args.block != nullptr)
                            : mayBeOverloaded;
@@ -450,27 +450,27 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     DispatchResult result;
     result.components.emplace_back(DispatchComponent{args.selfType, method, vector<unique_ptr<BasicError>>()});
 
-    const Symbol &data = method.data(ctx);
+    const SymbolData data = method.data(ctx);
     unique_ptr<TypeConstraint> maybeConstraint;
     TypeConstraint *constr;
     if (args.block) {
         constr = args.block->constr.get();
-    } else if (data.isGenericMethod()) {
+    } else if (data->isGenericMethod()) {
         maybeConstraint = make_unique<TypeConstraint>();
         constr = maybeConstraint.get();
     } else {
         constr = &TypeConstraint::EmptyFrozenConstraint;
     }
 
-    if (data.isGenericMethod()) {
-        constr->defineDomain(ctx, data.typeArguments());
+    if (data->isGenericMethod()) {
+        constr->defineDomain(ctx, data->typeArguments());
     }
-    bool hasKwargs = absl::c_any_of(data.arguments(), [&ctx](SymbolRef arg) { return arg.data(ctx).isKeyword(); });
+    bool hasKwargs = absl::c_any_of(data->arguments(), [&ctx](SymbolRef arg) { return arg.data(ctx)->isKeyword(); });
 
-    auto pit = data.arguments().begin();
-    auto pend = data.arguments().end();
+    auto pit = data->arguments().begin();
+    auto pend = data->arguments().end();
 
-    if (pit != pend && (pend - 1)->data(ctx).isBlockArgument()) {
+    if (pit != pend && (pend - 1)->data(ctx)->isBlockArgument()) {
         --pend;
     }
 
@@ -478,13 +478,13 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     auto aend = args.args.end();
 
     while (pit != pend && ait != aend) {
-        const Symbol &spec = pit->data(ctx);
+        const SymbolData spec = pit->data(ctx);
         auto &arg = *ait;
-        if (spec.isKeyword()) {
+        if (spec->isKeyword()) {
             break;
         }
         if (ait + 1 == aend && hasKwargs && arg->type->derivesFrom(ctx, Symbols::Hash()) &&
-            (spec.isOptional() || spec.isRepeated())) {
+            (spec->isOptional() || spec->isRepeated())) {
             break;
         }
 
@@ -494,22 +494,22 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             result.components.front().errors.emplace_back(move(e));
         }
 
-        if (!spec.isRepeated()) {
+        if (!spec->isRepeated()) {
             ++pit;
         }
         ++ait;
     }
 
     if (pit != pend) {
-        if (!(pit->data(ctx).isKeyword() || pit->data(ctx).isOptional() || pit->data(ctx).isRepeated() ||
-              pit->data(ctx).isBlockArgument())) {
+        if (!(pit->data(ctx)->isKeyword() || pit->data(ctx)->isOptional() || pit->data(ctx)->isRepeated() ||
+              pit->data(ctx)->isBlockArgument())) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
+                e.setHeader("Not enough arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
                             prettyArity(ctx, method),
                             args.args.size()); // TODO: should use position and print the source tree, not the cfg one.
-                e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", data.show(ctx));
+                e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", data->show(ctx));
                 if (args.name == core::Names::any() &&
-                    symbol == core::Symbols::T().data(ctx).lookupSingletonClass(ctx)) {
+                    symbol == core::Symbols::T().data(ctx)->lookupSingletonClass(ctx)) {
                     e.addErrorSection(
                         core::ErrorSection("Hint: if you want to allow any type as an argument, use `T.untyped`"));
                 }
@@ -526,7 +526,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
         auto kwit = pit;
-        while (!kwit->data(ctx).isKeyword()) {
+        while (!kwit->data(ctx)->isKeyword()) {
             kwit++;
         }
         pend = kwit;
@@ -537,11 +537,11 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         } else if (auto *hash = cast_type<ShapeType>(hashArg->type.get())) {
             --aend;
 
-            while (kwit != data.arguments().end()) {
-                const Symbol &spec = kwit->data(ctx);
-                if (spec.isBlockArgument()) {
+            while (kwit != data->arguments().end()) {
+                const SymbolData spec = kwit->data(ctx);
+                if (spec->isBlockArgument()) {
                     break;
-                } else if (spec.isRepeated()) {
+                } else if (spec->isRepeated()) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
                         auto key = *it;
                         SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
@@ -570,17 +570,17 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                 auto arg = absl::c_find_if(hash->keys, [&](shared_ptr<LiteralType> lit) {
                     return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
-                           lit->value == spec.name._id;
+                           lit->value == spec->name._id;
                 });
                 if (arg == hash->keys.end()) {
-                    if (!spec.isOptional()) {
-                        if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec.ref(ctx))) {
+                    if (!spec->isOptional()) {
+                        if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec->ref(ctx))) {
                             result.components.front().errors.emplace_back(move(e));
                         }
                     }
                     continue;
                 }
-                consumed.insert(spec.name);
+                consumed.insert(spec->name);
                 TypeAndOrigins tpe;
                 tpe.origins = args.args.back()->origins;
                 auto offset = arg - hash->keys.begin();
@@ -599,7 +599,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Unrecognized keyword argument `{}` passed for method `{}`", arg.toString(ctx),
-                                data.show(ctx));
+                                data->show(ctx));
                     result.components.front().errors.emplace_back(e.build());
                 }
             }
@@ -616,8 +616,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     if (hasKwargs && aend == args.args.end()) {
         // We have keyword arguments, but we didn't consume a hash at the
         // end. Report an error for each missing required keyword arugment.
-        for (auto &spec : data.arguments()) {
-            if (!spec.data(ctx).isKeyword() || spec.data(ctx).isOptional() || spec.data(ctx).isRepeated()) {
+        for (auto &spec : data->arguments()) {
+            if (!spec.data(ctx)->isKeyword() || spec.data(ctx)->isOptional() || spec.data(ctx)->isRepeated()) {
                 continue;
             }
             if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
@@ -628,17 +628,17 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
     if (ait != aend) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
-            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data.show(ctx),
+            e.setHeader("Too many arguments provided for method `{}`. Expected: `{}`, got: `{}`", data->show(ctx),
                         prettyArity(ctx, method), args.args.size());
-            e.addErrorLine(method.data(ctx).loc(), "`{}` defined here", args.name.toString(ctx));
+            e.addErrorLine(method.data(ctx)->loc(), "`{}` defined here", args.name.toString(ctx));
             result.components.front().errors.emplace_back(e.build());
         }
     }
 
     shared_ptr<Type> resultType = nullptr;
 
-    if (method.data(ctx).intrinsic != nullptr) {
-        resultType = method.data(ctx).intrinsic->apply(ctx, args, thisType);
+    if (method.data(ctx)->intrinsic != nullptr) {
+        resultType = method.data(ctx)->intrinsic->apply(ctx, args, thisType);
     }
 
     if (resultType == nullptr) {
@@ -664,10 +664,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
     if (args.block != nullptr) {
         SymbolRef bspec;
-        if (!data.arguments().empty()) {
-            bspec = data.arguments().back();
+        if (!data->arguments().empty()) {
+            bspec = data->arguments().back();
         }
-        if (!bspec.exists() || !bspec.data(ctx).isBlockArgument()) {
+        if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
             // TODO(nelhage): passing a block to a function that does not accept one
         } else {
             shared_ptr<Type> blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
@@ -699,23 +699,23 @@ DispatchResult AppliedType::dispatchCall(Context ctx, DispatchArgs args) {
 }
 
 shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vector<shared_ptr<Type>> &targs) {
-    SymbolRef method = klass.data(ctx).findMemberTransitive(ctx, name);
+    SymbolRef method = klass.data(ctx)->findMemberTransitive(ctx, name);
 
     if (!method.exists()) {
         return nullptr;
     }
-    const Symbol &data = method.data(ctx);
+    const SymbolData data = method.data(ctx);
 
     vector<shared_ptr<Type>> args;
-    args.reserve(data.arguments().size());
-    for (auto arg : data.arguments()) {
-        if (arg.data(ctx).isRepeated()) {
+    args.reserve(data->arguments().size());
+    for (auto arg : data->arguments()) {
+        if (arg.data(ctx)->isRepeated()) {
             ENFORCE(args.empty(),
-                    "getCallArguments with positional and repeated args is not supported: ", data.toString(ctx));
+                    "getCallArguments with positional and repeated args is not supported: ", data->toString(ctx));
             return Types::arrayOf(ctx, Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
         }
-        ENFORCE(!arg.data(ctx).isKeyword(), "getCallArguments does not support kwargs: ", data.toString(ctx));
-        if (arg.data(ctx).isBlockArgument()) {
+        ENFORCE(!arg.data(ctx)->isKeyword(), "getCallArguments does not support kwargs: ", data->toString(ctx));
+        if (arg.data(ctx)->isBlockArgument()) {
             continue;
         }
         args.emplace_back(Types::resultTypeAsSeenFrom(ctx, arg, klass, targs));
@@ -746,7 +746,7 @@ DispatchResult MetaType::dispatchCall(Context ctx, DispatchArgs args) {
     switch (args.name._id) {
         case Names::new_()._id: {
             auto res =
-                DispatchResult(wrapped, args.selfType, Symbols::Class().data(ctx).findMember(ctx, Names::new_()));
+                DispatchResult(wrapped, args.selfType, Symbols::Class().data(ctx)->findMember(ctx, Names::new_()));
             auto innerArgs = DispatchArgs{Names::initialize(), args.locs, args.args, wrapped, wrapped, args.block};
             auto inner = wrapped->dispatchCall(ctx, innerArgs);
             res.components.insert(res.components.end(), make_move_iterator(inner.components.begin()),
@@ -873,7 +873,7 @@ class Object_class : public IntrinsicMethod {
 public:
     shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         SymbolRef self = unwrapSymbol(thisType);
-        auto singleton = self.data(ctx).lookupSingletonClass(ctx);
+        auto singleton = self.data(ctx)->lookupSingletonClass(ctx);
         if (singleton.exists()) {
             return make_shared<ClassType>(singleton);
         }
@@ -886,7 +886,7 @@ public:
     shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         SymbolRef self = unwrapSymbol(thisType);
 
-        auto attachedClass = self.data(ctx).attachedClass(ctx);
+        auto attachedClass = self.data(ctx)->attachedClass(ctx);
         if (!attachedClass.exists()) {
             if (self == Symbols::Class()) {
                 // `Class.new(...)`, but it isn't a specific Class. We know
@@ -896,7 +896,7 @@ public:
                 return nullptr;
             }
         }
-        auto instanceTy = attachedClass.data(ctx).externalType(ctx);
+        auto instanceTy = attachedClass.data(ctx)->externalType(ctx);
         DispatchArgs innerArgs{Names::initialize(), args.locs, args.args, instanceTy, instanceTy, args.block};
         auto dispatched = instanceTy->dispatchCall(ctx, innerArgs);
 
@@ -923,7 +923,7 @@ public:
         SymbolRef attachedClass;
 
         SymbolRef self = unwrapSymbol(thisType);
-        attachedClass = self.data(ctx).attachedClass(ctx);
+        attachedClass = self.data(ctx)->attachedClass(ctx);
 
         if (!attachedClass.exists()) {
             return nullptr;
@@ -941,29 +941,29 @@ public:
             attachedClass = Symbols::Set();
         }
 
-        auto arity = attachedClass.data(ctx).typeArity(ctx);
+        auto arity = attachedClass.data(ctx)->typeArity(ctx);
         if (attachedClass == Symbols::Hash()) {
             arity = 2;
         }
-        if (attachedClass.data(ctx).typeMembers().empty()) {
+        if (attachedClass.data(ctx)->typeMembers().empty()) {
             return nullptr;
         }
 
         if (args.args.size() != arity) {
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::GenericArgumentCountMismatch)) {
                 e.setHeader("Wrong number of type parameters for `{}`. Expected: `{}`, got: `{}`",
-                            attachedClass.data(ctx).show(ctx), arity, args.args.size());
+                            attachedClass.data(ctx)->show(ctx), arity, args.args.size());
             }
         }
 
         vector<shared_ptr<Type>> targs;
         auto it = args.args.begin();
         int i = -1;
-        targs.reserve(attachedClass.data(ctx).typeMembers().size());
-        for (auto mem : attachedClass.data(ctx).typeMembers()) {
+        targs.reserve(attachedClass.data(ctx)->typeMembers().size());
+        for (auto mem : attachedClass.data(ctx)->typeMembers()) {
             ++i;
-            if (mem.data(ctx).isFixed()) {
-                targs.emplace_back(mem.data(ctx).resultType);
+            if (mem.data(ctx)->isFixed()) {
+                targs.emplace_back(mem.data(ctx)->resultType);
             } else if (it != args.args.end()) {
                 targs.emplace_back(unwrapType(ctx, args.locs.args[it - args.args.begin()], (*it)->type));
                 ++it;
@@ -1292,7 +1292,7 @@ public:
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
         shared_ptr<Type> element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx).derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
@@ -1336,7 +1336,7 @@ public:
     shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         shared_ptr<Type> element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
-            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx).derivesFrom(ctx, Symbols::Array()));
+            ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
             element = ap->targs.front();
         } else if (auto *tuple = cast_type<TupleType>(thisType)) {
@@ -1357,9 +1357,9 @@ public:
         }
 
         int arity = 0;
-        for (auto arg : args.block->block.data(ctx).arguments()) {
-            if (arg.data(ctx).isKeyword() || arg.data(ctx).isBlockArgument() || arg.data(ctx).isOptional() ||
-                arg.data(ctx).isRepeated()) {
+        for (auto arg : args.block->block.data(ctx)->arguments()) {
+            if (arg.data(ctx)->isKeyword() || arg.data(ctx)->isBlockArgument() || arg.data(ctx)->isOptional() ||
+                arg.data(ctx)->isRepeated()) {
                 return core::Types::procClass();
             }
             ++arity;

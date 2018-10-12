@@ -17,9 +17,9 @@ using namespace std;
 namespace sorbet::core {
 
 SymbolRef MutableContext::selfClass() {
-    Symbol &data = this->owner.data(this->state);
-    if (data.isClass()) {
-        return data.singletonClass(this->state);
+    SymbolData data = this->owner.data(this->state);
+    if (data->isClass()) {
+        return data->singletonClass(this->state);
     }
     return this->contextClass();
 }
@@ -28,7 +28,7 @@ bool Context::permitOverloadDefinitions() const {
     if (!owner.exists()) {
         return false;
     }
-    for (auto loc : owner.data(*this).locs()) {
+    for (auto loc : owner.data(*this)->locs()) {
         auto &file = loc.file().data(*this);
         constexpr char const *whitelistedTest = "overloads_test.rb";
         if (file.isPayload() || FileOps::getFileName(file.path()) == whitelistedTest) {
@@ -45,9 +45,9 @@ bool MutableContext::permitOverloadDefinitions() const {
 
 SymbolRef Context::contextClass() const {
     SymbolRef owner = this->owner;
-    while (!owner.data(this->state, false).isClass()) {
+    while (!owner.data(this->state, false)->isClass()) {
         ENFORCE(owner.exists(), "non-existing owner in contextClass");
-        owner = owner.data(this->state).owner;
+        owner = owner.data(this->state)->owner;
     }
     return owner;
 }
