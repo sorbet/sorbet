@@ -1,4 +1,5 @@
 #include "absl/algorithm/container.h"
+#include "common/Timer.h"
 #include "core/Names.h"
 #include "core/core.h"
 #include "core/errors/resolver.h"
@@ -202,7 +203,7 @@ void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vecto
 }; // namespace
 
 void Resolver::finalizeAncestors(core::GlobalState &gs) {
-    gs.trace("Finalizing ancestor chains");
+    Timer timer(gs.errorQueue->logger, "resolver.finalize_ancestors");
     int methodCount = 0;
     int classCount = 0;
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
@@ -378,7 +379,8 @@ InlinedVector<core::SymbolRef, 4> ParentLinearizationInformation::fullLinearizat
 }
 
 void computeLinearization(core::GlobalState &gs) {
-    gs.trace("Computing linearization");
+    Timer timer(gs.errorQueue->logger, "resolver.compute_linearization");
+
     // TODO: this does not support `prepend`
     for (int i = 1; i < gs.symbolsUsed(); ++i) {
         const auto &data = core::SymbolRef(&gs, i).data(gs);
@@ -390,7 +392,7 @@ void computeLinearization(core::GlobalState &gs) {
 }
 
 void Resolver::finalizeResolution(core::GlobalState &gs) {
-    gs.trace("Finalizing resolution");
+    Timer timer(gs.errorQueue->logger, "resolver.finalize_resolution");
     // TODO(nelhage): Properly this first loop should go in finalizeAncestors,
     // but we currently compute mixes_in_class_methods during the same AST walk
     // that resolves types and we don't want to introduce additional passes if

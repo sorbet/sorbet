@@ -10,9 +10,10 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
-#include "../core/Symbols.h"
 #include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
+#include "common/Timer.h"
+#include "core/Symbols.h"
 
 #include <algorithm> // find_if
 #include <list>
@@ -502,7 +503,7 @@ public:
 
     static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,
                                                                 vector<unique_ptr<ast::Expression>> trees) {
-        ctx.trace("Resolving constants");
+        Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
         ResolveConstantsWalk constants(ctx);
 
         for (auto &tree : trees) {
@@ -1403,7 +1404,7 @@ vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext c
                                                           vector<unique_ptr<ast::Expression>> trees) {
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
-    ctx.trace("Resolving sigs and vars");
+    Timer timeit(ctx.state.errorQueue->logger, "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
         tree = ast::TreeMap::apply(ctx, sigs, move(tree));
         tree = ast::TreeMap::apply(ctx, vars, move(tree));
@@ -1420,7 +1421,7 @@ vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext c
 
 void Resolver::sanityCheck(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> &trees) {
     if (debug_mode) {
-        ctx.trace("Sanity checking");
+        Timer timeit(ctx.state.errorQueue->logger, "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
             tree = ast::TreeMap::apply(ctx, sanity, move(tree));
