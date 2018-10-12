@@ -49,8 +49,8 @@ def externals():
 
     new_git_repository(
         name="lmdb",
-        remote="https://github.com/LMDB/lmdb.git",
-        commit="26c7df88e44e31623d0802a564f24781acdefde3",
+        remote="https://github.com/DarkDimius/lmdb.git",
+        commit="15a9c2604e3401593110ddf6c9e2e16a4b28e68e",
         build_file = "//third_party:lmdb.BUILD",
     )
 
