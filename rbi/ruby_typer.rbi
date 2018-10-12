@@ -19,6 +19,9 @@ class Struct
   end
   sig {returns(T.self_type)}
   def each(&blk); end
+
+  sig {returns(T::Array[Symbol])}
+  def self.members; end
 end
 
 module RubyTyper

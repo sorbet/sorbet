@@ -12,9 +12,9 @@ class CSV < Object
     type_parameters(:U).params(
         path: T.any(String, ::RubyTyper::IOLike),
         options: T::Hash[Symbol, T.type_parameter(:U)],
-        blk: T.proc.params(arg0: T::Array[String]).returns(BasicObject),
+        blk: T.proc.params(arg0: CSV::Row).void,
     )
-    .returns(NilClass)
+    .void
   end
   def self.foreach(path, options=T.unsafe(nil), &blk); end
 
@@ -69,4 +69,12 @@ sig do
   )
   .returns(CSV)
 end
+
+class CSV::Row < Object
+  include Enumerable
+
+  extend T::Generic
+  Elem = type_member(:out, fixed: T.nilable(String))
+end
+
 def CSV(io=T.unsafe(nil), options=T.unsafe(nil)); end

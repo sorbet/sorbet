@@ -17,13 +17,6 @@ end
 class CSV::MalformedCSVError < RuntimeError
 end
 
-class CSV::Row < Object
-  include Enumerable
-
-  extend T::Generic
-  Elem = type_member(:out)
-end
-
 class CSV::Table < Object
   include Enumerable
 
