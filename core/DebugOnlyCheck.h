@@ -3,26 +3,25 @@
 #include "common/common.h"
 namespace sorbet::core {
 
-template <class T> class DebugOnlyCheck {
+template <class T, bool DebugMode = debug_mode> class DebugOnlyCheck;
+
+template <class T> class DebugOnlyCheck<T, true> {
 private:
-#ifdef DEBUG_MODE
     T storage;
-#endif
 
 public:
-    template <typename... Args>
-    DebugOnlyCheck(Args &&... args)
-#ifdef DEBUG_MODE
-        : storage(std::forward<Args>(args)...)
-#endif
-    {
-    }
+    template <typename... Args> constexpr DebugOnlyCheck(Args &&... args) : storage(std::forward<Args>(args)...) {}
 
     template <typename... Args> void runDebugOnlyCheck(Args &&... args) const {
-#ifdef DEBUG_MODE
         storage.check(std::forward<Args>(args)...);
-#endif
     }
+};
+
+template <class T> class DebugOnlyCheck<T, false> {
+public:
+    template <typename... Args> constexpr DebugOnlyCheck(Args &&... args) {}
+
+    template <typename... Args> void runDebugOnlyCheck(Args &&... args) const {}
 };
 
 }; // namespace sorbet::core

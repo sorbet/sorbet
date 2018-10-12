@@ -11,20 +11,8 @@ using namespace std;
 
 namespace sorbet::core {
 
-NameRef::NameRef(const GlobalState &gs, unsigned int id) : _id(id) {
-#ifdef DEBUG_MODE
-    globalStateId = gs.globalStateId;
-    parentGlobalStateId = gs.parentGlobalStateId;
-#endif
-}
-
-bool NameRef::isWellKnownName() const {
-    bool def = false;
-#ifdef DEBUG_MODE
-    def = def || (globalStateId == -1);
-#endif
-    return def || (_id <= Names::LAST_WELL_KNOWN_NAME);
-}
+NameRef::NameRef(const GlobalState &gs, unsigned int id)
+    : DebugOnlyCheck(gs.globalStateId, gs.parentGlobalStateId), _id(id) {}
 
 Name::~Name() noexcept {
     if (kind == NameKind::UNIQUE) {
@@ -147,20 +135,33 @@ bool Name::isClassName(const GlobalState &gs) const {
     }
 }
 
-void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
-#ifdef DEBUG_MODE
-    if (isWellKnownName()) {
+void NameRefDebugCheck::check(const GlobalState &gs, int _id) const {
+    if (globalStateId == -1) {
+        return;
+    }
+    if (_id <= Names::LAST_WELL_KNOWN_NAME) {
         return;
     }
     if (globalStateId == gs.globalStateId) {
         return;
     }
     auto inParent = parentGlobalStateId == gs.globalStateId || parentGlobalStateId == gs.parentGlobalStateId;
-    if (inParent && id() < gs.lastNameKnownByParentGlobalState) {
+    if (inParent && _id < gs.lastNameKnownByParentGlobalState) {
         return;
     }
     ENFORCE(false, "NameRef not owned by correct GlobalState");
-#endif
+}
+
+void NameRefDebugCheck::check(const GlobalSubstitution &subst) const {
+    ENFORCE(globalStateId != subst.toGlobalStateId, "substituting a name twice!");
+}
+
+void NameRef::enforceCorrectGlobalState(const GlobalState &gs) const {
+    runDebugOnlyCheck(gs, id());
+}
+
+void NameRef::sanityCheckSubstitution(const GlobalSubstitution &subst) const {
+    runDebugOnlyCheck(subst);
 }
 
 NameData NameRef::data(GlobalState &gs) const {
