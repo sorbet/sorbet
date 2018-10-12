@@ -79,14 +79,14 @@ def foo
     #   ]
     # }
     #
-    # d: AppliedType {
+    # a: AppliedType {
     #   klass = ::Range
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
     #
-    # a: AppliedType {
+    # d: AppliedType {
     #   klass = ::Range
     #   targs = [
     #     <constant:Elem> = Integer

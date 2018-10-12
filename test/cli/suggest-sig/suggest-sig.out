@@ -1,110 +1,167 @@
-test/cli/suggest-sig/suggest-sig.rb:3: This function does not have a `sig` http://go/e/7017
-     3 |def hazTwoArgs(a, b); 1; end;
+test/cli/suggest-sig/suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
+     5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:3: Insert `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
+    test/cli/suggest-sig/suggest-sig.rb:5: Insert `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
 `
-     3 |def hazTwoArgs(a, b); 1; end;
+     5 |def hazTwoArgs(a, b); 1; end;
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:6: Method `foo` does not exist on `Object` http://go/e/7003
-     6 |  if foo
-             ^^^
+test/cli/suggest-sig/suggest-sig.rb:8: Method `someCondition` does not exist on `Object` http://go/e/7003
+     8 |  if someCondition
+             ^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
-     5 |def baz
+test/cli/suggest-sig/suggest-sig.rb:7: This function does not have a `sig` http://go/e/7017
+     7 |def baz
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:5: Insert `sig {returns(T.any(T::Array[T.untyped], String))}
+    test/cli/suggest-sig/suggest-sig.rb:7: Insert `sig {returns(T.any(T::Array[T.untyped], String))}
 `
-     5 |def baz
+     7 |def baz
         ^
-
-test/cli/suggest-sig/suggest-sig.rb:16: This function does not have a `sig` http://go/e/7017
-    16 |def bla; give_me_void; end
-        ^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:16: Insert `sig {void}
-`
-    16 |def bla; give_me_void; end
-        ^
-
-test/cli/suggest-sig/suggest-sig.rb:19: Method `foo` does not exist on `Object` http://go/e/7003
-    19 |  if foo
-             ^^^
 
 test/cli/suggest-sig/suggest-sig.rb:18: This function does not have a `sig` http://go/e/7017
-    18 |def bbq
+    18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:18: Insert `sig {void}
 `
-    18 |def bbq
+    18 |def bla; give_me_void; end
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:26: This function does not have a `sig` http://go/e/7017
-    26 |def idk(a); a / a + a * a; end
-        ^^^^^^^^^^
+test/cli/suggest-sig/suggest-sig.rb:21: Method `someCondition` does not exist on `Object` http://go/e/7003
+    21 |  if someCondition
+             ^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:20: This function does not have a `sig` http://go/e/7017
+    20 |def bbq
+        ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:20: Insert `sig {void}
+`
+    20 |def bbq
+        ^
 
 test/cli/suggest-sig/suggest-sig.rb:28: This function does not have a `sig` http://go/e/7017
-    28 |def give_me_literal; 1; end;
-        ^^^^^^^^^^^^^^^^^^^
-  Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:28: Insert `sig {returns(Integer)}
-`
-    28 |def give_me_literal; 1; end;
-        ^
+    28 |def idk(a); a / a + a * a; end
+        ^^^^^^^^^^
 
 test/cli/suggest-sig/suggest-sig.rb:30: This function does not have a `sig` http://go/e/7017
-    30 |def give_me_literal_nested; [[1]]; end;
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 |def give_me_literal; 1; end;
+        ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:30: Insert `sig {returns(T::Array[T::Array[Integer]])}
+    test/cli/suggest-sig/suggest-sig.rb:30: Insert `sig {returns(Integer)}
 `
-    30 |def give_me_literal_nested; [[1]]; end;
+    30 |def give_me_literal; 1; end;
         ^
 
 test/cli/suggest-sig/suggest-sig.rb:32: This function does not have a `sig` http://go/e/7017
-    32 |private def root_private; end
-                ^^^^^^^^^^^^^^^^
+    32 |def give_me_literal_nested; [[1]]; end;
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:32: Insert `sig {returns(NilClass)}
+    test/cli/suggest-sig/suggest-sig.rb:32: Insert `sig {returns(T::Array[T::Array[Integer]])}
 `
-    32 |private def root_private; end
+    32 |def give_me_literal_nested; [[1]]; end;
         ^
 
 test/cli/suggest-sig/suggest-sig.rb:34: This function does not have a `sig` http://go/e/7017
-    34 |protected def root_protected; end
-                  ^^^^^^^^^^^^^^^^^^
+    34 |private def root_private; end
+                ^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:34: Insert `sig {returns(NilClass)}
 `
-    34 |protected def root_protected; end
+    34 |private def root_private; end
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:42: This function does not have a `sig` http://go/e/7017
-    42 |def with_block
+test/cli/suggest-sig/suggest-sig.rb:36: This function does not have a `sig` http://go/e/7017
+    36 |protected def root_protected; end
+                  ^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:36: Insert `sig {returns(NilClass)}
+`
+    36 |protected def root_protected; end
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:44: This function does not have a `sig` http://go/e/7017
+    44 |def foo(a)
+        ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:44: Insert `sig {params(a: Integer).returns(Integer)}
+`
+    44 |def foo(a)
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:54: This function does not have a `sig` http://go/e/7017
+    54 |def fooCond(a, cond)
+        ^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:54: Insert `sig {params(a: T.any(Integer, String), cond: T.untyped).void}
+`
+    54 |def fooCond(a, cond)
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:62: This function does not have a `sig` http://go/e/7017
+    62 |def fooWhile(a, cond1, cond2)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:62: Insert `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
+`
+    62 |def fooWhile(a, cond1, cond2)
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:72: This function does not have a `sig` http://go/e/7017
+    72 |def takesBlock
         ^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:13: Method `sig` does not exist on `T.class_of(<root>)` http://go/e/7003
-    13 |sig {void}
-        ^^^^^^^^^^
-
-test/cli/suggest-sig/suggest-sig.rb:37: This function does not have a `sig` http://go/e/7017
-    37 |  private def a_private; end
-                  ^^^^^^^^^^^^^
+test/cli/suggest-sig/suggest-sig.rb:77: This function does not have a `sig` http://go/e/7017
+    77 |def list_ints_or_empty_list
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:37: Insert `sig {returns(NilClass)}
-  `
-    37 |  private def a_private; end
-          ^
+    test/cli/suggest-sig/suggest-sig.rb:77: Insert `sig {returns(T::Array[T.untyped])}
+`
+    77 |def list_ints_or_empty_list
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:83: This code is unreachable http://go/e/7006
+    83 |  if true || qux || blah
+                     ^^^
+
+test/cli/suggest-sig/suggest-sig.rb:83: This code is unreachable http://go/e/7006
+    83 |  if true || qux || blah
+                            ^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:86: This code is unreachable http://go/e/7006
+    86 |    takesString(x)
+            ^^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:82: This function does not have a `sig` http://go/e/7017
+    82 |def dead(x)
+        ^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:82: Insert `sig {params(x: Integer).void}
+`
+    82 |def dead(x)
+        ^
+
+test/cli/suggest-sig/suggest-sig.rb:90: This function does not have a `sig` http://go/e/7017
+    90 |def with_block
+        ^^^^^^^^^^^^^^
 
 test/cli/suggest-sig/suggest-sig.rb:39: This function does not have a `sig` http://go/e/7017
-    39 |  protected def a_protected; end
-                    ^^^^^^^^^^^^^^^
+    39 |  private def a_private; end
+                  ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
     test/cli/suggest-sig/suggest-sig.rb:39: Insert `sig {returns(NilClass)}
   `
-    39 |  protected def a_protected; end
+    39 |  private def a_private; end
           ^
-Errors: 15
+
+test/cli/suggest-sig/suggest-sig.rb:41: This function does not have a `sig` http://go/e/7017
+    41 |  protected def a_protected; end
+                    ^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:41: Insert `sig {returns(NilClass)}
+  `
+    41 |  protected def a_protected; end
+          ^
+Errors: 23

@@ -231,4 +231,13 @@ shared_ptr<Type> TypeConstraint::findSolution(SymbolRef forWhat) const {
     Error::raise("should never happen");
 }
 
+InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {
+    ENFORCE(isSolved());
+    InlinedVector<SymbolRef, 4> ret;
+    for (auto &entry : this->solution) {
+        ret.emplace_back(entry.first);
+    }
+    return ret;
+}
+
 } // namespace sorbet::core

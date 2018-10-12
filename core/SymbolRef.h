@@ -309,16 +309,20 @@ public:
         return SymbolRef(nullptr, 59);
     }
 
-    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam() {
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant() {
         return SymbolRef(nullptr, 60);
     }
 
-    static SymbolRef Sorbet_Private() {
+    static SymbolRef RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant() {
         return SymbolRef(nullptr, 61);
     }
 
-    static SymbolRef Sorbet_Private_Builder() {
+    static SymbolRef Sorbet_Private() {
         return SymbolRef(nullptr, 62);
+    }
+
+    static SymbolRef Sorbet_Private_Builder() {
+        return SymbolRef(nullptr, 63);
     }
 
     static constexpr int MAX_PROC_ARITY = 10;

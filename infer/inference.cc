@@ -1,3 +1,4 @@
+#include "absl/algorithm/container.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/errors/infer.h"
@@ -30,9 +31,258 @@ OffsetAndPadding getStartOffset(core::Context ctx, core::Loc loc) {
     u4 startOffset = lineStart + startPadding;
     return {startOffset, startPadding};
 }
+shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
+                                      int argId) {
+    // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
+    // logic
+    auto constr = make_shared<core::TypeConstraint>();
+    auto linkCopy =
+        send.link ? send.link->duplicate() : make_shared<core::SendAndBlockLink>(core::Symbols::noSymbol(), send.fun);
+
+    auto probeTypeSym =
+        core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();
+    InlinedVector<core::SymbolRef, 4> domainTemp;
+    InlinedVector<pair<core::SymbolRef, shared_ptr<core::Type>>, 4> solutions;
+    domainTemp.emplace_back(probeTypeSym);
+    if (send.link && send.link->constr) {
+        for (auto domainSym : send.link->constr->getDomain()) {
+            domainTemp.emplace_back(domainSym);
+            solutions.emplace_back(make_pair(domainSym, send.link->constr->getInstantiation(domainSym)));
+        }
+    }
+
+    auto probe = probeTypeSym.data(ctx)->resultType;
+    constr->defineDomain(ctx, domainTemp);
+    for (auto &pair : solutions) {
+        auto tparam = pair.first.data(ctx)->resultType;
+        core::Types::isSubTypeUnderConstraint(ctx, *constr, tparam, pair.second);
+        core::Types::isSubTypeUnderConstraint(ctx, *constr, pair.second, tparam);
+    }
+
+    linkCopy->constr = constr;
+
+    core::CallLocs locs{
+        send.receiverLoc,
+        send.receiverLoc,
+        send.argLocs,
+    };
+    InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
+    InlinedVector<const core::TypeAndOrigins *, 2> args;
+
+    args.reserve(send.args.size());
+    int i = -1;
+    for (cfg::VariableUseSite &arg : send.args) {
+        i++;
+        shared_ptr<core::Type> type;
+        if (i != argId) {
+            type = arg.type;
+        } else {
+            type = probe;
+        }
+        auto &t = typeAndOriginsOwner.emplace_back(make_unique<core::TypeAndOrigins>());
+        t->type = type;
+        t->origins.emplace_back(core::Loc::none());
+        args.emplace_back(t.get());
+    }
+    core::DispatchArgs dispatchArgs{send.fun, locs, args, send.recv.type, send.recv.type, linkCopy};
+
+    send.recv.type->dispatchCall(ctx, dispatchArgs);
+    if (!constr->isSolved()) {
+        constr->solve(ctx);
+    }
+    if (!constr->isSolved()) {
+        return nullptr;
+    }
+    return constr->getInstantiation(probeTypeSym);
+}
+
+void extractSendArgumentKnowledge(
+    core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
+    const UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>> &blockLocals,
+    UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> &blockArgRequirements) {
+    InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
+    InlinedVector<const core::TypeAndOrigins *, 2> args;
+
+    args.reserve(snd->args.size());
+    for (cfg::VariableUseSite &arg : snd->args) {
+        auto &t = typeAndOriginsOwner.emplace_back(make_unique<core::TypeAndOrigins>());
+        t->type = arg.type;
+        t->origins.emplace_back(core::Loc::none());
+    }
+
+    core::CallLocs locs{
+        bindLoc,
+        snd->receiverLoc,
+        snd->argLocs,
+    };
+    core::DispatchArgs dispatchArgs{snd->fun, locs, args, snd->recv.type, snd->recv.type, snd->link};
+    auto dispatchInfo = snd->recv.type->dispatchCall(ctx, dispatchArgs);
+
+    int i = -1;
+
+    // See if we can learn what types should they have
+    for (auto &arg : snd->args) {
+        i++;
+        // See if we can learn about what functions are expected to exist on arguments
+        auto fnd = blockLocals.find(arg.variable);
+        if (fnd == blockLocals.end()) {
+            continue;
+        }
+        shared_ptr<core::Type> thisType;
+        for (auto &component : dispatchInfo.components) {
+            auto argType = extractArgType(ctx, *snd, component, i);
+            if (argType && !argType->isUntyped()) {
+                if (!thisType) {
+                    thisType = argType;
+                } else {
+                    // 'or' together every dispatch component for _this_ usage site
+                    thisType = core::Types::lub(ctx, thisType, argType);
+                }
+            }
+        }
+        if (!thisType) {
+            continue;
+        }
+        for (auto argSym : fnd->second) {
+            auto &r = blockArgRequirements[argSym];
+            if (!r) {
+                r = thisType;
+            } else {
+                // 'and' this usage site against all the other usage sites
+                r = core::Types::glb(ctx, r, thisType);
+            }
+        }
+    }
+}
+
+UnorderedMap<core::SymbolRef, shared_ptr<core::Type>>
+guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<cfg::CFG> &cfg) {
+    // What variables by the end of basic block could plausibly contain what arguments.
+    vector<UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>>> localsStoringArguments;
+    localsStoringArguments.resize(cfg->maxBasicBlockId);
+
+    // what methods have been called on arguments, per basic block
+    vector<UnorderedMap<core::SymbolRef, InlinedVector<core::NameRef, 1>>> methodsCalledOnArguments;
+    methodsCalledOnArguments.resize(cfg->maxBasicBlockId);
+
+    // indicates what type should an argument have for basic block to execute
+    vector<UnorderedMap<core::SymbolRef, shared_ptr<core::Type>>> argTypesForBBToPass;
+    argTypesForBBToPass.resize(cfg->maxBasicBlockId);
+
+    // This loop computes per-block requirements... Should be a method on its own
+    for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+        cfg::BasicBlock *bb = *it;
+        if (bb == cfg->deadBlock()) {
+            continue;
+        }
+        UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>> &blockLocals =
+            localsStoringArguments[bb->id];
+        UnorderedMap<core::SymbolRef, InlinedVector<core::NameRef, 1>> &blockMethodsCalledOnArguments =
+            methodsCalledOnArguments[bb->id];
+        UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> &blockArgRequirements = argTypesForBBToPass[bb->id];
+
+        for (auto bbparent : bb->backEdges) {
+            for (auto kv : localsStoringArguments[bbparent->id]) {
+                for (auto argSym : kv.second) {
+                    if (!absl::c_linear_search(blockLocals[kv.first], argSym)) {
+                        blockLocals[kv.first].push_back(argSym);
+                    }
+                }
+            }
+        }
+
+        int i = 0;
+
+        for (cfg::Binding &bind : bb->exprs) {
+            i++;
+            if (bb->firstDeadInstructionIdx >= 0 && i >= bb->firstDeadInstructionIdx) {
+                break;
+            }
+            InlinedVector<core::SymbolRef, 1> newInsert;
+
+            if (auto load = cfg::cast_instruction<cfg::LoadArg>(bind.value.get())) {
+                newInsert.emplace_back(load->arg);
+            } else if (auto ident = cfg::cast_instruction<cfg::Ident>(bind.value.get())) {
+                auto fnd = blockLocals.find(ident->what);
+                if (fnd != blockLocals.end()) {
+                    newInsert.insert(newInsert.end(), fnd->second.begin(), fnd->second.end());
+                }
+            } else if (auto snd = cfg::cast_instruction<cfg::Send>(bind.value.get())) {
+                // See if we can learn about what functions are expected to exist on arguments
+                auto fnd = blockLocals.find(snd->recv.variable);
+                if (fnd != blockLocals.end()) {
+                    for (auto &arg : fnd->second) {
+                        if (!absl::c_linear_search(blockMethodsCalledOnArguments[arg], snd->fun)) {
+                            blockMethodsCalledOnArguments[arg].push_back(snd->fun);
+                        }
+                    }
+                }
+
+                // see if we have at least a single call argument that is a method argument
+                bool shouldFindArgumentTypes = false;
+                for (auto &arg : snd->args) {
+                    auto fnd = blockLocals.find(arg.variable);
+                    if (fnd != blockLocals.end() && !fnd->second.empty()) {
+                        shouldFindArgumentTypes = true;
+                        break;
+                    }
+                }
+
+                if (shouldFindArgumentTypes) {
+                    extractSendArgumentKnowledge(ctx, bind.loc, snd, blockLocals, blockArgRequirements);
+                }
+            }
+
+            // publish changes
+
+            if (!newInsert.empty()) {
+                blockLocals[bind.bind.variable] = move(newInsert);
+            } else {
+                blockLocals.erase(bind.bind.variable);
+            }
+        }
+    }
+
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
+            cfg::BasicBlock *bb = *it;
+            UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> entryRequirements;
+            for (auto bbparent : bb->backEdges) {
+                if (bbparent->firstDeadInstructionIdx >= 0 && bb != cfg->deadBlock()) {
+                    continue;
+                }
+                for (auto &kv : argTypesForBBToPass[bbparent->id]) {
+                    auto &cur = entryRequirements[kv.first];
+                    if (!cur) {
+                        cur = kv.second;
+                        continue;
+                    }
+                    cur = core::Types::lub(ctx, cur, kv.second);
+                }
+            }
+            auto &thisConstraints = argTypesForBBToPass[bb->id];
+            for (auto &kv : entryRequirements) {
+                auto &target = thisConstraints[kv.first];
+                if (!target) {
+                    target = kv.second;
+                }
+                auto newRequirement = core::Types::glb(ctx, target, kv.second);
+                if (newRequirement != target) {
+                    changed = true;
+                    target = newRequirement;
+                }
+            }
+        }
+    }
+
+    return argTypesForBBToPass[cfg->deadBlock()->id];
+}
 
 void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
-                     const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
+                     const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
+                     unique_ptr<cfg::CFG> &cfg) {
     if (constr.solve(ctx)) {
         auto guessedType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
@@ -52,6 +302,8 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
             stringstream ss;
             bool first = true;
 
+            auto argumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
+
             ss << "sig {";
             if (!methodSymbol.data(ctx)->arguments().empty()) {
                 ss << "params(";
@@ -60,7 +312,11 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                         ss << ", ";
                     }
                     first = false;
-                    ss << argSym.data(ctx)->name.show(ctx) << ": " << core::Types::untypedUntracked()->show(ctx);
+                    auto argType = argumentTypes[argSym];
+                    if (!argType) {
+                        argType = core::Types::untypedUntracked();
+                    }
+                    ss << argSym.data(ctx)->name.show(ctx) << ": " << argType->show(ctx);
                 }
                 ss << ").";
             }
@@ -117,7 +373,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             _constr = make_unique<core::TypeConstraint>();
             constr = _constr.get();
             auto returnTypeVar =
-                core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam();
+                core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant();
             InlinedVector<core::SymbolRef, 4> domainTemp;
             domainTemp.emplace_back(returnTypeVar);
             methodReturnType = returnTypeVar.data(ctx)->resultType;
@@ -205,6 +461,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
         visited[bb->id] = true;
         if (current.isDead) {
+            bb->firstDeadInstructionIdx = 0;
             // this block is unreachable.
             if (!bb->exprs.empty()) {
                 for (auto &expr : bb->exprs) {
@@ -221,7 +478,9 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
 
         core::Loc madeBlockDead;
+        int i = 0;
         for (cfg::Binding &bind : bb->exprs) {
+            i++;
             if (!current.isDead || cfg::isa_instruction<cfg::DebugEnvironment>(bind.value.get())) {
                 current.ensureGoodAssignTarget(ctx, bind.bind.variable);
                 bind.bind.type = current.processBinding(ctx, bind, bb->outerLoops, cfg->minLoops[bind.bind.variable],
@@ -243,6 +502,10 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                     current.isDead = true;
                     madeBlockDead = bind.loc;
                 }
+                if (current.isDead) {
+                    // this can also be result of evaluating an instruction, e.g. an always false hard_assert
+                    bb->firstDeadInstructionIdx = i;
+                }
             } else if (current.isDead && !bind.value->isSynthetic) {
                 if (auto e = ctx.state.beginError(bind.loc, core::errors::Infer::DeadBranchInferencer)) {
                     e.setHeader("This code is unreachable");
@@ -252,8 +515,11 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
             }
         }
         if (!current.isDead) {
+            ENFORCE(bb->firstDeadInstructionIdx == -1);
             current.getAndFillTypeAndOrigin(ctx, bb->bexit.cond);
             current.ensureGoodCondition(ctx, bb->bexit.cond.variable);
+        } else {
+            ENFORCE(bb->firstDeadInstructionIdx != -1);
         }
         histogramInc("infer.environment.size", current.vars.size());
         for (auto &pair : current.vars) {
@@ -271,7 +537,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
     if (missingReturnType && shouldHaveReturnType) {
         if (auto e = ctx.state.beginError(cfg->symbol.data(ctx)->loc(), core::errors::Infer::UntypedMethod)) {
             e.setHeader("This function does not have a `sig`");
-            maybeSuggestSig(ctx, e, cfg->symbol, methodReturnType, *constr);
+            maybeSuggestSig(ctx, e, cfg->symbol, methodReturnType, *constr, cfg);
         }
     }
 

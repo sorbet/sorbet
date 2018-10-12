@@ -724,6 +724,11 @@ bool ShapeType::hasUntyped() {
 SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun)
     : block(block), fun(fun), constr(make_shared<TypeConstraint>()) {}
 
+std::shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
+    auto copy = *this;
+    return make_shared<SendAndBlockLink>(move(copy));
+}
+
 shared_ptr<Type> TupleType::elementType() const {
     auto *ap = cast_type<AppliedType>(this->underlying().get());
     ENFORCE(ap);

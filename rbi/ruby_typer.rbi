@@ -180,8 +180,12 @@ end
 class RubyTyper::ReturnTypeInference
     extend T::Helpers
 
-    sig {type_parameters(:INFERRED_RETURN_TYPE).params().returns(T.type_parameter(:INFERRED_RETURN_TYPE))}
-    def guessed_type_type_parameter_holder
+    sig do
+        type_parameters(:INFERRED_RETURN_TYPE, :INFERRED_ARGUMENT_TYPE)
+        .params(a: T.type_parameter(:INFERRED_ARGUMENT_TYPE))
+        .returns(T.type_parameter(:INFERRED_RETURN_TYPE))
+    end
+    def guessed_type_type_parameter_holder(a)
     # this method only exists to define the type parameter.
     # it's used in infer for return type inference.
     end

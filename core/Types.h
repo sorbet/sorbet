@@ -557,7 +557,10 @@ public:
 CheckSize(MetaType, 24, 8);
 
 class SendAndBlockLink {
+    SendAndBlockLink(const SendAndBlockLink &) = default;
+
 public:
+    SendAndBlockLink(SendAndBlockLink &&) = default;
     SymbolRef block;
     std::shared_ptr<Type> receiver;
     NameRef fun;
@@ -565,8 +568,8 @@ public:
     std::shared_ptr<Type> returnTp;
     std::shared_ptr<Type> blockPreType;
     std::shared_ptr<Type> sendTp;
-    SendAndBlockLink(const SendAndBlockLink &) = delete;
     SendAndBlockLink(SymbolRef block, NameRef fun);
+    std::shared_ptr<SendAndBlockLink> duplicate();
 };
 
 class TypeAndOrigins final {

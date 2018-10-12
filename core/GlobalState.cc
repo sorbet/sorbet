@@ -76,6 +76,7 @@ const char *subclasses_str = "SUBCLASSES";
 const char *sorbet_str = "Sorbet";
 const char *return_type_inference_str = "ReturnTypeInference";
 const char *inferred_return_type_str = "INFERRED_RETURN_TYPE";
+const char *inferred_argument_type_str = "INFERRED_ARGUMENT_TYPE";
 const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
 const char *guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder";
 const char *private_str = "Private";
@@ -258,7 +259,13 @@ void GlobalState::initEmpty() {
         freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_return_type_str), 1),
         core::Variance::ContraVariant);
     id.data(*this)->resultType = make_shared<core::TypeVar>(id);
-    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam());
+    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
+    id = enterTypeArgument(
+        Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
+        freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_argument_type_str), 1),
+        core::Variance::CoVariant);
+    id.data(*this)->resultType = make_shared<core::TypeVar>(id);
+    ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(private_str));
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), enterNameConstant(builder_str));

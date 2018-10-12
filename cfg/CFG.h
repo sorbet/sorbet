@@ -49,6 +49,7 @@ public:
     int bwdId = -1;
     int flags = 0;
     int outerLoops = 0;
+    int firstDeadInstructionIdx = -1;
     std::vector<Binding> exprs;
     BlockExit bexit;
     std::vector<BasicBlock *> backEdges;
