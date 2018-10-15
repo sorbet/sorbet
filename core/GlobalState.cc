@@ -1113,6 +1113,10 @@ ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     return ErrorBuilder(*this, report, loc, what);
 }
 
+void GlobalState::suppressErrorClass(ErrorClass err) {
+    suppressed_error_classes.insert(err);
+}
+
 bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     StrictLevel level = StrictLevel::Strong;
     if (loc.file().exists()) {
@@ -1120,6 +1124,9 @@ bool GlobalState::shouldReportErrorOn(Loc loc, ErrorClass what) const {
     }
     if (what.code == errors::Internal::InternalError.code) {
         return true;
+    }
+    if (suppressed_error_classes.count(what) != 0) {
+        return false;
     }
 
     if (level > StrictLevel::Strong) {

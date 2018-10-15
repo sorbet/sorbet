@@ -178,4 +178,10 @@ public:
 
 } // namespace sorbet::core
 
+template <> struct std::hash<sorbet::core::ErrorClass> {
+    size_t operator()(const sorbet::core::ErrorClass &x) const {
+        return x.code;
+    }
+};
+
 #endif

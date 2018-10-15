@@ -6,6 +6,7 @@
 #include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
+#include "core/errors/errors.h"
 #include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
@@ -251,6 +252,11 @@ int realmain(int argc, char *argv[]) {
         }
 
         if (opts.print.Autogen || opts.print.AutogenMsgPack) {
+            gs->suppressErrorClass(core::errors::Namer::MethodNotFound);
+            gs->suppressErrorClass(core::errors::Namer::RedefinitionOfMethod);
+            gs->suppressErrorClass(core::errors::Namer::ModuleKindRedefinition);
+            gs->suppressErrorClass(core::errors::Resolver::StubConstant);
+
             core::MutableContext ctx(*gs, core::Symbols::root());
 
             indexed = pipeline::name(*gs, move(indexed), opts, logger);

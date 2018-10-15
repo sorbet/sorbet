@@ -133,6 +133,8 @@ public:
     unsigned int hash() const;
     std::vector<std::shared_ptr<File>> getFiles() const;
 
+    void suppressErrorClass(ErrorClass err);
+
 private:
     bool shouldReportErrorOn(Loc loc, ErrorClass what) const;
     static constexpr int STRINGS_PAGE_SIZE = 4096;
@@ -144,6 +146,7 @@ private:
     std::vector<Symbol> symbols;
     std::vector<std::pair<unsigned int, unsigned int>> names_by_hash;
     std::vector<std::shared_ptr<File>> files;
+    UnorderedSet<ErrorClass> suppressed_error_classes;
     bool wasModified_ = false;
 
     mutable std::mutex annotations_mtx;
