@@ -68,6 +68,7 @@ public:
     bool contains(const Loc &other) const;
     std::pair<Detail, Detail> position(const GlobalState &gs) const;
     std::string toString(const GlobalState &gs, int tabs = 0) const;
+    std::string showRaw(const GlobalState &gs) const;
     std::string filePosToString(const GlobalState &gs) const;
     std::string source(const GlobalState &gs) const;
 

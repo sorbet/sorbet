@@ -142,6 +142,12 @@ string Loc::toString(const GlobalState &gs, int tabs) const {
     return buf.str();
 }
 
+string Loc::showRaw(const GlobalState &gs) const {
+    auto path = file().data(gs).path();
+    auto [start, end] = this->position(gs);
+    return fmt::format("Loc {{file={} start={}:{} end={}:{}}}", path, start.line, start.column, end.line, end.column);
+}
+
 string Loc::filePosToString(const GlobalState &gs) const {
     stringstream buf;
     if (!exists()) {
