@@ -3,7 +3,7 @@ class CSV < Object
   include Enumerable
 
   extend T::Generic
-  Elem = type_member(:out, fixed: T::Array[String])
+  Elem = type_member(:out, fixed: T::Array[T.nilable(String)])
 
   DEFAULT_OPTIONS = T.let(T.unsafe(nil), Hash)
   VERSION = T.let(T.unsafe(nil), String)
@@ -12,7 +12,7 @@ class CSV < Object
     type_parameters(:U).params(
         path: T.any(String, ::RubyTyper::IOLike),
         options: T::Hash[Symbol, T.type_parameter(:U)],
-        blk: T.proc.params(arg0: CSV::Row).void,
+        blk: T.proc.params(arg0: T::Array[T.nilable(String)]).void,
     )
     .void
   end
@@ -31,7 +31,7 @@ class CSV < Object
     params(
         str: String,
         options: T::Hash[Symbol, T.untyped],
-        blk: T.proc.params(arg0: T::Array[T.nilable(String)]).returns(BasicObject),
+        blk: T.proc.params(arg0: T::Array[T.nilable(String)]).void
     )
     .returns(T.nilable(T::Array[T::Array[T.nilable(String)]]))
   end
