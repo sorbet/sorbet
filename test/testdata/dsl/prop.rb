@@ -72,6 +72,11 @@ class ShardingProp
   merchant_prop
 end
 
+class EncryptedProp
+  encrypted_prop :foo
+  encrypted_prop :bar, migrating: true, immutable: true
+end
+
 def main
     T.assert_type!(SomeODM.new.foo, T.nilable(String))
     T.assert_type!(SomeODM.new.foo, String) # error: Argument does not have asserted type
@@ -140,4 +145,10 @@ def main
 
     T.assert_type!(ShardingProp.new.merchant, String)
     ShardingProp.new.merchant = "hi" # error: Method `merchant=` does not exist
+
+    T.assert_type!(EncryptedProp.new.foo, T.nilable(String))
+    T.assert_type!(EncryptedProp.new.encrypted_foo, T.nilable(Opus::DB::Model::Mixins::Encryptable::EncryptedValue))
+    EncryptedProp.new.foo = "hello"
+    EncryptedProp.new.foo = nil
+    EncryptedProp.new.bar = "hello" # error: Method `bar=` does not exist
 end

@@ -6188,6 +6188,719 @@ ClassDef{
       ]
     }
 
+    ClassDef{
+      name = UnresolvedConstantLit{
+        scope = EmptyTree
+        cnst = <constant:EncryptedProp>
+      }<<constant:<todo sym>>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
+        }]
+      rhs = [
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::String
+                      typeAlias = nullptr
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = foo<<constant:<todo sym>>>
+          args = []
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = ::String
+                    typeAlias = nullptr
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = UnresolvedConstantLit{
+                                scope = EmptyTree
+                                cnst = <constant:Opus>
+                              }
+                              cnst = <constant:DB>
+                            }
+                            cnst = <constant:Model>
+                          }
+                          cnst = <constant:Mixins>
+                        }
+                        cnst = <constant:Encryptable>
+                      }
+                      cnst = <constant:EncryptedValue>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = encrypted_foo<<constant:<todo sym>>>
+          args = []
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Opus>
+                            }
+                            cnst = <constant:DB>
+                          }
+                          cnst = <constant:Model>
+                        }
+                        cnst = <constant:Mixins>
+                      }
+                      cnst = <constant:Encryptable>
+                    }
+                    cnst = <constant:EncryptedValue>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = nilable
+                          block = nullptr
+                          args = [
+                            ConstantLit{
+                              orig = nullptr
+                              symbol = ::String
+                              typeAlias = nullptr
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::String
+                      typeAlias = nullptr
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = foo=<<constant:<todo sym>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = arg0
+            }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = ::String
+                    typeAlias = nullptr
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                      [
+                        key = Literal{ value = :"arg0" }
+                        value = Send{
+                          recv = ConstantLit{
+                            orig = nullptr
+                            symbol = ::T
+                            typeAlias = nullptr
+                          }
+                          fun = nilable
+                          block = nullptr
+                          args = [
+                            UnresolvedConstantLit{
+                              scope = UnresolvedConstantLit{
+                                scope = UnresolvedConstantLit{
+                                  scope = UnresolvedConstantLit{
+                                    scope = UnresolvedConstantLit{
+                                      scope = UnresolvedConstantLit{
+                                        scope = EmptyTree
+                                        cnst = <constant:Opus>
+                                      }
+                                      cnst = <constant:DB>
+                                    }
+                                    cnst = <constant:Model>
+                                  }
+                                  cnst = <constant:Mixins>
+                                }
+                                cnst = <constant:Encryptable>
+                              }
+                              cnst = <constant:EncryptedValue>
+                            }
+                          ]
+                        }
+                      ]
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = UnresolvedConstantLit{
+                                scope = EmptyTree
+                                cnst = <constant:Opus>
+                              }
+                              cnst = <constant:DB>
+                            }
+                            cnst = <constant:Model>
+                          }
+                          cnst = <constant:Mixins>
+                        }
+                        cnst = <constant:Encryptable>
+                      }
+                      cnst = <constant:EncryptedValue>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = encrypted_foo=<<constant:<todo sym>>>
+          args = [UnresolvedIdent{
+              kind = Local
+              name = arg0
+            }]
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Opus>
+                            }
+                            cnst = <constant:DB>
+                          }
+                          cnst = <constant:Model>
+                        }
+                        cnst = <constant:Mixins>
+                      }
+                      cnst = <constant:Encryptable>
+                    }
+                    cnst = <constant:EncryptedValue>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    ConstantLit{
+                      orig = nullptr
+                      symbol = ::String
+                      typeAlias = nullptr
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = bar<<constant:<todo sym>>>
+          args = []
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  ConstantLit{
+                    orig = nullptr
+                    symbol = ::String
+                    typeAlias = nullptr
+                  }
+                ]
+              }
+            ]
+          }
+        }
+
+        Send{
+          recv = ConstantLit{
+            orig = nullptr
+            symbol = ::Sorbet
+            typeAlias = nullptr
+          }
+          fun = sig
+          block = Block {
+            args = [
+            ]
+            body = Send{
+              recv = Send{
+                recv = Self{ claz = ::<todo sym> }
+                fun = params
+                block = nullptr
+                args = [
+                  Hash{
+                    pairs = [
+                    ]
+                  }
+                ]
+              }
+              fun = returns
+              block = nullptr
+              args = [
+                Send{
+                  recv = ConstantLit{
+                    orig = nullptr
+                    symbol = ::T
+                    typeAlias = nullptr
+                  }
+                  fun = nilable
+                  block = nullptr
+                  args = [
+                    UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = UnresolvedConstantLit{
+                                scope = EmptyTree
+                                cnst = <constant:Opus>
+                              }
+                              cnst = <constant:DB>
+                            }
+                            cnst = <constant:Model>
+                          }
+                          cnst = <constant:Mixins>
+                        }
+                        cnst = <constant:Encryptable>
+                      }
+                      cnst = <constant:EncryptedValue>
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+          args = [
+          ]
+        }
+
+        MethodDef{
+          flags = dsl
+          name = encrypted_bar<<constant:<todo sym>>>
+          args = []
+          rhs = Send{
+            recv = ConstantLit{
+              orig = nullptr
+              symbol = ::T
+              typeAlias = nullptr
+            }
+            fun = cast
+            block = nullptr
+            args = [
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = unsafe
+                block = nullptr
+                args = [
+                  Literal{ value = nil }
+                ]
+              }
+              Send{
+                recv = ConstantLit{
+                  orig = nullptr
+                  symbol = ::T
+                  typeAlias = nullptr
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Opus>
+                            }
+                            cnst = <constant:DB>
+                          }
+                          cnst = <constant:Model>
+                        }
+                        cnst = <constant:Mixins>
+                      }
+                      cnst = <constant:Encryptable>
+                    }
+                    cnst = <constant:EncryptedValue>
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+
     MethodDef{
       flags = 0
       name = main<<constant:<todo sym>>>
@@ -7660,22 +8373,168 @@ ClassDef{
               }
             ]
           }
+          Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:ShardingProp>
+              }
+              fun = new
+              block = nullptr
+              args = [
+              ]
+            }
+            fun = merchant=
+            block = nullptr
+            args = [
+              Literal{ value = "hi" }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <constant:T>
+            }
+            fun = assert_type!
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:EncryptedProp>
+                  }
+                  fun = new
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = foo
+                block = nullptr
+                args = [
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:String>
+                  }
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = UnresolvedConstantLit{
+              scope = EmptyTree
+              cnst = <constant:T>
+            }
+            fun = assert_type!
+            block = nullptr
+            args = [
+              Send{
+                recv = Send{
+                  recv = UnresolvedConstantLit{
+                    scope = EmptyTree
+                    cnst = <constant:EncryptedProp>
+                  }
+                  fun = new
+                  block = nullptr
+                  args = [
+                  ]
+                }
+                fun = encrypted_foo
+                block = nullptr
+                args = [
+                ]
+              }
+              Send{
+                recv = UnresolvedConstantLit{
+                  scope = EmptyTree
+                  cnst = <constant:T>
+                }
+                fun = nilable
+                block = nullptr
+                args = [
+                  UnresolvedConstantLit{
+                    scope = UnresolvedConstantLit{
+                      scope = UnresolvedConstantLit{
+                        scope = UnresolvedConstantLit{
+                          scope = UnresolvedConstantLit{
+                            scope = UnresolvedConstantLit{
+                              scope = EmptyTree
+                              cnst = <constant:Opus>
+                            }
+                            cnst = <constant:DB>
+                          }
+                          cnst = <constant:Model>
+                        }
+                        cnst = <constant:Mixins>
+                      }
+                      cnst = <constant:Encryptable>
+                    }
+                    cnst = <constant:EncryptedValue>
+                  }
+                ]
+              }
+            ]
+          }
+          Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:EncryptedProp>
+              }
+              fun = new
+              block = nullptr
+              args = [
+              ]
+            }
+            fun = foo=
+            block = nullptr
+            args = [
+              Literal{ value = "hello" }
+            ]
+          }
+          Send{
+            recv = Send{
+              recv = UnresolvedConstantLit{
+                scope = EmptyTree
+                cnst = <constant:EncryptedProp>
+              }
+              fun = new
+              block = nullptr
+              args = [
+              ]
+            }
+            fun = foo=
+            block = nullptr
+            args = [
+              Literal{ value = nil }
+            ]
+          }
         ],
         expr = Send{
           recv = Send{
             recv = UnresolvedConstantLit{
               scope = EmptyTree
-              cnst = <constant:ShardingProp>
+              cnst = <constant:EncryptedProp>
             }
             fun = new
             block = nullptr
             args = [
             ]
           }
-          fun = merchant=
+          fun = bar=
           block = nullptr
           args = [
-            Literal{ value = "hi" }
+            Literal{ value = "hello" }
           ]
         }
       }

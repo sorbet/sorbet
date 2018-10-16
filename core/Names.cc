@@ -198,6 +198,13 @@ NameRef NameRef::addAt(GlobalState &gs) const {
     return gs.enterNameUTF8(nameEq);
 }
 
+NameRef NameRef::prepend(GlobalState &gs, string_view s) const {
+    auto name = this->data(gs);
+    ENFORCE(name->kind == UTF8, "prepend over non-utf8 name");
+    string nameEq = absl::StrCat(s, string(name->raw.utf8.begin(), name->raw.utf8.end()));
+    return gs.enterNameUTF8(nameEq);
+}
+
 Name Name::deepCopy(const GlobalState &to) const {
     Name out;
     out.kind = this->kind;

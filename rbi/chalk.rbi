@@ -30,3 +30,12 @@ end
 
 class Chalk::ODM::Mutator::Private::DocumentMutator
 end
+
+class Chalk::ODM::Document
+end
+
+class Opus::DB::Model::Mixins::Encryptable::EncryptedValue < Chalk::ODM::Document
+  Sorbet.sig {params(options: Hash).returns(Opus::DB::Model::Mixins::Encryptable::EncryptedValue)}
+  def initialize(options)
+  end
+end

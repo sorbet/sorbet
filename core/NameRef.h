@@ -93,6 +93,8 @@ public:
 
     NameRef addAt(GlobalState &gs) const;
 
+    NameRef prepend(GlobalState &gs, std::string_view s) const;
+
     std::string toString(const GlobalState &gs) const;
 
     std::string show(const GlobalState &gs) const;

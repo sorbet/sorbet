@@ -322,6 +322,23 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:33
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:35
     method ::<Class:AdvancedODM>#<block> () @ test/testdata/dsl/prop.rb:35
+  class ::EncryptedProp < ::Object () @ test/testdata/dsl/prop.rb:75
+    method ::EncryptedProp#<static-init> () @ test/testdata/dsl/prop.rb:75
+    method ::EncryptedProp#bar () -> String | NilClass @ test/testdata/dsl/prop.rb:77
+    method ::EncryptedProp#encrypted_bar () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:77
+    method ::EncryptedProp#encrypted_foo () -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:76
+    method ::EncryptedProp#encrypted_foo= (arg0) -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:76
+      argument ::EncryptedProp#encrypted_foo=#arg0<> -> Opus::DB::Model::Mixins::Encryptable::EncryptedValue | NilClass @ test/testdata/dsl/prop.rb:76
+    method ::EncryptedProp#foo () -> String | NilClass @ test/testdata/dsl/prop.rb:76
+    method ::EncryptedProp#foo= (arg0) -> String | NilClass @ test/testdata/dsl/prop.rb:76
+      argument ::EncryptedProp#foo=#arg0<> -> String | NilClass @ test/testdata/dsl/prop.rb:76
+  class ::<Class:EncryptedProp> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:75
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:76
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:76
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:76
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:76
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:77
+    method ::<Class:EncryptedProp>#<block> () @ test/testdata/dsl/prop.rb:77
   class ::ForeignClass < ::Object () @ test/testdata/dsl/prop.rb:27
   class ::<Class:ForeignClass> < ::<Class:Object> () @ test/testdata/dsl/prop.rb:27
   class ::NotAODM < ::Object () @ test/testdata/dsl/prop.rb:2
@@ -336,7 +353,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
     method ::<Class:NotAODM>#prop (args) @ test/testdata/dsl/prop.rb:3
       argument ::<Class:NotAODM>#prop#args<repeated> @ test/testdata/dsl/prop.rb:3
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L851
-    method ::Object#main () @ test/testdata/dsl/prop.rb:75
+    method ::Object#main () @ test/testdata/dsl/prop.rb:80
   class ::Opus < ::RubyTyper::ImplicitModuleSuperclass ()
     class ::Opus::Param < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12
       class ::Opus::Param::CaseParam < ::RubyTyper::StubClass () -> T.untyped @ test/testdata/dsl/prop.rb:12

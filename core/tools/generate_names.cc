@@ -148,6 +148,7 @@ NameDef names[] = {
     {"timestamped_token_prop"},
     {"created_prop"},
     {"merchant_prop"},
+    {"encrypted_prop"},
     {"array"},
     {"type"},
     {"optional"},
@@ -183,6 +184,11 @@ NameDef names[] = {
     {"helpers"},
 
     {"Opus"},
+    {"DB"},
+    {"Model"},
+    {"Mixins"},
+    {"Encryptable"},
+    {"EncryptedValue"},
     {"Command"},
     // end DSL methods
 
