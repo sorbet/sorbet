@@ -147,6 +147,14 @@ test/cli/suggest-sig/suggest-sig.rb:90: This function does not have a `sig` http
     90 |def with_block
         ^^^^^^^^^^^^^^
 
+test/cli/suggest-sig/suggest-sig.rb:96: This function does not have a `sig` http://go/e/7017
+    96 |def takesRepated(*a); end;
+        ^^^^^^^^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:97: This function does not have a `sig` http://go/e/7017
+    97 |def hasNoName(*); end;
+        ^^^^^^^^^^^^^^^^
+
 test/cli/suggest-sig/suggest-sig.rb:39: This function does not have a `sig` http://go/e/7017
     39 |  private def a_private; end
                   ^^^^^^^^^^^^^
@@ -164,4 +172,20 @@ test/cli/suggest-sig/suggest-sig.rb:41: This function does not have a `sig` http
   `
     41 |  protected def a_protected; end
           ^
-Errors: 23
+
+test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` http://go/e/7017
+     100 |Foo = Struct.new(:a, :b)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` http://go/e/7017
+     100 |Foo = Struct.new(:a, :b)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` http://go/e/7017
+     100 |Foo = Struct.new(:a, :b)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+
+test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` http://go/e/7017
+     100 |Foo = Struct.new(:a, :b)
+          ^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 29

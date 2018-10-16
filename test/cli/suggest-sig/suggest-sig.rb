@@ -91,3 +91,10 @@ def with_block
   yield
   nil
 end
+
+
+def takesRepated(*a); end;
+def hasNoName(*); end;
+
+# We used to generate multiple sigs for dsl'd methods here
+Foo = Struct.new(:a, :b)

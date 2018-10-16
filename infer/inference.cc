@@ -289,14 +289,24 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         bool isFullyDefined = guessedType->isFullyDefined();
         bool isUntyped = guessedType->isUntyped();
 
-        // We don't want to suggest a sig when the method has a block argument because
-        // - Sometimes we synthesize a block arg, and name it `<blk>` which is not a valid identifier name.
-        // - We're not attempting to infer types for them, and we don't want people to think that procs can't be typed.
-        auto isBlockArg = [&](const core::SymbolRef &arg) { return arg.data(ctx)->isBlockArgument(); };
-        bool hasBlockArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBlockArg);
+        auto hasBadArg = [&](const core::SymbolRef &arg) -> bool {
+            return arg.data(ctx)->isBlockArgument() || // Sometimes we synthesize a block arg,
+                                                       // and name it `<blk>` which is not a
+                                                       // valid identifier name.
+
+                   arg.data(ctx)->isRepeated() || // runtime does not support rest args
+                                                  // and key-rest args
+
+                   arg.data(ctx)->name.data(ctx)->shortName(ctx).empty(); // sometimes variable does not have
+                                                                          // a name e.g. `def initialize (*)`
+        };
+        bool hasBlockArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), hasBadArg);
 
         if (isFullyDefined && !isUntyped && !hasBlockArg) {
             auto loc = methodSymbol.data(ctx)->loc();
+            if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
+                return;
+            }
             auto [startOffset, startPadding] = getStartOffset(ctx, loc);
             core::Loc replacementLoc(loc.file(), startOffset, startOffset);
             stringstream ss;
