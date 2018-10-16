@@ -181,7 +181,7 @@ private:
         }
         auto resolved =
             resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases, lastRun);
-        if (!resolved) {
+        if (!resolved.exists()) {
             if (!lastRun) {
                 return false;
             }

@@ -51,10 +51,6 @@ public:
 
     bool operator!=(const SymbolRef &rhs) const;
 
-    bool operator!() {
-        return !_id;
-    }
-
     std::string toString(const GlobalState &gs, int tabs = 0, bool showHidden = false) const;
     std::string show(const GlobalState &gs) const;
 
