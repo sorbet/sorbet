@@ -40,3 +40,11 @@ config_setting(
         "host_cpu": "darwin",
     },
 )
+
+config_setting(
+    name = "darwindbg",
+    values = {
+        "host_cpu": "darwin",
+        "compilation_mode": "dbg",
+    },
+)
