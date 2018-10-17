@@ -188,4 +188,17 @@ test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` htt
 test/cli/suggest-sig/suggest-sig.rb:100: This function does not have a `sig` http://go/e/7017
      100 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 29
+
+test/cli/suggest-sig/suggest-sig.rb:110: This function does not have a `sig` http://go/e/7017
+     110 |  def self.load_account_business_profile(merchant)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:110: Insert `sig {params(merchant: T.untyped).returns(Integer)}
+  `
+     110 |  def self.load_account_business_profile(merchant)
+            ^
+
+test/cli/suggest-sig/suggest-sig.rb:106: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
+     106 |  sig {params(merchant: Merchant).void}
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Errors: 31

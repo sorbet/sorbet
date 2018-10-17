@@ -1,0 +1,13 @@
+test/cli/escaping/escaping.rb:7: `String("\n")` doesn't match `Integer` for argument `a` http://go/e/7002
+     7 |foo( #error: `String("\n")` doesn't match
+     8 |'
+     9 |'
+    10 |)
+    test/cli/escaping/escaping.rb:2: Method `Object#foo` has specified `a` as `Integer`
+     2 |Sorbet.sig{params(a: Integer).void}
+                          ^^
+  Got String("\n") originating from:
+    test/cli/escaping/escaping.rb:8:
+     8 |'
+     9 |'
+Errors: 1

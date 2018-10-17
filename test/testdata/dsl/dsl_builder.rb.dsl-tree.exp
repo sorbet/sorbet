@@ -142,7 +142,7 @@ class <emptyTree><<constant:<root>>> < ()
 
     self(<constant:<todo sym>>).implied_string()
 
-    self(<constant:<todo sym>>).no_getter("I'm setting the value")
+    self(<constant:<todo sym>>).no_getter("I\'m setting the value")
 
     self(<constant:<todo sym>>).get_no_getter()
 

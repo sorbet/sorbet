@@ -587,7 +587,7 @@ shared_ptr<Type> TypeVar::getCallArguments(Context ctx, NameRef name) {
 }
 
 bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("should never happen");
+    Error::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
 TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
@@ -788,6 +788,13 @@ std::shared_ptr<Type> Types::widen(Context ctx, const std::shared_ptr<Type> &typ
 
 DispatchArgs DispatchArgs::withSelfRef(const std::shared_ptr<Type> &newSelfRef) {
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
+}
+
+core::TypeConstraint &DispatchArgs::constraint() {
+    if (!block || !block->constr) {
+        return core::TypeConstraint::EmptyFrozenConstraint;
+    }
+    return *block->constr;
 }
 
 } // namespace sorbet::core

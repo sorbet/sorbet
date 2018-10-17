@@ -613,6 +613,7 @@ struct DispatchArgs {
     const std::shared_ptr<SendAndBlockLink> &block;
 
     DispatchArgs withSelfRef(const std::shared_ptr<Type> &newSelfRef);
+    core::TypeConstraint &constraint();
 };
 
 struct DispatchComponent {

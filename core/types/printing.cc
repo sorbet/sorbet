@@ -50,9 +50,9 @@ string LiteralType::showValue(const GlobalState &gs) const {
     string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying().get())->symbol;
     if (undSymbol == Symbols::String()) {
-        value = "\"" + NameRef(gs, this->value).toString(gs) + "\"";
+        value = "\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
     } else if (undSymbol == Symbols::Symbol()) {
-        value = ":\"" + NameRef(gs, this->value).toString(gs) + "\"";
+        value = ":\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
     } else if (undSymbol == Symbols::Integer()) {
         value = to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {

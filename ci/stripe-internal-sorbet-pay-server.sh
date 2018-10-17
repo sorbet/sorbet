@@ -151,9 +151,9 @@ TIMEFILE2=$(mktemp)
 /usr/local/bin/junit-script-output \
     typecheck-sanitized \
     /usr/bin/time -o "$TIMEFILE2" \
-    ./scripts/bin/typecheck --quiet --suppress-non-critical --typed=strict --suggest-typed \
+    ./scripts/bin/typecheck --suppress-non-critical --typed=strict --suggest-typed \
     --statsd-host=veneur-srv.service.consul --statsd-prefix=ruby_typer.payserver --counters \
-    --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/sorbet --metrics-sha="$GIT_SHA"
+    --metrics-file=metrics.json --metrics-prefix=ruby_typer.payserver --metrics-repo=stripe-internal/sorbet --metrics-sha="$GIT_SHA" > /dev/null
 
 cat "$TIMEFILE2"
 

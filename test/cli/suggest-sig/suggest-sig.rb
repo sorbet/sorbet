@@ -98,3 +98,18 @@ def hasNoName(*); end;
 
 # We used to generate multiple sigs for dsl'd methods here
 Foo = Struct.new(:a, :b)
+
+class TestCarash
+  class Merchant
+  end
+
+  sig {params(merchant: Merchant).void}
+  def self.blar(merchant:)
+  end
+
+  def self.load_account_business_profile(merchant)
+    blar(merchant: merchant)
+    1
+  end
+end
+

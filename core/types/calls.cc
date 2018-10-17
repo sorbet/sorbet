@@ -483,7 +483,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (spec->isKeyword()) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs && arg->type->derivesFrom(ctx, Symbols::Hash()) &&
+        if (ait + 1 == aend && hasKwargs &&
+            Types::approximate(ctx, arg->type, *constr)->derivesFrom(ctx, Symbols::Hash()) &&
             (spec->isOptional() || spec->isRepeated())) {
             break;
         }
@@ -522,6 +523,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
     if (hasKwargs && ait != aend) {
         UnorderedSet<NameRef> consumed;
         auto &hashArg = *(aend - 1);
+        auto hashArgType = Types::approximate(ctx, hashArg->type, *constr);
 
         // find keyword arguments and advance `pend` before them; We'll walk
         // `kwit` ahead below
@@ -531,10 +533,10 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
         pend = kwit;
 
-        if (hashArg->type->isUntyped()) {
+        if (hashArgType->isUntyped()) {
             // Allow an untyped arg to satisfy all kwargs
             --aend;
-        } else if (auto *hash = cast_type<ShapeType>(hashArg->type.get())) {
+        } else if (auto *hash = cast_type<ShapeType>(hashArgType.get())) {
             --aend;
 
             while (kwit != data->arguments().end()) {
@@ -603,11 +605,11 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     result.components.front().errors.emplace_back(e.build());
                 }
             }
-        } else if (hashArg->type->derivesFrom(ctx, Symbols::Hash())) {
+        } else if (hashArgType->derivesFrom(ctx, Symbols::Hash())) {
             --aend;
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentMismatch)) {
                 e.setHeader("Passing an untyped hash to keyword arguments");
-                e.addErrorSection(ErrorSection("Got " + hashArg->type->show(ctx) + " originating from:",
+                e.addErrorSection(ErrorSection("Got " + hashArgType->show(ctx) + " originating from:",
                                                hashArg->origins2Explanations(ctx)));
                 result.components.front().errors.emplace_back(e.build());
             }
@@ -1030,13 +1032,15 @@ public:
 } Magic_buildArray;
 
 class Magic_expandSplat : public IntrinsicMethod {
-    static shared_ptr<Type> expandArray(Context ctx, const shared_ptr<Type> &type, int expandTo) {
+    static shared_ptr<Type> expandArray(Context ctx, const shared_ptr<Type> &type, int expandTo,
+                                        core::TypeConstraint &constr) {
         if (auto *ot = cast_type<OrType>(type.get())) {
-            return Types::any(ctx, expandArray(ctx, ot->left, expandTo), expandArray(ctx, ot->right, expandTo));
+            return Types::any(ctx, expandArray(ctx, ot->left, expandTo, constr),
+                              expandArray(ctx, ot->right, expandTo, constr));
         }
 
         auto *tuple = cast_type<TupleType>(type.get());
-        if (tuple == nullptr && type->derivesFrom(ctx, Symbols::Array())) {
+        if (tuple == nullptr && core::Types::approximate(ctx, type, constr)->derivesFrom(ctx, Symbols::Array())) {
             // If this is an array and not a tuple, just pass it through. We
             // can't say anything about the elements.
             return type;
@@ -1068,7 +1072,7 @@ public:
         }
         int before = (int)beforeLit->value;
         int after = (int)afterLit->value;
-        return expandArray(ctx, val, before + after);
+        return expandArray(ctx, val, before + after, args.constraint());
     }
 } Magic_expandSplat;
 
@@ -1081,6 +1085,10 @@ public:
         auto &receiver = args.args[0];
         if (receiver->type->isUntyped()) {
             return receiver->type;
+        }
+
+        if (!receiver->type->isFullyDefined()) {
+            return core::Types::untypedUntracked();
         }
 
         auto *lit = cast_type<LiteralType>(args.args[1]->type.get());
