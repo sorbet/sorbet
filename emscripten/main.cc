@@ -13,6 +13,7 @@
 #include "parser/parser.h"
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
+#include "spdlog/sinks/stdout_sinks.h"
 #include "spdlog/spdlog.h"
 
 #include <iostream>
