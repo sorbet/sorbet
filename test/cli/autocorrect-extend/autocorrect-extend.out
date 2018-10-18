@@ -1,0 +1,157 @@
+test/cli/autocorrect-extend/autocorrect-extend.rb:4: This function does not have a `sig` http://go/e/7017
+     4 |def foo; end
+        ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:4: Insert `sig {returns(NilClass)}
+`
+     4 |def foo; end
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:26: This function does not have a `sig` http://go/e/7017
+    26 |def project(x); x; end
+        ^^^^^^^^^^^^^^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:8: This function does not have a `sig` http://go/e/7017
+     8 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:8: Insert `sig {returns(NilClass)}
+  `
+     8 |  def foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:8: Insert `  extend T::Helpers
+`
+     8 |  def foo; end
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:10: This function does not have a `sig` http://go/e/7017
+    10 |  def bar; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:10: Insert `sig {returns(NilClass)}
+  `
+    10 |  def bar; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:8: Insert `  extend T::Helpers
+`
+     8 |  def foo; end
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:14: This function does not have a `sig` http://go/e/7017
+    14 |class SigAndExtendOneLine; def foo; end; end
+                                   ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:14: Insert `sig {returns(NilClass)}
+`
+    14 |class SigAndExtendOneLine; def foo; end; end
+        ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:15: Insert `extend T::Helpers
+`
+    15 |
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:18: This function does not have a `sig` http://go/e/7017
+    18 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:18: Insert `sig {returns(NilClass)}
+  `
+    18 |  def foo; end
+          ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:23: This function does not have a `sig` http://go/e/7017
+    23 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:23: Insert `sig {returns(NilClass)}
+  `
+    23 |  def foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:23: Insert `  extend T::Helpers
+`
+    23 |  def foo; end
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:30: This function does not have a `sig` http://go/e/7017
+    30 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:30: Insert `sig {returns(NilClass)}
+  `
+    30 |  def foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:29: Insert `  extend T::Helpers
+`
+    29 |  project :sorbet
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:34: This function does not have a `sig` http://go/e/7017
+    34 |  def self.foo; end
+          ^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:34: Insert `sig {returns(NilClass)}
+  `
+    34 |  def self.foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:34: Insert `  extend T::Helpers
+`
+    34 |  def self.foo; end
+        ^
+Errors: 9
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+# Don't extend T::Helpers for this one, because the class wasn't defined here.
+sig {returns(NilClass)}
+def foo; end
+
+# Should only add one extend
+class SuggestSigAndExtend
+  extend T::Helpers
+  sig {returns(NilClass)}
+  def foo; end
+
+  sig {returns(NilClass)}
+  def bar; end
+end
+
+# This doesn't work right now, for both the injected 'sig' and 'extend'.
+sig {returns(NilClass)}
+class SigAndExtendOneLine; def foo; end; end
+extend T::Helpers
+
+class DontSuggestExtend
+  extend T::Helpers
+  sig {returns(NilClass)}
+  def foo; end
+end
+
+class Parent; end
+class Child < Parent
+  extend T::Helpers
+  sig {returns(NilClass)}
+  def foo; end
+end
+
+def project(x); x; end
+
+class MethodBetweenExtendAndSig
+  extend T::Helpers
+  project :sorbet
+  sig {returns(NilClass)}
+  def foo; end
+end
+
+class MethodOnSelf
+  extend T::Helpers
+  sig {returns(NilClass)}
+  def self.foo; end
+end

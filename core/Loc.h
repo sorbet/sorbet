@@ -77,6 +77,7 @@ public:
     bool operator!=(const Loc &rhs) const;
     static u4 pos2Offset(const File &source, Detail pos);
     static Detail offset2Pos(const File &source, u4 off);
+    static Loc fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
 };
 CheckSize(Loc, 8, 4);
 } // namespace sorbet::core

@@ -11,26 +11,76 @@ using namespace std;
 namespace sorbet::infer {
 
 namespace {
-struct OffsetAndPadding {
-    u4 startOffset;
-    u4 startPadding;
+struct LocAndColumn {
+    core::Loc loc;
+    u4 padding;
 };
 
-// TODO(jez) Might want to factor this out if we add more autocorrects that are "inject a line above this line"
-OffsetAndPadding getStartOffset(core::Context ctx, core::Loc loc) {
+//
+// For a given Loc, returns
+//
+// - the Loc corresponding to the first non-whitespace character on this line, and
+// - how many characters of the start of this line are whitespace.
+//
+LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
     core::Loc::Detail startDetail = loc.position(ctx).first;
     u4 lineStart = core::Loc::pos2Offset(loc.file().data(ctx), {startDetail.line, 1});
+    std::string_view lineView = loc.file().data(ctx).source().substr(lineStart);
 
-    // This isn't the entire line, it's just the line up until the end of the method def:
-    //     private def foo; end
-    //             ^^^^^^^
-    // but that's enough for us to find the initial padding on this line.
-    std::string_view lineView = loc.file().data(ctx).source().substr(lineStart, startDetail.column);
-
-    u4 startPadding = lineView.find_first_not_of(" \t");
-    u4 startOffset = lineStart + startPadding;
-    return {startOffset, startPadding};
+    u4 padding = lineView.find_first_not_of(" \t");
+    u4 startOffset = lineStart + padding;
+    return {core::Loc(loc.file(), startOffset, startOffset), padding};
 }
+
+// Walks the chain of attached classes to find the one at the end of the chain.
+core::SymbolRef topAttachedClass(core::Context ctx, core::SymbolRef classSymbol) {
+    while (true) {
+        auto attachedClass = classSymbol.data(ctx)->attachedClass(ctx);
+        if (!attachedClass.exists()) {
+            break;
+        }
+        classSymbol = attachedClass;
+    }
+    return classSymbol;
+}
+
+bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
+    ENFORCE(enclosingClass.exists());
+    auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
+    ENFORCE(enclosingSingletonClass.exists());
+    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+}
+
+unique_ptr<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
+    auto method = methodSymbol.data(ctx);
+
+    auto enclosingClass = topAttachedClass(ctx, method->enclosingClass(ctx));
+    if (extendsTHelpers(ctx, enclosingClass)) {
+        // No need to suggest here, because it already has 'extend T::Helpers'
+        return unique_ptr<core::AutocorrectSuggestion>{};
+    }
+
+    auto inFileOfMethod = [&](const auto &loc) { return loc.file() == method->loc().file(); };
+    auto classLocs = enclosingClass.data(ctx)->locs();
+    auto classLoc = absl::c_find_if(classLocs, inFileOfMethod);
+
+    if (classLoc == classLocs.end()) {
+        // Couldn't a loc for the enclosing class in this file, give up.
+        // TODO(jez) We might be able to expand this heuristic to be "found a file that we can write to"
+        return unique_ptr<core::AutocorrectSuggestion>{};
+    }
+
+    auto [classStart, classEnd] = classLoc->position(ctx);
+    ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).line_breaks().size());
+    core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
+    core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
+    auto [replacementLoc, nextLinePadding] = findStartOfLine(ctx, nextLineLoc);
+
+    // Preserve the indentation of the line below us.
+    string prefix(nextLinePadding, ' ');
+    return make_unique<core::AutocorrectSuggestion>(nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix));
+}
+
 shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
                                       int argId) {
     // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
@@ -283,68 +333,80 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
 void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
                      const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
                      unique_ptr<cfg::CFG> &cfg) {
-    if (constr.solve(ctx)) {
-        auto guessedType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
+    if (!constr.solve(ctx)) {
+        return;
+    }
 
-        bool isFullyDefined = guessedType->isFullyDefined();
-        bool isUntyped = guessedType->isUntyped();
+    auto guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
-        auto hasBadArg = [&](const core::SymbolRef &arg) -> bool {
-            return arg.data(ctx)->isBlockArgument() || // Sometimes we synthesize a block arg,
-                                                       // and name it `<blk>` which is not a
-                                                       // valid identifier name.
+    if (!guessedReturnType->isFullyDefined()) {
+        return;
+    }
+    if (guessedReturnType->isUntyped()) {
+        return;
+    }
 
-                   arg.data(ctx)->isRepeated() || // runtime does not support rest args
-                                                  // and key-rest args
+    auto isBadArg = [&](const core::SymbolRef &arg) -> bool {
+        return arg.data(ctx)->isBlockArgument() || // Sometimes we synthesize a block arg,
+                                                   // and name it `<blk>` which is not a
+                                                   // valid identifier name.
 
-                   arg.data(ctx)->name.data(ctx)->shortName(ctx).empty(); // sometimes variable does not have
-                                                                          // a name e.g. `def initialize (*)`
-        };
-        bool hasBlockArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), hasBadArg);
+               arg.data(ctx)->isRepeated() || // runtime does not support rest args
+                                              // and key-rest args
 
-        if (isFullyDefined && !isUntyped && !hasBlockArg) {
-            auto loc = methodSymbol.data(ctx)->loc();
-            if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
-                return;
+               arg.data(ctx)->name.data(ctx)->shortName(ctx).empty(); // sometimes variable does not have
+                                                                      // a name e.g. `def initialize (*)`
+    };
+    bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
+    if (hasBadArg) {
+        return;
+    }
+
+    auto loc = methodSymbol.data(ctx)->loc();
+    // Sometimes the methodSymbol we're looking at has been synthesized by a DSL pass, so no 'def' exists in the source
+    if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
+        return;
+    }
+
+    stringstream ss;
+    bool first = true;
+
+    auto argumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
+
+    ss << "sig {";
+    if (!methodSymbol.data(ctx)->arguments().empty()) {
+        ss << "params(";
+        for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
+            if (!first) {
+                ss << ", ";
             }
-            auto [startOffset, startPadding] = getStartOffset(ctx, loc);
-            core::Loc replacementLoc(loc.file(), startOffset, startOffset);
-            stringstream ss;
-            bool first = true;
-
-            auto argumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
-
-            ss << "sig {";
-            if (!methodSymbol.data(ctx)->arguments().empty()) {
-                ss << "params(";
-                for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
-                    if (!first) {
-                        ss << ", ";
-                    }
-                    first = false;
-                    auto argType = argumentTypes[argSym];
-                    if (!argType) {
-                        argType = core::Types::untypedUntracked();
-                    }
-                    ss << argSym.data(ctx)->name.show(ctx) << ": " << argType->show(ctx);
-                }
-                ss << ").";
+            first = false;
+            auto argType = argumentTypes[argSym];
+            if (!argType) {
+                argType = core::Types::untypedUntracked();
             }
-
-            string returnStr;
-            if (methodSymbol.data(ctx)->name == core::Names::initialize() ||
-                core::Types::isSubType(ctx, core::Types::void_(), guessedType)) {
-                returnStr = "void";
-            } else {
-                returnStr = fmt::format("returns({})", guessedType->show(ctx));
-            }
-            ss << returnStr;
-            ss << "}";
-
-            string spaces(startPadding, ' ');
-
-            e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
+            ss << argSym.data(ctx)->name.show(ctx) << ": " << argType->show(ctx);
         }
+        ss << ").";
+    }
+
+    string returnStr;
+    if (methodSymbol.data(ctx)->name == core::Names::initialize() ||
+        core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType)) {
+        returnStr = "void";
+    } else {
+        returnStr = fmt::format("returns({})", guessedReturnType->show(ctx));
+    }
+    ss << returnStr;
+    ss << "}";
+
+    auto [replacementLoc, padding] = findStartOfLine(ctx, loc);
+    string spaces(padding, ' ');
+
+    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
+
+    if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
+        e.addAutocorrect(move(*suggestion));
     }
 }
 } // namespace

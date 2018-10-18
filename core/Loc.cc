@@ -47,6 +47,11 @@ u4 Loc::pos2Offset(const File &file, Loc::Detail pos) {
     return lineOffset + pos.column;
 }
 
+Loc Loc::fromDetails(const GlobalState &gs, FileRef fileRef, Loc::Detail begin, Loc::Detail end) {
+    const auto &file = fileRef.data(gs);
+    return Loc(fileRef, pos2Offset(file, begin), pos2Offset(file, end));
+}
+
 pair<Loc::Detail, Loc::Detail> Loc::position(const GlobalState &gs) const {
     Loc::Detail begin(offset2Pos(this->file().data(gs), beginPos()));
     Loc::Detail end(offset2Pos(this->file().data(gs), endPos()));

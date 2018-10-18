@@ -81,6 +81,7 @@ const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
 const char *guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder";
 const char *private_str = "Private";
 const char *builder_str = "Builder";
+const char *helpers_str = "Helpers";
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 const char *reserved_str = "<<RESERVED>>";
@@ -270,6 +271,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), enterNameConstant(builder_str));
     ENFORCE(id == Symbols::Sorbet_Private_Builder());
+    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(helpers_str));
+    ENFORCE(id == Symbols::T_Helpers());
 
     // Root members
     Symbols::root().data(*this, true)->members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

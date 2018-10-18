@@ -36,6 +36,8 @@ private def root_private; end
 protected def root_protected; end
 
 class A
+  extend T::Helpers
+
   private def a_private; end
 
   protected def a_protected; end
