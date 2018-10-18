@@ -14,10 +14,10 @@ shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared
 
 shared_ptr<Type> Types::any(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
     auto ret = lub(ctx, t1, t2);
-    ENFORCE(Types::isSubType(ctx, t1, ret), ret->toString(ctx) + " is not a super type of " + t1->toString(ctx) +
-                                                " was lubbing with " + t2->toString(ctx));
-    ENFORCE(Types::isSubType(ctx, t2, ret), ret->toString(ctx) + " is not a super type of " + t2->toString(ctx) +
-                                                " was lubbing with " + t1->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, t1, ret), "\n" + ret->toString(ctx) + "\n is not a super type of \n" +
+                                                t1->toString(ctx) + "\n was lubbing with " + t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, t2, ret), "\n" + ret->toString(ctx) + "\n is not a super type of \n" +
+                                                t2->toString(ctx) + "\n was lubbing with \n" + t1->toString(ctx));
 
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
@@ -523,11 +523,11 @@ shared_ptr<Type> Types::all(Context ctx, const shared_ptr<Type> &t1, const share
     auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
-    ENFORCE(Types::isSubType(ctx, ret, t1), ret->toString(ctx) + " is not a subtype of " + t1->toString(ctx) +
-                                                " was glbbing with " + t2->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, ret, t1), "\n" + ret->toString(ctx) + "\n is not a subtype of \n" +
+                                                t1->toString(ctx) + "\n was glbbing with \n" + t2->toString(ctx));
 
-    ENFORCE(Types::isSubType(ctx, ret, t2), ret->toString(ctx) + " is not a subtype of " + t2->toString(ctx) +
-                                                " was glbbing with " + t1->toString(ctx));
+    ENFORCE(Types::isSubType(ctx, ret, t2), "\n" + glb(ctx, t1, t2)->toString(ctx) + "\n is not a subtype of \n" +
+                                                t2->toString(ctx) + "\n was glbbing with \n" + t1->toString(ctx));
     //  TODO: @dmitry, reenable
     //    ENFORCE(t1->hasUntyped() || t2->hasUntyped() || ret->hasUntyped() || // check if this test makes sense
     //                !Types::isSubTypeUnderConstraint(ctx, t1, t2) || ret == t1 || ret->isUntyped(),
@@ -604,6 +604,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                          if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
                              vector<shared_ptr<Type>> elemGlbs;
                              elemGlbs.reserve(a2->elems.size());
+
                              int i = -1;
                              for (auto &el2 : a2->elems) {
                                  ++i;
@@ -614,7 +615,13 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                                  }
                                  elemGlbs.emplace_back(glbe);
                              }
-                             result = TupleType::build(ctx, elemGlbs);
+                             if (absl::c_equal(a1->elems, elemGlbs)) {
+                                 result = t1;
+                             } else if (absl::c_equal(a2->elems, elemGlbs)) {
+                                 result = t2;
+                             } else {
+                                 result = TupleType::build(ctx, elemGlbs);
+                             }
                          } else {
                              result = Types::bottom();
                          }
@@ -628,6 +635,8 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              int i = -1;
                              vector<shared_ptr<Type>> valueLubs;
                              valueLubs.reserve(h2->keys.size());
+                             bool canReuseT1 = true;
+                             bool canReuseT2 = true;
                              for (auto &el2 : h2->keys) {
                                  ++i;
                                  auto *u2 = cast_type<ClassType>(el2->underlying().get());
@@ -637,18 +646,28 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                                      return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
                                  });
                                  if (fnd != h1->keys.end()) {
-                                     auto glbe = glb(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]);
+                                     auto left = h1->values[fnd - h1->keys.begin()];
+                                     auto right = h2->values[i];
+                                     auto glbe = glb(ctx, left, right);
                                      if (glbe->isBottom()) {
                                          result = Types::bottom();
                                          return;
                                      }
+                                     canReuseT1 &= glbe == left;
+                                     canReuseT2 &= glbe == right;
                                      valueLubs.emplace_back(glbe);
                                  } else {
                                      result = Types::bottom();
                                      return;
                                  }
                              }
-                             result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                             if (canReuseT1) {
+                                 result = t1;
+                             } else if (canReuseT2) {
+                                 result = t2;
+                             } else {
+                                 result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                             }
                          } else {
                              result = Types::bottom();
                          }
@@ -825,7 +844,13 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
             }
             j++;
         }
-        return make_shared<AppliedType>(a1->klass, newTargs);
+        if (absl::c_equal(a1->targs, newTargs)) {
+            return ltr ? t2 : t1;
+        } else if (absl::c_equal(a2->targs, newTargs) && a1->klass == a2->klass) {
+            return ltr ? t1 : t2;
+        } else {
+            return make_shared<AppliedType>(a1->klass, newTargs);
+        }
     }
     {
         if (isa_type<TypeVar>(t1.get()) || isa_type<TypeVar>(t2.get())) {
