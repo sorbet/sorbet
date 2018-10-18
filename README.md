@@ -11,19 +11,20 @@ also want to see:
 - The Sorbet [design doc](https://hackpad.corp.stripe.com/Design-Doc-sorbet-zd1LGHPfpvW)
 - The Sorbet [user guide](http://go/types)
 - The [Sorbet internals](https://stripe.exceedlms.com/student/activity/372979) talk
+- The [Gradual Typing of Ruby at Scale](https://www.youtube.com/watch?v=uFFJyp8vXQI) talk
 
 ## Sorbet user-facing design principles
 
 Early in our project we've defiend some guidelines for how working with sorbet should feel like.
 
 1. **Explicit**
-  
+
     We're willing to write annotations, and in fact see them as
     beneficial; They make code more readable and predictable. We're here
     to help readers as much as writers.
 
 2. **Feel useful, not burdensome**
-  
+
     While it is explicit, we are putting effort into making it concise.
     This shows in multiple ways:
      - error messages should be clear
@@ -44,7 +45,7 @@ Early in our project we've defiend some guidelines for how working with sorbet s
     we can leverage most of our existing tooling (editors, etc). Also,
     the whole point here is to improve an existing Ruby codebase, so we
     should be able to adopt it incrementally.
-  
+
 5. **Scales**
 
     On all axes: in speed, team size, codebase size and time (not
@@ -104,7 +105,7 @@ below). There are many options you can pass when building `sorbet`:
 
 - `--config=dbg`
   - Most common build config for development.
-  - Fast, good stack traces, and debugger symbols.
+  - Good stack traces, runs all ENFORCEs.
 - `--config=sanitize`
   - Link in extra sanitizers, in particular: UBSan and ASan.
   - Catches most memory and undefined-behavior errors.
@@ -292,14 +293,24 @@ There are a couple hoops to jump through for local development, but it's worth
 it because at the end you'll be able to run `sorbet` under `lldb` running over
 `pay-server`.
 
-### Build `sorbet` with optimizations
+### Build `sorbet`
 
-To run on pay-server, you must be using an optimized build (any build with `-c
-opt`). For example:
+There is a lot of code in pay-server, so it's best to build Sorbet with
+optimizations before running over it:
 
 ```
-bazel build //main:sorbet -c opt
+bazel build //main:sorbet -c opt --config=debugsymbols
 ```
+
+Or, if you want to try running sorbet under LLDB:
+
+```
+bazel build //main:sorbet --config=dbg
+```
+
+Careful! This will build a version of of Sorbet without optimizations and with
+all ENFORCE checks enabled, so it will take longer to run. You might want to see
+if you can reproduce the issue with an optimized build first.
 
 Alternatively, if you want to exactly reproduce what we ship to our users:
 
