@@ -115,3 +115,8 @@ class TestCarash
   end
 end
 
+def cantRun(a)
+  takesInt(a)
+  takesString(a)
+  1
+end

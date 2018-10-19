@@ -155,6 +155,15 @@ test/cli/suggest-sig/suggest-sig.rb:99: This function does not have a `sig` http
     99 |def hasNoName(*); end;
         ^^^^^^^^^^^^^^^^
 
+test/cli/suggest-sig/suggest-sig.rb:118: This function does not have a `sig` http://go/e/7017
+     118 |def cantRun(a)
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:118: Insert `sig {params(a: T.untyped).returns(Integer)}
+`
+     118 |def cantRun(a)
+          ^
+
 test/cli/suggest-sig/suggest-sig.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
@@ -206,4 +215,4 @@ test/cli/suggest-sig/suggest-sig.rb:112: This function does not have a `sig` htt
 test/cli/suggest-sig/suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 31
+Errors: 32

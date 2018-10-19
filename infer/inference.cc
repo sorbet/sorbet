@@ -382,7 +382,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
             }
             first = false;
             auto argType = argumentTypes[argSym];
-            if (!argType) {
+            if (!argType || argType->isBottom()) {
                 argType = core::Types::untypedUntracked();
             }
             ss << argSym.data(ctx)->name.show(ctx) << ": " << argType->show(ctx);
