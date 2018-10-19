@@ -5,7 +5,6 @@
 #include "core/GlobalState.h"
 #include "core/lsp/QueryResponse.h"
 #include "rang.hpp"
-#include "spdlog/fmt/ostr.h"
 #include <algorithm>
 
 template class std::unique_ptr<sorbet::core::BasicError>;

@@ -1,6 +1,5 @@
 #include "cfg/CFG.h"
 #include <algorithm>
-#include <sstream>
 #include <unordered_set>
 
 #include "absl/algorithm/container.h"
@@ -113,77 +112,60 @@ void CFG::sanityCheck(core::Context ctx) {
 }
 
 string CFG::toString(core::Context ctx) {
-    stringstream buf;
+    fmt::memory_buffer buf;
     string symbolName = this->symbol.data(ctx)->fullName(ctx);
-    buf << "subgraph \"cluster_" << symbolName << "\" {" << '\n';
-    buf << "    label = \"" << symbolName << "\";" << '\n';
-    buf << "    color = blue;" << '\n';
-    buf << "    \"bb" << symbolName << "_0\" [shape = invhouse];" << '\n';
-    buf << "    \"bb" << symbolName << "_1\" [shape = parallelogram];" << '\n' << '\n';
+    fmt::format_to(buf,
+                   "subgraph \"cluster_{}\" {{\n"
+                   "    label = \"{}\";\n"
+                   "    color = blue;\n"
+                   "    \"bb{}_0\" [shape = invhouse];\n"
+                   "    \"bb{}_1\" [shape = parallelogram];\n\n",
+                   symbolName, symbolName, symbolName, symbolName);
     for (auto &basicBlock : this->basicBlocks) {
         auto text = basicBlock->toString(ctx);
-        auto lines = absl::StrSplit(text, '\n');
-        stringstream escaped;
-        bool first = true;
-        for (auto &line : lines) {
-            if (!first) {
-                escaped << '\n';
-            }
-            first = false;
-            escaped << absl::CEscape(line);
-        }
-        string label = escaped.str();
-        size_t start_pos = 0;
-        while ((start_pos = label.find('\n', start_pos)) != string::npos) {
-            label.replace(start_pos, 1, "\\l");
-            start_pos += 2;
-        }
-        label += "\\l";
+        auto lines = absl::StrSplit(text, "\n");
 
-        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" [" << '\n';
-        buf << "        label = \"" << label << "\"" << '\n';
-        buf << "    ];" << '\n' << '\n';
-        buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-            << basicBlock->bexit.thenb->id << R"(" [style="bold"];)" << '\n';
+        fmt::format_to(
+            buf,
+            "    \"bb{}_{}\" [\n"
+            "        label = \"{}\\l\"\n"
+            "    ];\n\n"
+            "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"bold\"];\n",
+            symbolName, basicBlock->id,
+            fmt::map_join(lines.begin(), lines.end(), "\\l", [](auto line) -> string { return absl::CEscape(line); }),
+            symbolName, basicBlock->id, symbolName, basicBlock->bexit.thenb->id);
+
         if (basicBlock->bexit.thenb != basicBlock->bexit.elseb) {
-            buf << "    \"bb" << symbolName << "_" << basicBlock->id << "\" -> \"bb" << symbolName << "_"
-                << basicBlock->bexit.elseb->id << R"(" [style="tapered"];)" << '\n'
-                << '\n';
+            fmt::format_to(buf, "    \"bb{}_{}\" -> \"bb{}_{}\" [style=\"tapered\"];\n\n", symbolName, basicBlock->id,
+                           symbolName, basicBlock->bexit.elseb->id);
         }
     }
-    buf << "}";
-    return buf.str();
+    fmt::format_to(buf, "}}");
+    return to_string(buf);
 }
 
 string BasicBlock::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "block[id=" << this->id << "](";
-    bool first = true;
-    for (const cfg::VariableUseSite &arg : this->args) {
-        if (!first) {
-            buf << ", ";
-        }
-        first = false;
-        buf << arg.toString(ctx);
-    }
-    buf << ")" << '\n';
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "block[id={}]({})\n", this->id,
+                   fmt::map_join(this->args.begin(), this->args.end(),
+                                 ", ", [&](const auto &arg) -> auto { return arg.toString(ctx); }));
+
     if (this->outerLoops > 0) {
-        buf << "outerLoops: " << this->outerLoops << '\n';
+        fmt::format_to(buf, "outerLoops: {}\n", this->outerLoops);
     }
     for (Binding &exp : this->exprs) {
         if (isa_instruction<DebugEnvironment>(exp.value.get())) {
-            buf << exp.value->toString(ctx);
+            fmt::format_to(buf, "{}", exp.value->toString(ctx));
             continue;
         }
-        buf << exp.bind.toString(ctx) << " = " << exp.value->toString(ctx);
-        buf << '\n';
+        fmt::format_to(buf, "{} = {}\n", exp.bind.toString(ctx), exp.value->toString(ctx));
     }
     if (this->bexit.cond.variable.exists()) {
-        buf << this->bexit.cond.toString(ctx);
+        fmt::format_to(buf, "{}", this->bexit.cond.toString(ctx));
     } else {
-        buf << "<unconditional>";
+        fmt::format_to(buf, "<unconditional>");
     }
-    return buf.str();
+    return to_string(buf);
 }
 
 void CFG::recordAnnotations(core::Context ctx) {

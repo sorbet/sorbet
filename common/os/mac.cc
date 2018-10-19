@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <mach-o/dyld.h> /* _NSGetExecutablePath */
 
-#include "spdlog/fmt/ostr.h"
 #include <string>
 #include <sys/sysctl.h>
 #include <sys/types.h>

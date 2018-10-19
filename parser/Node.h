@@ -25,9 +25,9 @@ public:
     Loc loc;
 
 protected:
-    void printTabs(std::stringstream &to, int count);
-    void printNode(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
-    void printNodeJSON(std::stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    void printTabs(fmt::memory_buffer &to, int count);
+    void printNode(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
+    void printNodeJSON(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs);
 };
 
 template <class To> To *cast_node(Node *what) {

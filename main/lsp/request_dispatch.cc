@@ -1,7 +1,6 @@
 #include "absl/strings/match.h"
 #include "common/Timer.h"
 #include "lsp.h"
-#include "spdlog/fmt/ostr.h"
 
 using namespace std;
 

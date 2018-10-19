@@ -13,13 +13,11 @@ namespace sorbet::core {
 
 namespace {
 
-void printTabs(stringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
+std::string buildTabs(int count) {
+    string res(count * 2, ' ');
+    return res;
 }
+
 } // namespace
 
 string ClassType::toString(const GlobalState &gs, int tabs) const {
@@ -39,32 +37,30 @@ string LiteralType::typeName() const {
 }
 
 string LiteralType::toString(const GlobalState &gs, int tabs) const {
-    return this->underlying()->toString(gs, tabs) + "(" + showValue(gs) + ")";
+    return fmt::format("{}({})", this->underlying()->toString(gs, tabs), showValue(gs));
 }
 
 string LiteralType::show(const GlobalState &gs) const {
-    return this->underlying()->show(gs) + "(" + showValue(gs) + ")";
+    return fmt::format("{}({})", this->underlying()->show(gs), showValue(gs));
 }
 
 string LiteralType::showValue(const GlobalState &gs) const {
-    string value;
     SymbolRef undSymbol = cast_type<ClassType>(this->underlying().get())->symbol;
     if (undSymbol == Symbols::String()) {
-        value = "\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
+        return fmt::format("\"{}\"", absl::CEscape(NameRef(gs, this->value).toString(gs)));
     } else if (undSymbol == Symbols::Symbol()) {
-        value = ":\"" + absl::CEscape(NameRef(gs, this->value).toString(gs)) + "\"";
+        return fmt::format(":\"{}\"", absl::CEscape(NameRef(gs, this->value).toString(gs)));
     } else if (undSymbol == Symbols::Integer()) {
-        value = to_string(this->value);
+        return to_string(this->value);
     } else if (undSymbol == Symbols::Float()) {
-        value = to_string(absl::bit_cast<double>(this->value));
+        return to_string(absl::bit_cast<double>(this->value));
     } else if (undSymbol == Symbols::TrueClass()) {
-        value = "true";
+        return "true";
     } else if (undSymbol == Symbols::FalseClass()) {
-        value = "false";
+        return "false";
     } else {
         Error::raise("should not be reachable");
     }
-    return value;
 }
 
 string TupleType::typeName() const {
@@ -88,176 +84,108 @@ string OrType::typeName() const {
 }
 
 string TupleType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
-    buf << "TupleType {" << '\n';
+    fmt::memory_buffer buf;
+    auto thisTabs = buildTabs(tabs);
+    auto nestedTabs = buildTabs(tabs + 1);
+    fmt::format_to(buf, "TupleType {{\n");
     int i = -1;
     for (auto &el : this->elems) {
         i++;
-        printTabs(buf, tabs + 1);
-        buf << i << " = " << el->toString(gs, tabs + 3) << '\n';
+        fmt::format_to(buf, "{}{} = {}\n", nestedTabs, i, el->toString(gs, tabs + 3));
     }
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
+    fmt::format_to(buf, "{}}}", thisTabs);
+    return to_string(buf);
 }
 
 string TupleType::show(const GlobalState &gs) const {
-    stringstream buf;
-    buf << "[";
-    bool first = true;
-    for (auto &el : this->elems) {
-        if (first) {
-            first = false;
-        } else {
-            buf << ", ";
-        }
-        buf << el->show(gs);
-    }
-    buf << "]";
-    return buf.str();
+    return fmt::format("[{}]", fmt::map_join(this->elems.begin(), this->elems.end(), ", ",
+                                             [&](const auto &el) -> string { return el->show(gs); }));
 }
 
 string ShapeType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
-    buf << "ShapeType {" << '\n';
+    fmt::memory_buffer buf;
+    auto thisTabs = buildTabs(tabs);
+    auto nestedTabs = buildTabs(tabs + 1);
+    fmt::format_to(buf, "ShapeType {{\n");
     auto valueIterator = this->values.begin();
     for (auto &el : this->keys) {
-        printTabs(buf, tabs + 1);
-        buf << el->toString(gs, tabs + 2) << " => " << (*valueIterator)->toString(gs, tabs + 2) << '\n';
+        fmt::format_to(buf, "{}{} => {}\n", nestedTabs, el->toString(gs, tabs + 2),
+                       (*valueIterator)->toString(gs, tabs + 3));
         ++valueIterator;
     }
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
+    fmt::format_to(buf, "{}}}", thisTabs);
+    return to_string(buf);
 }
 
 string ShapeType::show(const GlobalState &gs) const {
-    stringstream buf;
-    buf << "{";
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "{{");
     auto valueIterator = this->values.begin();
     bool first = true;
     for (auto &key : this->keys) {
         if (first) {
             first = false;
         } else {
-            buf << ", ";
+            fmt::format_to(buf, ", ");
         }
         SymbolRef undSymbol = cast_type<ClassType>(key->underlying().get())->symbol;
         if (undSymbol == Symbols::Symbol()) {
-            buf << NameRef(gs, key->value).toString(gs) << ": ";
+            fmt::format_to(buf, "{}: {}", NameRef(gs, key->value).toString(gs), (*valueIterator)->show(gs));
         } else {
-            buf << key->show(gs) << " => ";
+            fmt::format_to(buf, "{} => {}", key->show(gs), (*valueIterator)->show(gs));
         }
-        buf << (*valueIterator)->show(gs);
         ++valueIterator;
     }
-    buf << "}";
-    return buf.str();
+    fmt::format_to(buf, "}}");
+    return to_string(buf);
 }
 
 string AliasType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
-    buf << "AliasType { symbol = " << this->symbol.data(gs)->fullName(gs) << " }";
-    return buf.str();
+    return fmt::format("AliasType {{ symbol = {} }}", this->symbol.data(gs)->fullName(gs));
 }
 
 string AliasType::show(const GlobalState &gs) const {
-    stringstream buf;
-    buf << "<Alias:" << this->symbol.data(gs)->fullName(gs) << ">";
-    return buf.str();
+    return fmt::format("<Alias: {} >", this->symbol.data(gs)->fullName(gs));
 }
 
 string AndType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
     bool leftBrace = isa_type<OrType>(this->left.get());
     bool rightBrace = isa_type<OrType>(this->right.get());
 
-    if (leftBrace) {
-        buf << "(";
-    }
-    buf << this->left->toString(gs, tabs + 2);
-    if (leftBrace) {
-        buf << ")";
-    }
-    buf << " & ";
-    if (rightBrace) {
-        buf << "(";
-    }
-    buf << this->right->toString(gs, tabs + 2);
-    if (rightBrace) {
-        buf << ")";
-    }
-    return buf.str();
+    return fmt::format("{}{}{} & {}{}{}", leftBrace ? "(" : "", this->left->toString(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toString(gs, tabs + 2),
+                       rightBrace ? ")" : "");
 }
 
 string AndType::show(const GlobalState &gs) const {
-    stringstream buf;
-
-    buf << "T.all(";
-    buf << this->left->show(gs);
-    buf << ", ";
-    buf << this->right->show(gs);
-    buf << ")";
-    return buf.str();
+    return fmt::format("T.all({}, {})", this->left->show(gs), this->right->show(gs));
 }
 
 string OrType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
     bool leftBrace = isa_type<AndType>(this->left.get());
     bool rightBrace = isa_type<AndType>(this->right.get());
 
-    if (leftBrace) {
-        buf << "(";
-    }
-    buf << this->left->toString(gs, tabs + 2);
-    if (leftBrace) {
-        buf << ")";
-    }
-    buf << " | ";
-    if (rightBrace) {
-        buf << "(";
-    }
-    buf << this->right->toString(gs, tabs + 2);
-    if (rightBrace) {
-        buf << ")";
-    }
-    return buf.str();
+    return fmt::format("{}{}{} | {}{}{}", leftBrace ? "(" : "", this->left->toString(gs, tabs + 2),
+                       leftBrace ? ")" : "", rightBrace ? "(" : "", this->right->toString(gs, tabs + 2),
+                       rightBrace ? ")" : "");
 }
 
 string showOrs(const GlobalState &gs, shared_ptr<Type> left, shared_ptr<Type> right) {
-    stringstream buf;
     auto *lt = cast_type<OrType>(left.get());
-    if (lt != nullptr) {
-        buf << showOrs(gs, lt->left, lt->right);
-    } else {
-        buf << left->show(gs);
-    }
-    buf << ", ";
-
     auto *rt = cast_type<OrType>(right.get());
-    if (rt != nullptr) {
-        buf << showOrs(gs, rt->left, rt->right);
-    } else {
-        buf << right->show(gs);
-    }
-    return buf.str();
+    return fmt::format("{}, {}", lt != nullptr ? showOrs(gs, lt->left, lt->right) : left->show(gs),
+                       rt != nullptr ? showOrs(gs, rt->left, rt->right) : right->show(gs));
 }
 
 string showOrSpecialCase(const GlobalState &gs, shared_ptr<Type> type, shared_ptr<Type> rest) {
     auto *ct = cast_type<ClassType>(type.get());
     if (ct != nullptr && ct->symbol == Symbols::NilClass()) {
-        stringstream buf;
-        buf << "T.nilable(";
-        buf << rest->show(gs);
-        buf << ")";
-        return buf.str();
+        return fmt::format("T.nilable({})", rest->show(gs));
     }
     return "";
 }
 
 string OrType::show(const GlobalState &gs) const {
-    stringstream buf;
-
     string ret;
     if (!(ret = showOrSpecialCase(gs, this->left, this->right)).empty()) {
         return ret;
@@ -266,14 +194,11 @@ string OrType::show(const GlobalState &gs) const {
         return ret;
     }
 
-    buf << "T.any(";
-    buf << showOrs(gs, this->left, this->right);
-    buf << ")";
-    return buf.str();
+    return fmt::format("T.any({})", showOrs(gs, this->left, this->right));
 }
 
 string TypeVar::toString(const GlobalState &gs, int tabs) const {
-    return "TypeVar(" + sym.data(gs)->name.toString(gs) + ")";
+    return fmt::format("TypeVar({})", sym.data(gs)->name.toString(gs));
 }
 
 string TypeVar::show(const GlobalState &gs) const {
@@ -285,49 +210,46 @@ string TypeVar::typeName() const {
 }
 
 string AppliedType::toString(const GlobalState &gs, int tabs) const {
-    stringstream buf;
-    buf << "AppliedType {" << '\n';
-    printTabs(buf, tabs + 1);
-    buf << "klass = " << this->klass.data(gs)->fullName(gs) << '\n';
+    auto thisTabs = buildTabs(tabs);
+    auto nestedTabs = buildTabs(tabs + 1);
+    auto twiceNestedTabs = buildTabs(tabs + 2);
+    fmt::memory_buffer buf;
+    fmt::format_to(buf, "AppliedType {{\n{}klass = {}\n{}targs = [\n", nestedTabs, this->klass.data(gs)->fullName(gs),
+                   nestedTabs);
 
-    printTabs(buf, tabs + 1);
-    buf << "targs = [" << '\n';
     int i = -1;
     for (auto &targ : this->targs) {
         ++i;
-        printTabs(buf, tabs + 2);
         if (i < this->klass.data(gs)->typeMembers().size()) {
             auto tyMem = this->klass.data(gs)->typeMembers()[i];
-            buf << tyMem.data(gs)->name.toString(gs) << " = " << targ->toString(gs, tabs + 3) << '\n';
+            fmt::format_to(buf, "{}{} = {}\n", twiceNestedTabs, tyMem.data(gs)->name.toString(gs),
+                           targ->toString(gs, tabs + 3));
         } else {
             // this happens if we try to print type before resolver has processed stdlib
-            buf << "EARLY_TYPE_MEMBER\n";
+            fmt::format_to(buf, "{}EARLY_TYPE_MEMBER\n", twiceNestedTabs);
         }
     }
-    printTabs(buf, tabs + 1);
-    buf << "]" << '\n';
+    fmt::format_to(buf, "{}]\n{}}}", nestedTabs, thisTabs);
 
-    printTabs(buf, tabs);
-    buf << "}";
-    return buf.str();
+    return to_string(buf);
 }
 
 string AppliedType::show(const GlobalState &gs) const {
-    stringstream buf;
+    fmt::memory_buffer buf;
     if (this->klass == Symbols::Array()) {
-        buf << "T::Array";
+        fmt::format_to(buf, "T::Array");
     } else if (this->klass == Symbols::Hash()) {
-        buf << "T::Hash";
+        fmt::format_to(buf, "T::Hash");
     } else if (this->klass == Symbols::Enumerable()) {
-        buf << "T::Enumerable";
+        fmt::format_to(buf, "T::Enumerable");
     } else if (this->klass == Symbols::Range()) {
-        buf << "T::Range";
+        fmt::format_to(buf, "T::Range");
     } else if (this->klass == Symbols::Set()) {
-        buf << "T::Set";
+        fmt::format_to(buf, "T::Set");
     } else {
-        buf << this->klass.data(gs)->show(gs);
+        fmt::format_to(buf, "{}", this->klass.data(gs)->show(gs));
     }
-    buf << "[";
+    fmt::format_to(buf, "[");
 
     bool first = true;
     for (auto &targ : this->targs) {
@@ -337,13 +259,13 @@ string AppliedType::show(const GlobalState &gs) const {
         if (first) {
             first = false;
         } else {
-            buf << ", ";
+            fmt::format_to(buf, ", ");
         }
-        buf << targ->show(gs);
+        fmt::format_to(buf, "{}", targ->show(gs));
     }
 
-    buf << "]";
-    return buf.str();
+    fmt::format_to(buf, "]");
+    return to_string(buf);
 }
 
 string AppliedType::typeName() const {
@@ -351,7 +273,7 @@ string AppliedType::typeName() const {
 }
 
 string LambdaParam::toString(const GlobalState &gs, int tabs) const {
-    return "LambdaParam(" + this->definition.data(gs)->fullName(gs) + ")";
+    return fmt::format("LambdaParam({})", this->definition.data(gs)->fullName(gs));
 }
 
 string LambdaParam::show(const GlobalState &gs) const {
@@ -359,7 +281,7 @@ string LambdaParam::show(const GlobalState &gs) const {
 }
 
 string SelfTypeParam::toString(const GlobalState &gs, int tabs) const {
-    return "SelfTypeParam(" + this->definition.data(gs)->fullName(gs) + ")";
+    return fmt::format("SelfTypeParam({})", this->definition.data(gs)->fullName(gs));
 }
 
 string SelfTypeParam::show(const GlobalState &gs) const {

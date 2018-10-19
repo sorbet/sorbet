@@ -105,14 +105,14 @@ struct Path {
     }
 
     string show(core::GlobalState &gs) {
-        stringstream result;
+        fmt::memory_buffer buf;
         if (myType) {
-            result << toString() + " -> " + myType->toString(gs) << '\n';
+            fmt::format_to(buf, "{} -> {}", toString(), myType->toString(gs));
         }
-        for (auto child : children) {
-            result << child->show(gs);
-        }
-        return result.str();
+        fmt::format_to(buf, "{}", fmt::map_join(children.begin(), children.end(), "", [&](const auto &child) -> string {
+                           return child->show(gs);
+                       }));
+        return "";
     }
 
     vector<shared_ptr<Path>> children;

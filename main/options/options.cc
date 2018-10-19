@@ -3,7 +3,6 @@
 #include "absl/algorithm/container.h"
 #include "core/Errors.h"
 #include "rang.hpp"
-#include "spdlog/fmt/ostr.h"
 #include "version/version.h"
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
@@ -116,25 +115,13 @@ cxxopts::Options buildOptions() {
     options.add_options()("color", "Use color output", cxxopts::value<string>()->default_value("auto"),
                           "{always,never,[auto]}");
 
-    stringstream all_prints;
-    all_prints << "Print: [";
-    for (auto &pr : print_options) {
-        if (&pr != &print_options[0]) {
-            all_prints << ", ";
-        }
-        all_prints << pr.option;
-    }
-    all_prints << "]";
+    fmt::memory_buffer all_prints;
+    fmt::memory_buffer all_stop_after;
 
-    stringstream all_stop_after;
-    all_stop_after << "Stop After: [";
-    for (auto &pr : stop_after_options) {
-        if (&pr != &stop_after_options[0]) {
-            all_stop_after << ", ";
-        }
-        all_stop_after << pr.option;
-    }
-    all_stop_after << "]";
+    fmt::format_to(all_prints, "Print: [{}]", fmt::map_join(print_options.begin(), print_options.end(), ", ", [
+                   ](const auto &pr) -> auto { return pr.option; }));
+    fmt::format_to(all_stop_after, "Stop After: [{}]", fmt::map_join(print_options.begin(), print_options.end(), ", ", [
+                   ](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
@@ -151,8 +138,8 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     // Developer options
-    options.add_options("dev")("p,print", all_prints.str(), cxxopts::value<vector<string>>(), "type");
-    options.add_options("dev")("stop-after", all_stop_after.str(),
+    options.add_options("dev")("p,print", to_string(all_prints), cxxopts::value<vector<string>>(), "type");
+    options.add_options("dev")("stop-after", to_string(all_stop_after),
                                cxxopts::value<string>()->default_value("inferencer"), "phase");
     options.add_options("dev")("no-stdlib", "Do not load included rbi files for stdlib");
     options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
@@ -227,14 +214,12 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
             }
         }
         if (!found) {
-            stringstream all;
+            vector<string_view> allOptions;
             for (auto &known : print_options) {
-                if (&known != &print_options[0]) {
-                    all << ", ";
-                }
-                all << known.option;
+                allOptions.emplace_back(known.option);
             }
-            logger->error("Unknown --print option: {}\nValid values: {}", opt, all.str());
+            logger->error("Unknown --print option: {}\nValid values: {}", opt,
+                          fmt::join(allOptions.begin(), allOptions.end(), ", "));
             return false;
         }
     }
@@ -248,14 +233,13 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> log
             return known.flag;
         }
     }
-    stringstream all;
-    for (auto &known : stop_after_options) {
-        if (&known != &stop_after_options[0]) {
-            all << ", ";
-        }
-        all << known.option;
+    vector<string_view> allOptions;
+    for (auto &known : print_options) {
+        allOptions.emplace_back(known.option);
     }
-    logger->error("Unknown --stop-after option: {}\nValid values: {}", opt, all.str());
+
+    logger->error("Unknown --stop-after option: {}\nValid values: {}", opt,
+                  fmt::join(allOptions.begin(), allOptions.end(), ", "));
     return Phase::INIT;
 }
 
@@ -314,7 +298,7 @@ void readOptions(Options &opts, int argc, char *argv[],
             throw EarlyReturnWithCode(0);
         }
         if (raw["version"].as<bool>()) {
-            cout << "Ruby Typer " << Version::full_version_string << endl;
+            fmt::print("Ruby Typer {}\n", Version::full_version_string);
             throw EarlyReturnWithCode(0);
         }
 

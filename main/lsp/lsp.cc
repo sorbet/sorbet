@@ -3,7 +3,6 @@
 #include "core/errors/internal.h"
 #include "core/errors/namer.h"
 #include "core/errors/resolver.h"
-#include "spdlog/fmt/ostr.h"
 
 using namespace std;
 

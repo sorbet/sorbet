@@ -16,14 +16,12 @@
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
-#include "spdlog/fmt/ostr.h"
 #include "spdlog/sinks/basic_file_sink.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
 #include <algorithm> // find
 #include <csignal>
-#include <iostream>
 #include <poll.h>
 
 namespace spd = spdlog;
@@ -276,10 +274,10 @@ int realmain(int argc, char *argv[]) {
                 tree = move(pf.tree);
 
                 if (opts.print.Autogen) {
-                    cout << pf.toString(ctx);
+                    fmt::print("{}", pf.toString(ctx));
                 }
                 if (opts.print.AutogenMsgPack) {
-                    cout << pf.toMsgpack(ctx);
+                    fmt::print("{}", pf.toMsgpack(ctx));
                 }
             }
         } else {
@@ -293,7 +291,7 @@ int realmain(int argc, char *argv[]) {
             for (auto &tree : indexed) {
                 auto f = tree->loc.file();
                 if (f.data(*gs).hadErrors()) {
-                    cout << f.data(*gs).path() << '\n';
+                    fmt::print("{}\n", f.data(*gs).path());
                 }
             }
         } else if (!opts.noErrorCount) {

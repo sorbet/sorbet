@@ -171,16 +171,6 @@ const int PAD_LIMIT = 30;
 const int MAX_STAT_WIDTH = MAX_WIDTH - PAD_LIMIT;
 const float HIST_CUTOFF = 0.1;
 
-string padOrLimit(string s, int l) {
-    if (s.size() < l) {
-        string prefix(l - s.size(), ' ');
-        s = prefix + s;
-    } else {
-        s = s.substr(0, l);
-    }
-    return s;
-}
-
 void CounterImpl::canonicalize() {
     CounterImpl out;
 
@@ -220,12 +210,14 @@ bool shouldShow(vector<string> &wantNames, string name) {
     return absl::c_linear_search(wantNames, name);
 }
 
+constexpr double TIMING_TO_MSEC_MULTIPLIER = 0.000001;
+
 string getCounterStatistics(vector<string> names) {
-    stringstream buf;
-
-    buf << "Counters and Histograms: " << '\n';
-
     counterState.canonicalize();
+
+    fmt::memory_buffer buf;
+
+    fmt::format_to(buf, "Counters and Histograms: \n");
 
     for (auto &cat : counterState.counters_by_category) {
         if (!shouldShow(names, cat.first)) {
@@ -239,21 +231,17 @@ string getCounterStatistics(vector<string> names) {
         }
         absl::c_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
-        buf << " " << cat.first << "    Total: " << sum << '\n';
+        fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", cat.first, "", (double)sum);
+
         if (sum == 0) {
             sum = 1;
         }
         for (auto &e : sorted) {
-            string number = to_string(e.first);
-            if (number.size() < 6) {
-                number = padOrLimit(number, 6);
-            }
-            string perc = padOrLimit(to_string(round(e.first * 1000.0 / sum) / 10.0), 3);
+            auto perc = e.first * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * e.first / sum), '#');
-            buf << "  " << padOrLimit(e.second, PAD_LIMIT - 4) << " :" << number << ", " << perc << "% " << hashes
-                << '\n';
+            fmt::format_to(buf, "  {:>30.30} :{:10.10}, {:3.1f}% {}\n", e.second, (double)e.first, perc, hashes);
         }
-        buf << '\n';
+        fmt::format_to(buf, "\n");
     }
 
     for (auto &hist : counterState.histograms) {
@@ -264,7 +252,7 @@ string getCounterStatistics(vector<string> names) {
         for (auto &e : hist.second) {
             sum += e.second;
         }
-        buf << " " << hist.first << "    Total: " << sum << '\n';
+        fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", hist.first, "", (double)sum);
 
         CounterImpl::CounterType header = 0;
         auto it = hist.second.begin();
@@ -274,104 +262,76 @@ string getCounterStatistics(vector<string> names) {
             it++;
         }
         if (it != hist.second.begin()) {
-            string number = to_string(header);
-            if (number.size() < 6) {
-                number = padOrLimit(number, 6);
-            }
-            string perc = padOrLimit(to_string(round(header * 1000.0 / sum) / 10.0), 3);
+            auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
-            buf << " <" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << '\n';
+            fmt::format_to(buf, "  <{:>29.29} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)header, perc,
+                           hashes);
         }
 
         while (it != hist.second.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
-            string number = to_string(it->second);
-            if (number.size() < 6) {
-                number = padOrLimit(number, 6);
-            }
-            string perc = padOrLimit(to_string(round(it->second * 1000.0 / sum) / 10.0), 3);
+            auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
-            buf << "  " << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << '\n';
+            fmt::format_to(buf, "  {:>30.30} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)it->second, perc,
+                           hashes);
             it++;
         }
         if (it != hist.second.end()) {
-            string number = to_string(sum - header);
-            if (number.size() < 6) {
-                number = padOrLimit(number, 6);
-            }
-            string perc = padOrLimit(to_string(round((sum - header) * 1000.0 / sum) / 10.0), 3);
+            auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
-            buf << ">=" << padOrLimit(to_string(it->first), PAD_LIMIT - 4) << " :" << number << ", " << perc << "% "
-                << hashes << '\n';
+            fmt::format_to(buf, "  >={:>28.28} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)(sum - header),
+                           perc, hashes);
         }
-        buf << '\n';
+        fmt::format_to(buf, "\n");
     }
 
     {
-        buf << "Timings: " << '\n';
+        fmt::format_to(buf, "Timings: \n");
         vector<pair<string, string>> sortedTimings;
         for (auto &e : counterState.timings) {
             if (!shouldShow(names, e.first)) {
                 continue;
             }
             if (e.second.size() == 1) {
-                string value = to_string(e.second[0]);
-                if (value.size() < 10) {
-                    value = padOrLimit(value, 10);
-                }
-                string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".value :" + value + '\n';
+                string line =
+                    fmt::format("  {:>24.24}.value :{:10.10} ms\n", e.first, e.second[0] * TIMING_TO_MSEC_MULTIPLIER);
                 sortedTimings.emplace_back(e.first, line);
                 continue;
             }
 
-            string min = to_string(*absl::c_min_element(e.second));
-            string max = to_string(*absl::c_max_element(e.second));
-            string avg = to_string(absl::c_accumulate(e.second, 0) / e.second.size());
-            if (min.size() < 10) {
-                min = padOrLimit(min, 10);
-            }
-            if (max.size() < 10) {
-                max = padOrLimit(max, 10);
-            }
-            if (avg.size() < 10) {
-                avg = padOrLimit(avg, 10);
-            }
-            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + ".min :" + min + '\n' + "  " +
-                          padOrLimit(e.first, PAD_LIMIT - 4) + ".max :" + max + '\n' + "  " +
-                          padOrLimit(e.first, PAD_LIMIT - 4) + ".avg :" + avg + '\n';
+            string line = fmt::format(
+                "  {:>26.26}.min :{:10.10} ms\n  {:>26.26}.max :{:10.10} ms\n  {:>26.26}.avg :{:10.10} ms\n", e.first,
+                *absl::c_min_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
+                *absl::c_max_element(e.second) * TIMING_TO_MSEC_MULTIPLIER, e.first,
+                absl::c_accumulate(e.second, 0) * TIMING_TO_MSEC_MULTIPLIER / e.second.size());
             sortedTimings.emplace_back(e.first, line);
         }
         absl::c_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        for (auto &e : sortedTimings) {
-            buf << e.second;
-        }
+        fmt::format_to(buf, "{}", fmt::map_join(sortedTimings.begin(), sortedTimings.end(), "", [
+                       ](const auto &el) -> auto { return el.second; }));
     }
 
     {
-        buf << "Counters: " << '\n';
+        fmt::format_to(buf, "Counters: \n");
+
         vector<pair<string, string>> sortedOther;
         for (auto &e : counterState.counters) {
             if (!shouldShow(names, e.first)) {
                 continue;
             }
-            string number = to_string(e.second);
-            if (number.size() < 6) {
-                number = padOrLimit(number, 6);
-            }
-            string line = "  " + padOrLimit(e.first, PAD_LIMIT - 4) + " :" + number + '\n';
+
+            string line = fmt::format("  {:>30.30} :{:10.10}\n", e.first, (double)e.second);
             sortedOther.emplace_back(e.first, line);
         }
 
         absl::c_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        for (auto &e : sortedOther) {
-            buf << e.second;
-        }
+        fmt::format_to(buf, "{}", fmt::map_join(sortedOther.begin(), sortedOther.end(), "", [](const auto &el) -> auto {
+                           return el.second;
+                       }));
     }
-    return buf.str();
+    return to_string(buf);
 }
 
 }; // namespace sorbet

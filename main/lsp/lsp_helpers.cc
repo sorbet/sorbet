@@ -153,26 +153,19 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
     if (!retType) {
         retType = getResultType(method, receiver, constraint);
     }
-    string methodReturnType = (retType == core::Types::void_()) ? "void" : "returns(" + retType->show(*finalGs) + ")";
+    string methodReturnType =
+        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(*finalGs), ")");
     vector<string> typeAndArgNames;
 
     if (method.data(*finalGs)->isMethod()) {
         for (auto &argSym : method.data(*finalGs)->arguments()) {
-            typeAndArgNames.emplace_back(argSym.data(*finalGs)->name.show(*finalGs) + ": " +
-                                         getResultType(argSym, receiver, constraint)->show(*finalGs));
+            typeAndArgNames.emplace_back(absl::StrCat(argSym.data(*finalGs)->name.show(*finalGs), ": ",
+                                                      getResultType(argSym, receiver, constraint)->show(*finalGs)));
         }
     }
 
-    stringstream ss;
-    for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
-        if (i != 0) {
-            ss << ", ";
-        }
-        ss << typeAndArgNames[i];
-    }
-    string joinedTypeAndArgNames = ss.str();
-
-    return fmt::format("sig {{params({}).{}}}", joinedTypeAndArgNames, methodReturnType);
+    return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames.begin(), typeAndArgNames.end(), ", "),
+                       methodReturnType);
 }
 
 shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,

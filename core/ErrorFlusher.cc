@@ -6,18 +6,17 @@ using namespace std;
 namespace sorbet::core {
 
 void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQueueMessage>> errors) {
-    stringstream critical;
-    stringstream nonCritical;
+    fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
             if (error->error->isSilenced) {
                 continue;
             }
             auto &out = error->error->isCritical ? critical : nonCritical;
-            if (out.tellp() != 0) {
-                out << "\n\n";
+            if (out.size() != 0) {
+                fmt::format_to(out, "\n\n");
             }
-            out << error->text;
+            fmt::format_to(out, "{}", error->text);
 
             for (auto &autocorrect : error->error->autocorrects) {
                 autocorrects.emplace_back(move(autocorrect));
@@ -25,21 +24,20 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
         }
     }
 
-    if (critical.tellp() != 0) {
+    if (critical.size() != 0) {
         if (!printedAtLeastOneError) {
-            logger.log(spdlog::level::critical, "{}", critical.str());
+            logger.log(spdlog::level::critical, "{}", to_string(critical));
             printedAtLeastOneError = true;
         } else {
-            logger.log(spdlog::level::critical, "\n{}", critical.str());
+            logger.log(spdlog::level::critical, "\n{}", to_string(critical));
         }
     }
-    if (nonCritical.tellp() != 0) {
+    if (nonCritical.size() != 0) {
         if (!printedAtLeastOneError) {
-            auto strOut = nonCritical.str();
-            logger.log(spdlog::level::err, "{}", strOut);
+            logger.log(spdlog::level::err, "{}", to_string(nonCritical));
             printedAtLeastOneError = true;
         } else {
-            logger.log(spdlog::level::err, "\n{}", nonCritical.str());
+            logger.log(spdlog::level::err, "\n{}", to_string(nonCritical));
         }
     }
 }

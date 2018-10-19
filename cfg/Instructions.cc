@@ -15,11 +15,11 @@ Return::Return(core::LocalVariable what) : what(what) {
 }
 
 string SolveConstraint::toString(core::Context ctx) {
-    return "Solve<" + this->link->block.data(ctx)->fullName(ctx) + ">";
+    return fmt::format("Solve<{}>", this->link->block.data(ctx)->fullName(ctx));
 }
 
 string Return::toString(core::Context ctx) {
-    return "return " + this->what.toString(ctx);
+    return fmt::format("return {}", this->what.toString(ctx));
 }
 
 BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::LocalVariable what)
@@ -28,7 +28,7 @@ BlockReturn::BlockReturn(const shared_ptr<core::SendAndBlockLink> &link, core::L
 }
 
 string BlockReturn::toString(core::Context ctx) {
-    return "blockreturn<" + this->link->block.data(ctx)->fullName(ctx) + "> " + this->what.toString(ctx);
+    return fmt::format("blockreturn<{}> {}", this->link->block.data(ctx)->fullName(ctx), this->what.toString(ctx));
 }
 
 Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
@@ -60,10 +60,10 @@ string Literal::toString(core::Context ctx) {
                  } else if (l->symbol == core::Symbols::TrueClass()) {
                      res = "true";
                  } else {
-                     res = "literal(" + this->value->toString(ctx, 0) + ")";
+                     res = fmt::format("literal({})", this->value->toString(ctx, 0));
                  }
              },
-             [&](core::Type *t) { res = "literal(" + this->value->toString(ctx, 0) + ")"; });
+             [&](core::Type *t) { res = fmt::format("literal({})", this->value->toString(ctx, 0)); });
     return res;
 }
 
@@ -80,23 +80,13 @@ string Ident::toString(core::Context ctx) {
 }
 
 string Alias::toString(core::Context ctx) {
-    return "alias " + this->what.data(ctx)->name.data(ctx)->toString(ctx);
+    return fmt::format("alias {}", this->what.data(ctx)->name.data(ctx)->toString(ctx));
 }
 
 string Send::toString(core::Context ctx) {
-    stringstream buf;
-
-    buf << this->recv.toString(ctx) << "." << this->fun.data(ctx)->toString(ctx) << "(";
-    bool isFirst = true;
-    for (auto &arg : this->args) {
-        if (!isFirst) {
-            buf << ", ";
-        }
-        isFirst = false;
-        buf << arg.toString(ctx);
-    }
-    buf << ")";
-    return buf.str();
+    return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->toString(ctx),
+                       fmt::map_join(this->args.begin(), this->args.end(), ", ",
+                                     [&](const auto &arg) -> string { return arg.toString(ctx); }));
 }
 
 string Self::toString(core::Context ctx) {
@@ -104,21 +94,11 @@ string Self::toString(core::Context ctx) {
 }
 
 string LoadArg::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "load_arg(";
-    buf << this->receiver.toString(ctx);
-    buf << ", ";
-    buf << this->arg.data(ctx)->show(ctx);
-    buf << ")";
-    return buf.str();
+    return fmt::format("load_arg({}, {})", this->receiver.toString(ctx), this->arg.data(ctx)->show(ctx));
 }
 
 string LoadYieldParams::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "load_yield_params(";
-    buf << this->link->block.data(ctx)->fullName(ctx);
-    buf << ", " << this->block.show(ctx) << ")";
-    return buf.str();
+    return fmt::format("load_yield_params({}, {})", this->link->block.data(ctx)->fullName(ctx), this->block.show(ctx));
 }
 
 string Unanalyzable::toString(core::Context ctx) {
@@ -126,17 +106,11 @@ string Unanalyzable::toString(core::Context ctx) {
 }
 
 string NotSupported::toString(core::Context ctx) {
-    return "NotSupported(" + why + ")";
+    return fmt::format("NotSupported({})", why);
 }
 
 string Cast::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "cast(";
-    buf << this->value.toString(ctx);
-    buf << ", ";
-    buf << this->type->toString(ctx);
-    buf << ");";
-    return buf.str();
+    return fmt::format("cast({}, {});", this->value.toString(ctx), this->type->toString(ctx));
 }
 
 string DebugEnvironment::toString(core::Context ctx) {
@@ -148,11 +122,9 @@ DebugEnvironment::DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(p
 }
 
 std::string VariableUseSite::toString(core::Context ctx) const {
-    auto ret = this->variable.toString(ctx);
     if (this->type) {
-        ret += ": ";
-        ret += this->type->show(ctx);
+        return fmt::format("{}: {}", this->variable.toString(ctx), this->type->show(ctx));
     }
-    return ret;
+    return this->variable.toString(ctx);
 }
 } // namespace sorbet::cfg

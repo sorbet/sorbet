@@ -1,7 +1,6 @@
 #include "absl/strings/match.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
-#include "spdlog/fmt/ostr.h"
 
 using namespace std;
 

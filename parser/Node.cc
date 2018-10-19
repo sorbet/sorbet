@@ -9,27 +9,27 @@ using namespace std;
 
 namespace sorbet::parser {
 
-void Node::printTabs(stringstream &to, int count) {
+void Node::printTabs(fmt::memory_buffer &to, int count) {
     int i = 0;
     while (i < count) {
-        to << "  ";
+        fmt::format_to(to, "{}", "  ");
         i++;
     }
 }
 
-void Node::printNode(stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
+void Node::printNode(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
     if (node) {
-        to << node->toString(gs, tabs) << '\n';
+        fmt::format_to(to, "{}\n", node->toString(gs, tabs));
     } else {
-        to << "NULL" << '\n';
+        fmt::format_to(to, "NULL\n");
     }
 }
 
-void Node::printNodeJSON(stringstream &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
+void Node::printNodeJSON(fmt::memory_buffer &to, unique_ptr<Node> &node, const core::GlobalState &gs, int tabs) {
     if (node) {
-        to << node->toJSON(gs, tabs);
+        fmt::format_to(to, "{}", node->toJSON(gs, tabs));
     } else {
-        to << "null";
+        fmt::format_to(to, "null");
     }
 }
 

@@ -327,101 +327,88 @@ std::vector<core::NameRef> ParsedFile::fullName(core::Context ctx, DefinitionRef
     return scope;
 }
 
-std::string namesToString(core::Context ctx, std::vector<core::NameRef> names) {
-    stringstream buf;
-    buf << "[";
-    bool first = true;
-    for (auto nm : names) {
-        if (first) {
-            first = false;
-        } else {
-            buf << " ";
-        }
-        buf << nm.data(ctx)->show(ctx);
-    }
-    buf << "]";
-    return buf.str();
-}
-
 std::string ParsedFile::toString(core::Context ctx) {
-    stringstream buf;
-    buf << "# ParsedFile: " << path << '\n';
-    buf << "requires: [";
-    {
-        bool first = true;
-        for (auto nm : requires) {
-            if (!first) {
-                buf << ", ";
-            }
-            first = false;
-            buf << nm.data(ctx)->show(ctx);
-        }
-        buf << "]\n";
-    }
-    buf << "## defs:" << '\n';
+    fmt::memory_buffer out;
+    auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
+
+    fmt::format_to(out,
+                   "# ParsedFile: {}\n"
+                   "requires: [{}]\n"
+                   "## defs:\n",
+                   path, fmt::map_join(requires.begin(), requires.end(), ", ", nameToString));
+
     for (auto &def : defs) {
-        buf << "[def id=" << def.id.id() << "]\n";
-        buf << " type=";
+        string_view type;
         switch (def.type) {
             case Definition::Module:
-                buf << "module";
+                type = "module"sv;
                 break;
             case Definition::Class:
-                buf << "class";
+                type = "class"sv;
                 break;
             case Definition::Casgn:
-                buf << "casgn";
+                type = "casgn"sv;
                 break;
             case Definition::Alias:
-                buf << "alias";
+                type = "alias"sv;
                 break;
         }
-        buf << '\n';
-        buf << " defines_behavior=" << def.defines_behavior << '\n';
-        buf << " is_empty=" << def.is_empty << '\n';
+
+        fmt::format_to(out,
+                       "[def id={}]\n"
+                       " type={}\n"
+                       " defines_behavior={}\n"
+                       " is_empty={}\n",
+                       def.id.id(), type, (int)def.defines_behavior, (int)def.is_empty);
+
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
-            buf << " defining_ref=" << namesToString(ctx, ref.name) << '\n';
+            fmt::format_to(out, " defining_ref=[{}]\n",
+                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            buf << " parent_ref=" << namesToString(ctx, ref.name) << '\n';
+            fmt::format_to(out, " parent_ref=[{}]\n",
+                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            buf << " aliased_ref=" << namesToString(ctx, ref.name) << '\n';
+            fmt::format_to(out, " aliased_ref=[{}]\n",
+                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
         }
     }
-    buf << "## refs:" << '\n';
+    fmt::format_to(out, "## refs:\n");
     for (auto &ref : refs) {
-        buf << "[ref id=" << ref.id.id() << "]\n";
-        buf << " scope=" << namesToString(ctx, fullName(ctx, ref.scope)) << '\n';
-
-        buf << " name=" << namesToString(ctx, ref.name) << '\n';
-        buf << " nesting=[";
+        vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
-            if (&scope != &ref.nesting.front()) {
-                buf << " ";
-            }
-            buf << namesToString(ctx, fullName(ctx, scope));
+            auto fullScopeName = fullName(ctx, scope);
+            nestingStrings.emplace_back(
+                fmt::format("[{}]", fmt::map_join(fullScopeName.begin(), fullScopeName.end(), " ", nameToString)));
         }
-        buf << "]\n";
 
-        buf << " resolved=[";
-        for (auto &nm : ref.resolved) {
-            if (&nm != &ref.resolved.front()) {
-                buf << " ";
-            }
-            buf << nm.show(ctx);
-        }
-        buf << "]\n";
-        buf << " loc=" << ref.loc.filePosToString(ctx) << '\n';
-        buf << " is_defining_ref=" << ref.is_defining_ref << '\n';
+        auto refFullName = fullName(ctx, ref.scope);
+        fmt::format_to(out,
+                       "[ref id={}]\n"
+                       " scope=[{}]\n"
+                       " name=[{}]\n"
+                       " nesting=[{}]\n"
+                       " resolved=[{}]\n"
+                       " loc={}\n"
+                       " is_defining_ref={}\n",
+
+                       ref.id.id(), fmt::map_join(refFullName.begin(), refFullName.end(), " ", nameToString),
+                       fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString),
+                       fmt::join(nestingStrings.begin(), nestingStrings.end(), " "),
+                       fmt::map_join(ref.resolved.begin(), ref.resolved.end(), " ", nameToString),
+                       ref.loc.filePosToString(ctx), (int)ref.is_defining_ref);
+
         if (ref.parent_of.exists()) {
-            buf << " parent_of=" << namesToString(ctx, fullName(ctx, ref.parent_of)) << '\n';
+            auto parentOfFullName = fullName(ctx, ref.parent_of);
+            fmt::format_to(out, " parent_of=[{}]\n",
+                           fmt::map_join(parentOfFullName.begin(), parentOfFullName.end(), " ", nameToString));
         }
     }
-    return buf.str();
+    return to_string(out);
 }
 
 class MsgpackWriter {

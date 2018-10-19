@@ -15,7 +15,6 @@
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
-#include "spdlog/fmt/ostr.h"
 #include <unordered_set>
 
 using namespace std;

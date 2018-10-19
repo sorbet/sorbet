@@ -1,8 +1,8 @@
 #include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
+#include "absl/strings/str_cat.h"
 #include "core/lsp/QueryResponse.h"
 #include "main/lsp/lsp.h"
-#include "spdlog/fmt/ostr.h"
 
 using namespace std;
 
@@ -72,22 +72,14 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
         for (auto &argSym : method.data(gs)->arguments()) {
             string s;
             if (argSym.data(gs)->isKeyword()) {
-                s += (string)argSym.data(gs)->name.data(gs)->shortName(gs) + ": ";
+                absl::StrAppend(&s, argSym.data(gs)->name.data(gs)->shortName(gs), ": ");
             }
-            s += "${" + to_string(i++) + "}";
+            absl::StrAppend(&s, "${", i++, "}");
             typeAndArgNames.emplace_back(s);
         }
     }
 
-    stringstream ss;
-    for (size_t i = 0; i < typeAndArgNames.size(); ++i) {
-        if (i != 0) {
-            ss << ", ";
-        }
-        ss << typeAndArgNames[i];
-    }
-
-    return fmt::format("{}({}){}", shortName, ss.str(), "${0}");
+    return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames.begin(), typeAndArgNames.end(), ", "), "${0}");
 }
 
 unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {

@@ -19,7 +19,6 @@
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "resolver/resolver.h"
-#include "spdlog/fmt/ostr.h"
 
 extern "C" {
 #include "blake2.h"
@@ -62,7 +61,7 @@ public:
         }
         cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (print.CFG || print.CFGRaw) {
-            cout << cfg->toString(ctx) << '\n' << '\n';
+            fmt::print("{}\n\n", cfg->toString(ctx));
         }
         if (printSrc) {
             cfg->recordAnnotations(ctx);
@@ -118,10 +117,10 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
                 nodes = parser::Parser::run(lgs, file);
             }
             if (print.ParseTree) {
-                cout << nodes->toString(lgs, 0) << '\n';
+                fmt::print("{}\n", nodes->toString(lgs, 0));
             }
             if (print.ParseTreeJSON) {
-                cout << nodes->toJSON(lgs, 0) << '\n';
+                fmt::print("{}\n", nodes->toJSON(lgs, 0));
             }
             if (opts.stopAfterPhase == options::Phase::PARSER) {
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -136,10 +135,10 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
                 ast = ast::desugar::node2Tree(ctx, move(nodes));
             }
             if (print.Desugared) {
-                cout << ast->toString(lgs, 0) << '\n';
+                fmt::print("{}\n", ast->toString(lgs, 0));
             }
             if (print.DesugaredRaw) {
-                cout << ast->showRaw(lgs) << '\n';
+                fmt::print("{}\n", ast->showRaw(lgs));
             }
             if (opts.stopAfterPhase == options::Phase::DESUGARER) {
                 return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -155,10 +154,10 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
             }
         }
         if (print.DSLTree) {
-            cout << dslsInlined->toString(lgs, 0) << '\n';
+            fmt::print("{}\n", dslsInlined->toString(lgs, 0));
         }
         if (print.DSLTreeRaw) {
-            cout << dslsInlined->showRaw(lgs) << '\n';
+            fmt::print("{}\n", dslsInlined->showRaw(lgs));
         }
         if (opts.stopAfterPhase == options::Phase::DSL) {
             return make_unique<ast::EmptyTree>(core::Loc::none(file));
@@ -377,7 +376,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
 
     try {
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "digraph \"" << FileOps::getFileName(f.data(ctx).path()) << "\" {" << '\n';
+            fmt::print("digraph \"{}\" {{\n", FileOps::getFileName(f.data(ctx).path()));
         }
         CFG_Collector_and_Typer collector(opts);
         {
@@ -386,10 +385,10 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
             result = ast::TreeMap::apply(ctx, collector, move(resolved));
         }
         if (wantTypedSource(opts, ctx, f)) {
-            cout << ctx.state.showAnnotatedSource(f);
+            fmt::print("{}", ctx.state.showAnnotatedSource(f));
         }
         if (opts.print.CFG || opts.print.CFGRaw) {
-            cout << "}" << '\n' << '\n';
+            fmt::print("}}\n\n");
         }
     } catch (SRubyException &) {
         if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
@@ -452,10 +451,10 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
 
         for (auto &named : what) {
             if (opts.print.NameTree) {
-                cout << named->toString(gs, 0) << '\n';
+                fmt::print("{}\n", named->toString(gs, 0));
             }
             if (opts.print.NameTreeRaw) {
-                cout << named->showRaw(gs) << '\n';
+                fmt::print("{}\n", named->showRaw(gs));
             }
         }
 
@@ -486,10 +485,10 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
 
     for (auto &resolved : what) {
         if (opts.print.ResolveTree) {
-            cout << resolved->toString(gs, 0) << '\n';
+            fmt::print("{}\n", resolved->toString(gs, 0));
         }
         if (opts.print.ResolveTreeRaw) {
-            cout << resolved->showRaw(gs) << '\n';
+            fmt::print("{}\n", resolved->showRaw(gs));
         }
     }
     return what;
@@ -559,14 +558,14 @@ vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
         }
 
         if (opts.print.NameTable) {
-            cout << gs->toString() << '\n';
+            fmt::print("{}\n", gs->toString());
         }
         if (opts.print.NameTableJson) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
             core::Proto::toJSON(root, cout);
         }
         if (opts.print.NameTableFull) {
-            cout << gs->toString(true) << '\n';
+            fmt::print("{}\n", gs->toString(true));
         }
         if (opts.print.FileTableJson) {
             auto files = core::Proto::filesToProto(*gs);
