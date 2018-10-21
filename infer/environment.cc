@@ -187,15 +187,8 @@ string KnowledgeFact::toString(core::Context ctx) const {
     }
     absl::c_sort(buf1);
     absl::c_sort(buf2);
-    stringstream out;
-    for (auto &e : buf1) {
-        out << move(e);
-    }
-    for (auto &e : buf2) {
-        out << move(e);
-    }
 
-    return out.str();
+    return fmt::format("{}{}", fmt::join(buf1.begin(), buf1.end(), ""), fmt::join(buf2.begin(), buf2.end(), ""));
 }
 
 const KnowledgeFact &KnowledgeRef::operator*() const {
@@ -215,16 +208,14 @@ KnowledgeFact &KnowledgeRef::mutate() {
 }
 
 string TestedKnowledge::toString(core::Context ctx) const {
-    stringstream buf;
+    fmt::memory_buffer buf;
     if (!truthy->noTypeTests.empty() || !truthy->yesTypeTests.empty()) {
-        buf << "  Being truthy entails:" << '\n';
+        fmt::format_to(buf, "  Being truthy entails:\n{}", truthy->toString(ctx));
     }
-    buf << truthy->toString(ctx);
     if (!falsy->noTypeTests.empty() || !falsy->yesTypeTests.empty()) {
-        buf << "  Being falsy entails:" << '\n';
+        fmt::format_to(buf, "  Being falsy entails:\n{}", falsy->toString(ctx));
     }
-    buf << falsy->toString(ctx);
-    return buf.str();
+    return to_string(buf);
 }
 
 void TestedKnowledge::sanityCheck() const {
@@ -240,9 +231,9 @@ void TestedKnowledge::sanityCheck() const {
 }
 
 string Environment::toString(core::Context ctx) const {
-    stringstream buf;
+    fmt::memory_buffer buf;
     if (isDead) {
-        buf << "dead=" << isDead << '\n';
+        fmt::format_to(buf, "dead={:d}\n", isDead);
     }
     vector<pair<core::LocalVariable, VariableState>> sorted;
     for (const auto &pair : vars) {
@@ -258,14 +249,10 @@ string Environment::toString(core::Context ctx) const {
         if (var._name == core::Names::debugEnvironmentTemp()) {
             continue;
         }
-        buf << var.toString(ctx) << ": " << state.typeAndOrigins.type->toString(ctx, 0);
-        if (state.knownTruthy) {
-            buf << " (and truthy)" << '\n';
-        }
-        buf << '\n';
-        buf << state.knowledge.toString(ctx) << '\n';
+        fmt::format_to(buf, "{}: {}{}\n{}\n", var.toString(ctx), state.typeAndOrigins.type->toString(ctx, 0),
+                       state.knownTruthy ? " (and truthy)\n" : "", state.knowledge.toString(ctx));
     }
-    return buf.str();
+    return to_string(buf);
 }
 
 bool Environment::hasType(core::Context ctx, core::LocalVariable symbol) const {
