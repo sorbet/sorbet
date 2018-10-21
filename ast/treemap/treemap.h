@@ -252,6 +252,12 @@ GENERATE_POSTPONE_POSTCLASS(Block);
 GENERATE_POSTPONE_POSTCLASS(InsSeq);
 GENERATE_POSTPONE_POSTCLASS(Cast);
 
+// Used to indicate that TreeMap has already reported location for this exception
+struct ReportedRubyException {
+    SRubyException reported;
+    core::Loc onLoc;
+};
+
 /**
  * Given a tree transformer FUNC transform a tree.
  * Tree is guaranteed to be visited in the definition order.
@@ -263,7 +269,6 @@ private:
     friend class TreeMap;
 
     FUNC &func;
-    bool locReported = false;
 
     static_assert(!HAS_MEMBER_preTransformField<FUNC>::value, "use post*Transform instead");
     static_assert(!HAS_MEMBER_preTransformUnresolvedIdent<FUNC>::value, "use post*Transform instead");
@@ -733,14 +738,8 @@ private:
                 auto *ref = what.get();
                 Error::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
             }
-        } catch (SRubyException &) {
-            if (!locReported) {
-                locReported = true;
-                if (auto e = ctx.state.beginError(loc, core::errors::Internal::InternalError)) {
-                    e.setHeader("Failed to process tree (backtrace is above)");
-                }
-            }
-            throw;
+        } catch (SRubyException &e) {
+            throw ReportedRubyException{e, loc};
         }
     }
 };
@@ -750,10 +749,16 @@ public:
     template <typename CTX, typename FUNC>
     static unique_ptr<Expression> apply(CTX ctx, FUNC &func, unique_ptr<Expression> to) {
         TreeMapper<FUNC, CTX> walker(func);
-        return walker.mapIt(move(to), ctx);
+        try {
+            return walker.mapIt(move(to), ctx);
+        } catch (ReportedRubyException &exception) {
+            if (auto e = ctx.state.beginError(exception.onLoc, core::errors::Internal::InternalError)) {
+                e.setHeader("Failed to process tree (backtrace is above)");
+            }
+            throw exception.reported;
+        }
     }
 };
-
 } // namespace sorbet::ast
 
 #endif // SORBET_TREEMAP_H
