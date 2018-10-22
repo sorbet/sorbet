@@ -5,7 +5,6 @@
 
 #include "common/common.h"
 #include <algorithm>
-#include <sstream>
 #include <string>
 
 template class std::vector<sorbet::core::NameRef>;

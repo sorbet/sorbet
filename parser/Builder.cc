@@ -40,7 +40,7 @@ string Dedenter::dedent(const string &str) {
                     break;
                 }
                 default:
-                    Error::raise("unexpected whitespace: '", ch, "'");
+                    Error::raise("unexpected whitespace: '", std::to_string(ch), "'");
             }
         } else {
             out.push_back(ch);

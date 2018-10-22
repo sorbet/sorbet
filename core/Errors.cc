@@ -6,6 +6,7 @@
 #include "core/lsp/QueryResponse.h"
 #include "rang.hpp"
 #include <algorithm>
+#include <sstream>
 
 template class std::unique_ptr<sorbet::core::BasicError>;
 namespace sorbet::core {

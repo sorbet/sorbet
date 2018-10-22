@@ -7,7 +7,6 @@
 #include "core/Names.h"
 #include "core/Types.h"
 #include "core/errors/internal.h"
-#include <sstream>
 #include <string>
 
 template class std::vector<sorbet::core::TypeAndOrigins>;
@@ -114,12 +113,9 @@ bool SymbolRef::isSynthetic() const {
     return this->_id < Symbols::MAX_SYNTHETIC_SYMBOLS;
 }
 
-void printTabs(ostringstream &to, int count) {
-    int i = 0;
-    while (i < count) {
-        to << "  ";
-        i++;
-    }
+void printTabs(fmt::memory_buffer &to, int count) {
+    string ident(count * 2, ' ');
+    fmt::format_to(to, "{}", ident);
 }
 
 SymbolRef::SymbolRef(const GlobalState &from, u4 _id) : _id(_id) {}
@@ -425,15 +421,11 @@ Symbol::FuzzySearchResult Symbol::findMemberFuzzyMatchUTF8(const GlobalState &gs
 
 string Symbol::fullName(const GlobalState &gs) const {
     string owner_str;
-    if (this->owner.exists() && this->owner != Symbols::root()) {
-        owner_str = this->owner.data(gs)->fullName(gs);
+    if (!this->owner.exists() || this->owner == Symbols::root()) {
+        return fmt::format("{}{}", this->isClass() ? "::" : "#", this->name.show(gs));
     }
 
-    if (this->isClass()) {
-        return owner_str + "::" + this->name.show(gs);
-    } else {
-        return owner_str + "#" + this->name.show(gs);
-    }
+    return fmt::format("{}{}{}", this->owner.data(gs)->fullName(gs), this->isClass() ? "::" : "#", this->name.show(gs));
 }
 
 bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
@@ -452,12 +444,105 @@ bool Symbol::isHiddenFromPrinting(const GlobalState &gs) const {
 }
 
 string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const {
-    ostringstream os;
-    string name = this->fullName(gs);
-    auto &members = this->members;
+    fmt::memory_buffer buf;
 
-    vector<string> children;
-    children.reserve(members.size());
+    printTabs(buf, tabs);
+
+    string_view type = "unknown"sv;
+    if (this->isClass()) {
+        type = "class"sv;
+    } else if (this->isStaticField()) {
+        type = "static-field"sv;
+    } else if (this->isField()) {
+        type = "field"sv;
+    } else if (this->isMethod()) {
+        type = "method"sv;
+    } else if (this->isMethodArgument()) {
+        type = "argument"sv;
+    } else if (this->isTypeMember()) {
+        type = "type-member"sv;
+    } else if (this->isTypeArgument()) {
+        type = "type-argument"sv;
+    }
+
+    string_view variance = ""sv;
+
+    if (this->isTypeArgument() || this->isTypeMember()) {
+        if (this->isCovariant()) {
+            variance = "(+)"sv;
+        } else if (this->isContravariant()) {
+            variance = "(-)"sv;
+        } else if (this->isInvariant()) {
+            variance = "(=)"sv;
+        } else {
+            Error::raise("type without variance");
+        }
+    }
+
+    fmt::format_to(buf, "{}{} {}", type, variance, this->fullName(gs));
+
+    if (this->isClass() || this->isMethod()) {
+        if (this->isMethod()) {
+            if (this->isPrivate()) {
+                fmt::format_to(buf, " : private");
+            } else if (this->isProtected()) {
+                fmt::format_to(buf, " : protected");
+            }
+        }
+
+        auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
+        if (!typeMembers.empty()) {
+            fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers.begin(), typeMembers.end(), ", ", [&](auto symb) {
+                               return symb.data(gs)->name.toString(gs);
+                           }));
+        }
+
+        if (this->superClass.exists()) {
+            fmt::format_to(buf, " < {}", this->superClass.data(gs)->fullName(gs));
+        }
+        const auto &list = this->isClass() ? this->mixins() : this->arguments();
+
+        fmt::format_to(buf, " ({})", fmt::map_join(list.begin(), list.end(), ", ", [&](auto symb) {
+                           return symb.data(gs)->name.toString(gs);
+                       }));
+    }
+    if (this->isMethodArgument()) {
+        vector<pair<int, string_view>> methodFlags = {
+            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"sv},
+            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"sv},
+            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"sv},
+            {Symbol::Flags::ARGUMENT_BLOCK, "block"sv},
+        };
+        fmt::format_to(buf, "<");
+        bool first = true;
+        for (auto &flag : methodFlags) {
+            if ((this->flags & flag.first) != 0) {
+                if (first) {
+                    first = false;
+                } else {
+                    fmt::format_to(buf, ", ");
+                }
+                fmt::format_to(buf, "{}", flag.second);
+            }
+        }
+        fmt::format_to(buf, ">");
+    }
+    if (this->resultType) {
+        fmt::format_to(buf, " -> {}", this->resultType->toString(gs, tabs));
+    }
+    if (!locs_.empty()) {
+        fmt::format_to(buf, " @ ");
+        if (locs_.size() > 1) {
+            fmt::format_to(buf, "({})", fmt::map_join(locs_.begin(), locs_.end(), ", ", [&](auto loc) {
+                               return loc.filePosToString(gs);
+                           }));
+        } else {
+            fmt::format_to(buf, "{}", locs_[0].filePosToString(gs));
+        }
+    }
+
+    fmt::format_to(buf, "\n");
+    bool hadPrintableChild = false;
     for (auto pair : membersStableOrderSlow(gs)) {
         if (pair.first == Names::singleton() || pair.first == Names::attached() ||
             pair.first == Names::classMethods()) {
@@ -466,136 +551,16 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
         auto str = pair.second.toString(gs, tabs + 1, showHidden);
         if (!str.empty()) {
-            children.emplace_back(str);
+            hadPrintableChild = true;
+            fmt::format_to(buf, "{}", move(str));
         }
     }
 
-    if (!showHidden && this->isHiddenFromPrinting(gs) && children.empty()) {
+    if (!showHidden && this->isHiddenFromPrinting(gs) && !hadPrintableChild) {
         return "";
     }
 
-    printTabs(os, tabs);
-
-    string type = "unknown";
-    if (this->isClass()) {
-        type = "class";
-    } else if (this->isStaticField()) {
-        type = "static-field";
-    } else if (this->isField()) {
-        type = "field";
-    } else if (this->isMethod()) {
-        type = "method";
-    } else if (this->isMethodArgument()) {
-        type = "argument";
-    } else if (this->isTypeMember()) {
-        type = "type-member";
-    } else if (this->isTypeArgument()) {
-        type = "type-argument";
-    }
-
-    if (this->isTypeArgument() || this->isTypeMember()) {
-        char variance;
-        if (this->isCovariant()) {
-            variance = '+';
-        } else if (this->isContravariant()) {
-            variance = '-';
-        } else if (this->isInvariant()) {
-            variance = '=';
-        } else {
-            Error::raise("type without variance");
-        }
-        type = type + "(" + variance + ")";
-    }
-
-    os << type << " " << name;
-    if (this->isClass() || this->isMethod()) {
-        if (this->isMethod()) {
-            if (this->isPrivate()) {
-                os << " : private";
-            } else if (this->isProtected()) {
-                os << " : protected";
-            }
-        }
-
-        auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
-        if (!typeMembers.empty()) {
-            os << "[";
-            bool first = true;
-            for (SymbolRef thing : typeMembers) {
-                if (first) {
-                    first = false;
-                } else {
-                    os << ", ";
-                }
-                os << thing.data(gs)->name.toString(gs);
-            }
-            os << "]";
-        }
-
-        if (this->superClass.exists()) {
-            os << " < " << this->superClass.data(gs)->fullName(gs);
-        }
-        os << " (";
-        bool first = true;
-        auto list = this->isClass() ? this->mixins() : this->arguments();
-        for (SymbolRef thing : list) {
-            if (first) {
-                first = false;
-            } else {
-                os << ", ";
-            }
-            os << thing.data(gs)->name.toString(gs);
-        }
-        os << ")";
-    }
-    if (this->isMethodArgument()) {
-        vector<pair<int, const char *>> methodFlags = {
-            {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"},
-            {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"},
-            {Symbol::Flags::ARGUMENT_REPEATED, "repeated"},
-            {Symbol::Flags::ARGUMENT_BLOCK, "block"},
-        };
-        os << "<";
-        bool first = true;
-        for (auto &flag : methodFlags) {
-            if ((this->flags & flag.first) != 0) {
-                if (first) {
-                    first = false;
-                } else {
-                    os << ", ";
-                }
-                os << flag.second;
-            }
-        }
-        os << ">";
-    }
-    if (this->resultType) {
-        os << " -> " << this->resultType->toString(gs, tabs);
-    }
-    if (!locs_.empty()) {
-        os << " @ ";
-        bool first = true;
-        if (locs_.size() > 1) {
-            os << "(";
-        }
-        for (auto &loc : locs_) {
-            if (!first) {
-                os << ", ";
-            }
-            os << loc.filePosToString(gs);
-            first = false;
-        }
-        if (locs_.size() > 1) {
-            os << ")";
-        }
-    }
-
-    os << '\n';
-
-    for (auto row : children) {
-        os << row;
-    }
-    return os.str();
+    return to_string(buf);
 }
 
 bool isSingleton(const GlobalState &gs, SymbolRef sym) {
@@ -604,32 +569,23 @@ bool isSingleton(const GlobalState &gs, SymbolRef sym) {
 }
 
 string Symbol::show(const GlobalState &gs) const {
-    string owner_str;
-
     if (isSingleton(gs, ref(gs))) {
         auto attached = this->attachedClass(gs);
         if (attached.exists()) {
-            return "T.class_of(" + attached.data(gs)->show(gs) + ")";
+            return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
         }
     }
 
-    if (this->owner.exists() && this->owner != Symbols::root()) {
-        if (this->isMethod() && isSingleton(gs, this->owner)) {
-            auto attached = this->owner.data(gs)->attachedClass(gs);
-            owner_str = attached.data(gs)->show(gs) + ".";
-        } else {
-            owner_str = this->owner.data(gs)->show(gs);
-            if (this->isClass()) {
-                if (!owner_str.empty()) {
-                    owner_str = owner_str + "::";
-                }
-            } else {
-                owner_str = owner_str + "#";
-            }
-        }
+    if (!this->owner.exists() || this->owner == Symbols::root()) {
+        return this->name.data(gs)->show(gs);
     }
 
-    return owner_str + this->name.data(gs)->show(gs);
+    if (this->isMethod() && isSingleton(gs, this->owner)) {
+        return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
+                           this->name.data(gs)->show(gs));
+    }
+    return fmt::format("{}{}{}", this->owner.data(gs)->show(gs), this->isClass() ? "::" : "#",
+                       this->name.data(gs)->show(gs));
 }
 
 SymbolRef Symbol::singletonClass(GlobalState &gs) {

@@ -32,13 +32,13 @@ static void symbolize_pc(void *pc, const char *fmt, char *out_buf, size_t out_bu
 }
 
 string addr2line(const string program_name, void const *const *addr, int count) {
-    stringstream os;
+    fmt::memory_buffer os;
     for (int i = 3; i < count; ++i) {
         char buf[4096];
         symbolize_pc(const_cast<void *>(addr[i]), "%p in %f %s:%l:%c", buf, sizeof(buf));
-        os << "  #" << i << " " << buf << '\n';
+        fmt::format_to(os, "  #{} {}\n", i, buf);
     }
-    return os.str();
+    return to_string(os);
 }
 string getProgramName() {
     char dest[512] = {}; // explicitly zero out

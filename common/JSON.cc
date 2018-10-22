@@ -1,48 +1,56 @@
 #include "common/JSON.h"
-
-#include <iomanip>
-#include <sstream>
+#include "spdlog/fmt/fmt.h"
 
 using namespace std;
 
 namespace sorbet::core {
 
-// https://stackoverflow.com/questions/7724448/simple-json-string-escape-for-c
 string JSON::escape(string from) {
-    ostringstream ss;
+    fmt::memory_buffer buf;
+    int firstUnusedChar = 0;
+    int currentChar = -1;
     for (auto ch : from) {
+        currentChar++;
+        string_view special;
         switch (ch) {
             case '\\':
-                ss << "\\\\";
+                special = "\\\\"sv;
                 break;
             case '"':
-                ss << "\\\"";
+                special = "\\\""sv;
                 break;
             case '\b':
-                ss << "\\b";
+                special = "\\b"sv;
                 break;
             case '\f':
-                ss << "\\f";
+                special = "\\f"sv;
                 break;
             case '\n':
-                ss << "\\n";
+                special = "\\n"sv;
                 break;
             case '\r':
-                ss << "\\r";
+                special = "\\r"sv;
                 break;
             case '\t':
-                ss << "\\t";
+                special = "\\t"sv;
                 break;
             default:
                 if (ch <= 0x1f) {
-                    ss << "\\u" << hex << setw(4) << setfill('0') << (int)ch;
+                    string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
+                    firstUnusedChar = currentChar + 1;
+                    fmt::format_to(buf, "{}\\u{:04x}", toAdd, ch);
                     break;
                 }
-                ss << ch;
-                break;
+                continue;
         }
+        string_view toAdd(from.data() + firstUnusedChar, currentChar - firstUnusedChar);
+        firstUnusedChar = currentChar + 1;
+        fmt::format_to(buf, "{}{}", toAdd, special);
     }
-    return ss.str();
+    string_view toAdd(from.data() + firstUnusedChar, from.size() - firstUnusedChar);
+    fmt::format_to(buf, "{}", toAdd);
+
+    return to_string(buf);
 }
 
 } // namespace sorbet::core

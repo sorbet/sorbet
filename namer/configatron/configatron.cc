@@ -3,7 +3,6 @@
 #include "yaml-cpp/yaml.h"
 #include <cctype>
 #include <dirent.h>
-#include <iostream>
 #include <sys/types.h>
 #include <utility>
 

@@ -9,7 +9,6 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 #include "gtest/gtest.h"
-#include <fstream>
 
 namespace spd = spdlog;
 

@@ -20,8 +20,6 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include "spdlog/fmt/fmt.h"
 #include <cstring>
 #include <functional>
-#include <ostream>
-#include <sstream>
 #include <stdint.h>
 #include <string>
 #include <string_view>

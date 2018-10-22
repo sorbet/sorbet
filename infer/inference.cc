@@ -368,42 +368,39 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         return;
     }
 
-    stringstream ss;
+    fmt::memory_buffer ss;
     bool first = true;
 
     auto argumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
 
-    ss << "sig {";
+    fmt::format_to(ss, "sig {{");
     if (!methodSymbol.data(ctx)->arguments().empty()) {
-        ss << "params(";
+        fmt::format_to(ss, "params(");
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
             if (!first) {
-                ss << ", ";
+                fmt::format_to(ss, ", ");
             }
             first = false;
             auto argType = argumentTypes[argSym];
             if (!argType || argType->isBottom()) {
                 argType = core::Types::untypedUntracked();
             }
-            ss << argSym.data(ctx)->name.show(ctx) << ": " << argType->show(ctx);
+            fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), argType->show(ctx));
         }
-        ss << ").";
+        fmt::format_to(ss, ").");
     }
 
-    string returnStr;
     if (methodSymbol.data(ctx)->name == core::Names::initialize() ||
         core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType)) {
-        returnStr = "void";
+        fmt::format_to(ss, "void}}");
     } else {
-        returnStr = fmt::format("returns({})", guessedReturnType->show(ctx));
+        fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));
     }
-    ss << returnStr;
-    ss << "}";
 
     auto [replacementLoc, padding] = findStartOfLine(ctx, loc);
     string spaces(padding, ' ');
 
-    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", ss.str(), spaces)));
+    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
 
     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
         e.addAutocorrect(move(*suggestion));

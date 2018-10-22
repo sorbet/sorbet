@@ -5,6 +5,7 @@
 #include "absl/algorithm/container.h"
 #include <algorithm>
 #include <iterator>
+#include <sstream>
 
 namespace sorbet::core {
 

@@ -1040,7 +1040,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         if (annotation.loc.file() != file) {
             continue;
         }
-        stringstream buf;
+        fmt::memory_buffer buf;
 
         auto pos = annotation.loc.position(*this);
         vector<string> lines = absl::StrSplit(annotation.str, '\n');
@@ -1048,21 +1048,13 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
             lines.pop_back();
         }
         if (!lines.empty()) {
-            buf << '\n';
+            fmt::format_to(buf, "\n");
             for (auto line : lines) {
-                for (int p = 1; p < pos.first.column; p++) {
-                    buf << " ";
-                }
-                if (line.empty()) {
-                    // Avoid the trailing space
-                    buf << "#";
-                } else {
-                    buf << "# " << line;
-                }
-                buf << '\n';
+                string spaces(pos.first.column - 1, ' ');
+                fmt::format_to(buf, "{}#{}{}\n", spaces, line.empty() ? "" : " ", line);
             }
         }
-        auto out = buf.str();
+        auto out = to_string(buf);
         out = out.substr(0, out.size() - 1); // Remove the last newline that the buf always has
 
         size_t start_of_line;
@@ -1082,7 +1074,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
                 }
                 break;
         }
-        outline = outline.substr(0, start_of_line) + out + outline.substr(start_of_line);
+        outline = absl::StrCat(outline.substr(0, start_of_line), out, outline.substr(start_of_line));
     }
     return outline;
 }

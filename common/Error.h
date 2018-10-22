@@ -1,6 +1,7 @@
 #ifndef SORBET_ERRO_H
 #define SORBET_ERRO_H
 
+#include "absl/strings/str_cat.h"
 #include "common/os/os.h"
 #include "spdlog/spdlog.h"
 #include <cstdio>
@@ -61,29 +62,19 @@ public:
                                                     const TArgs &... args) __attribute__((noreturn)) {
         raise(file + ":" + std::to_string(line), " enforced condition ", check, " has failed: ", args...);
     }
-
-private:
-    static inline void _raise(std::ostream &) {}
-
-    template <typename TArg, typename... TArgs>
-    static inline void _raise(std::ostream &os, const TArg &arg, const TArgs &... args) {
-        os << arg;
-        _raise(os, args...);
-    }
 };
 
 template <typename... TArgs>[[noreturn]] bool Error::raise(const TArgs &... args) {
-    std::stringstream message;
-    _raise(message, args...);
+    std::string message = absl::StrCat("", args...);
 
-    if (message.str().size() > 0) {
-        fatalLogger->error("Error::raise(): {}\n", message.str().c_str());
+    if (message.size() > 0) {
+        fatalLogger->error("Error::raise(): {}\n", message);
     } else {
         fatalLogger->error("Error::raise() (sadly without a message)\n");
     }
     print_backtrace();
     stopInDebugger();
-    throw SRubyException(message.str());
+    throw SRubyException(message);
 }
 } // namespace sorbet
 #endif // SORBET_ERRO_H
