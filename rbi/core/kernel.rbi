@@ -25,6 +25,7 @@ module Kernel
     )
     .returns(T.nilable(T::Array[String]))
   end
+  sig {params.returns(T::Array[String])}
   def caller(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
   sig do
