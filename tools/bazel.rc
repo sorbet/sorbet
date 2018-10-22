@@ -49,8 +49,9 @@ build:release --stamp
 # CI uses a funny build, with debug code enabled but compiled with optimizations.
 # intentionally does not reuse --config=debugsymbols because we want to have a sandboxed build
 build:ci --config=forcedebug
-build:ci --copt=-g3
-build:ci --cxxopt=-g3
+build:ci --copt=-g3 --copt=-glldb
+build:ci --cxxopt=-g3 --cxxopt=-glldb
+build:ci --linkopt=-g3 --linkopt=-glldb
 build:ci --config=sanitize
 build:ci --copt=-O2
 build:ci --cxxopt=-O2
@@ -99,9 +100,9 @@ build:size --cxxopt=-Os
 ### Debug symbols on OS X. ###
 # From https://github.com/RobotLocomotion/drake/blob/master/tools/cc_toolchain/bazel.rc
 # See https://github.com/bazelbuild/bazel/issues/2537
-build:debugsymbols --copt=-g3 --copt=-fstandalone-debug --copt=-DDEBUG_SYMBOLS
-build:debugsymbols --cxxopt=-g3 --cxxopt=-fstandalone-debug --cxxopt=-DDEBUG_SYMBOLS
-build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS
+build:debugsymbols --copt=-g3 --copt=-fstandalone-debug --copt=-DDEBUG_SYMBOLS --copt=-glldb
+build:debugsymbols --cxxopt=-g3 --cxxopt=-fstandalone-debug --cxxopt=-DDEBUG_SYMBOLS --cxxopt=-glldb
+build:debugsymbols --linkopt=-g3 --linkopt=-fstandalone-debug --linkopt=-DDEBUG_SYMBOLS --linkopt=-glldb
 build:debugsymbols --spawn_strategy=standalone
 build:debugsymbols --genrule_strategy=standalone
 
