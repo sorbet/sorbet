@@ -142,6 +142,19 @@ TEST(CoreTest, LocTest) { // NOLINT
             }
         }
     }
+    for (auto fileRef = 0; fileRef < maxFileId; fileRef = fileRef * 2 + 1) {
+        for (auto beginPos = 0; beginPos < maxOffset; beginPos = beginPos * 2 + 1) {
+            for (auto endPos = beginPos; endPos < maxOffset; endPos = endPos * 2 + 1) {
+                Loc loc(core::FileRef(fileRef), beginPos, endPos);
+                auto [low, high] = loc.getAs2u4();
+                Loc loc2;
+                loc2.setFrom2u4(low, high);
+                EXPECT_EQ(loc.file().id(), loc2.file().id());
+                EXPECT_EQ(loc.beginPos(), loc2.beginPos());
+                EXPECT_EQ(loc.endPos(), loc2.endPos());
+            }
+        }
+    }
 }
 
 } // namespace sorbet::core

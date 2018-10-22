@@ -182,7 +182,8 @@ bool Loc::contains(const Loc &other) const {
 }
 
 bool Loc::operator==(const Loc &rhs) const {
-    return storage.high == rhs.storage.high && storage.low == rhs.storage.low;
+    return storage.endLoc == rhs.storage.endLoc && storage.beginLoc == rhs.storage.beginLoc &&
+           storage.fileRef == rhs.storage.fileRef;
 }
 
 bool Loc::operator!=(const Loc &rhs) const {

@@ -11,50 +11,49 @@ class GlobalState;
 
 class Loc final {
     struct {
-        u4 high; // 3 upper bytes are beginLoc, 1 lower byte is upper byte of endLoc
-        u4 low;  // 2 upper bytes are lower bytes of endLoc, 2 lower bytes are fileRef
-    } storage;
+        unsigned int beginLoc : 24;
+        unsigned int endLoc : 24;
+        unsigned int fileRef : 16;
+    } __attribute__((packed, aligned(8))) storage;
     friend std::hash<sorbet::core::Loc>;
     friend class sorbet::core::serialize::SerializerImpl;
 
-    static constexpr int STORAGE_HIGH_NONE = 0xffffffff;
-    static constexpr int STORAGE_LOW_FILE_MASK = 0x0000ffff;
-    static constexpr int INVALID_POS = 0x00ffffff;
+    static constexpr int INVALID_POS_LOC = 0xffffff;
 
     void setFile(core::FileRef file) {
-        storage.low = (storage.low & ~STORAGE_LOW_FILE_MASK) | file.id();
+        storage.fileRef = file.id();
     }
 
 public:
     static Loc none(FileRef file = FileRef()) {
-        return Loc{file, INVALID_POS, INVALID_POS};
+        return Loc{file, INVALID_POS_LOC, INVALID_POS_LOC};
     }
 
     bool exists() const {
-        return storage.high != STORAGE_HIGH_NONE && ((storage.low & STORAGE_LOW_FILE_MASK) != 0);
+        return storage.fileRef != 0 && storage.endLoc != INVALID_POS_LOC && storage.beginLoc != INVALID_POS_LOC;
     }
 
     Loc join(Loc other) const;
 
     u4 beginPos() const {
-        return storage.high >> 8;
+        return storage.beginLoc;
     };
 
     u4 endPos() const {
-        return ((storage.high & 255) << 16) + (storage.low >> 16);
+        return storage.endLoc;
     }
 
     FileRef file() const {
-        return FileRef(storage.low & STORAGE_LOW_FILE_MASK);
+        return FileRef(storage.fileRef);
     }
 
-    inline Loc(FileRef file, u4 begin, u4 end) : storage{(begin << 8) | (end >> 16), (end << 16) + file.id()} {
-        ENFORCE(begin <= INVALID_POS);
-        ENFORCE(end <= INVALID_POS);
+    inline Loc(FileRef file, u4 begin, u4 end) : storage{begin, end, file.id()} {
+        ENFORCE(begin <= INVALID_POS_LOC);
+        ENFORCE(end <= INVALID_POS_LOC);
         ENFORCE(begin <= end);
     }
 
-    Loc() : Loc(FileRef(), INVALID_POS, INVALID_POS){};
+    Loc() : Loc(0, INVALID_POS_LOC, INVALID_POS_LOC){};
 
     Loc &operator=(const Loc &rhs) = default;
     Loc &operator=(Loc &&rhs) = default;
@@ -78,13 +77,26 @@ public:
     static u4 pos2Offset(const File &source, Detail pos);
     static Detail offset2Pos(const File &source, u4 off);
     static Loc fromDetails(const GlobalState &gs, FileRef fileRef, Detail begin, Detail end);
+    std::pair<u4, u4> getAs2u4() const {
+        auto low = (((u4)storage.beginLoc) << 8) + ((((u4)storage.fileRef) >> 8) & ((1 << 8) - 1));
+        auto high = (((u4)storage.endLoc) << 8) + ((((u4)storage.fileRef)) & ((1 << 8) - 1));
+        return {low, high};
+    };
+
+    // Intentionally not a constructor because we don't want to ever be able to call it unintentionally
+    void setFrom2u4(u4 low, u4 high) {
+        storage.fileRef = (high & ((1 << 8) - 1)) + ((low & ((1 << 8) - 1)) << 8);
+        storage.endLoc = high >> 8;
+        storage.beginLoc = low >> 8;
+    }
 };
-CheckSize(Loc, 8, 4);
+CheckSize(Loc, 8, 8);
 } // namespace sorbet::core
 
 template <> struct std::hash<sorbet::core::Loc> {
     std::size_t operator()(const sorbet::core::Loc loc) const {
-        return 5 * loc.storage.high + 7 * loc.storage.low;
+        // prime numbers as multipliers
+        return loc.storage.fileRef * 8388617ul + loc.storage.endLoc * 8388619ul + loc.storage.beginLoc * 8388623ul;
     }
 };
 
