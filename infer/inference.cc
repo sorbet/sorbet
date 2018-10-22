@@ -347,15 +347,15 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     }
 
     auto isBadArg = [&](const core::SymbolRef &arg) -> bool {
-        return arg.data(ctx)->isBlockArgument() || // Sometimes we synthesize a block arg,
-                                                   // and name it `<blk>` which is not a
-                                                   // valid identifier name.
+        return
+            // Sometimes we synthesize a block arg, and name it `<blk>` which is not a valid identifier name.
+            arg.data(ctx)->isBlockArgument() ||
 
-               arg.data(ctx)->isRepeated() || // runtime does not support rest args
-                                              // and key-rest args
+            // runtime does not support rest args and key-rest args
+            arg.data(ctx)->isRepeated() ||
 
-               arg.data(ctx)->name.data(ctx)->shortName(ctx).empty(); // sometimes variable does not have
-                                                                      // a name e.g. `def initialize (*)`
+            // sometimes variable does not have a name e.g. `def initialize (*)`
+            arg.data(ctx)->name.data(ctx)->shortName(ctx).empty();
     };
     bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
     if (hasBadArg) {
