@@ -174,10 +174,15 @@ private:
         }
     }
 
-    static bool resolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases,
-                           bool lastRun) {
+    static bool resolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases, bool lastRun,
+                           int depth = 0) {
         if (job.out->typeAlias || job.out->constantSymbol().exists()) {
             return true;
+        }
+        if (depth > 256) {
+            Error::raise("Too many recursive calls trying to resolve constant:\n", job.out->original->cnst.show(ctx),
+                         "\n", job.out->original->loc.file().data(ctx).path(), "\n",
+                         job.out->original->loc.toString(ctx));
         }
         auto resolved =
             resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases, lastRun);
@@ -253,7 +258,7 @@ private:
             stub.data(ctx)->resultType = core::Types::untypedUntracked();
             stub.data(ctx)->setIsModule(false);
             stub.data(ctx)->singletonClass(ctx); // force singleton class into existence.
-            bool resolved = resolveJob(ctx, job, typeAliases, true);
+            bool resolved = resolveJob(ctx, job, typeAliases, true, depth + 1);
             return resolved;
         }
         if (resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
