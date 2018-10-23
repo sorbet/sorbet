@@ -557,10 +557,10 @@ public:
 CheckSize(MetaType, 24, 8);
 
 class SendAndBlockLink {
-    SendAndBlockLink(const SendAndBlockLink &) = default;
+    SendAndBlockLink(const SendAndBlockLink &) noexcept = default;
 
 public:
-    SendAndBlockLink(SendAndBlockLink &&) = default;
+    SendAndBlockLink(SendAndBlockLink &&) noexcept = default;
     SymbolRef block;
     std::shared_ptr<Type> receiver;
     NameRef fun;

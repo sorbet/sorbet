@@ -147,7 +147,7 @@ class ErrorBuilder {
 
 public:
     ErrorBuilder(const ErrorBuilder &) = delete;
-    ErrorBuilder(ErrorBuilder &&) = default;
+    ErrorBuilder(ErrorBuilder &&) noexcept = default;
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
     ~ErrorBuilder();
     inline explicit operator bool() const {

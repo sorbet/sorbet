@@ -70,8 +70,8 @@ private:
         ast::ConstantLit *out;
 
         ResolutionItem() = default;
-        ResolutionItem(ResolutionItem &&rhs) = default;
-        ResolutionItem &operator=(ResolutionItem &&rhs) = default;
+        ResolutionItem(ResolutionItem &&rhs) noexcept = default;
+        ResolutionItem &operator=(ResolutionItem &&rhs) noexcept = default;
 
         ResolutionItem(const ResolutionItem &rhs) = delete;
         const ResolutionItem &operator=(const ResolutionItem &rhs) = delete;
@@ -83,8 +83,8 @@ private:
         bool isSuperclass; // true if superclass, false for mixin
 
         AncestorResolutionItem() = default;
-        AncestorResolutionItem(AncestorResolutionItem &&rhs) = default;
-        AncestorResolutionItem &operator=(AncestorResolutionItem &&rhs) = default;
+        AncestorResolutionItem(AncestorResolutionItem &&rhs) noexcept = default;
+        AncestorResolutionItem &operator=(AncestorResolutionItem &&rhs) noexcept = default;
 
         AncestorResolutionItem(const AncestorResolutionItem &rhs) = delete;
         const AncestorResolutionItem &operator=(const AncestorResolutionItem &rhs) = delete;
@@ -95,8 +95,8 @@ private:
         ast::ConstantLit *rhs;
 
         ClassAliasResolutionItem() = default;
-        ClassAliasResolutionItem(ClassAliasResolutionItem &&) = default;
-        ClassAliasResolutionItem &operator=(ClassAliasResolutionItem &&rhs) = default;
+        ClassAliasResolutionItem(ClassAliasResolutionItem &&) noexcept = default;
+        ClassAliasResolutionItem &operator=(ClassAliasResolutionItem &&rhs) noexcept = default;
 
         ClassAliasResolutionItem(const ClassAliasResolutionItem &) = delete;
         const ClassAliasResolutionItem &operator=(const ClassAliasResolutionItem &) = delete;
