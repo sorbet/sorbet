@@ -23,7 +23,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_2" -> "bb::Object#main_4" [style="bold"];
     "bb::Object#main_4" [
-        label = "block[id=4](<returnMethodTemp>$2: T.nilable(Integer))\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\ldead=1\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: <impossible>\l\l<unconditional>\l"
+        label = "block[id=4](<returnMethodTemp>$2: T.nilable(Integer))\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\ldead=1\l<returnMethodTemp>$2: NilClass | Integer\l\l<finalReturn>: T.noreturn\l\l<unconditional>\l"
     ];
 
     "bb::Object#main_4" -> "bb::Object#main_1" [style="bold"];

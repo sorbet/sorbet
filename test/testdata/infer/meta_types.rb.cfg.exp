@@ -6,7 +6,7 @@ subgraph "cluster_::TestMetaType#_" {
     "bb::TestMetaType#__1" [shape = parallelogram];
 
     "bb::TestMetaType#__0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#__0" -> "bb::TestMetaType#__1" [style="bold"];
@@ -63,7 +63,7 @@ subgraph "cluster_::TestMetaType#testit" {
 
     "bb::TestMetaType#testit_6" -> "bb::TestMetaType#testit_7" [style="bold"];
     "bb::TestMetaType#testit_7" [
-        label = "block[id=7](<statTemp>$18: TestMetaType, <statTemp>$19: Object)\l<returnMethodTemp>$2: NilClass = <statTemp>$18: TestMetaType.puts(<statTemp>$19: Object)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=7](<statTemp>$18: TestMetaType, <statTemp>$19: Object)\l<returnMethodTemp>$2: NilClass = <statTemp>$18: TestMetaType.puts(<statTemp>$19: Object)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestMetaType#testit_7" -> "bb::TestMetaType#testit_1" [style="bold"];

@@ -8,7 +8,7 @@ class A
   # dead=1
   # <returnMethodTemp>$2: T.untyped
   #
-  # <finalReturn>: <impossible>
+  # <finalReturn>: T.noreturn
   # dead=1
   # <statTemp>$9: Sorbet::Private::Builder
   #
@@ -29,7 +29,7 @@ class A
   #
   # <blockReturnTemp>$8: Sorbet::Private::Builder
   #
-  # <blockReturnTemp>$21: <impossible>
+  # <blockReturnTemp>$21: T.noreturn
   #
   # <hashTemp>$12: Symbol(:"x")
   #
@@ -72,7 +72,7 @@ class A
     # dead=1
     # <returnMethodTemp>$2: Integer
     #
-    # <finalReturn>: <impossible>
+    # <finalReturn>: T.noreturn
     #
     # x: Integer
     #

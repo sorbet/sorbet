@@ -6,7 +6,7 @@ subgraph "cluster_::Object#baz1" {
     "bb::Object#baz1_1" [shape = parallelogram];
 
     "bb::Object#baz1_0" [
-        label = "block[id=0]()\la: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = a: String(\"foo\").getbyte(a: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=0]()\la: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = a: String(\"foo\").getbyte(a: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz1_0" -> "bb::Object#baz1_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::Object#baz2" {
     "bb::Object#baz2_1" [shape = parallelogram];
 
     "bb::Object#baz2_0" [
-        label = "block[id=0]()\la: String(\"foo\") = \"foo\"\l<statTemp>$6: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = a: String(\"foo\").getbyte(<statTemp>$6: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=0]()\la: String(\"foo\") = \"foo\"\l<statTemp>$6: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = a: String(\"foo\").getbyte(<statTemp>$6: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz2_0" -> "bb::Object#baz2_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::Object#baz3" {
     "bb::Object#baz3_1" [shape = parallelogram];
 
     "bb::Object#baz3_0" [
-        label = "block[id=0]()\l<statTemp>$4: String(\"foo\") = \"foo\"\l<statTemp>$5: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = <statTemp>$4: String(\"foo\").getbyte(<statTemp>$5: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: String(\"foo\") = \"foo\"\l<statTemp>$5: String(\"foo\") = \"foo\"\lb: T.nilable(Integer) = <statTemp>$4: String(\"foo\").getbyte(<statTemp>$5: String(\"foo\"))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz3_0" -> "bb::Object#baz3_1" [style="bold"];
@@ -60,7 +60,7 @@ subgraph "cluster_::Object#baz4" {
     "bb::Object#baz4_1" [shape = parallelogram];
 
     "bb::Object#baz4_0" [
-        label = "block[id=0]()\l<statTemp>$5: Object = self\l<statTemp>$4: T.untyped = <statTemp>$5: Object.a()\l<statTemp>$6: String(\"foo\") = \"foo\"\lb: T.untyped = <statTemp>$4: T.untyped.getbyte(<statTemp>$6: String(\"foo\"))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: Object = self\l<statTemp>$4: T.untyped = <statTemp>$5: Object.a()\l<statTemp>$6: String(\"foo\") = \"foo\"\lb: T.untyped = <statTemp>$4: T.untyped.getbyte(<statTemp>$6: String(\"foo\"))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#baz4_0" -> "bb::Object#baz4_1" [style="bold"];
@@ -100,7 +100,7 @@ subgraph "cluster_::Object#baz5" {
 
     "bb::Object#baz5_3" -> "bb::Object#baz5_4" [style="bold"];
     "bb::Object#baz5_4" [
-        label = "block[id=4](b: T.any(Integer, String))\l<statTemp>$6: T.any(Integer, String) = b\l<statTemp>$7: Integer(1) = 1\lb: T.untyped = <statTemp>$6: T.any(Integer, String).getbyte(<statTemp>$7: Integer(1))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4](b: T.any(Integer, String))\l<statTemp>$6: T.any(Integer, String) = b\l<statTemp>$7: Integer(1) = 1\lb: T.untyped = <statTemp>$6: T.any(Integer, String).getbyte(<statTemp>$7: Integer(1))\l<returnMethodTemp>$2: T.untyped = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#baz5_4" -> "bb::Object#baz5_1" [style="bold"];
@@ -135,7 +135,7 @@ subgraph "cluster_::Object#baz6" {
 
     "bb::Object#baz6_3" -> "bb::Object#baz6_4" [style="bold"];
     "bb::Object#baz6_4" [
-        label = "block[id=4](b: T.any(Integer, String))\l<statTemp>$6: String(\"foo\") = \"foo\"\l<statTemp>$7: T.any(Integer, String) = b\lb: T.nilable(Integer) = <statTemp>$6: String(\"foo\").getbyte(<statTemp>$7: T.any(Integer, String))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=4](b: T.any(Integer, String))\l<statTemp>$6: String(\"foo\") = \"foo\"\l<statTemp>$7: T.any(Integer, String) = b\lb: T.nilable(Integer) = <statTemp>$6: String(\"foo\").getbyte(<statTemp>$7: T.any(Integer, String))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz6_4" -> "bb::Object#baz6_1" [style="bold"];
@@ -165,7 +165,7 @@ subgraph "cluster_::Object#baz7" {
 
     "bb::Object#baz7_2" -> "bb::Object#baz7_4" [style="bold"];
     "bb::Object#baz7_4" [
-        label = "block[id=4](b: T.nilable(Integer))\l<statTemp>$6: String(\"foo\") = \"foo\"\l<statTemp>$7: T.nilable(Integer) = b\lb: T.nilable(Integer) = <statTemp>$6: String(\"foo\").getbyte(<statTemp>$7: T.nilable(Integer))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=4](b: T.nilable(Integer))\l<statTemp>$6: String(\"foo\") = \"foo\"\l<statTemp>$7: T.nilable(Integer) = b\lb: T.nilable(Integer) = <statTemp>$6: String(\"foo\").getbyte(<statTemp>$7: T.nilable(Integer))\l<returnMethodTemp>$2: T.nilable(Integer) = b\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::Object#baz7_4" -> "bb::Object#baz7_1" [style="bold"];

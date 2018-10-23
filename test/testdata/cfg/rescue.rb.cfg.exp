@@ -49,7 +49,7 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_9" -> "bb::Object#main_6" [style="bold"];
     "bb::Object#main_10" [
-        label = "block[id=10](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=10](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#main_10" -> "bb::Object#main_1" [style="bold"];
@@ -62,7 +62,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_1" [shape = parallelogram];
 
     "bb::Object#a_0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#a_0" -> "bb::Object#a_1" [style="bold"];
@@ -80,7 +80,7 @@ subgraph "cluster_::Object#b" {
     "bb::Object#b_1" [shape = parallelogram];
 
     "bb::Object#b_0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#b_0" -> "bb::Object#b_1" [style="bold"];
@@ -98,7 +98,7 @@ subgraph "cluster_::Object#c" {
     "bb::Object#c_1" [shape = parallelogram];
 
     "bb::Object#c_0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#c_0" -> "bb::Object#c_1" [style="bold"];
@@ -116,7 +116,7 @@ subgraph "cluster_::Object#d" {
     "bb::Object#d_1" [shape = parallelogram];
 
     "bb::Object#d_0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#d_0" -> "bb::Object#d_1" [style="bold"];
@@ -134,7 +134,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<statTemp>$6: T.class_of(<root>) = self\l<statTemp>$5: T.untyped = <statTemp>$6: T.class_of(<root>).foo()\l<returnMethodTemp>$2: NilClass = <statTemp>$4: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<statTemp>$6: T.class_of(<root>) = self\l<statTemp>$5: T.untyped = <statTemp>$6: T.class_of(<root>).foo()\l<returnMethodTemp>$2: NilClass = <statTemp>$4: T.class_of(<root>).puts(<statTemp>$5: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

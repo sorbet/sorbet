@@ -6,7 +6,7 @@ subgraph "cluster_::TestArray#an_int" {
     "bb::TestArray#an_int_1" [shape = parallelogram];
 
     "bb::TestArray#an_int_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
+        label = "block[id=0]()\l<returnMethodTemp>$2: Integer(0) = 0\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(0)\l<unconditional>\l"
     ];
 
     "bb::TestArray#an_int_0" -> "bb::TestArray#an_int_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::TestArray#a_string" {
     "bb::TestArray#a_string_1" [shape = parallelogram];
 
     "bb::TestArray#a_string_0" [
-        label = "block[id=0]()\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
+        label = "block[id=0]()\l<returnMethodTemp>$2: String(\"str\") = \"str\"\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: String(\"str\")\l<unconditional>\l"
     ];
 
     "bb::TestArray#a_string_0" -> "bb::TestArray#a_string_1" [style="bold"];
@@ -42,7 +42,7 @@ subgraph "cluster_::TestArray#test_arrays" {
     "bb::TestArray#test_arrays_1" [shape = parallelogram];
 
     "bb::TestArray#test_arrays_0" [
-        label = "block[id=0]()\l<magic>$5: <Magic> = alias <constant:<Magic>>\l<statTemp>$4: T::Array[T.untyped] = <magic>$5: <Magic>.<build-array>()\l<arrayTemp>$7: Integer(1) = 1\l<arrayTemp>$8: Integer(2) = 2\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: [Integer(1), Integer(2)] = <magic>$9: <Magic>.<build-array>(<arrayTemp>$7: Integer(1), <arrayTemp>$8: Integer(2))\l<statTemp>$11: TestArray = self\l<arrayTemp>$10: Integer = <statTemp>$11: TestArray.an_int()\l<statTemp>$13: TestArray = self\l<arrayTemp>$12: String = <statTemp>$13: TestArray.a_string()\l<magic>$15: <Magic> = alias <constant:<Magic>>\l<arrayTemp>$14: T::Array[T.untyped] = <magic>$15: <Magic>.<build-array>()\l<magic>$16: <Magic> = alias <constant:<Magic>>\l<returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]] = <magic>$16: <Magic>.<build-array>(<arrayTemp>$10: Integer, <arrayTemp>$12: String, <arrayTemp>$14: T::Array[T.untyped])\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]]\l<unconditional>\l"
+        label = "block[id=0]()\l<magic>$5: <Magic> = alias <constant:<Magic>>\l<statTemp>$4: T::Array[T.untyped] = <magic>$5: <Magic>.<build-array>()\l<arrayTemp>$7: Integer(1) = 1\l<arrayTemp>$8: Integer(2) = 2\l<magic>$9: <Magic> = alias <constant:<Magic>>\l<statTemp>$6: [Integer(1), Integer(2)] = <magic>$9: <Magic>.<build-array>(<arrayTemp>$7: Integer(1), <arrayTemp>$8: Integer(2))\l<statTemp>$11: TestArray = self\l<arrayTemp>$10: Integer = <statTemp>$11: TestArray.an_int()\l<statTemp>$13: TestArray = self\l<arrayTemp>$12: String = <statTemp>$13: TestArray.a_string()\l<magic>$15: <Magic> = alias <constant:<Magic>>\l<arrayTemp>$14: T::Array[T.untyped] = <magic>$15: <Magic>.<build-array>()\l<magic>$16: <Magic> = alias <constant:<Magic>>\l<returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]] = <magic>$16: <Magic>.<build-array>(<arrayTemp>$10: Integer, <arrayTemp>$12: String, <arrayTemp>$14: T::Array[T.untyped])\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: [Integer, String, T::Array[T.untyped]]\l<unconditional>\l"
     ];
 
     "bb::TestArray#test_arrays_0" -> "bb::TestArray#test_arrays_1" [style="bold"];
@@ -82,7 +82,7 @@ subgraph "cluster_::TestArray#<static-init>" {
 
     "bb::TestArray#<static-init>_3" -> "bb::TestArray#<static-init>_5" [style="bold"];
     "bb::TestArray#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.returns(<statTemp>$11: T.class_of(Integer))\l<blockReturnTemp>$12: <impossible> = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$9: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<statTemp>$11: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.returns(<statTemp>$11: T.class_of(Integer))\l<blockReturnTemp>$12: T.noreturn = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$9: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_4" -> "bb::TestArray#<static-init>_2" [style="bold"];
@@ -94,12 +94,12 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_6" [style="tapered"];
 
     "bb::TestArray#<static-init>_6" [
-        label = "block[id=6]()\l<statTemp>$13: T.untyped = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=6]()\l<statTemp>$13: T.untyped = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_6" -> "bb::TestArray#<static-init>_1" [style="bold"];
     "bb::TestArray#<static-init>_7" [
-        label = "block[id=7]()\louterLoops: 1\l<statTemp>$19: Sorbet::Private::Builder = self\l<statTemp>$20: T.class_of(String) = alias <constant:String>\l<blockReturnTemp>$18: Sorbet::Private::Builder = <statTemp>$19: Sorbet::Private::Builder.returns(<statTemp>$20: T.class_of(String))\l<blockReturnTemp>$21: <impossible> = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$18: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=7]()\louterLoops: 1\l<statTemp>$19: Sorbet::Private::Builder = self\l<statTemp>$20: T.class_of(String) = alias <constant:String>\l<blockReturnTemp>$18: Sorbet::Private::Builder = <statTemp>$19: Sorbet::Private::Builder.returns(<statTemp>$20: T.class_of(String))\l<blockReturnTemp>$21: T.noreturn = blockreturn<::<Class:TestArray>#<block>> <blockReturnTemp>$18: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_7" -> "bb::TestArray#<static-init>_5" [style="bold"];

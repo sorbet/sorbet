@@ -28,7 +28,7 @@ subgraph "cluster_::Side#foo" {
 
     "bb::Side#foo_3" -> "bb::Side#foo_4" [style="bold"];
     "bb::Side#foo_4" [
-        label = "block[id=4](<statTemp>$5: Side, <statTemp>$6: Side, a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.untyped = <statTemp>$5: Side.bar(<statTemp>$6: Side, a: T.any(TrueClass, Integer), a: T.any(TrueClass, Integer))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<statTemp>$5: Side, <statTemp>$6: Side, a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.untyped = <statTemp>$5: Side.bar(<statTemp>$6: Side, a: T.any(TrueClass, Integer), a: T.any(TrueClass, Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Side#foo_4" -> "bb::Side#foo_1" [style="bold"];
@@ -41,7 +41,7 @@ subgraph "cluster_::Side#bar" {
     "bb::Side#bar_1" [shape = parallelogram];
 
     "bb::Side#bar_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Side = self\la: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#a)\lb: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#b)\lc: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#c)\l<statTemp>$4: Side = self\l<returnMethodTemp>$2: NilClass = <statTemp>$4: Side.puts(a: T.untyped, b: T.untyped, c: T.untyped)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Side = self\la: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#a)\lb: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#b)\lc: T.untyped = load_arg(<selfMethodTemp>$3, Side#bar#c)\l<statTemp>$4: Side = self\l<returnMethodTemp>$2: NilClass = <statTemp>$4: Side.puts(a: T.untyped, b: T.untyped, c: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Side#bar_0" -> "bb::Side#bar_1" [style="bold"];

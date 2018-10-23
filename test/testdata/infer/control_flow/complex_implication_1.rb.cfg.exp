@@ -114,7 +114,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
 
     "bb::ModuleMethods#instrumented_request_22" -> "bb::ModuleMethods#instrumented_request_25" [style="bold"];
     "bb::ModuleMethods#instrumented_request_25" [
-        label = "block[id=25](<returnMethodTemp>$2: T.nilable(Integer))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
+        label = "block[id=25](<returnMethodTemp>$2: T.nilable(Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.nilable(Integer)\l<unconditional>\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_25" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];

@@ -28,7 +28,7 @@ subgraph "cluster_::Foo#bar" {
 
     "bb::Foo#bar_3" -> "bb::Foo#bar_4" [style="bold"];
     "bb::Foo#bar_4" [
-        label = "block[id=4](s: {})\lr: {} = s\l<returnMethodTemp>$2: <impossible> = return r: {}\l<unconditional>\l"
+        label = "block[id=4](s: {})\lr: {} = s\l<returnMethodTemp>$2: T.noreturn = return r: {}\l<unconditional>\l"
     ];
 
     "bb::Foo#bar_4" -> "bb::Foo#bar_1" [style="bold"];

@@ -28,7 +28,7 @@ subgraph "cluster_::Side#foo" {
 
     "bb::Side#foo_3" -> "bb::Side#foo_4" [style="bold"];
     "bb::Side#foo_4" [
-        label = "block[id=4](<statTemp>$5: Integer(1), <statTemp>$6: Integer(1), a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.untyped = <statTemp>$5: Integer(1).foo(<statTemp>$6: Integer(1), a: T.any(TrueClass, Integer))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<statTemp>$5: Integer(1), <statTemp>$6: Integer(1), a: T.any(TrueClass, Integer))\l<returnMethodTemp>$2: T.untyped = <statTemp>$5: Integer(1).foo(<statTemp>$6: Integer(1), a: T.any(TrueClass, Integer))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Side#foo_4" -> "bb::Side#foo_1" [style="bold"];

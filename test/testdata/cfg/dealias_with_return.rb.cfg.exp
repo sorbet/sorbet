@@ -25,7 +25,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_3" -> "bb::Object#a_9" [style="tapered"];
 
     "bb::Object#a_4" [
-        label = "block[id=4]()\l<returnTemp>$6: Integer(1) = 1\l<statTemp>$4: <impossible> = return <returnTemp>$6: Integer(1)\l<unconditional>\l"
+        label = "block[id=4]()\l<returnTemp>$6: Integer(1) = 1\l<statTemp>$4: T.noreturn = return <returnTemp>$6: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Object#a_4" -> "bb::Object#a_1" [style="bold"];
@@ -44,7 +44,7 @@ subgraph "cluster_::Object#a" {
     "bb::Object#a_9" -> "bb::Object#a_10" [style="tapered"];
 
     "bb::Object#a_10" [
-        label = "block[id=10](a: Integer(2))\l<statTemp>$13: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$13: Integer(3))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=10](a: Integer(2))\l<statTemp>$13: Integer(3) = 3\l<returnMethodTemp>$2: Integer = a: Integer(2).+(<statTemp>$13: Integer(3))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#a_10" -> "bb::Object#a_1" [style="bold"];

@@ -73,7 +73,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_15" -> "bb#<static-init>_16" [style="tapered"];
 
     "bb#<static-init>_16" [
-        label = "block[id=16](x: Integer(0), y: Integer(0))\l<statTemp>$37: T.class_of(<root>) = self\l<statTemp>$36: NilClass = <statTemp>$37: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=16](x: Integer(0), y: Integer(0))\l<statTemp>$37: T.class_of(<root>) = self\l<statTemp>$36: NilClass = <statTemp>$37: T.class_of(<root>).puts(x: Integer(0), y: Integer(0))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_16" -> "bb#<static-init>_1" [style="bold"];

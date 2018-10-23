@@ -23,7 +23,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_2" -> "bb::A#initialize_3" [style="tapered"];
 
     "bb::A#initialize_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::A#initialize#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::A#initialize#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::A#initialize_3" -> "bb::A#initialize_1" [style="bold"];
@@ -70,7 +70,7 @@ subgraph "cluster_::A#initialize" {
     "bb::A#initialize_12" -> "bb::A#initialize_13" [style="tapered"];
 
     "bb::A#initialize_13" [
-        label = "block[id=13](<blockReturnTemp>$9: Integer, <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<blockReturnTemp>$16: <impossible> = blockreturn<::A#initialize#<block>> <blockReturnTemp>$9: Integer\l<unconditional>\l"
+        label = "block[id=13](<blockReturnTemp>$9: Integer, <gotoDeadTemp>$14: NilClass)\louterLoops: 1\l<blockReturnTemp>$16: T.noreturn = blockreturn<::A#initialize#<block>> <blockReturnTemp>$9: Integer\l<unconditional>\l"
     ];
 
     "bb::A#initialize_13" -> "bb::A#initialize_2" [style="bold"];

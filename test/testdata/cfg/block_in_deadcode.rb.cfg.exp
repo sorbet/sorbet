@@ -23,12 +23,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::Object#foo#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::Object#foo#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: <impossible> = return <returnTemp>$10: NilClass\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: T.noreturn = return <returnTemp>$10: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_1" [style="bold"];

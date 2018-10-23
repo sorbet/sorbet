@@ -37,7 +37,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_4" -> "bb::Object#main_10" [style="tapered"];
 
     "bb::Object#main_5" [
-        label = "block[id=5](try: Integer(0))\l<statTemp>$10: Integer(0) = try\l<statTemp>$11: Integer(1) = 1\ltry: Integer = <statTemp>$10: Integer(0).+(<statTemp>$11: Integer(1))\l<statTemp>$12: Object = self\l<statTemp>$13: String(\"e\") = \"e\"\l<returnMethodTemp>$2: <impossible> = <statTemp>$12: Object.raise(<statTemp>$13: String(\"e\"))\l<unconditional>\l"
+        label = "block[id=5](try: Integer(0))\l<statTemp>$10: Integer(0) = try\l<statTemp>$11: Integer(1) = 1\ltry: Integer = <statTemp>$10: Integer(0).+(<statTemp>$11: Integer(1))\l<statTemp>$12: Object = self\l<statTemp>$13: String(\"e\") = \"e\"\l<returnMethodTemp>$2: T.noreturn = <statTemp>$12: Object.raise(<statTemp>$13: String(\"e\"))\l<unconditional>\l"
     ];
 
     "bb::Object#main_5" -> "bb::Object#main_10" [style="bold"];
@@ -68,7 +68,7 @@ subgraph "cluster_::Object#main" {
     "bb::Object#main_12" -> "bb::Object#main_13" [style="tapered"];
 
     "bb::Object#main_13" [
-        label = "block[id=13](<returnMethodTemp>$2: NilClass)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=13](<returnMethodTemp>$2: NilClass)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Object#main_13" -> "bb::Object#main_1" [style="bold"];
@@ -81,7 +81,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: T.class_of(<root>).main()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(<root>) = self\l<returnMethodTemp>$2: T.untyped = <statTemp>$4: T.class_of(<root>).main()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];

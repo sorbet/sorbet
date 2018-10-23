@@ -23,12 +23,12 @@ subgraph "cluster_::Object#foo" {
     "bb::Object#foo_2" -> "bb::Object#foo_3" [style="tapered"];
 
     "bb::Object#foo_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T::Array[Integer] = Solve<::Object#foo#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T::Array[Integer]\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T::Array[Integer] = Solve<::Object#foo#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T::Array[Integer]\l<unconditional>\l"
     ];
 
     "bb::Object#foo_3" -> "bb::Object#foo_1" [style="bold"];
     "bb::Object#foo_4" [
-        label = "block[id=4]()\louterLoops: 1\l<blk>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<blk>$9: Integer(0) = 0\lx$2: Integer = <blk>$8: [Integer].[](<blk>$9: Integer(0))\l<statTemp>$12: Object = self\l<statTemp>$11: T.untyped = <statTemp>$12: Object.good()\l<nextTemp>$14: Integer = x$2\l<nextTemp>$15: <impossible> = blockreturn<::Object#foo#<block>> <nextTemp>$14: Integer\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<blk>$8: [Integer] = load_yield_params(::Object#foo#<block>, Object#foo#<block>)\l<blk>$9: Integer(0) = 0\lx$2: Integer = <blk>$8: [Integer].[](<blk>$9: Integer(0))\l<statTemp>$12: Object = self\l<statTemp>$11: T.untyped = <statTemp>$12: Object.good()\l<nextTemp>$14: Integer = x$2\l<nextTemp>$15: T.noreturn = blockreturn<::Object#foo#<block>> <nextTemp>$14: Integer\l<unconditional>\l"
     ];
 
     "bb::Object#foo_4" -> "bb::Object#foo_2" [style="bold"];

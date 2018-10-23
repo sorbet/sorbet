@@ -63,7 +63,7 @@ def foo
     #
     # <returnMethodTemp>$2: String
     #
-    # <finalReturn>: <impossible>
+    # <finalReturn>: T.noreturn
     #
     # c: AppliedType {
     #   klass = ::Range

@@ -18,12 +18,12 @@ subgraph "cluster_::Object#main" {
 
     "bb::Object#main_1" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_2" [
-        label = "block[id=2]()\l<returnTemp>$14: String(\"missing name\") = \"missing name\"\l<statTemp>$11: <impossible> = return <returnTemp>$14: String(\"missing name\")\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$14: String(\"missing name\") = \"missing name\"\l<statTemp>$11: T.noreturn = return <returnTemp>$14: String(\"missing name\")\l<unconditional>\l"
     ];
 
     "bb::Object#main_2" -> "bb::Object#main_1" [style="bold"];
     "bb::Object#main_3" [
-        label = "block[id=3](name: String)\l<statTemp>$16: String(\"foo\") = \"foo\"\l<returnMethodTemp>$2: T.any(TrueClass, FalseClass) = name: String.include?(<statTemp>$16: String(\"foo\"))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.any(TrueClass, FalseClass)\l<unconditional>\l"
+        label = "block[id=3](name: String)\l<statTemp>$16: String(\"foo\") = \"foo\"\l<returnMethodTemp>$2: T.any(TrueClass, FalseClass) = name: String.include?(<statTemp>$16: String(\"foo\"))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.any(TrueClass, FalseClass)\l<unconditional>\l"
     ];
 
     "bb::Object#main_3" -> "bb::Object#main_1" [style="bold"];

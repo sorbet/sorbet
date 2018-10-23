@@ -10,7 +10,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
     method ::A#f4 (y) -> T1 @ test/testdata/resolver/sig_misc.rb:62
       argument ::A#f4#y<> -> T1 @ test/testdata/resolver/sig_misc.rb:60
     method ::A#no_params () -> T1 @ test/testdata/resolver/sig_misc.rb:13
-    method ::A#noreturn () -> <impossible> @ test/testdata/resolver/sig_misc.rb:8
+    method ::A#noreturn () -> T.noreturn @ test/testdata/resolver/sig_misc.rb:8
     method ::A#private : private (x) -> T1 @ test/testdata/resolver/sig_misc.rb:41
       argument ::A#private#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:40
     method ::A#protected : protected (x) -> T1 @ test/testdata/resolver/sig_misc.rb:46

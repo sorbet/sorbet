@@ -18,7 +18,7 @@ subgraph "cluster_::Examples#i_like_ifs" {
 
     "bb::Examples#i_like_ifs_1" -> "bb::Examples#i_like_ifs_1" [style="bold"];
     "bb::Examples#i_like_ifs_2" [
-        label = "block[id=2]()\l<returnTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Examples#i_like_ifs_2" -> "bb::Examples#i_like_ifs_1" [style="bold"];
@@ -58,7 +58,7 @@ subgraph "cluster_::Examples#i_like_exps" {
 
     "bb::Examples#i_like_exps_3" -> "bb::Examples#i_like_exps_4" [style="bold"];
     "bb::Examples#i_like_exps_4" [
-        label = "block[id=4](<returnMethodTemp>$2: Integer(1))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=4](<returnMethodTemp>$2: Integer(1))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Examples#i_like_exps_4" -> "bb::Examples#i_like_exps_1" [style="bold"];
@@ -83,7 +83,7 @@ subgraph "cluster_::Examples#return_in_one_branch1" {
 
     "bb::Examples#return_in_one_branch1_1" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
     "bb::Examples#return_in_one_branch1_2" [
-        label = "block[id=2]()\l<returnTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: <impossible> = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
+        label = "block[id=2]()\l<returnTemp>$5: Integer(1) = 1\l<returnMethodTemp>$2: T.noreturn = return <returnTemp>$5: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch1_2" -> "bb::Examples#return_in_one_branch1_1" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::Examples#return_in_one_branch2" {
 
     "bb::Examples#return_in_one_branch2_1" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
     "bb::Examples#return_in_one_branch2_2" [
-        label = "block[id=2]()\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
+        label = "block[id=2]()\l<returnMethodTemp>$2: Integer(1) = 1\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer(1)\l<unconditional>\l"
     ];
 
     "bb::Examples#return_in_one_branch2_2" -> "bb::Examples#return_in_one_branch2_1" [style="bold"];
@@ -170,7 +170,7 @@ subgraph "cluster_::Examples#variables" {
 
     "bb::Examples#variables_6" -> "bb::Examples#variables_7" [style="bold"];
     "bb::Examples#variables_7" [
-        label = "block[id=7](b: Integer(2), a: Integer(1))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=7](b: Integer(2), a: Integer(1))\l<returnMethodTemp>$2: Integer = a: Integer(1).+(b: Integer(2))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Examples#variables_7" -> "bb::Examples#variables_1" [style="bold"];
@@ -311,7 +311,7 @@ subgraph "cluster_::Examples#take_arguments" {
 
     "bb::Examples#take_arguments_3" -> "bb::Examples#take_arguments_4" [style="bold"];
     "bb::Examples#take_arguments_4" [
-        label = "block[id=4](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=4](<returnMethodTemp>$2: T.untyped)\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Examples#take_arguments_4" -> "bb::Examples#take_arguments_1" [style="bold"];

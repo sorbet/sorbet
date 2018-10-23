@@ -6,7 +6,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(A) = alias <constant:A>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(A))\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Bar) = alias <constant:Bar>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Bar))\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(A) = alias <constant:A>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(A))\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(A) = alias <constant:A>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(A))\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Bar) = alias <constant:Bar>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Bar))\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(A) = alias <constant:A>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(A))\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_1" [style="bold"];
@@ -24,7 +24,7 @@ subgraph "cluster_::A#foo" {
     "bb::A#foo_1" [shape = parallelogram];
 
     "bb::A#foo_0" [
-        label = "block[id=0]()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=0]()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::A#foo_0" -> "bb::A#foo_1" [style="bold"];
@@ -59,12 +59,12 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_2" -> "bb::A#<static-init>_3" [style="tapered"];
 
     "bb::A#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:A>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:A>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
     "bb::A#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: T.class_of(Integer))\l<blockReturnTemp>$11: <impossible> = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$9: Sorbet::Private::Builder = self\l<statTemp>$10: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$10: T.class_of(Integer))\l<blockReturnTemp>$11: T.noreturn = blockreturn<::<Class:A>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_4" -> "bb::A#<static-init>_2" [style="bold"];
@@ -77,7 +77,7 @@ subgraph "cluster_::Bar#baz" {
     "bb::Bar#baz_1" [shape = parallelogram];
 
     "bb::Bar#baz_0" [
-        label = "block[id=0]()\l<selfMethodTemp>$3: Bar = self\l<statTemp>$4: Bar = self\l<returnMethodTemp>$2: Integer = <statTemp>$4: Bar.foo()\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
+        label = "block[id=0]()\l<selfMethodTemp>$3: Bar = self\l<statTemp>$4: Bar = self\l<returnMethodTemp>$2: Integer = <statTemp>$4: Bar.foo()\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: Integer\l<unconditional>\l"
     ];
 
     "bb::Bar#baz_0" -> "bb::Bar#baz_1" [style="bold"];
@@ -112,12 +112,12 @@ subgraph "cluster_::Bar#<static-init>" {
     "bb::Bar#<static-init>_2" -> "bb::Bar#<static-init>_3" [style="tapered"];
 
     "bb::Bar#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Bar>#<block>>\l<finalReturn>: <impossible> = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Bar>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
     ];
 
     "bb::Bar#<static-init>_3" -> "bb::Bar#<static-init>_1" [style="bold"];
     "bb::Bar#<static-init>_4" [
-        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"arg\") = :\"arg\"\l<hashTemp>$13: T.class_of(Integer) = alias <constant:Integer>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {arg: T.class_of(Integer)} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"arg\"), <hashTemp>$13: T.class_of(Integer))\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {arg: T.class_of(Integer)})\l<statTemp>$15: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: T.class_of(Integer))\l<blockReturnTemp>$16: <impossible> = blockreturn<::<Class:Bar>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
+        label = "block[id=4]()\louterLoops: 1\l<statTemp>$10: Sorbet::Private::Builder = self\l<hashTemp>$12: Symbol(:\"arg\") = :\"arg\"\l<hashTemp>$13: T.class_of(Integer) = alias <constant:Integer>\l<magic>$14: <Magic> = alias <constant:<Magic>>\l<statTemp>$11: {arg: T.class_of(Integer)} = <magic>$14: <Magic>.<build-hash>(<hashTemp>$12: Symbol(:\"arg\"), <hashTemp>$13: T.class_of(Integer))\l<statTemp>$9: Sorbet::Private::Builder = <statTemp>$10: Sorbet::Private::Builder.params(<statTemp>$11: {arg: T.class_of(Integer)})\l<statTemp>$15: T.class_of(Integer) = alias <constant:Integer>\l<blockReturnTemp>$8: Sorbet::Private::Builder = <statTemp>$9: Sorbet::Private::Builder.returns(<statTemp>$15: T.class_of(Integer))\l<blockReturnTemp>$16: T.noreturn = blockreturn<::<Class:Bar>#<block>> <blockReturnTemp>$8: Sorbet::Private::Builder\l<unconditional>\l"
     ];
 
     "bb::Bar#<static-init>_4" -> "bb::Bar#<static-init>_2" [style="bold"];

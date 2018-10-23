@@ -22,7 +22,7 @@ namespace sorbet::core {
 
 namespace {
 constexpr string_view top_str = "<any>"sv;
-constexpr string_view bottom_str = "<impossible>"sv;
+constexpr string_view bottom_str = "T.noreturn"sv;
 constexpr string_view untyped_str = "T.untyped"sv;
 constexpr string_view root_str = "<root>"sv;
 constexpr string_view object_str = "Object"sv;

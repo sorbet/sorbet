@@ -7,7 +7,7 @@ class Examples
       # dead=1
       # <returnTemp>$5: Integer(1)
       #
-      # <returnMethodTemp>$2: <impossible>
+      # <returnMethodTemp>$2: T.noreturn
     else
       return 2 # error: This code is unreachable
     end
@@ -25,7 +25,7 @@ class Examples
       # dead=1
       # <returnMethodTemp>$2: Integer(1)
       #
-      # <finalReturn>: <impossible>
+      # <finalReturn>: T.noreturn
     end
 
     def return_in_one_branch1()
@@ -35,7 +35,7 @@ class Examples
         # dead=1
         # <returnTemp>$5: Integer(1)
         #
-        # <returnMethodTemp>$2: <impossible>
+        # <returnMethodTemp>$2: T.noreturn
       else
         2 # error: This code is unreachable
       end
@@ -71,7 +71,7 @@ class Examples
       # dead=1
       # <returnMethodTemp>$2: Integer
       #
-      # <finalReturn>: <impossible>
+      # <finalReturn>: T.noreturn
       #
       # b: Integer(2)
       #
@@ -237,7 +237,7 @@ class Examples
       # dead=1
       # <returnMethodTemp>$2: T.untyped
       #
-      # <finalReturn>: <impossible>
+      # <finalReturn>: T.noreturn
     end
 
 end
