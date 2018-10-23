@@ -562,7 +562,10 @@ string ConstantLit::toString(const core::GlobalState &gs, int tabs) {
     if (symbol.exists()) {
         return this->symbol.data(gs, true)->fullName(gs);
     }
-    return this->typeAlias->toString(gs, tabs);
+    if (this->typeAlias) {
+        return this->typeAlias->toString(gs, tabs);
+    }
+    return "Unresolved: " + this->original->toString(gs, tabs);
 }
 
 string ConstantLit::showRaw(const core::GlobalState &gs, int tabs) {
