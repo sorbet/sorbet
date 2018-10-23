@@ -1,6 +1,7 @@
-#include "pipeline.h"
+// has to go first, as it violates poisons
+#include "core/proto/proto.h"
+
 #include "ProgressIndicator.h"
-#include "absl/algorithm/container.h"
 #include "absl/strings/escaping.h" // BytesToHexString
 #include "ast/desugar/Desugar.h"
 #include "ast/substitute/substitute.h"
@@ -11,13 +12,13 @@
 #include "common/concurrency/ConcurrentQueue.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
-#include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "namer/configatron/configatron.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
+#include "pipeline.h"
 #include "resolver/resolver.h"
 
 extern "C" {
@@ -358,7 +359,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, con
     auto by_file = [](unique_ptr<ast::Expression> const &a, unique_ptr<ast::Expression> const &b) {
         return a->loc.file() < b->loc.file();
     };
-    absl::c_sort(ret, by_file);
+    fast_sort(ret, by_file);
 
     return ret;
 }

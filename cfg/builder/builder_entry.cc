@@ -1,8 +1,5 @@
-#include "absl/algorithm/container.h"
 #include "cfg/builder/builder.h"
 #include "core/Names.h"
-
-#include <algorithm> // sort
 
 using namespace std;
 
@@ -84,8 +81,8 @@ unique_ptr<CFG> CFGBuilder::buildFor(core::Context ctx, ast::MethodDef &md) {
     histogramInc("cfgbuilder.aliases", aliasesPrefix.size());
     auto basicBlockCreated = res->basicBlocks.size();
     histogramInc("cfgbuilder.basicBlocksCreated", basicBlockCreated);
-    absl::c_sort(aliasesPrefix,
-                 [](const Binding &l, const Binding &r) -> bool { return l.bind.variable < r.bind.variable; });
+    fast_sort(aliasesPrefix,
+              [](const Binding &l, const Binding &r) -> bool { return l.bind.variable < r.bind.variable; });
 
     entry->exprs.insert(entry->exprs.begin(), make_move_iterator(aliasesPrefix.begin()),
                         make_move_iterator(aliasesPrefix.end()));
@@ -132,8 +129,7 @@ void CFGBuilder::fillInTopoSorts(core::Context ctx, CFG &cfg) {
 
     // needed to find loop headers.
     for (auto &bb : cfg.basicBlocks) {
-        absl::c_sort(bb->backEdges,
-                     [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
+        fast_sort(bb->backEdges, [](const BasicBlock *a, const BasicBlock *b) -> bool { return a->fwdId > b->fwdId; });
     }
 }
 

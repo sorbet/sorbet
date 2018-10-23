@@ -1,5 +1,4 @@
 #include "core/Symbols.h"
-#include "absl/algorithm/container.h"
 #include "common/JSON.h"
 #include "core/Context.h"
 #include "core/GlobalState.h"
@@ -327,7 +326,7 @@ vector<Symbol::FuzzySearchResult> Symbol::findMemberFuzzyMatchConstant(const Glo
     }
 
     // make sure we have a stable order
-    absl::c_sort(result, [&](auto lhs, auto rhs) -> bool {
+    fast_sort(result, [&](auto lhs, auto rhs) -> bool {
         return lhs.distance < rhs.distance || (lhs.distance == rhs.distance && lhs.symbol._id < rhs.symbol._id);
     });
 
@@ -783,7 +782,7 @@ std::vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const 
     for (const auto &e : members) {
         result.emplace_back(e);
     }
-    absl::c_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
+    fast_sort(result, [&](auto const &lhs, auto const &rhs) -> bool {
         auto lhsShort = lhs.first.data(gs)->shortName(gs);
         auto rhsShort = rhs.first.data(gs)->shortName(gs);
         return lhsShort < rhsShort ||

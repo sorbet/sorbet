@@ -8,7 +8,6 @@
 #include <algorithm> // find_if, sort
 
 #include "../Types.h"
-#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
 template class std::vector<sorbet::core::SymbolRef>;
@@ -210,7 +209,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
             }
         }
 
-        absl::c_sort(allCandidates, [&](SymbolRef s1, SymbolRef s2) -> bool {
+        fast_sort(allCandidates, [&](SymbolRef s1, SymbolRef s2) -> bool {
             if (getArity(ctx, s1) < getArity(ctx, s2)) {
                 return true;
             }

@@ -1,18 +1,15 @@
 #ifndef SORBET_CORE_PROTO_H
 #define SORBET_CORE_PROTO_H
-
-#include "core/core.h"
-
-#include <fstream>
-
-#include <google/protobuf/util/json_util.h>
-
+// have to go first as they violate our poisons
 #include "proto/File.pb.h"
 #include "proto/Loc.pb.h"
 #include "proto/Name.pb.h"
 #include "proto/Symbol.pb.h"
-
 #include "proto/pay-server/SourceMetrics.pb.h"
+#include <google/protobuf/util/json_util.h>
+
+#include "core/core.h"
+#include <fstream>
 
 namespace sorbet::core {
 class Proto {

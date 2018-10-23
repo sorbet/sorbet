@@ -1,11 +1,13 @@
-#include "core/errors/errors.h"
+// has to go first as it violates our poisons
+#include "rang.hpp"
+
 #include "absl/strings/str_replace.h"
 #include "core/Context.h"
 #include "core/ErrorQueue.h"
 #include "core/Errors.h"
 #include "core/GlobalState.h"
+#include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
-#include "rang.hpp"
 #include <algorithm>
 #include <sstream>
 

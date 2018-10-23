@@ -1,7 +1,8 @@
-#include "configatron.h"
-#include "absl/algorithm/container.h"
-#include "absl/strings/match.h"
 #include "yaml-cpp/yaml.h"
+// has to go first as it violates our poisions
+
+#include "absl/strings/match.h"
+#include "configatron.h"
 #include <cctype>
 #include <dirent.h>
 #include <sys/types.h>
@@ -33,7 +34,7 @@ vector<string> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    absl::c_sort(names);
+    fast_sort(names);
 
     closedir(dir);
     return names;

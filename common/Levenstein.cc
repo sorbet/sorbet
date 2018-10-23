@@ -1,6 +1,5 @@
 #include "common/Levenstein.h"
-#include "absl/algorithm/container.h"
-#include <numeric> // iota
+#include "common/common.h"
 #include <vector>
 
 using namespace std;

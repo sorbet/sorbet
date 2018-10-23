@@ -3,13 +3,6 @@ class A
 
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
   # dead=1
-  # <returnMethodTemp>$2: T.untyped
-  #
-  # <finalReturn>: <impossible>
-  # <statTemp>$4: T.class_of(A)
-  #
-  # <block-pre-call-temp>$5: Sorbet::Private::Builder
-  # dead=1
   # <statTemp>$9: Sorbet::Private::Builder
   #
   # <statTemp>$10: Sorbet::Private::Builder
@@ -40,6 +33,13 @@ class A
   # <hashTemp>$18: T.class_of(Integer)
   #
   # <magic>$19: <Magic>
+  # dead=1
+  # <returnMethodTemp>$2: T.untyped
+  #
+  # <finalReturn>: <impossible>
+  # <statTemp>$4: T.class_of(A)
+  #
+  # <block-pre-call-temp>$5: Sorbet::Private::Builder
   def a_method(x, y)
     if x.is_a?(String)
        # <ifTemp>$5: TrueClass | FalseClass

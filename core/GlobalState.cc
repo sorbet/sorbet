@@ -8,7 +8,6 @@
 #include "core/errors/errors.h"
 #include <utility>
 
-#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
 #include "errors/infer.h"
@@ -1031,7 +1030,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         return false;
     };
     auto sorted = annotations;
-    absl::c_sort(sorted, compare);
+    fast_sort(sorted, compare);
 
     auto source = file.data(*this).source();
     string outline(source.begin(), source.end());

@@ -1,5 +1,4 @@
 #include "common/Counters.h"
-#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include <algorithm>
@@ -229,7 +228,7 @@ string getCounterStatistics(vector<string> names) {
             sum += e.second;
             sorted.emplace_back(e.second, e.first);
         }
-        absl::c_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
+        fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first > e2.first; });
 
         fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", cat.first, "", (double)sum);
 
@@ -306,7 +305,7 @@ string getCounterStatistics(vector<string> names) {
                 absl::c_accumulate(e.second, 0) * TIMING_TO_MSEC_MULTIPLIER / e.second.size());
             sortedTimings.emplace_back(e.first, line);
         }
-        absl::c_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+        fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         fmt::format_to(buf, "{}", fmt::map_join(sortedTimings.begin(), sortedTimings.end(), "", [
                        ](const auto &el) -> auto { return el.second; }));
@@ -325,7 +324,7 @@ string getCounterStatistics(vector<string> names) {
             sortedOther.emplace_back(e.first, line);
         }
 
-        absl::c_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+        fast_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
         fmt::format_to(buf, "{}", fmt::map_join(sortedOther.begin(), sortedOther.end(), "", [](const auto &el) -> auto {
                            return el.second;

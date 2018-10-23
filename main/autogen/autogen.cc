@@ -1,12 +1,12 @@
-#include "main/autogen/autogen.h"
+// has to go first because it violates our poisons
+#include "msgpack.hpp"
+
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "core/Names.h"
+#include "main/autogen/autogen.h"
 
 #include "CRC.h"
-#include "msgpack.hpp"
-
-#include "absl/algorithm/container.h"
 
 using namespace std;
 namespace sorbet::autogen {

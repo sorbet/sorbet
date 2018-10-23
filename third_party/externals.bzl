@@ -70,6 +70,13 @@ def externals():
     )
 
     new_git_repository(
+            name="pdqsort",
+            remote="https://github.com/orlp/pdqsort.git",
+            commit="08879029ab8dcb80a70142acb709e3df02de5d37",
+            build_file = "//third_party:pdqsort.BUILD",
+    )
+
+    new_git_repository(
         name="jemalloc",
         remote="https://github.com/jemalloc/jemalloc.git",
         commit="0ff7ff3ec7b322881fff3bd6d4861fda6e9331d9", # 5.1.0 with some tunning patches

@@ -1,11 +1,8 @@
-#include "absl/algorithm/container.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/errors/infer.h"
 #include "infer/environment.h"
 #include "infer/infer.h"
-
-#include "absl/algorithm/container.h"
 
 using namespace std;
 namespace sorbet::infer {

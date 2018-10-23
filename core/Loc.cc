@@ -1,9 +1,8 @@
-#include "core/Loc.h"
-#include "core/Context.h"
+// has to go first as it violates our poisons
 #include "rang.hpp"
 
-#include "absl/algorithm/container.h"
-#include <algorithm>
+#include "core/Context.h"
+#include "core/Loc.h"
 #include <iterator>
 #include <sstream>
 

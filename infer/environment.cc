@@ -1,5 +1,4 @@
 #include "environment.h"
-#include "absl/algorithm/container.h"
 #include "core/GlobalState.h"
 #include "core/TypeConstraint.h"
 #include <algorithm> // find, remove_if
@@ -185,8 +184,8 @@ string KnowledgeFact::toString(core::Context ctx) const {
     for (auto &el : noTypeTests) {
         buf2.emplace_back(fmt::format("    {} NOT to be {}\n", el.first.toString(ctx), el.second->toString(ctx, 0)));
     }
-    absl::c_sort(buf1);
-    absl::c_sort(buf2);
+    fast_sort(buf1);
+    fast_sort(buf2);
 
     return fmt::format("{}{}", fmt::join(buf1.begin(), buf1.end(), ""), fmt::join(buf2.begin(), buf2.end(), ""));
 }
@@ -239,7 +238,7 @@ string Environment::toString(core::Context ctx) const {
     for (const auto &pair : vars) {
         sorted.emplace_back(pair);
     }
-    absl::c_sort(sorted, [](const auto &lhs, const auto &rhs) -> bool {
+    fast_sort(sorted, [](const auto &lhs, const auto &rhs) -> bool {
         return lhs.first._name.id() < rhs.first._name.id() ||
                (lhs.first._name.id() == rhs.first._name.id() && lhs.first.unique < rhs.first.unique);
     });

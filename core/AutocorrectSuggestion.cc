@@ -1,5 +1,4 @@
 #include "core/AutocorrectSuggestion.h"
-#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 
 using namespace std;
@@ -39,7 +38,7 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
 
         return false;
     };
-    absl::c_sort(autocorrects, compare);
+    fast_sort(autocorrects, compare);
 
     UnorderedSet<Loc> seen; // used to make sure nothing overlaps
     map<FileRef, string> ret;

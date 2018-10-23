@@ -1,5 +1,4 @@
 #include "namer/namer.h"
-#include "absl/algorithm/container.h"
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"

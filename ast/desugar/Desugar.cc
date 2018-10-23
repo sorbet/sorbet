@@ -9,8 +9,6 @@
 #include "core/errors/desugar.h"
 #include "core/errors/internal.h"
 
-#include "absl/algorithm/container.h"
-
 namespace sorbet::ast::desugar {
 
 using namespace std;

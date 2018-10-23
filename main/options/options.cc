@@ -1,11 +1,14 @@
-#include "options.h"
-#include "FileFlatMapper.h"
-#include "absl/algorithm/container.h"
-#include "core/Errors.h"
+// have to go first as they violate our poisons
 #include "rang.hpp"
-#include "version/version.h"
 #include "yaml-cpp/yaml.h"
 #include <cxxopts.hpp>
+
+#include "FileFlatMapper.h"
+#include "core/Errors.h"
+#include "main/options/FileFlatMapper.h"
+#include "main/options/options.h"
+#include "options.h"
+#include "version/version.h"
 
 namespace spd = spdlog;
 using namespace std;

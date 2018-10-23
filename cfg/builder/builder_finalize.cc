@@ -1,4 +1,3 @@
-#include "absl/algorithm/container.h"
 #include "cfg/builder/builder.h"
 #include "core/Names.h"
 
@@ -37,9 +36,8 @@ void CFGBuilder::simplify(core::Context ctx, CFG &cfg) {
                     sanityCheck(ctx, cfg);
                     continue;
                 } else {
-                    absl::c_sort(bb->backEdges, [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool {
-                        return bb1->id < bb2->id;
-                    });
+                    fast_sort(bb->backEdges,
+                              [](const BasicBlock *bb1, const BasicBlock *bb2) -> bool { return bb1->id < bb2->id; });
                     bb->backEdges.erase(unique(bb->backEdges.begin(), bb->backEdges.end()), bb->backEdges.end());
                 }
             }
@@ -406,7 +404,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
                 it->args.emplace_back(el);
             }
         }
-        absl::c_sort(it->args, [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable < rhs.variable; });
+        fast_sort(it->args, [](const auto &lhs, const auto &rhs) -> bool { return lhs.variable < rhs.variable; });
         histogramInc("cfgbuilder.blockArguments", it->args.size());
     }
 }

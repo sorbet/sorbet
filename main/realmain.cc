@@ -1,5 +1,6 @@
-#include "main/realmain.h"
-#include "absl/algorithm/container.h"
+// has to be included first as it violates our poisons
+#include "core/proto/proto.h"
+
 #include "absl/debugging/symbolize.h"
 #include "absl/strings/str_cat.h"
 #include "common/statsd/statsd.h"
@@ -7,12 +8,12 @@
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
-#include "core/proto/proto.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
+#include "main/realmain.h"
 #include "payload/binary/binary.h"
 #include "payload/text/text.h"
 #include "resolver/resolver.h"
@@ -326,7 +327,7 @@ int realmain(int argc, char *argv[]) {
                 withNames.emplace_back(core::SymbolRef(*gs, e.first).data(*gs, true)->fullName(*gs), e.second);
                 sum += e.second;
             }
-            absl::c_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
+            fast_sort(withNames, [](const auto &lhs, const auto &rhs) -> bool { return lhs.second > rhs.second; });
             for (auto &p : withNames) {
                 logger->error("Typing `{}` would impact {}% callsites({} out of {}).", p.first, p.second * 100.0 / sum,
                               p.second, sum);

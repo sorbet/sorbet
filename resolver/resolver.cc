@@ -10,13 +10,11 @@
 #include "resolver/resolver.h"
 #include "resolver/type_syntax.h"
 
-#include "absl/algorithm/container.h"
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
 #include "core/Symbols.h"
 
 #include <algorithm> // find_if
-#include <list>
 #include <utility>
 #include <vector>
 
@@ -578,11 +576,11 @@ public:
          *
          * - Within a file, report the first occurrence.
          */
-        absl::c_sort(todo, [ctx](const auto &lhs, const auto &rhs) -> bool {
+        fast_sort(todo, [ctx](const auto &lhs, const auto &rhs) -> bool {
             return compareLocs(ctx, lhs.out->loc, rhs.out->loc);
         });
 
-        absl::c_sort(todo_ancestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
+        fast_sort(todo_ancestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
             return compareLocs(ctx, lhs.ancestor->loc, rhs.ancestor->loc);
         });
 

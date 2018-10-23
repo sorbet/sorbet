@@ -1,4 +1,3 @@
-#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -616,7 +615,7 @@ vector<Expectations> listDir(const char *name) {
             names.emplace_back(entry->d_name);
         }
     }
-    absl::c_sort(names, compareNames);
+    fast_sort(names, compareNames);
 
     Expectations current;
     for (auto &s : names) {

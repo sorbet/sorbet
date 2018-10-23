@@ -1,13 +1,12 @@
+// have to be included first as they violate our poisons
 #include "core/proto/proto.h"
+#include <google/protobuf/io/zero_copy_stream_impl.h>
+#include <google/protobuf/util/type_resolver_util.h>
+
+#include "absl/strings/str_cat.h"
 #include "common/Counters_impl.h"
 #include "common/Random.h"
 #include "core/Names.h"
-
-#include "absl/algorithm/container.h"
-#include "absl/strings/str_cat.h"
-
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/util/type_resolver_util.h>
 
 using namespace std;
 

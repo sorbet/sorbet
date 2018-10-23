@@ -1,4 +1,3 @@
-#include "absl/algorithm/container.h"
 #include "absl/strings/match.h"
 #include "absl/strings/str_cat.h"
 #include "core/lsp/QueryResponse.h"
@@ -173,13 +172,13 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                 vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
                 methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
                                      make_move_iterator(methods.end()));
-                absl::c_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
+                fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
                     return leftPair.first.data(*finalGs)->shortName(*finalGs) <
                            rightPair.first.data(*finalGs)->shortName(*finalGs);
                 });
                 for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
-                        absl::c_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                        fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
                         addCompletionItem(items, entry.second[0], *resp);
                     }
                 }

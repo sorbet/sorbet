@@ -8,6 +8,8 @@
 static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
+#include "absl/algorithm/container.h"
+#include "pdqsort.h"
 #include <string_view>
 #if !defined(EMSCRIPTEN)
 #include "absl/container/inlined_vector.h"
@@ -178,6 +180,17 @@ template <typename It, class UnaryOp> auto map_join(It begin, It end, std::strin
         begin, end, sep, mapper);
 }
 } // namespace fmt
+
+template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {
+    pdqsort(container.begin(), container.end(), std::forward<Compare>(comp));
+};
+
+template <class Container> inline void fast_sort(Container &container) {
+    pdqsort(container.begin(), container.end());
+};
+
+/* use fast_sort */
+#pragma GCC poison sort c_sort
 
 #include "Error.h"
 #include "JSON.h"
