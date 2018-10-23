@@ -123,7 +123,7 @@ string_view KeyValueStore::readString(string_view key) {
     return result;
 }
 
-void KeyValueStore::writeString(string_view key, string value) {
+void KeyValueStore::writeString(string_view key, string_view value) {
     vector<u1> rawData(value.size() + sizeof(size_t));
     size_t sz = value.size();
     memcpy(rawData.data(), &sz, sizeof(sz));

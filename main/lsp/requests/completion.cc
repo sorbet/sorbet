@@ -61,8 +61,6 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
 }
 
 string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
-    string ret;
-
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 

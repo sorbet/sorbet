@@ -198,7 +198,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
     }
 }
 
-void handleFile(core::GlobalState &gs, string file, shared_ptr<Path> rootNode) {
+void handleFile(core::GlobalState &gs, const string &file, shared_ptr<Path> rootNode) {
     YAML::Node config = YAML::LoadFile(file);
     switch (config.Type()) {
         case YAML::NodeType::Map:
@@ -220,9 +220,9 @@ void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<strin
         auto files = listDir(folder.c_str());
         for (const auto &file : files) {
             constexpr int extLen = 5; // strlen(".yaml");
-            string fileName(file.c_str(), file.size() - extLen);
+            string_view fileName(file.c_str(), file.size() - extLen);
             auto innerNode = rootNode->getChild(fileName);
-            handleFile(gs, folder + "/" + file, innerNode);
+            handleFile(gs, absl::StrCat(folder, "/", file), innerNode);
         }
     }
     for (auto &file : files) {

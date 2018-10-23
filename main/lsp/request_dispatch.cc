@@ -27,7 +27,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
               "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
                 "contentChanges":[{"text":"..."}]
                 */
-            string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+            string_view uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
             // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
             // taught about it too: it merges consecutive TextDocumentDidChange
             if (absl::StartsWith(uri, rootUri)) {
@@ -83,7 +83,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
               "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
                 "contentChanges":[{"text":"..."}]
                 */
-            string uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+            string_view uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
             string content(edits["textDocument"]["text"].GetString(), edits["textDocument"]["text"].GetStringLength());
             if (absl::StartsWith(uri, rootUri)) {
                 files.emplace_back(

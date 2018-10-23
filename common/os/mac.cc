@@ -13,7 +13,7 @@ using namespace std;
 
 string exec(string cmd);
 
-string addr2line(const string program_name, void const *const *addr, int count) {
+string addr2line(string_view program_name, void const *const *addr, int count) {
     auto addr2line_cmd = fmt::format("atos -o {} -p {}", program_name, (int)getpid());
     for (int i = 3; i < count; ++i) {
         addr2line_cmd = fmt::format("{} {}", addr2line_cmd, addr[i]);

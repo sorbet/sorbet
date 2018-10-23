@@ -201,7 +201,7 @@ void CounterImpl::canonicalize() {
 }
 
 const vector<string> Counters::ALL_COUNTERS = {"<all>"};
-bool shouldShow(vector<string> &wantNames, string name) {
+bool shouldShow(vector<string> &wantNames, string_view name) {
     if (wantNames == Counters::ALL_COUNTERS) {
         return true;
     }

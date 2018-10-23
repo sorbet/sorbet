@@ -181,8 +181,7 @@ int realmain(int argc, char *argv[]) {
     {
         string argsConcat(argv[0]);
         for (int i = 1; i < argc; i++) {
-            string argString(argv[i]);
-            argsConcat = argsConcat + " " + argString;
+            absl::StrAppend(&argsConcat, " ", argv[i]);
         }
         logger->debug("Running sorbet version {} with arguments: {}", Version::full_version_string, argsConcat);
     }

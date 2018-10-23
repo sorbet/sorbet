@@ -31,7 +31,7 @@ static void symbolize_pc(void *pc, const char *fmt, char *out_buf, size_t out_bu
     }
 }
 
-string addr2line(const string program_name, void const *const *addr, int count) {
+string addr2line(string_view program_name, void const *const *addr, int count) {
     fmt::memory_buffer os;
     for (int i = 3; i < count; ++i) {
         char buf[4096];

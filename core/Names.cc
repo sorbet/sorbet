@@ -41,14 +41,14 @@ string Name::toString(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return "<singleton class:" + this->unique.original.data(gs)->toString(gs) + ">";
+                return fmt::format("<singleton class:{}>", this->unique.original.data(gs)->toString(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
-                return "<overload N." + to_string(this->unique.num) + " : " +
-                       this->unique.original.data(gs)->toString(gs) + ">";
+                return fmt::format("<overload N.{} : {}>", to_string(this->unique.num),
+                                   this->unique.original.data(gs)->toString(gs));
             }
-            return this->unique.original.data(gs)->toString(gs) + "$" + to_string(this->unique.num);
+            return fmt::format("{}${}", this->unique.original.data(gs)->toString(gs), this->unique.num);
         case CONSTANT:
-            return "<constant:" + this->cnst.original.toString(gs) + ">";
+            return fmt::format("<constant:{}>", this->cnst.original.toString(gs));
         default:
             Error::notImplemented();
     }
@@ -60,7 +60,7 @@ string Name::show(const GlobalState &gs) const {
             return string(raw.utf8.begin(), raw.utf8.end());
         case UNIQUE:
             if (this->unique.uniqueNameKind == UniqueNameKind::Singleton) {
-                return "<Class:" + this->unique.original.data(gs)->show(gs) + ">";
+                return fmt::format("<Class:{}>", this->unique.original.data(gs)->show(gs));
             } else if (this->unique.uniqueNameKind == UniqueNameKind::Overload) {
                 return absl::StrCat(this->unique.original.data(gs)->toString(gs), " (overload.", this->unique.num, ")");
             }

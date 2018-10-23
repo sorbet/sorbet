@@ -29,7 +29,7 @@ public:
     /** returns nullptr if not found*/
     u1 *read(std::string_view key);
     std::string_view readString(std::string_view key);
-    void writeString(std::string_view key, std::string value);
+    void writeString(std::string_view key, std::string_view value);
     /** can only be called from main thread */
     void write(std::string_view key, std::vector<u1> value);
     ~KeyValueStore() noexcept(false);

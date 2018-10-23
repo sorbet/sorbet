@@ -177,15 +177,15 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
         auto &current = *it;
         auto method = LSPMethod::getByName({current["method"].GetString(), current["method"].GetStringLength()});
         if (method == LSPMethod::TextDocumentDidChange()) {
-            string thisURI(current["params"]["textDocument"]["uri"].GetString(),
-                           current["params"]["textDocument"]["uri"].GetStringLength());
+            string_view thisURI(current["params"]["textDocument"]["uri"].GetString(),
+                                current["params"]["textDocument"]["uri"].GetStringLength());
             auto nextIt = it + 1;
             if (nextIt != pendingRequests.end()) {
                 auto &next = *nextIt;
                 auto nextMethod = LSPMethod::getByName({next["method"].GetString(), next["method"].GetStringLength()});
                 if (nextMethod == LSPMethod::TextDocumentDidChange()) {
-                    string nextURI(next["params"]["textDocument"]["uri"].GetString(),
-                                   next["params"]["textDocument"]["uri"].GetStringLength());
+                    string_view nextURI(next["params"]["textDocument"]["uri"].GetString(),
+                                        next["params"]["textDocument"]["uri"].GetStringLength());
                     if (nextURI == thisURI) {
                         auto currentUpdates = move(current["params"]["contentChanges"]);
                         for (auto &newUpdate : next["params"]["contentChanges"].GetArray()) {

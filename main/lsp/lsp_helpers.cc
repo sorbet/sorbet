@@ -148,7 +148,6 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
         return "";
     }
 
-    string ret;
     if (!retType) {
         retType = getResultType(method, receiver, constraint);
     }
