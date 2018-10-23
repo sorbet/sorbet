@@ -187,44 +187,32 @@ private:
                 return false;
             }
 
-            ast::ConstantLit *inner = job.out;
-            ast::ConstantLit *missingConstant = job.out;
-            ast::ConstantLit *scopeRec;
-            while (inner->original &&
-                   (scopeRec = ast::cast_tree<ast::ConstantLit>(inner->original->scope.get())) != nullptr) {
-                if (inner->typeAlias || inner->constantSymbol().exists()) {
-                    break;
-                }
-                missingConstant = inner;
-                inner = scopeRec;
-            }
             core::SymbolRef scope;
-            if (inner->constantSymbol().exists()) {
-                scope = inner->constantSymbol().data(ctx)->dealias(ctx);
-            } else if (auto *id = ast::cast_tree<ast::ConstantLit>(inner->original->scope.get())) {
+            if (job.out->constantSymbol().exists()) {
+                scope = job.out->constantSymbol().data(ctx)->dealias(ctx);
+            } else if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
                 scope = id->constantSymbol().data(ctx)->dealias(ctx);
             } else {
                 scope = job.scope->scope;
             }
-            auto customAutogenError = missingConstant->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
+
+            auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
             if (scope.data(ctx)->isStaticField()) {
                 // most likely an unresolved alias. Well, fill it in and emit an error
-                if (auto e =
-                        ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant `{}`", missingConstant->original->cnst.show(ctx));
+                if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
+                    e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
                 }
                 // as we're going to start adding definitions into it, we need some class to piggy back on
                 scope = ctx.state.enterClassSymbol(
-                    inner->loc, scope.data(ctx)->owner,
+                    job.out->loc, scope.data(ctx)->owner,
                     ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::ResolverMissingClass,
                                                                           scope.data(ctx)->name, 1)));
                 // as we've name-mangled the class, we have to manually create the next level of resolution
-                auto createdSym = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
-                missingConstant->setConstantSymbol(createdSym);
+                auto createdSym = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
+                job.out->setConstantSymbol(createdSym);
             } else if (!scope.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
-                if (auto e =
-                        ctx.state.beginError(missingConstant->original->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant `{}`", missingConstant->original->cnst.show(ctx));
+                if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
+                    e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
 
                     if (customAutogenError) {
                         e.addErrorSection(
@@ -232,7 +220,7 @@ private:
                                                "may need to re-generate the .rbi. Try running:\n"
                                                "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
                     } else {
-                        auto suggested = scope.data(ctx)->findMemberFuzzyMatch(ctx, missingConstant->original->cnst);
+                        auto suggested = scope.data(ctx)->findMemberFuzzyMatch(ctx, job.out->original->cnst);
                         if (suggested.size() > 3) {
                             suggested.resize(3);
                         }
@@ -249,7 +237,7 @@ private:
                 }
             }
 
-            core::SymbolRef stub = ctx.state.enterClassSymbol(inner->loc, scope, missingConstant->original->cnst);
+            core::SymbolRef stub = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
             stub.data(ctx)->superClass = core::Symbols::StubClass();
             stub.data(ctx)->resultType = core::Types::untypedUntracked();
             stub.data(ctx)->setIsModule(false);
@@ -502,6 +490,15 @@ public:
         return lhs.endPos() < rhs.endPos();
     }
 
+    static int constantDepth(ast::ConstantLit *exp) {
+        int depth = 0;
+        ast::ConstantLit *scope = exp;
+        while (scope->original && (scope = ast::cast_tree<ast::ConstantLit>(scope->original->scope.get()))) {
+            depth += 1;
+        }
+        return depth;
+    }
+
     static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,
                                                                 vector<unique_ptr<ast::Expression>> trees) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
@@ -575,10 +572,16 @@ public:
          * - Within a file, report the first occurrence.
          */
         fast_sort(todo, [ctx](const auto &lhs, const auto &rhs) -> bool {
+            if (lhs.out->loc == rhs.out->loc) {
+                return constantDepth(lhs.out) < constantDepth(rhs.out);
+            }
             return compareLocs(ctx, lhs.out->loc, rhs.out->loc);
         });
 
         fast_sort(todo_ancestors, [ctx](const auto &lhs, const auto &rhs) -> bool {
+            if (lhs.ancestor->loc == rhs.ancestor->loc) {
+                return constantDepth(lhs.ancestor) < constantDepth(rhs.ancestor);
+            }
             return compareLocs(ctx, lhs.ancestor->loc, rhs.ancestor->loc);
         });
 
