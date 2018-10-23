@@ -99,7 +99,7 @@ unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {
     string documentation = "";
     // keep looking for previous newline locations, searching for lines with # in them.
     while (prevLine.find('#') != prevLine.npos) {
-        documentation = (string)prevLine.substr(prevLine.find('#') + 1, prevLine.size()) + '\n' + documentation;
+        documentation = absl::StrCat(prevLine.substr(prevLine.find('#') + 1, prevLine.size()), "\n", documentation);
         int prev_newline_loc = preDefinition.rfind('\n', last_newline_loc - 1);
         // if there is no '\n', we're at the top of the file, so just return documentation.
         if (prev_newline_loc == preDefinition.npos) {
@@ -118,7 +118,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
     ENFORCE(what.exists());
     rapidjson::Value item;
     item.SetObject();
-    item.AddMember("label", (string)what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs), alloc);
+    item.AddMember("label", string(what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs)), alloc);
     auto resultType = what.data(*finalGs)->resultType;
     if (!resultType) {
         resultType = core::Types::untypedUntracked();

@@ -36,8 +36,8 @@ public:
 } // namespace
 
 bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
-    auto uri =
-        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
+    auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
+                           d["params"]["textDocument"]["uri"].GetStringLength());
 
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
@@ -161,7 +161,7 @@ void LSPLoop::pushErrors() {
             { // uri
                 string uriStr;
                 if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
-                    uriStr = (string)file.data(*finalGs).path();
+                    uriStr = string(file.data(*finalGs).path());
                 } else {
                     uriStr = fmt::format("{}/{}", rootUri, file.data(*finalGs).path());
                 }
@@ -237,13 +237,13 @@ const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),
                                                Pause(),
                                                Resume()};
 
-const LSPMethod LSPMethod::getByName(const string_view name) {
+const LSPMethod LSPMethod::getByName(string_view name) {
     for (auto &candidate : ALL_METHODS) {
         if (candidate.name == name) {
             return candidate;
         }
     }
-    return LSPMethod{(string)name, true, LSPMethod::Kind::ClientInitiated, false};
+    return LSPMethod{string(name), true, LSPMethod::Kind::ClientInitiated, false};
 }
 
 } // namespace sorbet::realmain::lsp

@@ -346,8 +346,8 @@ void readOptions(Options &opts, int argc, char *argv[],
                               "` and `-p typed-source` are incompatible. Either print out one file or all files.");
                 throw EarlyReturnWithCode(1);
             }
-            auto found = absl::c_any_of(
-                opts.inputFileNames, [&](const string &path) { return path.find(opts.typedSource) != string::npos; });
+            auto found = absl::c_any_of(opts.inputFileNames,
+                                        [&](string_view path) { return path.find(opts.typedSource) != string::npos; });
             if (!found) {
                 logger->error("`--typed-source " + opts.typedSource + "`: No matching files found.");
                 throw EarlyReturnWithCode(1);

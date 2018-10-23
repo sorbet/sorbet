@@ -20,14 +20,14 @@ void *Joinable::trampoline(void *ptr) {
     return ptr;
 }
 
-unique_ptr<Joinable> runInAThread(const string &threadName, function<void()> function) {
+unique_ptr<Joinable> runInAThread(std::string_view threadName, function<void()> function) {
     // AFAIK this should all be:
     //    - defined behaviour
     //    - available on all posix systems
 
     unique_ptr<Joinable> res = make_unique<Joinable>();
     res->realFunction = move(function);
-    res->originalThreadName = threadName;
+    res->originalThreadName = string(threadName);
 
     Joinable *joinablePTR = res.get();
 

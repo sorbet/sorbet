@@ -28,11 +28,11 @@ class KeyValueStore {
 public:
     KeyValueStore(std::string version, std::string path);
     /** returns nullptr if not found*/
-    u1 *read(const std::string_view key);
-    std::string_view readString(const std::string_view key);
-    void writeString(const std::string_view key, std::string value);
+    u1 *read(std::string_view key);
+    std::string_view readString(std::string_view key);
+    void writeString(std::string_view key, std::string value);
     /** can only be called from main thread */
-    void write(const std::string_view key, std::vector<u1> value);
+    void write(std::string_view key, std::vector<u1> value);
     ~KeyValueStore() noexcept(false);
     static bool commit(std::unique_ptr<KeyValueStore>);
 };

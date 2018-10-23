@@ -22,69 +22,69 @@ using namespace std;
 namespace sorbet::core {
 
 namespace {
-const char *top_str = "<any>";
-const char *bottom_str = "<impossible>";
-const char *untyped_str = "T.untyped";
-const char *root_str = "<root>";
-const char *object_str = "Object";
-const char *string_str = "String";
-const char *integer_str = "Integer";
-const char *float_str = "Float";
-const char *symbol_str = "Symbol";
-const char *array_str = "Array";
-const char *hash_str = "Hash";
-const char *proc_str = "Proc";
-const char *trueClass_str = "TrueClass";
-const char *falseClass_str = "FalseClass";
-const char *nilClass_str = "NilClass";
-const char *class_str = "Class";
-const char *module_str = "Module";
-const char *todo_str = "<todo sym>";
-const char *no_symbol_str = "<none>";
-const char *opus_str = "Opus";
-const char *T_str = "T";
-const char *basicObject_str = "BasicObject";
-const char *kernel_str = "Kernel";
-const char *range_str = "Range";
-const char *regexp_str = "Regexp";
-const char *standardError_str = "StandardError";
-const char *complex_str = "Complex";
-const char *rational_str = "Rational";
+constexpr string_view top_str = "<any>"sv;
+constexpr string_view bottom_str = "<impossible>"sv;
+constexpr string_view untyped_str = "T.untyped"sv;
+constexpr string_view root_str = "<root>"sv;
+constexpr string_view object_str = "Object"sv;
+constexpr string_view string_str = "String"sv;
+constexpr string_view integer_str = "Integer"sv;
+constexpr string_view float_str = "Float"sv;
+constexpr string_view symbol_str = "Symbol"sv;
+constexpr string_view array_str = "Array"sv;
+constexpr string_view hash_str = "Hash"sv;
+constexpr string_view proc_str = "Proc"sv;
+constexpr string_view trueClass_str = "TrueClass"sv;
+constexpr string_view falseClass_str = "FalseClass"sv;
+constexpr string_view nilClass_str = "NilClass"sv;
+constexpr string_view class_str = "Class"sv;
+constexpr string_view module_str = "Module"sv;
+constexpr string_view todo_str = "<todo sym>"sv;
+constexpr string_view no_symbol_str = "<none>"sv;
+constexpr string_view opus_str = "Opus"sv;
+constexpr string_view T_str = "T"sv;
+constexpr string_view basicObject_str = "BasicObject"sv;
+constexpr string_view kernel_str = "Kernel"sv;
+constexpr string_view range_str = "Range"sv;
+constexpr string_view regexp_str = "Regexp"sv;
+constexpr string_view standardError_str = "StandardError"sv;
+constexpr string_view complex_str = "Complex"sv;
+constexpr string_view rational_str = "Rational"sv;
 // A magic non user-creatable class with methods to keep state between passes
-const char *magic_str = "<Magic>";
-const char *enumerable_str = "Enumerable";
-const char *set_str = "Set";
-const char *struct_str = "Struct";
-const char *file_str = "File";
-const char *ruby_typer_str = "RubyTyper";
-const char *stubClass_str = "StubClass";
-const char *stubAncestor_str = "StubAncestor";
-const char *configatron_str = "Configatron";
-const char *store_str = "Store";
-const char *root_store_str = "RootStore";
-const char *sinatra_str = "Sinatra";
-const char *base_str = "Base";
-const char *void_str = "Void";
-const char *typeAliasTemp_str = "<TypeAlias>";
-const char *chalk_str = "Chalk";
-const char *tools_str = "Tools";
-const char *accessible_str = "Accessible";
-const char *generic_str = "Generic";
-const char *tuple_str = "Tuple";
-const char *shape_str = "Shape";
-const char *subclasses_str = "SUBCLASSES";
-const char *sorbet_str = "Sorbet";
-const char *return_type_inference_str = "ReturnTypeInference";
-const char *inferred_return_type_str = "INFERRED_RETURN_TYPE";
-const char *inferred_argument_type_str = "INFERRED_ARGUMENT_TYPE";
-const char *implicit_module_superclass_str = "ImplicitModuleSuperclass";
-const char *guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder";
-const char *private_str = "Private";
-const char *builder_str = "Builder";
-const char *helpers_str = "Helpers";
+constexpr string_view magic_str = "<Magic>"sv;
+constexpr string_view enumerable_str = "Enumerable"sv;
+constexpr string_view set_str = "Set"sv;
+constexpr string_view struct_str = "Struct"sv;
+constexpr string_view file_str = "File"sv;
+constexpr string_view ruby_typer_str = "RubyTyper"sv;
+constexpr string_view stubClass_str = "StubClass"sv;
+constexpr string_view stubAncestor_str = "StubAncestor"sv;
+constexpr string_view configatron_str = "Configatron"sv;
+constexpr string_view store_str = "Store"sv;
+constexpr string_view root_store_str = "RootStore"sv;
+constexpr string_view sinatra_str = "Sinatra"sv;
+constexpr string_view base_str = "Base"sv;
+constexpr string_view void_str = "Void"sv;
+constexpr string_view typeAliasTemp_str = "<TypeAlias>"sv;
+constexpr string_view chalk_str = "Chalk"sv;
+constexpr string_view tools_str = "Tools"sv;
+constexpr string_view accessible_str = "Accessible"sv;
+constexpr string_view generic_str = "Generic"sv;
+constexpr string_view tuple_str = "Tuple"sv;
+constexpr string_view shape_str = "Shape"sv;
+constexpr string_view subclasses_str = "SUBCLASSES"sv;
+constexpr string_view sorbet_str = "Sorbet"sv;
+constexpr string_view return_type_inference_str = "ReturnTypeInference"sv;
+constexpr string_view inferred_return_type_str = "INFERRED_RETURN_TYPE"sv;
+constexpr string_view inferred_argument_type_str = "INFERRED_ARGUMENT_TYPE"sv;
+constexpr string_view implicit_module_superclass_str = "ImplicitModuleSuperclass"sv;
+constexpr string_view guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder"sv;
+constexpr string_view private_str = "Private"sv;
+constexpr string_view builder_str = "Builder"sv;
+constexpr string_view helpers_str = "Helpers"sv;
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
-const char *reserved_str = "<<RESERVED>>";
+constexpr string_view reserved_str = "<<RESERVED>>"sv;
 } // namespace
 
 SymbolRef GlobalState::synthesizeClass(string_view name, u4 superclass, bool isModule) {
@@ -362,8 +362,7 @@ void GlobalState::initEmpty() {
 
     ENFORCE(symbols.size() < Symbols::Proc0()._id);
     while (symbols.size() < Symbols::Proc0()._id) {
-        string res(reserved_str);
-        res = res + to_string(reservedCount);
+        string res = absl::StrCat(reserved_str, reservedCount);
         synthesizeClass(res);
         reservedCount++;
     }
@@ -824,7 +823,7 @@ FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
 
     files.emplace_back(file);
     auto ret = FileRef(filesUsed() - 1);
-    fileRefByPath[(string)file->path()] = ret;
+    fileRefByPath[string(file->path())] = ret;
     return ret;
 }
 
@@ -1142,7 +1141,7 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
-void GlobalState::trace(const string &msg) const {
+void GlobalState::trace(std::string_view msg) const {
     errorQueue->tracer.trace(msg);
 }
 
@@ -1167,7 +1166,7 @@ unique_ptr<GlobalState> GlobalState::replaceFile(unique_ptr<GlobalState> inWhat,
 }
 
 FileRef GlobalState::findFileByPath(string_view path) {
-    auto fnd = fileRefByPath.find((string)path);
+    auto fnd = fileRefByPath.find(string(path));
     if (fnd != fileRefByPath.end()) {
         return fnd->second;
     }

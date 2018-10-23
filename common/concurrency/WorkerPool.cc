@@ -1,4 +1,5 @@
 #include "common/concurrency/WorkerPool.h"
+#include "absl/strings/str_cat.h"
 
 using namespace std;
 
@@ -8,7 +9,7 @@ WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : size(s
     for (int i = 0; i < size; i++) {
         auto &last = threadQueues.emplace_back(make_unique<Queue>());
         auto *ptr = last.get();
-        auto threadIdleName = "idle" + to_string(i);
+        auto threadIdleName = absl::StrCat("idle", i);
         threads.emplace_back(runInAThread(threadIdleName, [ptr, logger, threadIdleName]() {
             bool repeat = true;
             while (repeat) {
@@ -32,7 +33,7 @@ WorkerPool::~WorkerPool() {
     // join will be called when destructing joinable;
 }
 
-void WorkerPool::multiplexJob(const string &taskName, WorkerPool::Task t) {
+void WorkerPool::multiplexJob(string_view taskName, WorkerPool::Task t) {
     multiplexJob_([t{move(t)}, taskName] {
         setCurrentThreadName(taskName);
         t();

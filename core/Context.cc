@@ -29,7 +29,7 @@ bool Context::permitOverloadDefinitions() const {
     }
     for (auto loc : owner.data(*this)->locs()) {
         auto &file = loc.file().data(*this);
-        constexpr char const *whitelistedTest = "overloads_test.rb";
+        constexpr string_view whitelistedTest = "overloads_test.rb"sv;
         if (file.isPayload() || FileOps::getFileName(file.path()) == whitelistedTest) {
             return true;
         }
@@ -53,11 +53,11 @@ SymbolRef Context::contextClass() const {
 
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
-void Context::trace(const std::string &msg) const {
+void Context::trace(std::string_view msg) const {
     state.trace(msg);
 }
 
-void MutableContext::trace(const std::string &msg) const {
+void MutableContext::trace(std::string_view msg) const {
     state.trace(msg);
 }
 

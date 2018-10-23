@@ -10,7 +10,7 @@ std::string addr2line(const std::string program_name, void const *const *addr, i
 std::string getProgramName();
 
 class Joinable {
-    friend std::unique_ptr<Joinable> runInAThread(const std::string &threadName, std::function<void()> function);
+    friend std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function);
     pthread_t handle;
     pthread_attr_t attr;
     std::function<void()> realFunction;
@@ -31,8 +31,8 @@ public:
 };
 
 // run function in a thread. Return thread handle that you can join on
-std::unique_ptr<Joinable> runInAThread(const std::string &threadName, std::function<void()> function);
-bool setCurrentThreadName(const std::string &name);
+std::unique_ptr<Joinable> runInAThread(std::string_view threadName, std::function<void()> function);
+bool setCurrentThreadName(std::string_view name);
 
 /** The should trigger debugger breakpoint if the debugger is attached, if no debugger is attach, it should do nothing
  *  This allows to:

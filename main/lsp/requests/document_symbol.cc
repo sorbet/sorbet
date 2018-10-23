@@ -25,8 +25,8 @@ void LSPLoop::symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::Fil
 void LSPLoop::handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.documentSymbol");
     result.SetArray();
-    auto uri =
-        string(d["params"]["textDocument"]["uri"].GetString(), d["params"]["textDocument"]["uri"].GetStringLength());
+    auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
+                           d["params"]["textDocument"]["uri"].GetStringLength());
     auto fref = uri2FileRef(uri);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
         core::SymbolRef ref(finalGs.get(), idx);

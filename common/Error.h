@@ -18,12 +18,12 @@ public:
      * @param message contains information about exceptional situation.
      * @param stackTrace the stack trace where this exception happened.
      */
-    SRubyException(const std::string &message) : _message(message) {}
+    SRubyException(std::string_view message) : _message(message) {}
 
     /**
      * Returns information about the exceptional situation.
      */
-    inline const std::string &message() const {
+    inline const std::string_view message() const {
         return _message;
     }
 

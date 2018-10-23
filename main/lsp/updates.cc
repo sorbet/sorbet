@@ -178,7 +178,7 @@ void LSPLoop::reIndexFromFileSystem() {
     for (int i = 1; i < initialGS->filesUsed(); i++) {
         core::FileRef f(i);
         if (f.data(*initialGS, true).sourceType == core::File::Type::Normal) {
-            fileNamesDedup.insert((string)f.data(*initialGS, true).path());
+            fileNamesDedup.insert(string(f.data(*initialGS, true).path()));
         }
     }
     vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));

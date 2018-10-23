@@ -136,7 +136,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
     sorbet::core::GlobalState cb(errorQueue);
     cb.initEmpty();
     sorbet::core::MutableContext ctx(cb, core::Symbols::root());
-    static const char *foo_str = "Foo";
+    static constexpr string_view foo_str = "Foo"sv;
     sorbet::core::Loc loc(sorbet::core::FileRef(), 42, 91);
     sorbet::core::UnfreezeNameTable nt(ctx);
     sorbet::core::UnfreezeSymbolTable st(ctx);

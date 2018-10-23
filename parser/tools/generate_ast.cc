@@ -208,7 +208,7 @@ string arg_type(FieldType arg) {
         case NodeVec:
             return "NodeVec ";
         case String:
-            return "const std::string &";
+            return "std::string_view ";
         case Uint:
             return "u4 ";
         case Loc:

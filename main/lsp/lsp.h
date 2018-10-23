@@ -118,7 +118,7 @@ struct LSPMethod {
         return LSPMethod{"__RESUME__", true, LSPMethod::Kind::ClientInitiated};
     };
     static const std::vector<LSPMethod> ALL_METHODS;
-    static const LSPMethod getByName(const std::string_view name);
+    static const LSPMethod getByName(std::string_view name);
 };
 
 /** List of all LSP Methods that we are aware of */
@@ -188,7 +188,7 @@ class LSPLoop {
                      std::function<void(rapidjson::Value &)> onFail);
 
     void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
-    void sendError(rapidjson::Document &forRequest, int errorCode, std::string errorStr);
+    void sendError(rapidjson::Document &forRequest, int errorCode, const std::string &errorStr);
 
     void pushErrors();
     void drainErrors();
@@ -214,12 +214,12 @@ class LSPLoop {
     void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
     bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d);
 
-    core::FileRef uri2FileRef(const std::string_view uri);
+    core::FileRef uri2FileRef(std::string_view uri);
     std::string fileRef2Uri(core::FileRef);
-    std::string remoteName2Local(const std::string_view uri);
-    std::string localName2Remote(const std::string_view uri);
+    std::string remoteName2Local(std::string_view uri);
+    std::string localName2Remote(std::string_view uri);
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
-    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, const std::string_view &pattern);
+    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, std::string_view pattern);
     bool hideSymbol(core::SymbolRef sym);
 
     std::string methodDetail(core::SymbolRef method, std::shared_ptr<core::Type> receiver,
@@ -248,7 +248,7 @@ class LSPLoop {
     void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
     void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
                              std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
-    void sendShowMessageNotification(int messageType, std::string message);
+    void sendShowMessageNotification(int messageType, const std::string &message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);
     void addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method, const core::QueryResponse &resp,

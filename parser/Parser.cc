@@ -31,16 +31,16 @@ public:
         u4 max_off = file.data(gs).source().size();
 
         for (auto &diag : diagnostics) {
-            string level = "unknown";
+            string_view level = "unknown"sv;
             switch (diag.level()) {
                 case ruby_parser::dlevel::NOTE:
                 case ruby_parser::dlevel::WARNING:
                     continue;
                 case ruby_parser::dlevel::ERROR:
-                    level = "Error";
+                    level = "Error"sv;
                     break;
                 case ruby_parser::dlevel::FATAL:
-                    level = "Fatal";
+                    level = "Fatal"sv;
                     break;
                 default:
                     Error::notImplemented();
@@ -72,7 +72,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) 
     return ast;
 }
 
-unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, const string &path, const string &src) {
+unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, string_view path, string_view src) {
     core::FileRef file = gs.enterFile(path, src);
     return run(gs, file);
 }

@@ -127,7 +127,7 @@ public:
     Loc lspInfoQueryLoc;
     SymbolRef lspQuerySymbol;
 
-    void trace(const std::string &msg) const;
+    void trace(std::string_view msg) const;
 
     static constexpr int HASH_STATE_INVALID = 0;
     unsigned int hash() const;

@@ -94,9 +94,9 @@ bool stopInDebugger() {
     return false;
 }
 
-bool setCurrentThreadName(const std::string &name) {
+bool setCurrentThreadName(std::string_view name) {
     const size_t maxLen = 16 - 1; // Pthreads limits it to 16 bytes including trailing '\0'
-    auto truncatedName = name.substr(0, maxLen);
+    auto truncatedName = string(name.substr(0, maxLen));
     auto retCode = ::pthread_setname_np(::pthread_self(), truncatedName.c_str());
     return retCode == 0;
 }

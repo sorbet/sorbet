@@ -1,4 +1,5 @@
 #include "core/errors/errors.h"
+#include "absl/strings/str_replace.h"
 #include "core/Context.h"
 #include "core/ErrorQueue.h"
 #include "core/Errors.h"
@@ -27,29 +28,23 @@ constexpr auto RESET_STYLE = rang::style::reset;
  * You need to reset color to "previous color that was there", not white.
  * Otherwise you'll cancel color that was wrapping you.
  */
-const string REVERT_COLOR_SIGIL = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL restoreColors";
+constexpr string_view REVERT_COLOR_SIGIL = "@@<<``\t\v\b\r\aYOU_FORGOT_TO_CALL restoreColors"sv;
 
-string _replaceAll(const string &inWhat, const string &from, const string &to) {
-    size_t cursor = 0;
-    string copy = inWhat;
-    while ((cursor = copy.find(from, cursor)) != string::npos) {
-        copy.replace(cursor, from.length(), to);
-        cursor += to.length();
-    }
-    return copy;
+string _replaceAll(string_view inWhat, string_view from, string_view to) {
+    return absl::StrReplaceAll(inWhat, {{from, to}});
 }
 
-string ErrorColors::replaceAll(const string &inWhat, const string &from, const string &to) {
+string ErrorColors::replaceAll(string_view inWhat, string_view from, string_view to) {
     return _replaceAll(inWhat, from, to);
 }
 
-BasicError::BasicError(Loc loc, ErrorClass what, string formatted)
+BasicError::BasicError(Loc loc, ErrorClass what, string_view formatted)
     : loc(loc), what(what), formatted(formatted), isCritical(false) {
-    ENFORCE(formatted.back() != '.');
+    ENFORCE(formatted.empty() || formatted.back() != '.');
     ENFORCE(formatted.find('\n') == string::npos, formatted, " has a newline in it");
 }
 
-string restoreColors(const string &formatted, rang::fg color) {
+string restoreColors(string_view formatted, rang::fg color) {
     stringstream buf;
     buf << color;
     return _replaceAll(formatted, REVERT_COLOR_SIGIL, buf.str());

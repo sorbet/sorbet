@@ -19,11 +19,11 @@ class StatsdClientWrapper {
     statsd_link *link;
     string packet;
 
-    string cleanMetricName(const string &name) {
+    string cleanMetricName(string_view name) {
         return absl::StrReplaceAll(name, {{":", "_"}, {"|", "_"}, {"@", "_"}});
     }
 
-    void addMetric(const string &name, size_t value, const string &type) {
+    void addMetric(string_view name, size_t value, string_view type) {
         // spec: https://github.com/etsy/statsd/blob/master/docs/metric_types.md#multi-metric-packets
         auto newLine = fmt::format("{}{}:{}|{}", link->ns ? link->ns : "", cleanMetricName(name), value, type);
         if (packet.size() + newLine.size() + 1 < PKT_LEN) {
@@ -50,16 +50,16 @@ public:
         statsd_finalize(link);
     }
 
-    void gauge(const string &name, size_t value) { // type : g
+    void gauge(string_view name, size_t value) { // type : g
         addMetric(name, value, "g");
     }
-    void timing(const string &name, size_t ns) {    // type: ms
-        addMetric(name + ".duration_ns", ns, "ms"); // format suggested by #observability (@sjung and @an)
+    void timing(string_view name, size_t ns) {                   // type: ms
+        addMetric(absl::StrCat(name, ".duration_ns"), ns, "ms"); // format suggested by #observability (@sjung and @an)
     }
 };
 
-bool StatsD::submitCounters(const CounterState &counters, string host, int port, string prefix) {
-    StatsdClientWrapper statsd(host, port, prefix);
+bool StatsD::submitCounters(const CounterState &counters, string_view host, int port, string_view prefix) {
+    StatsdClientWrapper statsd(string(host), port, string(prefix));
 
     counters.counters->canonicalize();
     for (auto &cat : counters.counters->counters_by_category) {

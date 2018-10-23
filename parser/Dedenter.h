@@ -7,7 +7,7 @@ class Dedenter final {
 public:
     Dedenter(int level) : dedentLevel(level), spacesToRemove(level) {}
 
-    std::string dedent(const std::string &str);
+    std::string dedent(std::string_view str);
 
 private:
     unsigned int dedentLevel;

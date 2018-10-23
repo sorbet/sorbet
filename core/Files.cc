@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-vector<int> findLineBreaks(const string &s) {
+vector<int> findLineBreaks(std::string_view s) {
     vector<int> res;
     int i = -1;
     res.emplace_back(-1);

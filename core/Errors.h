@@ -33,11 +33,11 @@ public:
 class ErrorColors {
     static const std::string coloredPatternSigil;
     static std::string coloredPatternReplace;
-    static std::string replaceAll(const std::string &inWhat, const std::string &from, const std::string &to);
+    static std::string replaceAll(std::string_view inWhat, std::string_view from, std::string_view to);
 
 public:
     ErrorColors() = delete;
-    template <typename... Args> static std::string format(const std::string &msg, const Args &... args) {
+    template <typename... Args> static std::string format(std::string_view msg, const Args &... args) {
         return fmt::format(replaceAll(msg, coloredPatternSigil, coloredPatternReplace), args...);
     }
     static void enableColors();
@@ -53,7 +53,7 @@ public:
     bool isSilenced = false;
     std::vector<AutocorrectSuggestion> autocorrects;
 
-    BasicError(Loc loc, ErrorClass what, std::string formatted);
+    BasicError(Loc loc, ErrorClass what, std::string_view formatted);
 
     virtual std::string toString(const GlobalState &gs);
     virtual ~BasicError() = default;
@@ -62,9 +62,9 @@ public:
 struct ErrorLine {
     Loc loc;
     std::string formattedMessage;
-    ErrorLine(Loc loc, std::string formattedMessage) : loc(loc), formattedMessage(formattedMessage){};
+    ErrorLine(Loc loc, std::string_view formattedMessage) : loc(loc), formattedMessage(formattedMessage){};
 
-    template <typename... Args> static ErrorLine from(Loc loc, const std::string &msg, const Args &... args) {
+    template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
         return ErrorLine(loc, formatted);
     }
@@ -74,11 +74,13 @@ struct ErrorLine {
 struct ErrorSection {
     std::string header;
     std::vector<ErrorLine> messages;
-    ErrorSection(std::string header) : header(header) {}
-    ErrorSection(std::string header, std::initializer_list<ErrorLine> messages) : header(header), messages(messages) {}
-    ErrorSection(std::string header, std::vector<ErrorLine> messages) : header(header), messages(messages) {}
-    ErrorSection(std::initializer_list<ErrorLine> messages) : ErrorSection("", messages) {}
-    ErrorSection(std::vector<ErrorLine> messages) : ErrorSection("", messages) {}
+    ErrorSection(std::string_view header) : header(header) {}
+    ErrorSection(std::string_view header, const std::initializer_list<ErrorLine> &messages)
+        : header(header), messages(messages) {}
+    ErrorSection(std::string_view header, const std::vector<ErrorLine> &messages)
+        : header(header), messages(messages) {}
+    ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
+    ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
     std::string toString(const GlobalState &gs);
 };
 
@@ -86,11 +88,11 @@ class ComplexError : public BasicError {
 public:
     std::vector<ErrorSection> sections;
     virtual std::string toString(const GlobalState &gs);
-    ComplexError(Loc loc, ErrorClass what, std::string header, std::initializer_list<ErrorSection> sections)
+    ComplexError(Loc loc, ErrorClass what, std::string_view header, const std::initializer_list<ErrorSection> &sections)
         : BasicError(loc, what, header), sections(sections) {}
-    ComplexError(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections)
+    ComplexError(Loc loc, ErrorClass what, std::string_view header, const std::vector<ErrorSection> &sections)
         : BasicError(loc, what, header), sections(sections) {}
-    ComplexError(Loc loc, ErrorClass what, std::string header, ErrorLine other_line)
+    ComplexError(Loc loc, ErrorClass what, std::string_view header, const ErrorLine &other_line)
         : BasicError(loc, what, header), sections({ErrorSection({other_line})}) {}
 };
 

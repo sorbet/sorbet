@@ -172,7 +172,7 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
     }
 }
 
-vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vector<string> frs,
+vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, const vector<string> &frs,
                                           vector<core::FileRef> mainThreadFiles, const options::Options &opts,
                                           WorkerPool &workers, unique_ptr<KeyValueStore> &kvstore,
                                           shared_ptr<spdlog::logger> logger) {
@@ -277,7 +277,7 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, vec
                             file.data(*lgs).path().find(opts.typedSource) != string::npos) {
                             minStrict = core::StrictLevel::Typed;
                         }
-                        auto fnd = opts.strictnessOverrides.find((string)file.data(*lgs).path());
+                        auto fnd = opts.strictnessOverrides.find(string(file.data(*lgs).path()));
                         if (fnd != opts.strictnessOverrides.end()) {
                             if (fnd->second == file.data(*lgs).sigil) {
                                 core::ErrorRegion errs(*lgs, file);

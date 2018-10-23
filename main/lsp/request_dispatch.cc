@@ -15,7 +15,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
         return;
     }
     if (method.isNotification) {
-        logger->debug("Processing notification {} ", (string)method.name);
+        logger->debug("Processing notification {} ", method.name);
         if (method == LSPMethod::TextDocumentDidChange()) {
             prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
             Timer timeit(logger, "text_document_did_change");
@@ -34,8 +34,8 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 auto currentFileRef = initialGS->findFileByPath(remoteName2Local(uri));
                 unique_ptr<core::File> file;
                 if (currentFileRef.exists()) {
-                    file = make_unique<core::File>((string)currentFileRef.data(*initialGS).path(),
-                                                   (string)currentFileRef.data(*initialGS).source(),
+                    file = make_unique<core::File>(string(currentFileRef.data(*initialGS).path()),
+                                                   string(currentFileRef.data(*initialGS).source()),
                                                    core::File::Type::Normal);
                 } else {
                     file = make_unique<core::File>(remoteName2Local(uri), "", core::File::Type::Normal);
@@ -45,7 +45,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                     if (change.HasMember("range") && !change["range"].IsNull()) {
                         // incremental update
                         auto old = move(file);
-                        string oldContent = (string)old->source();
+                        string oldContent = string(old->source());
                         core::Loc::Detail start, end;
                         start.line = change["range"]["start"]["line"].GetInt() + 1;
                         start.column = change["range"]["start"]["character"].GetInt() + 1;
@@ -55,12 +55,12 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                         auto endOffset = core::Loc::pos2Offset(*old, end);
                         string delta(change["text"].GetString(), change["text"].GetStringLength());
                         string newContent = oldContent.replace(startOffset, endOffset - startOffset, delta);
-                        file = make_unique<core::File>((string)old->path(), move(newContent), core::File::Type::Normal);
+                        file = make_unique<core::File>(string(old->path()), move(newContent), core::File::Type::Normal);
                     } else {
                         // replace
                         auto old = move(file);
                         string newContent(change["text"].GetString(), change["text"].GetStringLength());
-                        file = make_unique<core::File>((string)old->path(), move(newContent), core::File::Type::Normal);
+                        file = make_unique<core::File>(string(old->path()), move(newContent), core::File::Type::Normal);
                     }
                 }
 

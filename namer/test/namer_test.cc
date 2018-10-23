@@ -33,7 +33,7 @@ private:
     unique_ptr<core::GlobalState> ctxPtr;
 };
 
-static const char *testClass_str = "Test";
+static string_view testClass_str = "Test"sv;
 
 unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
     sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings

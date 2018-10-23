@@ -135,7 +135,7 @@ class NotSupported final : public Unanalyzable {
 public:
     std::string why;
 
-    NotSupported(std::string why) : why(why) {
+    NotSupported(std::string_view why) : why(why) {
         categoryCounterInc("cfg", "notsupported");
     };
     virtual std::string toString(core::Context ctx);

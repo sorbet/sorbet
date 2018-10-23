@@ -17,7 +17,7 @@ FileFlatMapper::FileFlatMapper(int &argc, char **&argv, shared_ptr<spdlog::logge
                     argsPView = argsPView.substr(0, argsPView.size() - 1);
                 }
                 for (string_view arg : absl::StrSplit(argsPView, '\n')) {
-                    stringArgs.emplace_back((string)arg);
+                    stringArgs.emplace_back(string(arg));
                 }
             } catch (FileNotFoundException e) {
                 logger->error("File Not Found: {}", argv[i]);

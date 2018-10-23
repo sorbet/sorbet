@@ -3,9 +3,9 @@
 #include <utility>
 using namespace std;
 namespace sorbet {
-const string OLD_VERSION_KEY = "VERSION";
-const string VERSION_KEY = "DB_FORMAT_VERSION";
-const size_t MAX_DB_SIZE_BYTES =
+constexpr string_view OLD_VERSION_KEY = "VERSION"sv;
+constexpr string_view VERSION_KEY = "DB_FORMAT_VERSION"sv;
+constexpr size_t MAX_DB_SIZE_BYTES =
     4L * 1024 * 1024 * 1024; // 4G. This is both maximum fs db size and max virtual memory usage.
 KeyValueStore::KeyValueStore(string version, string path) : path(move(path)), writerId(this_thread::get_id()) {
     int rc;
@@ -47,7 +47,7 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     return;
 }
 
-void KeyValueStore::write(const string_view key, vector<u1> value) {
+void KeyValueStore::write(string_view key, vector<u1> value) {
     if (writerId != this_thread::get_id()) {
         throw invalid_argument("KeyValueStore can only write from thread that created it");
     }
@@ -65,7 +65,7 @@ void KeyValueStore::write(const string_view key, vector<u1> value) {
     }
 }
 
-u1 *KeyValueStore::read(const string_view key) {
+u1 *KeyValueStore::read(string_view key) {
     MDB_txn *txn;
     int rc = 0;
     {
@@ -112,7 +112,7 @@ fail:
     throw invalid_argument("failed to clear the database");
 }
 
-string_view KeyValueStore::readString(const string_view key) {
+string_view KeyValueStore::readString(string_view key) {
     auto rawData = read(key);
     if (!rawData) {
         return string_view();
@@ -123,7 +123,7 @@ string_view KeyValueStore::readString(const string_view key) {
     return result;
 }
 
-void KeyValueStore::writeString(const string_view key, string value) {
+void KeyValueStore::writeString(string_view key, string value) {
     vector<u1> rawData(value.size() + sizeof(size_t));
     size_t sz = value.size();
     memcpy(rawData.data(), &sz, sizeof(sz));

@@ -41,7 +41,7 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> make_stderr_color_sink() {
 
 shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr_color_sink();
 
-const string GLOBAL_STATE_KEY = "GlobalState";
+constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
 
 void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::Options &options,
                               unique_ptr<KeyValueStore> &kvstore) {

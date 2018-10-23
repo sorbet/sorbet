@@ -6,7 +6,7 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-string LSPLoop::remoteName2Local(const string_view uri) {
+string LSPLoop::remoteName2Local(string_view uri) {
     ENFORCE(absl::StartsWith(uri, rootUri));
     const char *start = uri.data() + rootUri.length();
     if (*start == '/') {
@@ -15,12 +15,12 @@ string LSPLoop::remoteName2Local(const string_view uri) {
     return string(start, uri.end());
 }
 
-string LSPLoop::localName2Remote(const string_view uri) {
+string LSPLoop::localName2Remote(string_view uri) {
     ENFORCE(!absl::StartsWith(uri, rootUri));
     return absl::StrCat(rootUri, "/", uri);
 }
 
-core::FileRef LSPLoop::uri2FileRef(const string_view uri) {
+core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     if (!absl::StartsWith(uri, rootUri)) {
         return core::FileRef();
     }
@@ -30,9 +30,9 @@ core::FileRef LSPLoop::uri2FileRef(const string_view uri) {
 
 string LSPLoop::fileRef2Uri(core::FileRef file) {
     if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
-        return (string)file.data(*finalGs).path();
+        return string(file.data(*finalGs).path());
     } else {
-        return localName2Remote((string)file.data(*finalGs).path());
+        return localName2Remote(string(file.data(*finalGs).path()));
     }
 }
 rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
@@ -98,8 +98,7 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
             // but shows you the same thing as
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-            uri =
-                fmt::format("{}#L{}", (string)messageFile.path(), to_string((int)(loc.position(*finalGs).first.line)));
+            uri = fmt::format("{}#L{}", messageFile.path(), loc.position(*finalGs).first.line);
         } else {
             uri = fileRef2Uri(loc.file());
         }
@@ -135,7 +134,7 @@ bool LSPLoop::hideSymbol(core::SymbolRef sym) {
     return false;
 }
 
-bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, const string_view &pattern) {
+bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, string_view pattern) {
     string_view view = name.data(gs)->shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;

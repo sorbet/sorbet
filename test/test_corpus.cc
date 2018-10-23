@@ -551,7 +551,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
-bool compareNames(const string &left, const string &right) {
+bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
     if (lsplit == string::npos) {
         lsplit = left.find(".");

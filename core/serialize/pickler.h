@@ -13,7 +13,7 @@ public:
     void putU1(const u1 u);
     void putU2(const u2 u);
     void putS8(const int64_t i);
-    void putStr(const std::string_view s);
+    void putStr(std::string_view s);
     std::vector<u1> result(int compressionDegree);
     Pickler() = default;
 };

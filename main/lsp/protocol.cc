@@ -237,7 +237,7 @@ LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pen
     return pendingRequests.end();
 }
 
-void LSPLoop::sendShowMessageNotification(int messageType, string message) {
+void LSPLoop::sendShowMessageNotification(int messageType, const string &message) {
     rapidjson::Value result;
     result.SetObject();
     result.AddMember("type", messageType, alloc);
@@ -252,7 +252,7 @@ void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &resu
     sendRaw(forRequest);
 }
 
-void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, string errorStr) {
+void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, const string &errorStr) {
     forRequest.RemoveMember("method");
     forRequest.RemoveMember("params");
     forRequest.RemoveMember("cancelled");

@@ -126,7 +126,7 @@ fi
 
 
 # Run 2: Make sure we don't crash on all of pay-server with ASAN on
-ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/clang_7_0_0_linux/bin/llvm-symbolizer"
+ASAN_SYMBOLIZER_PATH="$(bazel info output_base)/external/llvm_toolchain/bin/llvm-symbolizer"
 export ASAN_SYMBOLIZER_PATH
 ASAN_OPTIONS=detect_leaks=0
 export ASAN_OPTIONS

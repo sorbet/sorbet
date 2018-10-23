@@ -48,7 +48,7 @@ private:
     static void pickleAstHeader(Pickler &p, u1 tag, ast::Expression *tree);
 };
 
-void Pickler::putStr(const string_view s) {
+void Pickler::putStr(string_view s) {
     putU4(s.size());
 
     for (char c : s) {
@@ -235,8 +235,8 @@ void SerializerImpl::pickle(Pickler &p, const File &what) {
 
 shared_ptr<File> SerializerImpl::unpickleFile(UnPickler &p) {
     auto t = (File::Type)p.getU1();
-    auto path = (string)p.getStr();
-    auto source = (string)p.getStr();
+    auto path = string(p.getStr());
+    auto source = string(p.getStr());
     return make_shared<File>(move(path), move(source), t);
 }
 
@@ -610,7 +610,7 @@ void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     int i = 0;
     for (auto f : files) {
         if (f && !f->path().empty()) {
-            fileRefByPath[(string)f->path()] = FileRef(i);
+            fileRefByPath[string(f->path())] = FileRef(i);
         }
         i++;
     }

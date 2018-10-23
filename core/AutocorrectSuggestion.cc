@@ -1,5 +1,6 @@
 #include "core/AutocorrectSuggestion.h"
 #include "absl/algorithm/container.h"
+#include "absl/strings/str_cat.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
             continue;
         }
         seen.emplace(loc);
-        ret[loc.file()] = string(source.substr(0, start)) + autocorrect.replacement + string(source.substr(end, -1));
+        ret[loc.file()] = absl::StrCat(source.substr(0, start), autocorrect.replacement, source.substr(end, -1));
     }
     return ret;
 }

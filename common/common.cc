@@ -24,8 +24,8 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
 } // namespace
 shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
-string sorbet::FileOps::read(const string_view filename) {
-    std::FILE *fp = std::fopen(((string)filename).c_str(), "rb");
+string sorbet::FileOps::read(string_view filename) {
+    std::FILE *fp = std::fopen((string(filename)).c_str(), "rb");
     if (fp) {
         std::string contents;
         std::fseek(fp, 0, SEEK_END);
@@ -42,8 +42,8 @@ string sorbet::FileOps::read(const string_view filename) {
     throw sorbet::FileNotFoundException();
 }
 
-void sorbet::FileOps::write(const string_view filename, const vector<sorbet::u1> &data) {
-    std::FILE *fp = std::fopen(((string)filename).c_str(), "wb");
+void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data) {
+    std::FILE *fp = std::fopen(string(filename).c_str(), "wb");
     if (fp) {
         std::fwrite(data.data(), sizeof(sorbet::u1), data.size(), fp);
         std::fclose(fp);
@@ -52,8 +52,8 @@ void sorbet::FileOps::write(const string_view filename, const vector<sorbet::u1>
     throw sorbet::FileNotFoundException();
 }
 
-void sorbet::FileOps::write(const string_view filename, const string_view text) {
-    std::FILE *fp = std::fopen(((string)filename).c_str(), "w");
+void sorbet::FileOps::write(string_view filename, string_view text) {
+    std::FILE *fp = std::fopen(string(filename).c_str(), "w");
     if (fp) {
         std::fwrite(text.data(), sizeof(char), text.size(), fp);
         std::fclose(fp);
@@ -62,12 +62,12 @@ void sorbet::FileOps::write(const string_view filename, const string_view text) 
     throw sorbet::FileNotFoundException();
 }
 
-string_view sorbet::FileOps::getFileName(const string_view path) {
+string_view sorbet::FileOps::getFileName(string_view path) {
     size_t found = path.find_last_of("/\\");
     return path.substr(found + 1);
 }
 
-string_view sorbet::FileOps::getExtension(const string_view path) {
+string_view sorbet::FileOps::getExtension(string_view path) {
     size_t found = path.find_last_of(".");
     if (found == string_view::npos) {
         return string_view();

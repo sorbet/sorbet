@@ -90,7 +90,7 @@ public:
     WorkerPool(int size, const std::shared_ptr<spd::logger> &logger);
     ~WorkerPool();
 
-    void multiplexJob(const std::string &taskName, Task t);
+    void multiplexJob(std::string_view taskName, Task t);
 };
 
 #endif // SORBET_WORKERPOOL_H

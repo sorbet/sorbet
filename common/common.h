@@ -129,11 +129,11 @@ template <class From, class To> To *fast_cast(From *what) {
 
 class FileOps final {
 public:
-    static std::string read(const std::string_view filename);
-    static void write(const std::string_view filename, const std::vector<sorbet::u1> &data);
-    static void write(const std::string_view filename, const std::string_view text);
-    static std::string_view getFileName(const std::string_view path);
-    static std::string_view getExtension(const std::string_view path);
+    static std::string read(std::string_view filename);
+    static void write(std::string_view filename, const std::vector<sorbet::u1> &data);
+    static void write(std::string_view filename, std::string_view text);
+    static std::string_view getFileName(std::string_view path);
+    static std::string_view getExtension(std::string_view path);
 };
 
 } // namespace sorbet

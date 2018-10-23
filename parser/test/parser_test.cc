@@ -31,15 +31,15 @@ TEST(ParserTest, SimpleParse) { // NOLINT
 
 struct DedentTest {
     int level;
-    string in;
-    string out;
+    string_view in;
+    string_view out;
 };
 
 TEST(ParserTest, TestDedent) { // NOLINT
     vector<DedentTest> cases = {
-        {2, "    hi", "  hi"},
-        {10, "  \t    hi", "  hi"},
-        {2, "  a\n   b\n  c\n", "a\n   b\n  c\n"},
+        {2, "    hi"sv, "  hi"sv},
+        {10, "  \t    hi"sv, "  hi"sv},
+        {2, "  a\n   b\n  c\n"sv, "a\n   b\n  c\n"sv},
     };
     for (auto &tc : cases) {
         sorbet::parser::Dedenter dedent(tc.level);

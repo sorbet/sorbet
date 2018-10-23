@@ -435,12 +435,12 @@ private:
         }
     }
 
-    void packString(const string &str) {
+    void packString(string_view str) {
         packer.pack_str(str.size());
         packer.pack_str_body(str.data(), str.size());
     }
 
-    void packString(msgpack::packer<msgpack::sbuffer> &packer, const string &str) {
+    void packString(msgpack::packer<msgpack::sbuffer> &packer, string_view str) {
         packer.pack_str(str.size());
         packer.pack_str_body(str.data(), str.size());
     }

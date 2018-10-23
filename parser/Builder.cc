@@ -17,13 +17,14 @@ using ruby_parser::token;
 using sorbet::core::GlobalState;
 using std::make_unique;
 using std::string;
+using std::string_view;
 using std::type_info;
 using std::unique_ptr;
 using std::vector;
 
 namespace sorbet::parser {
 
-string Dedenter::dedent(const string &str) {
+string Dedenter::dedent(string_view str) {
     string out;
     for (auto ch : str) {
         if (spacesToRemove > 0) {
@@ -487,14 +488,14 @@ public:
         typecase(node.get(),
 
                  [&](String *s) {
-                     std::string dedented = dedenter.dedent(s->val.data(gs_)->toString(gs_));
+                     std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
                      result = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                  },
 
                  [&](DString *d) {
                      for (auto &p : d->nodes) {
                          if (auto *s = parser::cast_node<String>(p.get())) {
-                             std::string dedented = dedenter.dedent(s->val.data(gs_)->toString(gs_));
+                             std::string dedented = dedenter.dedent(s->val.data(gs_)->shortName(gs_));
                              unique_ptr<Node> newstr = make_unique<String>(s->loc, gs_.enterNameUTF8(dedented));
                              p.swap(newstr);
                          }

@@ -1,5 +1,6 @@
 #include "configatron.h"
 #include "absl/algorithm/container.h"
+#include "absl/strings/match.h"
 #include "yaml-cpp/yaml.h"
 #include <cctype>
 #include <dirent.h>
@@ -9,13 +10,6 @@
 using namespace std;
 namespace sorbet::namer {
 namespace {
-bool endsWith(const string &a, const string &b) {
-    if (b.size() > a.size()) {
-        return false;
-    }
-    return equal(a.begin() + a.size() - b.size(), a.end(), b.begin());
-}
-
 vector<string> listDir(const char *name) {
     vector<string> result;
     DIR *dir;
@@ -35,7 +29,7 @@ vector<string> listDir(const char *name) {
             snprintf(path, sizeof(path), "%s/%s", name, entry->d_name);
             auto nested = listDir(path);
             result.insert(result.end(), nested.begin(), nested.end());
-        } else if (endsWith(entry->d_name, ".yaml")) {
+        } else if (absl::EndsWith(entry->d_name, ".yaml")) {
             names.emplace_back(entry->d_name);
         }
     }
@@ -47,7 +41,7 @@ vector<string> listDir(const char *name) {
 
 enum class StringKind { String, Integer, Float, Symbol };
 
-StringKind classifyString(const string &str) {
+StringKind classifyString(string_view str) {
     int dotCount = 0;
     if (!str.empty() && str[0] == ':') {
         return StringKind::Symbol;
@@ -116,9 +110,9 @@ struct Path {
 
     vector<shared_ptr<Path>> children;
 
-    shared_ptr<Path> getChild(const string &name) {
+    shared_ptr<Path> getChild(string_view name) {
         if (!name.empty() && name[0] == ':') {
-            string withoutColon(name.c_str() + 1, name.size() - 1);
+            string_view withoutColon(name.data() + 1, name.size() - 1);
             return getChild(withoutColon);
         }
         for (auto &child : children) {
@@ -126,7 +120,7 @@ struct Path {
                 return child;
             }
         }
-        return children.emplace_back(make_shared<Path>(this, name));
+        return children.emplace_back(make_shared<Path>(this, string(name)));
     }
 
     void setType(core::GlobalState &gs, shared_ptr<core::Type> tp) {
@@ -218,7 +212,8 @@ void handleFile(core::GlobalState &gs, string file, shared_ptr<Path> rootNode) {
 }
 } // namespace
 
-void configatron::fillInFromFileSystem(core::GlobalState &gs, vector<string> folders, vector<string> files) {
+void configatron::fillInFromFileSystem(core::GlobalState &gs, const vector<string> &folders,
+                                       const vector<string> &files) {
     auto rootNode = make_shared<Path>(nullptr, "");
     for (auto &folder : folders) {
         auto files = listDir(folder.c_str());

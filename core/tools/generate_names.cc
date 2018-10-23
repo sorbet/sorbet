@@ -14,12 +14,12 @@ struct NameDef {
     string srcName;
     string val;
 
-    NameDef(const char *srcName, const char *val) : srcName(srcName), val(val) {
-        if (strcmp(srcName, val) == 0) {
+    NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)) {
+        if (srcName == val) {
             sorbet::Error::raise("Only pass one arg for '", val, "'");
         }
     }
-    NameDef(const char *srcName) : srcName(srcName), val(srcName) {}
+    NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)) {}
 };
 
 NameDef names[] = {

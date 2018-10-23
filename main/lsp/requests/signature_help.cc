@@ -16,7 +16,7 @@ void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef
     sig.SetObject();
     // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting
     // wtih respect to activeParameter here.
-    sig.AddMember("label", (string)method.data(*finalGs)->show(*finalGs), alloc);
+    sig.AddMember("label", method.data(*finalGs)->show(*finalGs), alloc);
     rapidjson::Value parameters;
     parameters.SetArray();
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
@@ -28,18 +28,18 @@ void LSPLoop::addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef
         parameter.SetObject();
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        parameter.AddMember("label", (string)arg.data(*finalGs)->name.show(*finalGs), alloc);
+        parameter.AddMember("label", arg.data(*finalGs)->name.show(*finalGs), alloc);
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
-            methodDocumentation += "**_" + (string)arg.data(*finalGs)->name.show(*finalGs) + "_**";
+            methodDocumentation += "**_" + arg.data(*finalGs)->name.show(*finalGs) + "_**";
         } else {
-            methodDocumentation += (string)arg.data(*finalGs)->name.show(*finalGs);
+            methodDocumentation += arg.data(*finalGs)->name.show(*finalGs);
         }
         if (i != args.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter.AddMember("documentation",
-                            (string)getResultType(arg, resp.receiver.type, resp.constraint)->show(*finalGs), alloc);
+        parameter.AddMember("documentation", getResultType(arg, resp.receiver.type, resp.constraint)->show(*finalGs),
+                            alloc);
         parameters.PushBack(move(parameter), alloc);
         i += 1;
     }
@@ -69,8 +69,8 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
             if (resp->kind == core::QueryResponse::Kind::SEND) {
                 auto sendLocIndex = resp->termLoc.beginPos();
 
-                auto uri = string(d["params"]["textDocument"]["uri"].GetString(),
-                                  d["params"]["textDocument"]["uri"].GetStringLength());
+                auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
+                                       d["params"]["textDocument"]["uri"].GetStringLength());
                 auto fref = uri2FileRef(uri);
                 if (!fref.exists()) {
                     return;
@@ -80,7 +80,7 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
                 if (!loc) {
                     return;
                 }
-                string call_str = (string)src.substr(sendLocIndex, loc->endPos() - sendLocIndex);
+                string_view call_str = src.substr(sendLocIndex, loc->endPos() - sendLocIndex);
                 int numberCommas = absl::c_count(call_str, ',');
                 // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
                 // 2nd arg)

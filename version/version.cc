@@ -15,16 +15,16 @@ namespace sorbet {
 // and this code has no debugger support
 
 #if BUILD_RELEASE
-const char *const build_scm_clean = STABLE_BUILD_SCM_CLEAN;
-const char *const build_scm_revision = STABLE_BUILD_SCM_REVISION;
-const char *const build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
-const long build_timestamp = BUILD_TIMESTAMP;
+constexpr string_view build_scm_clean = STABLE_BUILD_SCM_CLEAN;
+constexpr string_view build_scm_revision = STABLE_BUILD_SCM_REVISION;
+constexpr string_view build_scm_commit_count = STABLE_BUILD_SCM_COMMIT_COUNT;
+constexpr long build_timestamp = BUILD_TIMESTAMP;
 constexpr bool is_release_build = true;
 #else
-const char *const build_scm_clean = "1";
-const char *const build_scm_revision = "master";
-const char *const build_scm_commit_count = "0";
-const long build_timestamp = 0;
+constexpr string_view build_scm_clean = "1";
+constexpr string_view build_scm_revision = "master";
+constexpr string_view build_scm_commit_count = "0";
+constexpr long build_timestamp = 0;
 constexpr bool is_release_build = false;
 #endif
 
@@ -40,17 +40,17 @@ const string Version::codename = ""; // We Try Furiously
 const bool Version::isReleaseBuild = is_release_build;
 
 string makeScmStatus() {
-    return strncmp(build_scm_clean, "0", 1) == 0 ? "-dirty" : "";
+    return build_scm_clean == "0"sv ? "-dirty" : "";
 }
 const string Version::build_scm_status = makeScmStatus();
 
 string makeScmRevision() {
-    return build_scm_revision;
+    return string(build_scm_revision);
 }
 const string Version::build_scm_revision = makeScmRevision();
 
 string makeScmCommitCount() {
-    return build_scm_commit_count;
+    return string(build_scm_commit_count);
 }
 const string Version::build_scm_commit_count = makeScmCommitCount();
 

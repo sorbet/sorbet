@@ -435,9 +435,9 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
 
     buf << "flags =";
-    const pair<int, const char *> flags[] = {
-        {SelfMethod, "self"},
-        {DSLSynthesized, "dsl"},
+    const pair<int, string_view> flags[] = {
+        {SelfMethod, "self"sv},
+        {DSLSynthesized, "dsl"sv},
     };
     for (auto &ent : flags) {
         if ((this->flags & ent.first) != 0) {

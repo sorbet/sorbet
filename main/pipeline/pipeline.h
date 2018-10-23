@@ -15,9 +15,9 @@ std::unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::Gl
                                           std::shared_ptr<spdlog::logger> logger);
 
 std::vector<std::unique_ptr<ast::Expression>>
-index(std::unique_ptr<core::GlobalState> &gs, std::vector<std::string> frs, std::vector<core::FileRef> mainThreadFiles,
-      const options::Options &opts, WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore,
-      std::shared_ptr<spdlog::logger> logger);
+index(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &frs,
+      std::vector<core::FileRef> mainThreadFiles, const options::Options &opts, WorkerPool &workers,
+      std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
 
 std::vector<std::unique_ptr<ast::Expression>>
 resolve(core::GlobalState &gs, std::vector<std::unique_ptr<ast::Expression>> what, const options::Options &opts,

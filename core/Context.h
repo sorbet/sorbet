@@ -38,7 +38,7 @@ public:
 
     Context withOwner(SymbolRef sym) const;
 
-    void trace(const std::string &msg) const;
+    void trace(std::string_view msg) const;
 };
 CheckSize(Context, 16, 8);
 
@@ -76,7 +76,7 @@ public:
         return r;
     }
 
-    void trace(const std::string &msg) const;
+    void trace(std::string_view msg) const;
 };
 CheckSize(MutableContext, 16, 8);
 
