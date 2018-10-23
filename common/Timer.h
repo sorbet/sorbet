@@ -1,5 +1,4 @@
 #include "common/Counters.h"
-#include "spdlog/spdlog.h"
 #include <chrono>
 #include <memory>
 #include <string>

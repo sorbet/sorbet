@@ -13,8 +13,6 @@
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
 #include "core/Symbols.h"
-
-#include <algorithm> // find_if
 #include <utility>
 #include <vector>
 
@@ -644,8 +642,7 @@ private:
 
         for (auto it = methodInfo->arguments().begin(); it != methodInfo->arguments().end(); /* nothing */) {
             core::SymbolRef arg = *it;
-            auto spec = find_if(sig.argTypes.begin(), sig.argTypes.end(),
-                                [&](auto &spec) { return spec.name == arg.data(ctx)->name; });
+            auto spec = absl::c_find_if(sig.argTypes, [&](auto &spec) { return spec.name == arg.data(ctx)->name; });
             if (spec != sig.argTypes.end()) {
                 ENFORCE(spec->type != nullptr);
                 arg.data(ctx)->resultType = spec->type;

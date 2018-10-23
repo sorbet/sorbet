@@ -2,7 +2,6 @@
 #define SORBET_TYPECONSTRAINT_H
 
 #include "Types.h"
-#include <unordered_map>
 namespace sorbet::core {
 
 class TypeConstraint {

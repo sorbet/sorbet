@@ -996,9 +996,9 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     return result;
 }
 
-void GlobalState::addAnnotation(Loc loc, string str, AnnotationPos pos) const {
+void GlobalState::addAnnotation(Loc loc, string str, u4 blockId, AnnotationPos pos) const {
     unique_lock<mutex> lk(annotations_mtx);
-    annotations.emplace_back(loc, str, pos);
+    annotations.emplace_back(Annotation{loc, move(str), pos, blockId});
 }
 
 string GlobalState::showAnnotatedSource(FileRef file) const {
@@ -1008,7 +1008,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
     }
 
     // Sort the locs backwards
-    auto compare = [](Annotation left, Annotation right) {
+    auto compare = [](const Annotation &left, const Annotation &right) {
         if (left.loc.file() != right.loc.file()) {
             return left.loc.file().id() > right.loc.file().id();
         }
@@ -1027,7 +1027,7 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
                 return true;
             }
         }
-        return false;
+        return left.blockId > right.blockId;
     };
     auto sorted = annotations;
     fast_sort(sorted, compare);

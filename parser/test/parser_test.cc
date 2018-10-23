@@ -1,3 +1,5 @@
+#include "gtest/gtest.h"
+// has to go first as it violates are requirements
 #include "common/common.h"
 #include "core/BufferedErrorQueue.h"
 #include "core/Errors.h"
@@ -7,7 +9,6 @@
 #include "parser/parser.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include "gtest/gtest.h"
 #include <fstream>
 #include <string>
 #include <vector>

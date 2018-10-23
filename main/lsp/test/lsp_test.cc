@@ -1,5 +1,7 @@
-#include "main/lsp/lsp.h"
 #include "gtest/gtest.h"
+// has to go first as it violates are requirements
+
+#include "main/lsp/lsp.h"
 
 namespace spd = spdlog;
 using namespace std;

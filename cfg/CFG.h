@@ -6,8 +6,6 @@
 #include "core/Types.h"
 #include <climits>
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 
 #include "cfg/Instructions.h"
 
@@ -107,14 +105,14 @@ public:
     void sanityCheck(core::Context ctx);
 
     struct ReadsAndWrites {
-        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> reads;
-        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> writes;
+        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> reads;
+        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> writes;
 
         // The "dead" set reports, for each block, variables that are *only*
         // read in that block after being written; they are thus dead on entry,
         // which we take advantage of when building dataflow information for
         // inference.
-        UnorderedMap<core::LocalVariable, std::unordered_set<BasicBlock *>> dead;
+        UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> dead;
     };
     ReadsAndWrites findAllReadsAndWrites(core::Context ctx);
 

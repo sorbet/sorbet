@@ -22,8 +22,8 @@ bool hasSeen(const UnorderedSet<Loc> &seen, Loc loc) {
     return false;
 }
 
-map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
-                                                  map<FileRef, string> sources) {
+UnorderedMap<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> autocorrects,
+                                                           UnorderedMap<FileRef, string> sources) {
     // Sort the locs backwards
     auto compare = [](const AutocorrectSuggestion &left, const AutocorrectSuggestion &right) {
         if (left.loc.file() != right.loc.file()) {
@@ -41,7 +41,7 @@ map<FileRef, string> AutocorrectSuggestion::apply(vector<AutocorrectSuggestion> 
     fast_sort(autocorrects, compare);
 
     UnorderedSet<Loc> seen; // used to make sure nothing overlaps
-    map<FileRef, string> ret;
+    UnorderedMap<FileRef, string> ret;
     for (auto &autocorrect : autocorrects) {
         auto &loc = autocorrect.loc;
         if (!ret.count(loc.file())) {

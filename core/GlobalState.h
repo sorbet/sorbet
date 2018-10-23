@@ -101,9 +101,9 @@ public:
         Loc loc;
         std::string str;
         AnnotationPos pos;
-        Annotation(Loc loc, std::string str, AnnotationPos pos) : loc(loc), str(str), pos(pos){};
+        u4 blockId; // used to define order in case `loc`s are the same
     };
-    void addAnnotation(Loc loc, std::string str, AnnotationPos pos = AnnotationPos::BEFORE) const;
+    void addAnnotation(Loc loc, std::string str, u4 blockId, AnnotationPos pos) const;
 
     bool hadCriticalError() const;
 

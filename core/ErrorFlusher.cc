@@ -51,7 +51,7 @@ void ErrorFlusher::flushErrorCount(spdlog::logger &logger, int count) {
 }
 
 void ErrorFlusher::flushAutocorrects(const GlobalState &gs) {
-    map<FileRef, string> sources;
+    UnorderedMap<FileRef, string> sources;
     for (auto &autocorrect : autocorrects) {
         auto file = autocorrect.loc.file();
         if (!sources.count(file)) {

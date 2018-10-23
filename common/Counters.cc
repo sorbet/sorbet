@@ -5,7 +5,6 @@
 #include <chrono>
 #include <cmath>
 #include <iomanip> // set
-#include <map>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -88,9 +87,9 @@ void CounterImpl::clear() {
     this->counters_by_category.clear();
 }
 
-map<long, long> getAndClearHistogram(ConstExprStr histogram) {
+UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram) {
     counterState.canonicalize();
-    map<long, long> ret;
+    UnorderedMap<long, long> ret;
     auto fnd = counterState.histograms.find(counterState.internKey(histogram.str));
     if (fnd != counterState.histograms.end()) {
         for (auto e : fnd->second) {

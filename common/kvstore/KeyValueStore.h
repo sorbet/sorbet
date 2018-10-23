@@ -4,7 +4,6 @@
 #include "lmdb.h"
 #include <mutex>
 #include <thread>
-#include <unordered_map>
 namespace sorbet {
 
 /**

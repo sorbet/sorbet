@@ -20,6 +20,7 @@ static_assert(false, "Need c++14 to compile this codebase");
 #include <vector>
 #endif
 #include "spdlog/fmt/fmt.h"
+#include "spdlog/spdlog.h"
 #include <cstring>
 #include <functional>
 #include <stdint.h>
@@ -191,6 +192,34 @@ template <class Container> inline void fast_sort(Container &container) {
 
 /* use fast_sort */
 #pragma GCC poison sort c_sort
+
+/* use absl::c_ alternatives */
+#pragma GCC poison any_of find_if linear_search min_element max_element iota all_of
+// I wish I could add replace and find, but those names are too generic
+//         accumulate upper_bound are used by <random>
+//         lower_bound is needed for parser
+
+/* String handling functions. Use C++ alternatives */
+#pragma GCC poison strcpy wcscpy stpcpy wcpcpy
+#pragma GCC poison strdup
+#pragma GCC poison gets puts
+#pragma GCC poison strcat wcscat
+#pragma GCC poison wcrtomb wctob
+#pragma GCC poison sprintf vsprintf vfprintf
+#pragma GCC poison asprintf vasprintf
+#pragma GCC poison strncpy wcsncpy
+#pragma GCC poison strtok wcstok
+
+/* Signal related */
+#pragma GCC poison longjmp siglongjmp
+#pragma GCC poison setjmp sigsetjmp
+
+/* File API's */
+#pragma GCC poison tmpnam tempnam
+
+/* Misc */
+#pragma GCC poison cuserid
+#pragma GCC poison rexec rexec_af
 
 #include "Error.h"
 #include "JSON.h"

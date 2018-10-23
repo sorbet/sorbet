@@ -1,9 +1,7 @@
 #ifndef SORBET_COUNTERS_H
 #define SORBET_COUNTERS_H
 #include "common/common.h"
-#include <map>
 #include <string>
-#include <unordered_map>
 
 namespace sorbet {
 
@@ -89,7 +87,7 @@ void histogramAdd(ConstExprStr histogram, int key, unsigned long value);
 /* Does not aggregate over measures, instead, reports them separately.
  * Use with care, as it can make us report a LOT of data. */
 void timingAdd(ConstExprStr measure, unsigned long nanos);
-std::map<long, long> getAndClearHistogram(ConstExprStr histogram);
+UnorderedMap<long, long> getAndClearHistogram(ConstExprStr histogram);
 std::string getCounterStatistics(std::vector<std::string> names);
 
 } // namespace sorbet

@@ -1,6 +1,7 @@
+#include "gtest/gtest.h"
+// has to go first as it violates are requirements
 #include "core/serialize/pickler.h"
 #include "core/serialize/serialize.h"
-#include "gtest/gtest.h"
 
 using namespace std;
 

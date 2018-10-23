@@ -36,8 +36,7 @@ class AutogenWalk {
                  [&](ast::EmptyTree *) { result = true; },
 
                  [&](ast::InsSeq *seq) {
-                     result = all_of(seq->stats.begin(), seq->stats.end(),
-                                     [](auto &child) { return ignoreChild(child.get()); }) &&
+                     result = absl::c_all_of(seq->stats, [](auto &child) { return ignoreChild(child.get()); }) &&
                               ignoreChild(seq->expr.get());
                  },
 
@@ -76,8 +75,7 @@ class AutogenWalk {
                  },
 
                  [&](ast::InsSeq *seq) {
-                     result = any_of(seq->stats.begin(), seq->stats.end(),
-                                     [](auto &child) { return definesBehavior(child.get()); }) ||
+                     result = absl::c_any_of(seq->stats, [](auto &child) { return definesBehavior(child.get()); }) ||
                               definesBehavior(seq->expr.get());
                  },
 
@@ -129,8 +127,7 @@ public:
         } else {
             def.type = Definition::Module;
         }
-        def.is_empty =
-            all_of(original->rhs.begin(), original->rhs.end(), [](auto &tree) { return ignoreChild(tree.get()); });
+        def.is_empty = absl::c_all_of(original->rhs, [](auto &tree) { return ignoreChild(tree.get()); });
         for (auto &ancst : original->ancestors) {
             auto *cnst = ast::cast_tree<ast::ConstantLit>(ancst.get());
             if (cnst && cnst->original != nullptr) {
@@ -144,8 +141,8 @@ public:
             }
         }
         if (!def.defines_behavior) {
-            def.defines_behavior = any_of(original->rhs.begin(), original->rhs.end(),
-                                          [](auto &tree) { return definesBehavior(tree.get()); });
+            def.defines_behavior =
+                absl::c_any_of(original->rhs, [](auto &tree) { return definesBehavior(tree.get()); });
         }
 
         // TODO: ref.parent_of, def.parent_ref

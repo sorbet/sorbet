@@ -15,7 +15,6 @@
 #include "main/pipeline/pipeline.h"
 #include "namer/namer.h"
 #include "resolver/resolver.h"
-#include <unordered_set>
 
 using namespace std;
 
@@ -174,7 +173,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
 
 void LSPLoop::reIndexFromFileSystem() {
     indexed.clear();
-    unordered_set<string> fileNamesDedup(opts.inputFileNames.begin(), opts.inputFileNames.end());
+    UnorderedSet<string> fileNamesDedup(opts.inputFileNames.begin(), opts.inputFileNames.end());
     for (int i = 1; i < initialGS->filesUsed(); i++) {
         core::FileRef f(i);
         if (f.data(*initialGS, true).sourceType == core::File::Type::Normal) {

@@ -3,7 +3,6 @@
 
 #include <algorithm> // sort, remove, unique
 #include <climits>   // INT_MAX
-#include <unordered_set>
 using namespace std;
 
 namespace sorbet::cfg {
@@ -265,7 +264,7 @@ void CFGBuilder::removeDeadAssigns(core::Context ctx, const CFG::ReadsAndWrites 
 void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites &RnW, CFG &cfg) {
     for (auto &pair : RnW.reads) {
         core::LocalVariable what = pair.first;
-        const unordered_set<BasicBlock *> &where = pair.second;
+        const UnorderedSet<BasicBlock *> &where = pair.second;
         auto fnd = cfg.minLoops.insert({what, INT_MAX});
         int &min = (*(fnd.first)).second;
         for (const BasicBlock *bb : where) {
@@ -277,7 +276,7 @@ void CFGBuilder::computeMinMaxLoops(core::Context ctx, const CFG::ReadsAndWrites
 
     for (auto &pair : RnW.writes) {
         core::LocalVariable what = pair.first;
-        const unordered_set<BasicBlock *> &where = pair.second;
+        const UnorderedSet<BasicBlock *> &where = pair.second;
         auto fndMn = cfg.minLoops.insert({what, INT_MAX}); // note: this will NOT overrwite existing value
         auto fndMx = cfg.maxLoopWrite.insert({what, 0});
         int &min = (*(fndMn.first)).second;
@@ -306,9 +305,9 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     // This solution is  (|BB| + |symbols-mentioned|) * (|cycles|) + |answer_size| in complexity.
     // making this quadratic in anything will be bad.
 
-    vector<unordered_set<core::LocalVariable>> reads_by_block(cfg.maxBasicBlockId);
-    vector<unordered_set<core::LocalVariable>> writes_by_block(cfg.maxBasicBlockId);
-    vector<unordered_set<core::LocalVariable>> dead_by_block(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> reads_by_block(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> writes_by_block(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> dead_by_block(cfg.maxBasicBlockId);
 
     for (auto &rds : RnW.reads) {
         auto &wts = RnW.writes[rds.first];
@@ -342,7 +341,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
     }
 
     // iterate ver basic blocks in reverse and found upper bounds on what could a block need.
-    vector<unordered_set<core::LocalVariable>> upper_bounds1(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> upper_bounds1(cfg.maxBasicBlockId);
     bool changed = true;
 
     while (changed) {
@@ -374,7 +373,7 @@ void CFGBuilder::fillInBlockArguments(core::Context ctx, CFG::ReadsAndWrites &Rn
         }
     }
 
-    vector<unordered_set<core::LocalVariable>> upper_bounds2(cfg.maxBasicBlockId);
+    vector<UnorderedSet<core::LocalVariable>> upper_bounds2(cfg.maxBasicBlockId);
 
     changed = true;
     while (changed) {

@@ -12,8 +12,6 @@
 #include "core/lsp/QueryResponse.h"
 #include "inference.h"
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -25,7 +23,7 @@ class Environment;
 // it only makes sense for us to store it if we are going to use it
 // wallk all the instructions and collect knowledge that we may ever need
 class KnowledgeFilter {
-    std::unordered_set<core::LocalVariable> used_vars;
+    UnorderedSet<core::LocalVariable> used_vars;
 
 public:
     KnowledgeFilter(core::Context ctx, std::unique_ptr<cfg::CFG> &cfg);

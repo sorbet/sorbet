@@ -1,3 +1,6 @@
+#include "gtest/gtest.h"
+// has to go first as it violates are requirements
+
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
@@ -8,7 +11,6 @@
 #include "namer/namer.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include "gtest/gtest.h"
 
 namespace spd = spdlog;
 

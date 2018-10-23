@@ -1,7 +1,4 @@
 #include "cfg/CFG.h"
-#include <algorithm>
-#include <unordered_set>
-
 #include "absl/strings/escaping.h"
 #include "absl/strings/str_split.h"
 
@@ -31,9 +28,9 @@ CFG::CFG() {
 }
 
 CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
-    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> reads;
-    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> writes;
-    UnorderedMap<core::LocalVariable, unordered_set<BasicBlock *>> dead;
+    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> reads;
+    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> writes;
+    UnorderedMap<core::LocalVariable, UnorderedSet<BasicBlock *>> dead;
 
     for (unique_ptr<BasicBlock> &bb : this->basicBlocks) {
         for (Binding &bind : bb->exprs) {
@@ -181,7 +178,7 @@ void BasicBlock::recordAnnotations(core::Context ctx) {
 
     for (Binding &exp : this->exprs) {
         if (auto debugEnv = cast_instruction<DebugEnvironment>(exp.value.get())) {
-            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx), debugEnv->pos);
+            ctx.state.addAnnotation(exp.loc, exp.value->toString(ctx), this->id, debugEnv->pos);
         }
     }
 }

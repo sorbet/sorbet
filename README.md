@@ -230,6 +230,12 @@ them leverage CI, and one of them runs on your laptop.
 
 We write tests by adding files to subfolders of the `test/` directory.
 Individual subfolders are "magic"; each contains specific types of tests.
+We aspire to have our tests be fully reproducible.
+Note that in C++
+> Hash functions are only required to produce the same result for the same input within a single execution of a program.
+
+Thus we expect all user-visible outputs to be explicitly sorted using a
+reliable key.
 
 ### Expectation tests
 

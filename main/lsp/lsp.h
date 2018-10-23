@@ -145,7 +145,7 @@ class LSPLoop {
         std::function<void(rapidjson::Value &)> onResult;
         std::function<void(rapidjson::Value &)> onError;
     };
-    std::map<std::string, ResponseHandler> awaitingResponse;
+    UnorderedMap<std::string, ResponseHandler> awaitingResponse;
     /** LSP loop reuses a single arena for all json allocations. We never free memory used for JSON */
     rapidjson::MemoryPoolAllocator<> alloc;
     /** Trees that have been indexed and can be reused between different runs */

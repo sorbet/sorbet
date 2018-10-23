@@ -140,8 +140,12 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
 
     for (auto &hist : counters.counters->histograms) {
         CounterImpl::CounterType sum = 0;
+        int min = hist.second.begin()->first;
+        int max = hist.second.begin()->first;
         for (auto &e : hist.second) {
             sum += e.second;
+            min = std::min(min, e.first);
+            max = std::max(min, e.first);
         }
         CounterImpl::CounterType running = 0;
         vector<pair<int, bool>> percentiles = {{25, false}, {50, false}, {75, false}, {90, false}};
@@ -162,11 +166,11 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         }
         com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".min"));
-        metric->set_value(hist.second.begin()->first);
+        metric->set_value(min);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".max"));
-        metric->set_value((--hist.second.end())->first);
+        metric->set_value(max);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".total"));

@@ -498,7 +498,7 @@ Pickler SerializerImpl::pickle(const GlobalState &gs, bool payloadOnly) {
     absl::Span<const shared_ptr<File>> wantFiles;
     if (payloadOnly) {
         auto lastPayload =
-            find_if(gs.files.begin() + 1, gs.files.end(), [](auto &file) { return file->sourceType != File::Payload; });
+            absl::c_find_if(gs.files, [](auto &file) { return file && file->sourceType != File::Payload; });
         ENFORCE(none_of(lastPayload, gs.files.end(), [](auto &file) { return file->sourceType == File::Payload; }));
         wantFiles = absl::Span<const shared_ptr<File>>(gs.files.data(), lastPayload - gs.files.begin());
     } else {

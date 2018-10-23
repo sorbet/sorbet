@@ -1,3 +1,6 @@
+#include "gtest/gtest.h"
+// has to go first as it violates are requirements
+
 #include "common/common.h"
 #include "core/Context.h"
 #include "core/Errors.h"
@@ -5,7 +8,6 @@
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include "gtest/gtest.h"
 
 using namespace std;
 
@@ -24,8 +26,8 @@ TEST(ErrorTest, AutocorrectTest) { // NOLINT
     core::FileRef file(1);
     sorbet::core::UnfreezeFileTable ft(gs);
 
-    map<core::FileRef, string> sources;
-    map<core::FileRef, string> result;
+    UnorderedMap<core::FileRef, string> sources;
+    UnorderedMap<core::FileRef, string> result;
 
     sources[file] = "123";
     vector<core::AutocorrectSuggestion> autocorrects;

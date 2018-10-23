@@ -8,8 +8,6 @@
 #include "core/Types.h"
 #include <climits>
 #include <memory>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace sorbet::cfg {
 

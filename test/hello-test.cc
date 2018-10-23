@@ -1,3 +1,7 @@
+#include "gtest/gtest.h"
+#include <cxxopts.hpp>
+// has to go first as it violates are requirements
+
 #include "ast/Helpers.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
@@ -10,8 +14,6 @@
 #include "payload/binary/binary.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include "gtest/gtest.h"
-#include <cxxopts.hpp>
 
 using namespace std;
 

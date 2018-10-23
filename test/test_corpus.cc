@@ -1,3 +1,7 @@
+#include "gtest/gtest.h"
+#include <cxxopts.hpp>
+// has to go first as it violates are requirements
+
 #include "absl/strings/match.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
@@ -21,7 +25,6 @@
 #include "gtest/gtest.h"
 #include <algorithm>
 #include <cstdio>
-#include <cxxopts.hpp>
 #include <dirent.h>
 #include <fstream>
 #include <memory>
@@ -29,7 +32,6 @@
 #include <sstream>
 #include <string>
 #include <sys/types.h>
-#include <unordered_set>
 #include <vector>
 
 namespace spd = spdlog;
@@ -125,7 +127,7 @@ public:
     int endPos = -1;
 };
 
-unordered_set<string> knownPasses = {
+sorbet::UnorderedSet<string> knownPasses = {
     "parse-tree", "parse-tree-json", "ast",           "ast-raw",      "dsl-tree",         "dsl-tree-raw",
     "name-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
     "cfg-raw",    "typed-source",    "autogen"};
