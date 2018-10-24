@@ -148,6 +148,8 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("simulate-crash", "Crash on start");
+    options.add_options("dev")("error-white-list", "White list of errors to ever be reported",
+                               cxxopts::value<vector<int>>(), "errorCodes");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
                                cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
@@ -334,6 +336,9 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.debugLogFile = raw["debug-log-file"].as<string>();
         opts.typedSource = raw["typed-source"].as<string>();
         opts.reserveMemKiB = raw["reserve-mem-kb"].as<u8>();
+        if (raw.count("error-white-list") > 0) {
+            opts.errorCodeWhiteList = raw["error-white-list"].as<vector<int>>();
+        }
         if (sorbet::debug_mode) {
             opts.suggestSig = raw["suggest-sig"].as<bool>();
         }

@@ -59,7 +59,8 @@ void ConcurrentErrorQueue::pushQueryResponse(unique_ptr<core::QueryResponse> que
     this->queue.push(move(msg), 1);
 }
 
-ConcurrentErrorQueue::ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer) : ErrorQueue(logger, tracer) {
+ConcurrentErrorQueue::ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer, vector<int> errorCodeWhiteList)
+    : ErrorQueue(logger, tracer, errorCodeWhiteList) {
     owner = this_thread::get_id();
 }
 

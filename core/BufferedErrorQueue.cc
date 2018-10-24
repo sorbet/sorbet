@@ -4,7 +4,8 @@
 using namespace std;
 
 namespace sorbet::core {
-BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer) : ErrorQueue(logger, tracer) {}
+BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer, vector<int> errorCodeWhiteList)
+    : ErrorQueue(logger, tracer, errorCodeWhiteList) {}
 
 BufferedErrorQueue::~BufferedErrorQueue() = default;
 

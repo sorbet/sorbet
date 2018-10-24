@@ -6,7 +6,8 @@ namespace sorbet::core {
 
 using namespace std;
 
-ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer) : logger(logger), tracer(tracer) {}
+ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, vector<int> errorCodeWhiteList)
+    : errorFlusher(move(errorCodeWhiteList)), logger(logger), tracer(tracer){};
 
 ErrorQueue::~ErrorQueue() {}
 

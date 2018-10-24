@@ -9,7 +9,7 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
     fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
-            if (error->error->isSilenced) {
+            if (!error->error->isCritical && (error->error->isSilenced || !isWhitelisted(error->error->what.code))) {
                 continue;
             }
             auto &out = error->error->isCritical ? critical : nonCritical;
@@ -64,6 +64,10 @@ void ErrorFlusher::flushAutocorrects(const GlobalState &gs) {
         FileOps::write(entry.first.data(gs).path(), entry.second);
     }
     autocorrects.clear();
+}
+
+bool ErrorFlusher::isWhitelisted(int code) const {
+    return errorCodeWhiteList.empty() || absl::c_linear_search(errorCodeWhiteList, code);
 }
 
 } // namespace sorbet::core

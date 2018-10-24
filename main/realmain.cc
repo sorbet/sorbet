@@ -187,8 +187,8 @@ int realmain(int argc, char *argv[]) {
     }
     WorkerPool workers(opts.threads, logger);
 
-    unique_ptr<core::GlobalState> gs =
-        make_unique<core::GlobalState>((make_shared<ConcurrentErrorQueue>(*typeErrorsConsole, *logger)));
+    unique_ptr<core::GlobalState> gs = make_unique<core::GlobalState>(
+        (make_shared<ConcurrentErrorQueue>(*typeErrorsConsole, *logger, opts.errorCodeWhiteList)));
     vector<unique_ptr<ast::Expression>> indexed;
 
     logger->trace("building initial global state");

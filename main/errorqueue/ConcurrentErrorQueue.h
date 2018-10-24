@@ -31,7 +31,7 @@ private:
     std::vector<core::ErrorQueueMessage> drainKind(core::ErrorQueueMessage::Kind kind);
 
 public:
-    ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer);
+    ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer, std::vector<int> errorCodeWhiteList = {});
     ~ConcurrentErrorQueue();
 
     virtual void pushError(const core::GlobalState &gs, std::unique_ptr<core::BasicError> error) override;

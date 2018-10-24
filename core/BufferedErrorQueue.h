@@ -21,7 +21,7 @@ private:
     virtual std::vector<std::unique_ptr<ErrorQueueMessage>> drainAll() override;
 
 public:
-    BufferedErrorQueue(spd::logger &logger, spd::logger &tracer);
+    BufferedErrorQueue(spd::logger &logger, spd::logger &tracer, std::vector<int> errorCodeWhiteList = {});
     ~BufferedErrorQueue();
 
     virtual void pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) override;

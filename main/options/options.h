@@ -78,6 +78,7 @@ struct Options {
     std::string storeState = "";
     bool enableCounters = false;
     std::vector<std::string> someCounters;
+    std::vector<int> errorCodeWhiteList;
 
     u4 reserveMemKiB;
 
