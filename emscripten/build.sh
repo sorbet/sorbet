@@ -40,7 +40,7 @@ fi
 
 set -x
 
-emcc $CXXFLAGS core/*.cc core/types/*.cc \
+emcc $CXXFLAGS core/*.cc core/types/*.cc core/lsp/*.cc \
      "$genfiles/core/Names_gen.cc" \
      -o $objdir/core.bc
 
@@ -74,7 +74,9 @@ emcc $CXXFLAGS parser/*.cc \
      -o $objdir/parser.bc
 
 emcc $CXXFLAGS \
+     "$absl/absl/strings/escaping.cc" \
      "$absl/absl/strings/string_view.cc" \
+     "$absl/absl/strings/str_replace.cc" \
      "$absl/absl/strings/str_cat.cc" \
      "$absl/absl/strings/numbers.cc" \
      "$absl/absl/strings/internal/memutil.cc" \
