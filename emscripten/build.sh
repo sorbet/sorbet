@@ -26,6 +26,7 @@ CFLAGS="$CFLAGS -I$absl"
 CFLAGS="$CFLAGS -I$root/external/spdlog/include"
 CFLAGS="$CFLAGS -I$root/external/rang/include"
 CFLAGS="$CFLAGS -I$root/external/lizard"
+CFLAGS="$CFLAGS -I$root/external/pdqsort"
 CFLAGS="$CFLAGS -I$genfiles"
 CFLAGS="$CFLAGS -Oz"
 
