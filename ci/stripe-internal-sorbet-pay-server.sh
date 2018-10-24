@@ -67,11 +67,6 @@ rm ../.bazelrc
 # CI, and runs its own `bazel` invocations
 env -u JENKINS_URL rbenv exec bundle exec rake build:FileListStep
 
-# Make sure these specific files are typed
-while IFS= read -r f; do
-    echo "# typed: strict" >> "$f"
-done < ../ci/stripe-internal-sorbet-pay-server-typechecked
-
 RECORD_STATS=
 if [ "$GIT_BRANCH" == "master" ] || [[ "$GIT_BRANCH" == integration-* ]]; then
     RECORD_STATS=1
