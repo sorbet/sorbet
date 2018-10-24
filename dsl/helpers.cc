@@ -24,8 +24,8 @@ unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression>
 }
 
 unique_ptr<ast::Expression> mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className) {
-    auto chalk =
-        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), ctx.state.enterNameConstant(core::Names::Chalk()));
+    auto chalk = ast::MK::UnresolvedConstant(loc, ast::MK::Constant(loc, core::Symbols::root()),
+                                             ctx.state.enterNameConstant(core::Names::Chalk()));
     auto odm = ast::MK::UnresolvedConstant(loc, move(chalk), ctx.state.enterNameConstant(core::Names::ODM()));
     auto mutator = ast::MK::UnresolvedConstant(loc, move(odm), ctx.state.enterNameConstant(core::Names::Mutator()));
     auto private_ =

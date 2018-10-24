@@ -172,11 +172,11 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
       def array<<constant:<todo sym>>>()
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
 
@@ -222,11 +222,11 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
       def array_of_explicit<<constant:<todo sym>>>()
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
 
@@ -256,11 +256,11 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
+        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
       end
 
       def t_array<<constant:<todo sym>>>()
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
+        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](<emptyTree>::<constant:String>))
       end
     end
 
@@ -290,11 +290,11 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
 
       def hash_of<<constant:<todo sym>>>()
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
+        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:HashMutator>.[](<emptyTree>::<constant:Symbol>, <emptyTree>::<constant:String>))
       end
     end
 
@@ -396,11 +396,11 @@ class <emptyTree><<constant:<root>>> < ()
       end
 
       ::Sorbet.sig() do ||
-        self(<constant:<todo sym>>).returns(<emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        self(<constant:<todo sym>>).returns(::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
 
       def no_class_arg<<constant:<todo sym>>>()
-        ::T.cast(::T.unsafe(nil), <emptyTree>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
+        ::T.cast(::T.unsafe(nil), ::<root>::<constant:Chalk>::<constant:ODM>::<constant:Mutator>::<constant:Private>::<constant:ArrayMutator>.[](::T.untyped()))
       end
     end
 

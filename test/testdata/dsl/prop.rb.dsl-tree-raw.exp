@@ -1649,7 +1649,11 @@ ClassDef{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
                               scope = UnresolvedConstantLit{
-                                scope = EmptyTree
+                                scope = ConstantLit{
+                                  orig = nullptr
+                                  symbol = ::<root>
+                                  typeAlias = nullptr
+                                }
                                 cnst = <constant:Chalk>
                               }
                               cnst = <constant:ODM>
@@ -1714,7 +1718,11 @@ ClassDef{
                         scope = UnresolvedConstantLit{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
-                              scope = EmptyTree
+                              scope = ConstantLit{
+                                orig = nullptr
+                                symbol = ::<root>
+                                typeAlias = nullptr
+                              }
                               cnst = <constant:Chalk>
                             }
                             cnst = <constant:ODM>
@@ -2205,7 +2213,11 @@ ClassDef{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
                               scope = UnresolvedConstantLit{
-                                scope = EmptyTree
+                                scope = ConstantLit{
+                                  orig = nullptr
+                                  symbol = ::<root>
+                                  typeAlias = nullptr
+                                }
                                 cnst = <constant:Chalk>
                               }
                               cnst = <constant:ODM>
@@ -2270,7 +2282,11 @@ ClassDef{
                         scope = UnresolvedConstantLit{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
-                              scope = EmptyTree
+                              scope = ConstantLit{
+                                orig = nullptr
+                                symbol = ::<root>
+                                typeAlias = nullptr
+                              }
                               cnst = <constant:Chalk>
                             }
                             cnst = <constant:ODM>
@@ -2662,7 +2678,11 @@ ClassDef{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
                               scope = UnresolvedConstantLit{
-                                scope = EmptyTree
+                                scope = ConstantLit{
+                                  orig = nullptr
+                                  symbol = ::<root>
+                                  typeAlias = nullptr
+                                }
                                 cnst = <constant:Chalk>
                               }
                               cnst = <constant:ODM>
@@ -2720,7 +2740,11 @@ ClassDef{
                         scope = UnresolvedConstantLit{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
-                              scope = EmptyTree
+                              scope = ConstantLit{
+                                orig = nullptr
+                                symbol = ::<root>
+                                typeAlias = nullptr
+                              }
                               cnst = <constant:Chalk>
                             }
                             cnst = <constant:ODM>
@@ -3137,7 +3161,11 @@ ClassDef{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
                               scope = UnresolvedConstantLit{
-                                scope = EmptyTree
+                                scope = ConstantLit{
+                                  orig = nullptr
+                                  symbol = ::<root>
+                                  typeAlias = nullptr
+                                }
                                 cnst = <constant:Chalk>
                               }
                               cnst = <constant:ODM>
@@ -3199,7 +3227,11 @@ ClassDef{
                         scope = UnresolvedConstantLit{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
-                              scope = EmptyTree
+                              scope = ConstantLit{
+                                orig = nullptr
+                                symbol = ::<root>
+                                typeAlias = nullptr
+                              }
                               cnst = <constant:Chalk>
                             }
                             cnst = <constant:ODM>
@@ -4383,7 +4415,11 @@ ClassDef{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
                               scope = UnresolvedConstantLit{
-                                scope = EmptyTree
+                                scope = ConstantLit{
+                                  orig = nullptr
+                                  symbol = ::<root>
+                                  typeAlias = nullptr
+                                }
                                 cnst = <constant:Chalk>
                               }
                               cnst = <constant:ODM>
@@ -4448,7 +4484,11 @@ ClassDef{
                         scope = UnresolvedConstantLit{
                           scope = UnresolvedConstantLit{
                             scope = UnresolvedConstantLit{
-                              scope = EmptyTree
+                              scope = ConstantLit{
+                                orig = nullptr
+                                symbol = ::<root>
+                                typeAlias = nullptr
+                              }
                               cnst = <constant:Chalk>
                             }
                             cnst = <constant:ODM>
