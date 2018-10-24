@@ -327,6 +327,32 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
     return argTypesForBBToPass[cfg->deadBlock()->id];
 }
 
+core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
+    auto enclosingClass = enclosingClassSymbol.data(ctx);
+    ENFORCE(enclosingClass->isClassLinearizationComputed(), "Should have been linearized by resolver");
+
+    for (const auto &mixin : enclosingClass->mixins()) {
+        auto mixinMethod = mixin.data(ctx)->findMember(ctx, name);
+        if (mixinMethod.exists()) {
+            ENFORCE(mixinMethod.data(ctx)->isMethod());
+            return mixinMethod;
+        }
+    }
+
+    auto superClass = enclosingClass->superClass;
+    if (!superClass.exists()) {
+        core::SymbolRef none;
+        return none;
+    }
+
+    auto superMethod = superClass.data(ctx)->findMember(ctx, name);
+    if (superMethod.exists()) {
+        return superMethod;
+    } else {
+        return closestOverridenMethod(ctx, superClass, name);
+    }
+}
+
 void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
                      const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
                      unique_ptr<cfg::CFG> &cfg) {
@@ -385,6 +411,19 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
             fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), argType->show(ctx));
         }
         fmt::format_to(ss, ").");
+    }
+
+    {
+        auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
+        auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
+        if (closestMethod.exists()) {
+            if (closestMethod.data(ctx)->isAbstract()) {
+                fmt::format_to(ss, "implementation.");
+            }
+            if (closestMethod.data(ctx)->isOverridable()) {
+                fmt::format_to(ss, "overrides.");
+            }
+        }
     }
 
     if (methodSymbol.data(ctx)->name == core::Names::initialize() ||

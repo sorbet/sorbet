@@ -639,6 +639,9 @@ private:
                 }
             }
         }
+        if (sig.seen.overridable) {
+            method.data(ctx)->setOverridable();
+        }
         auto methodInfo = method.data(ctx);
 
         methodInfo->resultType = sig.returns;

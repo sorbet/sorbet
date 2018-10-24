@@ -215,4 +215,36 @@ test/cli/suggest-sig/suggest-sig.rb:112: This function does not have a `sig` htt
 test/cli/suggest-sig/suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 32
+
+test/cli/suggest-sig/suggest-sig.rb:134: This function does not have a `sig` http://go/e/7017
+     134 |  def foo; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:134: Insert `sig {implementation.returns(NilClass)}
+  `
+     134 |  def foo; end
+            ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:132: Insert `  extend T::Helpers
+`
+     132 |  include Abstract
+          ^
+
+test/cli/suggest-sig/suggest-sig.rb:144: This function does not have a `sig` http://go/e/7017
+     144 |  def foo; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:144: Insert `sig {overrides.returns(NilClass)}
+  `
+     144 |  def foo; end
+            ^
+
+test/cli/suggest-sig/suggest-sig.rb:154: This function does not have a `sig` http://go/e/7017
+     154 |  def foo; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:154: Insert `sig {returns(NilClass)}
+  `
+     154 |  def foo; end
+            ^
+Errors: 35

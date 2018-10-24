@@ -120,3 +120,36 @@ def cantRun(a)
   takesString(a)
   1
 end
+
+# Suggest "implementation." for these classes
+module Abstract
+  extend T::Helpers
+  abstract!
+  sig {abstract.void}
+  def foo; end
+end
+class Implementation
+  include Abstract
+
+  def foo; end
+end
+
+# Suggest "overrides." for these classes
+class Overridable
+  extend T::Helpers
+  sig {overridable.void}
+  def foo; end
+end
+class Overrides < Overridable
+  def foo; end
+end
+
+# Don't suggest either "implementation." or "overrides" for these classes
+class Parent
+  extend T::Helpers
+  sig {void}
+  def foo; end
+end
+class Child < Parent
+  def foo; end
+end
