@@ -1,3 +1,4 @@
+#include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
 #include "core/errors/infer.h"
@@ -360,12 +361,13 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         return;
     }
 
+    auto isSuggestableType = [&](shared_ptr<core::Type> type) {
+        return !(type == nullptr) && type->isFullyDefined() && !type->isUntyped();
+    };
+
     auto guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
-    if (!guessedReturnType->isFullyDefined()) {
-        return;
-    }
-    if (guessedReturnType->isUntyped()) {
+    if (!isSuggestableType(guessedReturnType)) {
         return;
     }
 
@@ -385,6 +387,27 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         return;
     }
 
+    auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
+
+    auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
+    auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
+
+    if (closestMethod.exists()) {
+        auto closestReturnType = closestMethod.data(ctx)->resultType;
+        if (isSuggestableType(closestReturnType)) {
+            guessedReturnType = closestReturnType;
+        }
+
+        auto hasSuggestableArgTypes = absl::c_all_of(closestMethod.data(ctx)->arguments(), [&](const auto &arg) {
+            return isSuggestableType(arg.data(ctx)->resultType);
+        });
+        if (hasSuggestableArgTypes) {
+            for (const auto &arg : closestMethod.data(ctx)->arguments()) {
+                guessedArgumentTypes[arg] = arg.data(ctx)->resultType;
+            }
+        }
+    }
+
     auto loc = methodSymbol.data(ctx)->loc();
     // Sometimes the methodSymbol we're looking at has been synthesized by a DSL pass, so no 'def' exists in the source
     if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
@@ -394,8 +417,6 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     fmt::memory_buffer ss;
     bool first = true;
 
-    auto argumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
-
     fmt::format_to(ss, "sig {{");
     if (!methodSymbol.data(ctx)->arguments().empty()) {
         fmt::format_to(ss, "params(");
@@ -404,7 +425,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                 fmt::format_to(ss, ", ");
             }
             first = false;
-            auto argType = argumentTypes[argSym];
+            auto argType = guessedArgumentTypes[argSym];
             if (!argType || argType->isBottom()) {
                 argType = core::Types::untypedUntracked();
             }
@@ -413,16 +434,11 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         fmt::format_to(ss, ").");
     }
 
-    {
-        auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
-        auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
-        if (closestMethod.exists()) {
-            if (closestMethod.data(ctx)->isAbstract()) {
-                fmt::format_to(ss, "implementation.");
-            }
-            if (closestMethod.data(ctx)->isOverridable()) {
-                fmt::format_to(ss, "overrides.");
-            }
+    if (closestMethod.exists()) {
+        if (closestMethod.data(ctx)->isAbstract()) {
+            fmt::format_to(ss, "implementation.");
+        } else {
+            fmt::format_to(ss, "override.");
         }
     }
 

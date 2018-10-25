@@ -923,6 +923,9 @@ void compareToUntyped(Context ctx, TypeConstraint &constr, const shared_ptr<Type
 // be proxies over class types, this means "class or class-like"
 bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &t1,
                                     const shared_ptr<Type> &t2) {
+    ENFORCE(t1 != nullptr);
+    ENFORCE(t2 != nullptr);
+
     if (t1.get() == t2.get()) {
         return true;
     }

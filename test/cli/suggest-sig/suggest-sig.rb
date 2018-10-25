@@ -134,22 +134,21 @@ class Implementation
   def foo; end
 end
 
-# Suggest "overrides." for these classes
-class Overridable
+# Suggest "override." for these classes
+class Parent
   extend T::Helpers
   sig {overridable.void}
   def foo; end
-end
-class Overrides < Overridable
-  def foo; end
-end
 
-# Don't suggest either "implementation." or "overrides" for these classes
-class Parent
-  extend T::Helpers
   sig {void}
-  def foo; end
+  def bar; end
+
+  def qux; end
 end
 class Child < Parent
   def foo; end
+
+  def bar; end
+
+  def qux; end
 end

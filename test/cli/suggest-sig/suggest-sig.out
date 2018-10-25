@@ -220,7 +220,7 @@ test/cli/suggest-sig/suggest-sig.rb:134: This function does not have a `sig` htt
      134 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:134: Insert `sig {implementation.returns(NilClass)}
+    test/cli/suggest-sig/suggest-sig.rb:134: Insert `sig {implementation.void}
   `
      134 |  def foo; end
             ^
@@ -230,21 +230,39 @@ test/cli/suggest-sig/suggest-sig.rb:134: This function does not have a `sig` htt
      132 |  include Abstract
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:144: This function does not have a `sig` http://go/e/7017
-     144 |  def foo; end
+test/cli/suggest-sig/suggest-sig.rb:146: This function does not have a `sig` http://go/e/7017
+     146 |  def qux; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:144: Insert `sig {overrides.returns(NilClass)}
+    test/cli/suggest-sig/suggest-sig.rb:146: Insert `sig {returns(NilClass)}
   `
-     144 |  def foo; end
+     146 |  def qux; end
             ^
 
-test/cli/suggest-sig/suggest-sig.rb:154: This function does not have a `sig` http://go/e/7017
-     154 |  def foo; end
+test/cli/suggest-sig/suggest-sig.rb:149: This function does not have a `sig` http://go/e/7017
+     149 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:154: Insert `sig {returns(NilClass)}
+    test/cli/suggest-sig/suggest-sig.rb:149: Insert `sig {override.void}
   `
-     154 |  def foo; end
+     149 |  def foo; end
             ^
-Errors: 35
+
+test/cli/suggest-sig/suggest-sig.rb:151: This function does not have a `sig` http://go/e/7017
+     151 |  def bar; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:151: Insert `sig {override.void}
+  `
+     151 |  def bar; end
+            ^
+
+test/cli/suggest-sig/suggest-sig.rb:153: This function does not have a `sig` http://go/e/7017
+     153 |  def qux; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/suggest-sig/suggest-sig.rb:153: Insert `sig {override.returns(NilClass)}
+  `
+     153 |  def qux; end
+            ^
+Errors: 37
