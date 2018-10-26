@@ -2,7 +2,7 @@ test/cli/print_generics/print_generics.rb:5: This function does not have a `sig`
      5 |def foo(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:5: Insert `sig {params(x: T.untyped).returns(T::Array[Integer])}
+    test/cli/print_generics/print_generics.rb:5: Insert `sig {generated.params(x: T.untyped).returns(T::Array[Integer]).generated}
 `
      5 |def foo(x)
         ^
@@ -11,7 +11,7 @@ test/cli/print_generics/print_generics.rb:9: This function does not have a `sig`
      9 |def bar(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:9: Insert `sig {params(x: T.untyped).returns(T::Hash[Symbol, Integer])}
+    test/cli/print_generics/print_generics.rb:9: Insert `sig {generated.params(x: T.untyped).returns(T::Hash[Symbol, Integer]).generated}
 `
      9 |def bar(x)
         ^
@@ -20,7 +20,7 @@ test/cli/print_generics/print_generics.rb:13: This function does not have a `sig
     13 |def qux(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:13: Insert `sig {params(x: T.untyped).returns(T::Enumerable[Integer])}
+    test/cli/print_generics/print_generics.rb:13: Insert `sig {generated.params(x: T.untyped).returns(T::Enumerable[Integer]).generated}
 `
     13 |def qux(x)
         ^
@@ -29,7 +29,7 @@ test/cli/print_generics/print_generics.rb:17: This function does not have a `sig
     17 |def wub(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:17: Insert `sig {params(x: T.untyped).returns(T::Range[Integer])}
+    test/cli/print_generics/print_generics.rb:17: Insert `sig {generated.params(x: T.untyped).returns(T::Range[Integer]).generated}
 `
     17 |def wub(x)
         ^
@@ -38,7 +38,7 @@ test/cli/print_generics/print_generics.rb:21: This function does not have a `sig
     21 |def zan(x)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/print_generics/print_generics.rb:21: Insert `sig {params(x: T.untyped).returns(T::Set[Integer])}
+    test/cli/print_generics/print_generics.rb:21: Insert `sig {generated.params(x: T.untyped).returns(T::Set[Integer]).generated}
 `
     21 |def zan(x)
         ^

@@ -68,6 +68,7 @@ public:
         static constexpr int METHOD_OVERLOADED = 0x0040;
         static constexpr int METHOD_ABSTRACT = 0x0020;
         static constexpr int METHOD_GENERIC = 0x0010;
+        static constexpr int METHOD_GENERATED_SIG = 0x0008;
         static constexpr int METHOD_OVERRIDABLE = 0x0004;
 
         // Type flags
@@ -210,6 +211,11 @@ public:
     inline bool isOverridable() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDABLE) != 0;
+    }
+
+    inline bool hasGeneratedSig() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_GENERATED_SIG) != 0;
     }
 
     inline bool isKeyword() const {
@@ -399,6 +405,11 @@ public:
     inline void setOverridable() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_OVERRIDABLE;
+    }
+
+    inline void setHasGeneratedSig() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_GENERATED_SIG;
     }
 
     inline void setBlockArgument() {

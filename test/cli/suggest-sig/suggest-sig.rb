@@ -157,3 +157,26 @@ class Child < Parent
 
   def qux; end
 end
+
+sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+def fooCondGeneratedCurly(a, cond)
+  if cond
+    takesInt(a)
+  else
+    takesString(a)
+  end
+end
+
+
+sig do
+  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
+  returns(T.untyped).
+  generated
+end
+def fooCondGeneratedDo(a, cond)
+  if cond
+    takesInt(a)
+  else
+    takesString(a)
+  end
+end

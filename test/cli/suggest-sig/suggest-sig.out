@@ -2,7 +2,7 @@ suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:5: Insert `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
+    suggest-sig.rb:5: Insert `sig {generated.params(a: T.untyped, b: T.untyped).returns(Integer).generated}
 `
      5 |def hazTwoArgs(a, b); 1; end;
         ^
@@ -15,7 +15,7 @@ suggest-sig.rb:7: This function does not have a `sig` http://go/e/7017
      7 |def baz
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:7: Insert `sig {returns(T.any(T::Array[T.untyped], String))}
+    suggest-sig.rb:7: Insert `sig {generated.returns(T.any(T::Array[T.untyped], String)).generated}
 `
      7 |def baz
         ^
@@ -24,7 +24,7 @@ suggest-sig.rb:18: This function does not have a `sig` http://go/e/7017
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:18: Insert `sig {void}
+    suggest-sig.rb:18: Insert `sig {generated.void.generated}
 `
     18 |def bla; give_me_void; end
         ^
@@ -37,7 +37,7 @@ suggest-sig.rb:20: This function does not have a `sig` http://go/e/7017
     20 |def bbq
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:20: Insert `sig {void}
+    suggest-sig.rb:20: Insert `sig {generated.void.generated}
 `
     20 |def bbq
         ^
@@ -50,7 +50,7 @@ suggest-sig.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:30: Insert `sig {returns(Integer)}
+    suggest-sig.rb:30: Insert `sig {generated.returns(Integer).generated}
 `
     30 |def give_me_literal; 1; end;
         ^
@@ -59,7 +59,7 @@ suggest-sig.rb:32: This function does not have a `sig` http://go/e/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:32: Insert `sig {returns(T::Array[T::Array[Integer]])}
+    suggest-sig.rb:32: Insert `sig {generated.returns(T::Array[T::Array[Integer]]).generated}
 `
     32 |def give_me_literal_nested; [[1]]; end;
         ^
@@ -68,7 +68,7 @@ suggest-sig.rb:34: This function does not have a `sig` http://go/e/7017
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:34: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:34: Insert `sig {generated.returns(NilClass).generated}
 `
     34 |private def root_private; end
         ^
@@ -77,7 +77,7 @@ suggest-sig.rb:36: This function does not have a `sig` http://go/e/7017
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:36: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:36: Insert `sig {generated.returns(NilClass).generated}
 `
     36 |protected def root_protected; end
         ^
@@ -86,7 +86,7 @@ suggest-sig.rb:46: This function does not have a `sig` http://go/e/7017
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:46: Insert `sig {params(a: Integer).returns(Integer)}
+    suggest-sig.rb:46: Insert `sig {generated.params(a: Integer).returns(Integer).generated}
 `
     46 |def foo(a)
         ^
@@ -95,7 +95,7 @@ suggest-sig.rb:56: This function does not have a `sig` http://go/e/7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:56: Insert `sig {params(a: T.any(Integer, String), cond: T.untyped).void}
+    suggest-sig.rb:56: Insert `sig {generated.params(a: T.any(Integer, String), cond: T.untyped).void.generated}
 `
     56 |def fooCond(a, cond)
         ^
@@ -104,7 +104,7 @@ suggest-sig.rb:64: This function does not have a `sig` http://go/e/7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:64: Insert `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
+    suggest-sig.rb:64: Insert `sig {generated.params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass).generated}
 `
     64 |def fooWhile(a, cond1, cond2)
         ^
@@ -117,7 +117,7 @@ suggest-sig.rb:79: This function does not have a `sig` http://go/e/7017
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:79: Insert `sig {returns(T::Array[T.untyped])}
+    suggest-sig.rb:79: Insert `sig {generated.returns(T::Array[T.untyped]).generated}
 `
     79 |def list_ints_or_empty_list
         ^
@@ -138,7 +138,7 @@ suggest-sig.rb:84: This function does not have a `sig` http://go/e/7017
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:84: Insert `sig {params(x: Integer).void}
+    suggest-sig.rb:84: Insert `sig {generated.params(x: Integer).void.generated}
 `
     84 |def dead(x)
         ^
@@ -159,16 +159,38 @@ suggest-sig.rb:118: This function does not have a `sig` http://go/e/7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:118: Insert `sig {params(a: T.untyped).returns(Integer)}
+    suggest-sig.rb:118: Insert `sig {generated.params(a: T.untyped).returns(Integer).generated}
 `
      118 |def cantRun(a)
           ^
+
+suggest-sig.rb:162: This function does not have a `sig` http://go/e/7017
+     162 |def fooCondGeneratedCurly(a, cond)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig.rb:161: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+`
+     161 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+     162 |def fooCondGeneratedCurly(a, cond)
+
+suggest-sig.rb:176: This function does not have a `sig` http://go/e/7017
+     176 |def fooCondGeneratedDo(a, cond)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig.rb:171: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+`
+     171 |sig do
+     172 |  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
+     173 |  returns(T.untyped).
+     174 |  generated
+     175 |end
+     176 |def fooCondGeneratedDo(a, cond)
 
 suggest-sig.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:41: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:41: Insert `sig {generated.returns(NilClass).generated}
   `
     41 |  private def a_private; end
           ^
@@ -177,7 +199,7 @@ suggest-sig.rb:43: This function does not have a `sig` http://go/e/7017
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:43: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:43: Insert `sig {generated.returns(NilClass).generated}
   `
     43 |  protected def a_protected; end
           ^
@@ -202,7 +224,7 @@ suggest-sig.rb:112: This function does not have a `sig` http://go/e/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:112: Insert `sig {params(merchant: T.untyped).returns(Integer)}
+    suggest-sig.rb:112: Insert `sig {generated.params(merchant: T.untyped).returns(Integer).generated}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
@@ -220,7 +242,7 @@ suggest-sig.rb:134: This function does not have a `sig` http://go/e/7017
      134 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:134: Insert `sig {implementation.void}
+    suggest-sig.rb:134: Insert `sig {generated.implementation.void.generated}
   `
      134 |  def foo; end
             ^
@@ -234,7 +256,7 @@ suggest-sig.rb:149: This function does not have a `sig` http://go/e/7017
      149 |  def qux; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:149: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:149: Insert `sig {generated.returns(NilClass).generated}
   `
      149 |  def qux; end
             ^
@@ -243,7 +265,7 @@ suggest-sig.rb:152: This function does not have a `sig` http://go/e/7017
      152 |  def initialize; end
             ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:152: Insert `sig {void}
+    suggest-sig.rb:152: Insert `sig {generated.void.generated}
   `
      152 |  def initialize; end
             ^
@@ -252,7 +274,7 @@ suggest-sig.rb:154: This function does not have a `sig` http://go/e/7017
      154 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:154: Insert `sig {override.void}
+    suggest-sig.rb:154: Insert `sig {generated.override.void.generated}
   `
      154 |  def foo; end
             ^
@@ -261,7 +283,7 @@ suggest-sig.rb:156: This function does not have a `sig` http://go/e/7017
      156 |  def bar; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:156: Insert `sig {override.void}
+    suggest-sig.rb:156: Insert `sig {generated.override.void.generated}
   `
      156 |  def bar; end
             ^
@@ -270,11 +292,11 @@ suggest-sig.rb:158: This function does not have a `sig` http://go/e/7017
      158 |  def qux; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig.rb:158: Insert `sig {override.returns(NilClass)}
+    suggest-sig.rb:158: Insert `sig {generated.override.returns(NilClass).generated}
   `
      158 |  def qux; end
             ^
-Errors: 38
+Errors: 40
 
 --------------------------------------------------------------------------
 
@@ -282,10 +304,10 @@ Errors: 38
 
 extend T::Helpers
 
-sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
+sig {generated.params(a: T.untyped, b: T.untyped).returns(Integer).generated}
 def hazTwoArgs(a, b); 1; end;
 
-sig {returns(T.any(T::Array[T.untyped], String))}
+sig {generated.returns(T.any(T::Array[T.untyped], String)).generated}
 def baz
   if someCondition
     []
@@ -297,10 +319,10 @@ end
 sig {void}
 def give_me_void; end
 
-sig {void}
+sig {generated.void.generated}
 def bla; give_me_void; end
 
-sig {void}
+sig {generated.void.generated}
 def bbq
   if someCondition
     give_me_void
@@ -311,29 +333,29 @@ end
 
 def idk(a); a / a + a * a; end
 
-sig {returns(Integer)}
+sig {generated.returns(Integer).generated}
 def give_me_literal; 1; end;
 
-sig {returns(T::Array[T::Array[Integer]])}
+sig {generated.returns(T::Array[T::Array[Integer]]).generated}
 def give_me_literal_nested; [[1]]; end;
 
-sig {returns(NilClass)}
+sig {generated.returns(NilClass).generated}
 private def root_private; end
 
-sig {returns(NilClass)}
+sig {generated.returns(NilClass).generated}
 protected def root_protected; end
 
 class A
   extend T::Helpers
 
-  sig {returns(NilClass)}
+  sig {generated.returns(NilClass).generated}
   private def a_private; end
 
-  sig {returns(NilClass)}
+  sig {generated.returns(NilClass).generated}
   protected def a_protected; end
 end
 
-sig {params(a: Integer).returns(Integer)}
+sig {generated.params(a: Integer).returns(Integer).generated}
 def foo(a)
  1 + a
 end
@@ -344,7 +366,7 @@ def takesInt(a); end;
 sig {params(a: String).void}
 def takesString(a); end;
 
-sig {params(a: T.any(Integer, String), cond: T.untyped).void}
+sig {generated.params(a: T.any(Integer, String), cond: T.untyped).void.generated}
 def fooCond(a, cond)
   if cond
     takesInt(a)
@@ -353,7 +375,7 @@ def fooCond(a, cond)
   end
 end
 
-sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
+sig {generated.params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass).generated}
 def fooWhile(a, cond1, cond2)
   while cond2
     if cond1
@@ -369,13 +391,13 @@ def takesBlock
   2
 end
 
-sig {returns(T::Array[T.untyped])}
+sig {generated.returns(T::Array[T.untyped]).generated}
 def list_ints_or_empty_list
   x = T.let(1, T.nilable(Integer))
   x.nil? ? [x] : []
 end
 
-sig {params(x: Integer).void}
+sig {generated.params(x: Integer).void.generated}
 def dead(x)
   if true || qux || blah
     takesInt(x)
@@ -405,14 +427,14 @@ class TestCarash
   def self.blar(merchant:)
   end
 
-  sig {params(merchant: T.untyped).returns(Integer)}
+  sig {generated.params(merchant: T.untyped).returns(Integer).generated}
   def self.load_account_business_profile(merchant)
     blar(merchant: merchant)
     1
   end
 end
 
-sig {params(a: T.untyped).returns(Integer)}
+sig {generated.params(a: T.untyped).returns(Integer).generated}
 def cantRun(a)
   takesInt(a)
   takesString(a)
@@ -430,7 +452,7 @@ class Implementation
   extend T::Helpers
   include Abstract
 
-  sig {implementation.void}
+  sig {generated.implementation.void.generated}
   def foo; end
 end
 
@@ -446,19 +468,38 @@ class Parent
   sig {void}
   def bar; end
 
-  sig {returns(NilClass)}
+  sig {generated.returns(NilClass).generated}
   def qux; end
 end
 class Child < Parent
-  sig {void}
+  sig {generated.void.generated}
   def initialize; end
 
-  sig {override.void}
+  sig {generated.override.void.generated}
   def foo; end
 
-  sig {override.void}
+  sig {generated.override.void.generated}
   def bar; end
 
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def qux; end
+end
+
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+def fooCondGeneratedCurly(a, cond)
+  if cond
+    takesInt(a)
+  else
+    takesString(a)
+  end
+end
+
+
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+def fooCondGeneratedDo(a, cond)
+  if cond
+    takesInt(a)
+  else
+    takesString(a)
+  end
 end

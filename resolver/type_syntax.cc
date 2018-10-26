@@ -216,6 +216,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             case core::Names::soft()._id:
                 break;
             case core::Names::generated()._id:
+                sig.seen.generated = true;
                 break;
             default:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidMethodSignature)) {

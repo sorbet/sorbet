@@ -2,7 +2,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:4: This function does not have
      4 |def foo; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:4: Insert `sig {returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:4: Insert `sig {generated.returns(NilClass).generated}
 `
      4 |def foo; end
         ^
@@ -15,7 +15,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:8: This function does not have
      8 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:8: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:8: Insert `sig {generated.override.returns(NilClass).generated}
   `
      8 |  def foo; end
           ^
@@ -29,7 +29,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:10: This function does not hav
     10 |  def bar; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:10: Insert `sig {returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:10: Insert `sig {generated.returns(NilClass).generated}
   `
     10 |  def bar; end
           ^
@@ -43,7 +43,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:14: This function does not hav
     14 |class SigAndExtendOneLine; def foo; end; end
                                    ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:14: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:14: Insert `sig {generated.override.returns(NilClass).generated}
 `
     14 |class SigAndExtendOneLine; def foo; end; end
         ^
@@ -57,7 +57,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:18: This function does not hav
     18 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:18: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:18: Insert `sig {generated.override.returns(NilClass).generated}
   `
     18 |  def foo; end
           ^
@@ -66,7 +66,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:23: This function does not hav
     23 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:23: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:23: Insert `sig {generated.override.returns(NilClass).generated}
   `
     23 |  def foo; end
           ^
@@ -80,7 +80,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:30: This function does not hav
     30 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:30: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:30: Insert `sig {generated.override.returns(NilClass).generated}
   `
     30 |  def foo; end
           ^
@@ -94,7 +94,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:34: This function does not hav
     34 |  def self.foo; end
           ^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:34: Insert `sig {override.returns(NilClass)}
+    test/cli/autocorrect-extend/autocorrect-extend.rb:34: Insert `sig {generated.override.returns(NilClass).generated}
   `
     34 |  def self.foo; end
           ^
@@ -110,34 +110,34 @@ Errors: 9
 # typed: strict
 
 # Don't extend T::Helpers for this one, because the class wasn't defined here.
-sig {returns(NilClass)}
+sig {generated.returns(NilClass).generated}
 def foo; end
 
 # Should only add one extend
 class SuggestSigAndExtend
   extend T::Helpers
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def foo; end
 
-  sig {returns(NilClass)}
+  sig {generated.returns(NilClass).generated}
   def bar; end
 end
 
 # This doesn't work right now, for both the injected 'sig' and 'extend'.
-sig {override.returns(NilClass)}
+sig {generated.override.returns(NilClass).generated}
 class SigAndExtendOneLine; def foo; end; end
 extend T::Helpers
 
 class DontSuggestExtend
   extend T::Helpers
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def foo; end
 end
 
 class Parent; end
 class Child < Parent
   extend T::Helpers
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def foo; end
 end
 
@@ -146,12 +146,12 @@ def project(x); x; end
 class MethodBetweenExtendAndSig
   extend T::Helpers
   project :sorbet
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def foo; end
 end
 
 class MethodOnSelf
   extend T::Helpers
-  sig {override.returns(NilClass)}
+  sig {generated.override.returns(NilClass).generated}
   def self.foo; end
 end

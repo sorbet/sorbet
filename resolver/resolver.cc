@@ -628,6 +628,9 @@ private:
         if (sig.seen.abstract) {
             method.data(ctx)->setAbstract();
         }
+        if (sig.seen.generated) {
+            method.data(ctx)->setHasGeneratedSig();
+        }
         if (!sig.typeArgs.empty()) {
             method.data(ctx)->setGenericMethod();
             for (auto &typeSpec : sig.typeArgs) {

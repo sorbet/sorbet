@@ -354,21 +354,25 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
     }
 }
 
-void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
+bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
                      const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
                      unique_ptr<cfg::CFG> &cfg) {
-    if (!constr.solve(ctx)) {
-        return;
-    }
+    bool guessedSomethingUseful = false;
+    shared_ptr<core::Type> guessedReturnType;
+    if (!constr.isEmpty()) {
+        if (!constr.solve(ctx)) {
+            return false;
+        }
 
-    auto isSuggestableType = [&](shared_ptr<core::Type> type) {
-        return !(type == nullptr) && type->isFullyDefined() && !type->isUntyped();
-    };
+        guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
 
-    auto guessedReturnType = core::Types::widen(ctx, core::Types::instantiate(ctx, methodReturnType, constr));
+        if (!guessedReturnType->isFullyDefined()) {
+            guessedReturnType = core::Types::untypedUntracked();
+        }
 
-    if (!isSuggestableType(guessedReturnType)) {
-        return;
+        guessedSomethingUseful = !guessedReturnType->isUntyped();
+    } else {
+        guessedReturnType = methodReturnType;
     }
 
     auto isBadArg = [&](const core::SymbolRef &arg) -> bool {
@@ -384,7 +388,7 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     };
     bool hasBadArg = absl::c_any_of(methodSymbol.data(ctx)->arguments(), isBadArg);
     if (hasBadArg) {
-        return;
+        return false;
     }
 
     auto guessedArgumentTypes = guessArgumentTypes(ctx, methodSymbol, cfg);
@@ -394,15 +398,13 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
 
     if (closestMethod.exists()) {
         auto closestReturnType = closestMethod.data(ctx)->resultType;
-        if (isSuggestableType(closestReturnType)) {
+        if (closestReturnType && !closestReturnType->isUntyped()) {
             guessedReturnType = closestReturnType;
         }
 
-        auto hasSuggestableArgTypes = absl::c_all_of(closestMethod.data(ctx)->arguments(), [&](const auto &arg) {
-            return isSuggestableType(arg.data(ctx)->resultType);
-        });
-        if (hasSuggestableArgTypes) {
-            for (const auto &arg : closestMethod.data(ctx)->arguments()) {
+        for (const auto &arg : closestMethod.data(ctx)->arguments()) {
+            auto argType = arg.data(ctx)->resultType;
+            if (argType && !argType->isUntyped()) {
                 guessedArgumentTypes[arg] = arg.data(ctx)->resultType;
             }
         }
@@ -411,13 +413,13 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     auto loc = methodSymbol.data(ctx)->loc();
     // Sometimes the methodSymbol we're looking at has been synthesized by a DSL pass, so no 'def' exists in the source
     if (loc.file().data(ctx).source().substr(loc.beginPos(), 3) != "def") {
-        return;
+        return false;
     }
 
     fmt::memory_buffer ss;
     bool first = true;
 
-    fmt::format_to(ss, "sig {{");
+    fmt::format_to(ss, "sig {{generated.");
     if (!methodSymbol.data(ctx)->arguments().empty()) {
         fmt::format_to(ss, "params(");
         for (auto &argSym : methodSymbol.data(ctx)->arguments()) {
@@ -426,12 +428,26 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
             }
             first = false;
             auto argType = guessedArgumentTypes[argSym];
-            if (!argType || argType->isBottom()) {
-                argType = core::Types::untypedUntracked();
+            shared_ptr<core::Type> chosenType;
+
+            auto oldType = argSym.data(ctx)->resultType;
+            if (!oldType || oldType->isUntyped()) {
+                if (!argType || argType->isBottom()) {
+                    chosenType = core::Types::untypedUntracked();
+                } else {
+                    guessedSomethingUseful = true;
+                    chosenType = argType;
+                }
+            } else {
+                // TODO: maybe combine the old and new types in some way?
+                chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), argType->show(ctx));
+            fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
         }
         fmt::format_to(ss, ").");
+    }
+    if (!guessedSomethingUseful) {
+        return false;
     }
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
@@ -445,20 +461,54 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     }
 
     if (methodSymbol.data(ctx)->name == core::Names::initialize() ||
-        core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType)) {
-        fmt::format_to(ss, "void}}");
+        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) && !guessedReturnType->isUntyped() &&
+         !guessedReturnType->isBottom())) {
+        fmt::format_to(ss, "void.generated}}");
     } else {
-        fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));
+        fmt::format_to(ss, "returns({}).generated}}", guessedReturnType->show(ctx));
     }
 
     auto [replacementLoc, padding] = findStartOfLine(ctx, loc);
     string spaces(padding, ' ');
+    bool hasExistingSig = methodSymbol.data(ctx)->resultType != nullptr;
 
+    if (!loc.file().exists()) {
+        return false;
+    }
+
+    if (hasExistingSig && !methodSymbol.data(ctx)->hasGeneratedSig()) {
+        return false;
+    }
+
+    if (hasExistingSig) {
+        // we need to replace existing sig. Lets find its beggining.
+        auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
+        auto lastSigCurly = textBeforeTheMethod.rfind("sig {");
+        auto lastSigDo = textBeforeTheMethod.rfind("sig do");
+        size_t chosenIdx;
+        if (lastSigCurly != string_view::npos) {
+            if (lastSigDo != string_view::npos) {
+                chosenIdx = max(lastSigCurly, lastSigDo);
+            } else {
+                chosenIdx = lastSigCurly;
+            }
+        } else {
+            if (lastSigDo != string_view::npos) {
+                chosenIdx = lastSigDo;
+            } else {
+                // failed to find sig
+                return false;
+            }
+        }
+
+        replacementLoc = core::Loc(loc.file(), chosenIdx, replacementLoc.endPos());
+    }
     e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
 
     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
         e.addAutocorrect(move(*suggestion));
     }
+    return true;
 }
 } // namespace
 
@@ -484,14 +534,15 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
 
     shared_ptr<core::Type> methodReturnType = cfg->symbol.data(ctx)->resultType;
     auto missingReturnType = methodReturnType == nullptr;
-    auto shouldHaveReturnType = true;
+    auto guessTypes = true;
 
     if (cfg->symbol.data(ctx)->name.data(ctx)->kind != core::NameKind::UTF8 ||
         cfg->symbol.data(ctx)->name == core::Names::staticInit() || !cfg->symbol.data(ctx)->loc().exists()) {
-        shouldHaveReturnType = false;
+        guessTypes = false;
     }
+
     if (missingReturnType) {
-        if (shouldHaveReturnType) {
+        if (guessTypes) {
             ENFORCE(constr->isSolved() && constr->isEmpty());
             _constr = make_unique<core::TypeConstraint>();
             constr = _constr.get();
@@ -657,7 +708,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         counterInc("infer.methods_typechecked.no_errors");
     }
 
-    if (missingReturnType && shouldHaveReturnType) {
+    if ((missingReturnType || cfg->symbol.data(ctx)->hasGeneratedSig()) && guessTypes) {
         if (auto e = ctx.state.beginError(cfg->symbol.data(ctx)->loc(), core::errors::Infer::UntypedMethod)) {
             e.setHeader("This function does not have a `sig`");
             maybeSuggestSig(ctx, e, cfg->symbol, methodReturnType, *constr, cfg);
