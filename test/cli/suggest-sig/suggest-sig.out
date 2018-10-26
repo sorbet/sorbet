@@ -1,268 +1,464 @@
-test/cli/suggest-sig/suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:5: Insert `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
+    suggest-sig.rb:5: Insert `sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
 `
      5 |def hazTwoArgs(a, b); 1; end;
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:8: Method `someCondition` does not exist on `Object` http://go/e/7003
+suggest-sig.rb:8: Method `someCondition` does not exist on `Object` http://go/e/7003
      8 |  if someCondition
              ^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:7: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:7: This function does not have a `sig` http://go/e/7017
      7 |def baz
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:7: Insert `sig {returns(T.any(T::Array[T.untyped], String))}
+    suggest-sig.rb:7: Insert `sig {returns(T.any(T::Array[T.untyped], String))}
 `
      7 |def baz
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:18: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:18: This function does not have a `sig` http://go/e/7017
     18 |def bla; give_me_void; end
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:18: Insert `sig {void}
+    suggest-sig.rb:18: Insert `sig {void}
 `
     18 |def bla; give_me_void; end
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:21: Method `someCondition` does not exist on `Object` http://go/e/7003
+suggest-sig.rb:21: Method `someCondition` does not exist on `Object` http://go/e/7003
     21 |  if someCondition
              ^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:20: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:20: This function does not have a `sig` http://go/e/7017
     20 |def bbq
         ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:20: Insert `sig {void}
+    suggest-sig.rb:20: Insert `sig {void}
 `
     20 |def bbq
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:28: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:30: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal; 1; end;
         ^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:30: Insert `sig {returns(Integer)}
+    suggest-sig.rb:30: Insert `sig {returns(Integer)}
 `
     30 |def give_me_literal; 1; end;
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:32: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:32: This function does not have a `sig` http://go/e/7017
     32 |def give_me_literal_nested; [[1]]; end;
         ^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:32: Insert `sig {returns(T::Array[T::Array[Integer]])}
+    suggest-sig.rb:32: Insert `sig {returns(T::Array[T::Array[Integer]])}
 `
     32 |def give_me_literal_nested; [[1]]; end;
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:34: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:34: This function does not have a `sig` http://go/e/7017
     34 |private def root_private; end
                 ^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:34: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:34: Insert `sig {returns(NilClass)}
 `
     34 |private def root_private; end
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:36: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:36: This function does not have a `sig` http://go/e/7017
     36 |protected def root_protected; end
                   ^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:36: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:36: Insert `sig {returns(NilClass)}
 `
     36 |protected def root_protected; end
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:46: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:46: This function does not have a `sig` http://go/e/7017
     46 |def foo(a)
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:46: Insert `sig {params(a: Integer).returns(Integer)}
+    suggest-sig.rb:46: Insert `sig {params(a: Integer).returns(Integer)}
 `
     46 |def foo(a)
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:56: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:56: This function does not have a `sig` http://go/e/7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:56: Insert `sig {params(a: T.any(Integer, String), cond: T.untyped).void}
+    suggest-sig.rb:56: Insert `sig {params(a: T.any(Integer, String), cond: T.untyped).void}
 `
     56 |def fooCond(a, cond)
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:64: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:64: This function does not have a `sig` http://go/e/7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:64: Insert `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
+    suggest-sig.rb:64: Insert `sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
 `
     64 |def fooWhile(a, cond1, cond2)
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:74: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:74: This function does not have a `sig` http://go/e/7017
     74 |def takesBlock
         ^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:79: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:79: This function does not have a `sig` http://go/e/7017
     79 |def list_ints_or_empty_list
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:79: Insert `sig {returns(T::Array[T.untyped])}
+    suggest-sig.rb:79: Insert `sig {returns(T::Array[T.untyped])}
 `
     79 |def list_ints_or_empty_list
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:85: This code is unreachable http://go/e/7006
+suggest-sig.rb:85: This code is unreachable http://go/e/7006
     85 |  if true || qux || blah
                      ^^^
 
-test/cli/suggest-sig/suggest-sig.rb:85: This code is unreachable http://go/e/7006
+suggest-sig.rb:85: This code is unreachable http://go/e/7006
     85 |  if true || qux || blah
                             ^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:88: This code is unreachable http://go/e/7006
+suggest-sig.rb:88: This code is unreachable http://go/e/7006
     88 |    takesString(x)
             ^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:84: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:84: This function does not have a `sig` http://go/e/7017
     84 |def dead(x)
         ^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:84: Insert `sig {params(x: Integer).void}
+    suggest-sig.rb:84: Insert `sig {params(x: Integer).void}
 `
     84 |def dead(x)
         ^
 
-test/cli/suggest-sig/suggest-sig.rb:92: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:92: This function does not have a `sig` http://go/e/7017
     92 |def with_block
         ^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:98: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:98: This function does not have a `sig` http://go/e/7017
     98 |def takesRepated(*a); end;
         ^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:99: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:99: This function does not have a `sig` http://go/e/7017
     99 |def hasNoName(*); end;
         ^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:118: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:118: This function does not have a `sig` http://go/e/7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:118: Insert `sig {params(a: T.untyped).returns(Integer)}
+    suggest-sig.rb:118: Insert `sig {params(a: T.untyped).returns(Integer)}
 `
      118 |def cantRun(a)
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:41: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:41: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:41: Insert `sig {returns(NilClass)}
   `
     41 |  private def a_private; end
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:43: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:43: This function does not have a `sig` http://go/e/7017
     43 |  protected def a_protected; end
                     ^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:43: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:43: Insert `sig {returns(NilClass)}
   `
     43 |  protected def a_protected; end
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:102: This function does not have a `sig` http://go/e/7017
      102 |Foo = Struct.new(:a, :b)
           ^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:112: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:112: This function does not have a `sig` http://go/e/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:112: Insert `sig {params(merchant: T.untyped).returns(Integer)}
+    suggest-sig.rb:112: Insert `sig {params(merchant: T.untyped).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:105: Insert `  extend T::Helpers
+    suggest-sig.rb:105: Insert `  extend T::Helpers
 `
      105 |  class Merchant
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
+suggest-sig.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-test/cli/suggest-sig/suggest-sig.rb:134: This function does not have a `sig` http://go/e/7017
+suggest-sig.rb:134: This function does not have a `sig` http://go/e/7017
      134 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:134: Insert `sig {implementation.void}
+    suggest-sig.rb:134: Insert `sig {implementation.void}
   `
      134 |  def foo; end
             ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:132: Insert `  extend T::Helpers
+    suggest-sig.rb:132: Insert `  extend T::Helpers
 `
      132 |  include Abstract
           ^
 
-test/cli/suggest-sig/suggest-sig.rb:146: This function does not have a `sig` http://go/e/7017
-     146 |  def qux; end
+suggest-sig.rb:149: This function does not have a `sig` http://go/e/7017
+     149 |  def qux; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:146: Insert `sig {returns(NilClass)}
+    suggest-sig.rb:149: Insert `sig {returns(NilClass)}
   `
-     146 |  def qux; end
+     149 |  def qux; end
             ^
 
-test/cli/suggest-sig/suggest-sig.rb:149: This function does not have a `sig` http://go/e/7017
-     149 |  def foo; end
-            ^^^^^^^
+suggest-sig.rb:152: This function does not have a `sig` http://go/e/7017
+     152 |  def initialize; end
+            ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:149: Insert `sig {override.void}
+    suggest-sig.rb:152: Insert `sig {void}
   `
-     149 |  def foo; end
+     152 |  def initialize; end
             ^
 
-test/cli/suggest-sig/suggest-sig.rb:151: This function does not have a `sig` http://go/e/7017
-     151 |  def bar; end
+suggest-sig.rb:154: This function does not have a `sig` http://go/e/7017
+     154 |  def foo; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:151: Insert `sig {override.void}
+    suggest-sig.rb:154: Insert `sig {override.void}
   `
-     151 |  def bar; end
+     154 |  def foo; end
             ^
 
-test/cli/suggest-sig/suggest-sig.rb:153: This function does not have a `sig` http://go/e/7017
-     153 |  def qux; end
+suggest-sig.rb:156: This function does not have a `sig` http://go/e/7017
+     156 |  def bar; end
             ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/suggest-sig/suggest-sig.rb:153: Insert `sig {override.returns(NilClass)}
+    suggest-sig.rb:156: Insert `sig {override.void}
   `
-     153 |  def qux; end
+     156 |  def bar; end
             ^
-Errors: 37
+
+suggest-sig.rb:158: This function does not have a `sig` http://go/e/7017
+     158 |  def qux; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig.rb:158: Insert `sig {override.returns(NilClass)}
+  `
+     158 |  def qux; end
+            ^
+Errors: 38
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+extend T::Helpers
+
+sig {params(a: T.untyped, b: T.untyped).returns(Integer)}
+def hazTwoArgs(a, b); 1; end;
+
+sig {returns(T.any(T::Array[T.untyped], String))}
+def baz
+  if someCondition
+    []
+  else
+    "[]"
+  end
+end
+
+sig {void}
+def give_me_void; end
+
+sig {void}
+def bla; give_me_void; end
+
+sig {void}
+def bbq
+  if someCondition
+    give_me_void
+  else
+    nil
+  end
+end
+
+def idk(a); a / a + a * a; end
+
+sig {returns(Integer)}
+def give_me_literal; 1; end;
+
+sig {returns(T::Array[T::Array[Integer]])}
+def give_me_literal_nested; [[1]]; end;
+
+sig {returns(NilClass)}
+private def root_private; end
+
+sig {returns(NilClass)}
+protected def root_protected; end
+
+class A
+  extend T::Helpers
+
+  sig {returns(NilClass)}
+  private def a_private; end
+
+  sig {returns(NilClass)}
+  protected def a_protected; end
+end
+
+sig {params(a: Integer).returns(Integer)}
+def foo(a)
+ 1 + a
+end
+
+sig {params(a: Integer).void}
+def takesInt(a); end;
+
+sig {params(a: String).void}
+def takesString(a); end;
+
+sig {params(a: T.any(Integer, String), cond: T.untyped).void}
+def fooCond(a, cond)
+  if cond
+    takesInt(a)
+  else
+    takesString(a)
+  end
+end
+
+sig {params(a: T.any(Integer, String), cond1: T.untyped, cond2: T.untyped).returns(NilClass)}
+def fooWhile(a, cond1, cond2)
+  while cond2
+    if cond1
+      takesInt(a)
+    else
+      takesString(a)
+    end
+  end
+end
+
+def takesBlock
+  yield 1
+  2
+end
+
+sig {returns(T::Array[T.untyped])}
+def list_ints_or_empty_list
+  x = T.let(1, T.nilable(Integer))
+  x.nil? ? [x] : []
+end
+
+sig {params(x: Integer).void}
+def dead(x)
+  if true || qux || blah
+    takesInt(x)
+  else
+    takesString(x)
+  end
+end
+
+def with_block
+  yield
+  nil
+end
+
+
+def takesRepated(*a); end;
+def hasNoName(*); end;
+
+# We used to generate multiple sigs for dsl'd methods here
+Foo = Struct.new(:a, :b)
+
+class TestCarash
+  extend T::Helpers
+  class Merchant
+  end
+
+  sig {params(merchant: Merchant).void}
+  def self.blar(merchant:)
+  end
+
+  sig {params(merchant: T.untyped).returns(Integer)}
+  def self.load_account_business_profile(merchant)
+    blar(merchant: merchant)
+    1
+  end
+end
+
+sig {params(a: T.untyped).returns(Integer)}
+def cantRun(a)
+  takesInt(a)
+  takesString(a)
+  1
+end
+
+# Suggest "implementation." for these classes
+module Abstract
+  extend T::Helpers
+  abstract!
+  sig {abstract.void}
+  def foo; end
+end
+class Implementation
+  extend T::Helpers
+  include Abstract
+
+  sig {implementation.void}
+  def foo; end
+end
+
+# Suggest "override." for these classes
+class Parent
+  extend T::Helpers
+  sig {void}
+  def initialize; end
+
+  sig {overridable.void}
+  def foo; end
+
+  sig {void}
+  def bar; end
+
+  sig {returns(NilClass)}
+  def qux; end
+end
+class Child < Parent
+  sig {void}
+  def initialize; end
+
+  sig {override.void}
+  def foo; end
+
+  sig {override.void}
+  def bar; end
+
+  sig {override.returns(NilClass)}
+  def qux; end
+end

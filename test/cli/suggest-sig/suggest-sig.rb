@@ -137,6 +137,9 @@ end
 # Suggest "override." for these classes
 class Parent
   extend T::Helpers
+  sig {void}
+  def initialize; end
+
   sig {overridable.void}
   def foo; end
 
@@ -146,6 +149,8 @@ class Parent
   def qux; end
 end
 class Child < Parent
+  def initialize; end
+
   def foo; end
 
   def bar; end

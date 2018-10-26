@@ -434,11 +434,13 @@ void maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         fmt::format_to(ss, ").");
     }
 
-    if (closestMethod.exists()) {
-        if (closestMethod.data(ctx)->isAbstract()) {
-            fmt::format_to(ss, "implementation.");
-        } else {
-            fmt::format_to(ss, "override.");
+    if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
+        if (closestMethod.exists()) {
+            if (closestMethod.data(ctx)->isAbstract()) {
+                fmt::format_to(ss, "implementation.");
+            } else {
+                fmt::format_to(ss, "override.");
+            }
         }
     }
 
