@@ -240,14 +240,14 @@ class Module < Object
 
   sig do
     params(
-        arg0: Symbol,
+        arg0: T.any(Symbol, String),
         arg1: Method,
     )
     .returns(Symbol)
   end
   sig do
     params(
-        arg0: Symbol,
+        arg0: T.any(Symbol, String),
         blk: BasicObject,
     )
     .returns(Symbol)
