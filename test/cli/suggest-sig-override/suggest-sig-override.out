@@ -1,0 +1,109 @@
+suggest-sig-override.rb:15: This function does not have a `sig` http://go/e/7017
+    15 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:15: Insert `sig {generated.implementation.void.generated}
+  `
+    15 |  def foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:13: Insert `  extend T::Helpers
+`
+    13 |  include Abstract
+        ^
+
+suggest-sig-override.rb:30: This function does not have a `sig` http://go/e/7017
+    30 |  def qux; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:30: Insert `sig {generated.returns(NilClass).generated}
+  `
+    30 |  def qux; end
+          ^
+
+suggest-sig-override.rb:33: This function does not have a `sig` http://go/e/7017
+    33 |  def initialize; end
+          ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:33: Insert `sig {generated.void.generated}
+  `
+    33 |  def initialize; end
+          ^
+
+suggest-sig-override.rb:35: This function does not have a `sig` http://go/e/7017
+    35 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:35: Insert `sig {generated.override.void.generated}
+  `
+    35 |  def foo; end
+          ^
+
+suggest-sig-override.rb:37: This function does not have a `sig` http://go/e/7017
+    37 |  def bar; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:37: Insert `sig {generated.override.void.generated}
+  `
+    37 |  def bar; end
+          ^
+
+suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
+    39 |  def qux; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:39: Insert `sig {generated.override.returns(NilClass).generated}
+  `
+    39 |  def qux; end
+          ^
+Errors: 6
+
+--------------------------------------------------------------------------
+
+# typed: strict
+
+extend T::Helpers
+
+# Suggest "implementation." for these classes
+module Abstract
+  extend T::Helpers
+  abstract!
+  sig {abstract.void}
+  def foo; end
+end
+class Implementation
+  extend T::Helpers
+  include Abstract
+
+  sig {generated.implementation.void.generated}
+  def foo; end
+end
+
+# Suggest "override." for these classes
+class Parent
+  extend T::Helpers
+  sig {void}
+  def initialize; end
+
+  sig {overridable.void}
+  def foo; end
+
+  sig {void}
+  def bar; end
+
+  sig {generated.returns(NilClass).generated}
+  def qux; end
+end
+class Child < Parent
+  sig {generated.void.generated}
+  def initialize; end
+
+  sig {generated.override.void.generated}
+  def foo; end
+
+  sig {generated.override.void.generated}
+  def bar; end
+
+  sig {generated.override.returns(NilClass).generated}
+  def qux; end
+end
