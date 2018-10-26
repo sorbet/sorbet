@@ -1367,28 +1367,33 @@ public:
 class ResolveSanityCheckWalk {
 public:
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
-        ENFORCE(original->symbol != core::Symbols::todo());
+        ENFORCE(original->symbol != core::Symbols::todo(),
+                "These should have all been resolved: ", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> original) {
-        ENFORCE(original->symbol != core::Symbols::todo());
+        ENFORCE(original->symbol != core::Symbols::todo(),
+                "These should have all been resolved: ", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedConstantLit(core::MutableContext ctx,
                                                                    unique_ptr<ast::UnresolvedConstantLit> original) {
-        ENFORCE(false, "should have been removed");
+        ENFORCE(false, "These should have all been removed: ", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformUnresolvedIdent(core::MutableContext ctx,
                                                              unique_ptr<ast::UnresolvedIdent> original) {
-        Error::raise("These should have all been removed");
+        ENFORCE(false, "These should have all been removed: ", original->toString(ctx));
+        return original;
     }
     unique_ptr<ast::Expression> postTransformSelf(core::MutableContext ctx, unique_ptr<ast::Self> original) {
-        ENFORCE(original->claz != core::Symbols::todo());
+        ENFORCE(original->claz != core::Symbols::todo(),
+                "These should have all been resolved: ", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::Expression> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> original) {
-        ENFORCE(original->symbol != core::Symbols::todo());
+        ENFORCE(original->symbol != core::Symbols::todo(),
+                "These should have all been resolved: ", original->toString(ctx));
         return original;
     }
     unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
