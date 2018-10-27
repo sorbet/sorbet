@@ -262,6 +262,11 @@ int realmain(int argc, char *argv[]) {
                 core::UnfreezeNameTable nameTableAccess(*gs);
                 core::UnfreezeSymbolTable symbolAccess(*gs);
 
+                vector<core::ErrorRegion> errs;
+                for (auto &tree : indexed) {
+                    auto file = tree->loc.file();
+                    errs.emplace_back(*gs, file);
+                }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
             }
 
