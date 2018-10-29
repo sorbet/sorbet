@@ -302,7 +302,7 @@ private:
                 return false;
             }
             if (auto e = ctx.state.beginError(job.ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically typeAlias to classes");
+                e.setHeader("Superclasses and mixins may only use `T.type_alias`es to classes");
             }
             resolved = core::Symbols::StubAncestor();
         }
@@ -366,7 +366,7 @@ private:
             ancestor = move(out);
         } else {
             if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
-                e.setHeader("Superclasses and mixins must be statically typeAlias");
+                e.setHeader("Superclasses and mixins must not be dynamic");
             }
             return;
         }

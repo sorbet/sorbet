@@ -5,5 +5,5 @@ A = Class.new
 # resolve it because we replace `A` with `StubClass` and we would
 # interpret B as unresolved.
 
-class B < A # error: Superclasses and mixins must be statically typeAlias to classes
+class B < A # error: Superclasses and mixins may only use `T.type_alias`es to classes
 end
