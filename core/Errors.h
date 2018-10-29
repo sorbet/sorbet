@@ -31,7 +31,7 @@ public:
 };
 
 class ErrorColors {
-    static const std::string coloredPatternSigil;
+    static constexpr std::string_view coloredPatternSigil = "`{}`";
     static std::string coloredPatternReplace;
     static std::string replaceAll(std::string_view inWhat, std::string_view from, std::string_view to);
 

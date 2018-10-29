@@ -168,8 +168,7 @@ unique_ptr<BasicError> ErrorBuilder::build() {
     return err;
 }
 
-const string ErrorColors::coloredPatternSigil = "`{}`";
-string ErrorColors::coloredPatternReplace = coloredPatternSigil;
+string ErrorColors::coloredPatternReplace = (string)coloredPatternSigil;
 
 void ErrorColors::enableColors() {
     rang::setControlMode(rang::control::Force);
