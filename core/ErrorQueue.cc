@@ -24,6 +24,20 @@ vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
         }
     }
 
+    stable_sort(out.begin(), out.end(), [](auto &left, auto &right) -> bool {
+        /* we want the most precise information to go first. Normally, they are computed in this order by construction,
+         * but threading artifact might reoder them, thus we'd like to sort them */
+        auto leftLength = left->termLoc.endPos() - left->termLoc.beginPos();
+        auto rightLength = right->termLoc.endPos() - right->termLoc.beginPos();
+        if (leftLength != rightLength) {
+            return leftLength < rightLength;
+        }
+        if (left->termLoc.beginPos() != right->termLoc.beginPos()) {
+            return left->termLoc.beginPos() < right->termLoc.beginPos();
+        }
+        return left->termLoc.endPos() < right->termLoc.endPos();
+    });
+
     return out;
 }
 

@@ -295,10 +295,8 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.noStdlib = raw["no-stdlib"].as<bool>();
         opts.stdoutHUPHack = raw["stdout-hup-hack"].as<bool>();
 
-        opts.threads = min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
-        if (opts.threads == 0) {
-            opts.threads = 1;
-        }
+        opts.threads = opts.runLSP ? raw["max-threads"].as<int>()
+                                   : min(raw["max-threads"].as<int>(), int(opts.inputFileNames.size() / 2));
 
         if (raw["h"].as<bool>()) {
             logger->info("{}", options.help({"", "advanced", "dev"}));

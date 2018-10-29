@@ -80,7 +80,6 @@ void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::
             }
         }
         options::Options emptyOpts;
-        emptyOpts.threads = 1;
         WorkerPool workers(emptyOpts.threads, logger);
         vector<string> empty;
         auto indexed = pipeline::index(gs, empty, payloadFiles, emptyOpts, workers, kvstore, logger);

@@ -34,11 +34,16 @@ WorkerPool::~WorkerPool() {
 }
 
 void WorkerPool::multiplexJob(string_view taskName, WorkerPool::Task t) {
-    multiplexJob_([t{move(t)}, taskName] {
-        setCurrentThreadName(taskName);
+    if (size > 0) {
+        multiplexJob_([t{move(t)}, taskName] {
+            setCurrentThreadName(taskName);
+            t();
+            return true;
+        });
+    } else {
+        // main thread is the worker.
         t();
-        return true;
-    });
+    }
 }
 
 void WorkerPool::multiplexJob_(WorkerPool::Task_ t) {
