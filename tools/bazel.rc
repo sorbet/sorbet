@@ -115,3 +115,14 @@ build --strip=never
 # Enable nice UIs. Taken from bazel.rc of Bazel itself.
 common --experimental_ui --experimental_ui_actions_shown 8
 common --show_progress_rate_limit=0.25
+
+# Webasm config. Please use either of those depending on your platform
+build:webasm-linux --crosstool_top=//tools/toolchain/webasm-linux --config=webasm
+build:webasm-darwin --crosstool_top=//tools/toolchain/webasm-darwin --config=webasm
+
+# common webasm config
+# Use --cpu as a differentiator.
+build:webasm --cpu=webasm --spawn_strategy=standalone --genrule_strategy=standalone --copt=-Oz --cxxopt=-Oz --linkopt=-Oz
+build:webasm --compilation_mode=opt
+# Specify a "sane" C++ toolchain for the host platform.
+build:webasm --host_crosstool_top=@bazel_tools//tools/cpp:toolchain

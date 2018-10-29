@@ -475,24 +475,9 @@ cloned it locally:
 git clone https://github.com/stripe/sorbet.run ~/stripe/sorbet.run
 ```
 
-To build the WASM and asm.js assets, follow these steps (macOS-specific):
+Run `./tools/scripts/update-sorbet.run.sh` and follow the steps suggested by that script.
 
-1.  `brew install emscripten cmake`
-
-    We're not using `cmake` directly--it's used transitively by the `emcc`
-    command.
-
-1.  Take note of the caveats in `brew info emscripten`.
-
-    In particular, after your first build (successful or unsuccessful), you will
-    have to edit some variables `~/.emscripten` to point at the proper paths
-    according to Homebrew.
-
-1.  `emscripten/build.sh`
-
-    Once this command finishes and everything is built, it will print a manual
-    step with where to copy the files into the sorbet.run repo.
-
-Note that the emscripten build is not run in CI, so it frequently becomes broken
-with time. If you get stuck building it, please ask on Slack!
+Note that the build using emscripten toolchain does not run in CI,
+so it frequently becomes broken with time.
+If you get stuck building it, please ask at #ruby-types Slack!
 

@@ -18,7 +18,12 @@
 
 #include <iostream>
 
+#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
+#else
+// so that we can compile this file with normal C++ compiler
+#define EMSCRIPTEN_KEEPALIVE
+#endif
 
 using namespace std;
 using namespace sorbet;

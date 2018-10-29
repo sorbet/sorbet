@@ -33,6 +33,13 @@ config_setting(
 )
 
 config_setting(
+    name = "webasm",
+    values = {
+        "cpu": "webasm",
+    },
+)
+
+config_setting(
     name = "linkshared",
     values = {
         "define": "unsanitized=false",

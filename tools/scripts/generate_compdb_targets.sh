@@ -16,7 +16,7 @@ bazel run --script_path "$buildifier" @com_github_bazelbuild_buildtools//buildif
 
 (
     sed -n '1,/BEGIN compile_commands/p' tools/BUILD
-    echo "$targets" | sed -e 's/^/"/' -e 's/$/",/'
+    echo "$targets" | sed -e 's/^/"/' -e 's/$/",/' | grep -v "\\.tar"
     sed -n '/END compile_commands/,$p' tools/BUILD
 ) | "$buildifier" > tools/BUILD.tmp
 

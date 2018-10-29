@@ -180,3 +180,31 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/d-bahr/CRCpp.git",
         build_file = "//third_party:crcpp.BUILD",
     )
+
+    native.new_http_archive(
+      name = "emscripten_toolchain",
+      url = "https://github.com/kripken/emscripten/archive/1.38.14.tar.gz",
+      build_file = "//third_party:emscripten-toolchain.BUILD",
+      sha256 = "c8dd08fcdda7c4efaba30f983ab252d3bdc78e1232b736ffbaf6ce9b6b96f62a",
+      strip_prefix = "emscripten-1.38.14"
+    )
+
+    native.new_http_archive(
+      name = "emscripten_clang_linux",
+      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.14.tar.gz",
+      build_file = "//third_party:emscripten-clang.BUILD",
+      strip_prefix = "emscripten-llvm-e1.38.14",
+      sha256 = "11480580900b7166720b1c06033aa8928052384abc7e4bd3fbaab7272b2e3f22",
+    )
+
+    native.new_http_archive(
+      name = "emscripten_clang_darwin",
+      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.14.tar.gz",
+      build_file = "//third_party:emscripten-clang.BUILD",
+      strip_prefix = "emscripten-llvm-e1.38.14",
+      sha256 = "f362e19ad637978bb7456fd00439e7574452fd00c28c145accb74a1e49639d08",
+    )
+
+
+
+
