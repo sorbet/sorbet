@@ -160,12 +160,22 @@ package(default_visibility = ["//visibility:public"])
         remote = "https://github.com/bazelbuild/buildifier.git",
     )
 
+
+    # optimized version of blake2 hashing algorithm
     new_git_repository(
         name = "com_github_blake2_libb2",
         commit = "7feb2bb35dfe89750fba62bcd909409e995af754",
         remote ="https://github.com/BLAKE2/libb2",
         build_file = "//third_party:libb2.BUILD",
     )
+
+    # portable reference implementation of blake2
+    new_git_repository(
+            name = "com_github_blake2_blake2",
+            commit = "320c325437539ae91091ce62efec1913cd8093c2",
+            remote ="https://github.com/BLAKE2/BLAKE2",
+            build_file = "//third_party:blake2.BUILD",
+        )
 
     new_git_repository(
         name = "com_github_msgpack_msgpack",

@@ -401,11 +401,13 @@ int realmain(int argc, char *argv[]) {
         returnCode = 1;
     }
 
-    // Let it go: leak memory so that we don't need to call destructors
-    for (auto &e : indexed) {
-        intentionallyLeakMemory(e.release());
+    if (!sorbet::emscripten_build) {
+        // Let it go: leak memory so that we don't need to call destructors
+        for (auto &e : indexed) {
+            intentionallyLeakMemory(e.release());
+        }
+        intentionallyLeakMemory(gs.release());
     }
-    intentionallyLeakMemory(gs.release());
 
     // je_malloc_stats_print(nullptr, nullptr, nullptr); // uncomment this to print jemalloc statistics
 

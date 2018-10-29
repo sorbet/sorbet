@@ -33,17 +33,8 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "//ast/desugar",
-        "//cfg",
-        "//cfg/builder",
-        "//core",
-        "//core/serialize",
-        "//dsl",
-        "//infer",
-        "//namer",
-        "//parser",
+        "//main:realmain",
         "//payload/binary:some",
         "//payload/text:empty",
-        "//resolver",
     ],
 )

@@ -1,15 +1,9 @@
 cc_library(
     name = "statsd",
-    srcs = glob(
-        [
-            "*.cc",
-            "*.h",
-        ],
-        exclude = [
-            # workaround https://github.com/flycheck/flycheck/issues/248 in emacs
-            "**/flycheck_*",
-        ],
-    ),
+    srcs = select({
+        "//tools/config:webasm": ["statsd-emscripten.cc"],
+        "//conditions:default": ["statsd.cc"],
+    }),
     hdrs = [
         "statsd.h",
     ],
@@ -21,6 +15,8 @@ cc_library(
     deps = [
         "//common",
         "//core",
-        "@statsd",
-    ],
+    ] + select({
+        "//tools/config:webasm": [],
+        "//conditions:default": ["@statsd"],
+    }),
 )

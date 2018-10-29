@@ -5,21 +5,26 @@ using namespace std;
 
 WorkerPool::WorkerPool(int size, const shared_ptr<spd::logger> &logger) : size(size), logger(logger) {
     logger->debug("Creating {} worker threads", size);
-    threadQueues.reserve(size);
-    for (int i = 0; i < size; i++) {
-        auto &last = threadQueues.emplace_back(make_unique<Queue>());
-        auto *ptr = last.get();
-        auto threadIdleName = absl::StrCat("idle", i);
-        threads.emplace_back(runInAThread(threadIdleName, [ptr, logger, threadIdleName]() {
-            bool repeat = true;
-            while (repeat) {
-                Task_ task;
-                setCurrentThreadName(threadIdleName);
-                ptr->wait_dequeue(task);
-                logger->debug("Worker got task");
-                repeat = task();
-            }
-        }));
+    if (sorbet::emscripten_build) {
+        ENFORCE(size == 0);
+        this->size = 0;
+    } else {
+        threadQueues.reserve(size);
+        for (int i = 0; i < size; i++) {
+            auto &last = threadQueues.emplace_back(make_unique<Queue>());
+            auto *ptr = last.get();
+            auto threadIdleName = absl::StrCat("idle", i);
+            threads.emplace_back(runInAThread(threadIdleName, [ptr, logger, threadIdleName]() {
+                bool repeat = true;
+                while (repeat) {
+                    Task_ task;
+                    setCurrentThreadName(threadIdleName);
+                    ptr->wait_dequeue(task);
+                    logger->debug("Worker got task");
+                    repeat = task();
+                }
+            }));
+        }
     }
     logger->debug("Worker threads created");
 }

@@ -47,16 +47,19 @@ public:
     template <typename Rep, typename Period>
     inline DequeueResult wait_pop_timed(Elem &elem, std::chrono::duration<Rep, Period> const &timeout) noexcept {
         DequeueResult ret;
-        ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
-        if (ret.shouldRetry) {
-            ret.returned = _queue.wait_dequeue_timed(elem, timeout);
-        } else { // all elements has been pushed, no need to wait.
-            ret.returned = _queue.try_dequeue(elem);
+        if (!sorbet::emscripten_build) {
+            ret.shouldRetry = elementsLeftToPush.load(std::memory_order_acquire) != 0;
+            if (ret.shouldRetry) {
+                ret.returned = _queue.wait_dequeue_timed(elem, timeout);
+            } else { // all elements has been pushed, no need to wait.
+                ret.returned = _queue.try_dequeue(elem);
+            }
+            if (ret.returned) {
+                elementsPopped.fetch_add(1, std::memory_order_relaxed);
+            }
+            return ret;
         }
-        if (ret.returned) {
-            elementsPopped.fetch_add(1, std::memory_order_relaxed);
-        }
-        return ret;
+        return try_pop(elem);
     }
 
     int doneEstimate() {

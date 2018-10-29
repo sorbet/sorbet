@@ -10,6 +10,7 @@
 #include "cfg/builder/builder.h"
 #include "common/Timer.h"
 #include "common/concurrency/ConcurrentQueue.h"
+#include "common/crypto_hashing/crypto_hashing.h"
 #include "core/Unfreeze.h"
 #include "core/errors/parser.h"
 #include "core/serialize/serialize.h"
@@ -20,10 +21,6 @@
 #include "parser/parser.h"
 #include "pipeline.h"
 #include "resolver/resolver.h"
-
-extern "C" {
-#include "blake2.h"
-};
 
 using namespace std;
 
@@ -81,12 +78,8 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     auto path = file.data(gs).path();
     string key(path.begin(), path.end());
     key += "//";
-    char out[BLAKE2B_OUTBYTES];
-
-    auto src = file.data(gs).source();
-    int err = blake2b((uint8_t *)&out[0], src.begin(), nullptr, sizeof(out), src.size(), 0);
-    ENFORCE(err == 0);
-    key += absl::BytesToHexString(string_view{&out[0], BLAKE2B_OUTBYTES});
+    auto hashBytes = sorbet::crypto_hashing::hash64(file.data(gs).source());
+    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), std::size(hashBytes)});
     return key;
 }
 

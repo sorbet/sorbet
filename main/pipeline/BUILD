@@ -18,6 +18,7 @@ cc_library(
         "//cfg",
         "//cfg/builder",
         "//common/concurrency",
+        "//common/crypto_hashing",
         "//common/kvstore",
         "//common/statsd",
         "//core",
@@ -32,6 +33,5 @@ cc_library(
         "//payload/binary",
         "//payload/text",
         "//resolver",
-        "@com_github_blake2_libb2",
     ],
 )
