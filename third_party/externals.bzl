@@ -122,7 +122,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="445998d7ac4e5d3c50411d377e3b50e960d2d6c2"
+        commit="f86f9413856b65afdd61fea938d684b8ab73115a"
     )
 
     new_git_repository(
@@ -169,7 +169,7 @@ package(default_visibility = ["//visibility:public"])
 
     new_git_repository(
         name = "com_github_msgpack_msgpack",
-        commit = "db54c78ed46e469ac86d57e168aa7bcdb4094749",
+        commit = "8792f42f8dbd5edc0f0cf975ccc8ea5c846667f4",
         remote = "https://github.com/msgpack/msgpack-c",
         build_file = "//third_party:msgpack.BUILD",
     )
