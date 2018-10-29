@@ -118,6 +118,7 @@ public:
     int lastNameKnownByParentGlobalState;
     bool silenceErrors = false;
     bool autocorrect = false;
+    bool suggestGarbageType = false;
 
     std::unique_ptr<GlobalState> deepCopy(bool keepId = false) const;
     mutable std::shared_ptr<ErrorQueue> errorQueue;

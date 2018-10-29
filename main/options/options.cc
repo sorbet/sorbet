@@ -138,6 +138,8 @@ cxxopts::Options buildOptions() {
                                     cxxopts::value<u8>()->default_value("0"));
     options.add_options("advanced")("stdout-hup-hack", "Monitor STDERR for HUP and exit on hangup");
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
+    options.add_options("advanced")(
+        "suggest-garbage-type", "When suggesting signatures in `typed: strict` mode, suggest `::Sorbet::GarbageType`");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     // Developer options
@@ -324,6 +326,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.suggestTyped = raw["suggest-typed"].as<bool>();
         opts.waitForDebugger = raw["wait-for-dbg"].as<bool>();
         opts.silenceErrors = raw["q"].as<bool>();
+        opts.suggestGarbageType = raw["suggest-garbage-type"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();

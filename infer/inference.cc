@@ -442,7 +442,11 @@ bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
+            if (!ctx.state.suggestGarbageType) {
+                fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
+            } else {
+                fmt::format_to(ss, "{}: ::Sorbet::GarbageType", argSym.data(ctx)->name.show(ctx));
+            }
         }
         fmt::format_to(ss, ").");
     }
@@ -460,9 +464,13 @@ bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         }
     }
 
-    if (methodSymbol.data(ctx)->name == core::Names::initialize() ||
-        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) && !guessedReturnType->isUntyped() &&
-         !guessedReturnType->isBottom())) {
+    bool suggestsVoid = methodSymbol.data(ctx)->name == core::Names::initialize() ||
+                        (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
+                         !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
+
+    if (ctx.state.suggestGarbageType) {
+        fmt::format_to(ss, "returns(::Sorbet::GarbageType).generated}}");
+    } else if (suggestsVoid) {
         fmt::format_to(ss, "void.generated}}");
     } else {
         fmt::format_to(ss, "returns({}).generated}}", guessedReturnType->show(ctx));
