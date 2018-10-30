@@ -2,7 +2,7 @@ suggest-sig-override.rb:15: This function does not have a `sig` http://go/e/7017
     15 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:15: Insert `sig {generated.implementation.void.generated}
+    suggest-sig-override.rb:15: Insert `sig {generated.implementation.void}
   `
     15 |  def foo; end
           ^
@@ -16,7 +16,7 @@ suggest-sig-override.rb:30: This function does not have a `sig` http://go/e/7017
     30 |  def qux; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:30: Insert `sig {generated.returns(NilClass).generated}
+    suggest-sig-override.rb:30: Insert `sig {generated.returns(NilClass)}
   `
     30 |  def qux; end
           ^
@@ -25,7 +25,7 @@ suggest-sig-override.rb:33: This function does not have a `sig` http://go/e/7017
     33 |  def initialize; end
           ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:33: Insert `sig {generated.void.generated}
+    suggest-sig-override.rb:33: Insert `sig {generated.void}
   `
     33 |  def initialize; end
           ^
@@ -34,7 +34,7 @@ suggest-sig-override.rb:35: This function does not have a `sig` http://go/e/7017
     35 |  def foo; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:35: Insert `sig {generated.override.void.generated}
+    suggest-sig-override.rb:35: Insert `sig {generated.override.void}
   `
     35 |  def foo; end
           ^
@@ -43,7 +43,7 @@ suggest-sig-override.rb:37: This function does not have a `sig` http://go/e/7017
     37 |  def bar; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:37: Insert `# sig {generated.override.void.generated}
+    suggest-sig-override.rb:37: Insert `# sig {generated.override.void}
   `
     37 |  def bar; end
           ^
@@ -52,7 +52,7 @@ suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
     39 |  def qux; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:39: Insert `# sig {generated.override.returns(NilClass).generated}
+    suggest-sig-override.rb:39: Insert `# sig {generated.override.returns(NilClass)}
   `
     39 |  def qux; end
           ^
@@ -75,7 +75,7 @@ class Implementation
   extend T::Helpers
   include Abstract
 
-  sig {generated.implementation.void.generated}
+  sig {generated.implementation.void}
   def foo; end
 end
 
@@ -91,19 +91,19 @@ class Parent
   sig {void}
   def bar; end
 
-  sig {generated.returns(NilClass).generated}
+  sig {generated.returns(NilClass)}
   def qux; end
 end
 class Child < Parent
-  sig {generated.void.generated}
+  sig {generated.void}
   def initialize; end
 
-  sig {generated.override.void.generated}
+  sig {generated.override.void}
   def foo; end
 
-  # sig {generated.override.void.generated}
+  # sig {generated.override.void}
   def bar; end
 
-  # sig {generated.override.returns(NilClass).generated}
+  # sig {generated.override.returns(NilClass)}
   def qux; end
 end

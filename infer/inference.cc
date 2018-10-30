@@ -475,11 +475,11 @@ bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
                          !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
 
     if (ctx.state.suggestGarbageType) {
-        fmt::format_to(ss, "returns(::Sorbet::GarbageType).generated}}");
+        fmt::format_to(ss, "returns(::Sorbet::GarbageType)}}");
     } else if (suggestsVoid) {
-        fmt::format_to(ss, "void.generated}}");
+        fmt::format_to(ss, "void}}");
     } else {
-        fmt::format_to(ss, "returns({}).generated}}", guessedReturnType->show(ctx));
+        fmt::format_to(ss, "returns({})}}", guessedReturnType->show(ctx));
     }
 
     auto [replacementLoc, padding] = findStartOfLine(ctx, loc);
