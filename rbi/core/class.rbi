@@ -22,7 +22,7 @@ class Class < Module
   end
   def instance_methods(arg0=T.unsafe(nil)); end
 
-  sig {returns(String)}
+  sig {returns(T.nilable(String))}
   def name(); end
 
   sig {returns(T.nilable(Class))}
