@@ -248,6 +248,9 @@ vector<unique_ptr<ast::Expression>> index(unique_ptr<core::GlobalState> &gs, con
                         }
 
                         switch (file.data(*lgs).strict) {
+                            case core::StrictLevel::Internal:
+                                Exception::raise("Should never happen");
+                                break;
                             case core::StrictLevel::Stripe:
                                 prodCounterInc("types.input.files.sigil.none");
                                 break;

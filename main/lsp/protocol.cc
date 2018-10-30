@@ -218,7 +218,7 @@ std::deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(dequ
                     return it;
                 }
             } else {
-                Error::raise("should never happen. Request id is neither int nor string.");
+                Exception::raise("should never happen. Request id is neither int nor string.");
             }
         }
     }

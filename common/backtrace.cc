@@ -36,7 +36,7 @@ void filter_unnecessary(string &out) {
     }
 }
 
-void sorbet::Error::print_backtrace() noexcept {
+void sorbet::Exception::print_backtrace() noexcept {
     int trace_size = 0;
     auto **messages = (char **)nullptr;
     string program_name = getProgramName();
@@ -55,5 +55,5 @@ void sorbet::Error::print_backtrace() noexcept {
 
 #else
 
-void sorbet::Error::print_backtrace() noexcept {}
+void sorbet::Exception::print_backtrace() noexcept {}
 #endif

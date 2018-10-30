@@ -1,5 +1,5 @@
 #include "core/ErrorQueue.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "lsp/QueryResponse.h"
 
 namespace sorbet::core {
@@ -41,9 +41,9 @@ vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
     return out;
 }
 
-vector<unique_ptr<core::BasicError>> ErrorQueue::drainAllErrors() {
+vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
     checkOwned();
-    vector<unique_ptr<core::BasicError>> out;
+    vector<unique_ptr<core::Error>> out;
     auto collected = drainAll();
 
     out.reserve(collected.size());

@@ -9,7 +9,7 @@ BufferedErrorQueue::BufferedErrorQueue(spd::logger &logger, spd::logger &tracer,
 
 BufferedErrorQueue::~BufferedErrorQueue() = default;
 
-void BufferedErrorQueue::pushError(const GlobalState &gs, unique_ptr<BasicError> error) {
+void BufferedErrorQueue::pushError(const GlobalState &gs, unique_ptr<Error> error) {
     if (!error->isSilenced) {
         this->nonSilencedErrorCount.fetch_add(1);
     }

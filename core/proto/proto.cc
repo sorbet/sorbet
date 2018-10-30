@@ -211,6 +211,8 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
 
 com::stripe::rubytyper::File::StrictLevel strictToProto(core::StrictLevel strict) {
     switch (strict) {
+        case core::StrictLevel::Internal:
+            Exception::raise("Should never happen");
         case core::StrictLevel::Stripe:
             return com::stripe::rubytyper::File::StrictLevel::File_StrictLevel_Stripe;
         case core::StrictLevel::Typed:

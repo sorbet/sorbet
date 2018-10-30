@@ -34,7 +34,7 @@ public:
     ConcurrentErrorQueue(spd::logger &logger, spd::logger &tracer, std::vector<int> errorCodeWhiteList = {});
     ~ConcurrentErrorQueue();
 
-    virtual void pushError(const core::GlobalState &gs, std::unique_ptr<core::BasicError> error) override;
+    virtual void pushError(const core::GlobalState &gs, std::unique_ptr<core::Error> error) override;
     virtual void pushQueryResponse(std::unique_ptr<core::QueryResponse> error) override;
     virtual void markFileForFlushing(core::FileRef file) override;
 };

@@ -4,7 +4,7 @@
 #include "../common/common.h"
 #include "cfg/CFG.h"
 #include "core/Context.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include "core/errors/infer.h"

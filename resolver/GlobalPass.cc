@@ -273,7 +273,7 @@ struct ParentLinearizationInformation {
 int maybeAddMixin(core::GlobalState &gs, core::SymbolRef forSym, InlinedVector<core::SymbolRef, 4> &mixinList,
                   core::SymbolRef mixin, core::SymbolRef parent, int pos) {
     if (forSym == mixin) {
-        Error::raise("Loop in mixins");
+        Exception::raise("Loop in mixins");
     }
     if (parent.data(gs)->derivesFrom(gs, mixin)) {
         return pos;

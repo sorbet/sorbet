@@ -1,5 +1,5 @@
 #include "common/common.h"
-#include "common/Error.h"
+#include "common/Exception.h"
 #include "os/os.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include <array>
@@ -78,7 +78,7 @@ string_view sorbet::FileOps::getExtension(string_view path) {
 class SetTerminateHandler {
 public:
     static void on_terminate() {
-        sorbet::Error::print_backtrace();
+        sorbet::Exception::print_backtrace();
     }
 
     SetTerminateHandler() {

@@ -1,7 +1,7 @@
 #ifndef SORBET_TYPECASE_H
 #define SORBET_TYPECASE_H
 
-#include "common/Error.h"
+#include "common/Exception.h"
 #include "common/common.h"
 #include <functional>
 #include <string>
@@ -46,7 +46,7 @@ template <typename Base, typename... Subclasses> void typecase(Base *base, Subcl
         (done = done || typecaseHelper(base, std::function<get_signature<Subclasses>>(funcs)))...};
 
     if (!done) {
-        sorbet::Error::raise("not handled typecase case: ", demangle(typeid(*base).name()));
+        sorbet::Exception::raise("not handled typecase case: ", demangle(typeid(*base).name()));
     }
 }
 } // namespace sorbet

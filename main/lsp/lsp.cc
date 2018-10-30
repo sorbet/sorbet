@@ -88,7 +88,7 @@ bool silenceError(core::ErrorClass what) {
     return false;
 }
 
-void LSPLoop::drainErrors() {
+void LSPLoop::drainDiagnostics() {
     for (auto &e : errorQueue->drainAllErrors()) {
         if (e->isSilenced || silenceError(e->what)) {
             continue;
@@ -128,8 +128,8 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
     return false;
 }
 
-void LSPLoop::pushErrors() {
-    drainErrors();
+void LSPLoop::pushDiagnostics() {
+    drainDiagnostics();
 
     // Dedup updates
     fast_sort(updatedErrors);
@@ -178,9 +178,9 @@ void LSPLoop::pushErrors() {
 
                         diagnostic.AddMember("range", loc2Range(e->loc), alloc);
                         diagnostic.AddMember("code", e->what.code, alloc);
-                        diagnostic.AddMember("message", e->formatted, alloc);
+                        diagnostic.AddMember("message", e->header, alloc);
 
-                        typecase(e.get(), [&](core::ComplexError *ce) {
+                        typecase(e.get(), [&](core::Error *ce) {
                             rapidjson::Value relatedInformation;
                             relatedInformation.SetArray();
                             for (auto &section : ce->sections) {

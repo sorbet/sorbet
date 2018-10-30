@@ -41,7 +41,7 @@ string Dedenter::dedent(string_view str) {
                     break;
                 }
                 default:
-                    Error::raise("unexpected whitespace: '", std::to_string(ch), "'");
+                    Exception::raise("unexpected whitespace: '", std::to_string(ch), "'");
             }
         } else {
             out.push_back(ch);
@@ -333,7 +333,7 @@ public:
 
                  [&](Next *n) { exprs = &n->exprs; },
 
-                 [&](Node *n) { Error::raise("Unexpected send node: ", n->nodeName()); });
+                 [&](Node *n) { Exception::raise("Unexpected send node: ", n->nodeName()); });
 
         auto &send = exprs->front();
         Loc block_loc = send->loc.join(tok_loc(end));
@@ -503,7 +503,7 @@ public:
                      result = move(node);
                  },
 
-                 [&](Node *n) { Error::raise("Unexpected dedent node: ", n->nodeName()); });
+                 [&](Node *n) { Exception::raise("Unexpected dedent node: ", n->nodeName()); });
 
         return result;
     }
@@ -747,7 +747,7 @@ public:
         if (auto *r = parser::cast_node<Rational>(numeric.get())) {
             return make_unique<Float>(loc, "-" + r->val);
         }
-        Error::raise("unexpected numeric type: ", numeric->nodeName());
+        Exception::raise("unexpected numeric type: ", numeric->nodeName());
     }
 
     unique_ptr<Node> nil(const token *tok) {
@@ -941,108 +941,108 @@ public:
     }
 
     unique_ptr<Node> tr_any(const token *special) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_arg_instance(unique_ptr<Node> base, sorbet::parser::NodeVec types, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_array(const token *begin, unique_ptr<Node> type_, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_cast(const token *begin, unique_ptr<Node> expr, const token *colon, unique_ptr<Node> type_,
                              const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_class(const token *special) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_consubtype(unique_ptr<Node> sub, unique_ptr<Node> super_) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_conunify(unique_ptr<Node> a, unique_ptr<Node> b) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_cpath(unique_ptr<Node> cpath) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_genargs(const token *begin, sorbet::parser::NodeVec genargs,
                                 sorbet::parser::NodeVec constraints, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_gendecl(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
                                 sorbet::parser::NodeVec constraints, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_gendeclarg(const token *tok, unique_ptr<Node> constraint) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_geninst(unique_ptr<Node> cpath, const token *begin, sorbet::parser::NodeVec genargs,
                                 const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_hash(const token *begin, unique_ptr<Node> key_type, const token *assoc,
                              unique_ptr<Node> value_type, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_instance(const token *special) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_ivardecl(const token *def, const token *name, unique_ptr<Node> type_) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_nil(const token *nil) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_nillable(const token *tilde, unique_ptr<Node> type_) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_or(unique_ptr<Node> a, unique_ptr<Node> b) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_paren(const token *begin, unique_ptr<Node> node, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_proc(const token *begin, unique_ptr<Node> args, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_prototype(unique_ptr<Node> genargs, unique_ptr<Node> args, unique_ptr<Node> return_type) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_returnsig(const token *arrow, unique_ptr<Node> ret) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_self(const token *special) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_tuple(const token *begin, sorbet::parser::NodeVec types, const token *end) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> tr_typed_arg(unique_ptr<Node> type_, unique_ptr<Node> arg) {
-        Error::raise("Unsupported TypedRuby syntax");
+        Exception::raise("Unsupported TypedRuby syntax");
     }
 
     unique_ptr<Node> true_(const token *tok) {

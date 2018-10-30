@@ -139,7 +139,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 current->exprs.emplace_back(cctx.target, a->loc, make_unique<Literal>(a->value));
                 ret = current;
             },
-            [&](ast::UnresolvedConstantLit *a) { Error::raise("Should have been eliminated by namer/resolver"); },
+            [&](ast::UnresolvedConstantLit *a) { Exception::raise("Should have been eliminated by namer/resolver"); },
             [&](ast::Field *a) {
                 current->exprs.emplace_back(
                     cctx.target, a->loc, make_unique<Ident>(global2Local(cctx, a->symbol, cctx.inWhat, cctx.aliases)));
@@ -179,7 +179,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                     // TODO(nelhage): Once namer is complete this should be a
                     // fatal error
                     // lhs = core::Symbols::todo();
-                    Error::raise("should never be reached");
+                    Exception::raise("should never be reached");
                 }
 
                 auto rhsCont = walk(cctx.withTarget(lhs), a->rhs.get(), current);
@@ -286,7 +286,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 ret = current;
             },
 
-            [&](ast::Block *a) { Error::raise("should never encounter a bare Block"); },
+            [&](ast::Block *a) { Exception::raise("should never encounter a bare Block"); },
 
             [&](ast::Next *a) {
                 core::LocalVariable exprSym = cctx.newTemporary(core::Names::nextTemp());
@@ -483,10 +483,10 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
 
             [&](ast::EmptyTree *n) { ret = current; },
 
-            [&](ast::ClassDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
-            [&](ast::MethodDef *c) { Error::raise("Should have been removed by FlattenWalk"); },
+            [&](ast::ClassDef *c) { Exception::raise("Should have been removed by FlattenWalk"); },
+            [&](ast::MethodDef *c) { Exception::raise("Should have been removed by FlattenWalk"); },
 
-            [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
+            [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: ", n->nodeName()); });
 
         // For, Rescue,
         // Symbol, Array,

@@ -846,7 +846,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                         tp.type = core::Types::untyped(ctx, symbol);
                     }
                 } else {
-                    Error::notImplemented();
+                    Exception::notImplemented();
                 }
 
                 if (lspQueryMatch) {

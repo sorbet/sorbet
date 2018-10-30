@@ -255,7 +255,7 @@ public:
             return Variance::CoVariant;
         if (isContravariant())
             return Variance::ContraVariant;
-        Error::raise("Should not happen");
+        Exception::raise("Should not happen");
     }
 
     inline bool isPublic() const {
@@ -281,7 +281,7 @@ public:
             return true;
         if (flags & Symbol::Flags::CLASS_CLASS)
             return false;
-        Error::raise("Should never happen");
+        Exception::raise("Should never happen");
     }
 
     inline bool isClassModuleSet() {

@@ -9,7 +9,7 @@
 #include "cfg/CFG.h"
 #include "cfg/builder/builder.h"
 #include "common/common.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
 #include "dsl/dsl.h"
@@ -140,7 +140,7 @@ unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
 }
 
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
-    vector<unique_ptr<sorbet::core::BasicError>> errors;
+    vector<unique_ptr<sorbet::core::Error>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
     auto rbName = test.basename + ".rb";
@@ -485,11 +485,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto expectedError = expectedErrors.find(make_pair(files.front(), line));
             if (expectedError == expectedErrors.end()) {
                 ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << '\n'
-                                                      << "Reported error: " << error->formatted;
-            } else if (error->formatted.find(expectedError->second.error) == string::npos) {
+                                                      << "Reported error: " << error->header;
+            } else if (error->header.find(expectedError->second.error) == string::npos) {
                 ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << '\n'
                                                       << " Expectation: " << expectedError->second.error << '\n'
-                                                      << " Reported error: " << error->formatted;
+                                                      << " Reported error: " << error->header;
             } else {
                 seenErrorLines[make_pair(files.front(), line)]++;
             }
@@ -508,13 +508,13 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
                     ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
                                                           "substring of) the expected error after `# error:` "
                                                        << '\n'
-                                                       << "The message was: '" << error->formatted << "'";
+                                                       << "The message was: '" << error->header << "'";
                 } else if (expectedError.find("MULTI") != string::npos) { // multiple errors. Ignore message and pos
                     continue;
-                } else if (error->formatted.find(expectedError) == string::npos) {
+                } else if (error->header.find(expectedError) == string::npos) {
                     ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << '\n'
                                                        << " Expectation: " << expectedError << '\n'
-                                                       << " Reported error: " << error->formatted;
+                                                       << " Reported error: " << error->header;
                 } else if (expectedErrorIt->second.beginPos != -1 &&
                            pos.first.column != expectedErrorIt->second.beginPos) {
                     ADD_FAILURE_AT(filePath.data(), i)
@@ -660,7 +660,7 @@ vector<Expectations> listDir(const char *name) {
 vector<Expectations> getInputs(string singleTest) {
     vector<Expectations> result;
     if (singleTest.empty()) {
-        sorbet::Error::raise("No test specified. Pass one with --single_test=<test_path>");
+        sorbet::Exception::raise("No test specified. Pass one with --single_test=<test_path>");
     }
 
     string parentDir;
@@ -682,7 +682,7 @@ vector<Expectations> getInputs(string singleTest) {
     }
 
     if (result.empty()) {
-        sorbet::Error::raise("None tests found!");
+        sorbet::Exception::raise("None tests found!");
     }
     return result;
 }

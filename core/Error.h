@@ -14,8 +14,8 @@ struct QueryResponse;
 
 class ErrorClass {
 public:
-    u2 code;
-    StrictLevel minLevel;
+    const u2 code;
+    const StrictLevel minLevel;
 
     constexpr ErrorClass(u2 code, StrictLevel minLevel) : code(code), minLevel(minLevel){};
     ErrorClass(const ErrorClass &rhs) = default;
@@ -44,31 +44,16 @@ public:
     static void disableColors();
 };
 
-class BasicError {
-public:
-    Loc loc;
-    ErrorClass what;
-    std::string formatted;
-    bool isCritical;
-    bool isSilenced = false;
-    std::vector<AutocorrectSuggestion> autocorrects;
-
-    BasicError(Loc loc, ErrorClass what, std::string_view formatted);
-
-    virtual std::string toString(const GlobalState &gs);
-    virtual ~BasicError() = default;
-};
-
 struct ErrorLine {
-    Loc loc;
-    std::string formattedMessage;
-    ErrorLine(Loc loc, std::string_view formattedMessage) : loc(loc), formattedMessage(formattedMessage){};
+    const Loc loc;
+    const std::string formattedMessage;
+    ErrorLine(Loc loc, std::string formattedMessage) : loc(loc), formattedMessage(move(formattedMessage)){};
 
     template <typename... Args> static ErrorLine from(Loc loc, std::string_view msg, const Args &... args) {
         std::string formatted = ErrorColors::format(msg, args...);
-        return ErrorLine(loc, formatted);
+        return ErrorLine(loc, move(formatted));
     }
-    std::string toString(const GlobalState &gs, bool color = true);
+    std::string toString(const GlobalState &gs, bool color = true) const;
 };
 
 struct ErrorSection {
@@ -81,19 +66,27 @@ struct ErrorSection {
         : header(header), messages(messages) {}
     ErrorSection(const std::initializer_list<ErrorLine> &messages) : ErrorSection("", messages) {}
     ErrorSection(const std::vector<ErrorLine> &messages) : ErrorSection("", messages) {}
-    std::string toString(const GlobalState &gs);
+    std::string toString(const GlobalState &gs) const;
 };
 
-class ComplexError : public BasicError {
+class Error {
 public:
-    std::vector<ErrorSection> sections;
-    virtual std::string toString(const GlobalState &gs);
-    ComplexError(Loc loc, ErrorClass what, std::string_view header, const std::initializer_list<ErrorSection> &sections)
-        : BasicError(loc, what, header), sections(sections) {}
-    ComplexError(Loc loc, ErrorClass what, std::string_view header, const std::vector<ErrorSection> &sections)
-        : BasicError(loc, what, header), sections(sections) {}
-    ComplexError(Loc loc, ErrorClass what, std::string_view header, const ErrorLine &other_line)
-        : BasicError(loc, what, header), sections({ErrorSection({other_line})}) {}
+    const Loc loc;
+    const ErrorClass what;
+    const std::string header;
+    const bool isSilenced;
+    std::vector<AutocorrectSuggestion> autocorrects;
+    const std::vector<ErrorSection> sections;
+
+    bool isCritical() const;
+    std::string toString(const GlobalState &gs) const;
+    Error(Loc loc, ErrorClass what, std::string header, std::vector<ErrorSection> sections,
+          std::vector<AutocorrectSuggestion> autocorrects, bool isSilenced)
+        : loc(loc), what(what), header(move(header)), isSilenced(isSilenced), autocorrects(move(autocorrects)),
+          sections(sections) {
+        ENFORCE(this->header.empty() || this->header.back() != '.');
+        ENFORCE(this->header.find('\n') == std::string::npos, this->header, " has a newline in it");
+    }
 };
 
 /*
@@ -147,9 +140,10 @@ class ErrorBuilder {
 
 public:
     ErrorBuilder(const ErrorBuilder &) = delete;
-    ErrorBuilder(ErrorBuilder &&) noexcept = default;
+    ErrorBuilder(ErrorBuilder &&) = default;
     ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what);
     ~ErrorBuilder();
+
     inline explicit operator bool() const {
         ENFORCE(state != State::DidBuild);
         return state == State::WillBuild;
@@ -175,7 +169,7 @@ public:
     // WillBuild. This passes ownership of the error to the caller; ErrorBuilder
     // will no longer report the error, and is the caller's responsibility to
     // pass it to GlobalState::_error if the error should actually be recorded.
-    std::unique_ptr<BasicError> build();
+    std::unique_ptr<Error> build();
 };
 
 } // namespace sorbet::core

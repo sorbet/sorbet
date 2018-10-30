@@ -1,6 +1,6 @@
 LOG BEGINS
 TIMESTAMP [consoleAndFile] [debug] Creating 0 worker threads
 TIMESTAMP [consoleAndFile] [debug] Worker threads created
-TIMESTAMP [typeErrorsAndFile] [error] No errors! Great job.
+TIMESTAMP [typeDiagnosticsAndFile] [error] No errors! Great job.
 TIMESTAMP [consoleAndFile] [debug] Counters and Histograms: 
 TIMESTAMP [consoleAndFile] [debug] Multiplexing job

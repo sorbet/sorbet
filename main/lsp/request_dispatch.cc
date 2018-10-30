@@ -69,7 +69,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 files.emplace_back(move(file));
 
                 tryFastPath(files);
-                pushErrors();
+                pushDiagnostics();
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
@@ -90,7 +90,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                     make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
 
                 tryFastPath(files);
-                pushErrors();
+                pushDiagnostics();
             }
         }
         if (method == LSPMethod::Initialized()) {
@@ -102,7 +102,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 vector<shared_ptr<core::File>> changedFiles;
                 runSlowPath(move(changedFiles));
                 ENFORCE(finalGs);
-                pushErrors();
+                pushDiagnostics();
                 this->globalStateHashes = computeStateHashes(finalGs->getFiles());
             }
         }

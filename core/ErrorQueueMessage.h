@@ -3,7 +3,7 @@
 
 namespace sorbet::core {
 
-class BasicError;
+class Error;
 struct QueryResponse;
 
 struct ErrorQueueMessage {
@@ -11,7 +11,7 @@ struct ErrorQueueMessage {
     Kind kind;
     core::FileRef whatFile;
     std::string text;
-    std::unique_ptr<BasicError> error;
+    std::unique_ptr<Error> error;
     std::unique_ptr<QueryResponse> queryResponse;
 };
 

@@ -60,13 +60,13 @@ constexpr bool debug_mode = false;
 constexpr bool debug_mode = true;
 #endif
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
-#define ENFORCE(x, ...)                                                                         \
-    ((::sorbet::debug_mode && !(x)) ? ({                                                        \
-        if (stopInDebugger()) {                                                                 \
-            (void)!(x);                                                                         \
-        }                                                                                       \
-        ::sorbet::Error::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
-    })                                                                                          \
+#define ENFORCE(x, ...)                                                                             \
+    ((::sorbet::debug_mode && !(x)) ? ({                                                            \
+        if (stopInDebugger()) {                                                                     \
+            (void)!(x);                                                                             \
+        }                                                                                           \
+        ::sorbet::Exception::enforce_handler(#x, __FILE__, __LINE__ _MAYBE_ADD_COMMA(__VA_ARGS__)); \
+    })                                                                                              \
                                     : false)
 
 #define DEBUG_ONLY(X) \
@@ -221,7 +221,7 @@ template <class Container> inline void fast_sort(Container &container) {
 #pragma GCC poison cuserid
 #pragma GCC poison rexec rexec_af
 
-#include "Error.h"
+#include "Exception.h"
 #include "JSON.h"
 #include "Levenstein.h"
 #include "typecase.h"

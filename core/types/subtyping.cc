@@ -1135,7 +1135,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                 return classSymbolIsAsGoodAs(ctx, c1->symbol, c2->symbol);
             }
         }
-        Error::raise("isSubTypeUnderConstraint(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
+        Exception::raise("isSubTypeUnderConstraint(", t1->typeName(), ", ", t2->typeName(), "): unreachable");
     }
 }
 
@@ -1238,7 +1238,7 @@ bool AndType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 }
 
 bool AliasType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("AliasType.derivesfrom");
+    Exception::raise("AliasType.derivesfrom");
 }
 
 void AliasType::_sanityCheck(Context ctx) {
@@ -1247,7 +1247,7 @@ void AliasType::_sanityCheck(Context ctx) {
 
 shared_ptr<Type> AliasType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                          const vector<shared_ptr<Type>> &targs) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 string MetaType::toString(const GlobalState &gs, int tabs) const {
@@ -1277,7 +1277,7 @@ bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
 
 shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                         const vector<shared_ptr<Type>> &targs) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 MetaType::MetaType(const shared_ptr<Type> &wrapped) : ProxyType(), wrapped(move(wrapped)) {

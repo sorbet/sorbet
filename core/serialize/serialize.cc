@@ -2,7 +2,7 @@
 #include "absl/base/casts.h"
 #include "absl/types/span.h"
 #include "ast/Helpers.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/GlobalState.h"
 #include "core/Symbols.h"
 #include "core/serialize/pickler.h"
@@ -74,7 +74,7 @@ vector<u1> Pickler::result(int compressionDegree) {
                                      data.size(), (compressed_data.size() - SIZE_BYTES * 2), compressionDegree);
     if (resultCode == 0) {
         // did not compress!
-        Error::raise("incompressible pickler?");
+        Exception::raise("incompressible pickler?");
     } else {
         memcpy(compressed_data.data(), &resultCode, SIZE_BYTES); // ~200K of our stdlib
         int uncompressedSize = data.size();
@@ -97,7 +97,7 @@ UnPickler::UnPickler(const u1 *const compressed) : pos(0) {
     int resultCode = Lizard_decompress_safe((const char *)(compressed + 2 * SIZE_BYTES), (char *)this->data.data(),
                                             compressedSize, uncompressedSize);
     if (resultCode != uncompressedSize) {
-        Error::raise("incomplete decompression");
+        Exception::raise("incomplete decompression");
     }
 }
 
@@ -334,7 +334,7 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
     } else if (auto *st = cast_type<SelfType>(what)) {
         p.putU4(11);
     } else {
-        Error::notImplemented();
+        Exception::notImplemented();
     }
 }
 
@@ -422,7 +422,7 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
             return make_shared<SelfType>();
         }
         default:
-            Error::raise("Uknown type tag {}", tag);
+            Exception::raise("Uknown type tag {}", tag);
     }
 }
 
@@ -546,7 +546,7 @@ int nearestPowerOf2(int from) {
 
 void SerializerImpl::unpickleGS(UnPickler &p, GlobalState &result) {
     if (p.getU4() != Serializer::VERSION) {
-        Error::raise("Payload version mismatch");
+        Exception::raise("Payload version mismatch");
     }
 
     vector<shared_ptr<File>> files(move(result.files));
@@ -882,7 +882,7 @@ void SerializerImpl::pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expr
                  pickleTree(p, file, a->typeAlias);
              },
 
-             [&](ast::Expression *n) { Error::raise("Unimplemented AST Node: ", n->nodeName()); });
+             [&](ast::Expression *n) { Exception::raise("Unimplemented AST Node: ", n->nodeName()); });
 }
 
 unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p, GlobalState &gs, FileRef file) {
@@ -1125,7 +1125,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::ConstantLit>(loc, sym, move(orig), move(resolved));
         }
     }
-    Error::raise("Not handled {}", kind);
+    Exception::raise("Not handled {}", kind);
 }
 
 unique_ptr<ast::Expression> Serializer::loadExpression(GlobalState &gs, const u1 *const p, u4 forceId) {

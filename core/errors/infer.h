@@ -1,6 +1,6 @@
 #ifndef SORBET_CORE_ERRORS_INFER_H
 #define SORBET_CORE_ERRORS_INFER_H
-#include "core/Errors.h"
+#include "core/Error.h"
 
 namespace sorbet::core::errors::Infer {
 // N.B infer does not run for untyped call at all. Level::Ruby here would be meaningless

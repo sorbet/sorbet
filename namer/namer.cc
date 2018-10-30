@@ -382,7 +382,7 @@ public:
                         ctx.owner.data(ctx)->arguments().emplace_back(sym);
                     }
                 } else {
-                    Error::raise("Must be a reference!");
+                    Exception::raise("Must be a reference!");
                 }
             }
 

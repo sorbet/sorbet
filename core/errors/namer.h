@@ -1,6 +1,6 @@
 #ifndef SORBET_CORE_ERRORS_NAMER_H
 #define SORBET_CORE_ERRORS_NAMER_H
-#include "core/Errors.h"
+#include "core/Error.h"
 
 namespace sorbet::core::errors::Namer {
 constexpr ErrorClass IncludeMutipleParam{4001, StrictLevel::Stripe};

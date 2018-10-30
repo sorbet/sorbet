@@ -1,6 +1,6 @@
 #include "GlobalState.h"
 
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Names.h"
 #include "core/Names_gen.h"
 #include "core/Types.h"
@@ -10,7 +10,7 @@
 
 #include "absl/strings/str_cat.h"
 #include "absl/strings/str_split.h"
-#include "errors/infer.h"
+#include "core/errors/infer.h"
 
 template class std::vector<std::pair<unsigned int, unsigned int>>;
 template class std::shared_ptr<sorbet::core::GlobalState>;
@@ -493,7 +493,7 @@ SymbolRef GlobalState::enterTypeMember(Loc loc, SymbolRef owner, NameRef name, V
     } else if (variance == Variance::ContraVariant) {
         flags = Symbol::Flags::TYPE_CONTRAVARIANT;
     } else {
-        Error::notImplemented();
+        Exception::notImplemented();
     }
 
     flags = flags | Symbol::Flags::TYPE_MEMBER;
@@ -514,7 +514,7 @@ SymbolRef GlobalState::enterTypeArgument(Loc loc, SymbolRef owner, NameRef name,
     } else if (variance == Variance::ContraVariant) {
         flags = Symbol::Flags::TYPE_CONTRAVARIANT;
     } else {
-        Error::notImplemented();
+        Exception::notImplemented();
     }
 
     flags = flags | Symbol::Flags::TYPE_ARGUMENT;
@@ -664,7 +664,7 @@ NameRef GlobalState::enterNameConstant(NameRef original) {
         probe_count++;
     }
     if (probe_count == hashTableSize) {
-        Error::raise("Full table?");
+        Exception::raise("Full table?");
     }
     ENFORCE(!nameTableFrozen);
 
@@ -752,7 +752,7 @@ NameRef GlobalState::getNameUnique(UniqueNameKind uniqueNameKind, NameRef origin
         bucketId = (bucketId + probe_count) & mask;
         probe_count++;
     }
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef original, u2 num) {
@@ -779,7 +779,7 @@ NameRef GlobalState::freshNameUnique(UniqueNameKind uniqueNameKind, NameRef orig
         probe_count++;
     }
     if (probe_count == hashTableSize) {
-        Error::raise("Full table?");
+        Exception::raise("Full table?");
     }
     ENFORCE(!nameTableFrozen);
 
@@ -820,7 +820,7 @@ FileRef GlobalState::enterFile(const shared_ptr<File> &file) {
                     : this->files) {
         if (f) {
             if (f->path() == file->path()) {
-                Error::raise("should never happen");
+                Exception::raise("should never happen");
             }
         }
     })
@@ -838,7 +838,7 @@ FileRef GlobalState::enterFile(string_view path, string_view source) {
 
 FileRef GlobalState::enterFileAt(string_view path, string_view source, FileRef id) {
     if (this->files[id.id()] && this->files[id.id()]->sourceType != File::Type::TombStone) {
-        Error::raise("should never happen");
+        Exception::raise("should never happen");
     }
 
     auto ret = GlobalState::enterNewFileAt(
@@ -1087,8 +1087,8 @@ int GlobalState::totalErrors() const {
     return errorQueue->nonSilencedErrorCount.load();
 }
 
-void GlobalState::_error(unique_ptr<BasicError> error) const {
-    if (error->isCritical) {
+void GlobalState::_error(unique_ptr<Error> error) const {
+    if (error->isCritical()) {
         errorQueue->hadCritical = true;
     }
     auto loc = error->loc;

@@ -42,7 +42,7 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
         // do nothing
     } else {
         auto node = argnode.get();
-        Error::raise("not implemented: ", demangle(typeid(*node).name()));
+        Exception::raise("not implemented: ", demangle(typeid(*node).name()));
     }
 
     auto body = node2TreeImpl(ctx, move(bodynode), uniqueCounter);
@@ -408,7 +408,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
                 } else {
-                    Error::notImplemented();
+                    Exception::notImplemented();
                 }
             },
             [&](parser::OrAsgn *orAsgn) {
@@ -458,7 +458,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
                 } else {
-                    Error::notImplemented();
+                    Exception::notImplemented();
                 }
             },
             [&](parser::OpAsgn *opAsgn) {
@@ -503,7 +503,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     unique_ptr<Expression> res = MK::EmptyTree(what->loc);
                     result.swap(res);
                 } else {
-                    Error::notImplemented();
+                    Exception::notImplemented();
                 }
             },
             [&](parser::CSend *csend) {
@@ -1193,7 +1193,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                             "Unknown exceptionSend function");
                     exceptions.emplace_back(move(exceptionsExpr));
                 } else {
-                    Error::raise("Bad inner node type");
+                    Exception::raise("Bad inner node type");
                 }
 
                 auto varExpr = node2TreeImpl(ctx, move(resbody->var), uniqueCounter);
@@ -1361,8 +1361,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
 
-            [&](parser::BlockPass *blockPass) { Error::raise("Send should have already handled the BlockPass"); },
-            [&](parser::Node *node) { Error::raise("Unimplemented Parser Node: ", node->nodeName()); });
+            [&](parser::BlockPass *blockPass) { Exception::raise("Send should have already handled the BlockPass"); },
+            [&](parser::Node *node) { Exception::raise("Unimplemented Parser Node: ", node->nodeName()); });
         ENFORCE(result.get() != nullptr, "desugar result unset");
         return result;
     } catch (SRubyException &) {

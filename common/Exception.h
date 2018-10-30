@@ -40,16 +40,9 @@ public:
     FileNotFoundException() : SRubyException("File not found") {}
 };
 
-class Error final {
+class Exception final {
 public:
     template <typename... TArgs>[[noreturn]] static bool raise(const TArgs &... args) __attribute__((noreturn));
-
-    template <typename... TArgs> static inline void check(bool cond, const TArgs &... args) {
-        if (debug_mode)
-            if (!cond) {
-                raise(args...);
-            }
-    }
 
     [[noreturn]] static inline void notImplemented() {
         raise("Not Implemented");
@@ -64,13 +57,13 @@ public:
     }
 };
 
-template <typename... TArgs>[[noreturn]] bool Error::raise(const TArgs &... args) {
+template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... args) {
     std::string message = absl::StrCat("", args...);
 
     if (message.size() > 0) {
-        fatalLogger->error("Error::raise(): {}\n", message);
+        fatalLogger->error("Exception::raise(): {}\n", message);
     } else {
-        fatalLogger->error("Error::raise() (sadly without a message)\n");
+        fatalLogger->error("Exception::raise() (sadly without a message)\n");
     }
     print_backtrace();
     stopInDebugger();

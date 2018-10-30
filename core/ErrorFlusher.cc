@@ -9,10 +9,10 @@ void ErrorFlusher::flushErrors(spdlog::logger &logger, vector<unique_ptr<ErrorQu
     fmt::memory_buffer critical, nonCritical;
     for (auto &error : errors) {
         if (error->kind == ErrorQueueMessage::Kind::Error) {
-            if (!error->error->isCritical && (error->error->isSilenced || !isWhitelisted(error->error->what.code))) {
+            if (error->error->isSilenced || !isWhitelisted(error->error->what.code)) {
                 continue;
             }
-            auto &out = error->error->isCritical ? critical : nonCritical;
+            auto &out = error->error->isCritical() ? critical : nonCritical;
             if (out.size() != 0) {
                 fmt::format_to(out, "\n\n");
             }

@@ -4,7 +4,7 @@
 #include <cxxopts.hpp>
 
 #include "FileFlatMapper.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "main/options/FileFlatMapper.h"
 #include "main/options/options.h"
 #include "options.h"
@@ -258,7 +258,7 @@ void readOptions(Options &opts, int argc, char *argv[],
     try {
         cxxopts::ParseResult raw = options.parse(argc, argv);
         if (raw["simulate-crash"].as<bool>()) {
-            Error::raise("simulated crash");
+            Exception::raise("simulated crash");
         }
 
         if (raw.count("files") > 0) {

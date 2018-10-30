@@ -1,6 +1,6 @@
 #ifndef SORBET_CORE_ERRORS_RESOLVER_H
 #define SORBET_CORE_ERRORS_RESOLVER_H
-#include "core/Errors.h"
+#include "core/Error.h"
 
 namespace sorbet::core::errors::Resolver {
 constexpr ErrorClass DynamicConstant{5001, StrictLevel::Typed};

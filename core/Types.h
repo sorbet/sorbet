@@ -3,7 +3,7 @@
 
 #include "common/Counters.h"
 #include "core/Context.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/SymbolRef.h"
 #include <memory>
 #include <string>
@@ -619,7 +619,7 @@ struct DispatchArgs {
 struct DispatchComponent {
     std::shared_ptr<Type> receiver;
     SymbolRef method;
-    std::vector<std::unique_ptr<BasicError>> errors;
+    std::vector<std::unique_ptr<Error>> errors;
 };
 
 struct DispatchResult {
@@ -634,8 +634,7 @@ struct DispatchResult {
 
     DispatchResult(std::shared_ptr<Type> returnType, std::shared_ptr<Type> receiver, SymbolRef method)
         : returnType(std::move(returnType)) {
-        components.emplace_back(
-            DispatchComponent{std::move(receiver), method, std::vector<std::unique_ptr<BasicError>>()});
+        components.emplace_back(DispatchComponent{std::move(receiver), method, std::vector<std::unique_ptr<Error>>()});
     }
 };
 

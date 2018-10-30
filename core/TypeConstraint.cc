@@ -210,7 +210,7 @@ shared_ptr<Type> TypeConstraint::findUpperBound(SymbolRef forWhat) const {
             return entry.second;
         }
     }
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 shared_ptr<Type> TypeConstraint::findLowerBound(SymbolRef forWhat) const {
@@ -219,7 +219,7 @@ shared_ptr<Type> TypeConstraint::findLowerBound(SymbolRef forWhat) const {
             return entry.second;
         }
     }
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 shared_ptr<Type> TypeConstraint::findSolution(SymbolRef forWhat) const {
@@ -228,7 +228,7 @@ shared_ptr<Type> TypeConstraint::findSolution(SymbolRef forWhat) const {
             return entry.second;
         }
     }
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 InlinedVector<SymbolRef, 4> TypeConstraint::getDomain() const {

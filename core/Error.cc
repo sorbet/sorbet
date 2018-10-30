@@ -3,15 +3,15 @@
 
 #include "absl/strings/str_replace.h"
 #include "core/Context.h"
+#include "core/Error.h"
 #include "core/ErrorQueue.h"
-#include "core/Errors.h"
 #include "core/GlobalState.h"
 #include "core/errors/errors.h"
 #include "core/lsp/QueryResponse.h"
 #include <algorithm>
 #include <sstream>
 
-template class std::unique_ptr<sorbet::core::BasicError>;
+template class std::unique_ptr<sorbet::core::Error>;
 namespace sorbet::core {
 
 using namespace std;
@@ -40,10 +40,8 @@ string ErrorColors::replaceAll(string_view inWhat, string_view from, string_view
     return _replaceAll(inWhat, from, to);
 }
 
-BasicError::BasicError(Loc loc, ErrorClass what, string_view formatted)
-    : loc(loc), what(what), formatted(formatted), isCritical(false) {
-    ENFORCE(formatted.empty() || formatted.back() != '.');
-    ENFORCE(formatted.find('\n') == string::npos, formatted, " has a newline in it");
+bool Error::isCritical() const {
+    return this->what.minLevel == StrictLevel::Internal;
 }
 
 string restoreColors(string_view formatted, rang::fg color) {
@@ -52,18 +50,7 @@ string restoreColors(string_view formatted, rang::fg color) {
     return _replaceAll(formatted, REVERT_COLOR_SIGIL, buf.str());
 }
 
-string BasicError::toString(const GlobalState &gs) {
-    stringstream buf;
-    buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
-        << restoreColors(formatted, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
-        << RESET_COLOR;
-    if (loc.exists()) {
-        buf << '\n' << loc.toString(gs, 2);
-    }
-    return buf.str();
-}
-
-string ErrorLine::toString(const GlobalState &gs, bool color) {
+string ErrorLine::toString(const GlobalState &gs, bool color) const {
     stringstream buf;
     string indent = "  ";
     buf << indent << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ":";
@@ -82,7 +69,7 @@ string ErrorLine::toString(const GlobalState &gs, bool color) {
     return buf.str();
 }
 
-string ErrorSection::toString(const GlobalState &gs) {
+string ErrorSection::toString(const GlobalState &gs) const {
     stringstream buf;
     string indent = "  ";
     bool coloredLineHeaders = true;
@@ -103,9 +90,14 @@ string ErrorSection::toString(const GlobalState &gs) {
     return buf.str();
 }
 
-string ComplexError::toString(const GlobalState &gs) {
+string Error::toString(const GlobalState &gs) const {
     stringstream buf;
-    buf << BasicError::toString(gs);
+    buf << RESET_STYLE << FILE_POS_STYLE << loc.filePosToString(gs) << RESET_STYLE << ": " << ERROR_COLOR
+        << restoreColors(header, ERROR_COLOR) << RESET_COLOR << LOW_NOISE_COLOR << " http://go/e/" << what.code
+        << RESET_COLOR;
+    if (loc.exists()) {
+        buf << '\n' << loc.toString(gs, 2);
+    }
 
     for (auto &section : this->sections) {
         buf << '\n' << section.toString(gs);
@@ -118,7 +110,9 @@ ErrorRegion::~ErrorRegion() {
 }
 
 ErrorBuilder::ErrorBuilder(const GlobalState &gs, bool willBuild, Loc loc, ErrorClass what)
-    : gs(gs), state(willBuild ? State::WillBuild : State::Unreported), loc(loc), what(what) {}
+    : gs(gs), state(willBuild ? State::WillBuild : State::Unreported), loc(loc), what(what) {
+    ENFORCE(willBuild || what.minLevel != StrictLevel::Internal);
+}
 
 void ErrorBuilder::_setHeader(string &&header) {
     ENFORCE(state == State::WillBuild);
@@ -153,18 +147,13 @@ ErrorBuilder::~ErrorBuilder() {
     this->gs._error(build());
 }
 
-unique_ptr<BasicError> ErrorBuilder::build() {
+unique_ptr<Error> ErrorBuilder::build() {
     ENFORCE(state != State::DidBuild);
     bool silence = state == State::Unreported;
     state = State::DidBuild;
 
-    unique_ptr<ComplexError> err =
-        make_unique<ComplexError>(this->loc, this->what, move(this->header), move(this->sections));
-    err->autocorrects = move(this->autocorrects);
-    err->isSilenced = silence;
-    if (this->what == errors::Internal::InternalError) {
-        err->isCritical = true;
-    }
+    unique_ptr<Error> err = make_unique<Error>(this->loc, this->what, move(this->header), move(this->sections),
+                                               move(this->autocorrects), silence);
     return err;
 }
 

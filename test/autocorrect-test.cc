@@ -3,7 +3,7 @@
 
 #include "common/common.h"
 #include "core/Context.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "spdlog/sinks/stdout_color_sinks.h"

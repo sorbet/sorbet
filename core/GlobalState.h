@@ -1,7 +1,7 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
+#include "core/Error.h"
 #include "core/ErrorQueue.h"
-#include "core/Errors.h"
 #include "core/Files.h"
 #include "core/Hashing.h"
 #include "core/Loc.h"
@@ -108,7 +108,7 @@ public:
     bool hadCriticalError() const;
 
     ErrorBuilder beginError(Loc loc, ErrorClass what) const;
-    void _error(std::unique_ptr<BasicError> error) const;
+    void _error(std::unique_ptr<Error> error) const;
 
     int totalErrors() const;
     bool wasModified() const;

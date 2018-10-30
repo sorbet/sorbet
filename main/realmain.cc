@@ -4,7 +4,7 @@
 #include "absl/debugging/symbolize.h"
 #include "absl/strings/str_cat.h"
 #include "common/statsd/statsd.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
@@ -127,7 +127,7 @@ int realmain(int argc, char *argv[]) {
     logger->set_pattern("%v");
     fatalLogger = logger;
 
-    auto typeErrorsConsole = make_shared<spd::logger>("typeErrors", stderr_color_sink);
+    auto typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderr_color_sink);
     typeErrorsConsole->set_pattern("%v");
 
     options::Options opts;
@@ -153,7 +153,7 @@ int realmain(int argc, char *argv[]) {
         }
         { // replace type error logger
             vector<spd::sink_ptr> sinks{stderr_color_sink, fileSink};
-            auto combinedLogger = make_shared<spd::logger>("typeErrorsAndFile", begin(sinks), end(sinks));
+            auto combinedLogger = make_shared<spd::logger>("typeDiagnosticsAndFile", begin(sinks), end(sinks));
             spd::register_logger(combinedLogger);
             combinedLogger->set_level(spd::level::trace); // pass through everything, let the sinks decide
             typeErrorsConsole = combinedLogger;

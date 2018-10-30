@@ -59,7 +59,7 @@ string LiteralType::showValue(const GlobalState &gs) const {
     } else if (undSymbol == Symbols::FalseClass()) {
         return "false";
     } else {
-        Error::raise("should not be reachable");
+        Exception::raise("should not be reachable");
     }
 }
 

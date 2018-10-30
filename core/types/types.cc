@@ -315,7 +315,7 @@ shared_ptr<Type> LiteralType::underlying() const {
         case LiteralTypeKind::False:
             return Types::falseClass();
     }
-    Error::raise("should never be reached");
+    Exception::raise("should never be reached");
 }
 
 TupleType::TupleType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> elements)
@@ -583,11 +583,11 @@ bool TypeVar::isFullyDefined() {
 }
 
 shared_ptr<Type> TypeVar::getCallArguments(Context ctx, NameRef name) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 bool TypeVar::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
+    Exception::raise("should never happen. You're missing a call to either Types::approximate or Types::instantiate");
 }
 
 TypeVar::TypeVar(SymbolRef sym) : sym(sym) {
@@ -635,23 +635,23 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
 }
 
 bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 shared_ptr<Type> LambdaParam::getCallArguments(Context ctx, NameRef name) {
-    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 shared_ptr<Type> SelfTypeParam::getCallArguments(Context ctx, NameRef name) {
-    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, DispatchArgs args) {
-    Error::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult SelfTypeParam::dispatchCall(Context ctx, DispatchArgs args) {
@@ -753,15 +753,15 @@ bool SelfType::isFullyDefined() {
 }
 
 shared_ptr<Type> SelfType::getCallArguments(Context ctx, NameRef name) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 bool SelfType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 DispatchResult SelfType::dispatchCall(Context ctx, DispatchArgs args) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 void SelfType::_sanityCheck(Context ctx) {}

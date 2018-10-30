@@ -31,7 +31,7 @@ unsigned int Name::hash(const GlobalState &gs) const {
         case CONSTANT:
             return _hash_mix_constant(CONSTANT, cnst.original.id());
         default:
-            Error::raise("Unknown name kind?", kind);
+            Exception::raise("Unknown name kind?", kind);
     }
 }
 
@@ -50,7 +50,7 @@ string Name::toString(const GlobalState &gs) const {
         case CONSTANT:
             return fmt::format("<constant:{}>", this->cnst.original.toString(gs));
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 }
 
@@ -68,7 +68,7 @@ string Name::show(const GlobalState &gs) const {
         case CONSTANT:
             return this->cnst.original.toString(gs);
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 }
 string_view Name::shortName(const GlobalState &gs) const {
@@ -80,7 +80,7 @@ string_view Name::shortName(const GlobalState &gs) const {
         case CONSTANT:
             return this->cnst.original.data(gs)->shortName(gs);
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 }
 
@@ -108,7 +108,7 @@ void Name::sanityCheck(const GlobalState &gs) const {
                     "Name table corrupted, re-entering CONSTANT name gives different id");
             break;
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 }
 
@@ -131,7 +131,7 @@ bool Name::isClassName(const GlobalState &gs) const {
                         this->cnst.original.data(gs)->unique.uniqueNameKind == UniqueNameKind::ResolverMissingClass);
             return true;
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 }
 
@@ -225,7 +225,7 @@ Name Name::deepCopy(const GlobalState &to) const {
             break;
 
         default:
-            Error::notImplemented();
+            Exception::notImplemented();
     }
 
     return out;

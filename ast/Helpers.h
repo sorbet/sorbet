@@ -112,7 +112,7 @@ public:
         if (auto *nm = cast_tree<UnresolvedIdent>(&name)) {
             return std::make_unique<UnresolvedIdent>(name.loc, nm->kind, nm->name);
         }
-        Error::notImplemented();
+        Exception::notImplemented();
     }
 
     static std::unique_ptr<Expression> Assign(core::Loc loc, std::unique_ptr<Expression> lhs,

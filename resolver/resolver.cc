@@ -3,7 +3,7 @@
 #include "ast/Trees.h"
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Names.h"
 #include "core/StrictLevel.h"
 #include "core/core.h"
@@ -176,9 +176,9 @@ private:
             return true;
         }
         if (depth > 256) {
-            Error::raise("Too many recursive calls trying to resolve constant:\n", job.out->original->cnst.show(ctx),
-                         "\n", job.out->original->loc.file().data(ctx).path(), "\n",
-                         job.out->original->loc.toString(ctx));
+            Exception::raise("Too many recursive calls trying to resolve constant:\n",
+                             job.out->original->cnst.show(ctx), "\n", job.out->original->loc.file().data(ctx).path(),
+                             "\n", job.out->original->loc.toString(ctx));
         }
         auto resolved =
             resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases, lastRun);
@@ -1047,7 +1047,7 @@ public:
             } else if (send->args.size() == 2) {
                 arg = 1;
             } else {
-                Error::raise("Wrong arg count");
+                Exception::raise("Wrong arg count");
             }
 
             auto *hash = ast::cast_tree<ast::Hash>(send->args[arg].get());
@@ -1344,7 +1344,7 @@ public:
                 break;
             default:
                 // These should have been removed in the namer
-                Error::notImplemented();
+                Exception::notImplemented();
         }
 
         core::SymbolRef sym = klass.data(ctx)->findMemberTransitive(ctx, id->name);

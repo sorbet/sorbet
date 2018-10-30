@@ -2,5 +2,5 @@
 #include <csignal>
 
 int main() {
-    sorbet::Error::raise("oops");
+    sorbet::Exception::raise("oops");
 }

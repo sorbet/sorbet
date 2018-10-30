@@ -1,6 +1,6 @@
 #include "ast/treemap/treemap.h"
 #include "common/Timer.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Files.h"
 #include "core/GlobalState.h"
 #include "core/Names.h"

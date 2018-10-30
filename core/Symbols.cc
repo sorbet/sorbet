@@ -201,7 +201,7 @@ SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef na
             }
         }
 
-        Error::raise("findMemberTransitive hit a loop while resolving ");
+        Exception::raise("findMemberTransitive hit a loop while resolving ");
     }
 
     SymbolRef result = findMember(gs, name);
@@ -474,7 +474,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         } else if (this->isInvariant()) {
             variance = "(=)"sv;
         } else {
-            Error::raise("type without variance");
+            Exception::raise("type without variance");
         }
     }
 

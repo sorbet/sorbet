@@ -16,7 +16,7 @@ private:
 
 public:
     ErrorFlusher(std::vector<int> errorCodeWhiteList) : errorCodeWhiteList(move(errorCodeWhiteList)) {}
-    void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> errors);
+    void flushErrors(spdlog::logger &logger, std::vector<std::unique_ptr<ErrorQueueMessage>> error);
     void flushErrorCount(spdlog::logger &logger, int count);
     void flushAutocorrects(const GlobalState &gs);
 };

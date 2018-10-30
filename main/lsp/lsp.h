@@ -20,7 +20,7 @@
 //
 //
 // This is an implementation of LSP protocol(version 3.0) for Ruby typer
-// So far we only support diagnostics but the intention is to
+// So far we only support errors but the intention is to
 // continue adding support to features already in LSP:
 // - code navigation(jump to definition, find all usages, etc)
 // - refactorings(rename classes)
@@ -156,7 +156,7 @@ class LSPLoop {
     std::vector<core::FileRef> updatedErrors;
     /** LSP clients do not store errors on their side. We have to resend the entire list of errors
      * every time we send a single new one */
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::BasicError>>> errorsAccumulated;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Error>>> errorsAccumulated;
     /** Root of LSP client workspace */
     std::string rootUri;
 
@@ -190,8 +190,8 @@ class LSPLoop {
     void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
     void sendError(rapidjson::Document &forRequest, int errorCode, const std::string &errorStr);
 
-    void pushErrors();
-    void drainErrors();
+    void pushDiagnostics();
+    void drainDiagnostics();
     rapidjson::Value loc2Range(core::Loc loc);
     rapidjson::Value loc2Location(core::Loc loc);
     void addLocIfExists(rapidjson::Value &result, core::Loc loc);

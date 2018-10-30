@@ -4,7 +4,7 @@ using namespace std;
 
 namespace sorbet::realmain {
 
-void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::BasicError> error) {
+void ConcurrentErrorQueue::pushError(const core::GlobalState &gs, unique_ptr<core::Error> error) {
     if (!error->isSilenced) {
         this->nonSilencedErrorCount.fetch_add(1);
     }

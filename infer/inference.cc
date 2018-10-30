@@ -542,7 +542,7 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
                                       make_shared<core::SelfTypeParam>(typeArgument));
         }
         if (!constr->solve(ctx)) {
-            Error::raise("should never happen");
+            Exception::raise("should never happen");
         }
     }
 

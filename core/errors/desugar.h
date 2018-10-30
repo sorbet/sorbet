@@ -1,6 +1,6 @@
 #ifndef SORBET_CORE_ERRORS_DESUGAR_H
 #define SORBET_CORE_ERRORS_DESUGAR_H
-#include "core/Errors.h"
+#include "core/Error.h"
 
 namespace sorbet::core::errors::Desugar {
 constexpr ErrorClass InvalidSingletonDef{3001, StrictLevel::Typed};

@@ -3,18 +3,20 @@
 
 namespace sorbet::core {
 enum class StrictLevel {
+    // Internal Sorbet errors. There is no syntax to make those errors ignored.
+    Internal = 0,
     // Temporary; A level defined as "whatever Stripe needs it to be right now".
     // Eventually this will be named "Ruby" and contain even fewer checks.
-    Stripe = 0,
+    Stripe = 1,
 
     // Normally the first level you transition your files to.
-    Typed = 1,
+    Typed = 2,
 
     // Everything must be declared.
-    Strict = 2,
+    Strict = 3,
 
     // Nothing can be T.untyped in the file. Basically Java.
-    Strong = 3,
+    Strong = 4,
 
     // Custom levels which mirror another level with some tweaks.
 

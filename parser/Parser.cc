@@ -15,7 +15,7 @@ extern const char *dclass_strings[];
 
 using namespace std;
 
-class DiagnosticToError {
+class ErrorToError {
     static u4 translatePos(size_t pos, u4 max_off) {
         if (pos == 0) {
             return pos;
@@ -43,7 +43,7 @@ public:
                     level = "Fatal"sv;
                     break;
                 default:
-                    Error::notImplemented();
+                    Exception::notImplemented();
             }
             string msg("Parse {}: ");
             msg.append(dclass_strings[(int)diag.error_class()]);
@@ -61,7 +61,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) 
     auto source = file.data(gs).source();
     ruby_parser::typedruby24 driver(string(source.begin(), source.end()), Builder::interface);
     auto ast = unique_ptr<Node>(builder.build(&driver));
-    DiagnosticToError::run(gs, file, driver.diagnostics);
+    ErrorToError::run(gs, file, driver.diagnostics);
 
     if (!ast) {
         core::Loc loc(file, 0, 0);

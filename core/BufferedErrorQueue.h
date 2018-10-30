@@ -7,7 +7,7 @@ namespace spd = spdlog;
 
 namespace sorbet::core {
 struct ErrorQueueMessage;
-class BasicError;
+class Error;
 
 // This is a simple, non-thread-safe, implementation of ErrorQueue that buffers
 // all errors in memory for later retrieval.
@@ -24,8 +24,8 @@ public:
     BufferedErrorQueue(spd::logger &logger, spd::logger &tracer, std::vector<int> errorCodeWhiteList = {});
     ~BufferedErrorQueue();
 
-    virtual void pushError(const GlobalState &gs, std::unique_ptr<BasicError> error) override;
-    virtual void pushQueryResponse(std::unique_ptr<QueryResponse> error) override;
+    virtual void pushError(const GlobalState &gs, std::unique_ptr<Error> error) override;
+    virtual void pushQueryResponse(std::unique_ptr<QueryResponse> response) override;
     virtual void markFileForFlushing(FileRef file) override;
 };
 } // namespace sorbet::core

@@ -163,7 +163,7 @@ GENERATE_HAS_MEMBER(postTransformCast);
     template <class FUNC, class CTX, bool has> class PostPonePreTransform_##X {         \
     public:                                                                             \
         static unique_ptr<X> call(CTX ctx, unique_ptr<X> cd, FUNC &what) {              \
-            Error::raise("should never be called. Incorrect use of TreeMap?");          \
+            Exception::raise("should never be called. Incorrect use of TreeMap?");      \
             return nullptr;                                                             \
         }                                                                               \
     };                                                                                  \
@@ -187,7 +187,7 @@ GENERATE_HAS_MEMBER(postTransformCast);
     template <class FUNC, class CTX, bool has> class PostPonePostTransform_##X {         \
     public:                                                                              \
         static unique_ptr<Expression> call(CTX ctx, unique_ptr<X> cd, FUNC &what) {      \
-            Error::raise("should never be called. Incorrect use of TreeMap?");           \
+            Exception::raise("should never be called. Incorrect use of TreeMap?");       \
             return nullptr;                                                              \
         }                                                                                \
     };                                                                                   \
@@ -736,7 +736,7 @@ private:
                 return mapCast(std::unique_ptr<Cast>(static_cast<Cast *>(what.release())), ctx);
             } else {
                 auto *ref = what.get();
-                Error::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
+                Exception::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
             }
         } catch (SRubyException &e) {
             throw ReportedRubyException{e, loc};

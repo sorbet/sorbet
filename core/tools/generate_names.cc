@@ -15,7 +15,7 @@ struct NameDef {
 
     NameDef(string_view srcName, string_view val) : srcName(string(srcName)), val(string(val)) {
         if (srcName == val) {
-            sorbet::Error::raise("Only pass one arg for '", val, "'");
+            sorbet::Exception::raise("Only pass one arg for '", val, "'");
         }
     }
     NameDef(string_view srcName) : srcName(string(srcName)), val(string(srcName)) {}

@@ -44,7 +44,7 @@ shared_ptr<Type> OrType::getCallArguments(Context ctx, NameRef name) {
 }
 
 DispatchResult TypeVar::dispatchCall(Context ctx, DispatchArgs args) {
-    Error::raise("should never happen");
+    Exception::raise("should never happen");
 }
 
 DispatchResult AndType::dispatchCall(Context ctx, DispatchArgs args) {
@@ -122,10 +122,10 @@ bool isSetter(Context ctx, NameRef fun) {
     return fun.data(ctx)->raw.utf8.back() == '=';
 }
 
-unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc,
-                                    SymbolRef inClass, SymbolRef method, const TypeAndOrigins &argTpe,
-                                    const SymbolData argSym, const shared_ptr<Type> &selfType,
-                                    vector<shared_ptr<Type>> &targs, Loc loc, bool mayBeSetter = false) {
+unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc, SymbolRef inClass,
+                               SymbolRef method, const TypeAndOrigins &argTpe, const SymbolData argSym,
+                               const shared_ptr<Type> &selfType, vector<shared_ptr<Type>> &targs, Loc loc,
+                               bool mayBeSetter = false) {
     auto ref = argSym->ref(ctx);
     shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
     if (!expectedType) {
@@ -162,7 +162,7 @@ unique_ptr<BasicError> matchArgType(Context ctx, TypeConstraint &constr, Loc cal
     return nullptr;
 }
 
-unique_ptr<BasicError> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, SymbolRef arg) {
+unique_ptr<Error> missingArg(Context ctx, Loc callLoc, Loc receiverLoc, SymbolRef method, SymbolRef arg) {
     if (auto e = ctx.state.beginError(callLoc, errors::Infer::MethodArgumentCountMismatch)) {
         e.setHeader("Missing required keyword argument `{}` for method `{}`", arg.data(ctx)->name.toString(ctx),
                     method.data(ctx)->show(ctx));
@@ -202,7 +202,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
             NameRef overloadName = ctx.state.getNameUnique(UniqueNameKind::Overload, primary.data(ctx)->name, i);
             SymbolRef overload = primary.data(ctx)->owner.data(ctx)->findMember(ctx, overloadName);
             if (!overload.exists()) {
-                Error::raise("Corruption of overloads?");
+                Exception::raise("Corruption of overloads?");
             } else {
                 allCandidates.emplace_back(overload);
                 current = overload;
@@ -447,7 +447,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                            : mayBeOverloaded;
 
     DispatchResult result;
-    result.components.emplace_back(DispatchComponent{args.selfType, method, vector<unique_ptr<BasicError>>()});
+    result.components.emplace_back(DispatchComponent{args.selfType, method, vector<unique_ptr<Error>>()});
 
     const SymbolData data = method.data(ctx);
     unique_ptr<TypeConstraint> maybeConstraint;
@@ -736,11 +736,11 @@ shared_ptr<Type> AppliedType::getCallArguments(Context ctx, NameRef name) {
 }
 
 DispatchResult AliasType::dispatchCall(Context ctx, DispatchArgs args) {
-    Error::raise("AliasType::dispatchCall");
+    Exception::raise("AliasType::dispatchCall");
 }
 
 shared_ptr<Type> AliasType::getCallArguments(Context ctx, NameRef name) {
-    Error::raise("AliasType::getCallArgumentType");
+    Exception::raise("AliasType::getCallArgumentType");
 }
 
 DispatchResult MetaType::dispatchCall(Context ctx, DispatchArgs args) {

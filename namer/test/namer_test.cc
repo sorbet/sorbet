@@ -5,7 +5,7 @@
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
 #include "core/BufferedErrorQueue.h"
-#include "core/Errors.h"
+#include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "dsl/dsl.h"
 #include "namer/namer.h"
