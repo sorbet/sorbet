@@ -124,7 +124,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         continue;
                     }
                     shared_ptr<core::GlobalState> lgs =
-                        make_shared<core::GlobalState>((make_shared<realmain::ConcurrentErrorQueue>(*logger, *logger)));
+                        make_shared<core::GlobalState>((make_shared<core::ErrorQueue>(*logger, *logger)));
                     lgs->initEmpty();
                     lgs->errorQueue->ignoreFlushes = true;
                     lgs->silenceErrors = true;

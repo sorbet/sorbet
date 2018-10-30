@@ -8,9 +8,9 @@
 #include "core/Files.h"
 #include "core/Unfreeze.h"
 #include "core/errors/errors.h"
+#include "core/lsp/QueryResponse.h"
 #include "core/serialize/serialize.h"
 #include "main/autogen/autogen.h"
-#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/lsp/lsp.h"
 #include "main/pipeline/pipeline.h"
 #include "main/realmain.h"
@@ -187,7 +187,7 @@ int realmain(int argc, char *argv[]) {
     WorkerPool workers(opts.threads, logger);
 
     unique_ptr<core::GlobalState> gs = make_unique<core::GlobalState>(
-        (make_shared<ConcurrentErrorQueue>(*typeErrorsConsole, *logger, opts.errorCodeWhiteList)));
+        (make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, opts.errorCodeWhiteList)));
     vector<unique_ptr<ast::Expression>> indexed;
 
     logger->trace("building initial global state");

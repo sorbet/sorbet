@@ -4,8 +4,8 @@
 #include "ast/ast.h"
 #include "common/concurrency/WorkerPool.h"
 #include "common/kvstore/KeyValueStore.h"
+#include "core/ErrorQueue.h"
 #include "core/core.h"
-#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "main/options/options.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
@@ -161,7 +161,7 @@ class LSPLoop {
     std::string rootUri;
 
     /** Concrete error queue shared by all global states */
-    std::shared_ptr<ConcurrentErrorQueue> errorQueue;
+    std::shared_ptr<core::ErrorQueue> errorQueue;
     /** GlobalState that is used for indexing. It effectively accumulates a huge nametable.
      * It is never discarded. */
     std::unique_ptr<core::GlobalState> initialGS;

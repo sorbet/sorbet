@@ -83,4 +83,10 @@ public:
 template <class Elem>
 using BlockingBoundedQueue = AbstractConcurrentBoundedQueue<Elem, moodycamel::BlockingConcurrentQueue<Elem>>;
 
+#ifdef _MACH_BOOLEAN_H_
+// on mac, system headers define FALSE and TRUE as macros. Undefine them so that they don't break parser.
+#undef TRUE
+#undef FALSE
+#endif // _MACH_BOOLEAN_H_
+
 #endif // SORBET_CONCURRENTQUEUE_H

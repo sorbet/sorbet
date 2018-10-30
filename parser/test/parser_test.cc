@@ -1,7 +1,6 @@
 #include "gtest/gtest.h"
 // has to go first as it violates are requirements
 #include "common/common.h"
-#include "core/BufferedErrorQueue.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/core.h"
@@ -18,7 +17,7 @@ using sorbet::u4;
 using namespace std;
 
 auto logger = spd::stderr_color_mt("parser_test");
-auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST(ParserTest, SimpleParse) { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);

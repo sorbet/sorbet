@@ -4,7 +4,6 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
-#include "core/BufferedErrorQueue.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
@@ -16,7 +15,7 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("error-check-test");
-auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 

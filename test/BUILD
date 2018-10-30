@@ -20,7 +20,6 @@ cc_binary(
         "//dsl",
         "//infer",
         "//main/autogen",
-        "//main/errorqueue",
         "//namer",
         "//payload/binary:some",
         "//resolver",
@@ -87,7 +86,6 @@ cc_test(
     deps = [
         "//common",
         "//core",
-        "//main/errorqueue",
         "@gtest",
         "@gtest//:gtest_main",
     ],

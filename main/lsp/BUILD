@@ -20,7 +20,6 @@ cc_library(
         "//core",
         "//core/proto",
         "//core/serialize",
-        "//main/errorqueue",
         "//main/options",
         "//main/pipeline",
         "//payload/binary",

@@ -3,7 +3,6 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
-#include "core/BufferedErrorQueue.h"
 #include "core/Error.h"
 #include "core/Names.h"
 #include "core/Unfreeze.h"
@@ -22,7 +21,7 @@ using namespace std;
 namespace sorbet::infer::test {
 
 auto logger = spd::stderr_color_mt("infer_test");
-auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 class InferFixture : public ::testing::Test {
 public:

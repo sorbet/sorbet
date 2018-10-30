@@ -25,6 +25,7 @@ cc_library(
     visibility = ["//visibility:public"],
     deps = [
         "//common",
+        "//common/concurrency",
         "@com_google_absl//absl/strings",
         "@rang",
     ],

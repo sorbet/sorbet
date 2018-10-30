@@ -10,7 +10,7 @@ namespace sorbet::realmain::lsp {
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
                  WorkerPool &workers)
     : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {
-    errorQueue = dynamic_pointer_cast<realmain::ConcurrentErrorQueue>(initialGS->errorQueue);
+    errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
 }
 

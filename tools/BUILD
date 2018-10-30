@@ -42,7 +42,6 @@ compilation_database(
         "//infer:infer",
         "//main/options:options",
         "//version:version",
-        "//main/errorqueue:errorqueue",
         "//main/autogen:autogen",
         "//dsl:dsl",
         "//core/serialize:serialize_test",
@@ -55,7 +54,6 @@ compilation_database(
         "//common/statsd:statsd",
         "//common/kvstore:kvstore",
         "//common/crypto_hashing:crypto_hashing",
-        "//common/concurrency:concurrency",
         "//common:common_test",
         "//cfg/builder:builder",
         "//cfg:cfg",
@@ -67,6 +65,7 @@ compilation_database(
         "//ast/treemap:treemap",
         "//ast:ast",
         "//core:core",
+        "//common/concurrency:concurrency",
         "//common:common",
         # END compile_commands targets
     ],

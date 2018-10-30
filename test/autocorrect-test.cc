@@ -5,7 +5,6 @@
 #include "core/Context.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
-#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
 
@@ -17,7 +16,7 @@ namespace sorbet {
 
 TEST(ErrorTest, AutocorrectTest) { // NOLINT
     auto logger = spd::stderr_color_mt("autocorrect-test");
-    auto errorQueue = make_shared<sorbet::realmain::ConcurrentErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
     sorbet::core::GlobalState gs(errorQueue);
     gs.initEmpty();

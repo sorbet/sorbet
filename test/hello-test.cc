@@ -6,7 +6,6 @@
 #include "ast/ast.h"
 #include "ast/treemap/treemap.h"
 #include "common/common.h"
-#include "core/BufferedErrorQueue.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "core/serialize/serialize.h"
@@ -20,7 +19,7 @@ using namespace std;
 namespace spd = spdlog;
 
 auto logger = spd::stderr_color_mt("hello-test");
-auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 namespace sorbet {
 
@@ -177,7 +176,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
 TEST(PayloadTests, CloneSubstitutePayload) {
     auto logger = spd::stderr_color_mt("ClonePayload");
-    auto errorQueue = make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);

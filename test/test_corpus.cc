@@ -15,7 +15,6 @@
 #include "dsl/dsl.h"
 #include "infer/infer.h"
 #include "main/autogen/autogen.h"
-#include "main/errorqueue/ConcurrentErrorQueue.h"
 #include "namer/namer.h"
 #include "parser/parser.h"
 #include "payload/binary/binary.h"
@@ -154,7 +153,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = make_shared<sorbet::realmain::ConcurrentErrorQueue>(*logger, *logger);
+    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
     sorbet::core::GlobalState gs(errorQueue);
     sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
     sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());

@@ -3,7 +3,6 @@
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "common/common.h"
-#include "core/BufferedErrorQueue.h"
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
@@ -16,7 +15,7 @@
 
 namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("desugar_test");
-auto errorQueue = std::make_shared<sorbet::core::BufferedErrorQueue>(*logger, *logger);
+auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);

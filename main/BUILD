@@ -75,7 +75,6 @@ cc_library(
         "//core/proto",
         "//core/serialize",
         "//main/autogen",
-        "//main/errorqueue",
         "//main/lsp",
         "//main/options",
         "//main/pipeline",
