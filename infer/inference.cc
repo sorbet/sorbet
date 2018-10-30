@@ -396,7 +396,14 @@ bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
     auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
     auto closestMethod = closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
 
+    fmt::memory_buffer ss;
     if (closestMethod.exists()) {
+        if (!closestMethod.data(ctx)->isOverridable() && !closestMethod.data(ctx)->isAbstract() &&
+            methodSymbol.data(ctx)->name != core::Names::initialize()) {
+            // TODO(jez) Support autocorrecting the parent method's sig to make it overridable.
+            fmt::format_to(ss, "# ");
+        }
+
         auto closestReturnType = closestMethod.data(ctx)->resultType;
         if (closestReturnType && !closestReturnType->isUntyped()) {
             guessedReturnType = closestReturnType;
@@ -416,7 +423,6 @@ bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef m
         return false;
     }
 
-    fmt::memory_buffer ss;
     bool first = true;
 
     fmt::format_to(ss, "sig {{generated.");

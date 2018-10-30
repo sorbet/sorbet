@@ -1,7 +1,7 @@
 # typed: strict
 
 # Don't extend T::Helpers for this one, because the class wasn't defined here.
-def foo; end
+def top_level; end
 
 # Should only add one extend
 class SuggestSigAndExtend

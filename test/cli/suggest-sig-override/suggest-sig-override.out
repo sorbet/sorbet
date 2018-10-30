@@ -43,7 +43,7 @@ suggest-sig-override.rb:37: This function does not have a `sig` http://go/e/7017
     37 |  def bar; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:37: Insert `sig {generated.override.void.generated}
+    suggest-sig-override.rb:37: Insert `# sig {generated.override.void.generated}
   `
     37 |  def bar; end
           ^
@@ -52,7 +52,7 @@ suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
     39 |  def qux; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:39: Insert `sig {generated.override.returns(NilClass).generated}
+    suggest-sig-override.rb:39: Insert `# sig {generated.override.returns(NilClass).generated}
   `
     39 |  def qux; end
           ^
@@ -101,9 +101,9 @@ class Child < Parent
   sig {generated.override.void.generated}
   def foo; end
 
-  sig {generated.override.void.generated}
+  # sig {generated.override.void.generated}
   def bar; end
 
-  sig {generated.override.returns(NilClass).generated}
+  # sig {generated.override.returns(NilClass).generated}
   def qux; end
 end
