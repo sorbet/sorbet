@@ -292,7 +292,7 @@ int realmain(int argc, char *argv[]) {
             indexed = pipeline::typecheck(gs, move(indexed), opts, workers, logger);
         }
 
-        gs->errorQueue->flushErrors();
+        gs->errorQueue->flushErrors(true);
 
         if (opts.print.ErrorFiles) {
             for (auto &tree : indexed) {
