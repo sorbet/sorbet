@@ -412,15 +412,30 @@ invariant you’ve violated. `ENFORCE`s are free in the release build.
 - [ ] TODO(jez) Write about how to profile Sorbet
 
 
+## Updating sorbet.run
+
+We have an online REPL for Sorbet: <https://sorbet.run>. It's deployed as a
+GitHub pages site, and so the sources lives on github.com. Make sure you've
+cloned it locally:
+
+```
+git clone https://github.com/stripe/sorbet.run ~/stripe/sorbet.run
+```
+
+Run `./tools/scripts/update-sorbet.run.sh` and follow the steps suggested by that script.
+
+
 ## Editor and environment
 
 ### Bazel
 
 Bazel supports having a persistent cache of previous build results so that
 rebuilds for the same input files are fast. To enable this feature, run these
-commands to create a `~/.bazelrc` and cache folder:
+commands to create a `./.bazelrc` and cache folder:
 
-```
+```shell
+# The .bazelrc will live in the sorbet repo so it doesn't interfere with other
+# bazel-based repos you have.
 echo "build  --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
 echo "test   --disk_cache=$HOME/.cache/sorbet/bazel-cache" >> ./.bazelrc
 mkdir -p "$HOME/.cache/sorbet/bazel-cache"
@@ -450,34 +465,101 @@ tools/scripts/format_build_files.sh
 ```
 
 CI will fail if there are any unformatted files, so you might want to set up
-your files to be formatted automatically. There are two options:
+your files to be formatted automatically with one of these options:
+
+1.  Set up a pre-commit / pre-push hook which runs these scripts.
+2.  Set up your editor to run these scripts. See below.
 
 
-1.  Set up a pre-commit / pre-push hook which runs these scripts and commits any
-    changes.
-2.  Run the script once locally, then copy `clang-format` onto your PATH and
-    point your editor at it.
+### Editor setup for C++
 
-    - The `format_cxx.sh` script builds `bazel-bin/tools/clang-format`.
-    - All bazel build targets share `bazel-bin`, so building anything else
-      invalidates the `clang-format` symlink.
-    - Copying `clang-format` onto your PATH works around this detail, so that
-      your editor can always run it.
+The `clang` suite of tools has a pretty great story around editor tooling: you
+can build a `compile_commands.json` using Clang's [Compilation Database] format.
 
+Many clang-based tools consume this file to provide language-aware features in,
+for example, editor integrations.
 
-## Updating sorbet.run
-
-We have an online REPL for Sorbet: <https://sorbet.run>. It's deployed as a
-GitHub pages site, and so the sources lives on github.com. Make sure you've
-cloned it locally:
+To build a `compile_commands.json` file for Sorbet with bazel:
 
 ```
-git clone https://github.com/stripe/sorbet.run ~/stripe/sorbet.run
+tools/scripts/build_compilation_db.sh
 ```
 
-Run `./tools/scripts/update-sorbet.run.sh` and follow the steps suggested by that script.
+You are encouraged to play around with various clang-based tools which use the
+`compile_commands.json` database. Some suggestions:
 
-Note that the build using emscripten toolchain does not run in CI,
-so it frequently becomes broken with time.
-If you get stuck building it, please ask at #ruby-types Slack!
+-   [rtags] -- Clang aware jump-to-definition / find references / etc.
 
+    ```shell
+    brew install rtags
+
+    # Have the rtags daemon be automatically launched by macOS on demand
+    brew services start rtags
+
+    # cd into sorbet
+    # ensure that ./compile_commands.json exists
+
+    # Tell rtags to index sorbet using our compile_commands.json file
+    rc -J .
+    ```
+
+    There are rtags editor plugins for most text editors.
+
+-   [clangd] -- Clang-based language server implementation
+
+    ```shell
+    brew install llvm@7
+
+    # => /usr/local/opt/llvm/bin/clangd
+    # You might need to put this on your PATH to tell your editor about it.
+    ```
+
+    `clangd` supports more features than `rtags` (specifically, reporting
+    Diagnostics), but can be somewhat slower at times because it does not
+    pre-index all your code like rtags does.
+
+-   [clang-format] -- Clang-based source code formatter
+
+    We build `clang-format` in Bazel to ensure that everyone uses the same
+    version. Here's how you can get `clang-format` out of Bazel to use it in
+    your editor:
+
+    ```shell
+    # Build clang-format with bazel
+    bazel build //tools:clang-format
+
+    # Once bazel runs again, this symlink to clang-format will go away.
+    # We need to copy it out of bazel so our editor can use it:
+    mkdir -p "$HOME/bin"
+    cp bazel-bin/tools/clang-format $HOME/bin
+
+    # (Be sure that $HOME/bin is on your PATH, or use a path that is)
+    ```
+
+    With `clang-format` on your path, you should be able to find an editor
+    plugin that uses it to format your code on save.
+
+    Note: our format script passes some extra options to `clang-format`.
+    Configure your editor to pass these options along to `clang-format`:
+
+    ```shell
+    -style=file -assume-filename=<CURRENT_FILE>
+    ```
+
+-   [CLion] -- JetBrains C/C++ IDE
+
+    CLion can be made aware of the `compile_commands.json` database.
+    Replaces your entire text editing workflow (full-fledged IDE).
+
+
+[Compilation Database]: https://clang.llvm.org/docs/JSONCompilationDatabase.html
+[rtags]: https://github.com/Andersbakken/rtags
+[clangd]: https://clang.llvm.org/extra/clangd.html
+[clang-format]: https://clang.llvm.org/docs/ClangFormat.html
+[CLion]: https://www.jetbrains.com/clion/
+
+Here are some sample config setups:
+
+- Vim
+  - [rtags (vim-rtags)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L649-L676)
+  - [clangd + clang-format (ALE)](https://github.com/jez/dotfiles/blob/dafe23c95fd908719bf477f189335bd1451bd8a7/vim/plug-settings.vim#L288-L303)
