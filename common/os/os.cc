@@ -22,7 +22,7 @@ void *Joinable::trampoline(void *ptr) {
 
 unique_ptr<Joinable> runInAThread(std::string_view threadName, function<void()> function) {
 #ifdef EMSCRIPTEN
-    sorbet::Error::raise("Creating threads in unsupported in EMSCRIPTEN");
+    sorbet::Exception::raise("Creating threads in unsupported in EMSCRIPTEN");
 #endif
     // AFAIK this should all be:
     //    - defined behaviour

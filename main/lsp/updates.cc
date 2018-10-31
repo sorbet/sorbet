@@ -315,4 +315,11 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
         runSlowPath(changedFiles);
     }
 }
+
+std::unique_ptr<core::GlobalState> LSPLoop::extractGlobalState(LSPLoop &&loop) {
+    if (loop.finalGs) {
+        return move(loop.finalGs);
+    }
+    return move(loop.initialGS);
+}
 } // namespace sorbet::realmain::lsp

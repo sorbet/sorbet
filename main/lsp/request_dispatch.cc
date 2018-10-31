@@ -6,7 +6,18 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+void LSPLoop::processRequest(const string &json) {
+    rapidjson::Document d(&alloc);
+    if (d.Parse(json.c_str()).HasParseError()) {
+        Exception::raise("Last LSP request: `{}` is not a valid json object", json);
+    }
+    LSPLoop::processRequest(d);
+}
+
 void LSPLoop::processRequest(rapidjson::Document &d) {
+    if (handleReplies(d)) {
+        return;
+    }
     const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
     ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);

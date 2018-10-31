@@ -219,7 +219,8 @@ int realmain(int argc, char *argv[]) {
                       "it will enable outputing the LSP session to stderr(`Write: ` and `Read: ` log lines)",
                       Version::full_version_string);
         lsp::LSPLoop loop(move(gs), opts, logger, workers);
-        gs = loop.runLSP();
+        loop.runLSP();
+        gs = lsp::LSPLoop::extractGlobalState(move(loop));
     } else {
         Timer timeall(logger, "wall_time");
         vector<core::FileRef> inputFiles;

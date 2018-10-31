@@ -196,7 +196,6 @@ class LSPLoop {
     rapidjson::Value loc2Location(core::Loc loc);
     void addLocIfExists(rapidjson::Value &result, core::Loc loc);
 
-    void processRequest(rapidjson::Document &d);
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
     bool handleReplies(rapidjson::Document &d);
@@ -263,9 +262,12 @@ class LSPLoop {
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers);
-    std::unique_ptr<core::GlobalState> runLSP();
+    void runLSP();
+    void processRequest(rapidjson::Document &d);
+    void processRequest(const std::string &json);
 
     void invalidateAllErrors();
+    static std::unique_ptr<core::GlobalState> extractGlobalState(LSPLoop &&);
 };
 std::unique_ptr<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 
