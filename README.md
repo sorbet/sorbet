@@ -13,6 +13,40 @@ also want to see:
 - The [Sorbet internals](https://stripe.exceedlms.com/student/activity/372979) talk
 - The [Gradual Typing of Ruby at Scale](https://www.youtube.com/watch?v=uFFJyp8vXQI) talk
 
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of Contents
+
+- [Sorbet user-facing design principles](#sorbet-user-facing-design-principles)
+- [Quickstart](#quickstart)
+  - [Troubleshooting](#troubleshooting)
+- [Building Sorbet](#building-sorbet)
+- [Running Sorbet](#running-sorbet)
+- [Running the tests](#running-the-tests)
+- [Testing Sorbet against pay-server](#testing-sorbet-against-pay-server)
+- [Writing tests](#writing-tests)
+  - [Expectation tests](#expectation-tests)
+  - [CLI tests](#cli-tests)
+  - [LSP tests](#lsp-tests)
+  - [Updating tests](#updating-tests)
+- [Local development](#local-development)
+  - [Build `sorbet`](#build-sorbet)
+  - [Set up "autogen" locally](#set-up-autogen-locally)
+  - [Make sure `sorbet` is on your PATH](#make-sure-sorbet-is-on-your-path)
+  - [Run `sorbet/scripts/typecheck_devel`](#run-sorbetscriptstypecheck_devel)
+- [C++ conventions](#c-conventions)
+- [Debugging and profiling](#debugging-and-profiling)
+  - [Debugging](#debugging)
+  - [Profiling](#profiling)
+- [Updating sorbet.run](#updating-sorbetrun)
+- [Editor and environment](#editor-and-environment)
+  - [Bazel](#bazel)
+  - [Shell](#shell)
+  - [Formatting files](#formatting-files)
+  - [Editor setup for C++](#editor-setup-for-c)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 ## Sorbet user-facing design principles
 
 Early in our project we've defiend some guidelines for how working with sorbet should feel like.
