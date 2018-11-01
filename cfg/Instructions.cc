@@ -85,8 +85,7 @@ string Alias::toString(core::Context ctx) {
 
 string Send::toString(core::Context ctx) {
     return fmt::format("{}.{}({})", this->recv.toString(ctx), this->fun.data(ctx)->toString(ctx),
-                       fmt::map_join(this->args.begin(), this->args.end(), ", ",
-                                     [&](const auto &arg) -> string { return arg.toString(ctx); }));
+                       fmt::map_join(this->args, ", ", [&](const auto &arg) -> string { return arg.toString(ctx); }));
 }
 
 string Self::toString(core::Context ctx) {

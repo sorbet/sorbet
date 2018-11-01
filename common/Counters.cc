@@ -306,8 +306,7 @@ string getCounterStatistics(vector<string> names) {
         }
         fast_sort(sortedTimings, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, "{}", fmt::map_join(sortedTimings.begin(), sortedTimings.end(), "", [
-                       ](const auto &el) -> auto { return el.second; }));
+        fmt::format_to(buf, "{}", fmt::map_join(sortedTimings, "", [](const auto &el) -> auto { return el.second; }));
     }
 
     {
@@ -325,9 +324,7 @@ string getCounterStatistics(vector<string> names) {
 
         fast_sort(sortedOther, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
 
-        fmt::format_to(buf, "{}", fmt::map_join(sortedOther.begin(), sortedOther.end(), "", [](const auto &el) -> auto {
-                           return el.second;
-                       }));
+        fmt::format_to(buf, "{}", fmt::map_join(sortedOther, "", [](const auto &el) -> auto { return el.second; }));
     }
     return to_string(buf);
 }

@@ -180,6 +180,13 @@ template <typename It, class UnaryOp> auto map_join(It begin, It end, std::strin
                         typename std::result_of<UnaryOp(typename std::iterator_traits<It>::value_type)>::type>(
         begin, end, sep, mapper);
 }
+template <typename Container, class UnaryOp>
+auto map_join(const Container &collection, std::string_view sep, const UnaryOp &mapper) {
+    return arg_map_join<typename Container::const_iterator, char, UnaryOp,
+                        typename std::result_of<UnaryOp(
+                            typename std::iterator_traits<typename Container::const_iterator>::value_type)>::type>(
+        collection.begin(), collection.end(), sep, mapper);
+}
 } // namespace fmt
 
 template <class Container, class Compare> inline void fast_sort(Container &container, Compare &&comp) {

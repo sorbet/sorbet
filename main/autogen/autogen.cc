@@ -332,7 +332,7 @@ std::string ParsedFile::toString(core::Context ctx) {
                    "# ParsedFile: {}\n"
                    "requires: [{}]\n"
                    "## defs:\n",
-                   path, fmt::map_join(requires.begin(), requires.end(), ", ", nameToString));
+                   path, fmt::map_join(requires, ", ", nameToString));
 
     for (auto &def : defs) {
         string_view type;
@@ -360,18 +360,15 @@ std::string ParsedFile::toString(core::Context ctx) {
 
         if (def.defining_ref.exists()) {
             auto &ref = def.defining_ref.data(*this);
-            fmt::format_to(out, " defining_ref=[{}]\n",
-                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
+            fmt::format_to(out, " defining_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
         }
         if (def.parent_ref.exists()) {
             auto &ref = def.parent_ref.data(*this);
-            fmt::format_to(out, " parent_ref=[{}]\n",
-                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
+            fmt::format_to(out, " parent_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
         }
         if (def.aliased_ref.exists()) {
             auto &ref = def.aliased_ref.data(*this);
-            fmt::format_to(out, " aliased_ref=[{}]\n",
-                           fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString));
+            fmt::format_to(out, " aliased_ref=[{}]\n", fmt::map_join(ref.name, " ", nameToString));
         }
     }
     fmt::format_to(out, "## refs:\n");
@@ -379,8 +376,7 @@ std::string ParsedFile::toString(core::Context ctx) {
         vector<string> nestingStrings;
         for (auto &scope : ref.nesting) {
             auto fullScopeName = fullName(ctx, scope);
-            nestingStrings.emplace_back(
-                fmt::format("[{}]", fmt::map_join(fullScopeName.begin(), fullScopeName.end(), " ", nameToString)));
+            nestingStrings.emplace_back(fmt::format("[{}]", fmt::map_join(fullScopeName, " ", nameToString)));
         }
 
         auto refFullName = fullName(ctx, ref.scope);
@@ -393,16 +389,14 @@ std::string ParsedFile::toString(core::Context ctx) {
                        " loc={}\n"
                        " is_defining_ref={}\n",
 
-                       ref.id.id(), fmt::map_join(refFullName.begin(), refFullName.end(), " ", nameToString),
-                       fmt::map_join(ref.name.begin(), ref.name.end(), " ", nameToString),
-                       fmt::join(nestingStrings.begin(), nestingStrings.end(), " "),
-                       fmt::map_join(ref.resolved.begin(), ref.resolved.end(), " ", nameToString),
-                       ref.loc.filePosToString(ctx), (int)ref.is_defining_ref);
+                       ref.id.id(), fmt::map_join(refFullName, " ", nameToString),
+                       fmt::map_join(ref.name, " ", nameToString), fmt::join(nestingStrings, " "),
+                       fmt::map_join(ref.resolved, " ", nameToString), ref.loc.filePosToString(ctx),
+                       (int)ref.is_defining_ref);
 
         if (ref.parent_of.exists()) {
             auto parentOfFullName = fullName(ctx, ref.parent_of);
-            fmt::format_to(out, " parent_of=[{}]\n",
-                           fmt::map_join(parentOfFullName.begin(), parentOfFullName.end(), " ", nameToString));
+            fmt::format_to(out, " parent_of=[{}]\n", fmt::map_join(parentOfFullName, " ", nameToString));
         }
     }
     return to_string(out);

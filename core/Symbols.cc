@@ -491,7 +491,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
 
         auto typeMembers = this->isClass() ? this->typeMembers() : this->typeArguments();
         if (!typeMembers.empty()) {
-            fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers.begin(), typeMembers.end(), ", ", [&](auto symb) {
+            fmt::format_to(buf, "[{}]", fmt::map_join(typeMembers, ", ", [&](auto symb) {
                                return symb.data(gs)->name.toString(gs);
                            }));
         }
@@ -501,9 +501,8 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
         }
         const auto &list = this->isClass() ? this->mixins() : this->arguments();
 
-        fmt::format_to(buf, " ({})", fmt::map_join(list.begin(), list.end(), ", ", [&](auto symb) {
-                           return symb.data(gs)->name.toString(gs);
-                       }));
+        fmt::format_to(buf, " ({})",
+                       fmt::map_join(list, ", ", [&](auto symb) { return symb.data(gs)->name.toString(gs); }));
     }
     if (this->isMethodArgument()) {
         vector<pair<int, string_view>> methodFlags = {
@@ -532,9 +531,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     if (!locs_.empty()) {
         fmt::format_to(buf, " @ ");
         if (locs_.size() > 1) {
-            fmt::format_to(buf, "({})", fmt::map_join(locs_.begin(), locs_.end(), ", ", [&](auto loc) {
-                               return loc.filePosToString(gs);
-                           }));
+            fmt::format_to(buf, "({})", fmt::map_join(locs_, ", ", [&](auto loc) { return loc.filePosToString(gs); }));
         } else {
             fmt::format_to(buf, "{}", locs_[0].filePosToString(gs));
         }

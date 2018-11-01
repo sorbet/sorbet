@@ -76,7 +76,7 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
         }
     }
 
-    return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames.begin(), typeAndArgNames.end(), ", "), "${0}");
+    return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
 unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {

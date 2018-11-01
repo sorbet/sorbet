@@ -98,8 +98,8 @@ string TupleType::toString(const GlobalState &gs, int tabs) const {
 }
 
 string TupleType::show(const GlobalState &gs) const {
-    return fmt::format("[{}]", fmt::map_join(this->elems.begin(), this->elems.end(), ", ",
-                                             [&](const auto &el) -> string { return el->show(gs); }));
+    return fmt::format("[{}]",
+                       fmt::map_join(this->elems, ", ", [&](const auto &el) -> string { return el->show(gs); }));
 }
 
 string ShapeType::toString(const GlobalState &gs, int tabs) const {

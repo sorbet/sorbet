@@ -121,10 +121,10 @@ cxxopts::Options buildOptions() {
     fmt::memory_buffer all_prints;
     fmt::memory_buffer all_stop_after;
 
-    fmt::format_to(all_prints, "Print: [{}]", fmt::map_join(print_options.begin(), print_options.end(), ", ", [
-                   ](const auto &pr) -> auto { return pr.option; }));
-    fmt::format_to(all_stop_after, "Stop After: [{}]", fmt::map_join(print_options.begin(), print_options.end(), ", ", [
-                   ](const auto &pr) -> auto { return pr.option; }));
+    fmt::format_to(all_prints, "Print: [{}]",
+                   fmt::map_join(print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+    fmt::format_to(all_stop_after, "Stop After: [{}]",
+                   fmt::map_join(print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
@@ -225,8 +225,7 @@ bool extractPrinters(cxxopts::ParseResult &raw, Options &opts, shared_ptr<spdlog
             for (auto &known : print_options) {
                 allOptions.emplace_back(known.option);
             }
-            logger->error("Unknown --print option: {}\nValid values: {}", opt,
-                          fmt::join(allOptions.begin(), allOptions.end(), ", "));
+            logger->error("Unknown --print option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
             return false;
         }
     }
@@ -245,8 +244,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> log
         allOptions.emplace_back(known.option);
     }
 
-    logger->error("Unknown --stop-after option: {}\nValid values: {}", opt,
-                  fmt::join(allOptions.begin(), allOptions.end(), ", "));
+    logger->error("Unknown --stop-after option: {}\nValid values: {}", opt, fmt::join(allOptions, ", "));
     return Phase::INIT;
 }
 

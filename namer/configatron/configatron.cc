@@ -103,9 +103,8 @@ struct Path {
         if (myType) {
             fmt::format_to(buf, "{} -> {}", toString(), myType->toString(gs));
         }
-        fmt::format_to(buf, "{}", fmt::map_join(children.begin(), children.end(), "", [&](const auto &child) -> string {
-                           return child->show(gs);
-                       }));
+        fmt::format_to(buf, "{}",
+                       fmt::map_join(children, "", [&](const auto &child) -> string { return child->show(gs); }));
         return "";
     }
 

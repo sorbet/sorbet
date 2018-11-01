@@ -187,7 +187,7 @@ string KnowledgeFact::toString(core::Context ctx) const {
     fast_sort(buf1);
     fast_sort(buf2);
 
-    return fmt::format("{}{}", fmt::join(buf1.begin(), buf1.end(), ""), fmt::join(buf2.begin(), buf2.end(), ""));
+    return fmt::format("{}{}", fmt::join(buf1, ""), fmt::join(buf2, ""));
 }
 
 const KnowledgeFact &KnowledgeRef::operator*() const {

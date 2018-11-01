@@ -162,8 +162,7 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
         }
     }
 
-    return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames.begin(), typeAndArgNames.end(), ", "),
-                       methodReturnType);
+    return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
 }
 
 shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,
