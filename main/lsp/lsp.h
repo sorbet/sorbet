@@ -139,6 +139,22 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
+/*
+ * The LSP*Capabilities structs are transcriptions from the specification, but
+ * for now we're only encoding the fields we actually look at.
+ */
+struct LSPTextDocumentClientCapabilities {
+    struct {
+        struct {
+            bool snippetSupport = false;
+        } completionItem;
+    } completion;
+};
+
+struct LSPClientCapabilities {
+    LSPTextDocumentClientCapabilities textDocument;
+};
+
 class LSPLoop {
     int requestCounter = 1;
     struct ResponseHandler {
@@ -173,6 +189,7 @@ class LSPLoop {
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> &logger;
     WorkerPool &workers;
+    LSPClientCapabilities clientCapabilities;
 
     /* Send the following document to client */
     void sendRaw(rapidjson::Document &raw);

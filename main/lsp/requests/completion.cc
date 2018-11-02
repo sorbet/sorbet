@@ -125,8 +125,13 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
         if (what.exists()) {
             item.AddMember("detail", methodDetail(what, resp.receiver.type, nullptr, resp.constraint), alloc);
         }
-        item.AddMember("insertTextFormat", 2, alloc); // Snippet
-        item.AddMember("insertText", methodSnippet(*finalGs, what), alloc);
+        if (clientCapabilities.textDocument.completion.completionItem.snippetSupport) {
+            item.AddMember("insertTextFormat", 2, alloc); // Snippet
+            item.AddMember("insertText", methodSnippet(*finalGs, what), alloc);
+        } else {
+            item.AddMember("insertTextFormat", 1, alloc); // PlainText
+            item.AddMember("insertText", string(what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs)), alloc);
+        }
 
         unique_ptr<string> documentation = nullptr;
         if (what.data(*finalGs)->loc().file().exists()) {

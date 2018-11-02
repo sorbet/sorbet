@@ -135,6 +135,22 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             prodCategoryCounterInc("lsp.requests.processed", "initialize");
             result.SetObject();
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
+            auto &clientCaps = d["params"]["capabilities"];
+            auto tddCaps = clientCaps.FindMember("textDocument");
+            if (tddCaps != clientCaps.MemberEnd()) {
+                auto completionCaps = tddCaps->value.FindMember("completion");
+                if (completionCaps != tddCaps->value.MemberEnd()) {
+                    auto itemCaps = completionCaps->value.FindMember("completionItem");
+                    if (itemCaps != completionCaps->value.MemberEnd()) {
+                        auto snippetSupport = itemCaps->value.FindMember("snippetSupport");
+                        if (snippetSupport != itemCaps->value.MemberEnd() && snippetSupport->value.IsBool()) {
+                            clientCapabilities.textDocument.completion.completionItem.snippetSupport =
+                                snippetSupport->value.GetBool();
+                        }
+                    }
+                }
+            }
+
             string serverCap = "{\"capabilities\": "
                                "   {"
                                "       \"textDocumentSync\": 2, "
