@@ -29,7 +29,7 @@ also want to see:
   - [CLI tests](#cli-tests)
   - [LSP tests](#lsp-tests)
   - [Updating tests](#updating-tests)
-- [Local development](#local-development)
+- [Running over pay-server locally](#running-over-pay-server-locally)
   - [Build `sorbet`](#build-sorbet)
   - [Set up "autogen" locally](#set-up-autogen-locally)
   - [Make sure `sorbet` is on your PATH](#make-sure-sorbet-is-on-your-path)
@@ -96,9 +96,7 @@ Early in our project we've defiend some guidelines for how working with sorbet s
 
 1.  Install the dependencies
 
-    - macOS: `brew install bazel ragel bison autoconf coreutils parallel`
-    - ubuntu: `sudo apt install ragel bison libncurses5-dev autoconf`
-      - then: `cat ./bazelrc-ubuntu >> ./.bazelrc`
+    - `brew install bazel ragel bison autoconf coreutils parallel`
 
 2. Build Sorbet
 
@@ -253,8 +251,8 @@ them leverage CI, and one of them runs on your laptop.
 
 3. Use the `sorbet/scripts/typecheck_devel` script in pay-server.
 
-    - This requires a bit more setup. See the section below on "Local
-      development"
+    - This requires a bit more setup. See the section below on [Running over
+      pay-server locally](#running-over-pay-server-locally)
 
 [ci/stripe-internal-sorbet-pay-server-sha]: https://git.corp.stripe.com/stripe-internal/sorbet/blob/master/ci/stripe-internal-sorbet-pay-server-sha
 [sorbet/sorbet.sha]: https://git.corp.stripe.com/stripe-internal/pay-server/blob/master/sorbet/sorbet.sha
@@ -299,7 +297,7 @@ Our bazel setup will produce two targets:
 - `bazel test test_<name>` will execute the `.sh` and check it against what's in
   the `.out` file.
 
-The scripts are run insize Bazel, so they will be executed from the top of the
+The scripts are run inside Bazel, so they will be executed from the top of the
 workspace and have access to sources files and built targets using their path
 from the root. In particular, the compiled sorbet binary is available under
 `main/sorbet`.
@@ -327,7 +325,8 @@ tools/scripts/update_exp_files.sh
 You will probably want to look through the changes and `git checkout` any files
 with changes that you believe are actually bugs in your code and fix your code.
 
-## Local development
+
+## Running over pay-server locally
 
 There are a couple hoops to jump through for local development, but it's worth
 it because at the end you'll be able to run `sorbet` under `lldb` running over
@@ -480,7 +479,7 @@ mkdir -p "$HOME/.cache/sorbet/bazel-cache"
 Many of the build commands are very long. You might consider shortening the
 common ones with shell aliases of your choice:
 
-```
+```shell
 # mnemonic: 's' for sorbet
 alias sb="bazel build //main-sorbet --config=dbg"
 alias st="bazel test //... --config=dbg --test_output=errors"
