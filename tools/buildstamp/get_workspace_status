@@ -14,6 +14,13 @@ set -e
 # If the script exits with non-zero code, it's considered as a failure
 # and the output will be discarded.
 
+if ! git rev-parse --git-dir >&/dev/null; then
+    echo "STABLE_BUILD_SCM_REVISION nongit"
+    echo "STABLE_BUILD_SCM_COMMIT_COUNT 0"
+    echo "STABLE_BUILD_SCM_CLEAN 0"
+    exit 0
+fi
+
 # The code below presents an implementation that works for git repository
 git_rev=$(git rev-parse HEAD)
 git_commit_count=$(git rev-list --count HEAD)
@@ -21,11 +28,9 @@ echo "STABLE_BUILD_SCM_REVISION ${git_rev}"
 echo "STABLE_BUILD_SCM_COMMIT_COUNT ${git_commit_count}"
 
 # Check whether there are any uncommited changes
-set +e
 if git diff-index --quiet HEAD --; then
     clean="1"
 else
     clean="0"
 fi
-set -e
 echo "STABLE_BUILD_SCM_CLEAN ${clean}"
