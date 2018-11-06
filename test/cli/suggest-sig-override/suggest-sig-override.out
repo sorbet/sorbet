@@ -43,20 +43,106 @@ suggest-sig-override.rb:37: This function does not have a `sig` http://go/e/7017
     37 |  def bar; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:37: Insert `# sig {generated.override.void}
+    suggest-sig-override.rb:37: Insert `sig {generated.override.void}
   `
     37 |  def bar; end
           ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:27: Insert `generated.overridable.`
+    27 |  sig {void}
+               ^
 
 suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
     39 |  def qux; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:39: Insert `# sig {generated.override.returns(NilClass)}
+    suggest-sig-override.rb:39: Insert `sig {generated.override.returns(NilClass)}
   `
     39 |  def qux; end
           ^
-Errors: 6
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:27: Insert `generated.overridable.`
+    27 |  sig {void}
+               ^
+
+suggest-sig-override.rb:71: This function does not have a `sig` http://go/e/7017
+    71 |  def just_void; end
+          ^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:71: Insert `sig {generated.override.void}
+  `
+    71 |  def just_void; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:46: Insert `generated.overridable.`
+    46 |  sig {void}
+               ^
+
+suggest-sig-override.rb:73: This function does not have a `sig` http://go/e/7017
+    73 |  def just_returns; end
+          ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:73: Insert `sig {generated.override.returns(NilClass)}
+  `
+    73 |  def just_returns; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:49: Insert `generated.overridable.`
+    49 |  sig {returns(NilClass)}
+               ^
+
+suggest-sig-override.rb:75: This function does not have a `sig` http://go/e/7017
+    75 |  def x_to_void(x); end
+          ^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:75: Insert `sig {generated.params(x: T.untyped).override.void}
+  `
+    75 |  def x_to_void(x); end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:52: Insert `generated.overridable.`
+    52 |  sig {params(x: Integer).void}
+                                  ^
+
+suggest-sig-override.rb:77: This function does not have a `sig` http://go/e/7017
+    77 |  def x_to_returns(x); end
+          ^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:77: Insert `sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  `
+    77 |  def x_to_returns(x); end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:55: Insert `generated.overridable.`
+    55 |  sig {params(x: Integer).returns(NilClass)}
+                                  ^
+
+suggest-sig-override.rb:79: This function does not have a `sig` http://go/e/7017
+    79 |  def multiline_x_to_void(x); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:79: Insert `sig {generated.params(x: T.untyped).override.void}
+  `
+    79 |  def multiline_x_to_void(x); end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:60: Insert `generated.overridable.`
+    60 |    .void
+             ^
+
+suggest-sig-override.rb:81: This function does not have a `sig` http://go/e/7017
+    81 |  def multiline_x_to_returns(x); end
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:81: Insert `sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  `
+    81 |  def multiline_x_to_returns(x); end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:66: Insert `generated.overridable.`
+    66 |    .returns(NilClass)
+             ^
+Errors: 12
 
 --------------------------------------------------------------------------
 
@@ -88,7 +174,7 @@ class Parent
   sig {overridable.void}
   def foo; end
 
-  sig {void}
+  sig {generated.overridable.void}
   def bar; end
 
   sig {generated.returns(NilClass)}
@@ -101,9 +187,57 @@ class Child < Parent
   sig {generated.override.void}
   def foo; end
 
-  # sig {generated.override.void}
+  sig {generated.override.void}
   def bar; end
 
-  # sig {generated.override.returns(NilClass)}
+  sig {generated.override.returns(NilClass)}
   def qux; end
+end
+
+# Weird overridable edge cases in string parsing
+class Parent
+  extend T::Helpers
+
+  sig {generated.overridable.void}
+  def just_void; end
+
+  sig {generated.overridable.returns(NilClass)}
+  def just_returns; end
+
+  sig {params(x: Integer).generated.overridable.void}
+  def x_to_void(x); end
+
+  sig {params(x: Integer).generated.overridable.returns(NilClass)}
+  def x_to_returns(x); end
+
+  sig do
+    params(x: Integer)
+    .generated.overridable.void
+  end
+  def multiline_x_to_void(x); end
+
+  sig do
+    params(x: Integer)
+    .generated.overridable.returns(NilClass)
+  end
+  def multiline_x_to_returns(x); end
+end
+class Child < Parent
+  sig {generated.override.void}
+  def just_void; end
+
+  sig {generated.override.returns(NilClass)}
+  def just_returns; end
+
+  sig {generated.params(x: T.untyped).override.void}
+  def x_to_void(x); end
+
+  sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  def x_to_returns(x); end
+
+  sig {generated.params(x: T.untyped).override.void}
+  def multiline_x_to_void(x); end
+
+  sig {generated.params(x: T.untyped).override.returns(NilClass)}
+  def multiline_x_to_returns(x); end
 end

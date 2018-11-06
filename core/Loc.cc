@@ -24,7 +24,7 @@ Loc Loc::join(Loc other) const {
 Loc::Detail Loc::offset2Pos(const File &file, u4 off) {
     Loc::Detail pos;
 
-    ENFORCE(off <= file.source().size(), "file offset out of bounds");
+    ENFORCE(off <= file.source().size(), "file offset out of bounds in file: " + (string)file.path());
     if (off >= file.source().size()) {
         // parser generate positions out of file \facepalm.
         off = file.source().size() - 1;

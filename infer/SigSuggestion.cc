@@ -29,6 +29,53 @@ LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
     return {core::Loc(loc.file(), startOffset, startOffset), padding};
 }
 
+std::unique_ptr<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
+    auto file = loc.file();
+    ENFORCE(file.exists());
+    auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
+    auto lastSigCurly = textBeforeTheMethod.rfind("sig {");
+    auto lastSigDo = textBeforeTheMethod.rfind("sig do");
+    if (lastSigCurly != string_view::npos) {
+        if (lastSigDo != string_view::npos) {
+            return make_unique<u4>(max(lastSigCurly, lastSigDo));
+        } else {
+            return make_unique<u4>(lastSigCurly);
+        }
+    } else {
+        if (lastSigDo != string_view::npos) {
+            return make_unique<u4>(lastSigDo);
+        } else {
+            // failed to find sig
+            return std::unique_ptr<u4>{};
+        }
+    }
+}
+
+std::unique_ptr<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
+    auto file = loc.file();
+    if (!file.exists()) {
+        return std::unique_ptr<u4>{};
+    }
+
+    auto textBeforeTheMethod = file.data(ctx).source().substr(0, loc.beginPos());
+    auto lastReturns = textBeforeTheMethod.rfind("returns(");
+    auto lastVoid = textBeforeTheMethod.rfind("void");
+    if (lastReturns != string_view::npos) {
+        if (lastVoid != string_view::npos) {
+            return make_unique<u4>(max(lastReturns, lastVoid));
+        } else {
+            return make_unique<u4>(lastReturns);
+        }
+    } else {
+        if (lastVoid != string_view::npos) {
+            return make_unique<u4>(lastVoid);
+        } else {
+            // failed to find sig
+            return std::unique_ptr<u4>{};
+        }
+    }
+}
+
 // Walks the chain of attached classes to find the one at the end of the chain.
 core::SymbolRef topAttachedClass(core::Context ctx, core::SymbolRef classSymbol) {
     while (true) {
@@ -352,6 +399,23 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
         return closestOverridenMethod(ctx, superClass, name);
     }
 }
+
+bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
+    return
+        // We're overriding a method...
+        parentSymbol.exists() &&
+        // that is neither overridable...
+        !parentSymbol.data(ctx)->isOverridable() &&
+        // nor abstract...
+        !parentSymbol.data(ctx)->isAbstract() &&
+        // nor the constructor...
+        childSymbol.data(ctx)->name != core::Names::initialize() &&
+        // in a file which we can edit...
+        parentSymbol.data(ctx)->loc().file().exists() &&
+        // and isn't defined in an RBI (because it might be codegen'd)
+        !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI();
+}
+
 } // namespace
 
 bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
@@ -398,12 +462,6 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, co
 
     fmt::memory_buffer ss;
     if (closestMethod.exists()) {
-        if (!closestMethod.data(ctx)->isOverridable() && !closestMethod.data(ctx)->isAbstract() &&
-            methodSymbol.data(ctx)->name != core::Names::initialize()) {
-            // TODO(jez) Support autocorrecting the parent method's sig to make it overridable.
-            fmt::format_to(ss, "# ");
-        }
-
         auto closestReturnType = closestMethod.data(ctx)->resultType;
         if (closestReturnType && !closestReturnType->isUntyped()) {
             guessedReturnType = closestReturnType;
@@ -495,29 +553,27 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, co
     }
 
     if (hasExistingSig) {
-        // we need to replace existing sig. Lets find its beggining.
-        auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
-        auto lastSigCurly = textBeforeTheMethod.rfind("sig {");
-        auto lastSigDo = textBeforeTheMethod.rfind("sig do");
-        size_t chosenIdx;
-        if (lastSigCurly != string_view::npos) {
-            if (lastSigDo != string_view::npos) {
-                chosenIdx = max(lastSigCurly, lastSigDo);
-            } else {
-                chosenIdx = lastSigCurly;
-            }
+        if (auto existingStart = startOfExistingSig(ctx, loc)) {
+            replacementLoc = core::Loc(loc.file(), *existingStart, replacementLoc.endPos());
         } else {
-            if (lastSigDo != string_view::npos) {
-                chosenIdx = lastSigDo;
+            // Had existing sig, but couldn't find where it started, so give up suggesting a sig.
+            return false;
+        }
+    }
+
+    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
+
+    if (parentNeedsOverridable(ctx, methodSymbol, closestMethod)) {
+        if (auto maybeOffset = startOfExistingReturn(ctx, closestMethod.data(ctx)->loc())) {
+            auto offset = *maybeOffset;
+            core::Loc overridableReturnLoc(closestMethod.data(ctx)->loc().file(), offset, offset);
+            if (closestMethod.data(ctx)->hasGeneratedSig()) {
+                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "overridable."));
             } else {
-                // failed to find sig
-                return false;
+                e.addAutocorrect(core::AutocorrectSuggestion(overridableReturnLoc, "generated.overridable."));
             }
         }
-
-        replacementLoc = core::Loc(loc.file(), chosenIdx, replacementLoc.endPos());
     }
-    e.addAutocorrect(core::AutocorrectSuggestion(replacementLoc, fmt::format("{}\n{}", to_string(ss), spaces)));
 
     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
         e.addAutocorrect(move(*suggestion));
