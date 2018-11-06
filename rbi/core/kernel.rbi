@@ -165,6 +165,9 @@ module Kernel
   sig {returns(Integer)}
   def hash(); end
 
+  sig {params(object: T.self_type).returns(T.self_type)}
+  def initialize_copy(object); end
+
   sig {returns(String)}
   def inspect(); end
 
