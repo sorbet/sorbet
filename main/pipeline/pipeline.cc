@@ -364,7 +364,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
                                          const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     unique_ptr<ast::Expression> result;
     core::FileRef f = resolved->loc.file();
-    if (opts.stopAfterPhase == options::Phase::RESOLVER) {
+    if (opts.stopAfterPhase == options::Phase::NAMER || opts.stopAfterPhase == options::Phase::RESOLVER) {
         return make_unique<ast::EmptyTree>(core::Loc::none(f));
     }
     if (f.data(ctx).isRBI()) {
