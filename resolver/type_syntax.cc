@@ -182,6 +182,9 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
             case core::Names::overridable()._id:
                 sig.seen.overridable = true;
                 break;
+            case core::Names::final()._id:
+                sig.seen.final = true;
+                break;
             case core::Names::returns()._id: {
                 sig.seen.returns = true;
                 if (send->args.size() != 1) {

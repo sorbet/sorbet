@@ -303,6 +303,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
         trees = sorbet::resolver::Resolver::run(ctx, move(trees));
+        auto newErrors = errorQueue->drainAllErrors();
+        errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
     expectation = test.expectations.find("name-table");

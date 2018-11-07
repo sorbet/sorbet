@@ -71,7 +71,7 @@ next 1
 next 1,2
 
 # defined
-defined?(X)
+defined?(X) # error: Unable to resolve
 
 
 # zsuper
@@ -118,7 +118,7 @@ END{bar} # error: Unsupported node type `Postexe`
 
 # rescue, resbody
 begin
-rescue E=>x
+rescue E=>x # error: Unable to resolve constant
   nil
 end
 

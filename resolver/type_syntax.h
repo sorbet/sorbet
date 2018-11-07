@@ -34,6 +34,7 @@ struct ParsedSig {
         bool returns = false;
         bool void_ = false;
         bool checked = false;
+        bool final = false;
     } seen;
 
     TypeArgSpec &enterTypeArgByName(core::NameRef name);

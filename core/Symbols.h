@@ -70,6 +70,7 @@ public:
         static constexpr int METHOD_GENERIC = 0x0010;
         static constexpr int METHOD_GENERATED_SIG = 0x0008;
         static constexpr int METHOD_OVERRIDABLE = 0x0004;
+        static constexpr int METHOD_FINAL = 0x0002;
 
         // Type flags
         static constexpr int TYPE_COVARIANT = 0x0100;
@@ -405,6 +406,16 @@ public:
     inline void setOverridable() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_OVERRIDABLE;
+    }
+
+    inline void setFinalMethod() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_FINAL;
+    }
+
+    inline bool isFinalMethod() {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_FINAL) != 0;
     }
 
     inline void setHasGeneratedSig() {

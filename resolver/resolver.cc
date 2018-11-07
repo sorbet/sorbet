@@ -645,6 +645,9 @@ private:
         if (sig.seen.overridable) {
             method.data(ctx)->setOverridable();
         }
+        if (sig.seen.final) {
+            method.data(ctx)->setFinalMethod();
+        }
         auto methodInfo = method.data(ctx);
 
         methodInfo->resultType = sig.returns;

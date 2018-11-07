@@ -173,6 +173,35 @@ const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
     return entry;
 }
 
+void validateOverriding(core::GlobalState &gs, core::SymbolRef method) {
+    auto klass = method.data(gs)->owner;
+    auto name = method.data(gs)->name;
+    ENFORCE(klass.data(gs)->isClass());
+    auto klassData = klass.data(gs);
+    InlinedVector<core::SymbolRef, 4> overridenMethods;
+    if (klassData->superClass.exists()) {
+        auto superMethod = klassData->superClass.data(gs)->findMemberTransitive(gs, name);
+        if (superMethod.exists()) {
+            overridenMethods.emplace_back(superMethod);
+        }
+    }
+    for (const auto &mixin : klassData->mixins()) {
+        auto superMethod = mixin.data(gs)->findMember(gs, name);
+        if (superMethod.exists()) {
+            overridenMethods.emplace_back(superMethod);
+        }
+    }
+
+    for (const auto &overridenMethod : overridenMethods) {
+        if (overridenMethod.data(gs)->isFinalMethod()) {
+            if (auto e = gs.beginError(method.data(gs)->loc(), core::errors::Resolver::OverridesFinal)) {
+                e.setHeader("Method overrides a final method `{}`", overridenMethod.data(gs)->show(gs));
+                e.addErrorLine(overridenMethod.data(gs)->loc(), "defined here");
+            }
+        }
+    }
+}
+
 void validateAbstract(core::GlobalState &gs, UnorderedMap<core::SymbolRef, vector<core::SymbolRef>> &abstractCache,
                       core::SymbolRef sym) {
     if (sym.data(gs)->isClassAbstract()) {
@@ -437,6 +466,9 @@ void Resolver::finalizeResolution(core::GlobalState &gs) {
         auto sym = core::SymbolRef(&gs, i);
         if (sym.data(gs)->isClass()) {
             validateAbstract(gs, abstractCache, sym);
+        }
+        if (sym.data(gs)->isMethod() && !sym.data(gs)->isBlockSymbol(gs)) {
+            validateOverriding(gs, sym);
         }
     }
 }
