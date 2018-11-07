@@ -58,7 +58,7 @@ SORBET_MASQUERADE_SHA="$(cat sorbet/sorbet.sha)"
     ln -s "$(pwd)/bazel-bin/main/sorbet" "${SORBET_CACHE_DIR}/${SORBET_MASQUERADE_SHA}/bin"
 )
 eval "$(rbenv init -)"
-stripe-deps-ruby  --without monster ci_ignore test_ui
+stripe-deps-ruby --without ci_ignore
 
 # Clobber our .bazelrc so pay-server's bazel doesn't see it.
 rm ../.bazelrc
