@@ -143,3 +143,10 @@ def fooCondGeneratedDo(a, cond)
     takesString(a)
   end
 end
+
+class Abstract
+  extend T::Helpers
+  abstract!
+  sig {abstract.params(a: T.untyped).void}
+  def abstract_foo(a); end
+end
