@@ -522,7 +522,8 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     }
 
     if (methodSymbol.data(ctx)->name != core::Names::initialize()) {
-        if (closestMethod.exists()) {
+        // Only need override / implementation if the parent has a sig
+        if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
             if (closestMethod.data(ctx)->isAbstract()) {
                 fmt::format_to(ss, "implementation.");
             } else {

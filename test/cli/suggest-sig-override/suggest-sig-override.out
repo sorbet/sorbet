@@ -56,7 +56,7 @@ suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
     39 |  def qux; end
           ^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:39: Insert `sig {generated.override.returns(NilClass)}
+    suggest-sig-override.rb:39: Insert `sig {generated.returns(NilClass)}
   `
     39 |  def qux; end
           ^
@@ -157,7 +157,7 @@ suggest-sig-override.rb:92: This function does not have a `sig` http://go/e/7017
     92 |  def nope; end
           ^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:92: Insert `sig {generated.override.returns(NilClass)}
+    suggest-sig-override.rb:92: Insert `sig {generated.returns(NilClass)}
   `
     92 |  def nope; end
           ^
@@ -214,7 +214,7 @@ class Child < Parent
   sig {generated.override.void}
   def bar; end
 
-  sig {generated.override.returns(NilClass)}
+  sig {generated.returns(NilClass)}
   def qux; end
 end
 
@@ -277,6 +277,6 @@ end
 
 class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
   extend T::Helpers
-  sig {generated.override.returns(NilClass)}
+  sig {generated.returns(NilClass)}
   def nope; end
 end
