@@ -91,3 +91,12 @@ end
 class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
   def nope; end
 end
+
+class DSLParent
+  # avoid sigging this
+  dsl_optional :opt_string, String
+end
+
+class DSLChild < DSLParent
+  def opt_string; end
+end

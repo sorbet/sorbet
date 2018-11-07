@@ -166,7 +166,21 @@ suggest-sig-override.rb:92: This function does not have a `sig` http://go/e/7017
 `
     92 |  def nope; end
         ^
-Errors: 14
+
+suggest-sig-override.rb:101: This function does not have a `sig` http://go/e/7017
+     101 |  def opt_string; end
+            ^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:101: Insert `sig {generated.override.returns(String)}
+  `
+     101 |  def opt_string; end
+            ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:101: Insert `  extend T::Helpers
+`
+     101 |  def opt_string; end
+          ^
+Errors: 15
 
 --------------------------------------------------------------------------
 
@@ -279,4 +293,15 @@ class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
   extend T::Helpers
   sig {generated.returns(NilClass)}
   def nope; end
+end
+
+class DSLParent
+  # avoid sigging this
+  dsl_optional :opt_string, String
+end
+
+class DSLChild < DSLParent
+  extend T::Helpers
+  sig {generated.override.returns(String)}
+  def opt_string; end
 end

@@ -414,8 +414,10 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
         childSymbol.data(ctx)->name != core::Names::initialize() &&
         // in a file which we can edit...
         parentSymbol.data(ctx)->loc().file().exists() &&
-        // and isn't defined in an RBI (because it might be codegen'd)
-        !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI();
+        // and isn't defined in an RBI (because it might be codegen'd)...
+        !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
+        // and is wasn't DSL synthesized (beause we can't change DSL'd sigs)
+        !parentSymbol.data(ctx)->isDSLSynthesized();
 }
 
 } // namespace

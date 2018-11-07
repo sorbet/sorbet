@@ -463,7 +463,7 @@ public:
         ENFORCE(isStaticField());
         flags |= Symbol::Flags::STATIC_FIELD_TYPE_ALIAS;
     }
-    inline bool isStaticTypeAlias() {
+    inline bool isStaticTypeAlias() const {
         ENFORCE(isStaticField());
         return (flags & Symbol::Flags::STATIC_FIELD_TYPE_ALIAS) != 0;
     }
@@ -471,7 +471,7 @@ public:
     inline void setDSLSynthesized() {
         flags |= Symbol::Flags::DSL_SYNTHESIZED;
     }
-    inline bool isDSLSynthesized() {
+    inline bool isDSLSynthesized() const {
         return (flags & Symbol::Flags::DSL_SYNTHESIZED) != 0;
     }
 
