@@ -80,3 +80,14 @@ class Child < Parent
 
   def multiline_x_to_returns(x); end
 end
+
+# Doesn't need overridable because parent doesn't have a sig
+class DoesntNeedOverridable
+  # random words to trip up our hacky text search:
+  # void return sig params generated
+  def nope; end
+end
+
+class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
+  def nope; end
+end

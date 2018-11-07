@@ -60,10 +60,6 @@ suggest-sig-override.rb:39: This function does not have a `sig` http://go/e/7017
   `
     39 |  def qux; end
           ^
-  Autocorrect: Use `-a` to autocorrect
-    suggest-sig-override.rb:27: Insert `generated.overridable.`
-    27 |  sig {void}
-               ^
 
 suggest-sig-override.rb:71: This function does not have a `sig` http://go/e/7017
     71 |  def just_void; end
@@ -142,7 +138,35 @@ suggest-sig-override.rb:81: This function does not have a `sig` http://go/e/7017
     suggest-sig-override.rb:66: Insert `generated.overridable.`
     66 |    .returns(NilClass)
              ^
-Errors: 12
+
+suggest-sig-override.rb:88: This function does not have a `sig` http://go/e/7017
+    88 |  def nope; end
+          ^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:88: Insert `sig {generated.returns(NilClass)}
+  `
+    88 |  def nope; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:86: Insert `  extend T::Helpers
+`
+    86 |  # random words to trip up our hacky text search:
+        ^
+
+suggest-sig-override.rb:92: This function does not have a `sig` http://go/e/7017
+    92 |  def nope; end
+          ^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:92: Insert `sig {generated.override.returns(NilClass)}
+  `
+    92 |  def nope; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-override.rb:92: Insert `  extend T::Helpers
+`
+    92 |  def nope; end
+        ^
+Errors: 14
 
 --------------------------------------------------------------------------
 
@@ -240,4 +264,19 @@ class Child < Parent
 
   sig {generated.params(x: T.untyped).override.returns(NilClass)}
   def multiline_x_to_returns(x); end
+end
+
+# Doesn't need overridable because parent doesn't have a sig
+class DoesntNeedOverridable
+  extend T::Helpers
+  # random words to trip up our hacky text search:
+  # void return sig params generated
+  sig {generated.returns(NilClass)}
+  def nope; end
+end
+
+class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
+  extend T::Helpers
+  sig {generated.override.returns(NilClass)}
+  def nope; end
 end
