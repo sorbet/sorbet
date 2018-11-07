@@ -789,129 +789,8 @@ private:
     void processClassBody(core::MutableContext ctx, unique_ptr<ast::ClassDef> &klass) {
         InlinedVector<ast::Expression *, 1> lastSig;
         for (auto &stat : klass->rhs) {
-            typecase(
-                stat.get(),
-
-                [&](ast::Send *send) {
-                    if (TypeSyntax::isSig(ctx, send)) {
-                        if (!lastSig.empty()) {
-                            if (!ctx.permitOverloadDefinitions()) {
-                                if (auto e = ctx.state.beginError(lastSig[0]->loc,
-                                                                  core::errors::Resolver::InvalidMethodSignature)) {
-                                    e.setHeader("Unused type annotation. No method def before next annotation");
-                                    e.addErrorLine(send->loc, "Type annotation that will be used instead");
-                                }
-                            }
-                        }
-
-                        // parsing the sig will transform the sig into a format we can use
-                        TypeSyntax::parseSig(ctx, send, nullptr, true, core::Symbols::untyped());
-
-                        lastSig.emplace_back(stat.get());
-                        return;
-                    }
-
-                    if (!ast::isa_tree<ast::Self>(send->recv.get())) {
-                        return;
-                    }
-
-                    switch (send->fun._id) {
-                        case core::Names::mixesInClassMethods()._id: {
-                            processMixesInClassMethods(ctx, send);
-                        } break;
-                        default:
-                            return;
-                    }
-                    stat.reset(nullptr);
-                },
-
-                [&](ast::MethodDef *mdef) {
-                    if (debug_mode) {
-                        bool hasSig = !lastSig.empty();
-                        bool DSL = mdef->isDSLSynthesized();
-                        bool isRBI = mdef->loc.file().data(ctx).isRBI();
-                        if (hasSig) {
-                            categoryCounterInc("method.sig", "true");
-                        } else {
-                            categoryCounterInc("method.sig", "false");
-                        }
-                        if (DSL) {
-                            categoryCounterInc("method.dsl", "true");
-                        } else {
-                            categoryCounterInc("method.dsl", "false");
-                        }
-                        if (isRBI) {
-                            categoryCounterInc("method.rbi", "true");
-                        } else {
-                            categoryCounterInc("method.rbi", "false");
-                        }
-                        if (hasSig && !isRBI && !DSL) {
-                            counterInc("types.sig.human");
-                        }
-                    }
-
-                    if (!lastSig.empty()) {
-                        prodCounterInc("types.sig.count");
-
-                        bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
-
-                        if (isOverloaded) {
-                            mdef->symbol.data(ctx)->setOverloaded();
-                            int i = 1;
-
-                            while (i < lastSig.size()) {
-                                auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
-                                fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded);
-                                if (i + 1 < lastSig.size()) {
-                                    overload.data(ctx)->setOverloaded();
-                                }
-                                i++;
-                            }
-                        }
-
-                        fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded);
-
-                        // TODO(jez) Should we handle isOverloaded?
-                        if (!isOverloaded) {
-                            injectOptionalArgs(ctx, mdef);
-                        }
-
-                        // OVERLOAD
-                        lastSig.clear();
-                    }
-
-                    if (mdef->symbol.data(ctx)->isAbstract()) {
-                        if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
-                            if (auto e = ctx.state.beginError(mdef->rhs->loc,
-                                                              core::errors::Resolver::AbstractMethodWithBody)) {
-                                e.setHeader("Abstract methods must not contain any code in their body");
-                            }
-
-                            mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
-                        }
-                        if (!mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassAbstract()) {
-                            if (auto e = ctx.state.beginError(mdef->loc,
-                                                              core::errors::Resolver::AbstractMethodOutsideAbstract)) {
-                                e.setHeader("Before declaring an abstract method, you must mark your class/module "
-                                            "as abstract using `abstract!` or `interface!`");
-                            }
-                        }
-                    } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassInterface()) {
-                        if (auto e =
-                                ctx.state.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
-                            e.setHeader("All methods in an interface must be declared abstract");
-                        }
-                    }
-                },
-                [&](ast::ClassDef *cdef) {
-                    // Leave in place
-                },
-
-                [&](ast::EmptyTree *e) { stat.reset(nullptr); },
-
-                [&](ast::Expression *e) {});
+            processStatement(ctx, stat, lastSig);
         }
-
         if (!lastSig.empty()) {
             if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
                 e.setHeader("Malformed `{}`. No method def following it", "sig");
@@ -920,8 +799,149 @@ private:
 
         auto toRemove = remove_if(klass->rhs.begin(), klass->rhs.end(),
                                   [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
-
         klass->rhs.erase(toRemove, klass->rhs.end());
+    }
+
+    void processInSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> &seq) {
+        InlinedVector<ast::Expression *, 1> lastSig;
+        for (auto &stat : seq->stats) {
+            processStatement(ctx, stat, lastSig);
+        }
+        if (!ast::isa_tree<ast::EmptyTree>(seq->expr.get())) {
+            processStatement(ctx, seq->expr, lastSig);
+        }
+        if (!lastSig.empty()) {
+            if (auto e = ctx.state.beginError(lastSig[0]->loc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`. No method def following it", "sig");
+            }
+        }
+        auto toRemove = remove_if(seq->stats.begin(), seq->stats.end(),
+                                  [](unique_ptr<ast::Expression> &stat) -> bool { return stat.get() == nullptr; });
+        seq->stats.erase(toRemove, seq->stats.end());
+    }
+
+    void processStatement(core::MutableContext ctx, unique_ptr<ast::Expression> &stat,
+                          InlinedVector<ast::Expression *, 1> &lastSig) {
+        typecase(
+            stat.get(),
+
+            [&](ast::Send *send) {
+                if (TypeSyntax::isSig(ctx, send)) {
+                    if (!lastSig.empty()) {
+                        if (!ctx.permitOverloadDefinitions()) {
+                            if (auto e = ctx.state.beginError(lastSig[0]->loc,
+                                                              core::errors::Resolver::InvalidMethodSignature)) {
+                                e.setHeader("Unused type annotation. No method def before next annotation");
+                                e.addErrorLine(send->loc, "Type annotation that will be used instead");
+                            }
+                        }
+                    }
+
+                    // parsing the sig will transform the sig into a format we can use
+                    TypeSyntax::parseSig(ctx, send, nullptr, true, core::Symbols::untyped());
+
+                    lastSig.emplace_back(stat.get());
+                    return;
+                }
+
+                if (!ast::isa_tree<ast::Self>(send->recv.get())) {
+                    return;
+                }
+
+                switch (send->fun._id) {
+                    case core::Names::mixesInClassMethods()._id: {
+                        processMixesInClassMethods(ctx, send);
+                    } break;
+                    default:
+                        return;
+                }
+                stat.reset(nullptr);
+            },
+
+            [&](ast::MethodDef *mdef) {
+                if (debug_mode) {
+                    bool hasSig = !lastSig.empty();
+                    bool DSL = mdef->isDSLSynthesized();
+                    bool isRBI = mdef->loc.file().data(ctx).isRBI();
+                    if (hasSig) {
+                        categoryCounterInc("method.sig", "true");
+                    } else {
+                        categoryCounterInc("method.sig", "false");
+                    }
+                    if (DSL) {
+                        categoryCounterInc("method.dsl", "true");
+                    } else {
+                        categoryCounterInc("method.dsl", "false");
+                    }
+                    if (isRBI) {
+                        categoryCounterInc("method.rbi", "true");
+                    } else {
+                        categoryCounterInc("method.rbi", "false");
+                    }
+                    if (hasSig && !isRBI && !DSL) {
+                        counterInc("types.sig.human");
+                    }
+                }
+
+                if (!lastSig.empty()) {
+                    prodCounterInc("types.sig.count");
+
+                    bool isOverloaded = lastSig.size() > 1 && ctx.permitOverloadDefinitions();
+
+                    if (isOverloaded) {
+                        mdef->symbol.data(ctx)->setOverloaded();
+                        int i = 1;
+
+                        while (i < lastSig.size()) {
+                            auto overload = ctx.state.enterNewMethodOverload(lastSig[i]->loc, mdef->symbol, i);
+                            fillInInfoFromSig(ctx, overload, ast::cast_tree<ast::Send>(lastSig[i]), isOverloaded);
+                            if (i + 1 < lastSig.size()) {
+                                overload.data(ctx)->setOverloaded();
+                            }
+                            i++;
+                        }
+                    }
+
+                    fillInInfoFromSig(ctx, mdef->symbol, ast::cast_tree<ast::Send>(lastSig[0]), isOverloaded);
+
+                    // TODO(jez) Should we handle isOverloaded?
+                    if (!isOverloaded) {
+                        injectOptionalArgs(ctx, mdef);
+                    }
+
+                    // OVERLOAD
+                    lastSig.clear();
+                }
+
+                if (mdef->symbol.data(ctx)->isAbstract()) {
+                    if (!ast::isa_tree<ast::EmptyTree>(mdef->rhs.get())) {
+                        if (auto e =
+                                ctx.state.beginError(mdef->rhs->loc, core::errors::Resolver::AbstractMethodWithBody)) {
+                            e.setHeader("Abstract methods must not contain any code in their body");
+                        }
+
+                        mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
+                    }
+                    if (!mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassAbstract()) {
+                        if (auto e = ctx.state.beginError(mdef->loc,
+                                                          core::errors::Resolver::AbstractMethodOutsideAbstract)) {
+                            e.setHeader("Before declaring an abstract method, you must mark your class/module "
+                                        "as abstract using `abstract!` or `interface!`");
+                        }
+                    }
+                } else if (mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassInterface()) {
+                    if (auto e = ctx.state.beginError(mdef->loc, core::errors::Resolver::ConcreteMethodInInterface)) {
+                        e.setHeader("All methods in an interface must be declared abstract");
+                    }
+                }
+            },
+            [&](ast::ClassDef *cdef) {
+                // Leave in place
+            },
+
+            [&](ast::EmptyTree *e) { stat.reset(nullptr); },
+
+            [&](ast::Expression *e) {});
     }
 
     // Resolve the type of the rhs of a constant declaration. This logic is
@@ -1078,6 +1098,11 @@ public:
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
         processClassBody(ctx.withOwner(original->symbol), original);
+        return original;
+    }
+
+    unique_ptr<ast::Expression> postTransformInsSeq(core::MutableContext ctx, unique_ptr<ast::InsSeq> original) {
+        processInSeq(ctx, original);
         return original;
     }
 
