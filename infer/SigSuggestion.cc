@@ -418,9 +418,10 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
 
 } // namespace
 
-bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
-                                    const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
-                                    unique_ptr<cfg::CFG> &cfg) {
+bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
+                                    const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
+    core::SymbolRef methodSymbol = cfg->symbol;
+
     bool guessedSomethingUseful = false;
     shared_ptr<core::Type> guessedReturnType;
     if (!constr.isEmpty()) {

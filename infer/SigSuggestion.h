@@ -6,9 +6,8 @@
 namespace sorbet::infer {
 class SigSuggestion final {
 public:
-    static bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, core::SymbolRef methodSymbol,
-                                const std::shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr,
-                                std::unique_ptr<cfg::CFG> &cfg);
+    static bool maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, std::unique_ptr<cfg::CFG> &cfg,
+                                const std::shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr);
 };
 } // namespace sorbet::infer
 
