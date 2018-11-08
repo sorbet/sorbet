@@ -33,3 +33,14 @@ end
 class MethodOnSelf
   def self.foo; end
 end
+
+# Should properly indent it when the first line has an empty line
+class ProperIndentation
+
+  def foo; end
+
+  class Nested
+
+    def bar; end
+  end
+end

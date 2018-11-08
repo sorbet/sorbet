@@ -115,13 +115,18 @@ unique_ptr<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context
     }
 
     auto [classStart, classEnd] = classLoc->position(ctx);
+
+    core::Loc::Detail thisLineStart = {classStart.line, 1};
+    core::Loc thisLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), thisLineStart, thisLineStart);
+    auto thisLinePadding = findStartOfLine(ctx, thisLineLoc).padding;
+
     ENFORCE(classStart.line + 1 <= classLoc->file().data(ctx).line_breaks().size());
     core::Loc::Detail nextLineStart = {classStart.line + 1, 1};
     core::Loc nextLineLoc = core::Loc::fromDetails(ctx, classLoc->file(), nextLineStart, nextLineStart);
     auto [replacementLoc, nextLinePadding] = findStartOfLine(ctx, nextLineLoc);
 
     // Preserve the indentation of the line below us.
-    string prefix(nextLinePadding, ' ');
+    string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
     return make_unique<core::AutocorrectSuggestion>(nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix));
 }
 

@@ -48,7 +48,7 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:14: This function does not hav
     14 |class SigAndExtendOneLine; def foo; end; end
         ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/autocorrect-extend/autocorrect-extend.rb:15: Insert `extend T::Helpers
+    test/cli/autocorrect-extend/autocorrect-extend.rb:15: Insert `  extend T::Helpers
 `
     15 |
         ^
@@ -103,7 +103,35 @@ test/cli/autocorrect-extend/autocorrect-extend.rb:34: This function does not hav
 `
     34 |  def self.foo; end
         ^
-Errors: 9
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:40: This function does not have a `sig` http://go/e/7017
+    40 |  def foo; end
+          ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:40: Insert `sig {generated.returns(NilClass)}
+  `
+    40 |  def foo; end
+          ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:39: Insert `  extend T::Helpers
+`
+    39 |
+        ^
+
+test/cli/autocorrect-extend/autocorrect-extend.rb:44: This function does not have a `sig` http://go/e/7017
+    44 |    def bar; end
+            ^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:44: Insert `sig {generated.returns(NilClass)}
+    `
+    44 |    def bar; end
+            ^
+  Autocorrect: Use `-a` to autocorrect
+    test/cli/autocorrect-extend/autocorrect-extend.rb:43: Insert `    extend T::Helpers
+`
+    43 |
+        ^
+Errors: 11
 
 --------------------------------------------------------------------------
 
@@ -126,7 +154,7 @@ end
 # This doesn't work right now, for both the injected 'sig' and 'extend'.
 sig {generated.returns(NilClass)}
 class SigAndExtendOneLine; def foo; end; end
-extend T::Helpers
+  extend T::Helpers
 
 class DontSuggestExtend
   extend T::Helpers
@@ -154,4 +182,19 @@ class MethodOnSelf
   extend T::Helpers
   sig {generated.returns(NilClass)}
   def self.foo; end
+end
+
+# Should properly indent it when the first line has an empty line
+class ProperIndentation
+  extend T::Helpers
+
+  sig {generated.returns(NilClass)}
+  def foo; end
+
+  class Nested
+    extend T::Helpers
+
+    sig {generated.returns(NilClass)}
+    def bar; end
+  end
 end
