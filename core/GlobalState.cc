@@ -278,6 +278,7 @@ void GlobalState::initEmpty() {
     Symbols::root().data(*this, true)->members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();
     Symbols::root().data(*this, true)->members[enterNameConstant(top_str)] = Symbols::top();
     Symbols::root().data(*this, true)->members[enterNameConstant(bottom_str)] = Symbols::bottom();
+    Context ctx(*this, Symbols::root());
 
     // Synthesize untyped = T.untyped
     Symbols::untyped().data(*this)->resultType = Types::untyped(*this, Symbols::untyped());
@@ -313,7 +314,7 @@ void GlobalState::initEmpty() {
     arg = enterMethodArgumentSymbol(Loc::none(), method, Names::arg0());
     arg.data(*this)->resultType = Types::Object();
     method.data(*this)->arguments().emplace_back(arg);
-    method.data(*this)->resultType = Types::Boolean();
+    method.data(*this)->resultType = Types::any(ctx, Types::nilClass(), Types::String());
 
     // Synthesize <Magic>#<expandSplat>(arg0: T.untyped, arg1: Integer, arg2: Integer) => T.untyped
     method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::expandSplat());
