@@ -48,11 +48,16 @@ struct StopAfterOptions {
     Phase flag;
 };
 
-StopAfterOptions stop_after_options[] = {
-    {"init", Phase::INIT}, {"parser", Phase::PARSER},         {"desugarer", Phase::DESUGARER},
-    {"dsl", Phase::DSL},   {"namer", Phase::NAMER},           {"resolver", Phase::RESOLVER},
-    {"cfg", Phase::CFG},   {"inferencer", Phase::INFERENCER},
-};
+const vector<StopAfterOptions> stop_after_options({
+    {"init", Phase::INIT},
+    {"parser", Phase::PARSER},
+    {"desugarer", Phase::DESUGARER},
+    {"dsl", Phase::DSL},
+    {"namer", Phase::NAMER},
+    {"resolver", Phase::RESOLVER},
+    {"cfg", Phase::CFG},
+    {"inferencer", Phase::INFERENCER},
+});
 
 core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> logger) {
     if (key == "ruby" || key == "stripe") {
@@ -124,7 +129,7 @@ cxxopts::Options buildOptions() {
     fmt::format_to(all_prints, "Print: [{}]",
                    fmt::map_join(print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
     fmt::format_to(all_stop_after, "Stop After: [{}]",
-                   fmt::map_join(print_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
+                   fmt::map_join(stop_after_options, ", ", [](const auto &pr) -> auto { return pr.option; }));
 
     // Advanced options
     options.add_options("advanced")("configatron-dir", "Path to configatron yaml folders",
@@ -240,7 +245,7 @@ Phase extractStopAfter(cxxopts::ParseResult &raw, shared_ptr<spdlog::logger> log
         }
     }
     vector<string_view> allOptions;
-    for (auto &known : print_options) {
+    for (auto &known : stop_after_options) {
         allOptions.emplace_back(known.option);
     }
 
