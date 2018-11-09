@@ -9,6 +9,15 @@
 
 #include "cfg/Instructions.h"
 
+//
+// This file defines the IR that the inference algorithm operates on.
+// A CFG (control flow graph) is a directed graph of "basic blocks" which are
+// sequences of instructions which cannot conditionally branch.
+//
+// The list of valid instructions in a binding of a basic block are defined
+// elsewhere.
+//
+
 namespace sorbet::cfg {
 
 class BasicBlock;

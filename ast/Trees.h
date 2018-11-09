@@ -9,6 +9,23 @@
 #include <memory>
 #include <vector>
 
+//
+// This file defines the IR that most of the middle phases of Sorbet operate on
+// and manipulate It aims to be a middle ground between the parser output (very
+// verbose and fine grained) and the CFG data structure (very easy to typecheck
+// but very hard to do ad-hoc transformations on).
+//
+// This IR is best learned by example. Try using the `--print` option to sorbet
+// on a handful of test/testdata files. Since there are multiple phases that
+// return this IR, there are multiple valid print options which will show you
+// an ast::Expression.
+//
+// Another good way to discover things is to grep for the class name in the
+// various *-raw.exp snapshot tests to fine a test file that uses that node.
+// Keep in mind that this IR is meant to be somewhat coarse grained, so one
+// node type can likely have been created from multiple Ruby constructs.
+//
+
 namespace sorbet::ast {
 
 class Expression {
