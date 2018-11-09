@@ -47,11 +47,11 @@ module T
   def self.enum(values); end
   def self.untyped; end
 
-  sig {params(arg0: T.untyped, types: T.untyped).returns(BasicObject)}
-  def self.any(arg0, *types); end
+  sig {params(arg0: T.untyped, arg1: T.untyped, types: T.untyped).returns(BasicObject)}
+  def self.any(arg0, arg1, *types); end
 
-  sig {params(arg0: T.untyped, types: T.untyped).returns(BasicObject)}
-  def self.all(arg0, *types); end
+  sig {params(arg0: T.untyped, arg1: T.untyped, types: T.untyped).returns(BasicObject)}
+  def self.all(arg0, arg1, *types); end
 
   def self.reveal_type(value); end
   def self.type_parameter(var); end

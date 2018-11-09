@@ -12,6 +12,8 @@ T.noreturn
 T.enum([:a, :b])
 
 T.untyped
+T.any(String) # error: Not enough arguments provided for method `T.any`.
+T.all(String) # error: Not enough arguments provided for method `T.all`.
 T.any(String, Integer, Symbol)
 T.all(String, Integer, Symbol)
 
@@ -28,5 +30,5 @@ T.noreturn(String) # error: Too many arguments provided for method `T.noreturn`.
 T.enum # error: Not enough arguments provided for method `T.enum`. Expected: `1`, got: `0`
 
 T.untyped(String) # error: Too many arguments provided for method `T.untyped`. Expected: `0`, got: `1`
-T.any # error: Not enough arguments provided for method `T.any`. Expected: `1+`, got: `0`
-T.all # error: Not enough arguments provided for method `T.all`. Expected: `1+`, got: `0`
+T.any # error: Not enough arguments provided for method `T.any`. Expected: `2+`, got: `0`
+T.all # error: Not enough arguments provided for method `T.all`. Expected: `2+`, got: `0`
