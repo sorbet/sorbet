@@ -26,4 +26,5 @@ def clang_tool(name):
     _clang_tool(
         name = name,
         tool = "@llvm_toolchain//:bin/" + name,
+        visibility = ["//visibility:public"],
     )

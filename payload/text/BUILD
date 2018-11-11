@@ -60,8 +60,12 @@ genrule(
         "text.cc",
         "text.h",
     ],
-    cmd = "$(location :generate_payload) $(location text.h) $(location text.cc) $(locations //rbi)",
-    tools = [":generate_payload"],
+    cmd = "$(location :generate_payload) $(location text.h) $(location text.cc) $(locations //rbi) && \
+    $(location //tools:clang-format) -i $(location text.h) $(location text.cc)",
+    tools = [
+        ":generate_payload",
+        "//tools:clang-format",
+    ],
 )
 
 genrule(
@@ -70,6 +74,10 @@ genrule(
         "empty.cc",
         "empty.h",
     ],
-    cmd = "$(location :generate_payload) $(location empty.h) $(location empty.cc)",
-    tools = [":generate_payload"],
+    cmd = "$(location :generate_payload) $(location empty.h) $(location empty.cc)&& \
+       $(location //tools:clang-format) -i $(location empty.h) $(location empty.cc)",
+    tools = [
+        ":generate_payload",
+        "//tools:clang-format",
+    ],
 )

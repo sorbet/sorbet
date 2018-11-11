@@ -74,6 +74,10 @@ genrule(
         "Names_gen.h",
         "Names_gen.cc",
     ],
-    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc)",
-    tools = [":generate_names"],
+    cmd = "$(location :generate_names) $(location Names_gen.h) $(location Names_gen.cc) && \
+             $(location //tools:clang-format) -i $(location Names_gen.h) $(location Names_gen.cc)",
+    tools = [
+        ":generate_names",
+        "//tools:clang-format",
+    ],
 )

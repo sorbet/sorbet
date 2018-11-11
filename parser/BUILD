@@ -44,8 +44,12 @@ genrule(
         "Node_gen.h",
         "Node_gen.cc",
     ],
-    cmd = "$(location :generate_ast) $(location Node_gen.h) $(location Node_gen.cc)",
-    tools = [":generate_ast"],
+    cmd = "$(location :generate_ast) $(location Node_gen.h) $(location Node_gen.cc) && \
+             $(location //tools:clang-format) -i $(location Node_gen.cc) $(location Node_gen.h)",
+    tools = [
+        ":generate_ast",
+        "//tools:clang-format",
+    ],
 )
 
 genrule(
@@ -57,7 +61,9 @@ genrule(
     outs = [
         "diagnostics.cc",
     ],
-    cmd = "ruby $(location tools/generate_diagnostics.rb) $(location @parser//:codegen/diagnostics.rb) $(location diagnostics.cc)",
+    cmd = "ruby $(location tools/generate_diagnostics.rb) $(location @parser//:codegen/diagnostics.rb) $(location diagnostics.cc) && \
+           $(location //tools:clang-format) -i $(location diagnostics.cc)",
+    tools = ["//tools:clang-format"],
 )
 
 cc_test(
