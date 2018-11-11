@@ -19,25 +19,25 @@ string sourceName2funcName(string sourceName) {
 }
 
 void emit_header(vector<string> sourceFiles, ostream &out) {
-    out << "#include<string>" << '\n' << "#include<vector>" << '\n';
+    out << "#include<string_view>" << '\n' << "#include<vector>" << '\n';
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
-        out << "  std::string " + sourceName2funcName(file) << "();" << '\n';
+        out << "  std::string_view " + sourceName2funcName(file) << "();" << '\n';
     }
-    out << "  std::vector<std::pair<std::string, std::string> > all();" << '\n';
+    out << "  std::vector<std::pair<std::string_view, std::string_view> > all();" << '\n';
 
     out << "}};" << '\n';
 }
 
 void emit_classfile(vector<string> sourceFiles, ostream &out) {
-    out << "#include<string>" << '\n' << "#include<vector>" << '\n';
+    out << "#include<string_view>" << '\n' << "#include<vector>\nusing namespace std;\n";
     out << "namespace sorbet{" << '\n' << "namespace rbi{" << '\n';
     for (auto &file : sourceFiles) {
-        out << "  std::string " + sourceName2funcName(file) << "() {" << '\n';
-        out << "  return \"" + absl::CEscape(sorbet::FileOps::read(file.c_str())) + "\";" << '\n' << "}" << '\n';
+        out << "  string_view " + sourceName2funcName(file) << "() {" << '\n';
+        out << "  return \"" + absl::CEscape(sorbet::FileOps::read(file.c_str())) + "\"sv;" << '\n' << "}" << '\n';
     }
-    out << "std::vector<std::pair<std::string, std::string> > all() {" << '\n';
-    out << "  std::vector<std::pair<std::string, std::string> > result;" << '\n';
+    out << "vector<pair<string_view, string_view> > all() {" << '\n';
+    out << "  vector<pair<string_view, string_view> > result;" << '\n';
     for (auto &file : sourceFiles) {
         string version;
         if (sorbet::Version::isReleaseBuild) {
@@ -46,7 +46,7 @@ void emit_classfile(vector<string> sourceFiles, ostream &out) {
             version = "master";
         }
         string permalink = "https://git.corp.stripe.com/stripe-internal/sorbet/tree/" + version + "/" + file;
-        out << "  result.emplace_back(std::make_pair<std::string, std::string>(\"" + absl::CEscape(permalink) + "\", " +
+        out << "  result.emplace_back(make_pair<string_view, string_view>(\"" + absl::CEscape(permalink) + "\"sv, " +
                    sourceName2funcName(file) + "()));"
             << '\n';
     }
