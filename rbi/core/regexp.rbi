@@ -49,7 +49,7 @@ class Regexp < Object
 
   sig do
     params(
-        str: String,
+        str: T.nilable(String),
     )
     .returns(T.nilable(Integer))
   end
