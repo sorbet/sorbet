@@ -21,9 +21,9 @@
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "version/version.h"
 
-#include <algorithm> // find
 #include <csignal>
 #include <poll.h>
+#include <sys/resource.h> // getrusage
 
 namespace spd = spdlog;
 
@@ -117,6 +117,25 @@ void startHUPMonitor() {
         }
     });
     monitor.detach();
+}
+
+void addStandardMetrics() {
+    prodCounterAdd("release.build_scm_commit_count", Version::build_scm_commit_count);
+    prodCounterAdd(
+        "release.build_timestamp",
+        std::chrono::duration_cast<std::chrono::seconds>(Version::build_timestamp.time_since_epoch()).count());
+
+    struct rusage usage;
+    getrusage(RUSAGE_SELF, &usage);
+    prodCounterAdd("run.utilization.user_time.ms", usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec);
+    prodCounterAdd("run.utilization.system_time.ms", usage.ru_stime.tv_sec * 1000 + usage.ru_stime.tv_usec);
+    prodCounterAdd("run.utilization.max_rss", usage.ru_maxrss);
+    prodCounterAdd("run.utilization.minor_faults", usage.ru_minflt);
+    prodCounterAdd("run.utilization.major_faults", usage.ru_majflt);
+    prodCounterAdd("run.utilization.inblock", usage.ru_inblock);
+    prodCounterAdd("run.utilization.oublock", usage.ru_oublock);
+    prodCounterAdd("run.utilization.context_switch.voluntary", usage.ru_nvcsw);
+    prodCounterAdd("run.utilization.context_switch.involuntary", usage.ru_nivcsw);
 }
 
 int realmain(int argc, char *argv[]) {
@@ -341,6 +360,8 @@ int realmain(int argc, char *argv[]) {
             }
         }
     }
+
+    addStandardMetrics();
 
     if (!opts.someCounters.empty()) {
         if (opts.enableCounters) {

@@ -10,7 +10,7 @@ public:
     static const std::string version;
     static const std::string codename;
     static const std::string build_scm_revision;
-    static const std::string build_scm_commit_count;
+    static const int build_scm_commit_count;
     static const std::string build_scm_status;
     static const std::chrono::system_clock::time_point build_timestamp;
     static const std::string build_timestamp_string;

@@ -49,10 +49,10 @@ string makeScmRevision() {
 }
 const string Version::build_scm_revision = makeScmRevision();
 
-string makeScmCommitCount() {
-    return string(build_scm_commit_count);
+int makeScmCommitCount() {
+    return std::stoi(string(build_scm_commit_count));
 }
-const string Version::build_scm_commit_count = makeScmCommitCount();
+const int Version::build_scm_commit_count = makeScmCommitCount();
 
 chrono::system_clock::time_point makeBuildTime() {
     const long buildStampSec = build_timestamp;
@@ -72,7 +72,7 @@ string makeBuildTimeString() {
 const string Version::build_timestamp_string = makeBuildTimeString(); // non-release builds have 1970-01-01 00:00:00 GMT
 
 const string Version::full_version_string =
-    Version::version + Version::codename + "rev " + Version::build_scm_commit_count +
+    Version::version + Version::codename + "rev " + to_string(Version::build_scm_commit_count) +
     (Version::isReleaseBuild ? "" : " (non-release)") + " git " + Version::build_scm_revision +
     Version::build_scm_status + " built on " + Version::build_timestamp_string +
     (Version::withDebugSymbols ? " with debug symbols" : "");
