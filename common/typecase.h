@@ -30,8 +30,19 @@ template <typename T> using get_signature = typename get_signature_impl<T>::type
 // End ecatmur's code
 
 // Begin typecase code
-template <typename Base, typename T> bool typecaseHelper(Base *base, std::function<void(T *)> func) {
-    if (T *first = fast_cast<Base, T>(base)) {
+
+template <typename T> struct argtype_extractor : public argtype_extractor<decltype(&T::operator())> {};
+template <typename ClassType, typename ReturnType, typename ArgType>
+struct argtype_extractor<ReturnType (ClassType::*)(ArgType *) const>
+// we specialize for pointers to member function
+{
+    using arg_type = ArgType;
+};
+
+template <typename Base, typename FUNC> bool typecaseHelper(Base *base, FUNC &&func) {
+    typedef argtype_extractor<std::function<get_signature<FUNC>>> traits;
+    typedef typename traits::arg_type ArgType;
+    if (ArgType *first = fast_cast<Base, ArgType>(base)) {
         func(first);
         return true;
     } else {
@@ -42,8 +53,7 @@ template <typename Base, typename T> bool typecaseHelper(Base *base, std::functi
 template <typename Base, typename... Subclasses> void typecase(Base *base, Subclasses &&... funcs) {
     bool done = false;
 
-    bool UNUSED(dummy[sizeof...(Subclasses)]) = {
-        (done = done || typecaseHelper(base, std::function<get_signature<Subclasses>>(funcs)))...};
+    bool UNUSED(dummy[sizeof...(Subclasses)]) = {(done = done || typecaseHelper<Base>(base, funcs))...};
 
     if (!done) {
         sorbet::Exception::raise("not handled typecase case: ", demangle(typeid(*base).name()));
