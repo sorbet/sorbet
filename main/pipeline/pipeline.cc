@@ -554,14 +554,14 @@ vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
             }
         }
 
-        if (opts.print.NameTable) {
+        if (opts.print.SymbolTable) {
             fmt::print("{}\n", gs->toString());
         }
-        if (opts.print.NameTableJson) {
+        if (opts.print.SymbolTableJson) {
             auto root = core::Proto::toProto(*gs, core::Symbols::root());
             core::Proto::toJSON(root, cout);
         }
-        if (opts.print.NameTableFull) {
+        if (opts.print.SymbolTableFull) {
             fmt::print("{}\n", gs->toString(true));
         }
         if (opts.print.FileTableJson) {

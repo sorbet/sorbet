@@ -210,8 +210,8 @@ Namer walks the [`ast::Expression`] tree and calls various methods to create a
 which is conceptually a newtype wrapper around a pointer to a `Symbol`. See
 below for a discussion of [`Symbol`s vs `SymbolRef`s](#refs-ie-symbol-vs-symbolref).
 
-The key datastructure for the Namer pass is the table of `Symbol`s, which we
-call `name-table`. For example, given this file:
+The key datastructure for the Namer pass is the `Symbol` table, which we can
+print out. Given this file:
 
 <details>
 <summary>Click to expand docs_example_1.rb</summary>
@@ -238,10 +238,10 @@ end
 
 </details>
 
-We'll see this name-table output:
+We'll see this symbol-table output:
 
 ```
-❯ sorbet --no-stdlib -p name-table --stop-after namer docs_example_1.rb
+❯ sorbet --no-stdlib -p symbol-table --stop-after namer docs_example_1.rb
 class ::<root> ()
   field #$global @ docs_example_1.rb:7
   class ::A < ::<todo sym> () @ docs_example_1.rb:1
@@ -296,7 +296,7 @@ To give you an idea, this is what our Namer example looks like after the
 Resolver pass:
 
 ```
-❯ sorbet --no-stdlib -p name-table --stop-after resolver docs_example_1.rb
+❯ sorbet --no-stdlib -p symbol-table --stop-after resolver docs_example_1.rb
 class ::<root> < ::Object ()
   field #$global @ docs_example_1.rb:7
   class ::A < ::Object () @ docs_example_1.rb:1

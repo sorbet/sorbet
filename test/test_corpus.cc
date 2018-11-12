@@ -127,9 +127,9 @@ public:
 };
 
 sorbet::UnorderedSet<string> knownPasses = {
-    "parse-tree", "parse-tree-json", "ast",           "ast-raw",      "dsl-tree",         "dsl-tree-raw",
-    "name-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
-    "cfg-raw",    "typed-source",    "autogen"};
+    "parse-tree",   "parse-tree-json", "ast",           "ast-raw",      "dsl-tree",         "dsl-tree-raw",
+    "symbol-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
+    "cfg-raw",      "typed-source",    "autogen"};
 
 unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
                                                   unique_ptr<sorbet::ast::Expression> expr) {
@@ -307,9 +307,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
 
-    expectation = test.expectations.find("name-table");
+    expectation = test.expectations.find("symbol-table");
     if (expectation != test.expectations.end()) {
-        got["name-table"] = gs.toString() + '\n';
+        got["symbol-table"] = gs.toString() + '\n';
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
@@ -423,10 +423,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
     }
 
-    expectation = test.expectations.find("name-table");
+    expectation = test.expectations.find("symbol-table");
     if (expectation != test.expectations.end()) {
         string table = gs.toString() + '\n';
-        EXPECT_EQ(got["name-table"], table) << " name-table should not be mutated by CFG+inference";
+        EXPECT_EQ(got["symbol-table"], table) << " symbol-table should not be mutated by CFG+inference";
     }
 
     // Check warnings and errors

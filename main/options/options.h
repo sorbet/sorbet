@@ -21,9 +21,9 @@ struct Printers {
     bool DSLTreeRaw = false;
     bool NameTree = false;
     bool NameTreeRaw = false;
-    bool NameTable = false;
-    bool NameTableJson = false;
-    bool NameTableFull = false;
+    bool SymbolTable = false;
+    bool SymbolTableJson = false;
+    bool SymbolTableFull = false;
     bool FileTableJson = false;
     bool ResolveTree = false;
     bool ResolveTreeRaw = false;
