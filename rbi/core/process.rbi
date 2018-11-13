@@ -288,11 +288,11 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns([Integer, Integer])
+    .returns([Integer, Process::Status])
   end
   def self.wait2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 
-  sig {returns(T::Array[[Integer, Integer]])}
+  sig {returns(T::Array[[Integer, Process::Status]])}
   def self.waitall(); end
 
   sig do
@@ -309,7 +309,7 @@ module Process
         pid: Integer,
         flags: Integer,
     )
-    .returns([Integer, Integer])
+    .returns([Integer, Process::Status])
   end
   def self.waitpid2(pid=T.unsafe(nil), flags=T.unsafe(nil)); end
 end
