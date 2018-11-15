@@ -46,7 +46,7 @@ class TestArgs
     kwarg(1, {}) # error: Missing required keyword argument `b`
     kwarg(1, b: "hi") # error: `String("hi")` doesn't match `Integer` for argument `b`
     kwarg(1, any)
-    kwarg(1, a_hash) # error: Passing an untyped hash
+    kwarg(1, a_hash) # error: Passing a hash where the specific keys are unknown
   end
 
   sig do

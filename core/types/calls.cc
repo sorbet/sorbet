@@ -607,7 +607,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         } else if (hashArgType->derivesFrom(ctx, Symbols::Hash())) {
             --aend;
             if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentMismatch)) {
-                e.setHeader("Passing an untyped hash to keyword arguments");
+                e.setHeader("Passing a hash where the specific keys are unknown to a method taking keyword arguments");
                 e.addErrorSection(ErrorSection("Got " + hashArgType->show(ctx) + " originating from:",
                                                hashArg->origins2Explanations(ctx)));
                 result.components.front().errors.emplace_back(e.build());
