@@ -115,10 +115,21 @@ class NameInserter {
         UnorderedMap<core::NameRef, core::LocalVariable> locals;
         vector<core::LocalVariable> args;
         bool moduleFunctionActive;
+        u4 scopeId;
     };
 
+    LocalFrame &enterScope() {
+        scopeStack.emplace_back().scopeId = scopeCounter;
+        ++scopeCounter;
+        return scopeStack.back();
+    }
+
+    void exitScope() {
+        scopeStack.pop_back();
+    }
+
     vector<LocalFrame> scopeStack;
-    u4 scopeId;
+    u4 scopeCounter;
 
     // `yield` needs to know the block argument provided to the enclosing
     // method. When we enter a method, we push a frame with `declared`
@@ -260,8 +271,8 @@ public:
                 klass->symbol.data(ctx)->setIsModule(isModule);
             }
         }
-        scopeStack.emplace_back();
-        scopeId = 0;
+        scopeCounter = 0;
+        enterScope();
         return klass;
     }
 
@@ -307,7 +318,7 @@ public:
     }
 
     unique_ptr<ast::Expression> postTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> klass) {
-        scopeStack.pop_back();
+        exitScope();
         if (klass->kind == ast::Class && !klass->symbol.data(ctx)->superClass.exists() &&
             klass->symbol != core::Symbols::BasicObject()) {
             klass->symbol.data(ctx)->superClass = core::Symbols::todo();
@@ -343,7 +354,7 @@ public:
         if (!ctx.owner.data(ctx)->isBlockSymbol(ctx)) {
             return core::LocalVariable(name, 0);
         }
-        return core::LocalVariable(name, scopeId);
+        return core::LocalVariable(name, scopeStack.back().scopeId);
     }
 
     void fillInArgs(core::MutableContext ctx, ast::MethodDef::ARGS_store &args) {
@@ -534,8 +545,8 @@ public:
     }
 
     unique_ptr<ast::MethodDef> preTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> method) {
-        scopeStack.emplace_back();
-        ++scopeId;
+        enterScope();
+
         core::SymbolRef owner = methodOwner(ctx);
 
         if (method->isSelf()) {
@@ -592,7 +603,7 @@ public:
         }
 
         ENFORCE(method->args.size() == method->symbol.data(ctx)->arguments().size());
-        scopeStack.pop_back();
+        exitScope();
         if (scopeStack.back().moduleFunctionActive) {
             aliasModuleFunction(ctx, method->symbol);
         }
@@ -620,9 +631,8 @@ public:
                                                                   ++(owner.data(ctx)->uniqueCounter)));
 
         auto outerArgs = scopeStack.back().args;
-        auto &frame = scopeStack.emplace_back();
+        auto &frame = enterScope();
         frame.args = move(outerArgs);
-        ++scopeId;
         auto &parent = *(scopeStack.end() - 2);
 
         // We inherit our parent's locals
@@ -638,7 +648,7 @@ public:
     }
 
     unique_ptr<ast::Block> postTransformBlock(core::MutableContext ctx, unique_ptr<ast::Block> blk) {
-        scopeStack.pop_back();
+        exitScope();
         return blk;
     }
 
@@ -831,8 +841,8 @@ public:
 
 private:
     NameInserter() {
-        scopeStack.emplace_back();
-        scopeId = 0;
+        scopeCounter = 0;
+        enterScope();
     }
 }; // namespace namer
 
