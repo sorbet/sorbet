@@ -4,18 +4,10 @@ tmp="$(mktemp)"
 infile="test/cli/suggest-sig-override/suggest-sig-override.rb"
 cp "$infile" "$tmp"
 
-cwd="$(pwd)"
-cd "$(dirname "$tmp")" || exit 1
-cp "$tmp" suggest-sig-override.rb
+# Run the autocorrect in place, on the temp file
+main/sorbet -a "$tmp" 2> /dev/null
 
-"$cwd/main/sorbet" -a suggest-sig-override.rb 2>&1
+# cat the file to see the autocorrected output
+cat "$tmp"
 
-echo
-echo --------------------------------------------------------------------------
-echo
-
-# Also cat the file, to make sure that 'extend' is only added once per class.
-cat suggest-sig-override.rb
-
-rm suggest-sig-override.rb
 rm "$tmp"

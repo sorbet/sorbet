@@ -5,15 +5,9 @@ infile="test/cli/autocorrect-extend/autocorrect-extend.rb"
 cp "$infile" "$tmp"
 
 # Run the autocorrect in place, on the temp file
-main/sorbet -a "$infile" 2>&1
+main/sorbet -a "$tmp" 2> /dev/null
 
-echo
-echo --------------------------------------------------------------------------
-echo
+# cat the file to see the autocorrected output
+cat "$tmp"
 
-# Also cat the file, to make sure that 'extend' is only added once per class.
-cat "$infile"
-
-# Restore input file (use cat because of symlinks)
-cat "$tmp" > "$infile"
 rm "$tmp"
