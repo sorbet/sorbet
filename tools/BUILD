@@ -23,6 +23,7 @@ compilation_database(
         "//parser:generate_ast",
         "//namer:namer_test",
         "//main/lsp:lsp_test",
+        "//main/lsp:generate_lsp_messages",
         "//main:sorbet-orig",
         "//payload/text:some",
         "//payload/binary:empty",

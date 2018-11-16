@@ -3,10 +3,13 @@ cc_library(
     srcs = glob([
         "*.cc",
         "requests/*.cc",
-    ]),
+    ]) + ["lsp_messages_gen.cc"],
     hdrs = [
         "DefLocSaver.h",
+        "json_types.h",
         "lsp.h",
+        "lsp_messages_gen.h",
+        "lsp_messages_gen_helpers.h",
     ],
     linkstatic = select({
         "//tools/config:linkshared": 0,
@@ -26,6 +29,38 @@ cc_library(
         "//payload/text",
         "@com_google_absl//absl/synchronization",
         "@rapidjson",
+    ],
+)
+
+cc_binary(
+    name = "generate_lsp_messages",
+    srcs = glob([
+        "tools/*.h",
+        "tools/*.cc",
+    ]),
+    linkstatic = select({
+        "//tools/config:linkshared": 0,
+        "//conditions:default": 1,
+    }),
+    visibility = ["//tools:__pkg__"],
+    deps = [
+        "//common",
+        "//core",
+        "@rapidjson",
+    ],
+)
+
+genrule(
+    name = "generate_lsp_messages_h",
+    outs = [
+        "lsp_messages_gen.h",
+        "lsp_messages_gen.cc",
+    ],
+    cmd = "$(location :generate_lsp_messages) $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc) && \
+             $(location //tools:clang-format) -i $(location lsp_messages_gen.h) $(location lsp_messages_gen.cc)",
+    tools = [
+        ":generate_lsp_messages",
+        "//tools:clang-format",
     ],
 )
 
