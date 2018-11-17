@@ -2,120 +2,85 @@
 
 extend T::Helpers
 
-# Suggest "implementation." for these classes
-module Abstract
+# This test file aims to exhaustively cover the cases for suggesting a sig on a
+# child method, across all the possible builder methods that could be used on
+# the parent:
+#
+# - no sig
+# - standard sig
+# - overridable
+# - abstract
+# - override
+# - implementation
+
+class ParentNoSig
+  extend T::Helpers
+  sig {generated.returns(NilClass)}
+  def foo; end
+end
+class ChildNoSig < ParentNoSig
+  sig {generated.returns(NilClass)}
+  def foo; end
+end
+
+class ParentStandardSig
+  extend T::Helpers
+  sig {generated.overridable.void}
+  def foo; end
+end
+class ChildStandardSig < ParentStandardSig
+  sig {generated.override.void}
+  def foo; end
+end
+
+class ParentOverridable
+  extend T::Helpers
+  sig {overridable.void}
+  def foo; end
+end
+class ChildOverridable < ParentOverridable
+  sig {generated.override.void}
+  def foo; end
+end
+
+class ParentAbstract
   extend T::Helpers
   abstract!
   sig {abstract.void}
   def foo; end
 end
-class Implementation
-  extend T::Helpers
-  include Abstract
-
+class ChildAbstract < ParentAbstract
   sig {generated.implementation.void}
   def foo; end
 end
 
-# Suggest "override." for these classes
-class Parent
+class GrandParentOverride
+  # Only need this class to allow `override` below.
   extend T::Helpers
-  sig {void}
-  def initialize; end
-
   sig {overridable.void}
   def foo; end
-
-  sig {generated.overridable.void}
-  def bar; end
-
-  sig {generated.returns(NilClass)}
-  def qux; end
 end
-class Child < Parent
-  sig {generated.void}
-  def initialize; end
-
+class ParentOverride < GrandParentOverride
+  sig {override.generated.overridable.void}
+  def foo; end
+end
+class ChildOverride < ParentOverride
   sig {generated.override.void}
   def foo; end
+end
 
+class GrandParentImplementation
+  # Only need this class to allow `implementation` below.
+  extend T::Helpers
+  abstract!
+  sig {abstract.void}
+  def foo; end
+end
+class ParentImplementation < GrandParentImplementation
+  sig {implementation.generated.overridable.void}
+  def foo; end
+end
+class ChildImplementation < ParentImplementation
   sig {generated.override.void}
-  def bar; end
-
-  sig {generated.returns(NilClass)}
-  def qux; end
-end
-
-# Weird overridable edge cases in string parsing
-class Parent
-  extend T::Helpers
-
-  sig {generated.overridable.void}
-  def just_void; end
-
-  sig {generated.overridable.returns(NilClass)}
-  def just_returns; end
-
-  sig {params(x: Integer).generated.overridable.void}
-  def x_to_void(x); end
-
-  sig {params(x: Integer).generated.overridable.returns(NilClass)}
-  def x_to_returns(x); end
-
-  sig do
-    params(x: Integer)
-    .generated.overridable.void
-  end
-  def multiline_x_to_void(x); end
-
-  sig do
-    params(x: Integer)
-    .generated.overridable.returns(NilClass)
-  end
-  def multiline_x_to_returns(x); end
-end
-class Child < Parent
-  sig {generated.override.void}
-  def just_void; end
-
-  sig {generated.override.returns(NilClass)}
-  def just_returns; end
-
-  sig {generated.params(x: T.untyped).override.void}
-  def x_to_void(x); end
-
-  sig {generated.params(x: T.untyped).override.returns(NilClass)}
-  def x_to_returns(x); end
-
-  sig {generated.params(x: T.untyped).override.void}
-  def multiline_x_to_void(x); end
-
-  sig {generated.params(x: T.untyped).override.returns(NilClass)}
-  def multiline_x_to_returns(x); end
-end
-
-# Doesn't need overridable because parent doesn't have a sig
-class DoesntNeedOverridable
-  extend T::Helpers
-  # random words to trip up our hacky text search:
-  # void return sig params generated
-  sig {generated.returns(NilClass)}
-  def nope; end
-end
-
-class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
-  extend T::Helpers
-  sig {generated.returns(NilClass)}
-  def nope; end
-end
-
-class DSLParent
-  # avoid sigging this
-  dsl_optional :opt_string, String
-end
-
-class DSLChild < DSLParent
-  extend T::Helpers
-  sig {generated.override.returns(String)}
-  def opt_string; end
+  def foo; end
 end

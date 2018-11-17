@@ -2,101 +2,78 @@
 
 extend T::Helpers
 
-# Suggest "implementation." for these classes
-module Abstract
+# This test file aims to exhaustively cover the cases for suggesting a sig on a
+# child method, across all the possible builder methods that could be used on
+# the parent:
+#
+# - no sig
+# - standard sig
+# - overridable
+# - abstract
+# - override
+# - implementation
+
+class ParentNoSig
+  extend T::Helpers
+  def foo; end
+end
+class ChildNoSig < ParentNoSig
+  def foo; end
+end
+
+class ParentStandardSig
+  extend T::Helpers
+  sig {void}
+  def foo; end
+end
+class ChildStandardSig < ParentStandardSig
+  def foo; end
+end
+
+class ParentOverridable
+  extend T::Helpers
+  sig {overridable.void}
+  def foo; end
+end
+class ChildOverridable < ParentOverridable
+  def foo; end
+end
+
+class ParentAbstract
   extend T::Helpers
   abstract!
   sig {abstract.void}
   def foo; end
 end
-class Implementation
-  include Abstract
-
+class ChildAbstract < ParentAbstract
   def foo; end
 end
 
-# Suggest "override." for these classes
-class Parent
+class GrandParentOverride
+  # Only need this class to allow `override` below.
   extend T::Helpers
-  sig {void}
-  def initialize; end
-
   sig {overridable.void}
   def foo; end
-
-  sig {void}
-  def bar; end
-
-  def qux; end
 end
-class Child < Parent
-  def initialize; end
-
+class ParentOverride < GrandParentOverride
+  sig {override.void}
   def foo; end
-
-  def bar; end
-
-  def qux; end
+end
+class ChildOverride < ParentOverride
+  def foo; end
 end
 
-# Weird overridable edge cases in string parsing
-class Parent
+class GrandParentImplementation
+  # Only need this class to allow `implementation` below.
   extend T::Helpers
-
-  sig {void}
-  def just_void; end
-
-  sig {returns(NilClass)}
-  def just_returns; end
-
-  sig {params(x: Integer).void}
-  def x_to_void(x); end
-
-  sig {params(x: Integer).returns(NilClass)}
-  def x_to_returns(x); end
-
-  sig do
-    params(x: Integer)
-    .void
-  end
-  def multiline_x_to_void(x); end
-
-  sig do
-    params(x: Integer)
-    .returns(NilClass)
-  end
-  def multiline_x_to_returns(x); end
+  abstract!
+  sig {abstract.void}
+  def foo; end
 end
-class Child < Parent
-  def just_void; end
-
-  def just_returns; end
-
-  def x_to_void(x); end
-
-  def x_to_returns(x); end
-
-  def multiline_x_to_void(x); end
-
-  def multiline_x_to_returns(x); end
+class ParentImplementation < GrandParentImplementation
+  sig {implementation.void}
+  def foo; end
 end
-
-# Doesn't need overridable because parent doesn't have a sig
-class DoesntNeedOverridable
-  # random words to trip up our hacky text search:
-  # void return sig params generated
-  def nope; end
-end
-
-class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
-  def nope; end
-end
-
-class DSLParent
-  # avoid sigging this
-  dsl_optional :opt_string, String
-end
-
-class DSLChild < DSLParent
-  def opt_string; end
+class ChildImplementation < ParentImplementation
+  def foo; end
 end
