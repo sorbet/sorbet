@@ -1380,6 +1380,33 @@ public:
     }
 } Kernel_proc;
 
+class Enumerable_to_h : public IntrinsicMethod {
+public:
+    // Forward Enumerable.to_h to RubyType.Enumerable_to_h[self]
+    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        auto hash = make_shared<ClassType>(core::Symbols::RubyTyper().data(ctx)->lookupSingletonClass(ctx));
+        InlinedVector<Loc, 2> argLocs{args.locs.receiver};
+        CallLocs locs{
+            args.locs.call,
+            args.locs.call,
+            argLocs,
+        };
+        TypeAndOrigins myType{args.selfType, {args.locs.receiver}};
+        InlinedVector<const TypeAndOrigins *, 2> innerArgs{&myType};
+
+        DispatchArgs dispatch{
+            core::Names::Enumerable_to_h(), locs, innerArgs, hash, hash, nullptr,
+        };
+        auto dispatched = hash->dispatchCall(ctx, dispatch);
+        for (auto &comp : dispatched.components) {
+            for (auto &err : comp.errors) {
+                ctx.state._error(move(err));
+            }
+        }
+        return dispatched.returnType;
+    }
+} Enumerable_to_h;
+
 } // namespace
 
 const vector<Intrinsic> intrinsicMethods{
@@ -1423,6 +1450,8 @@ const vector<Intrinsic> intrinsicMethods{
 
     {Symbols::Kernel(), false, Names::proc(), &Kernel_proc},
     {Symbols::Kernel(), false, Names::lambda(), &Kernel_proc},
+
+    {Symbols::Enumerable(), false, Names::to_h(), &Enumerable_to_h},
 };
 
 } // namespace sorbet::core

@@ -42,6 +42,19 @@ module RubyTyper
   end
   def self.keep_for_typechecking(expr)
   end
+
+  # Used to implement Enumerable#to_h, which forwards here in C++.
+  #
+  # Implemented this way because we don't have a way to destructure
+  # `self` in the type system yet, but generic methods *do* let us
+  # destructure arguments
+  sig do
+    type_parameters(:U, :V).params(
+      arg0: T::Enumerable[[T.type_parameter(:U), T.type_parameter(:V)]],
+    )
+    .returns(T::Hash[T.type_parameter(:U), T.type_parameter(:V)])
+  end
+  def self.Enumerable_to_h(*arg0); end
 end
 
 class RubyTyper::DynamicStruct < Struct

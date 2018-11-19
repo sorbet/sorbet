@@ -271,6 +271,7 @@ NameDef names[] = {
 
     {"require"},
     {"callWithSplat", "<call-with-splat>"},
+    {"Enumerable_to_h"},
 };
 
 void emit_name_header(ostream &out, NameDef &name) {

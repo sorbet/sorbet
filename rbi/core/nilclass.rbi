@@ -28,7 +28,7 @@ class NilClass < Object
   sig {returns(Float)}
   def to_f(); end
 
-  sig {returns(T.untyped)}
+  sig {returns(T::Hash[T.untyped, T.untyped])}
   def to_h(); end
 
   sig {returns(Rational)}
