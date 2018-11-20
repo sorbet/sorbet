@@ -127,8 +127,8 @@ void addStandardMetrics() {
 
     struct rusage usage;
     getrusage(RUSAGE_SELF, &usage);
-    prodCounterAdd("run.utilization.user_time.ms", usage.ru_utime.tv_sec * 1000 + usage.ru_utime.tv_usec);
-    prodCounterAdd("run.utilization.system_time.ms", usage.ru_stime.tv_sec * 1000 + usage.ru_stime.tv_usec);
+    prodCounterAdd("run.utilization.user_time.us", usage.ru_utime.tv_sec * 1000'000 + usage.ru_utime.tv_usec);
+    prodCounterAdd("run.utilization.system_time.us", usage.ru_stime.tv_sec * 1000'000 + usage.ru_stime.tv_usec);
     prodCounterAdd("run.utilization.max_rss", usage.ru_maxrss);
     prodCounterAdd("run.utilization.minor_faults", usage.ru_minflt);
     prodCounterAdd("run.utilization.major_faults", usage.ru_majflt);
