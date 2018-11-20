@@ -2,6 +2,7 @@
 #include "common/common.h"
 #include "core/Loc.h"
 #include "core/TypeConstraint.h"
+#include <optional>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
     return {core::Loc(loc.file(), startOffset, startOffset), padding};
 }
 
-std::unique_ptr<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
+optional<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
     auto file = loc.file();
     ENFORCE(file.exists());
     auto textBeforeTheMethod = loc.file().data(ctx).source().substr(0, loc.beginPos());
@@ -37,24 +38,24 @@ std::unique_ptr<u4> startOfExistingSig(core::Context ctx, core::Loc loc) {
     auto lastSigDo = textBeforeTheMethod.rfind("sig do");
     if (lastSigCurly != string_view::npos) {
         if (lastSigDo != string_view::npos) {
-            return make_unique<u4>(max(lastSigCurly, lastSigDo));
+            return max(lastSigCurly, lastSigDo);
         } else {
-            return make_unique<u4>(lastSigCurly);
+            return lastSigCurly;
         }
     } else {
         if (lastSigDo != string_view::npos) {
-            return make_unique<u4>(lastSigDo);
+            return lastSigDo;
         } else {
             // failed to find sig
-            return std::unique_ptr<u4>{};
+            return nullopt;
         }
     }
 }
 
-std::unique_ptr<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
+optional<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
     auto file = loc.file();
     if (!file.exists()) {
-        return std::unique_ptr<u4>{};
+        return nullopt;
     }
 
     auto textBeforeTheMethod = file.data(ctx).source().substr(0, loc.beginPos());
@@ -62,16 +63,16 @@ std::unique_ptr<u4> startOfExistingReturn(core::Context ctx, core::Loc loc) {
     auto lastVoid = textBeforeTheMethod.rfind("void");
     if (lastReturns != string_view::npos) {
         if (lastVoid != string_view::npos) {
-            return make_unique<u4>(max(lastReturns, lastVoid));
+            return max(lastReturns, lastVoid);
         } else {
-            return make_unique<u4>(lastReturns);
+            return lastReturns;
         }
     } else {
         if (lastVoid != string_view::npos) {
-            return make_unique<u4>(lastVoid);
+            return lastVoid;
         } else {
             // failed to find sig
-            return std::unique_ptr<u4>{};
+            return nullopt;
         }
     }
 }
@@ -95,13 +96,13 @@ bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
     return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
 }
 
-unique_ptr<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
+optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
     auto method = methodSymbol.data(ctx);
 
     auto enclosingClass = topAttachedClass(ctx, method->enclosingClass(ctx));
     if (extendsTHelpers(ctx, enclosingClass)) {
         // No need to suggest here, because it already has 'extend T::Helpers'
-        return unique_ptr<core::AutocorrectSuggestion>{};
+        return nullopt;
     }
 
     auto inFileOfMethod = [&](const auto &loc) { return loc.file() == method->loc().file(); };
@@ -111,7 +112,7 @@ unique_ptr<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context
     if (classLoc == classLocs.end()) {
         // Couldn't a loc for the enclosing class in this file, give up.
         // TODO(jez) We might be able to expand this heuristic to be "found a file that we can write to"
-        return unique_ptr<core::AutocorrectSuggestion>{};
+        return nullopt;
     }
 
     auto [classStart, classEnd] = classLoc->position(ctx);
@@ -127,7 +128,7 @@ unique_ptr<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return make_unique<core::AutocorrectSuggestion>(nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix));
+    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
 }
 
 shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
