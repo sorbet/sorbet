@@ -122,7 +122,8 @@ template <class From, class To> To *fast_cast(From *what) {
         return nullptr;
     }
     if (isFinal) {
-        const std::type_info &ty = typeid(*what);
+        From &nonNull = *what;
+        const std::type_info &ty = typeid(nonNull);
         if (ty == typeid(To))
             return static_cast<To *>(what);
         return nullptr;
