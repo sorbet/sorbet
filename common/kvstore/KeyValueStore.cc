@@ -47,7 +47,7 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     return;
 }
 
-void KeyValueStore::write(string_view key, vector<u1> value) {
+void KeyValueStore::write(string_view key, const vector<u1> &value) {
     if (writerId != this_thread::get_id()) {
         throw invalid_argument("KeyValueStore can only write from thread that created it");
     }

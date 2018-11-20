@@ -31,7 +31,7 @@ public:
     std::string_view readString(std::string_view key);
     void writeString(std::string_view key, std::string_view value);
     /** can only be called from main thread */
-    void write(std::string_view key, std::vector<u1> value);
+    void write(std::string_view key, const std::vector<u1> &value);
     ~KeyValueStore() noexcept(false);
     static bool commit(std::unique_ptr<KeyValueStore>);
 };
