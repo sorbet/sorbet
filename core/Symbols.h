@@ -39,52 +39,67 @@ public:
 
     class Flags {
     public:
-        static constexpr int NONE = 0;
+        static constexpr u4 NONE = 0;
 
-        static constexpr int CLASS = 0x8000;
-        static constexpr int METHOD = 0x4000;
-        static constexpr int FIELD = 0x2000;
-        static constexpr int STATIC_FIELD = 0x1000;
-        static constexpr int METHOD_ARGUMENT = 0x0800;
-        static constexpr int TYPE_ARGUMENT = 0x0400;
-        static constexpr int TYPE_MEMBER = 0x0200;
+        // We're packing three different kinds of flags into separate ranges with the u4's below:
+        //
+        // 0x0000'0000
+        //   ├▶    ◀┤└─ Applies to all types of symbol
+        //   │      │
+        //   │      └─ For our current symbol type, what flags does it have?
+        //   │         (New flags grow up towards MSB)
+        //   │
+        //   └─ What type of symbol is this?
+        //      (New flags grow down towards LSB)
+        //
 
-        // Class flags
-        static constexpr int CLASS_CLASS = 0x0100;
-        static constexpr int CLASS_MODULE = 0x0080;
-        static constexpr int CLASS_ABSTRACT = 0x0040;
-        static constexpr int CLASS_INTERFACE = 0x0020;
-        static constexpr int CLASS_LINEARIZATION_COMPUTED = 0x0010;
+        // --- What type of symbol is this? ---
+        static constexpr u4 CLASS = 0x8000'0000;
+        static constexpr u4 METHOD = 0x4000'0000;
+        static constexpr u4 FIELD = 0x2000'0000;
+        static constexpr u4 STATIC_FIELD = 0x1000'0000;
+        static constexpr u4 METHOD_ARGUMENT = 0x0800'0000;
+        static constexpr u4 TYPE_ARGUMENT = 0x0400'0000;
+        static constexpr u4 TYPE_MEMBER = 0x0200'0000;
 
-        // Method argument flags
-        static constexpr int ARGUMENT_OPTIONAL = 0x0100;
-        static constexpr int ARGUMENT_KEYWORD = 0x0080;
-        static constexpr int ARGUMENT_REPEATED = 0x0040;
-        static constexpr int ARGUMENT_BLOCK = 0x0020;
-
-        // Method flags
-        static constexpr int METHOD_PROTECTED = 0x0100;
-        static constexpr int METHOD_PRIVATE = 0x0080;
-        static constexpr int METHOD_OVERLOADED = 0x0040;
-        static constexpr int METHOD_ABSTRACT = 0x0020;
-        static constexpr int METHOD_GENERIC = 0x0010;
-        static constexpr int METHOD_GENERATED_SIG = 0x0008;
-        static constexpr int METHOD_OVERRIDABLE = 0x0004;
-        static constexpr int METHOD_FINAL = 0x0002;
-
-        // Type flags
-        static constexpr int TYPE_COVARIANT = 0x0100;
-        static constexpr int TYPE_INVARIANT = 0x0080;
-        static constexpr int TYPE_CONTRAVARIANT = 0x0040;
-        static constexpr int TYPE_FIXED = 0x0020;
-
-        // Static Field flags
-        static constexpr int STATIC_FIELD_TYPE_ALIAS = 0x0100;
-
-        // Flags applying to all symbol types
+        // --- Applies to all types of Symbols ---
 
         // Synthesized by C++ code in a DSL pass
-        static constexpr int DSL_SYNTHESIZED = 0x0001;
+        static constexpr u4 DSL_SYNTHESIZED = 0x0000'0001;
+
+        // --- For our current symbol type, what flags does it have?
+
+        // Class flags
+        static constexpr u4 CLASS_CLASS = 0x0000'0010;
+        static constexpr u4 CLASS_MODULE = 0x0000'0020;
+        static constexpr u4 CLASS_ABSTRACT = 0x0000'0040;
+        static constexpr u4 CLASS_INTERFACE = 0x0000'0080;
+        static constexpr u4 CLASS_LINEARIZATION_COMPUTED = 0x0000'0100;
+
+        // Method argument flags
+        static constexpr u4 ARGUMENT_OPTIONAL = 0x0000'0010;
+        static constexpr u4 ARGUMENT_KEYWORD = 0x0000'0020;
+        static constexpr u4 ARGUMENT_REPEATED = 0x0000'0040;
+        static constexpr u4 ARGUMENT_BLOCK = 0x0000'0080;
+
+        // Method flags
+        static constexpr u4 METHOD_PROTECTED = 0x0000'0010;
+        static constexpr u4 METHOD_PRIVATE = 0x0000'0020;
+        static constexpr u4 METHOD_OVERLOADED = 0x0000'0040;
+        static constexpr u4 METHOD_ABSTRACT = 0x0000'0080;
+        static constexpr u4 METHOD_GENERIC = 0x0000'0100;
+        static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
+        static constexpr u4 METHOD_OVERRIDABLE = 0x0000'0400;
+        static constexpr u4 METHOD_FINAL = 0x0000'0800;
+
+        // Type flags
+        static constexpr u4 TYPE_COVARIANT = 0x0000'0010;
+        static constexpr u4 TYPE_INVARIANT = 0x0000'0020;
+        static constexpr u4 TYPE_CONTRAVARIANT = 0x0000'0040;
+        static constexpr u4 TYPE_FIXED = 0x0000'0080;
+
+        // Static Field flags
+        static constexpr u4 STATIC_FIELD_TYPE_ALIAS = 0x0000'0010;
     };
 
     Loc loc() const;
@@ -565,7 +580,7 @@ private:
     InlinedVector<SymbolRef, 4> typeParams;
     InlinedVector<Loc, 2> locs_;
 
-    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
+    SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                            int maxDepth = 100) const;
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking

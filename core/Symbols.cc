@@ -177,7 +177,7 @@ SymbolRef Symbol::findConcreteMethodTransitive(const GlobalState &gs, NameRef na
     return findMemberTransitiveInternal(gs, name, Flags::METHOD | Flags::METHOD_ABSTRACT, Flags::METHOD, 100);
 }
 
-SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
+SymbolRef Symbol::findMemberTransitiveInternal(const GlobalState &gs, NameRef name, u4 mask, u4 flags,
                                                int maxDepth) const {
     ENFORCE(this->isClass());
     if (maxDepth == 0) {
@@ -505,7 +505,7 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
                        fmt::map_join(list, ", ", [&](auto symb) { return symb.data(gs)->name.toString(gs); }));
     }
     if (this->isMethodArgument()) {
-        vector<pair<int, string_view>> methodFlags = {
+        vector<pair<u4, string_view>> methodFlags = {
             {Symbol::Flags::ARGUMENT_OPTIONAL, "optional"sv},
             {Symbol::Flags::ARGUMENT_KEYWORD, "keyword"sv},
             {Symbol::Flags::ARGUMENT_REPEATED, "repeated"sv},
