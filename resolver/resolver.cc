@@ -628,6 +628,9 @@ private:
         if (sig.seen.abstract) {
             method.data(ctx)->setAbstract();
         }
+        if (sig.seen.implementation) {
+            method.data(ctx)->setImplementation();
+        }
         if (sig.seen.generated) {
             method.data(ctx)->setHasGeneratedSig();
         }
@@ -644,6 +647,9 @@ private:
         }
         if (sig.seen.overridable) {
             method.data(ctx)->setOverridable();
+        }
+        if (sig.seen.override_) {
+            method.data(ctx)->setOverride();
         }
         if (sig.seen.final) {
             method.data(ctx)->setFinalMethod();

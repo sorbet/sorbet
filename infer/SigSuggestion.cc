@@ -405,24 +405,45 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
     }
 }
 
+bool childNeedsOverride(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
+    return
+        // We're overriding a method...
+        parentSymbol.exists() &&
+        // in a file which we can edit...
+        parentSymbol.data(ctx)->loc().file().exists() &&
+        // defined outside an RBI (because it might be codegen'd)...
+        !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
+        // that isn't the constructor...
+        childSymbol.data(ctx)->name != core::Names::initialize() &&
+        // and wasn't DSL synthesized (beause we can't change DSL'd sigs).
+        !parentSymbol.data(ctx)->isDSLSynthesized() &&
+        // It has a sig...
+        parentSymbol.data(ctx)->resultType != nullptr &&
+        //  that is either overridable...
+        (parentSymbol.data(ctx)->isOverridable() ||
+         // or override...
+         parentSymbol.data(ctx)->isOverride() ||
+         // or implementation.
+         parentSymbol.data(ctx)->isImplementation());
+}
+
 bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
     return
         // We're overriding a method...
         parentSymbol.exists() &&
-        // and it has a sig...
-        parentSymbol.data(ctx)->resultType != nullptr &&
-        // that is neither overridable...
-        !parentSymbol.data(ctx)->isOverridable() &&
-        // nor abstract...
-        !parentSymbol.data(ctx)->isAbstract() &&
-        // nor the constructor...
-        childSymbol.data(ctx)->name != core::Names::initialize() &&
         // in a file which we can edit...
         parentSymbol.data(ctx)->loc().file().exists() &&
-        // and isn't defined in an RBI (because it might be codegen'd)...
+        // defined outside an RBI (because it might be codegen'd)...
         !parentSymbol.data(ctx)->loc().file().data(ctx).isRBI() &&
-        // and is wasn't DSL synthesized (beause we can't change DSL'd sigs)
-        !parentSymbol.data(ctx)->isDSLSynthesized();
+        // that isn't the constructor...
+        childSymbol.data(ctx)->name != core::Names::initialize() &&
+        // and wasn't DSL synthesized (beause we can't change DSL'd sigs)
+        !parentSymbol.data(ctx)->isDSLSynthesized() &&
+        // It it has a sig...
+        parentSymbol.data(ctx)->resultType != nullptr &&
+        //  that is implementation.
+        parentSymbol.data(ctx)->isImplementation();
+    // In all other cases, we wouldn't have put override on the child's sig.
 }
 
 } // namespace
@@ -537,7 +558,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr) {
             if (closestMethod.data(ctx)->isAbstract()) {
                 fmt::format_to(ss, "implementation.");
-            } else {
+            } else if (childNeedsOverride(ctx, methodSymbol, closestMethod)) {
                 fmt::format_to(ss, "override.");
             }
         }

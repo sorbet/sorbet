@@ -91,6 +91,8 @@ public:
         static constexpr u4 METHOD_GENERATED_SIG = 0x0000'0200;
         static constexpr u4 METHOD_OVERRIDABLE = 0x0000'0400;
         static constexpr u4 METHOD_FINAL = 0x0000'0800;
+        static constexpr u4 METHOD_OVERRIDE = 0x0000'1000;
+        static constexpr u4 METHOD_IMPLEMENTATION = 0x0000'2000;
 
         // Type flags
         static constexpr u4 TYPE_COVARIANT = 0x0000'0010;
@@ -219,6 +221,11 @@ public:
         return (flags & Symbol::Flags::METHOD_ABSTRACT) != 0;
     }
 
+    inline bool isImplementation() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_IMPLEMENTATION) != 0;
+    }
+
     inline bool isGenericMethod() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_GENERIC) != 0;
@@ -227,6 +234,11 @@ public:
     inline bool isOverridable() const {
         ENFORCE(isMethod());
         return (flags & Symbol::Flags::METHOD_OVERRIDABLE) != 0;
+    }
+
+    inline bool isOverride() const {
+        ENFORCE(isMethod());
+        return (flags & Symbol::Flags::METHOD_OVERRIDE) != 0;
     }
 
     inline bool hasGeneratedSig() const {
@@ -413,6 +425,11 @@ public:
         flags |= Symbol::Flags::METHOD_ABSTRACT;
     }
 
+    inline void setImplementation() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_IMPLEMENTATION;
+    }
+
     inline void setGenericMethod() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_GENERIC;
@@ -426,6 +443,11 @@ public:
     inline void setFinalMethod() {
         ENFORCE(isMethod());
         flags |= Symbol::Flags::METHOD_FINAL;
+    }
+
+    inline void setOverride() {
+        ENFORCE(isMethod());
+        flags |= Symbol::Flags::METHOD_OVERRIDE;
     }
 
     inline bool isFinalMethod() {

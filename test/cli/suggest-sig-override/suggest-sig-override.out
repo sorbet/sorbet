@@ -25,11 +25,11 @@ end
 
 class ParentStandardSig
   extend T::Helpers
-  sig {generated.overridable.void}
+  sig {void}
   def foo; end
 end
 class ChildStandardSig < ParentStandardSig
-  sig {generated.override.void}
+  sig {generated.void}
   def foo; end
 end
 
@@ -61,7 +61,7 @@ class GrandParentOverride
   def foo; end
 end
 class ParentOverride < GrandParentOverride
-  sig {override.generated.overridable.void}
+  sig {override.void}
   def foo; end
 end
 class ChildOverride < ParentOverride

@@ -15,26 +15,28 @@ class ParentNeedsOverridable
   # Every sig here should have `generated.overridable.` added to it.
   extend T::Helpers
 
-  sig {void}
+  sig {implementation.void}
   def just_void; end
 
-  sig {returns(NilClass)}
+  sig {implementation.returns(NilClass)}
   def just_returns; end
 
-  sig {params(x: Integer).void}
+  sig {implementation.params(x: Integer).void}
   def x_to_void(x); end
 
-  sig {params(x: Integer).returns(NilClass)}
+  sig {implementation.params(x: Integer).returns(NilClass)}
   def x_to_returns(x); end
 
   sig do
-    params(x: Integer)
+    implementation
+    .params(x: Integer)
     .void
   end
   def multiline_x_to_void(x); end
 
   sig do
-    params(x: Integer)
+    implementation
+    .params(x: Integer)
     .returns(NilClass)
   end
   def multiline_x_to_returns(x); end
