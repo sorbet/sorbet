@@ -12,7 +12,7 @@ void *stack_traces[MAX_STACK_FRAMES];
 void filter_unnecessary(string &out) {
     string::size_type i = 0;
     string::size_type j = 0;
-    vector<string> patterns{"typecase.h:", "__functional_base:", "functional:"};
+    string_view patterns[] = {"typecase.h:"sv, "__functional_base:"sv, "functional:"sv};
 
     while (i < out.length()) {
         i = out.find('\n', i);
