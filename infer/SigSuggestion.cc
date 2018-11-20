@@ -432,6 +432,10 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     core::SymbolRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
+    if (ctx.state.suggestRuntimeProfiledType) {
+        guessedSomethingUseful = true;
+    }
+
     shared_ptr<core::Type> guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
@@ -516,10 +520,10 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                 // TODO: maybe combine the old and new types in some way?
                 chosenType = oldType;
             }
-            if (!ctx.state.suggestGarbageType) {
+            if (!ctx.state.suggestRuntimeProfiledType || !chosenType->isUntyped()) {
                 fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
             } else {
-                fmt::format_to(ss, "{}: ::Sorbet::GarbageType", argSym.data(ctx)->name.show(ctx));
+                fmt::format_to(ss, "{}: ::Sorbet::RuntimeProfiled", argSym.data(ctx)->name.show(ctx));
             }
         }
         fmt::format_to(ss, ").");
@@ -543,8 +547,8 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                         (core::Types::isSubType(ctx, core::Types::void_(), guessedReturnType) &&
                          !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
 
-    if (ctx.state.suggestGarbageType) {
-        fmt::format_to(ss, "returns(::Sorbet::GarbageType)}}");
+    if (ctx.state.suggestRuntimeProfiledType && guessedReturnType->isUntyped()) {
+        fmt::format_to(ss, "returns(::Sorbet::RuntimeProfiled)}}");
     } else if (suggestsVoid) {
         fmt::format_to(ss, "void}}");
     } else {

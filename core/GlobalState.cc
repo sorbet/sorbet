@@ -81,7 +81,7 @@ constexpr string_view guessed_type_type_parameter_holder_str = "guessed_type_typ
 constexpr string_view private_str = "Private"sv;
 constexpr string_view builder_str = "Builder"sv;
 constexpr string_view helpers_str = "Helpers"sv;
-constexpr string_view garbage_type_str = "GarbageType"sv;
+constexpr string_view runtime_profiled_str = "RuntimeProfiled"sv;
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
 constexpr string_view reserved_str = "<<RESERVED>>"sv;
@@ -345,8 +345,8 @@ void GlobalState::initEmpty() {
     Symbols::SinatraBase().data(*this)->setIsModule(false);
     Symbols::SinatraBase().data(*this)->superClass = Symbols::Object();
 
-    // Synthesize GarbageType
-    id = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(garbage_type_str));
+    // Synthesize RuntimeProfiledType
+    id = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(runtime_profiled_str));
     id.data(*this)->resultType = make_shared<core::AliasType>(Symbols::untyped());
 
     int reservedCount = 0;
@@ -972,7 +972,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     this->sanityCheck();
     auto result = make_unique<GlobalState>(this->errorQueue);
     result->silenceErrors = this->silenceErrors;
-    result->suggestGarbageType = this->suggestGarbageType;
+    result->suggestRuntimeProfiledType = this->suggestRuntimeProfiledType;
 
     if (keepId) {
         result->globalStateId = this->globalStateId;

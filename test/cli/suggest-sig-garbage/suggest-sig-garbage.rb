@@ -143,3 +143,9 @@ def fooCondGeneratedDo(a, cond)
     takesString(a)
   end
 end
+
+sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
+def updatesUntypedToProfiled(a, cond)
+  a.baz
+end
+

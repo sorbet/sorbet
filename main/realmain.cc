@@ -221,8 +221,8 @@ int realmain(int argc, char *argv[]) {
     if (opts.autocorrect) {
         gs->autocorrect = true;
     }
-    if (opts.suggestGarbageType) {
-        gs->suggestGarbageType = true;
+    if (opts.suggestRuntimeProfiledType) {
+        gs->suggestRuntimeProfiledType = true;
     }
     if (opts.reserveMemKiB > 0) {
         gs->reserveMemory(opts.reserveMemKiB);
