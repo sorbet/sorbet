@@ -6,7 +6,7 @@
 namespace sorbet::realmain::options {
 
 // Terminate execution of sorbet with specific return code
-class EarlyReturnWithCode : public SRubyException {
+class EarlyReturnWithCode : public SorbetException {
 public:
     EarlyReturnWithCode(int returnCode);
     const int returnCode;

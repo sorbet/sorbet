@@ -22,7 +22,7 @@ namespace sorbet {
 TEST(ErrorTest, RawCheck) { // NOLINT
     try {
         ENFORCE(false, "intentional failure");
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
     }
 }
 
@@ -37,7 +37,7 @@ TEST(ErrorTest, ParserCheck) { // NOLINT
 
     try {
         auto desugared = sorbet::ast::desugar::node2Tree(ctx, move(ast));
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
     }
 
     EXPECT_EQ(0, errorQueue->drainAllErrors().size());

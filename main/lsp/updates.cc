@@ -67,7 +67,7 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
                 core::UnfreezeNameTable nameTable(gs);
                 tree = sorbet::namer::Namer::run(ctx, move(tree));
                 i++;
-            } catch (SRubyException &) {
+            } catch (SorbetException &) {
                 if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
                     e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
                 }
@@ -84,7 +84,7 @@ vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, ve
 
             what = sorbet::resolver::Resolver::runTreePasses(ctx, move(what));
         }
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), sorbet::core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }

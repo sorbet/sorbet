@@ -10,34 +10,15 @@
 
 namespace sorbet {
 extern std::shared_ptr<spdlog::logger> fatalLogger;
-class SRubyException {
+class SorbetException : std::logic_error {
 public:
-    /**
-     * Creates an exception given the message and the stack trace.
-     *
-     * @param message contains information about exceptional situation.
-     * @param stackTrace the stack trace where this exception happened.
-     */
-    SRubyException(std::string_view message) : _message(message) {}
-
-    /**
-     * Returns information about the exceptional situation.
-     */
-    inline const std::string_view message() const {
-        return _message;
-    }
-
-private:
-    std::string _message;
-
-    std::string _stackTrace;
-
-    // std::stringstream _message;
+    SorbetException(const std::string &message) : logic_error(message) {}
+    SorbetException(const char *message) : logic_error(message) {}
 };
 
-class FileNotFoundException : SRubyException {
+class FileNotFoundException : SorbetException {
 public:
-    FileNotFoundException() : SRubyException("File not found") {}
+    FileNotFoundException() : SorbetException("File not found") {}
 };
 
 class Exception final {
@@ -67,7 +48,7 @@ template <typename... TArgs>[[noreturn]] bool Exception::raise(const TArgs &... 
     }
     print_backtrace();
     stopInDebugger();
-    throw SRubyException(message);
+    throw SorbetException(message);
 }
 } // namespace sorbet
 #endif // SORBET_ERRO_H

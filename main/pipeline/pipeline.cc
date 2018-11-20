@@ -158,7 +158,7 @@ unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalS
         }
 
         return dslsInlined;
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
         if (auto e = lgs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
             e.setHeader("Exception parsing file: `{}` (backtrace is above)", file.data(lgs).path());
         }
@@ -387,7 +387,7 @@ unique_ptr<ast::Expression> typecheckOne(core::Context ctx, unique_ptr<ast::Expr
         if (opts.print.CFG || opts.print.CFGRaw) {
             fmt::print("}}\n\n");
         }
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
         if (auto e = ctx.state.beginError(sorbet::core::Loc::none(f), core::errors::Internal::InternalError)) {
             e.setHeader("Exception in cfg+infer: {} (backtrace is above)", f.data(ctx).path());
         }
@@ -429,7 +429,7 @@ vector<unique_ptr<ast::Expression>> name(core::GlobalState &gs, vector<unique_pt
                 gs.errorQueue->flushErrors();
                 namingProgress.reportProgress(i);
                 i++;
-            } catch (SRubyException &) {
+            } catch (SorbetException &) {
                 if (auto e = gs.beginError(sorbet::core::Loc::none(file), core::errors::Internal::InternalError)) {
                     e.setHeader("Exception naming file: `{}` (backtrace is above)", file.data(gs).path());
                 }
@@ -473,7 +473,7 @@ vector<unique_ptr<ast::Expression>> resolve(core::GlobalState &gs, vector<unique
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
             what = resolver::Resolver::run(ctx, move(what));
         }
-    } catch (SRubyException &) {
+    } catch (SorbetException &) {
         if (auto e = gs.beginError(sorbet::core::Loc::none(), core::errors::Internal::InternalError)) {
             e.setHeader("Exception resolving (backtrace is above)");
         }
@@ -527,7 +527,7 @@ vector<unique_ptr<ast::Expression>> typecheck(unique_ptr<core::GlobalState> &gs,
                             core::FileRef file = job->loc.file();
                             try {
                                 threadResult.trees.emplace_back(typecheckOne(ctx, move(job), opts, logger));
-                            } catch (SRubyException &) {
+                            } catch (SorbetException &) {
                                 logger->error("Exception typing file: {} (backtrace is above)", file.data(ctx).path());
                             }
                         }

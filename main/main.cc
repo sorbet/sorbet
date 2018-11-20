@@ -6,7 +6,7 @@ int main(int argc, char *argv[]) {
         return sorbet::realmain::realmain(argc, argv);
     } catch (sorbet::realmain::options::EarlyReturnWithCode &c) {
         return c.returnCode;
-    } catch (sorbet::SRubyException &e) {
+    } catch (sorbet::SorbetException &e) {
         return 1;
     }
 };

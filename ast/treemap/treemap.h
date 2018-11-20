@@ -254,7 +254,7 @@ GENERATE_POSTPONE_POSTCLASS(Cast);
 
 // Used to indicate that TreeMap has already reported location for this exception
 struct ReportedRubyException {
-    SRubyException reported;
+    SorbetException reported;
     core::Loc onLoc;
 };
 
@@ -738,7 +738,7 @@ private:
                 auto *ref = what.get();
                 Exception::raise("should never happen. Forgot to add new tree kind? ", demangle(typeid(*ref).name()));
             }
-        } catch (SRubyException &e) {
+        } catch (SorbetException &e) {
             throw ReportedRubyException{e, loc};
         }
     }

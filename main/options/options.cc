@@ -394,6 +394,6 @@ void readOptions(Options &opts, int argc, char *argv[],
 }
 
 EarlyReturnWithCode::EarlyReturnWithCode(int returnCode)
-    : SRubyException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
+    : SorbetException("early return with code " + to_string(returnCode)), returnCode(returnCode){};
 
 } // namespace sorbet::realmain::options
