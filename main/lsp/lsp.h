@@ -11,6 +11,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 #include <deque>
+#include <optional>
 
 //  _     ____  ____
 // | |   / ___||  _ _\
@@ -286,7 +287,7 @@ public:
     void invalidateAllErrors();
     static std::unique_ptr<core::GlobalState> extractGlobalState(LSPLoop &&);
 };
-std::unique_ptr<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
+std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 
 } // namespace sorbet::realmain::lsp
 #endif // RUBY_TYPER_LSPLOOP_H

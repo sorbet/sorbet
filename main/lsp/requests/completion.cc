@@ -79,18 +79,18 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
     return fmt::format("{}({}){}", shortName, fmt::join(typeAndArgNames, ", "), "${0}");
 }
 
-unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {
+optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     // everything in the file before the method definition.
     auto preDefinition = sourceCode.substr(0, sourceCode.rfind('\n', beginIndex));
 
     int last_newline_loc = preDefinition.rfind('\n');
     // if there is no '\n' in preDefinition, we're at the top of the file.
     if (last_newline_loc == preDefinition.npos) {
-        return nullptr;
+        return nullopt;
     }
     auto prevLine = preDefinition.substr(last_newline_loc, preDefinition.size() - last_newline_loc);
     if (prevLine.find('#') == prevLine.npos) {
-        return nullptr;
+        return nullopt;
     }
 
     string documentation = "";
@@ -106,9 +106,9 @@ unique_ptr<string> findDocumentation(string_view sourceCode, int beginIndex) {
         last_newline_loc = prev_newline_loc;
     }
     if (documentation.empty()) {
-        return nullptr;
+        return nullopt;
     }
-    return make_unique<string>(documentation);
+    return documentation;
 }
 
 void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp) {
@@ -133,7 +133,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
             item.AddMember("insertText", string(what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs)), alloc);
         }
 
-        unique_ptr<string> documentation = nullptr;
+        optional<string> documentation = nullopt;
         if (what.data(*finalGs)->loc().file().exists()) {
             documentation = findDocumentation(what.data(*finalGs)->loc().file().data(*finalGs).source(),
                                               what.data(*finalGs)->loc().beginPos());
