@@ -247,26 +247,30 @@ string getCounterStatistics(vector<string> names) {
             continue;
         }
         CounterImpl::CounterType sum = 0;
+        vector<pair<int, CounterImpl::CounterType>> sorted;
         for (auto &e : hist.second) {
             sum += e.second;
+            sorted.emplace_back(e);
         }
+        fast_sort(sorted, [](const auto &e1, const auto &e2) -> bool { return e1.first < e2.first; });
+
         fmt::format_to(buf, " {}\n{:<26.26} Total :{:10.10}\n", hist.first, "", (double)sum);
 
         CounterImpl::CounterType header = 0;
-        auto it = hist.second.begin();
-        auto cutoff = hist.second.size() > 30 ? HIST_CUTOFF : 0.0;
-        while (it != hist.second.end() && (header + it->second) * 1.0 / sum < cutoff) {
+        auto it = sorted.begin();
+        auto cutoff = sorted.size() > 30 ? HIST_CUTOFF : 0.0;
+        while (it != sorted.end() && (header + it->second) * 1.0 / sum < cutoff) {
             header += it->second;
             it++;
         }
-        if (it != hist.second.begin()) {
+        if (it != sorted.begin()) {
             auto perc = header * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * header / sum), '#');
             fmt::format_to(buf, "  <{:>29.29} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)header, perc,
                            hashes);
         }
 
-        while (it != hist.second.end() && (sum - header) * 1.0 / sum > cutoff) {
+        while (it != sorted.end() && (sum - header) * 1.0 / sum > cutoff) {
             header += it->second;
             auto perc = it->second * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * it->second / sum), '#');
@@ -274,7 +278,7 @@ string getCounterStatistics(vector<string> names) {
                            hashes);
             it++;
         }
-        if (it != hist.second.end()) {
+        if (it != sorted.end()) {
             auto perc = (sum - header) * 100.0 / sum;
             string hashes((int)(MAX_STAT_WIDTH * 1.0 * (sum - header) / sum), '#');
             fmt::format_to(buf, "  >={:>28.28} :{:10.10}, {:5.1f}% {}\n", to_string(it->first), (double)(sum - header),
