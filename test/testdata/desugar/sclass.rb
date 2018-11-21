@@ -2,6 +2,8 @@
 class A
 end
 
+module MM; end
+
 class << A # error: `class << EXPRESSION` is only supported for `class << self`
     def a
         'a'
@@ -78,6 +80,24 @@ class H
                 "h"
             end
         end
+    end
+end
+
+class I
+    class << self
+        include MM
+
+        def newer
+            new
+        end
+    end
+end
+
+class J
+    extend MM
+
+    def self.newer
+        new
     end
 end
 

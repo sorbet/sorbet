@@ -21,6 +21,8 @@ class SendAndBlockLink;
 struct DispatchArgs;
 struct CallLocs;
 
+bool isSingleton(const GlobalState &gs, SymbolRef sym);
+
 namespace serialize {
 class SerializerImpl;
 }

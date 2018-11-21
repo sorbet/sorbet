@@ -3,6 +3,10 @@ class <emptyTree><<constant:<root>>> < ()
     <emptyTree>
   end
 
+  module <emptyTree>::<constant:MM><<constant:<todo sym>>> < ()
+    <emptyTree>
+  end
+
   <emptyTree>
 
   class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
@@ -79,6 +83,24 @@ class <emptyTree><<constant:<root>>> < ()
           "h"
         end
       end
+    end
+  end
+
+  class <emptyTree>::<constant:I><<constant:<todo sym>>> < (::<todo sym>)
+    class <singleton class><<constant:<todo sym>>> < ()
+      self(<constant:<todo sym>>).include(<emptyTree>::<constant:MM>)
+
+      def newer<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).new()
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:J><<constant:<todo sym>>> < (::<todo sym>)
+    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:MM>)
+
+    def self.newer<<constant:<todo sym>>>()
+      self(<constant:<todo sym>>).new()
     end
   end
 
