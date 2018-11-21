@@ -442,8 +442,10 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
         !parentSymbol.data(ctx)->isDSLSynthesized() &&
         // It it has a sig...
         parentSymbol.data(ctx)->resultType != nullptr &&
-        //  that is implementation.
-        parentSymbol.data(ctx)->isImplementation();
+        // that is implementation...
+        parentSymbol.data(ctx)->isImplementation() &&
+        // and doesn't already have overridable.
+        !parentSymbol.data(ctx)->isOverridable();
     // In all other cases, we wouldn't have put override on the child's sig.
 }
 

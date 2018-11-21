@@ -66,6 +66,17 @@ class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
   def nope; end
 end
 
+
+# Doesn't need generated because parent already has overridable
+class DoesntNeedGenerated
+  sig {implementation.overridable.void}
+  def already_overridable; end
+end
+
+class ChildOfDoesntNeedGenerated < DoesntNeedGenerated
+  def already_overridable; end
+end
+
 class DSLParent
   # avoid sigging this
   dsl_optional :opt_string, String
