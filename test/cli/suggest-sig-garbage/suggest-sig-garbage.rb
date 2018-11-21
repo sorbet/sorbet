@@ -149,3 +149,6 @@ def updatesUntypedToProfiled(a, cond)
   a.baz
 end
 
+def recur
+  recur
+end

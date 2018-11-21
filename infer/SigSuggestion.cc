@@ -470,7 +470,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             guessedReturnType = core::Types::untypedUntracked();
         }
 
-        guessedSomethingUseful = !guessedReturnType->isUntyped();
+        guessedSomethingUseful = guessedSomethingUseful || !guessedReturnType->isUntyped();
     } else {
         guessedReturnType = methodReturnType;
     }

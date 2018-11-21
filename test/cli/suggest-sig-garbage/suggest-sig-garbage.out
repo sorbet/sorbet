@@ -45,6 +45,11 @@ suggest-sig-garbage.rb:20: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-garbage.rb:28: Insert `sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(::Sorbet::RuntimeProfiled)}
+`
+    28 |def idk(a); a / a + a * a; end
+        ^
 
 suggest-sig-garbage.rb:30: This function does not have a `sig` http://go/e/7017
     30 |def give_me_literal; 1; end;
@@ -195,6 +200,15 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
      147 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
 
+suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
+     152 |def recur
+          ^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-garbage.rb:152: Insert `sig {generated.returns(::Sorbet::RuntimeProfiled)}
+`
+     152 |def recur
+          ^
+
 suggest-sig-garbage.rb:41: This function does not have a `sig` http://go/e/7017
     41 |  private def a_private; end
                   ^^^^^^^^^^^^^
@@ -246,7 +260,7 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
 suggest-sig-garbage.rb:108: Method `sig` does not exist on `T.class_of(TestCarash)` http://go/e/7003
      108 |  sig {params(merchant: Merchant).void}
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Errors: 35
+Errors: 36
 
 --------------------------------------------------------------------------
 
@@ -281,6 +295,7 @@ def bbq
   end
 end
 
+sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(::Sorbet::RuntimeProfiled)}
 def idk(a); a / a + a * a; end
 
 sig {generated.returns(Integer)}
@@ -415,3 +430,7 @@ def updatesUntypedToProfiled(a, cond)
   a.baz
 end
 
+sig {generated.returns(::Sorbet::RuntimeProfiled)}
+def recur
+  recur
+end
