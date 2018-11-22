@@ -1,0 +1,17 @@
+suggest-sig-literal.rb:2: This function does not have a `sig` http://go/e/7017
+     2 |def index_for_live(fields)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  Autocorrect: Use `-a` to autocorrect
+    suggest-sig-literal.rb:2: Insert `sig {generated.params(fields: T::Enumerable[T::Array[T.any(Symbol, Integer)]]).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}
+`
+     2 |def index_for_live(fields)
+        ^
+Errors: 1
+
+--------------------------------------------------------------------------
+
+# typed: strict
+sig {generated.params(fields: T::Enumerable[T::Array[T.any(Symbol, Integer)]]).returns(T::Array[T::Array[T.any(Symbol, Integer)]])}
+def index_for_live(fields)
+  [[:deleted_at, 1]] + fields
+end

@@ -538,7 +538,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                     chosenType = core::Types::untypedUntracked();
                 } else {
                     guessedSomethingUseful = true;
-                    chosenType = argType;
+                    chosenType = core::Types::widen(ctx, argType);
                 }
             } else {
                 // TODO: maybe combine the old and new types in some way?
