@@ -378,7 +378,7 @@ module Kernel
         initial: T.any(Integer, Float, Rational, BigDecimal, String),
         digits: Integer,
     )
-    .void
+    .returns(BigDecimal)
   end
   def BigDecimal(initial, digits=0); end
 
