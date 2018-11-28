@@ -2,7 +2,7 @@ suggest-sig-garbage.rb:5: This function does not have a `sig` http://go/e/7017
      5 |def hazTwoArgs(a, b); 1; end;
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:5: Insert `sig {generated.params(a: ::Sorbet::RuntimeProfiled, b: ::Sorbet::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:5: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      5 |def hazTwoArgs(a, b); 1; end;
         ^
@@ -46,7 +46,7 @@ suggest-sig-garbage.rb:28: This function does not have a `sig` http://go/e/7017
     28 |def idk(a); a / a + a * a; end
         ^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:28: Insert `sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(::Sorbet::RuntimeProfiled)}
+    suggest-sig-garbage.rb:28: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
 `
     28 |def idk(a); a / a + a * a; end
         ^
@@ -100,7 +100,7 @@ suggest-sig-garbage.rb:56: This function does not have a `sig` http://go/e/7017
     56 |def fooCond(a, cond)
         ^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:56: Insert `sig {generated.params(a: T.any(Integer, String), cond: ::Sorbet::RuntimeProfiled).void}
+    suggest-sig-garbage.rb:56: Insert `sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
 `
     56 |def fooCond(a, cond)
         ^
@@ -109,7 +109,7 @@ suggest-sig-garbage.rb:64: This function does not have a `sig` http://go/e/7017
     64 |def fooWhile(a, cond1, cond2)
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:64: Insert `sig {generated.params(a: T.any(Integer, String), cond1: ::Sorbet::RuntimeProfiled, cond2: ::Sorbet::RuntimeProfiled).returns(NilClass)}
+    suggest-sig-garbage.rb:64: Insert `sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
 `
     64 |def fooWhile(a, cond1, cond2)
         ^
@@ -164,7 +164,7 @@ suggest-sig-garbage.rb:118: This function does not have a `sig` http://go/e/7017
      118 |def cantRun(a)
           ^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:118: Insert `sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:118: Insert `sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
 `
      118 |def cantRun(a)
           ^
@@ -173,7 +173,7 @@ suggest-sig-garbage.rb:125: This function does not have a `sig` http://go/e/7017
      125 |def fooCondGeneratedCurly(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:124: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+    suggest-sig-garbage.rb:124: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      124 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
      125 |def fooCondGeneratedCurly(a, cond)
@@ -182,7 +182,7 @@ suggest-sig-garbage.rb:139: This function does not have a `sig` http://go/e/7017
      139 |def fooCondGeneratedDo(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:134: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+    suggest-sig-garbage.rb:134: Replace with `sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      134 |sig do
      135 |  params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).
@@ -195,7 +195,7 @@ suggest-sig-garbage.rb:148: This function does not have a `sig` http://go/e/7017
      148 |def updatesUntypedToProfiled(a, cond)
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:147: Replace with `sig {generated.params(a: ::Sorbet::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+    suggest-sig-garbage.rb:147: Replace with `sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 `
      147 |sig {params(a: T.untyped, cond: T.any(TrueClass, FalseClass)).returns(T.untyped).generated}
      148 |def updatesUntypedToProfiled(a, cond)
@@ -204,7 +204,7 @@ suggest-sig-garbage.rb:152: This function does not have a `sig` http://go/e/7017
      152 |def recur
           ^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:152: Insert `sig {generated.returns(::Sorbet::RuntimeProfiled)}
+    suggest-sig-garbage.rb:152: Insert `sig {generated.returns(::T::Utils::RuntimeProfiled)}
 `
      152 |def recur
           ^
@@ -247,7 +247,7 @@ suggest-sig-garbage.rb:112: This function does not have a `sig` http://go/e/7017
      112 |  def self.load_account_business_profile(merchant)
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
   Autocorrect: Use `-a` to autocorrect
-    suggest-sig-garbage.rb:112: Insert `sig {generated.params(merchant: ::Sorbet::RuntimeProfiled).returns(Integer)}
+    suggest-sig-garbage.rb:112: Insert `sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
   `
      112 |  def self.load_account_business_profile(merchant)
             ^
@@ -268,7 +268,7 @@ Errors: 36
 
 extend T::Helpers
 
-sig {generated.params(a: ::Sorbet::RuntimeProfiled, b: ::Sorbet::RuntimeProfiled).returns(Integer)}
+sig {generated.params(a: ::T::Utils::RuntimeProfiled, b: ::T::Utils::RuntimeProfiled).returns(Integer)}
 def hazTwoArgs(a, b); 1; end;
 
 sig {generated.returns(T.any(T::Array[T.untyped], String))}
@@ -295,7 +295,7 @@ def bbq
   end
 end
 
-sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(::Sorbet::RuntimeProfiled)}
+sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(::T::Utils::RuntimeProfiled)}
 def idk(a); a / a + a * a; end
 
 sig {generated.returns(Integer)}
@@ -331,7 +331,7 @@ def takesInt(a); end;
 sig {params(a: String).void}
 def takesString(a); end;
 
-sig {generated.params(a: T.any(Integer, String), cond: ::Sorbet::RuntimeProfiled).void}
+sig {generated.params(a: T.any(Integer, String), cond: ::T::Utils::RuntimeProfiled).void}
 def fooCond(a, cond)
   if cond
     takesInt(a)
@@ -340,7 +340,7 @@ def fooCond(a, cond)
   end
 end
 
-sig {generated.params(a: T.any(Integer, String), cond1: ::Sorbet::RuntimeProfiled, cond2: ::Sorbet::RuntimeProfiled).returns(NilClass)}
+sig {generated.params(a: T.any(Integer, String), cond1: ::T::Utils::RuntimeProfiled, cond2: ::T::Utils::RuntimeProfiled).returns(NilClass)}
 def fooWhile(a, cond1, cond2)
   while cond2
     if cond1
@@ -392,21 +392,21 @@ class TestCarash
   def self.blar(merchant:)
   end
 
-  sig {generated.params(merchant: ::Sorbet::RuntimeProfiled).returns(Integer)}
+  sig {generated.params(merchant: ::T::Utils::RuntimeProfiled).returns(Integer)}
   def self.load_account_business_profile(merchant)
     blar(merchant: merchant)
     1
   end
 end
 
-sig {generated.params(a: ::Sorbet::RuntimeProfiled).returns(Integer)}
+sig {generated.params(a: ::T::Utils::RuntimeProfiled).returns(Integer)}
 def cantRun(a)
   takesInt(a)
   takesString(a)
   1
 end
 
-sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedCurly(a, cond)
   if cond
     takesInt(a)
@@ -416,7 +416,7 @@ def fooCondGeneratedCurly(a, cond)
 end
 
 
-sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+sig {generated.params(a: T.any(Integer, String), cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def fooCondGeneratedDo(a, cond)
   if cond
     takesInt(a)
@@ -425,12 +425,12 @@ def fooCondGeneratedDo(a, cond)
   end
 end
 
-sig {generated.params(a: ::Sorbet::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::Sorbet::RuntimeProfiled)}
+sig {generated.params(a: ::T::Utils::RuntimeProfiled, cond: T.any(TrueClass, FalseClass)).returns(::T::Utils::RuntimeProfiled)}
 def updatesUntypedToProfiled(a, cond)
   a.baz
 end
 
-sig {generated.returns(::Sorbet::RuntimeProfiled)}
+sig {generated.returns(::T::Utils::RuntimeProfiled)}
 def recur
   recur
 end

@@ -547,7 +547,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             if (!ctx.state.suggestRuntimeProfiledType || !chosenType->isUntyped()) {
                 fmt::format_to(ss, "{}: {}", argSym.data(ctx)->name.show(ctx), chosenType->show(ctx));
             } else {
-                fmt::format_to(ss, "{}: ::Sorbet::RuntimeProfiled", argSym.data(ctx)->name.show(ctx));
+                fmt::format_to(ss, "{}: ::T::Utils::RuntimeProfiled", argSym.data(ctx)->name.show(ctx));
             }
         }
         fmt::format_to(ss, ").");
@@ -572,7 +572,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
                          !guessedReturnType->isUntyped() && !guessedReturnType->isBottom());
 
     if (ctx.state.suggestRuntimeProfiledType && guessedReturnType->isUntyped()) {
-        fmt::format_to(ss, "returns(::Sorbet::RuntimeProfiled)}}");
+        fmt::format_to(ss, "returns(::T::Utils::RuntimeProfiled)}}");
     } else if (suggestsVoid) {
         fmt::format_to(ss, "void}}");
     } else {

@@ -81,6 +81,7 @@ constexpr string_view guessed_type_type_parameter_holder_str = "guessed_type_typ
 constexpr string_view private_str = "Private"sv;
 constexpr string_view builder_str = "Builder"sv;
 constexpr string_view helpers_str = "Helpers"sv;
+constexpr string_view utils_str = "Utils"sv;
 constexpr string_view runtime_profiled_str = "RuntimeProfiled"sv;
 
 // This fills in all the way up to MAX_SYNTHETIC_SYMBOLS
@@ -345,8 +346,12 @@ void GlobalState::initEmpty() {
     Symbols::SinatraBase().data(*this)->setIsModule(false);
     Symbols::SinatraBase().data(*this)->superClass = Symbols::Object();
 
-    // Synthesize RuntimeProfiledType
-    id = enterStaticFieldSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(runtime_profiled_str));
+    // Synthesize T::Utils
+    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(utils_str));
+    id.data(*this)->setIsModule(true);
+
+    // Synthesize T::Utils::RuntimeProfiled
+    id = enterStaticFieldSymbol(Loc::none(), id, enterNameConstant(runtime_profiled_str));
     id.data(*this)->resultType = make_shared<core::AliasType>(Symbols::untyped());
 
     int reservedCount = 0;

@@ -145,7 +145,7 @@ cxxopts::Options buildOptions() {
     options.add_options("advanced")("a,autocorrect", "Auto-correct source files with suggested fixes");
     options.add_options("advanced")(
         "suggest-runtime-profiled",
-        "When suggesting signatures in `typed: strict` mode, suggest `::Sorbet::RuntimeProfiled`");
+        "When suggesting signatures in `typed: strict` mode, suggest `::T::Utils::RuntimeProfiled`");
     options.add_options("advanced")("lsp", "Start in language-server-protocol mode");
     options.add_options("advanced")("no-error-count", "Do not print the error count summary line");
     // Developer options
