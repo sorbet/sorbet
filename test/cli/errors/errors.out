@@ -1,6 +1,12 @@
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/getoptlong.rbi#L38: Did you mean: `GetoptLong::MissingArgument`?
+    38 |  class MissingArgument < ::GetoptLong::Error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/optparse.rbi#L6: Did you mean: `OptionParser::MissingArgument`?
+     6 |  class MissingArgument < OptionParser::ParseError
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib
@@ -48,6 +54,12 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/getoptlong.rbi#L38: Did you mean: `GetoptLong::MissingArgument`?
+    38 |  class MissingArgument < ::GetoptLong::Error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/optparse.rbi#L6: Did you mean: `OptionParser::MissingArgument`?
+     6 |  class MissingArgument < OptionParser::ParseError
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib
@@ -95,6 +107,12 @@ Errors: 4
 test/cli/errors/errors.rb:4: Unable to resolve constant `MissingConstant` http://go/e/5002
      4 |    MissingConstant
             ^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/getoptlong.rbi#L38: Did you mean: `GetoptLong::MissingArgument`?
+    38 |  class MissingArgument < ::GetoptLong::Error
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/optparse.rbi#L6: Did you mean: `OptionParser::MissingArgument`?
+     6 |  class MissingArgument < OptionParser::ParseError
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 test/cli/errors/errors.rb:14: `Integer` doesn't match `String` for argument `arg0` http://go/e/7002
     14 |    raise arg # raise is defined by stdlib

@@ -39,7 +39,7 @@ subgraph "cluster_::ModuleMethods#instrumented_request" {
     "bb::ModuleMethods#instrumented_request_7" -> "bb::ModuleMethods#instrumented_request_6" [style="tapered"];
 
     "bb::ModuleMethods#instrumented_request_8" [
-        label = "block[id=8](final_attempt: T.untyped, foo: T.untyped, e: StandardError)\lerr: StandardError = e\l<gotoDeadTemp>$9: NilClass\l"
+        label = "block[id=8](e: StandardError, final_attempt: T.untyped, foo: T.untyped)\lerr: StandardError = e\l<gotoDeadTemp>$9: NilClass\l"
     ];
 
     "bb::ModuleMethods#instrumented_request_8" -> "bb::ModuleMethods#instrumented_request_1" [style="bold"];

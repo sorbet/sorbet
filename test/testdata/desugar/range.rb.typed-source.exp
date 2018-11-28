@@ -86,14 +86,14 @@ def foo
     #   ]
     # }
     #
+    # e: Integer
+    #
     # d: AppliedType {
     #   klass = ::Range
     #   targs = [
     #     <constant:Elem> = Integer
     #   ]
     # }
-    #
-    # e: Integer
     #
     # f: String
 end

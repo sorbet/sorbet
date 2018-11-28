@@ -38,7 +38,7 @@ ClassDef{
 }
 --- dsl-tree-raw end ---
 --- symbol-table start ---
-class ::<root> < ::Object () @ (-e:1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
+class ::<root> < ::Object () @ (-e:1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/bundler.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/matrix.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/rubygems.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/securerandom.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
   method #<static-init> () @ ???
 
 --- symbol-table end ---
@@ -58,7 +58,7 @@ ClassDef{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$76>()
+  def self.<static-init><<static-init>$109>()
     1
   end
 end
@@ -70,7 +70,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <static-init><<static-init>$76>
+      name = <static-init><<static-init>$109>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -403,7 +403,37 @@ ClassDef{
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi"
   },
   {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/abbrev.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/base64.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/benchmark.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/bundler.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cgi.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/cmath.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/csv.rbi",
    "sigil": "Typed",
    "strict": "Typed"
   },
@@ -413,9 +443,112 @@ ClassDef{
    "strict": "Strict"
   },
   {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/e2mmap.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/erb.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/fileutils.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/find.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/forwardable.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/getoptlong.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ipaddr.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/irb.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/logger.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/matrix.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/open3.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/optparse.rbi"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ostruct.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/psych.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/readline.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/resolv.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ripper.rbi",
    "sigil": "Strict",
    "strict": "Strict"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/rubygems.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/rubygems/remote_fetcher.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/securerandom.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/shell.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/shellwords.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/singleton.rbi",
@@ -428,9 +561,19 @@ ClassDef{
    "strict": "Strict"
   },
   {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tempfile.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/time.rbi",
    "sigil": "Strict",
    "strict": "Strict"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/timeout.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tmpdir.rbi",
@@ -438,9 +581,29 @@ ClassDef{
    "strict": "Strict"
   },
   {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/tsort.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/uri.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/weakref.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
+  },
+  {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi",
    "sigil": "Strict",
    "strict": "Strict"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/yaml.rbi",
+   "sigil": "Typed",
+   "strict": "Typed"
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi",
