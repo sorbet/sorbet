@@ -456,14 +456,14 @@ class String < Object
     params(
         arg0: T.any(Regexp, String),
     )
-    .returns(MatchData)
+    .returns(T.nilable(MatchData))
   end
   sig do
     params(
         arg0: T.any(Regexp, String),
         arg1: Integer,
     )
-    .returns(MatchData)
+    .returns(T.nilable(MatchData))
   end
   def match(arg0, arg1=T.unsafe(nil)); end
 
