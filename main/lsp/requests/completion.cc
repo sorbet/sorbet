@@ -176,8 +176,12 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
                 methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
                                      make_move_iterator(methods.end()));
                 fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    return leftPair.first.data(*finalGs)->shortName(*finalGs) <
-                           rightPair.first.data(*finalGs)->shortName(*finalGs);
+                    auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
+                    auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
+                    if (leftShortName != rightShortName) {
+                        return leftShortName < rightShortName;
+                    }
+                    return leftPair.first._id < rightPair.first._id;
                 });
                 for (auto &entry : methodsSorted) {
                     if (entry.second[0].exists()) {
