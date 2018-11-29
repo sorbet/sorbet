@@ -172,12 +172,9 @@ public:
     std::unique_ptr<Error> build();
 };
 
+template <typename H> H AbslHashValue(H h, const ErrorClass &m) {
+    return H::combine(std::move(h), m.code);
+}
 } // namespace sorbet::core
-
-template <> struct std::hash<sorbet::core::ErrorClass> {
-    size_t operator()(const sorbet::core::ErrorClass &x) const {
-        return x.code;
-    }
-};
 
 #endif

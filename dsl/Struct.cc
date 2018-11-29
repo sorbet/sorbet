@@ -21,7 +21,7 @@ unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     ENFORCE(cnst);
     auto newScope = dupName(cnst->scope.get());
     ENFORCE(newScope);
-    return ast::MK::UnresolvedConstant(node->loc, move(newScope), cnst->cnst);
+    return ast::MK::UnresolvedConstant(node->loc, std::move(newScope), cnst->cnst);
 }
 
 vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx, ast::Assign *asgn) {
@@ -70,8 +70,9 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                            ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
     }
 
-    body.emplace_back(ast::MK::Sig(loc, ast::MK::Hash(loc, move(sigKeys), move(sigValues)), dupName(asgn->lhs.get())));
-    body.emplace_back(ast::MK::Method(loc, loc, core::Names::new_(), move(newArgs),
+    body.emplace_back(
+        ast::MK::Sig(loc, ast::MK::Hash(loc, std::move(sigKeys), std::move(sigValues)), dupName(asgn->lhs.get())));
+    body.emplace_back(ast::MK::Method(loc, loc, core::Names::new_(), std::move(newArgs),
                                       ast::MK::Cast(loc, dupName(asgn->lhs.get())),
                                       ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
@@ -80,8 +81,8 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
                                                        ctx.state.enterNameConstant(core::Names::Struct())));
 
     vector<unique_ptr<ast::Expression>> stats;
-    stats.emplace_back(make_unique<ast::ClassDef>(loc, loc, core::Symbols::todo(), move(asgn->lhs), move(ancestors),
-                                                  move(body), ast::ClassDefKind::Class));
+    stats.emplace_back(make_unique<ast::ClassDef>(loc, loc, core::Symbols::todo(), std::move(asgn->lhs),
+                                                  std::move(ancestors), std::move(body), ast::ClassDefKind::Class));
     return stats;
 }
 

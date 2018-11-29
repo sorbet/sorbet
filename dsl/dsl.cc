@@ -27,7 +27,7 @@ public:
                      [&](ast::Assign *assign) {
                          auto nodes = Struct::replaceDSL(ctx, assign);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
                      },
@@ -35,26 +35,26 @@ public:
                      [&](ast::Send *send) {
                          auto nodes = ChalkODMProp::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
 
                          nodes = MixinEncryptedProp::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
 
                          nodes = DSLBuilder::replaceDSL(ctx, send);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
 
                          // This one is different: it gets an extra prevStat argument.
                          nodes = AttrReader::replaceDSL(ctx, send, prevStat);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
                      },
@@ -62,7 +62,7 @@ public:
                      [&](ast::MethodDef *mdef) {
                          auto nodes = Sinatra::replaceDSL(ctx, mdef);
                          if (!nodes.empty()) {
-                             replaceNodes[stat.get()] = move(nodes);
+                             replaceNodes[stat.get()] = std::move(nodes);
                              return;
                          }
                      },
@@ -75,24 +75,24 @@ public:
             return classDef;
         }
 
-        auto oldRHS = move(classDef->rhs);
+        auto oldRHS = std::move(classDef->rhs);
         classDef->rhs.clear();
         classDef->rhs.reserve(oldRHS.size());
 
         for (auto &stat : oldRHS) {
             if (replaceNodes.find(stat.get()) != replaceNodes.end()) {
                 for (auto &newNode : replaceNodes.at(stat.get())) {
-                    classDef->rhs.emplace_back(move(newNode));
+                    classDef->rhs.emplace_back(std::move(newNode));
                 }
             } else {
-                classDef->rhs.emplace_back(move(stat));
+                classDef->rhs.emplace_back(std::move(stat));
             }
         }
         return classDef;
     }
 
     unique_ptr<ast::Expression> postTransformSend(core::MutableContext ctx, unique_ptr<ast::Send> send) {
-        return InterfaceWrapper::replaceDSL(ctx, move(send));
+        return InterfaceWrapper::replaceDSL(ctx, std::move(send));
     }
 
 private:
@@ -100,10 +100,10 @@ private:
 };
 
 unique_ptr<ast::Expression> DSL::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
-    auto ast = move(tree);
+    auto ast = std::move(tree);
 
     DSLReplacer dslReplacer;
-    ast = ast::TreeMap::apply(ctx, dslReplacer, move(ast));
+    ast = ast::TreeMap::apply(ctx, dslReplacer, std::move(ast));
 
     return ast;
 }

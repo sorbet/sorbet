@@ -168,12 +168,12 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
                 auto fnd = other.find(el.first);
                 if (fnd != other.end()) {
                     if (fnd->second != el.second) {
-                        it = current.erase(it);
+                        current.erase(it++);
                     } else {
                         ++it;
                     }
                 } else {
-                    it = current.erase(it); // note: this is correct but to conservative. In particular for loop headers
+                    current.erase(it++); // note: this is correct but to conservative. In particular for loop headers
                 }
             }
         }
@@ -185,7 +185,7 @@ void CFGBuilder::dealias(core::Context ctx, CFG &cfg) {
             /* invalidate a stale record */
             for (auto it = current.begin(); it != current.end(); /* nothing */) {
                 if (it->second == bind.bind.variable) {
-                    it = current.erase(it);
+                    current.erase(it++);
                 } else {
                     ++it;
                 }

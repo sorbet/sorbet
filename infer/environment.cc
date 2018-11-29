@@ -493,7 +493,7 @@ void Environment::updateKnowledge(core::Context ctx, core::LocalVariable local, 
 
 void Environment::setTypeAndOrigin(core::LocalVariable symbol, core::TypeAndOrigins typeAndOrigins) {
     ENFORCE(typeAndOrigins.type.get() != nullptr);
-    vars[symbol].typeAndOrigins = move(typeAndOrigins);
+    vars[symbol].typeAndOrigins = std::move(typeAndOrigins);
 }
 
 const Environment &Environment::withCond(core::Context ctx, const Environment &env, Environment &copy, bool isTrue,
@@ -729,7 +729,7 @@ shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> t
 
              [&](core::TupleType *t) { result = t->elementType(); },
 
-             [&](core::Type *t) { result = move(type); });
+             [&](core::Type *t) { result = std::move(type); });
     return result;
 }
 
@@ -791,7 +791,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     tp.type = dispatched.returnType;
                     for (auto &comp : dispatched.components) {
                         for (auto &err : comp.errors) {
-                            ctx.state._error(move(err));
+                            ctx.state._error(std::move(err));
                         }
                         lspQueryMatch = lspQueryMatch ||
                                         (ctx.state.lspQuerySymbol.exists() && ctx.state.lspQuerySymbol == comp.method);
@@ -799,7 +799,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                     if (lspQueryMatch) {
                         core::QueryResponse::setQueryResponse(
-                            ctx, core::QueryResponse::Kind::SEND, move(dispatched.components),
+                            ctx, core::QueryResponse::Kind::SEND, std::move(dispatched.components),
                             send->link ? send->link->constr : nullptr, bind.loc, send->fun, recvType, tp);
                     }
                 }
@@ -855,9 +855,9 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                     dealiasedReceiver.origins = tp.origins;
                     core::DispatchResult::ComponentVec components;
                     components.emplace_back(core::DispatchComponent{tp.type, symbol, {}});
-                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT, move(components),
-                                                          nullptr, bind.loc, symbol.data(ctx)->name, dealiasedReceiver,
-                                                          tp);
+                    core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::CONSTANT,
+                                                          std::move(components), nullptr, bind.loc,
+                                                          symbol.data(ctx)->name, dealiasedReceiver, tp);
                 }
                 pinnedTypes[bind.bind.variable] = tp;
             },
@@ -870,7 +870,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
 
                 auto type = core::Types::instantiate(ctx, i->link->sendTp, *i->link->constr);
                 type = flatmapHack(ctx, i->link, type);
-                tp.type = move(type);
+                tp.type = std::move(type);
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::Self *i) {
@@ -891,7 +891,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 ENFORCE(ctx.owner == i->arg.data(ctx)->owner);
 
                 auto argType = i->arg.data(ctx)->argumentTypeAsSeenByImplementation(ctx, constr);
-                tp.type = move(argType);
+                tp.type = std::move(argType);
                 tp.origins.emplace_back(bind.loc);
             },
             [&](cfg::LoadYieldParams *insn) {
@@ -908,7 +908,7 @@ shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Bindi
                 auto *tuple = core::cast_type<core::TupleType>(params.get());
                 if (blkArgs.size() > 1 && !blkArgs.front().data(ctx)->isRepeated() && tuple &&
                     tuple->elems.size() == 1 && tuple->elems.front()->derivesFrom(ctx, core::Symbols::Array())) {
-                    tp.type = move(tuple->elems.front());
+                    tp.type = std::move(tuple->elems.front());
                 } else if (params == nullptr) {
                     tp.type = core::Types::untypedUntracked();
                 } else {

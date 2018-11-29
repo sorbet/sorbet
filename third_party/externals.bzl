@@ -29,14 +29,6 @@ def externals():
         build_file = "//third_party:spdlog.BUILD",
     )
 
-    # their zip archive has symlinks that bazel does not like
-    new_git_repository(
-            name="skarupke_maps",
-            remote="https://github.com/skarupke/flat_hash_map.git",
-            commit="2c4687431f978f02a3780e24b8b701d22aa32d9c",
-            build_file = "//third_party:skarupke_maps.BUILD",
-    )
-
     # proto_library, cc_proto_library, and java_proto_library rules implicitly
     # depend on @com_google_protobuf for protoc and proto runtimes.
     # This statement defines the @com_google_protobuf repo.

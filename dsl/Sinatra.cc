@@ -35,27 +35,27 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
 
     auto inseq = ast::cast_tree<ast::InsSeq>(mdef->rhs.get());
     if (inseq) {
-        auto stats = move(inseq->stats);
+        auto stats = std::move(inseq->stats);
         inseq->stats.clear();
         for (auto &stat : stats) {
             typecase(stat.get(),
                      [&](ast::Send *send) {
                          if (send->fun == core::Names::helpers() && send->args.size() == 1) {
                              ret.emplace_back(ast::MK::Send1(send->loc, ast::MK::Self(loc), core::Names::include(),
-                                                             move(send->args[0])));
+                                                             std::move(send->args[0])));
                          } else {
-                             inseq->stats.emplace_back(move(stat));
+                             inseq->stats.emplace_back(std::move(stat));
                          }
                      },
-                     [&](ast::Expression *e) { inseq->stats.emplace_back(move(stat)); });
+                     [&](ast::Expression *e) { inseq->stats.emplace_back(std::move(stat)); });
         }
         if (inseq->stats.empty()) {
-            mdef->rhs = move(inseq->expr);
+            mdef->rhs = std::move(inseq->expr);
         }
     }
 
-    ret.emplace_back(ast::MK::Method(loc, loc, core::Names::instanceRegistered(), move(mdef->args), move(mdef->rhs),
-                                     ast::MethodDef::DSLSynthesized));
+    ret.emplace_back(ast::MK::Method(loc, loc, core::Names::instanceRegistered(), std::move(mdef->args),
+                                     std::move(mdef->rhs), ast::MethodDef::DSLSynthesized));
 
     return ret;
 }

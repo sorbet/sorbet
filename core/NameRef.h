@@ -105,19 +105,11 @@ public:
 public:
     int _id;
 };
-
 CheckSize(NameRef, 4, 4);
+
+template <typename H> H AbslHashValue(H h, const NameRef &m) {
+    return H::combine(std::move(h), m.id());
+}
 } // namespace sorbet::core
 
-template <> struct std::hash<sorbet::core::NameRef> {
-    size_t operator()(const sorbet::core::NameRef &x) const {
-        return x._id;
-    }
-};
-
-template <> struct std::equal_to<sorbet::core::NameRef> {
-    constexpr bool operator()(const sorbet::core::NameRef &lhs, const sorbet::core::NameRef &rhs) const {
-        return lhs._id == rhs._id;
-    }
-};
 #endif // RUBY_TYPER_NAMEREF_H

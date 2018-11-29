@@ -29,12 +29,12 @@ DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "ortype");
     auto leftRet = left->dispatchCall(ctx, args.withSelfRef(left));
     auto rightRet = right->dispatchCall(ctx, args.withSelfRef(right));
-    DispatchResult::ComponentVec components = move(leftRet.components);
+    DispatchResult::ComponentVec components = std::move(leftRet.components);
     components.insert(components.end(), make_move_iterator(rightRet.components.begin()),
                       make_move_iterator(rightRet.components.end()));
     DispatchResult ret{
         Types::any(ctx, leftRet.returnType, rightRet.returnType),
-        move(components),
+        std::move(components),
     };
     return ret;
 }
@@ -62,12 +62,12 @@ DispatchResult AndType::dispatchCall(Context ctx, DispatchArgs args) {
         return rightRet;
     }
 
-    DispatchResult::ComponentVec components = move(leftRet.components);
+    DispatchResult::ComponentVec components = std::move(leftRet.components);
     components.insert(components.end(), make_move_iterator(rightRet.components.begin()),
                       make_move_iterator(rightRet.components.end()));
     DispatchResult ret{
         Types::all(ctx, leftRet.returnType, rightRet.returnType),
-        move(components),
+        std::move(components),
     };
     return ret;
 }
@@ -93,7 +93,7 @@ DispatchResult ShapeType::dispatchCall(Context ctx, DispatchArgs args) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = args.selfType;
             components.front().method = method;
-            return DispatchResult{result, move(components)};
+            return DispatchResult{result, std::move(components)};
         }
     }
     return ProxyType::dispatchCall(ctx, args);
@@ -108,7 +108,7 @@ DispatchResult TupleType::dispatchCall(Context ctx, DispatchArgs args) {
             DispatchResult::ComponentVec components(1);
             components.front().receiver = args.selfType;
             components.front().method = method;
-            return DispatchResult{result, move(components)};
+            return DispatchResult{result, std::move(components)};
         }
     }
     return ProxyType::dispatchCall(ctx, args);
@@ -370,12 +370,13 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
                                   const Type *thisType, core::SymbolRef symbol, vector<shared_ptr<Type>> &targs) {
     if (symbol == core::Symbols::untyped()) {
-        return DispatchResult(Types::untyped(ctx, thisType->untypedBlame()), move(args.selfType), Symbols::untyped());
+        return DispatchResult(Types::untyped(ctx, thisType->untypedBlame()), std::move(args.selfType),
+                              Symbols::untyped());
     } else if (symbol == Symbols::void_()) {
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
             e.setHeader("Can not call method `{}` on void type", args.name.data(ctx)->toString(ctx));
         }
-        return DispatchResult(Types::untypedUntracked(), move(args.selfType), Symbols::noSymbol());
+        return DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
     }
 
     SymbolRef mayBeOverloaded = symbol.data(ctx)->findMemberTransitive(ctx, args.name);
@@ -386,7 +387,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             // `BasicObject`, but our method-resolution order is wrong, and
             // putting it there will inadvertently shadow real definitions in
             // some cases, so we special-case it here as a last resort.
-            auto result = DispatchResult(Types::untypedUntracked(), move(args.selfType), Symbols::noSymbol());
+            auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
             if (!args.args.empty()) {
                 if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::MethodArgumentCountMismatch)) {
                     e.setHeader("Wrong number of arguments for constructor. Expected: `{}`, got: `{}`", 0,
@@ -396,7 +397,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             }
             return result;
         }
-        auto result = DispatchResult(Types::untypedUntracked(), move(args.selfType), Symbols::noSymbol());
+        auto result = DispatchResult(Types::untypedUntracked(), std::move(args.selfType), Symbols::noSymbol());
         if (auto e = ctx.state.beginError(args.locs.call, errors::Infer::UnknownMethod)) {
             if (args.fullType.get() != thisType) {
                 e.setHeader("Method `{}` does not exist on `{}` component of `{}`", args.name.data(ctx)->toString(ctx),
@@ -491,7 +492,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         auto offset = ait - args.args.begin();
         if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, *arg, spec,
                                   args.selfType, targs, args.locs.args[offset], args.args.size() == 1)) {
-            result.components.front().errors.emplace_back(move(e));
+            result.components.front().errors.emplace_back(std::move(e));
         }
 
         if (!spec->isRepeated()) {
@@ -562,7 +563,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                         tpe.type = hash->values[offset];
                         if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, tpe,
                                                   spec, args.selfType, targs, Loc::none())) {
-                            result.components.front().errors.emplace_back(move(e));
+                            result.components.front().errors.emplace_back(std::move(e));
                         }
                     }
                     break;
@@ -576,7 +577,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 if (arg == hash->keys.end()) {
                     if (!spec->isOptional()) {
                         if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec->ref(ctx))) {
-                            result.components.front().errors.emplace_back(move(e));
+                            result.components.front().errors.emplace_back(std::move(e));
                         }
                     }
                     continue;
@@ -588,7 +589,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 tpe.type = hash->values[offset];
                 if (auto e = matchArgType(ctx, *constr, args.locs.call, args.locs.receiver, symbol, method, tpe, spec,
                                           args.selfType, targs, Loc::none())) {
-                    result.components.front().errors.emplace_back(move(e));
+                    result.components.front().errors.emplace_back(std::move(e));
                 }
             }
             for (auto &key : hash->keys) {
@@ -622,7 +623,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 continue;
             }
             if (auto e = missingArg(ctx, args.locs.call, args.locs.receiver, method, spec)) {
-                result.components.front().errors.emplace_back(move(e));
+                result.components.front().errors.emplace_back(std::move(e));
             }
         }
     }
@@ -684,7 +685,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
             args.block->sendTp = resultType;
         }
     }
-    result.returnType = move(resultType);
+    result.returnType = std::move(resultType);
     return result;
 }
 
@@ -911,7 +912,7 @@ public:
         // and we should pass these errors up to the caller.
         for (auto &comp : dispatched.components) {
             for (auto &err : comp.errors) {
-                ctx.state._error(move(err));
+                ctx.state._error(std::move(err));
             }
         }
         return instanceTy;
@@ -1112,7 +1113,7 @@ public:
             TypeAndOrigins tao;
             tao.type = arg;
             tao.origins.emplace_back(args.locs.args[2]);
-            sendArgStore.emplace_back(move(tao));
+            sendArgStore.emplace_back(std::move(tao));
         }
         InlinedVector<const TypeAndOrigins *, 2> sendArgs;
         sendArgs.reserve(sendArgStore.size());
@@ -1125,7 +1126,7 @@ public:
         auto dispatched = receiver->type->dispatchCall(ctx, innerArgs);
         for (auto &comp : dispatched.components) {
             for (auto &err : comp.errors) {
-                ctx.state._error(move(err));
+                ctx.state._error(std::move(err));
             }
         }
         return dispatched.returnType;
@@ -1225,7 +1226,7 @@ public:
                 return nullptr;
             }
         }
-        return TupleType::build(ctx, move(elems));
+        return TupleType::build(ctx, std::move(elems));
     }
 } Tuple_concat;
 
@@ -1255,7 +1256,7 @@ public:
             }
         }
 
-        return make_shared<ShapeType>(Types::hashOfUntyped(), move(keys), move(values));
+        return make_shared<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
     }
 } Shape_merge;
 
@@ -1290,7 +1291,7 @@ class Array_flatten : public IntrinsicMethod {
 
                  [&](TupleType *t) { result = recursivelyFlattenArrays(ctx, t->elementType(), newDepth); },
 
-                 [&](Type *t) { result = move(type); });
+                 [&](Type *t) { result = std::move(type); });
         return result;
     }
 
@@ -1400,7 +1401,7 @@ public:
         auto dispatched = hash->dispatchCall(ctx, dispatch);
         for (auto &comp : dispatched.components) {
             for (auto &err : comp.errors) {
-                ctx.state._error(move(err));
+                ctx.state._error(std::move(err));
             }
         }
         return dispatched.returnType;

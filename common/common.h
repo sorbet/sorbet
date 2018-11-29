@@ -9,16 +9,10 @@ static_assert(false, "Need c++14 to compile this codebase");
 #endif
 
 #include "absl/algorithm/container.h"
-#include "pdqsort.h"
-#include <string_view>
-#if !defined(EMSCRIPTEN)
+#include "absl/container/flat_hash_map.h"
+#include "absl/container/flat_hash_set.h"
 #include "absl/container/inlined_vector.h"
-#include "unordered_map.hpp"
-#else
-#include <unordered_map>
-#include <unordered_set>
-#include <vector>
-#endif
+#include "pdqsort.h"
 #include "spdlog/fmt/fmt.h"
 #include "spdlog/spdlog.h"
 #include <cstring>
@@ -38,17 +32,9 @@ static_assert(false, "Need c++14 to compile this codebase");
 
 namespace sorbet {
 
-#if !defined(EMSCRIPTEN)
 template <class T, size_t N> using InlinedVector = absl::InlinedVector<T, N>;
-template <class K, class V> using UnorderedMap = ska::unordered_map<K, V>;
-template <class E> using UnorderedSet = ska::unordered_set<E>;
-constexpr bool emscripten_build = false;
-#else
-template <class T, size_t N> using InlinedVector = std::vector<T>;
-template <class K, class V> using UnorderedMap = std::unordered_map<K, V>;
-template <class E> using UnorderedSet = std::unordered_set<E>;
-constexpr bool emscripten_build = true;
-#endif
+template <class K, class V> using UnorderedMap = absl::flat_hash_map<K, V>;
+template <class E> using UnorderedSet = absl::flat_hash_set<E>;
 // Uncomment to make vectors debuggable
 // template <class T, size_t N> using InlinedVector = std::vector<T>;
 
@@ -59,6 +45,13 @@ constexpr bool debug_mode = false;
 #define DEBUG_MODE
 constexpr bool debug_mode = true;
 #endif
+
+#if !defined(EMSCRIPTEN)
+constexpr bool emscripten_build = false;
+#else
+constexpr bool emscripten_build = true;
+#endif
+
 #define _MAYBE_ADD_COMMA(...) , ##__VA_ARGS__
 #define ENFORCE(x, ...)                                                                             \
     ((::sorbet::debug_mode && !(x)) ? ({                                                            \

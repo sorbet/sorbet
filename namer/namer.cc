@@ -46,7 +46,7 @@ class NameInserter {
 
         node.release();
         unique_ptr<ast::UnresolvedConstantLit> constTmp(constLit);
-        node = make_unique<ast::ConstantLit>(constLit->loc, existing, move(constTmp), nullptr);
+        node = make_unique<ast::ConstantLit>(constLit->loc, existing, std::move(constTmp), nullptr);
         return existing;
     }
 
@@ -212,7 +212,7 @@ class NameInserter {
                 }
                 return false;
             }
-            dest->emplace_back(move(arg));
+            dest->emplace_back(std::move(arg));
         }
 
         return true;
@@ -347,7 +347,7 @@ public:
             shouldLeaveAncestorForIDE(klass->ancestors.front())) {
             ideSeqs.emplace_back(ast::MK::KeepForIDE(klass->ancestors.front()->deepCopy()));
         }
-        return ast::MK::InsSeq(klass->declLoc, move(ideSeqs), move(klass));
+        return ast::MK::InsSeq(klass->declLoc, std::move(ideSeqs), std::move(klass));
     }
 
     core::LocalVariable enterLocal(core::MutableContext ctx, core::NameRef name) {
@@ -383,7 +383,7 @@ public:
                     unique_ptr<ast::Reference> refExpImpl(refExp);
                     arg.release();
                     auto pair = arg2Symbol(ctx, refExpImpl, i);
-                    arg = move(refExpImpl);
+                    arg = std::move(refExpImpl);
                     core::SymbolRef sym = pair.first;
                     localVariable = pair.second;
                     name = localVariable._name;
@@ -435,7 +435,7 @@ public:
                 default:
                     return original;
             }
-            return move(original->args[0]);
+            return std::move(original->args[0]);
         }
         if (ast::isa_tree<ast::Self>(original->recv.get())) {
             switch (original->fun._id) {
@@ -516,7 +516,7 @@ public:
                     if (!blockArgStack.empty()) {
                         auto loc = original->loc;
                         auto blockArg = findOrCreateBlockParameter(ctx, loc);
-                        auto iff = ast::MK::If(loc, make_unique<ast::Local>(loc, blockArg), move(original),
+                        auto iff = ast::MK::If(loc, make_unique<ast::Local>(loc, blockArg), std::move(original),
                                                ast::MK::False(loc));
                         return iff;
                     }
@@ -632,7 +632,7 @@ public:
 
         auto outerArgs = scopeStack.back().args;
         auto &frame = enterScope();
-        frame.args = move(outerArgs);
+        frame.args = std::move(outerArgs);
         auto &parent = *(scopeStack.end() - 2);
 
         // We inherit our parent's locals
@@ -699,7 +699,7 @@ public:
         auto loc = lhs->loc;
         unique_ptr<ast::UnresolvedConstantLit> lhsU(lhs);
         asgn->lhs.release();
-        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, move(lhsU), nullptr);
+        asgn->lhs = make_unique<ast::ConstantLit>(loc, cnst, std::move(lhsU), nullptr);
         return asgn;
     }
 
@@ -794,11 +794,11 @@ public:
 
         auto *send = ast::cast_tree<ast::Send>(asgn->rhs.get());
         if (send == nullptr) {
-            return fillAssign(ctx, move(asgn));
+            return fillAssign(ctx, std::move(asgn));
         }
         auto *shouldBeSelf = ast::cast_tree<ast::Self>(send->recv.get());
         if (shouldBeSelf == nullptr) {
-            auto ret = fillAssign(ctx, move(asgn));
+            auto ret = fillAssign(ctx, std::move(asgn));
             if (send->fun == core::Names::typeAlias()) {
                 core::SymbolRef sym;
                 if (auto id = ast::cast_tree<ast::ConstantLit>(ret->lhs.get())) {
@@ -813,29 +813,29 @@ public:
 
         auto *typeName = ast::cast_tree<ast::UnresolvedConstantLit>(asgn->lhs.get());
         if (typeName == nullptr) {
-            return fillAssign(ctx, move(asgn));
+            return fillAssign(ctx, std::move(asgn));
         }
 
         switch (send->fun._id) {
             case core::Names::typeTemplate()._id:
                 return handleTypeMemberDefinition(
                     ctx, true, ctx.owner.data(ctx)->enclosingClass(ctx).data(ctx)->singletonClass(ctx), send,
-                    move(asgn), typeName);
+                    std::move(asgn), typeName);
             case core::Names::typeMember()._id:
                 return handleTypeMemberDefinition(ctx, false, ctx.owner.data(ctx)->enclosingClass(ctx), send,
-                                                  move(asgn), typeName);
+                                                  std::move(asgn), typeName);
             default:
-                return fillAssign(ctx, move(asgn));
+                return fillAssign(ctx, std::move(asgn));
         }
     }
 
     unique_ptr<ast::Expression> postTransformYield(core::MutableContext ctx, unique_ptr<ast::Yield> yield) {
         if (!blockArgStack.empty()) {
             auto recv = make_unique<ast::Local>(yield->loc, findOrCreateBlockParameter(ctx, yield->loc));
-            return make_unique<ast::Send>(yield->loc, move(recv), core::Names::call(), move(yield->args));
+            return make_unique<ast::Send>(yield->loc, std::move(recv), core::Names::call(), std::move(yield->args));
         } else {
             return make_unique<ast::Send>(yield->loc, ast::MK::Unsafe(yield->loc, ast::MK::Nil(yield->loc)),
-                                          core::Names::call(), move(yield->args));
+                                          core::Names::call(), std::move(yield->args));
         }
     }
 
@@ -848,7 +848,7 @@ private:
 
 unique_ptr<ast::Expression> Namer::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
     NameInserter nameInserter;
-    return ast::TreeMap::apply(ctx, nameInserter, move(tree));
+    return ast::TreeMap::apply(ctx, nameInserter, std::move(tree));
 }
 
 }; // namespace sorbet::namer

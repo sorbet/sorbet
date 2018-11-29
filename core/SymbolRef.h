@@ -350,14 +350,9 @@ public:
     static constexpr int MAX_SYNTHETIC_SYMBOLS = 200;
 };
 
+template <typename H> H AbslHashValue(H h, const SymbolRef &m) {
+    return H::combine(std::move(h), m._id);
+}
+
 } // namespace sorbet::core
-
-namespace std {
-template <> struct hash<sorbet::core::SymbolRef> {
-    std::size_t operator()(const sorbet::core::SymbolRef k) const {
-        return k._id;
-    }
-};
-
-} // namespace std
 #endif // RUBY_TYPER_SYMBOLREF_H

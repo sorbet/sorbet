@@ -247,7 +247,7 @@ void emit_node_header(ostream &out, NodeDef &node) {
     for (auto &arg : node.fields) {
         out << ", " << arg.name << "(";
         if (arg.type == Node || arg.type == NodeVec) {
-            out << "move(";
+            out << "std::move(";
         }
         out << arg.name;
         if (arg.type == Node || arg.type == NodeVec) {

@@ -9,7 +9,7 @@ namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
                  WorkerPool &workers)
-    : initialGS(move(gs)), opts(opts), logger(logger), workers(workers) {
+    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
 }
@@ -62,7 +62,7 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
         LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
         LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
         vector<shared_ptr<core::File>> files;
-        files.emplace_back(make_shared<core::File>((move(fref.data(*finalGs)))));
+        files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
         tryFastPath(files);
     }
 
@@ -94,7 +94,7 @@ void LSPLoop::drainDiagnostics() {
             continue;
         }
         auto file = e->loc.file();
-        errorsAccumulated[file].emplace_back(move(e));
+        errorsAccumulated[file].emplace_back(std::move(e));
 
         if (!updatedErrors.empty() && updatedErrors.back() == file) {
             continue;
@@ -104,7 +104,7 @@ void LSPLoop::drainDiagnostics() {
     auto iter = errorsAccumulated.begin();
     for (; iter != errorsAccumulated.end();) {
         if (iter->first.exists() && iter->first.data(*initialGS).sourceType == core::File::TombStone) {
-            iter = errorsAccumulated.erase(iter);
+            errorsAccumulated.erase(iter++);
         } else {
             ++iter;
         }

@@ -15,7 +15,7 @@ class Loc final {
         unsigned int endLoc : 24;
         unsigned int fileRef : 16;
     } __attribute__((packed, aligned(8))) storage;
-    friend std::hash<sorbet::core::Loc>;
+    template <typename H> friend H AbslHashValue(H h, const Loc &m);
     friend class sorbet::core::serialize::SerializerImpl;
 
     static constexpr int INVALID_POS_LOC = 0xffffff;
@@ -91,13 +91,10 @@ public:
     }
 };
 CheckSize(Loc, 8, 8);
-} // namespace sorbet::core
 
-template <> struct std::hash<sorbet::core::Loc> {
-    std::size_t operator()(const sorbet::core::Loc loc) const {
-        // prime numbers as multipliers
-        return loc.storage.fileRef * 8388617ul + loc.storage.endLoc * 8388619ul + loc.storage.beginLoc * 8388623ul;
-    }
-};
+template <typename H> H AbslHashValue(H h, const Loc &m) {
+    return H::combine(std::move(h), m.storage.beginLoc, m.storage.endLoc, m.storage.fileRef);
+}
+} // namespace sorbet::core
 
 #endif // SORBET_AST_LOC_H

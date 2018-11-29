@@ -86,12 +86,9 @@ public:
     const StrictLevel sigil;
     StrictLevel strict;
 };
+
+template <typename H> H AbslHashValue(H h, const FileRef &m) {
+    return H::combine(std::move(h), m.id());
+}
 } // namespace sorbet::core
-namespace std {
-template <> struct hash<sorbet::core::FileRef> {
-    std::size_t operator()(const sorbet::core::FileRef k) const {
-        return k.id();
-    }
-};
-} // namespace std
 #endif // SORBET_AST_FILES_H

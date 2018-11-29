@@ -55,15 +55,9 @@ public:
 };
 
 CheckSize(LocalVariable, 8, 4);
+
+template <typename H> H AbslHashValue(H h, const LocalVariable &m) {
+    return H::combine(std::move(h), m._name, m.unique);
+}
 } // namespace sorbet::core
-
-namespace std {
-template <> struct hash<sorbet::core::LocalVariable> {
-    std::size_t operator()(const sorbet::core::LocalVariable k) const {
-        return k._name._id * 63 + k.unique;
-    }
-};
-
-} // namespace std
-
 #endif // RUBY_TYPER_LOCALVARIABLE_H

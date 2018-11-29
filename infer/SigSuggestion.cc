@@ -336,7 +336,7 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
             // publish changes
 
             if (!newInsert.empty()) {
-                blockLocals[bind.bind.variable] = move(newInsert);
+                blockLocals[bind.bind.variable] = std::move(newInsert);
             } else {
                 blockLocals.erase(bind.bind.variable);
             }
@@ -615,7 +615,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
     }
 
     if (auto suggestion = maybeSuggestExtendTHelpers(ctx, methodSymbol)) {
-        e.addAutocorrect(move(*suggestion));
+        e.addAutocorrect(std::move(*suggestion));
     }
     return true;
 }

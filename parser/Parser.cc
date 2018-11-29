@@ -66,7 +66,7 @@ unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) 
     if (!ast) {
         core::Loc loc(file, 0, 0);
         NodeVec empty;
-        return make_unique<Begin>(loc, move(empty));
+        return make_unique<Begin>(loc, std::move(empty));
     }
 
     return ast;

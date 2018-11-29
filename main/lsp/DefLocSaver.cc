@@ -13,9 +13,9 @@ unique_ptr<ast::MethodDef> DefLocSaver::postTransformMethodDef(core::Context ctx
         core::DispatchComponent dispatchComponent;
         core::DispatchResult::ComponentVec dispatchComponents;
         dispatchComponent.method = methodDef->symbol;
-        dispatchComponents.emplace_back(move(dispatchComponent));
+        dispatchComponents.emplace_back(std::move(dispatchComponent));
         tp.type = methodDef->symbol.data(ctx)->resultType;
-        core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::DEFINITION, move(dispatchComponents),
+        core::QueryResponse::setQueryResponse(ctx, core::QueryResponse::Kind::DEFINITION, std::move(dispatchComponents),
                                               nullptr, methodDef->declLoc, methodDef->name, tp, tp);
     }
 

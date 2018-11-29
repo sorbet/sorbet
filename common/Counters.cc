@@ -194,10 +194,10 @@ void CounterImpl::canonicalize() {
         }
     }
 
-    this->counters_by_category = move(out.counters_by_category);
-    this->histograms = move(out.histograms);
-    this->counters = move(out.counters);
-    this->timings = move(out.timings);
+    this->counters_by_category = std::move(out.counters_by_category);
+    this->histograms = std::move(out.histograms);
+    this->counters = std::move(out.counters);
+    this->timings = std::move(out.timings);
 }
 
 const vector<string> Counters::ALL_COUNTERS = {"<all>"};

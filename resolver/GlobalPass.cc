@@ -169,7 +169,7 @@ const vector<core::SymbolRef> &getAbstractMethods(core::GlobalState &gs,
     }
 
     auto &entry = abstractCache[klass];
-    entry = move(abstract);
+    entry = std::move(abstract);
     return entry;
 }
 
@@ -370,7 +370,7 @@ ParentLinearizationInformation computeLinearization(core::GlobalState &gs, core:
                 }
             }
         }
-        data->mixins() = move(newMixins);
+        data->mixins() = std::move(newMixins);
         data->setClassLinearizationComputed();
         if (debug_mode) {
             for (auto oldMixin : currentMixins) {

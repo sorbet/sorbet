@@ -71,7 +71,7 @@ CFG::ReadsAndWrites CFG::findAllReadsAndWrites(core::Context ctx) {
             reads[bb->bexit.cond.variable].insert(bb.get());
         }
     }
-    return CFG::ReadsAndWrites{move(reads), move(writes), move(dead)};
+    return CFG::ReadsAndWrites{std::move(reads), std::move(writes), std::move(dead)};
 }
 
 void CFG::sanityCheck(core::Context ctx) {
@@ -194,6 +194,6 @@ core::Loc BasicBlock::loc() const {
 }
 
 Binding::Binding(core::LocalVariable bind, core::Loc loc, unique_ptr<Instruction> value)
-    : bind(bind), loc(loc), value(move(value)) {}
+    : bind(bind), loc(loc), value(std::move(value)) {}
 
 } // namespace sorbet::cfg

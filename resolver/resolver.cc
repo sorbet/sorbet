@@ -60,7 +60,7 @@ private:
         shared_ptr<Nesting> parent;
         core::SymbolRef scope;
 
-        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(move(parent)), scope(scope) {}
+        Nesting(shared_ptr<Nesting> parent, core::SymbolRef scope) : parent(std::move(parent)), scope(scope) {}
     };
     shared_ptr<Nesting> nesting_;
 
@@ -134,7 +134,7 @@ private:
     static bool isFullyResolved(core::MutableContext ctx, const ast::Expression *expression) {
         ResolutionChecker checker;
         unique_ptr<ast::Expression> dummy(const_cast<ast::Expression *>(expression));
-        dummy = ast::TreeMap::apply(ctx, checker, move(dummy));
+        dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
         ENFORCE(dummy.get() == expression);
         dummy.release();
         return !checker.seenUnresolved;
@@ -251,7 +251,7 @@ private:
                 if (isFullyResolved(ctx, fnd->second)) {
                     auto ret = fnd->second->deepCopy();
                     if (ret) {
-                        job.out->typeAlias = move(ret);
+                        job.out->typeAlias = std::move(ret);
                         job.out->setAliasSymbol(resolved);
                         return true;
                     }
@@ -344,7 +344,7 @@ private:
             if (isSuperclass) {
                 nesting_ = nesting_->parent;
             }
-            ancestor = postTransformUnresolvedConstantLit(ctx, move(inner));
+            ancestor = postTransformUnresolvedConstantLit(ctx, std::move(inner));
             nesting_ = scopeTmp;
         }
         AncestorResolutionItem job;
@@ -360,10 +360,11 @@ private:
             job.ancestor = cnst;
         } else if (auto *self = ast::cast_tree<ast::Self>(ancestor.get())) {
             auto loc = ancestor->loc;
-            auto nw = make_unique<ast::UnresolvedConstantLit>(loc, move(ancestor), ctx.contextClass().data(ctx)->name);
-            auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), move(nw), nullptr);
+            auto nw =
+                make_unique<ast::UnresolvedConstantLit>(loc, std::move(ancestor), ctx.contextClass().data(ctx)->name);
+            auto out = make_unique<ast::ConstantLit>(loc, ctx.contextClass(), std::move(nw), nullptr);
             job.ancestor = out.get();
-            ancestor = move(out);
+            ancestor = std::move(out);
         } else {
             if (auto e = ctx.state.beginError(ancestor->loc, core::errors::Resolver::DynamicSuperclass)) {
                 e.setHeader("Superclasses and mixins must not be dynamic");
@@ -374,7 +375,7 @@ private:
         if (resolveAncestorJob(ctx, job, typeAliases, false)) {
             categoryCounterInc("resolve.constants.ancestor", "firstpass");
         } else {
-            todo_ancestors_.emplace_back(move(job));
+            todo_ancestors_.emplace_back(std::move(job));
         }
     }
 
@@ -382,7 +383,7 @@ public:
     ResolveConstantsWalk(core::MutableContext ctx) : nesting_(make_unique<Nesting>(nullptr, core::Symbols::root())) {}
 
     unique_ptr<ast::ClassDef> preTransformClassDef(core::MutableContext ctx, unique_ptr<ast::ClassDef> original) {
-        nesting_ = make_unique<Nesting>(move(nesting_), original->symbol);
+        nesting_ = make_unique<Nesting>(std::move(nesting_), original->symbol);
         return original;
     }
 
@@ -391,15 +392,15 @@ public:
         if (auto *constScope = ast::cast_tree<ast::UnresolvedConstantLit>(c->scope.get())) {
             unique_ptr<ast::UnresolvedConstantLit> inner(constScope);
             c->scope.release();
-            c->scope = postTransformUnresolvedConstantLit(ctx, move(inner));
+            c->scope = postTransformUnresolvedConstantLit(ctx, std::move(inner));
         }
         auto loc = c->loc;
-        auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), move(c), nullptr);
+        auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(c), nullptr);
         ResolutionItem job{nesting_, out.get()};
         if (resolveJob(ctx, job, typeAliases, false)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
-            todo_.emplace_back(move(job));
+            todo_.emplace_back(std::move(job));
         }
         return out;
     }
@@ -417,7 +418,7 @@ public:
             transformAncestor(ctx, singleton, ancst);
         }
 
-        nesting_ = move(nesting_->parent);
+        nesting_ = std::move(nesting_->parent);
         return original;
     }
 
@@ -462,7 +463,7 @@ public:
         } else {
             // TODO(perf) currently, by construction the last item in resolve todo list is the one this alias depends on
             // We may be able to get some perf by using this
-            this->todo_aliases_.emplace_back(move(item));
+            this->todo_aliases_.emplace_back(std::move(item));
         }
         return asgn;
     }
@@ -505,13 +506,13 @@ public:
         ResolveConstantsWalk constants(ctx);
 
         for (auto &tree : trees) {
-            tree = ast::TreeMap::apply(ctx, constants, move(tree));
+            tree = ast::TreeMap::apply(ctx, constants, std::move(tree));
         }
 
-        auto todo = move(constants.todo_);
-        auto todo_ancestors = move(constants.todo_ancestors_);
-        auto todo_aliases = move(constants.todo_aliases_);
-        const auto typeAliases = move(constants.typeAliases);
+        auto todo = std::move(constants.todo_);
+        auto todo_ancestors = std::move(constants.todo_ancestors_);
+        auto todo_aliases = std::move(constants.todo_aliases_);
+        const auto typeAliases = std::move(constants.typeAliases);
         bool progress = true;
 
         while (!(todo.empty() && todo_ancestors.empty()) && progress) {
@@ -734,13 +735,13 @@ private:
                 // Using optArgExp's loc will make errors point to the arg list, even though the T.let is in the body.
                 auto let = make_unique<ast::Cast>(optArgExp->loc, argType, optArgExp->default_->deepCopy(),
                                                   core::Names::let());
-                lets.emplace_back(move(let));
+                lets.emplace_back(std::move(let));
             }
         }
 
         if (lets.size() > 0) {
             auto loc = mdef->rhs->loc;
-            mdef->rhs = ast::MK::InsSeq(loc, move(lets), move(mdef->rhs));
+            mdef->rhs = ast::MK::InsSeq(loc, std::move(lets), std::move(mdef->rhs));
         }
     }
 
@@ -1131,11 +1132,11 @@ public:
                     return send;
                 }
 
-                auto expr = move(send->args[0]);
+                auto expr = std::move(send->args[0]);
                 ParsedSig emptySig;
                 auto type = TypeSyntax::getResultType(ctx, send->args[1], emptySig, false, core::Symbols::noSymbol());
-                return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(move(send->args[1])),
-                                        make_unique<ast::Cast>(send->loc, type, move(expr), send->fun));
+                return ast::MK::InsSeq1(send->loc, ast::MK::KeepForTypechecking(std::move(send->args[1])),
+                                        make_unique<ast::Cast>(send->loc, type, std::move(expr), send->fun));
             }
             default:
                 return send;
@@ -1167,7 +1168,7 @@ private:
                 ++it;
                 continue;
             }
-            inits.emplace_back(move(*it));
+            inits.emplace_back(std::move(*it));
             it = klass->rhs.erase(it);
         }
 
@@ -1175,9 +1176,10 @@ private:
             return nullptr;
         }
         if (inits.size() == 1) {
-            return move(inits.front());
+            return std::move(inits.front());
         }
-        return make_unique<ast::InsSeq>(klass->declLoc, move(inits), make_unique<ast::EmptyTree>(core::Loc::none()));
+        return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits),
+                                        make_unique<ast::EmptyTree>(core::Loc::none()));
     }
 
 public:
@@ -1212,8 +1214,8 @@ public:
             sym = ctx.state.enterMethodSymbol(inits->loc, classDef->symbol, core::Names::staticInit());
         }
         auto init = make_unique<ast::MethodDef>(inits->loc, inits->loc, sym, core::Names::staticInit(),
-                                                ast::MethodDef::ARGS_store(), move(inits), true);
-        classDef->rhs.emplace_back(move(init));
+                                                ast::MethodDef::ARGS_store(), std::move(inits), true);
+        classDef->rhs.emplace_back(std::move(init));
 
         return classDef;
     }
@@ -1231,8 +1233,8 @@ public:
         ENFORCE(classes[classStack.back()] == nullptr);
 
         auto loc = classDef->loc;
-        classDef->rhs = addMethods(ctx, move(classDef->rhs));
-        classes[classStack.back()] = move(classDef);
+        classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
+        classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
         return make_unique<ast::EmptyTree>(loc);
     };
@@ -1244,7 +1246,7 @@ public:
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
         auto loc = methodDef->loc;
-        methods.methods[methods.stack.back()] = move(methodDef);
+        methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
         return make_unique<ast::EmptyTree>(loc);
     };
@@ -1256,7 +1258,7 @@ public:
         }
         if (classes.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
             // It was only 1 class to begin with, put it back
-            return move(sortedClasses()[0]);
+            return std::move(sortedClasses()[0]);
         }
 
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
@@ -1264,12 +1266,12 @@ public:
             ast::InsSeq::STATS_store stats;
             auto sorted = sortedClasses();
             stats.insert(stats.begin(), make_move_iterator(sorted.begin()), make_move_iterator(sorted.end()));
-            return ast::MK::InsSeq(tree->loc, move(stats), move(tree));
+            return ast::MK::InsSeq(tree->loc, std::move(stats), std::move(tree));
         }
 
         for (auto &clas : sortedClasses()) {
             ENFORCE(!!clas);
-            insSeq->stats.emplace_back(move(clas));
+            insSeq->stats.emplace_back(std::move(clas));
         }
         return tree;
     }
@@ -1282,20 +1284,20 @@ public:
         }
         if (methods.size() == 1 && (ast::cast_tree<ast::EmptyTree>(tree.get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
-            unique_ptr<ast::Expression> methodDef = move(popCurMethodDefs()[0]);
+            unique_ptr<ast::Expression> methodDef = std::move(popCurMethodDefs()[0]);
             return methodDef;
         }
 
         auto insSeq = ast::cast_tree<ast::InsSeq>(tree.get());
         if (insSeq == nullptr) {
             ast::InsSeq::STATS_store stats;
-            tree = make_unique<ast::InsSeq>(tree->loc, move(stats), move(tree));
-            return addMethods(ctx, move(tree));
+            tree = make_unique<ast::InsSeq>(tree->loc, std::move(stats), std::move(tree));
+            return addMethods(ctx, std::move(tree));
         }
 
         for (auto &method : popCurMethodDefs()) {
             ENFORCE(!!method);
-            insSeq->stats.emplace_back(move(method));
+            insSeq->stats.emplace_back(std::move(method));
         }
         return tree;
     }
@@ -1303,7 +1305,7 @@ public:
 private:
     vector<unique_ptr<ast::ClassDef>> sortedClasses() {
         ENFORCE(classStack.empty());
-        auto ret = move(classes);
+        auto ret = std::move(classes);
         classes.clear();
         return ret;
     }
@@ -1313,18 +1315,18 @@ private:
             (ast::cast_tree<ast::EmptyTree>(rhs[0].get()) != nullptr)) {
             // It was only 1 method to begin with, put it back
             rhs.pop_back();
-            rhs.emplace_back(move(popCurMethodDefs()[0]));
+            rhs.emplace_back(std::move(popCurMethodDefs()[0]));
             return rhs;
         }
         for (auto &method : popCurMethodDefs()) {
             ENFORCE(method.get() != nullptr);
-            rhs.emplace_back(move(method));
+            rhs.emplace_back(std::move(method));
         }
         return rhs;
     }
 
     vector<unique_ptr<ast::MethodDef>> popCurMethodDefs() {
-        auto ret = move(curMethodSet().methods);
+        auto ret = std::move(curMethodSet().methods);
         ENFORCE(curMethodSet().stack.empty());
         popCurMethodSet();
         return ret;
@@ -1439,9 +1441,9 @@ public:
 }; // namespace
 
 vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     finalizeAncestors(ctx.state);
-    trees = resolveSigs(ctx, move(trees));
+    trees = resolveSigs(ctx, std::move(trees));
     finalizeResolution(ctx.state);
     sanityCheck(ctx, trees);
 
@@ -1454,14 +1456,14 @@ vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext c
     ResolveVariablesWalk vars;
     Timer timeit(ctx.state.errorQueue->logger, "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
-        tree = ast::TreeMap::apply(ctx, sigs, move(tree));
-        tree = ast::TreeMap::apply(ctx, vars, move(tree));
+        tree = ast::TreeMap::apply(ctx, sigs, std::move(tree));
+        tree = ast::TreeMap::apply(ctx, vars, std::move(tree));
 
         // declared in here since it holds onto state
         FlattenWalk flatten;
-        tree = ast::TreeMap::apply(ctx, flatten, move(tree));
-        tree = flatten.addClasses(ctx, move(tree));
-        tree = flatten.addMethods(ctx, move(tree));
+        tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
+        tree = flatten.addClasses(ctx, std::move(tree));
+        tree = flatten.addMethods(ctx, std::move(tree));
     }
 
     return trees;
@@ -1472,15 +1474,15 @@ void Resolver::sanityCheck(core::MutableContext ctx, vector<unique_ptr<ast::Expr
         Timer timeit(ctx.state.errorQueue->logger, "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            tree = ast::TreeMap::apply(ctx, sanity, move(tree));
+            tree = ast::TreeMap::apply(ctx, sanity, std::move(tree));
         }
     }
 }
 
 vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext ctx,
                                                             vector<unique_ptr<ast::Expression>> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
-    trees = resolveSigs(ctx, move(trees));
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
+    trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
 
     return trees;
@@ -1488,7 +1490,7 @@ vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext
 
 std::vector<std::unique_ptr<ast::Expression>>
 Resolver::runConstantResolution(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees) {
-    trees = ResolveConstantsWalk::resolveConstants(ctx, move(trees));
+    trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     sanityCheck(ctx, trees);
 
     return trees;

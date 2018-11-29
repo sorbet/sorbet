@@ -14,7 +14,7 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
         first[other.first].insert(first[other.first].end(), make_move_iterator(other.second.begin()),
                                   make_move_iterator(other.second.end()));
     }
-    return move(first);
+    return std::move(first);
 };
 
 UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(shared_ptr<core::Type> receiver,
@@ -30,10 +30,11 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
                      }
                  }
                  for (auto mixin : owner->mixins()) {
-                     result = mergeMaps(move(result), findSimilarMethodsIn(make_shared<core::ClassType>(mixin), name));
+                     result =
+                         mergeMaps(std::move(result), findSimilarMethodsIn(make_shared<core::ClassType>(mixin), name));
                  }
                  if (owner->superClass.exists()) {
-                     result = mergeMaps(move(result),
+                     result = mergeMaps(std::move(result),
                                         findSimilarMethodsIn(make_shared<core::ClassType>(owner->superClass), name));
                  }
              },
@@ -47,7 +48,7 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
                      auto &other = *it;
                      auto fnd = lhs.find(other.first);
                      if (fnd == lhs.end()) {
-                         it = rhs.erase(it);
+                         rhs.erase(it++);
                      } else {
                          it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
                                            make_move_iterator(fnd->second.end()));
@@ -142,7 +143,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
             if (documentation->find("@deprecated") != documentation->npos) {
                 item.AddMember("deprecated", true, alloc);
             }
-            item.AddMember("documentation", move(*documentation), alloc);
+            item.AddMember("documentation", std::move(*documentation), alloc);
         }
 
     } else if (what.data(*finalGs)->isStaticField()) {
@@ -151,7 +152,7 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
     } else if (what.data(*finalGs)->isClass()) {
         item.AddMember("kind", 7, alloc); // Class
     }
-    items.PushBack(move(item), alloc);
+    items.PushBack(std::move(item), alloc);
 }
 
 void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d) {
@@ -164,7 +165,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
         auto queryResponses = errorQueue->drainQueryResponses();
         if (!queryResponses.empty()) {
-            auto resp = move(queryResponses[0]);
+            auto resp = std::move(queryResponses[0]);
 
             auto receiverType = resp->receiver.type;
             if (resp->kind == core::QueryResponse::Kind::SEND) {
@@ -213,7 +214,7 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
             } else {
             }
         }
-        result.AddMember("items", move(items), alloc);
+        result.AddMember("items", std::move(items), alloc);
     }
     sendResult(d, result);
 }

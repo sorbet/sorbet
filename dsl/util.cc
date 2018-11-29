@@ -27,9 +27,9 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
                 // This isn't a Type signature, bail out
                 return nullptr;
             }
-            args.emplace_back(move(dupArg));
+            args.emplace_back(std::move(dupArg));
         }
-        return ast::MK::Send(send->loc, move(dupRecv), send->fun, move(args));
+        return ast::MK::Send(send->loc, std::move(dupRecv), send->fun, std::move(args));
     }
 
     auto ident = ast::cast_tree<ast::ConstantLit>(orig);
@@ -45,7 +45,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
             return nullptr;
         }
         return make_unique<ast::ConstantLit>(ident->loc, ident->typeAliasOrConstantSymbol(),
-                                             unique_ptr<ast::UnresolvedConstantLit>(ptr), move(typeAlias));
+                                             unique_ptr<ast::UnresolvedConstantLit>(ptr), std::move(typeAlias));
     }
 
     auto cons = ast::cast_tree<ast::UnresolvedConstantLit>(orig);
@@ -67,7 +67,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
     if (scope == nullptr) {
         return nullptr;
     }
-    return ast::MK::UnresolvedConstant(cons->loc, move(scope), cons->cnst);
+    return ast::MK::UnresolvedConstant(cons->loc, std::move(scope), cons->cnst);
 }
 
 unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast::Hash *hash, core::NameRef name) {
@@ -76,7 +76,7 @@ unique_ptr<ast::Expression> ASTUtil::getHashValue(core::MutableContext ctx, ast:
         i++;
         auto *key = ast::cast_tree<ast::Literal>(keyExpr.get());
         if (key && key->isSymbol(ctx) && key->asSymbol(ctx) == name) {
-            return move(hash->values[i]);
+            return std::move(hash->values[i]);
         }
     }
     return nullptr;

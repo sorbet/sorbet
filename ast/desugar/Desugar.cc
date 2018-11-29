@@ -32,10 +32,11 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
                                                                     core::Names::destructureArg(), ++uniqueCounter);
                 args.emplace_back(MK::Local(arg->loc, temporary));
                 unique_ptr<parser::Node> lvarNode = make_unique<parser::LVar>(arg->loc, temporary);
-                unique_ptr<parser::Node> destructure = make_unique<parser::Masgn>(arg->loc, move(arg), move(lvarNode));
-                destructures.emplace_back(node2TreeImpl(ctx, move(destructure), uniqueCounter));
+                unique_ptr<parser::Node> destructure =
+                    make_unique<parser::Masgn>(arg->loc, std::move(arg), std::move(lvarNode));
+                destructures.emplace_back(node2TreeImpl(ctx, std::move(destructure), uniqueCounter));
             } else {
-                args.emplace_back(node2TreeImpl(ctx, move(arg), uniqueCounter));
+                args.emplace_back(node2TreeImpl(ctx, std::move(arg), uniqueCounter));
             }
         }
     } else if (argnode.get() == nullptr) {
@@ -45,16 +46,16 @@ pair<MethodDef::ARGS_store, unique_ptr<Expression>> desugarArgsAndBody(core::Mut
         Exception::raise("not implemented: ", demangle(typeid(*node).name()));
     }
 
-    auto body = node2TreeImpl(ctx, move(bodynode), uniqueCounter);
+    auto body = node2TreeImpl(ctx, std::move(bodynode), uniqueCounter);
     if (!destructures.empty()) {
         core::Loc bodyLoc = body->loc;
         if (!bodyLoc.exists()) {
             bodyLoc = loc;
         }
-        body = MK::InsSeq(loc, move(destructures), move(body));
+        body = MK::InsSeq(loc, std::move(destructures), std::move(body));
     }
 
-    return make_pair(move(args), move(body));
+    return make_pair(std::move(args), std::move(body));
 }
 bool isStringLit(core::MutableContext ctx, unique_ptr<Expression> &expr) {
     Literal *lit;
@@ -69,22 +70,22 @@ unique_ptr<Expression> desugarDString(core::MutableContext ctx, core::Loc loc, p
     auto it = nodes.begin();
     auto end = nodes.end();
     unique_ptr<Expression> res;
-    unique_ptr<Expression> first = node2TreeImpl(ctx, move(*it), uniqueCounter);
+    unique_ptr<Expression> first = node2TreeImpl(ctx, std::move(*it), uniqueCounter);
     if (isStringLit(ctx, first)) {
-        res = move(first);
+        res = std::move(first);
     } else {
         auto pieceLoc = first->loc;
-        res = MK::Send0(pieceLoc, move(first), core::Names::to_s());
+        res = MK::Send0(pieceLoc, std::move(first), core::Names::to_s());
     }
     ++it;
     for (; it != end; ++it) {
         auto &stat = *it;
-        unique_ptr<Expression> narg = node2TreeImpl(ctx, move(stat), uniqueCounter);
+        unique_ptr<Expression> narg = node2TreeImpl(ctx, std::move(stat), uniqueCounter);
         if (!isStringLit(ctx, first)) {
             auto pieceLoc = narg->loc;
-            narg = MK::Send0(pieceLoc, move(narg), core::Names::to_s());
+            narg = MK::Send0(pieceLoc, std::move(narg), core::Names::to_s());
         }
-        auto n = MK::Send1(loc, move(res), core::Names::concat(), move(narg));
+        auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
         res.reset(n.release());
     };
     return res;
@@ -94,7 +95,7 @@ unique_ptr<MethodDef> buildMethod(core::MutableContext ctx, core::Loc loc, core:
                                   unique_ptr<parser::Node> &argnode, unique_ptr<parser::Node> &body,
                                   u2 &uniqueCounter) {
     auto argsAndBody = desugarArgsAndBody(ctx, loc, argnode, body, uniqueCounter);
-    return MK::Method(loc, declLoc, name, move(argsAndBody.first), move(argsAndBody.second));
+    return MK::Method(loc, declLoc, name, std::move(argsAndBody.first), std::move(argsAndBody.second));
 }
 
 unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> node, u2 &uniqueCounter) {
@@ -102,7 +103,7 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
         return nullptr;
     }
 
-    auto expr = node2TreeImpl(ctx, move(node), uniqueCounter);
+    auto expr = node2TreeImpl(ctx, std::move(node), uniqueCounter);
     core::Loc loc = expr->loc;
     core::NameRef temp =
         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::blockPassTemp(), ++uniqueCounter);
@@ -113,22 +114,22 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
         MethodDef::ARGS_store args;
         args.emplace_back(MK::Local(loc, temp));
         unique_ptr<Expression> recv = MK::Local(loc, temp);
-        unique_ptr<Expression> body = MK::Send0(loc, move(recv), name);
-        return make_unique<Block>(loc, move(args), move(body));
+        unique_ptr<Expression> body = MK::Send0(loc, std::move(recv), name);
+        return make_unique<Block>(loc, std::move(args), std::move(body));
     }
 
     // &foo => {|*args| foo.to_proc.call(*args) }
     // aka Magic.callWithSplat(foo.to_proc, :call, args)
 
-    auto proc = MK::Send0(loc, move(expr), core::Names::to_proc());
+    auto proc = MK::Send0(loc, std::move(expr), core::Names::to_proc());
     MethodDef::ARGS_store args;
     unique_ptr<Expression> rest = make_unique<RestArg>(loc, MK::Local(loc, temp));
-    args.emplace_back(move(rest));
+    args.emplace_back(std::move(rest));
     auto magic = MK::Constant(loc, core::Symbols::Magic());
     auto callLiteral = MK::Literal(loc, make_unique<core::LiteralType>(core::Symbols::Symbol(), core::Names::call()));
-    unique_ptr<Expression> body =
-        MK::Send3(loc, move(magic), core::Names::callWithSplat(), move(proc), move(callLiteral), MK::Local(loc, temp));
-    return make_unique<Block>(loc, move(args), move(body));
+    unique_ptr<Expression> body = MK::Send3(loc, std::move(magic), core::Names::callWithSplat(), std::move(proc),
+                                            std::move(callLiteral), MK::Local(loc, temp));
+    return make_unique<Block>(loc, std::move(args), std::move(body));
 }
 
 unique_ptr<Expression> unsupportedNode(core::MutableContext ctx, parser::Node *node) {
@@ -154,7 +155,7 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
             ENFORCE(!didSplat, "did splat already");
             didSplat = true;
 
-            unique_ptr<Expression> lh = node2TreeImpl(ctx, move(splat->var), uniqueCounter);
+            unique_ptr<Expression> lh = node2TreeImpl(ctx, std::move(splat->var), uniqueCounter);
 
             int left = i;
             int right = lhs->exprs.size() - left - 1;
@@ -166,9 +167,10 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
                 }
                 auto lhloc = lh->loc;
                 auto index = MK::Send3(lhloc, MK::Constant(lhloc, core::Symbols::Range()), core::Names::new_(),
-                                       MK::Int(lhloc, left), MK::Int(lhloc, -right), move(exclusive));
-                stats.emplace_back(MK::Assign(
-                    lhloc, move(lh), MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), move(index))));
+                                       MK::Int(lhloc, left), MK::Int(lhloc, -right), std::move(exclusive));
+                stats.emplace_back(
+                    MK::Assign(lhloc, std::move(lh),
+                               MK::Send1(loc, MK::Local(loc, tempName), core::Names::slice(), std::move(index))));
             }
             i = -right;
         } else {
@@ -180,22 +182,22 @@ unique_ptr<Expression> desugarMlhs(core::MutableContext ctx, core::Loc loc, pars
             auto val = MK::Send1(loc, MK::Local(loc, tempName), core::Names::squareBrackets(), MK::Int(loc, i));
 
             if (auto *mlhs = parser::cast_node<parser::Mlhs>(c.get())) {
-                stats.emplace_back(desugarMlhs(ctx, mlhs->loc, mlhs, move(val), uniqueCounter));
+                stats.emplace_back(desugarMlhs(ctx, mlhs->loc, mlhs, std::move(val), uniqueCounter));
             } else {
-                unique_ptr<Expression> lh = node2TreeImpl(ctx, move(c), uniqueCounter);
+                unique_ptr<Expression> lh = node2TreeImpl(ctx, std::move(c), uniqueCounter);
                 auto lhloc = lh->loc;
-                stats.emplace_back(MK::Assign(lhloc, move(lh), move(val)));
+                stats.emplace_back(MK::Assign(lhloc, std::move(lh), std::move(val)));
             }
 
             i++;
         }
     }
 
-    auto expanded = MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(), move(rhs),
-                              MK::Int(loc, before), MK::Int(loc, after));
-    stats.insert(stats.begin(), MK::Assign(loc, tempName, move(expanded)));
+    auto expanded = MK::Send3(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::expandSplat(),
+                              std::move(rhs), MK::Int(loc, before), MK::Int(loc, after));
+    stats.insert(stats.begin(), MK::Assign(loc, tempName, std::move(expanded)));
 
-    return MK::InsSeq(loc, move(stats), MK::Local(loc, tempName));
+    return MK::InsSeq(loc, std::move(stats), MK::Local(loc, tempName));
 }
 
 bool locReported = false;
@@ -206,10 +208,10 @@ ClassDef::RHS_store scopeNodeToBody(core::MutableContext ctx, unique_ptr<parser:
     if (auto *begin = parser::cast_node<parser::Begin>(node.get())) {
         body.reserve(begin->stmts.size());
         for (auto &stat : begin->stmts) {
-            body.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+            body.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
         };
     } else {
-        body.emplace_back(node2TreeImpl(ctx, move(node), uniqueCounter));
+        body.emplace_back(node2TreeImpl(ctx, std::move(node), uniqueCounter));
     }
     return body;
 }
@@ -230,7 +232,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             // run over a representative code base.
             [&](parser::Send *send) {
                 u4 flags = 0;
-                auto rec = node2TreeImpl(ctx, move(send->receiver), uniqueCounter);
+                auto rec = node2TreeImpl(ctx, std::move(send->receiver), uniqueCounter);
                 if (isa_tree<EmptyTree>(rec.get())) {
                     rec = MK::Self(loc);
                     flags |= Send::PRIVATE_OK;
@@ -243,27 +245,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     // The callWithSplat implementation (in C++) will unpack a
                     // tuple type and call into the normal call merchanism.
                     unique_ptr<parser::Node> block;
-                    auto argnodes = move(send->args);
+                    auto argnodes = std::move(send->args);
                     auto it = absl::c_find_if(argnodes,
                                               [](auto &arg) { return parser::isa_node<parser::BlockPass>(arg.get()); });
                     if (it != argnodes.end()) {
                         auto *bp = parser::cast_node<parser::BlockPass>(it->get());
-                        block = move(bp->block);
+                        block = std::move(bp->block);
                         argnodes.erase(it);
                     }
 
-                    auto array = make_unique<parser::Array>(loc, move(argnodes));
-                    auto args = node2TreeImpl(ctx, move(array), uniqueCounter);
+                    auto array = make_unique<parser::Array>(loc, std::move(argnodes));
+                    auto args = node2TreeImpl(ctx, std::move(array), uniqueCounter);
                     auto method =
                         MK::Literal(loc, make_shared<core::LiteralType>(core::Symbols::Symbol(), send->method));
 
                     Send::ARGS_store sendargs;
-                    sendargs.emplace_back(move(rec));
-                    sendargs.emplace_back(move(method));
-                    sendargs.emplace_back(move(args));
+                    sendargs.emplace_back(std::move(rec));
+                    sendargs.emplace_back(std::move(method));
+                    sendargs.emplace_back(std::move(args));
 
                     auto res = MK::Send(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::callWithSplat(),
-                                        move(sendargs), 0, node2Proc(ctx, move(block), uniqueCounter));
+                                        std::move(sendargs), 0, node2Proc(ctx, std::move(block), uniqueCounter));
                     result.swap(res);
                 } else {
                     Send::ARGS_store args;
@@ -272,20 +274,20 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     for (auto &stat : send->args) {
                         if (auto bp = parser::cast_node<parser::BlockPass>(stat.get())) {
                             ENFORCE(block == nullptr, "passing a block where there is no block");
-                            block = move(bp->block);
+                            block = std::move(bp->block);
                         } else {
-                            args.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                            args.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                         }
                     };
 
-                    auto res = MK::Send(loc, move(rec), send->method, move(args), flags,
-                                        node2Proc(ctx, move(block), uniqueCounter));
+                    auto res = MK::Send(loc, std::move(rec), send->method, std::move(args), flags,
+                                        node2Proc(ctx, std::move(block), uniqueCounter));
                     result.swap(res);
                 }
             },
             [&](parser::Const *const_) {
-                auto scope = node2TreeImpl(ctx, move(const_->scope), uniqueCounter);
-                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, move(scope), const_->name);
+                auto scope = node2TreeImpl(ctx, std::move(const_->scope), uniqueCounter);
+                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, std::move(scope), const_->name);
                 result.swap(res);
             },
             [&](parser::String *string) {
@@ -301,7 +303,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::DString *dstring) {
-                unique_ptr<Expression> res = desugarDString(ctx, loc, move(dstring->nodes), uniqueCounter);
+                unique_ptr<Expression> res = desugarDString(ctx, loc, std::move(dstring->nodes), uniqueCounter);
                 result.swap(res);
             },
             [&](parser::Begin *begin) {
@@ -312,11 +314,11 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     --end;
                     for (auto it = begin->stmts.begin(); it != end; ++it) {
                         auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        stats.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     };
                     auto &last = begin->stmts.back();
-                    auto expr = node2TreeImpl(ctx, move(last), uniqueCounter);
-                    auto block = MK::InsSeq(loc, move(stats), move(expr));
+                    auto expr = node2TreeImpl(ctx, std::move(last), uniqueCounter);
+                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
                     result.swap(block);
                 } else {
                     unique_ptr<Expression> res = MK::EmptyTree(loc);
@@ -325,51 +327,54 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             // END hand-ordered clauses
             [&](parser::And *and_) {
-                auto lhs = node2TreeImpl(ctx, move(and_->left), uniqueCounter);
+                auto lhs = node2TreeImpl(ctx, std::move(and_->left), uniqueCounter);
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff = MK::If(loc, move(cond), node2TreeImpl(ctx, move(and_->right), uniqueCounter), move(lhs));
+                    auto iff = MK::If(loc, std::move(cond), node2TreeImpl(ctx, std::move(and_->right), uniqueCounter),
+                                      std::move(lhs));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar,
                                                                        core::Names::andAnd(), ++uniqueCounter);
-                    auto temp = MK::Assign(loc, tempName, move(lhs));
+                    auto temp = MK::Assign(loc, tempName, std::move(lhs));
 
-                    auto iff = MK::If(loc, MK::Local(loc, tempName),
-                                      node2TreeImpl(ctx, move(and_->right), uniqueCounter), MK::Local(loc, tempName));
-                    auto wrapped = MK::InsSeq1(loc, move(temp), move(iff));
+                    auto iff =
+                        MK::If(loc, MK::Local(loc, tempName), node2TreeImpl(ctx, std::move(and_->right), uniqueCounter),
+                               MK::Local(loc, tempName));
+                    auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
 
                     result.swap(wrapped);
                 }
             },
             [&](parser::Or *or_) {
-                auto lhs = node2TreeImpl(ctx, move(or_->left), uniqueCounter);
+                auto lhs = node2TreeImpl(ctx, std::move(or_->left), uniqueCounter);
                 if (auto i = cast_tree<Reference>(lhs.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto iff = MK::If(loc, move(cond), move(lhs), node2TreeImpl(ctx, move(or_->right), uniqueCounter));
+                    auto iff = MK::If(loc, std::move(cond), std::move(lhs),
+                                      node2TreeImpl(ctx, std::move(or_->right), uniqueCounter));
                     result.swap(iff);
                 } else {
                     core::NameRef tempName =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::orOr(), ++uniqueCounter);
-                    auto temp = MK::Assign(loc, tempName, move(lhs));
+                    auto temp = MK::Assign(loc, tempName, std::move(lhs));
 
                     auto iff = MK::If(loc, MK::Local(loc, tempName), MK::Local(loc, tempName),
-                                      node2TreeImpl(ctx, move(or_->right), uniqueCounter));
-                    auto wrapped = MK::InsSeq1(loc, move(temp), move(iff));
+                                      node2TreeImpl(ctx, std::move(or_->right), uniqueCounter));
+                    auto wrapped = MK::InsSeq1(loc, std::move(temp), std::move(iff));
 
                     result.swap(wrapped);
                 }
             },
             [&](parser::AndAsgn *andAsgn) {
-                auto recv = node2TreeImpl(ctx, move(andAsgn->left), uniqueCounter);
-                auto arg = node2TreeImpl(ctx, move(andAsgn->right), uniqueCounter);
+                auto recv = node2TreeImpl(ctx, std::move(andAsgn->left), uniqueCounter);
+                auto arg = node2TreeImpl(ctx, std::move(andAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
                     readArgs.reserve(s->args.size());
@@ -379,27 +384,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
                             ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
                         readArgs.emplace_back(MK::Local(argLoc, name));
                         assgnArgs.emplace_back(MK::Local(argLoc, name));
                     }
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, move(readArgs), s->flags);
+                    assgnArgs.emplace_back(std::move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
-                    auto body =
-                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto body = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), std::move(assgnArgs),
+                                         s->flags);
                     auto elsep = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
-                    auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto body = MK::Assign(loc, move(recv), move(arg));
+                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto elsep = MK::cpRef(*i);
-                    auto iff = MK::If(loc, move(cond), move(body), move(elsep));
+                    auto iff = MK::If(loc, std::move(cond), std::move(body), std::move(elsep));
                     result.swap(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
                     if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
@@ -412,15 +417,15 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 }
             },
             [&](parser::OrAsgn *orAsgn) {
-                auto recv = node2TreeImpl(ctx, move(orAsgn->left), uniqueCounter);
-                auto arg = node2TreeImpl(ctx, move(orAsgn->right), uniqueCounter);
+                auto recv = node2TreeImpl(ctx, std::move(orAsgn->left), uniqueCounter);
+                auto arg = node2TreeImpl(ctx, std::move(orAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, move(s->recv)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempRecv, std::move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
                     readArgs.reserve(s->args.size());
@@ -429,27 +434,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
                             ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
                         readArgs.emplace_back(MK::Local(argLoc, name));
                         assgnArgs.emplace_back(MK::Local(argLoc, name));
                     }
-                    assgnArgs.emplace_back(move(arg));
-                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, move(readArgs), s->flags);
+                    assgnArgs.emplace_back(std::move(arg));
+                    auto cond = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
                     core::NameRef tempResult =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(sendLoc, tempResult, move(cond)));
+                    stats.emplace_back(MK::Assign(sendLoc, tempResult, std::move(cond)));
 
-                    auto elsep =
-                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
+                    auto elsep = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx),
+                                          std::move(assgnArgs), s->flags);
                     auto body = MK::Local(sendLoc, tempResult);
-                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), move(body), move(elsep));
-                    auto wrapped = MK::InsSeq(loc, move(stats), move(iff));
+                    auto iff = MK::If(sendLoc, MK::Local(sendLoc, tempResult), std::move(body), std::move(elsep));
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(iff));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
                     auto cond = MK::cpRef(*i);
-                    auto body = MK::Assign(loc, move(recv), move(arg));
+                    auto body = MK::Assign(loc, std::move(recv), std::move(arg));
                     auto elsep = MK::cpRef(*i);
-                    auto iff = MK::If(loc, move(cond), move(elsep), move(body));
+                    auto iff = MK::If(loc, std::move(cond), std::move(elsep), std::move(body));
                     result.swap(iff);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
                     if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
@@ -462,15 +467,15 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 }
             },
             [&](parser::OpAsgn *opAsgn) {
-                auto recv = node2TreeImpl(ctx, move(opAsgn->left), uniqueCounter);
-                auto rhs = node2TreeImpl(ctx, move(opAsgn->right), uniqueCounter);
+                auto recv = node2TreeImpl(ctx, std::move(opAsgn->left), uniqueCounter);
+                auto rhs = node2TreeImpl(ctx, std::move(opAsgn->right), uniqueCounter);
                 if (auto s = cast_tree<Send>(recv.get())) {
                     auto sendLoc = s->loc;
                     InsSeq::STATS_store stats;
                     stats.reserve(s->args.size() + 2);
                     core::NameRef tempRecv =
                         ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                    stats.emplace_back(MK::Assign(loc, tempRecv, move(s->recv)));
+                    stats.emplace_back(MK::Assign(loc, tempRecv, std::move(s->recv)));
                     Send::ARGS_store readArgs;
                     Send::ARGS_store assgnArgs;
                     readArgs.reserve(s->args.size());
@@ -479,22 +484,23 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         core::Loc argLoc = arg->loc;
                         core::NameRef name =
                             ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, s->fun, ++uniqueCounter);
-                        stats.emplace_back(MK::Assign(argLoc, name, move(arg)));
+                        stats.emplace_back(MK::Assign(argLoc, name, std::move(arg)));
                         readArgs.emplace_back(MK::Local(argLoc, name));
                         assgnArgs.emplace_back(MK::Local(argLoc, name));
                     }
-                    auto prevValue = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, move(readArgs), s->flags);
-                    auto newValue = MK::Send1(sendLoc, move(prevValue), opAsgn->op, move(rhs));
-                    assgnArgs.emplace_back(move(newValue));
+                    auto prevValue =
+                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun, std::move(readArgs), s->flags);
+                    auto newValue = MK::Send1(sendLoc, std::move(prevValue), opAsgn->op, std::move(rhs));
+                    assgnArgs.emplace_back(std::move(newValue));
 
-                    auto res =
-                        MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), move(assgnArgs), s->flags);
-                    auto wrapped = MK::InsSeq(loc, move(stats), move(res));
+                    auto res = MK::Send(sendLoc, MK::Local(sendLoc, tempRecv), s->fun.addEq(ctx), std::move(assgnArgs),
+                                        s->flags);
+                    auto wrapped = MK::InsSeq(loc, std::move(stats), std::move(res));
                     result.swap(wrapped);
                 } else if (auto i = cast_tree<Reference>(recv.get())) {
                     auto lhs = MK::cpRef(*i);
-                    auto send = MK::Send1(loc, move(recv), opAsgn->op, move(rhs));
-                    auto res = MK::Assign(loc, move(lhs), move(send));
+                    auto send = MK::Send1(loc, std::move(recv), opAsgn->op, std::move(rhs));
+                    auto res = MK::Assign(loc, std::move(lhs), std::move(send));
                     result.swap(res);
                 } else if (auto i = cast_tree<UnresolvedConstantLit>(recv.get())) {
                     if (auto e = ctx.state.beginError(what->loc, core::errors::Desugar::NoConstantReassignment)) {
@@ -515,16 +521,17 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 // object has overridden `nil?`, this technically will not match
                 // Ruby's behavior.
 
-                auto assgn = MK::Assign(recvLoc, tempRecv, node2TreeImpl(ctx, move(csend->receiver), uniqueCounter));
+                auto assgn =
+                    MK::Assign(recvLoc, tempRecv, node2TreeImpl(ctx, std::move(csend->receiver), uniqueCounter));
                 auto cond = MK::Send0(loc, MK::Local(recvLoc, tempRecv), core::Names::nil_p());
 
                 unique_ptr<parser::Node> sendNode = make_unique<parser::Send>(
-                    loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, move(csend->args));
-                auto send = node2TreeImpl(ctx, move(sendNode), uniqueCounter);
+                    loc, make_unique<parser::LVar>(recvLoc, tempRecv), csend->method, std::move(csend->args));
+                auto send = node2TreeImpl(ctx, std::move(sendNode), uniqueCounter);
 
                 unique_ptr<Expression> nil = MK::Nil(loc);
-                auto iff = MK::If(loc, move(cond), move(nil), move(send));
-                auto res = MK::InsSeq1(loc, move(assgn), move(iff));
+                auto iff = MK::If(loc, std::move(cond), std::move(nil), std::move(send));
+                auto res = MK::InsSeq1(loc, std::move(assgn), std::move(iff));
                 result.swap(res);
             },
             [&](parser::Self *self) {
@@ -541,23 +548,23 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto it = dsymbol->nodes.begin();
                 auto end = dsymbol->nodes.end();
                 unique_ptr<Expression> res;
-                unique_ptr<Expression> first = node2TreeImpl(ctx, move(*it), uniqueCounter);
+                unique_ptr<Expression> first = node2TreeImpl(ctx, std::move(*it), uniqueCounter);
                 if (isStringLit(ctx, first)) {
-                    res = move(first);
+                    res = std::move(first);
                 } else {
-                    res = MK::Send0(loc, move(first), core::Names::to_s());
+                    res = MK::Send0(loc, std::move(first), core::Names::to_s());
                 }
                 ++it;
                 for (; it != end; ++it) {
                     auto &stat = *it;
-                    unique_ptr<Expression> narg = node2TreeImpl(ctx, move(stat), uniqueCounter);
+                    unique_ptr<Expression> narg = node2TreeImpl(ctx, std::move(stat), uniqueCounter);
                     if (!isStringLit(ctx, narg)) {
-                        narg = MK::Send0(loc, move(narg), core::Names::to_s());
+                        narg = MK::Send0(loc, std::move(narg), core::Names::to_s());
                     }
-                    auto n = MK::Send1(loc, move(res), core::Names::concat(), move(narg));
+                    auto n = MK::Send1(loc, std::move(res), core::Names::concat(), std::move(narg));
                     res.reset(n.release());
                 };
-                res = MK::Send0(loc, move(res), core::Names::intern());
+                res = MK::Send0(loc, std::move(res), core::Names::intern());
 
                 result.swap(res);
             },
@@ -566,8 +573,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::ConstLhs *constLhs) {
-                auto scope = node2TreeImpl(ctx, move(constLhs->scope), uniqueCounter);
-                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, move(scope), constLhs->name);
+                auto scope = node2TreeImpl(ctx, std::move(constLhs->scope), uniqueCounter);
+                unique_ptr<Expression> res = MK::UnresolvedConstant(loc, std::move(scope), constLhs->name);
                 result.swap(res);
             },
             [&](parser::Cbase *cbase) {
@@ -582,11 +589,11 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     --end;
                     for (auto it = kwbegin->stmts.begin(); it != end; ++it) {
                         auto &stat = *it;
-                        stats.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        stats.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     };
                     auto &last = kwbegin->stmts.back();
-                    auto expr = node2TreeImpl(ctx, move(last), uniqueCounter);
-                    auto block = MK::InsSeq(loc, move(stats), move(expr));
+                    auto expr = node2TreeImpl(ctx, std::move(last), uniqueCounter);
+                    auto block = MK::InsSeq(loc, std::move(stats), std::move(expr));
                     result.swap(block);
                 } else {
                     unique_ptr<Expression> res = MK::EmptyTree(loc);
@@ -594,26 +601,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 }
             },
             [&](parser::Module *module) {
-                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(module->body));
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, std::move(module->body));
                 ClassDef::ANCESTORS_store ancestors;
                 unique_ptr<Expression> res =
                     make_unique<ClassDef>(module->loc, module->declLoc, core::Symbols::todo(),
-                                          node2TreeImpl(ctx, move(module->name), uniqueCounter), move(ancestors),
-                                          move(body), ClassDefKind::Module);
+                                          node2TreeImpl(ctx, std::move(module->name), uniqueCounter),
+                                          std::move(ancestors), std::move(body), ClassDefKind::Module);
                 result.swap(res);
             },
             [&](parser::Class *claz) {
-                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(claz->body));
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, std::move(claz->body));
                 ClassDef::ANCESTORS_store ancestors;
                 if (claz->superclass == nullptr) {
                     ancestors.emplace_back(MK::Constant(loc, core::Symbols::todo()));
                 } else {
-                    ancestors.emplace_back(node2TreeImpl(ctx, move(claz->superclass), uniqueCounter));
+                    ancestors.emplace_back(node2TreeImpl(ctx, std::move(claz->superclass), uniqueCounter));
                 }
 
-                unique_ptr<Expression> res = make_unique<ClassDef>(claz->loc, claz->declLoc, core::Symbols::todo(),
-                                                                   node2TreeImpl(ctx, move(claz->name), uniqueCounter),
-                                                                   move(ancestors), move(body), ClassDefKind::Class);
+                unique_ptr<Expression> res =
+                    make_unique<ClassDef>(claz->loc, claz->declLoc, core::Symbols::todo(),
+                                          node2TreeImpl(ctx, std::move(claz->name), uniqueCounter),
+                                          std::move(ancestors), std::move(body), ClassDefKind::Class);
                 result.swap(res);
             },
             [&](parser::Arg *arg) {
@@ -640,12 +648,12 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::Kwoptarg *arg) {
                 unique_ptr<Expression> res =
                     make_unique<OptionalArg>(loc, make_unique<KeywordArg>(loc, MK::Local(loc, arg->name)),
-                                             node2TreeImpl(ctx, move(arg->default_), uniqueCounter));
+                                             node2TreeImpl(ctx, std::move(arg->default_), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::Optarg *arg) {
                 unique_ptr<Expression> res = make_unique<OptionalArg>(
-                    loc, MK::Local(loc, arg->name), node2TreeImpl(ctx, move(arg->default_), uniqueCounter));
+                    loc, MK::Local(loc, arg->name), node2TreeImpl(ctx, std::move(arg->default_), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::Shadowarg *arg) {
@@ -689,16 +697,16 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     return;
                 }
 
-                ClassDef::RHS_store body = scopeNodeToBody(ctx, move(sclass->body));
+                ClassDef::RHS_store body = scopeNodeToBody(ctx, std::move(sclass->body));
                 ClassDef::ANCESTORS_store emptyAncestors;
                 unique_ptr<Expression> res = make_unique<ClassDef>(
                     sclass->loc, sclass->declLoc, core::Symbols::todo(),
                     make_unique<UnresolvedIdent>(sclass->expr->loc, UnresolvedIdent::Class, core::Names::singleton()),
-                    move(emptyAncestors), move(body), ClassDefKind::Class);
+                    std::move(emptyAncestors), std::move(body), ClassDefKind::Class);
                 result.swap(res);
             },
             [&](parser::Block *block) {
-                auto recv = node2TreeImpl(ctx, move(block->send), uniqueCounter);
+                auto recv = node2TreeImpl(ctx, std::move(block->send), uniqueCounter);
                 Send *send;
                 unique_ptr<Expression> res;
                 if ((send = cast_tree<Send>(recv.get())) != nullptr) {
@@ -717,14 +725,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto argsAndBody = desugarArgsAndBody(ctx, loc, block->args, block->body, uniqueCounter);
 
                 // TODO the send->block's loc is too big and includes the whole send
-                send->block = make_unique<Block>(loc, move(argsAndBody.first), move(argsAndBody.second));
+                send->block = make_unique<Block>(loc, std::move(argsAndBody.first), std::move(argsAndBody.second));
                 send->loc = loc;
                 result.swap(res);
             },
             [&](parser::While *wl) {
-                auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
-                auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
-                unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                auto cond = node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter);
+                auto body = node2TreeImpl(ctx, std::move(wl->body), uniqueCounter);
+                unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
             // Most of the time a WhilePost is a normal while.
@@ -738,48 +746,52 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             // end
             [&](parser::WhilePost *wl) {
                 bool isDoWhile = parser::isa_node<parser::Kwbegin>(wl->body.get());
-                auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
+                auto body = node2TreeImpl(ctx, std::move(wl->body), uniqueCounter);
 
                 if (isDoWhile) {
-                    auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
+                    auto cond =
+                        MK::Send0(loc, node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter), core::Names::bang());
 
                     auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                           ++uniqueCounter);
-                    auto withResult = MK::Assign(loc, temp, move(body));
-                    auto breaker = MK::If(loc, move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
-                    auto breakWithResult = MK::InsSeq1(loc, move(withResult), move(breaker));
-                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), move(breakWithResult));
+                    auto withResult = MK::Assign(loc, temp, std::move(body));
+                    auto breaker =
+                        MK::If(loc, std::move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
+                    auto breakWithResult = MK::InsSeq1(loc, std::move(withResult), std::move(breaker));
+                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
                     result.swap(res);
                 } else {
-                    auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
-                    unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                    auto cond = node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter);
+                    unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                     result.swap(res);
                 }
             },
             [&](parser::Until *wl) {
-                auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
-                auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
-                unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                auto cond = MK::Send0(loc, node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter), core::Names::bang());
+                auto body = node2TreeImpl(ctx, std::move(wl->body), uniqueCounter);
+                unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                 result.swap(res);
             },
             // This is the same as WhilePost, but the cond negation in the other branch.
             [&](parser::UntilPost *wl) {
                 bool isDoUntil = parser::isa_node<parser::Kwbegin>(wl->body.get());
-                auto body = node2TreeImpl(ctx, move(wl->body), uniqueCounter);
+                auto body = node2TreeImpl(ctx, std::move(wl->body), uniqueCounter);
 
                 if (isDoUntil) {
-                    auto cond = node2TreeImpl(ctx, move(wl->cond), uniqueCounter);
+                    auto cond = node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter);
 
                     auto temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(),
                                                           ++uniqueCounter);
-                    auto withResult = MK::Assign(loc, temp, move(body));
-                    auto breaker = MK::If(loc, move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
-                    auto breakWithResult = MK::InsSeq1(loc, move(withResult), move(breaker));
-                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), move(breakWithResult));
+                    auto withResult = MK::Assign(loc, temp, std::move(body));
+                    auto breaker =
+                        MK::If(loc, std::move(cond), MK::Break(loc, MK::Local(loc, temp)), MK::EmptyTree(loc));
+                    auto breakWithResult = MK::InsSeq1(loc, std::move(withResult), std::move(breaker));
+                    unique_ptr<Expression> res = make_unique<While>(loc, MK::True(loc), std::move(breakWithResult));
                     result.swap(res);
                 } else {
-                    auto cond = MK::Send0(loc, node2TreeImpl(ctx, move(wl->cond), uniqueCounter), core::Names::bang());
-                    unique_ptr<Expression> res = make_unique<While>(loc, move(cond), move(body));
+                    auto cond =
+                        MK::Send0(loc, node2TreeImpl(ctx, std::move(wl->cond), uniqueCounter), core::Names::bang());
+                    unique_ptr<Expression> res = make_unique<While>(loc, std::move(cond), std::move(body));
                     result.swap(res);
                 }
             },
@@ -821,9 +833,9 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 result.swap(res);
             },
             [&](parser::Assign *asgn) {
-                auto lhs = node2TreeImpl(ctx, move(asgn->lhs), uniqueCounter);
-                auto rhs = node2TreeImpl(ctx, move(asgn->rhs), uniqueCounter);
-                auto res = MK::Assign(loc, move(lhs), move(rhs));
+                auto lhs = node2TreeImpl(ctx, std::move(asgn->lhs), uniqueCounter);
+                auto rhs = node2TreeImpl(ctx, std::move(asgn->rhs), uniqueCounter);
+                auto res = MK::Assign(loc, std::move(lhs), std::move(rhs));
                 result.swap(res);
             },
             [&](parser::Super *super) {
@@ -831,8 +843,8 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 // Do this by synthesizing a `Send` parse node and letting our
                 // Send desugar handle it.
                 auto method = core::Names::super();
-                auto send = make_unique<parser::Send>(super->loc, nullptr, method, move(super->args));
-                auto res = node2TreeImpl(ctx, move(send), uniqueCounter);
+                auto send = make_unique<parser::Send>(super->loc, nullptr, method, std::move(super->args));
+                auto res = node2TreeImpl(ctx, std::move(send), uniqueCounter);
                 result.swap(res);
             },
             [&](parser::ZSuper *zuper) {
@@ -844,26 +856,27 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto temp =
                     ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::forTemp(), ++uniqueCounter);
 
-                auto mlhsNode = move(for_->vars);
+                auto mlhsNode = std::move(for_->vars);
                 if (!parser::isa_node<parser::Mlhs>(mlhsNode.get())) {
                     parser::NodeVec vars;
-                    vars.emplace_back(move(mlhsNode));
-                    mlhsNode = make_unique<parser::Mlhs>(loc, move(vars));
+                    vars.emplace_back(std::move(mlhsNode));
+                    mlhsNode = make_unique<parser::Mlhs>(loc, std::move(vars));
                 }
                 unique_ptr<parser::Node> masgn =
-                    make_unique<parser::Masgn>(loc, move(mlhsNode), make_unique<parser::LVar>(loc, temp));
+                    make_unique<parser::Masgn>(loc, std::move(mlhsNode), make_unique<parser::LVar>(loc, temp));
 
                 InsSeq::STATS_store stats;
-                stats.emplace_back(node2TreeImpl(ctx, move(masgn), uniqueCounter));
-                auto body = make_unique<InsSeq>(loc, move(stats), node2TreeImpl(ctx, move(for_->body), uniqueCounter));
+                stats.emplace_back(node2TreeImpl(ctx, std::move(masgn), uniqueCounter));
+                auto body = make_unique<InsSeq>(loc, std::move(stats),
+                                                node2TreeImpl(ctx, std::move(for_->body), uniqueCounter));
 
                 MethodDef::ARGS_store blockArgs;
                 blockArgs.emplace_back(make_unique<RestArg>(loc, MK::Local(loc, temp)));
-                auto block = make_unique<Block>(loc, move(blockArgs), move(body));
+                auto block = make_unique<Block>(loc, std::move(blockArgs), std::move(body));
 
                 Send::ARGS_store noargs;
-                auto res = MK::Send(loc, node2TreeImpl(ctx, move(for_->expr), uniqueCounter), core::Names::each(),
-                                    move(noargs), 0, move(block));
+                auto res = MK::Send(loc, node2TreeImpl(ctx, std::move(for_->expr), uniqueCounter), core::Names::each(),
+                                    std::move(noargs), 0, std::move(block));
                 result.swap(res);
             },
             [&](parser::Integer *integer) {
@@ -914,14 +927,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Complex().data(ctx)->name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->value);
-                auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
+                auto send = MK::Send1(loc, std::move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Rational *complex) {
                 auto kernel = MK::Constant(loc, core::Symbols::Kernel());
                 core::NameRef complex_name = core::Symbols::Rational().data(ctx)->name;
                 core::NameRef value = ctx.state.enterNameUTF8(complex->val);
-                auto send = MK::Send1(loc, move(kernel), complex_name, MK::String(loc, value));
+                auto send = MK::Send1(loc, std::move(kernel), complex_name, MK::String(loc, value));
                 result.swap(send);
             },
             [&](parser::Array *array) {
@@ -934,42 +947,43 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         //   [a, **x, remaining}
                         // into
                         //   a.concat(x.to_a).concat(remaining)
-                        auto var =
-                            MK::Send0(loc, node2TreeImpl(ctx, move(splat->var), uniqueCounter), core::Names::to_a());
+                        auto var = MK::Send0(loc, node2TreeImpl(ctx, std::move(splat->var), uniqueCounter),
+                                             core::Names::to_a());
                         if (elems.empty()) {
                             if (lastMerge != nullptr) {
-                                lastMerge = MK::Send1(loc, move(lastMerge), core::Names::concat(), move(var));
+                                lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(var));
                             } else {
-                                lastMerge = move(var);
+                                lastMerge = std::move(var);
                             }
                         } else {
-                            unique_ptr<Expression> current = make_unique<Array>(loc, move(elems));
+                            unique_ptr<Expression> current = make_unique<Array>(loc, std::move(elems));
                             /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
                             elems = Array::ENTRY_store();
                             if (lastMerge != nullptr) {
-                                lastMerge = MK::Send1(loc, move(lastMerge), core::Names::concat(), move(current));
+                                lastMerge =
+                                    MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(current));
                             } else {
-                                lastMerge = move(current);
+                                lastMerge = std::move(current);
                             }
-                            lastMerge = MK::Send1(loc, move(lastMerge), core::Names::concat(), move(var));
+                            lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(var));
                         }
                     } else {
-                        elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        elems.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     }
                 };
 
                 unique_ptr<Expression> res;
                 if (elems.empty()) {
                     if (lastMerge != nullptr) {
-                        res = move(lastMerge);
+                        res = std::move(lastMerge);
                     } else {
                         // Empty array
-                        res = make_unique<Array>(loc, move(elems));
+                        res = make_unique<Array>(loc, std::move(elems));
                     }
                 } else {
-                    res = make_unique<Array>(loc, move(elems));
+                    res = make_unique<Array>(loc, std::move(elems));
                     if (lastMerge != nullptr) {
-                        res = MK::Send1(loc, move(lastMerge), core::Names::concat(), move(res));
+                        res = MK::Send1(loc, std::move(lastMerge), core::Names::concat(), std::move(res));
                     }
                 }
                 result.swap(res);
@@ -984,10 +998,10 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 for (auto &pairAsExpression : hash->pairs) {
                     auto *pair = parser::cast_node<parser::Pair>(pairAsExpression.get());
                     if (pair != nullptr) {
-                        auto key = node2TreeImpl(ctx, move(pair->key), uniqueCounter);
-                        auto value = node2TreeImpl(ctx, move(pair->value), uniqueCounter);
-                        keys.emplace_back(move(key));
-                        values.emplace_back(move(value));
+                        auto key = node2TreeImpl(ctx, std::move(pair->key), uniqueCounter);
+                        auto value = node2TreeImpl(ctx, std::move(pair->value), uniqueCounter);
+                        keys.emplace_back(std::move(key));
+                        values.emplace_back(std::move(value));
                     } else {
                         auto *splat = parser::cast_node<parser::Kwsplat>(pairAsExpression.get());
                         ENFORCE(splat != nullptr, "kwsplat cast failed");
@@ -996,27 +1010,28 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         //   {a: 'a', **x, remaining}
                         // into
                         //   {a: 'a'}.merge(x.to_h).merge(remaining)
-                        auto expr = MK::Send0(loc, node2TreeImpl(ctx, move(splat->expr), uniqueCounter),
+                        auto expr = MK::Send0(loc, node2TreeImpl(ctx, std::move(splat->expr), uniqueCounter),
                                               core::Names::to_hash());
                         if (keys.empty()) {
                             if (lastMerge != nullptr) {
-                                lastMerge = MK::Send1(loc, move(lastMerge), core::Names::merge(), move(expr));
+                                lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(expr));
 
                             } else {
-                                lastMerge = move(expr);
+                                lastMerge = std::move(expr);
                             }
                         } else {
-                            unique_ptr<Expression> current = make_unique<Hash>(loc, move(keys), move(values));
+                            unique_ptr<Expression> current = make_unique<Hash>(loc, std::move(keys), std::move(values));
                             /* reassign instead of clear to work around https://bugs.llvm.org/show_bug.cgi?id=37553 */
                             keys = Hash::ENTRY_store();
                             values = Hash::ENTRY_store();
 
                             if (lastMerge != nullptr) {
-                                lastMerge = MK::Send1(loc, move(lastMerge), core::Names::merge(), move(current));
+                                lastMerge =
+                                    MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(current));
                             } else {
-                                lastMerge = move(current);
+                                lastMerge = std::move(current);
                             }
-                            lastMerge = MK::Send1(loc, move(lastMerge), core::Names::merge(), move(expr));
+                            lastMerge = MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(expr));
                         }
                     }
                 };
@@ -1024,15 +1039,15 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 unique_ptr<Expression> res;
                 if (keys.empty()) {
                     if (lastMerge != nullptr) {
-                        res = move(lastMerge);
+                        res = std::move(lastMerge);
                     } else {
                         // Empty array
-                        res = make_unique<Hash>(loc, move(keys), move(values));
+                        res = make_unique<Hash>(loc, std::move(keys), std::move(values));
                     }
                 } else {
-                    res = make_unique<Hash>(loc, move(keys), move(values));
+                    res = make_unique<Hash>(loc, std::move(keys), std::move(values));
                     if (lastMerge != nullptr) {
-                        res = MK::Send1(loc, move(lastMerge), core::Names::merge(), move(res));
+                        res = MK::Send1(loc, std::move(lastMerge), core::Names::merge(), std::move(res));
                     }
                 }
 
@@ -1041,24 +1056,25 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             [&](parser::IRange *ret) {
                 core::NameRef range_name = core::Symbols::Range().data(ctx)->name;
                 unique_ptr<Expression> range = MK::UnresolvedConstant(loc, MK::EmptyTree(loc), range_name);
-                auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
-                auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
-                auto send = MK::Send2(loc, move(range), core::Names::new_(), move(from), move(to));
+                auto from = node2TreeImpl(ctx, std::move(ret->from), uniqueCounter);
+                auto to = node2TreeImpl(ctx, std::move(ret->to), uniqueCounter);
+                auto send = MK::Send2(loc, std::move(range), core::Names::new_(), std::move(from), std::move(to));
                 result.swap(send);
             },
             [&](parser::ERange *ret) {
                 unique_ptr<Expression> range = MK::Constant(loc, core::Symbols::Range());
-                auto from = node2TreeImpl(ctx, move(ret->from), uniqueCounter);
-                auto to = node2TreeImpl(ctx, move(ret->to), uniqueCounter);
+                auto from = node2TreeImpl(ctx, std::move(ret->from), uniqueCounter);
+                auto to = node2TreeImpl(ctx, std::move(ret->to), uniqueCounter);
                 auto true_ = MK::True(loc);
-                auto send = MK::Send3(loc, move(range), core::Names::new_(), move(from), move(to), move(true_));
+                auto send = MK::Send3(loc, std::move(range), core::Names::new_(), std::move(from), std::move(to),
+                                      std::move(true_));
                 result.swap(send);
             },
             [&](parser::Regexp *regexpNode) {
                 unique_ptr<Expression> regexp = MK::Constant(loc, core::Symbols::Regexp());
-                auto regex = desugarDString(ctx, loc, move(regexpNode->regex), uniqueCounter);
-                auto opts = node2TreeImpl(ctx, move(regexpNode->opts), uniqueCounter);
-                auto send = MK::Send2(loc, move(regexp), core::Names::new_(), move(regex), move(opts));
+                auto regex = desugarDString(ctx, loc, std::move(regexpNode->regex), uniqueCounter);
+                auto opts = node2TreeImpl(ctx, std::move(regexpNode->opts), uniqueCounter);
+                auto send = MK::Send2(loc, std::move(regexp), core::Names::new_(), std::move(regex), std::move(opts));
                 result.swap(send);
             },
             [&](parser::Regopt *regopt) {
@@ -1086,7 +1102,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                             break;
                     }
                     if (flag != 0) {
-                        acc = MK::Send1(loc, move(acc), core::Names::orOp(), MK::Int(loc, flag));
+                        acc = MK::Send1(loc, std::move(acc), core::Names::orOp(), MK::Int(loc, flag));
                     }
                 }
                 result.swap(acc);
@@ -1096,14 +1112,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
-                        elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        elems.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, move(elems));
-                    unique_ptr<Expression> res = make_unique<Return>(loc, move(arr));
+                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> res = make_unique<Return>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
                     unique_ptr<Expression> res =
-                        make_unique<Return>(loc, node2TreeImpl(ctx, move(ret->exprs[0]), uniqueCounter));
+                        make_unique<Return>(loc, node2TreeImpl(ctx, std::move(ret->exprs[0]), uniqueCounter));
                     result.swap(res);
                 } else {
                     unique_ptr<Expression> res = make_unique<Return>(loc, MK::EmptyTree(loc));
@@ -1115,14 +1131,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
-                        elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        elems.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, move(elems));
-                    unique_ptr<Expression> res = make_unique<Break>(loc, move(arr));
+                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> res = make_unique<Break>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
                     unique_ptr<Expression> res =
-                        make_unique<Break>(loc, node2TreeImpl(ctx, move(ret->exprs[0]), uniqueCounter));
+                        make_unique<Break>(loc, node2TreeImpl(ctx, std::move(ret->exprs[0]), uniqueCounter));
                     result.swap(res);
                 } else {
                     unique_ptr<Expression> res = make_unique<Break>(loc, MK::EmptyTree(loc));
@@ -1134,14 +1150,14 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     Array::ENTRY_store elems;
                     elems.reserve(ret->exprs.size());
                     for (auto &stat : ret->exprs) {
-                        elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                        elems.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                     };
-                    unique_ptr<Expression> arr = make_unique<Array>(loc, move(elems));
-                    unique_ptr<Expression> res = make_unique<Next>(loc, move(arr));
+                    unique_ptr<Expression> arr = make_unique<Array>(loc, std::move(elems));
+                    unique_ptr<Expression> res = make_unique<Next>(loc, std::move(arr));
                     result.swap(res);
                 } else if (ret->exprs.size() == 1) {
                     unique_ptr<Expression> res =
-                        make_unique<Next>(loc, node2TreeImpl(ctx, move(ret->exprs[0]), uniqueCounter));
+                        make_unique<Next>(loc, node2TreeImpl(ctx, std::move(ret->exprs[0]), uniqueCounter));
                     result.swap(res);
                 } else {
                     unique_ptr<Expression> res = make_unique<Next>(loc, MK::EmptyTree(loc));
@@ -1156,48 +1172,48 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 Send::ARGS_store elems;
                 elems.reserve(ret->exprs.size());
                 for (auto &stat : ret->exprs) {
-                    elems.emplace_back(node2TreeImpl(ctx, move(stat), uniqueCounter));
+                    elems.emplace_back(node2TreeImpl(ctx, std::move(stat), uniqueCounter));
                 };
-                unique_ptr<Expression> res = make_unique<Yield>(loc, move(elems));
+                unique_ptr<Expression> res = make_unique<Yield>(loc, std::move(elems));
                 result.swap(res);
             },
             [&](parser::Rescue *rescue) {
                 Rescue::RESCUE_CASE_store cases;
                 cases.reserve(rescue->rescue.size());
                 for (auto &node : rescue->rescue) {
-                    unique_ptr<Expression> rescueCaseExpr = node2TreeImpl(ctx, move(node), uniqueCounter);
+                    unique_ptr<Expression> rescueCaseExpr = node2TreeImpl(ctx, std::move(node), uniqueCounter);
                     auto rescueCase = cast_tree<ast::RescueCase>(rescueCaseExpr.get());
                     ENFORCE(rescueCase != nullptr, "rescue case cast failed");
                     cases.emplace_back(rescueCase);
                     rescueCaseExpr.release();
                 }
-                unique_ptr<Expression> res =
-                    make_unique<Rescue>(loc, node2TreeImpl(ctx, move(rescue->body), uniqueCounter), move(cases),
-                                        node2TreeImpl(ctx, move(rescue->else_), uniqueCounter), MK::EmptyTree(loc));
+                unique_ptr<Expression> res = make_unique<Rescue>(
+                    loc, node2TreeImpl(ctx, std::move(rescue->body), uniqueCounter), std::move(cases),
+                    node2TreeImpl(ctx, std::move(rescue->else_), uniqueCounter), MK::EmptyTree(loc));
                 result.swap(res);
             },
             [&](parser::Resbody *resbody) {
                 RescueCase::EXCEPTION_store exceptions;
-                auto exceptionsExpr = node2TreeImpl(ctx, move(resbody->exception), uniqueCounter);
+                auto exceptionsExpr = node2TreeImpl(ctx, std::move(resbody->exception), uniqueCounter);
                 if (isa_tree<EmptyTree>(exceptionsExpr.get())) {
                     // No exceptions captured
                 } else if (auto exceptionsArray = cast_tree<ast::Array>(exceptionsExpr.get())) {
                     ENFORCE(exceptionsArray != nullptr, "exception array cast failed");
 
                     for (auto &elem : exceptionsArray->elems) {
-                        exceptions.emplace_back(move(elem));
+                        exceptions.emplace_back(std::move(elem));
                     }
                 } else if (auto exceptionsSend = cast_tree<ast::Send>(exceptionsExpr.get())) {
                     ENFORCE(exceptionsSend->fun == core::Names::splat() || exceptionsSend->fun == core::Names::to_a() ||
                                 exceptionsSend->fun == core::Names::concat(),
                             "Unknown exceptionSend function");
-                    exceptions.emplace_back(move(exceptionsExpr));
+                    exceptions.emplace_back(std::move(exceptionsExpr));
                 } else {
                     Exception::raise("Bad inner node type");
                 }
 
-                auto varExpr = node2TreeImpl(ctx, move(resbody->var), uniqueCounter);
-                auto body = node2TreeImpl(ctx, move(resbody->body), uniqueCounter);
+                auto varExpr = node2TreeImpl(ctx, std::move(resbody->var), uniqueCounter);
+                auto body = node2TreeImpl(ctx, std::move(resbody->body), uniqueCounter);
 
                 auto varLoc = varExpr->loc;
                 auto var = core::NameRef::noName();
@@ -1216,32 +1232,33 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 if (isa_tree<EmptyTree>(varExpr.get())) {
                     varLoc = loc;
                 } else if (varExpr != nullptr) {
-                    body = MK::InsSeq1(varLoc, MK::Assign(varLoc, move(varExpr), MK::Local(varLoc, var)), move(body));
+                    body = MK::InsSeq1(varLoc, MK::Assign(varLoc, std::move(varExpr), MK::Local(varLoc, var)),
+                                       std::move(body));
                 }
 
                 unique_ptr<Expression> res =
-                    make_unique<RescueCase>(loc, move(exceptions), MK::Local(varLoc, var), move(body));
+                    make_unique<RescueCase>(loc, std::move(exceptions), MK::Local(varLoc, var), std::move(body));
                 result.swap(res);
             },
             [&](parser::Ensure *ensure) {
-                auto bodyExpr = node2TreeImpl(ctx, move(ensure->body), uniqueCounter);
-                auto ensureExpr = node2TreeImpl(ctx, move(ensure->ensure), uniqueCounter);
+                auto bodyExpr = node2TreeImpl(ctx, std::move(ensure->body), uniqueCounter);
+                auto ensureExpr = node2TreeImpl(ctx, std::move(ensure->ensure), uniqueCounter);
                 auto rescue = cast_tree<ast::Rescue>(bodyExpr.get());
                 if (rescue != nullptr) {
-                    rescue->ensure = move(ensureExpr);
+                    rescue->ensure = std::move(ensureExpr);
                     result.swap(bodyExpr);
                 } else {
                     Rescue::RESCUE_CASE_store cases;
-                    unique_ptr<Expression> res =
-                        make_unique<Rescue>(loc, move(bodyExpr), move(cases), MK::EmptyTree(loc), move(ensureExpr));
+                    unique_ptr<Expression> res = make_unique<Rescue>(loc, std::move(bodyExpr), std::move(cases),
+                                                                     MK::EmptyTree(loc), std::move(ensureExpr));
                     result.swap(res);
                 }
             },
             [&](parser::If *if_) {
-                auto cond = node2TreeImpl(ctx, move(if_->condition), uniqueCounter);
-                auto thenp = node2TreeImpl(ctx, move(if_->then_), uniqueCounter);
-                auto elsep = node2TreeImpl(ctx, move(if_->else_), uniqueCounter);
-                auto iff = MK::If(loc, move(cond), move(thenp), move(elsep));
+                auto cond = node2TreeImpl(ctx, std::move(if_->condition), uniqueCounter);
+                auto thenp = node2TreeImpl(ctx, std::move(if_->then_), uniqueCounter);
+                auto elsep = node2TreeImpl(ctx, std::move(if_->else_), uniqueCounter);
+                auto iff = MK::If(loc, std::move(cond), std::move(thenp), std::move(elsep));
                 result.swap(iff);
             },
             [&](parser::Masgn *masgn) {
@@ -1249,7 +1266,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                 ENFORCE(lhs != nullptr, "Failed to get lhs of Masgn");
 
                 auto res =
-                    desugarMlhs(ctx, loc, lhs, node2TreeImpl(ctx, move(masgn->rhs), uniqueCounter), uniqueCounter);
+                    desugarMlhs(ctx, loc, lhs, node2TreeImpl(ctx, std::move(masgn->rhs), uniqueCounter), uniqueCounter);
 
                 result.swap(res);
             },
@@ -1270,20 +1287,20 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     cloc = case_->condition->loc;
                     temp = ctx.state.freshNameUnique(core::UniqueNameKind::Desugar, core::Names::assignTemp(),
                                                      ++uniqueCounter);
-                    assign = MK::Assign(cloc, temp, node2TreeImpl(ctx, move(case_->condition), uniqueCounter));
+                    assign = MK::Assign(cloc, temp, node2TreeImpl(ctx, std::move(case_->condition), uniqueCounter));
                 }
-                unique_ptr<Expression> res = node2TreeImpl(ctx, move(case_->else_), uniqueCounter);
+                unique_ptr<Expression> res = node2TreeImpl(ctx, std::move(case_->else_), uniqueCounter);
                 for (auto it = case_->whens.rbegin(); it != case_->whens.rend(); ++it) {
                     auto when = parser::cast_node<parser::When>(it->get());
                     ENFORCE(when != nullptr, "case without a when?");
                     unique_ptr<Expression> cond;
                     for (auto &cnode : when->patterns) {
-                        auto ctree = node2TreeImpl(ctx, move(cnode), uniqueCounter);
+                        auto ctree = node2TreeImpl(ctx, std::move(cnode), uniqueCounter);
                         unique_ptr<Expression> test;
                         if (temp.exists()) {
                             auto local = MK::Local(cloc, temp);
                             auto patternloc = ctree->loc;
-                            test = MK::Send1(patternloc, move(ctree), core::Names::tripleEq(), move(local));
+                            test = MK::Send1(patternloc, std::move(ctree), core::Names::tripleEq(), std::move(local));
                         } else {
                             test.swap(ctree);
                         }
@@ -1292,29 +1309,30 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                         } else {
                             auto true_ = MK::True(test->loc);
                             auto loc = test->loc;
-                            cond = MK::If(loc, move(test), move(true_), move(cond));
+                            cond = MK::If(loc, std::move(test), std::move(true_), std::move(cond));
                         }
                     }
-                    res = MK::If(when->loc, move(cond), node2TreeImpl(ctx, move(when->body), uniqueCounter), move(res));
+                    res = MK::If(when->loc, std::move(cond), node2TreeImpl(ctx, std::move(when->body), uniqueCounter),
+                                 std::move(res));
                 }
                 if (assign != nullptr) {
-                    res = MK::InsSeq1(loc, move(assign), move(res));
+                    res = MK::InsSeq1(loc, std::move(assign), std::move(res));
                 }
                 result.swap(res);
             },
             [&](parser::Splat *splat) {
-                auto res = MK::Splat(loc, node2TreeImpl(ctx, move(splat->var), uniqueCounter));
+                auto res = MK::Splat(loc, node2TreeImpl(ctx, std::move(splat->var), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::Alias *alias) {
                 auto res = MK::Send2(loc, MK::Self(loc), core::Names::aliasMethod(),
-                                     node2TreeImpl(ctx, move(alias->from), uniqueCounter),
-                                     node2TreeImpl(ctx, move(alias->to), uniqueCounter));
+                                     node2TreeImpl(ctx, std::move(alias->from), uniqueCounter),
+                                     node2TreeImpl(ctx, std::move(alias->to), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::Defined *defined) {
                 auto res = MK::Send1(loc, MK::Constant(loc, core::Symbols::Magic()), core::Names::defined_p(),
-                                     node2TreeImpl(ctx, move(defined->value), uniqueCounter));
+                                     node2TreeImpl(ctx, std::move(defined->value), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::LineLiteral *line) {
@@ -1325,7 +1343,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
             },
             [&](parser::XString *xstring) {
                 auto res = MK::Send1(loc, MK::Self(loc), core::Names::backtick(),
-                                     desugarDString(ctx, loc, move(xstring->nodes), uniqueCounter));
+                                     desugarDString(ctx, loc, std::move(xstring->nodes), uniqueCounter));
                 result.swap(res);
             },
             [&](parser::Preexe *preexe) {
@@ -1388,23 +1406,23 @@ unique_ptr<Expression> liftTopLevel(core::MutableContext ctx, unique_ptr<Express
     if (insSeq) {
         rhs.reserve(insSeq->stats.size() + 1);
         for (auto &stat : insSeq->stats) {
-            rhs.emplace_back(move(stat));
+            rhs.emplace_back(std::move(stat));
         }
-        rhs.emplace_back(move(insSeq->expr));
+        rhs.emplace_back(std::move(insSeq->expr));
     } else {
-        rhs.emplace_back(move(what));
+        rhs.emplace_back(std::move(what));
     }
     return make_unique<ClassDef>(loc, loc, core::Symbols::root(), MK::EmptyTree(core::Loc::none()),
-                                 ClassDef::ANCESTORS_store(), move(rhs), Class);
+                                 ClassDef::ANCESTORS_store(), std::move(rhs), Class);
 }
 } // namespace
 
 unique_ptr<Expression> node2Tree(core::MutableContext ctx, unique_ptr<parser::Node> what) {
     try {
         u2 uniqueCounter = 1;
-        auto result = node2TreeImpl(ctx, move(what), uniqueCounter);
-        result = liftTopLevel(ctx, move(result));
-        auto verifiedResult = Verifier::run(ctx, move(result));
+        auto result = node2TreeImpl(ctx, std::move(what), uniqueCounter);
+        result = liftTopLevel(ctx, std::move(result));
+        auto verifiedResult = Verifier::run(ctx, std::move(result));
         return verifiedResult;
     } catch (SorbetException &) {
         locReported = false;
