@@ -19,8 +19,17 @@ class B
     end
 end
 
+class C < A
+   class << self
+      def newerer
+         newer
+      end
+   end
+end
+
 def main
     puts A.newer
     puts B.newer
+    puts C.newerer
 end
 main

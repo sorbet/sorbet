@@ -21,10 +21,19 @@ class <emptyTree><<constant:<root>>> < ()
     end
   end
 
+  class <emptyTree>::<constant:C><<constant:<todo sym>>> < (<emptyTree>::<constant:A>)
+    class <singleton class><<constant:<todo sym>>> < ()
+      def newerer<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).newer()
+      end
+    end
+  end
+
   def main<<constant:<todo sym>>>()
     begin
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.newer())
       self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.newer())
+      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:C>.newerer())
     end
   end
 

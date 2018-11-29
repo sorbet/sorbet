@@ -8,8 +8,12 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass_inheritance.rb:2, h
   class ::B < ::Object () @ test/testdata/desugar/sclass_inheritance.rb:14
   class ::<Class:B> < ::<Class:Object> (<constant:MM>) @ test/testdata/desugar/sclass_inheritance.rb:14
     method ::<Class:B>#newer () @ test/testdata/desugar/sclass_inheritance.rb:17
+  class ::C < ::A () @ test/testdata/desugar/sclass_inheritance.rb:22
+  class ::<Class:C> < ::<Class:A> () @ test/testdata/desugar/sclass_inheritance.rb:23
+    method ::<Class:C>#newerer () @ test/testdata/desugar/sclass_inheritance.rb:24
+  class ::<Class:<Class:C>> < ::<Class:<Class:A>> () @ test/testdata/desugar/sclass_inheritance.rb:23
   class ::MM < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/desugar/sclass_inheritance.rb:2
   class ::<Class:MM> < ::Module () @ test/testdata/desugar/sclass_inheritance.rb:2
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L851
-    method ::Object#main () @ test/testdata/desugar/sclass_inheritance.rb:22
+    method ::Object#main () @ test/testdata/desugar/sclass_inheritance.rb:30
 

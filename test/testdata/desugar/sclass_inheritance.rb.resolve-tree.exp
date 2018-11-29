@@ -8,6 +8,7 @@ begin
       begin
         self(<constant:Object>).puts(::A.newer())
         self(<constant:Object>).puts(::B.newer())
+        self(<constant:Object>).puts(::C.newerer())
       end
     end
 
@@ -23,6 +24,11 @@ begin
         end
         begin
           ::RubyTyper.keep_for_ide(::B)
+          <emptyTree>
+        end
+        begin
+          ::RubyTyper.keep_for_ide(::C)
+          ::RubyTyper.keep_for_ide(::A)
           <emptyTree>
         end
         self(<singleton class:<constant:<root>>>).main()
@@ -47,6 +53,14 @@ begin
   class ::B<<constant:B>> < (::<todo sym>)
     def self.newer<newer>()
       self(<singleton class:<constant:B>>).new()
+    end
+  end
+  class ::C<<constant:C>> < (::A)
+    <emptyTree>
+  end
+  class <singleton class><<singleton class:<constant:C>>> < ()
+    def newerer<newerer>()
+      self(<singleton class:<constant:C>>).newer()
     end
   end
   <emptyTree>
