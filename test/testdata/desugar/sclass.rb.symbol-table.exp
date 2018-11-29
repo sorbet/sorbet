@@ -1,55 +1,45 @@
 class ::<root> < ::Object () @ (test/testdata/desugar/sclass.rb:2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/bazel-out/host/genfiles/rbi/procs.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/chalk.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_root.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_self.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/base64.rbi#L1, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/benchmark.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/csv.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/didyoumean.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/encoding.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fileutils.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fixnum.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/gem.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/process.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/uri.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/pay-server.rbi#L8, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/ruby_typer.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/sorbet.rbi#L4, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/date.rbi#L2, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/webrick.rbi#L3, https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/t.rbi#L2)
-  field #$c @ test/testdata/desugar/sclass.rb:21
+  field #$c @ test/testdata/desugar/sclass.rb:19
   method #<static-init> () @ ???
   class ::A < ::Object () @ test/testdata/desugar/sclass.rb:2
   class ::<Class:A> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:2
-  class ::B < ::Object () @ test/testdata/desugar/sclass.rb:13
-  class ::<Class:B> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:14
-    method ::<Class:B>#b () @ test/testdata/desugar/sclass.rb:15
-  class ::<Class:<Class:B>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:14
-  class ::D < ::Object () @ test/testdata/desugar/sclass.rb:28
-  class ::<Class:D> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:29
-  class ::<Class:<Class:D>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:30
-    method ::<Class:<Class:D>>#d () @ test/testdata/desugar/sclass.rb:31
-  class ::<Class:<Class:<Class:D>>> < ::<Class:<Class:<Class:Object>>> () @ test/testdata/desugar/sclass.rb:30
-  class ::E < ::Object () @ test/testdata/desugar/sclass.rb:38
-    method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:46
-  class ::<Class:E> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:39
-    method ::<Class:E>#e () @ test/testdata/desugar/sclass.rb:41
-    method ::<Class:E>#wrapper () @ test/testdata/desugar/sclass.rb:40
-  class ::<Class:<Class:E>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:39
-  class ::F < ::Object () @ test/testdata/desugar/sclass.rb:49
-  class ::<Class:F> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:50
-    method ::<Class:F>#<static-init> () @ test/testdata/desugar/sclass.rb:57
-    field ::<Class:F>#@f -> Integer @ test/testdata/desugar/sclass.rb:52
-    method ::<Class:F>#f= (f) -> Integer @ test/testdata/desugar/sclass.rb:58
-      argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:57
-    method ::<Class:F>#initialize () @ test/testdata/desugar/sclass.rb:51
-  class ::<Class:<Class:F>> < ::<Class:<Class:Object>> (<constant:Helpers>) @ test/testdata/desugar/sclass.rb:49
-    method ::<Class:<Class:F>>#<block> () @ test/testdata/desugar/sclass.rb:57
-  class ::G < ::Object () @ test/testdata/desugar/sclass.rb:62
-    method ::G#wrapper () @ test/testdata/desugar/sclass.rb:63
-  class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:64
-    method ::<Class:G>#g () @ test/testdata/desugar/sclass.rb:71
-    method ::<Class:G>#inner () @ test/testdata/desugar/sclass.rb:65
-  class ::<Class:<Class:G>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:64
-  class ::H < ::Object () @ test/testdata/desugar/sclass.rb:76
-  class ::<Class:H> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:77
-    method ::<Class:H>#<static-init> () @ test/testdata/desugar/sclass.rb:78
-    class ::<Class:H>::H2 < ::Object () @ test/testdata/desugar/sclass.rb:78
-    class ::<Class:H>::<Class:H2> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:78
-      method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:79
-  class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:77
-  class ::I < ::Object () @ test/testdata/desugar/sclass.rb:86
-    method ::I#<static-init> () @ test/testdata/desugar/sclass.rb:87
-  class ::<Class:I> < ::<Class:Object> (<constant:MM>) @ test/testdata/desugar/sclass.rb:87
-    method ::<Class:I>#newer () @ test/testdata/desugar/sclass.rb:90
-  class ::<Class:<Class:I>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:86
-  class ::J < ::Object () @ test/testdata/desugar/sclass.rb:96
-  class ::<Class:J> < ::<Class:Object> (<constant:MM>) @ test/testdata/desugar/sclass.rb:96
-    method ::<Class:J>#newer () @ test/testdata/desugar/sclass.rb:99
-  class ::MM < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/desugar/sclass.rb:5
-  class ::<Class:MM> < ::Module () @ test/testdata/desugar/sclass.rb:5
+  class ::B < ::Object () @ test/testdata/desugar/sclass.rb:11
+  class ::<Class:B> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:12
+    method ::<Class:B>#b () @ test/testdata/desugar/sclass.rb:13
+  class ::<Class:<Class:B>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:12
+  class ::D < ::Object () @ test/testdata/desugar/sclass.rb:26
+  class ::<Class:D> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:27
+  class ::<Class:<Class:D>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:28
+    method ::<Class:<Class:D>>#d () @ test/testdata/desugar/sclass.rb:29
+  class ::<Class:<Class:<Class:D>>> < ::<Class:<Class:<Class:Object>>> () @ test/testdata/desugar/sclass.rb:28
+  class ::E < ::Object () @ test/testdata/desugar/sclass.rb:36
+    method ::E#<static-init> () @ test/testdata/desugar/sclass.rb:44
+  class ::<Class:E> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:37
+    method ::<Class:E>#e () @ test/testdata/desugar/sclass.rb:39
+    method ::<Class:E>#wrapper () @ test/testdata/desugar/sclass.rb:38
+  class ::<Class:<Class:E>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:37
+  class ::F < ::Object () @ test/testdata/desugar/sclass.rb:47
+  class ::<Class:F> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:48
+    method ::<Class:F>#<static-init> () @ test/testdata/desugar/sclass.rb:55
+    field ::<Class:F>#@f -> Integer @ test/testdata/desugar/sclass.rb:50
+    method ::<Class:F>#f= (f) -> Integer @ test/testdata/desugar/sclass.rb:56
+      argument ::<Class:F>#f=#f<> -> Integer @ test/testdata/desugar/sclass.rb:55
+    method ::<Class:F>#initialize () @ test/testdata/desugar/sclass.rb:49
+  class ::<Class:<Class:F>> < ::<Class:<Class:Object>> (<constant:Helpers>) @ test/testdata/desugar/sclass.rb:47
+    method ::<Class:<Class:F>>#<block> () @ test/testdata/desugar/sclass.rb:55
+  class ::G < ::Object () @ test/testdata/desugar/sclass.rb:60
+    method ::G#wrapper () @ test/testdata/desugar/sclass.rb:61
+  class ::<Class:G> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:62
+    method ::<Class:G>#g () @ test/testdata/desugar/sclass.rb:69
+    method ::<Class:G>#inner () @ test/testdata/desugar/sclass.rb:63
+  class ::<Class:<Class:G>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:62
+  class ::H < ::Object () @ test/testdata/desugar/sclass.rb:74
+  class ::<Class:H> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:75
+    method ::<Class:H>#<static-init> () @ test/testdata/desugar/sclass.rb:76
+    class ::<Class:H>::H2 < ::Object () @ test/testdata/desugar/sclass.rb:76
+    class ::<Class:H>::<Class:H2> < ::<Class:Object> () @ test/testdata/desugar/sclass.rb:76
+      method ::<Class:H>::<Class:H2>#h () @ test/testdata/desugar/sclass.rb:77
+  class ::<Class:<Class:H>> < ::<Class:<Class:Object>> () @ test/testdata/desugar/sclass.rb:75
   class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L851
-    method ::Object#main () @ test/testdata/desugar/sclass.rb:104
+    method ::Object#main () @ test/testdata/desugar/sclass.rb:84
 

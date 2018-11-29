@@ -24,10 +24,6 @@ begin
           <emptyTree>
         end
         begin
-          ::RubyTyper.keep_for_ide(::MM)
-          <emptyTree>
-        end
-        begin
           ::RubyTyper.keep_for_ide(::B)
           <emptyTree>
         end
@@ -52,21 +48,12 @@ begin
           ::RubyTyper.keep_for_ide(::H)
           <emptyTree>
         end
-        begin
-          ::RubyTyper.keep_for_ide(::I)
-          <emptyTree>
-        end
-        begin
-          ::RubyTyper.keep_for_ide(::J)
-          <emptyTree>
-        end
         self(<singleton class:<constant:<root>>>).main()
         <emptyTree>
       end
     end
   end
   class ::A<<constant:A>> < (::<todo sym>)  end
-  module ::MM<<constant:MM>> < ()  end
   class ::B<<constant:B>> < (::<todo sym>)
     <emptyTree>
   end
@@ -168,24 +155,6 @@ begin
   class ::<Class:H>::H2<<constant:H2>> < (::<todo sym>)
     def self.h<h>()
       "h"
-    end
-  end
-  class ::I<<constant:I>> < (::<todo sym>)
-    def self.<static-init><<static-init>>()
-      begin
-        ::RubyTyper.keep_for_ide(::MM)
-        <emptyTree>
-      end
-    end
-  end
-  class <singleton class><<singleton class:<constant:I>>> < (::MM)
-    def newer<newer>()
-      self(<singleton class:<constant:I>>).new()
-    end
-  end
-  class ::J<<constant:J>> < (::<todo sym>)
-    def self.newer<newer>()
-      self(<singleton class:<constant:J>>).new()
     end
   end
   <emptyTree>

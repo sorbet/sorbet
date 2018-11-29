@@ -1,0 +1,32 @@
+class <emptyTree><<constant:<root>>> < ()
+  module <emptyTree>::<constant:MM><<constant:<todo sym>>> < ()
+    <emptyTree>
+  end
+
+  class <emptyTree>::<constant:A><<constant:<todo sym>>> < (::<todo sym>)
+    class <singleton class><<constant:<todo sym>>> < ()
+      self(<constant:<todo sym>>).include(<emptyTree>::<constant:MM>)
+
+      def newer<<constant:<todo sym>>>()
+        self(<constant:<todo sym>>).new()
+      end
+    end
+  end
+
+  class <emptyTree>::<constant:B><<constant:<todo sym>>> < (::<todo sym>)
+    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:MM>)
+
+    def self.newer<<constant:<todo sym>>>()
+      self(<constant:<todo sym>>).new()
+    end
+  end
+
+  def main<<constant:<todo sym>>>()
+    begin
+      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:A>.newer())
+      self(<constant:<todo sym>>).puts(<emptyTree>::<constant:B>.newer())
+    end
+  end
+
+  self(<constant:<todo sym>>).main()
+end
