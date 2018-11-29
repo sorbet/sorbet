@@ -345,11 +345,11 @@ class Rational < Numeric
   sig {returns(Integer)}
   sig do
     params(
-        arg0: Integer,
+        digits: Integer,
     )
     .returns(Numeric)
   end
-  def ceil(arg0=T.unsafe(nil)); end
+  def ceil(digits=0); end
 
   sig do
     params(
@@ -463,11 +463,11 @@ class Rational < Numeric
   sig {returns(Integer)}
   sig do
     params(
-        arg0: Integer,
+        digits: Integer,
     )
     .returns(Numeric)
   end
-  def floor(arg0=T.unsafe(nil)); end
+  def floor(digits=0); end
 
   sig {returns(Integer)}
   def hash(); end

@@ -371,7 +371,13 @@ class BigDecimal < Numeric
   def arg(); end
 
   sig {returns(Integer)}
-  def ceil(); end
+  sig do
+    params(
+      digits: Integer
+    )
+    .returns(BigDecimal)
+  end
+  def ceil(digits=0); end
 
   sig do
     params(
@@ -482,7 +488,13 @@ class BigDecimal < Numeric
   def fix(); end
 
   sig {returns(Integer)}
-  def floor(); end
+  sig do
+    params(
+      digits: Integer
+    )
+    .returns(BigDecimal)
+  end
+  def floor(digits=0); end
 
   sig {returns(BigDecimal)}
   def frac(); end

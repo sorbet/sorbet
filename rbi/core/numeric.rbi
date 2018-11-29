@@ -101,7 +101,13 @@ class Numeric < Object
   def arg(); end
 
   sig {returns(Integer)}
-  def ceil(); end
+  sig do
+    params(
+      digits: Integer
+    )
+    .returns(Numeric)
+  end
+  def ceil(digits=0); end
 
   sig do
     params(
@@ -153,7 +159,13 @@ class Numeric < Object
   def fdiv(arg0); end
 
   sig {returns(Integer)}
-  def floor(); end
+  sig do
+    params(
+      digits: Integer
+    )
+    .returns(Numeric)
+  end
+  def floor(digits=0); end
 
   sig {returns(Complex)}
   def i(); end
