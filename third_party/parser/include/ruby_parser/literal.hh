@@ -3,9 +3,9 @@
 
 #include <string>
 #include <utility>
+#include <optional>
 
 #include "token.hh"
-#include "optional.hh"
 
 namespace ruby_parser {
   enum class literal_type {

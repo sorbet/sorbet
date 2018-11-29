@@ -7,13 +7,14 @@
 #include <set>
 #include <memory>
 #include <map>
+#include <optional>
 
 #include "diagnostic.hh"
 #include "literal.hh"
 #include "token.hh"
 #include "state_stack.hh"
 #include "pool.hh"
-#include "optional.hh"
+
 
 namespace ruby_parser {
   enum class ruby_version {
