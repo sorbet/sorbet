@@ -1009,14 +1009,18 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
 }
 
 void GlobalState::addAnnotation(Loc loc, string str, u4 blockId, AnnotationPos pos) const {
-    unique_lock<mutex> lk(annotations_mtx);
+    absl::MutexLock lk(&annotations_mtx);
     annotations.emplace_back(Annotation{loc, move(str), pos, blockId});
 }
 
 string GlobalState::showAnnotatedSource(FileRef file) const {
-    unique_lock<mutex> lk(annotations_mtx);
-    if (annotations.empty()) {
-        return "";
+    std::vector<Annotation> sorted;
+    {
+        absl::MutexLock lk(&annotations_mtx);
+        if (annotations.empty()) {
+            return "";
+        }
+        sorted = annotations;
     }
 
     // Sort the locs backwards
@@ -1041,7 +1045,6 @@ string GlobalState::showAnnotatedSource(FileRef file) const {
         }
         return left.blockId > right.blockId;
     };
-    auto sorted = annotations;
     fast_sort(sorted, compare);
 
     auto source = file.data(*this).source();

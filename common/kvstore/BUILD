@@ -24,6 +24,7 @@ cc_library(
     deps = [
         "//common",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
         "@lmdb",
     ],
 )

@@ -44,7 +44,6 @@ KeyValueStore::~KeyValueStore() noexcept(false) {
     mdb_txn_abort(txn);
     mdb_close(env, dbi);
     mdb_env_close(env);
-    return;
 }
 
 void KeyValueStore::write(string_view key, const vector<u1> &value) {
@@ -66,14 +65,21 @@ void KeyValueStore::write(string_view key, const vector<u1> &value) {
 }
 
 u1 *KeyValueStore::read(string_view key) {
-    MDB_txn *txn;
+    MDB_txn *txn = nullptr;
     int rc = 0;
     {
-        unique_lock<mutex> lk(readersLock);
-        auto &txn_store = readers[this_thread::get_id()];
-        if (!txn_store) {
-            rc = mdb_txn_begin(env, nullptr, MDB_RDONLY, &txn_store);
+        absl::ReaderMutexLock lk(&readers_mtx);
+        auto fnd = readers.find(this_thread::get_id());
+        if (fnd != readers.end()) {
+            txn = fnd->second;
+            ENFORCE(txn != nullptr);
         }
+    }
+    if (txn == nullptr) {
+        absl::WriterMutexLock lk(&readers_mtx);
+        auto &txn_store = readers[this_thread::get_id()];
+        ENFORCE(txn_store == nullptr);
+        rc = mdb_txn_begin(env, nullptr, MDB_RDONLY, &txn_store);
         txn = txn_store;
     }
     if (rc != 0) {
@@ -143,7 +149,10 @@ void KeyValueStore::refreshMainTransaction() {
     if (rc != 0) {
         goto fail;
     }
-    readers[writerId] = txn;
+    {
+        absl::WriterMutexLock lk(&readers_mtx);
+        readers[writerId] = txn;
+    }
     return;
 fail:
     throw invalid_argument("failed to create transaction");

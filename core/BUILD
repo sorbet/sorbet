@@ -27,6 +27,7 @@ cc_library(
         "//common",
         "//common/concurrency",
         "@com_google_absl//absl/strings",
+        "@com_google_absl//absl/synchronization",
         "@rang",
     ],
 )

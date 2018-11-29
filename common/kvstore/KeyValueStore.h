@@ -1,8 +1,8 @@
 #ifndef SORBET_KEYVALUESTORE_H
 #define SORBET_KEYVALUESTORE_H
+#include "absl/synchronization/mutex.h"
 #include "common/common.h"
 #include "lmdb.h"
-#include <mutex>
 #include <thread>
 namespace sorbet {
 
@@ -18,7 +18,7 @@ class KeyValueStore {
     const std::string path;
     const std::thread::id writerId;
     UnorderedMap<std::thread::id, MDB_txn *> readers;
-    std::mutex readersLock;
+    absl::Mutex readers_mtx;
     bool commited = false;
 
     void clear();

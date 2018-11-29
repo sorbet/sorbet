@@ -1,5 +1,7 @@
 #ifndef SORBET_GLOBAL_STATE_H
 #define SORBET_GLOBAL_STATE_H
+#include "absl/synchronization/mutex.h"
+
 #include "core/Error.h"
 #include "core/ErrorQueue.h"
 #include "core/Files.h"
@@ -8,7 +10,6 @@
 #include "core/Names.h"
 #include "core/Symbols.h"
 #include <memory>
-#include <mutex>
 
 namespace sorbet::core {
 
@@ -150,7 +151,7 @@ private:
     UnorderedSet<ErrorClass> suppressed_error_classes;
     bool wasModified_ = false;
 
-    mutable std::mutex annotations_mtx;
+    mutable absl::Mutex annotations_mtx;
     mutable std::vector<Annotation> annotations;
 
     bool freezeSymbolTable();
