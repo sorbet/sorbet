@@ -12,7 +12,6 @@
 
 #include "absl/strings/str_cat.h"
 #include "common/Timer.h"
-#include "core/Context.h"
 #include "core/Symbols.h"
 #include <utility>
 #include <vector>
@@ -410,7 +409,7 @@ public:
 
         for (auto &ancst : original->ancestors) {
             bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front() &&
-                                 !isSingleton(ctx.state, klass));
+                                 !klass.data(ctx)->isSingletonClass(ctx));
             transformAncestor(ctx, klass, ancst, isSuperclass);
         }
 

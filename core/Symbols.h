@@ -21,8 +21,6 @@ class SendAndBlockLink;
 struct DispatchArgs;
 struct CallLocs;
 
-bool isSingleton(const GlobalState &gs, SymbolRef sym);
-
 namespace serialize {
 class SerializerImpl;
 }
@@ -160,6 +158,13 @@ public:
 
     inline bool isClass() const {
         return (flags & Symbol::Flags::CLASS) != 0;
+    }
+
+    inline bool isSingletonClass(const GlobalState &gs) const {
+        bool isSingleton = isClass() && name.data(gs)->kind == UNIQUE &&
+                         name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+        ENFORCE(isSingleton ^ !attachedClass(gs).exists());
+        return isSingleton;
     }
 
     inline bool isStaticField() const {
