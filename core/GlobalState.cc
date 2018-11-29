@@ -476,6 +476,12 @@ SymbolRef GlobalState::enterSymbol(Loc loc, SymbolRef owner, NameRef name, u4 fl
         categoryCounterInc("symbols", "static_field");
     } else if (data->isMethodArgument()) {
         categoryCounterInc("symbols", "argument");
+    } else if (data->isTypeArgument()) {
+        categoryCounterInc("symbols", "type_argument");
+    } else if (data->isTypeMember()) {
+        categoryCounterInc("symbols", "type_member");
+    } else {
+        Exception::notImplemented();
     }
 
     wasModified_ = true;
