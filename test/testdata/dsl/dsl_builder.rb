@@ -14,12 +14,14 @@ class TestChild < TestDSLBuilder
   get_opt_string
   opt_string # error: Not enough arguments provided
   opt_string :nope # error: `Symbol(:"nope")` doesn't match `String` for argument `opt_string`
+  opt_string nil # error: `NilClass` doesn't match `String` for argument `opt_string`
   opt_int_defaulted 17
   implied_string
   no_getter "I'm setting the value"
   get_no_getter # error: Method `get_no_getter` does not exist on `T.class_of(TestChild)`
 
   T.assert_type!(get_opt_string, T.nilable(String))
+  T.assert_type!(get_opt_string, String) # error: does not have asserted type
   T.assert_type!(get_opt_int_defaulted, Integer)
   T.assert_type!(get_req_string, String)
 

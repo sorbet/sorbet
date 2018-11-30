@@ -81,6 +81,10 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
                                         ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     if (!skipGetter) {
+        if (nilable) {
+            auto tyloc = type->loc;
+            type = ast::MK::Nilable(tyloc, move(type));
+        }
         // def self.get_<prop>
         core::NameRef getName = ctx.state.enterNameUTF8("get_" + name.data(ctx)->toString(ctx));
         stats.emplace_back(ast::MK::Sig0(loc, ASTUtil::dupType(type.get())));

@@ -97,6 +97,6 @@ end
 
 class DSLChild < DSLParent
   extend T::Helpers
-  sig {generated.returns(String)}
+  sig {generated.returns(T.nilable(String))}
   def opt_string; end
 end

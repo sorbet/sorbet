@@ -9,7 +9,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
 
     ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
     def self.get_opt_string<<constant:<todo sym>>>()
@@ -17,7 +17,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
 
     ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).returns(<emptyTree>::<constant:String>)
+      self(<constant:<todo sym>>).returns(::T.nilable(<emptyTree>::<constant:String>))
     end
 
     def opt_string<<constant:<todo sym>>>()
@@ -113,7 +113,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
 
     ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).returns(::<root>::<constant:Integer>)
+      self(<constant:<todo sym>>).returns(::T.nilable(::<root>::<constant:Integer>))
     end
 
     def self.get_root_const<<constant:<todo sym>>>()
@@ -121,7 +121,7 @@ class <emptyTree><<constant:<root>>> < ()
     end
 
     ::Sorbet.sig() do ||
-      self(<constant:<todo sym>>).returns(::<root>::<constant:Integer>)
+      self(<constant:<todo sym>>).returns(::T.nilable(::<root>::<constant:Integer>))
     end
 
     def root_const<<constant:<todo sym>>>()
@@ -138,6 +138,8 @@ class <emptyTree><<constant:<root>>> < ()
 
     self(<constant:<todo sym>>).opt_string(:"nope")
 
+    self(<constant:<todo sym>>).opt_string(nil)
+
     self(<constant:<todo sym>>).opt_int_defaulted(17)
 
     self(<constant:<todo sym>>).implied_string()
@@ -147,6 +149,8 @@ class <emptyTree><<constant:<root>>> < ()
     self(<constant:<todo sym>>).get_no_getter()
 
     <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_string(), <emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))
+
+    <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_string(), <emptyTree>::<constant:String>)
 
     <emptyTree>::<constant:T>.assert_type!(self(<constant:<todo sym>>).get_opt_int_defaulted(), <emptyTree>::<constant:Integer>)
 
