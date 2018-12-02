@@ -215,6 +215,72 @@ unique_ptr<cfg::CFG> Inference::run(core::Context ctx, unique_ptr<cfg::CFG> cfg)
         }
     }
 
+    core::SymbolRef methodSymbol = cfg->symbol;
+    auto enclosingClass = methodSymbol.data(ctx)->enclosingClass(ctx);
+    auto closestMethod = SigSuggestion::closestOverridenMethod(ctx, enclosingClass, methodSymbol.data(ctx)->name);
+
+    if (closestMethod.exists() && closestMethod.data(ctx)->resultType != nullptr && closestMethod.data(ctx)->isAbstract()) {
+        auto arguments = methodSymbol.data(ctx)->arguments();
+        UnorderedMap<std::string, core::SymbolRef> argumentMap;
+        vector<string> nonOptionals;
+        for (auto i = 0; i < arguments.size(); i++) {
+            auto arg = arguments.at(i);
+            auto data = arg.data(ctx);
+            auto key = data->isKeyword() ? data->name.toString(ctx) : data->isBlockArgument() ? "&" : to_string(i);
+            argumentMap[key] = arg;
+            if (!data->isOptional()) {
+                nonOptionals.emplace_back(key);
+            }
+        }
+
+        auto closestArguments = closestMethod.data(ctx)->arguments();
+        UnorderedMap<std::string, core::SymbolRef> closestArgumentMap;
+        for (auto i = 0; i < closestArguments.size(); i++) {
+            auto closestArg = closestArguments.at(i);
+            auto data = closestArg.data(ctx);
+            auto key = data->isKeyword() ? data->name.toString(ctx) : data->isBlockArgument() ? "&" : to_string(i);
+            closestArgumentMap[key] = closestArg;
+
+            auto fnd = argumentMap.find(key);
+            if (fnd == argumentMap.end()) {
+                if (auto e = ctx.state.beginError(methodSymbol.data(ctx)->loc(), core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Abstract method implementation missing argument `{}`", data->name.show(ctx));
+                }
+                continue;
+            }
+
+            auto arg = fnd->second;
+            if (data->isOptional() && !arg.data(ctx)->isOptional()) {
+                if (auto e = ctx.state.beginError(methodSymbol.data(ctx)->loc(), core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Default value missing on `{}`", data->name.show(ctx));
+                }
+            }
+
+            if (!core::Types::isSubType(ctx, data->resultType, arg.data(ctx)->resultType)) {
+                if (auto e = ctx.state.beginError(methodSymbol.data(ctx)->loc(), core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Argument type `{}` doesn't match interface `{}`", arg.data(ctx)->resultType->show(ctx), data->resultType->show(ctx));
+                }
+            }
+        }
+
+        for (auto &nonOptional : nonOptionals) {
+            if (closestArgumentMap.find(nonOptional) == closestArgumentMap.end()) {
+                auto arg = argumentMap[nonOptional];
+                if (auto e = ctx.state.beginError(methodSymbol.data(ctx)->loc(), core::errors::Infer::MethodArgumentMismatch)) {
+                    e.setHeader("Abstract method implementation adds argument `{}`", arg.data(ctx)->name.show(ctx));
+                }
+            }
+        }
+
+        auto closestReturnType = closestMethod.data(ctx)->resultType;
+        if (closestReturnType && !closestReturnType->isUntyped() &&
+            !core::Types::isSubType(ctx, methodReturnType, closestReturnType)) {
+            if (auto e = ctx.state.beginError(methodSymbol.data(ctx)->loc(), core::errors::Infer::ReturnTypeMismatch)) {
+                e.setHeader("Return type `{}` doesn't match interface `{}`", methodReturnType->show(ctx), closestReturnType->show(ctx));
+            }
+        }
+    }
+
     prodCounterAdd("types.input.sends.typed", typedSendCount);
     prodCounterAdd("types.input.sends.total", totalSendCount);
 

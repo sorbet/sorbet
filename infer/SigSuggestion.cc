@@ -379,7 +379,9 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
     return argTypesForBBToPass[cfg->deadBlock()->id];
 }
 
-core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
+} // namespace
+
+core::SymbolRef SigSuggestion::closestOverridenMethod(core::Context ctx, core::SymbolRef enclosingClassSymbol, core::NameRef name) {
     auto enclosingClass = enclosingClassSymbol.data(ctx);
     ENFORCE(enclosingClass->isClassLinearizationComputed(), "Should have been linearized by resolver");
 
@@ -405,7 +407,7 @@ core::SymbolRef closestOverridenMethod(core::Context ctx, core::SymbolRef enclos
     }
 }
 
-bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
+bool SigSuggestion::parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core::SymbolRef parentSymbol) {
     return
         // We're overriding a method...
         parentSymbol.exists() &&
@@ -424,8 +426,6 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
         // and is wasn't DSL synthesized (beause we can't change DSL'd sigs)
         !parentSymbol.data(ctx)->isDSLSynthesized();
 }
-
-} // namespace
 
 bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
                                     const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
