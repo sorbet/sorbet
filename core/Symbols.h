@@ -161,10 +161,7 @@ public:
     }
 
     inline bool isSingletonClass(const GlobalState &gs) const {
-        bool isSingleton = isClass() && name.data(gs)->kind == UNIQUE &&
-                           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
-        ENFORCE(isSingleton ^ !attachedClass(gs).exists());
-        return isSingleton;
+        return isSingletonClass(gs, true);
     }
 
     inline bool isStaticField() const {
@@ -574,6 +571,13 @@ private:
 
     SymbolRef findMemberTransitiveInternal(const GlobalState &gs, NameRef name, int mask, int flags,
                                            int maxDepth = 100) const;
+
+    inline bool isSingletonClass(const GlobalState &gs, const bool enforced) const {
+        bool isSingleton = isClass() && name.data(gs)->kind == UNIQUE &&
+                           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+        ENFORCE(!enforced || isSingleton ^ !attachedClass(gs).exists());
+        return isSingleton;
+    }
 };
 // CheckSize(Symbol, 144, 8); // This is under too much churn to be worth checking
 

@@ -559,13 +559,8 @@ string Symbol::toString(const GlobalState &gs, int tabs, bool showHidden) const 
     return to_string(buf);
 }
 
-bool isSingleton(const GlobalState &gs, SymbolRef sym) {
-    return sym.data(gs)->isClass() && sym.data(gs)->name.data(gs)->kind == UNIQUE &&
-           sym.data(gs)->name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
-}
-
 string Symbol::show(const GlobalState &gs) const {
-    if (isSingleton(gs, ref(gs))) {
+    if (ref(gs).data(gs)->isSingletonClass(gs, false)) {
         auto attached = this->attachedClass(gs);
         if (attached.exists()) {
             return fmt::format("T.class_of({})", attached.data(gs)->show(gs));
@@ -576,7 +571,7 @@ string Symbol::show(const GlobalState &gs) const {
         return this->name.data(gs)->show(gs);
     }
 
-    if (this->isMethod() && isSingleton(gs, this->owner)) {
+    if (this->isMethod() && this->owner.data(gs)->isSingletonClass(gs, false)) {
         return fmt::format("{}.{}", this->owner.data(gs)->attachedClass(gs).data(gs)->show(gs),
                            this->name.data(gs)->show(gs));
     }
