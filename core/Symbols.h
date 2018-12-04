@@ -162,7 +162,7 @@ public:
 
     inline bool isSingletonClass(const GlobalState &gs) const {
         bool isSingleton = isClass() && name.data(gs)->kind == UNIQUE &&
-                         name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
+                           name.data(gs)->unique.uniqueNameKind == UniqueNameKind::Singleton;
         ENFORCE(isSingleton ^ !attachedClass(gs).exists());
         return isSingleton;
     }
