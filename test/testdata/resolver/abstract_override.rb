@@ -60,7 +60,7 @@ class AbstractSingleton
 
   abstract!
 
-  sig {abstract}
+  sig {abstract.void}
   def self.abstract_method; end
 end
 

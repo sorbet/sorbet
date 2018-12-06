@@ -8,7 +8,7 @@ class HasAbstract
   def abstract(x)
   end
 
-  sig {abstract}
+  sig {abstract.void}
   def self.abstract_singleton
   end
 

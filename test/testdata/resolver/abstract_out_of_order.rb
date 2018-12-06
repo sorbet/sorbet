@@ -9,6 +9,6 @@ module Interface
 
   interface!
 
-  sig {abstract}
+  sig {abstract.void}
   def f; end
 end

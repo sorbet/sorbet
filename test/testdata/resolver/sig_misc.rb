@@ -75,8 +75,9 @@ class A
    # empty, because abstract
   end
 
-  sig {implementation}
-  def test_implementation(x, y); end
+  sig { implementation.void }
+  def test_implementation(x, y) # error: Malformed `sig`. Type not specified for argument
+  end
 
   sig {override.returns(T1)}
   def test_override;
@@ -93,7 +94,10 @@ class A
     T1.new
   end
 
-  sig {abstract}; def test_abstract_untyped; end
+  sig {abstract} # error: Malformed `sig`: No return type specified. Specify one with .returns()
+  def test_abstract_untyped
+  end
+
   sig {}; def test_standard_untyped; end # error: Malformed `sig`: No return type specified. Specify one with .returns()
 
   sig {void.foo}; def test_junk_inside; end # error: Method `foo` does not exist on `Sorbet::Private::Builder`

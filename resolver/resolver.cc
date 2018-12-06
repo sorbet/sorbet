@@ -628,11 +628,8 @@ private:
         auto sig = TypeSyntax::parseSig(ctx, send, nullptr, true, method);
 
         if (!sig.seen.returns && !sig.seen.void_) {
-            if (sig.seen.params ||
-                !(sig.seen.abstract || sig.seen.override_ || sig.seen.implementation || sig.seen.overridable)) {
-                if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
-                    e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
-                }
+            if (auto e = ctx.state.beginError(exprLoc, core::errors::Resolver::InvalidMethodSignature)) {
+                e.setHeader("Malformed `{}`: No return type specified. Specify one with .returns()", "sig");
             }
         }
         if (sig.seen.returns && sig.seen.void_) {
