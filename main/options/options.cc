@@ -62,7 +62,7 @@ const vector<StopAfterOptions> stop_after_options({
 core::StrictLevel text2StrictLevel(string_view key, shared_ptr<spdlog::logger> logger) {
     if (key == "ruby" || key == "stripe") {
         return core::StrictLevel::Stripe;
-    } else if (key == "typed" || key == "true") {
+    } else if (key == "true") {
         return core::StrictLevel::Typed;
     } else if (key == "strict") {
         return core::StrictLevel::Strict;
@@ -378,7 +378,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         }
 
         if (opts.suggestTyped && opts.forceMinStrict == core::StrictLevel::Stripe) {
-            logger->error("--suggest-typed requires --typed=typed or higher.");
+            logger->error("--suggest-typed requires --typed=true or higher.");
             throw EarlyReturnWithCode(1);
         }
 

@@ -1,2 +1,2 @@
-typed:
+true:
  - 'test/cli/override-typed-bad/override-typed-bad.rb'
