@@ -108,7 +108,7 @@ private:
     using TypeAliasMap = UnorderedMap<core::SymbolRef, const ast::Expression *>;
     TypeAliasMap typeAliases;
 
-    static core::SymbolRef resolveLhs(core::MutableContext ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
+    static core::SymbolRef resolveLhs(core::Context ctx, shared_ptr<Nesting> nesting, core::NameRef name) {
         Nesting *scope = nesting.get();
         while (scope != nullptr) {
             auto lookup = scope->scope.data(ctx)->findMember(ctx, name);
@@ -124,14 +124,14 @@ private:
     public:
         bool seenUnresolved = false;
 
-        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::MutableContext ctx,
+        unique_ptr<ast::ConstantLit> postTransformConstantLit(core::Context ctx,
                                                               unique_ptr<ast::ConstantLit> original) {
             seenUnresolved = seenUnresolved || (original->typeAlias == nullptr && !original->constantSymbol().exists());
             return original;
         };
     };
 
-    static bool isFullyResolved(core::MutableContext ctx, const ast::Expression *expression) {
+    static bool isFullyResolved(core::Context ctx, const ast::Expression *expression) {
         ResolutionChecker checker;
         unique_ptr<ast::Expression> dummy(const_cast<ast::Expression *>(expression));
         dummy = ast::TreeMap::apply(ctx, checker, std::move(dummy));
@@ -140,9 +140,9 @@ private:
         return !checker.seenUnresolved;
     }
 
-    static core::SymbolRef resolveConstant(core::MutableContext ctx, shared_ptr<Nesting> nesting,
+    static core::SymbolRef resolveConstant(core::Context ctx, shared_ptr<Nesting> nesting,
                                            const unique_ptr<ast::UnresolvedConstantLit> &c,
-                                           const TypeAliasMap &typeAliases, bool lastRun) {
+                                           const TypeAliasMap &typeAliases) {
         if (ast::isa_tree<ast::EmptyTree>(c->scope.get())) {
             core::SymbolRef result = resolveLhs(ctx, nesting, c->cnst);
             return result;
@@ -170,80 +170,85 @@ private:
         }
     }
 
-    static bool resolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases, bool lastRun,
-                           int depth = 0) {
-        if (job.out->typeAlias || job.out->constantSymbol().exists()) {
-            return true;
-        }
-        if (depth > 256) {
-            Exception::raise("Too many recursive calls trying to resolve constant:\n",
-                             job.out->original->cnst.show(ctx), "\n", job.out->original->loc.file().data(ctx).path(),
-                             "\n", job.out->original->loc.toString(ctx));
-        }
-        auto resolved =
-            resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases, lastRun);
-        if (!resolved.exists()) {
-            if (!lastRun) {
-                return false;
+    // We have failed to resolve the constant. We'll need to report the error and stub it so that we can proceed
+    static void stubOneConstantNesting(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
+        if (resolved.exists() && resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
+            auto fnd = typeAliases.find(resolved);
+            ENFORCE(fnd != typeAliases.end());
+            if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(), core::errors::Resolver::RecursiveTypeAlias)) {
+                e.setHeader("Type alias expands to to an infinite type");
             }
+            job.out->typeAlias = ast::MK::Constant(job.out->loc, core::Symbols::untyped());
+            job.out->setAliasSymbol(resolved);
+            return;
+        }
+        ENFORCE(!resolved.exists());
 
-            core::SymbolRef scope;
-            if (job.out->constantSymbol().exists()) {
-                scope = job.out->constantSymbol().data(ctx)->dealias(ctx);
-            } else if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
-                scope = id->constantSymbol().data(ctx)->dealias(ctx);
-            } else {
-                scope = job.scope->scope;
+        core::SymbolRef scope;
+        if (job.out->constantSymbol().exists()) {
+            scope = job.out->constantSymbol().data(ctx)->dealias(ctx);
+        } else if (auto *id = ast::cast_tree<ast::ConstantLit>(job.out->original->scope.get())) {
+            scope = id->constantSymbol().data(ctx)->dealias(ctx);
+        } else {
+            scope = job.scope->scope;
+        }
+
+        auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
+        if (scope.data(ctx)->isStaticField()) {
+            // most likely an unresolved alias. Well, fill it in and emit an error
+            if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
             }
+            // as we're going to start adding definitions into it, we need some class to piggy back on
+            scope =
+                ctx.state.enterClassSymbol(job.out->loc, scope.data(ctx)->owner,
+                                           ctx.state.enterNameConstant(ctx.state.freshNameUnique(
+                                               core::UniqueNameKind::ResolverMissingClass, scope.data(ctx)->name, 1)));
+            // as we've name-mangled the class, we have to manually create the next level of resolution
+            auto createdSym = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
+            job.out->setConstantSymbol(createdSym);
+        } else if (!scope.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
+            if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
+                e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
 
-            auto customAutogenError = job.out->original->cnst == core::Symbols::Subclasses().data(ctx)->name;
-            if (scope.data(ctx)->isStaticField()) {
-                // most likely an unresolved alias. Well, fill it in and emit an error
-                if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
-                }
-                // as we're going to start adding definitions into it, we need some class to piggy back on
-                scope = ctx.state.enterClassSymbol(
-                    job.out->loc, scope.data(ctx)->owner,
-                    ctx.state.enterNameConstant(ctx.state.freshNameUnique(core::UniqueNameKind::ResolverMissingClass,
-                                                                          scope.data(ctx)->name, 1)));
-                // as we've name-mangled the class, we have to manually create the next level of resolution
-                auto createdSym = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
-                job.out->setConstantSymbol(createdSym);
-            } else if (!scope.data(ctx)->derivesFrom(ctx, core::Symbols::StubClass()) || customAutogenError) {
-                if (auto e = ctx.state.beginError(job.out->original->loc, core::errors::Resolver::StubConstant)) {
-                    e.setHeader("Unable to resolve constant `{}`", job.out->original->cnst.show(ctx));
-
-                    if (customAutogenError) {
-                        e.addErrorSection(
-                            core::ErrorSection("If this constant is generated by Autogen, you "
-                                               "may need to re-generate the .rbi. Try running:\n"
-                                               "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
-                    } else {
-                        auto suggested = scope.data(ctx)->findMemberFuzzyMatch(ctx, job.out->original->cnst);
-                        if (suggested.size() > 3) {
-                            suggested.resize(3);
+                if (customAutogenError) {
+                    e.addErrorSection(
+                        core::ErrorSection("If this constant is generated by Autogen, you "
+                                           "may need to re-generate the .rbi. Try running:\n"
+                                           "  scripts/bin/remote-script sorbet/shim_generation/autogen.rb"));
+                } else {
+                    auto suggested = scope.data(ctx)->findMemberFuzzyMatch(ctx, job.out->original->cnst);
+                    if (suggested.size() > 3) {
+                        suggested.resize(3);
+                    }
+                    if (!suggested.empty()) {
+                        vector<core::ErrorLine> lines;
+                        for (auto suggestion : suggested) {
+                            lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx)->loc(),
+                                                                     "Did you mean: `{}`?",
+                                                                     suggestion.symbol.show(ctx)));
                         }
-                        if (!suggested.empty()) {
-                            vector<core::ErrorLine> lines;
-                            for (auto suggestion : suggested) {
-                                lines.emplace_back(core::ErrorLine::from(suggestion.symbol.data(ctx)->loc(),
-                                                                         "Did you mean: `{}`?",
-                                                                         suggestion.symbol.show(ctx)));
-                            }
-                            e.addErrorSection(core::ErrorSection(lines));
-                        }
+                        e.addErrorSection(core::ErrorSection(lines));
                     }
                 }
             }
+        }
 
-            core::SymbolRef stub = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
-            stub.data(ctx)->superClass = core::Symbols::StubClass();
-            stub.data(ctx)->resultType = core::Types::untypedUntracked();
-            stub.data(ctx)->setIsModule(false);
-            stub.data(ctx)->singletonClass(ctx); // force singleton class into existence.
-            bool resolved = resolveJob(ctx, job, typeAliases, true, depth + 1);
-            return resolved;
+        core::SymbolRef stub = ctx.state.enterClassSymbol(job.out->loc, scope, job.out->original->cnst);
+        stub.data(ctx)->superClass = core::Symbols::StubClass();
+        stub.data(ctx)->resultType = core::Types::untypedUntracked();
+        stub.data(ctx)->setIsModule(false);
+        stub.data(ctx)->singletonClass(ctx); // force singleton class into existence.
+    }
+
+    static bool resolveJob(core::Context ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
+        if (job.out->typeAlias || job.out->constantSymbol().exists()) {
+            return true;
+        }
+        auto resolved = resolveConstant(ctx.withOwner(job.scope->scope), job.scope, job.out->original, typeAliases);
+        if (!resolved.exists()) {
+            return false;
         }
         if (resolved.data(ctx)->isStaticField() && resolved.data(ctx)->isStaticTypeAlias()) {
             auto fnd = typeAliases.find(resolved);
@@ -256,21 +261,31 @@ private:
                         return true;
                     }
                 }
-                if (lastRun) {
-                    if (auto e = ctx.state.beginError(resolved.data(ctx)->loc(),
-                                                      core::errors::Resolver::RecursiveTypeAlias)) {
-                        e.setHeader("Type alias expands to to an infinite type");
-                    }
-                    job.out->typeAlias = ast::MK::Constant(job.out->loc, core::Symbols::untyped());
-                    job.out->setAliasSymbol(resolved);
-                    return true;
-                }
             }
             return false;
         }
 
         job.out->setConstantSymbol(resolved);
         return true;
+    }
+
+    static bool forceResolveJob(core::MutableContext ctx, ResolutionItem &job, const TypeAliasMap &typeAliases) {
+        if (resolveJob(ctx, job, typeAliases)) {
+            return true;
+        }
+
+        int depth = 0;
+        while (depth < 256) {
+            stubOneConstantNesting(ctx, job, typeAliases);
+            if (resolveJob(ctx, job, typeAliases)) {
+                return true;
+            }
+            depth++;
+        }
+
+        Exception::raise("Too many recursive calls trying to resolve constant:\n", job.out->original->cnst.show(ctx),
+                         "\n", job.out->original->loc.file().data(ctx).path(), "\n",
+                         job.out->original->loc.toString(ctx));
     }
 
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
@@ -397,7 +412,7 @@ public:
         auto loc = c->loc;
         auto out = make_unique<ast::ConstantLit>(loc, core::Symbols::noSymbol(), std::move(c), nullptr);
         ResolutionItem job{nesting_, out.get()};
-        if (resolveJob(ctx, job, typeAliases, false)) {
+        if (resolveJob(ctx, job, typeAliases)) {
             categoryCounterInc("resolve.constants.nonancestor", "firstpass");
         } else {
             todo_.emplace_back(std::move(job));
@@ -533,7 +548,7 @@ public:
             {
                 int orig_size = todo.size();
                 auto it = remove_if(todo.begin(), todo.end(), [ctx, &typeAliases](ResolutionItem &job) -> bool {
-                    return resolveJob(ctx, job, typeAliases, false);
+                    return resolveJob(ctx, job, typeAliases);
                 });
                 todo.erase(it, todo.end());
                 progress = progress || (orig_size != todo.size());
@@ -589,7 +604,7 @@ public:
         // Note that this is missing alias stubbing, thus resolveJob needs to be able to handle missing aliases.
 
         for (auto &job : todo) {
-            auto resolved = resolveJob(ctx, job, typeAliases, true);
+            auto resolved = forceResolveJob(ctx, job, typeAliases);
             ENFORCE(resolved);
         }
 
