@@ -33,13 +33,13 @@ module Kernel
         start_or_range: Integer,
         length: Integer,
     )
-    .returns(T.nilable(T::Array[String]))
+    .returns(T.nilable(T::Array[Thread::Backtrace::Location]))
   end
   sig do
     params(
         start_or_range: T::Range[Integer],
     )
-    .returns(T.nilable(T::Array[String]))
+    .returns(T.nilable(T::Array[Thread::Backtrace::Location]))
   end
   def caller_locations(start_or_range=T.unsafe(nil), length=T.unsafe(nil)); end
 
