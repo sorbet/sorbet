@@ -359,13 +359,13 @@ class Array < Object
     type_parameters(:U).params(
         arg0: T.type_parameter(:U),
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   sig do
     params(
         blk: T.proc.params(arg0: Elem).returns(BasicObject),
     )
-    .returns(Integer)
+    .returns(T.nilable(Integer))
   end
   sig {returns(Enumerator[Elem])}
   def index(arg0=T.unsafe(nil), &blk); end
