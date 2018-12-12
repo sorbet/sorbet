@@ -72,7 +72,11 @@ string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
             if (argSym.data(gs)->isKeyword()) {
                 absl::StrAppend(&s, argSym.data(gs)->name.data(gs)->shortName(gs), ": ");
             }
-            absl::StrAppend(&s, "${", i++, "}");
+            if (argSym.data(gs)->resultType) {
+                absl::StrAppend(&s, "${", i++, ":", argSym.data(gs)->resultType->show(gs), "}");
+            } else {
+                absl::StrAppend(&s, "${", i++, "}");
+            }
             typeAndArgNames.emplace_back(s);
         }
     }
