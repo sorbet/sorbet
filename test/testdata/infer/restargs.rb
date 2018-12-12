@@ -1,7 +1,7 @@
 # typed: true
 
 class A
-  extend T::Helpers
+  extend T::Sig
 
   # Repeated argument is typed using element type
   sig {params(xs: Integer).void}

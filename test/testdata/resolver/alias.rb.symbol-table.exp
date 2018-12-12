@@ -16,7 +16,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::Foo#bar (a) -> Integer @ test/testdata/resolver/alias.rb:7
       argument ::Foo#bar#a<> -> Integer @ test/testdata/resolver/alias.rb:6
     method ::Foo#react () -> String @ test/testdata/resolver/alias.rb:14
-  class ::<Class:Foo> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/alias.rb:2
+  class ::<Class:Foo> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/alias.rb:2
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:6
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:13
     method ::<Class:Foo>#<block> () @ test/testdata/resolver/alias.rb:27

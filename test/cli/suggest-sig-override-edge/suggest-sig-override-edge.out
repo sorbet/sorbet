@@ -2,7 +2,7 @@
 
 # initialize can be overriden without overridable/override
 class ParentInitialize
-  extend T::Helpers
+  extend T::Sig
   sig {void}
   def initialize; end
 end
@@ -14,7 +14,7 @@ end
 # Weird edge cases in string parsing for adding 'overridable.'
 class ParentNeedsOverridable
   # Every sig here should have `generated.overridable.` added to it.
-  extend T::Helpers
+  extend T::Sig
 
   sig {implementation.generated.overridable.void}
   def just_void; end
@@ -64,7 +64,7 @@ end
 
 # Doesn't need overridable because parent doesn't have a sig
 class DoesntNeedOverridable
-  extend T::Helpers
+  extend T::Sig
   # random words to trip up our hacky text search:
   # void return sig params generated
   sig {generated.returns(NilClass)}
@@ -72,7 +72,7 @@ class DoesntNeedOverridable
 end
 
 class ChildOfDoesntNeedOverridable < DoesntNeedOverridable
-  extend T::Helpers
+  extend T::Sig
   sig {generated.returns(NilClass)}
   def nope; end
 end
@@ -85,7 +85,7 @@ class DoesntNeedGenerated
 end
 
 class ChildOfDoesntNeedGenerated < DoesntNeedGenerated
-  extend T::Helpers
+  extend T::Sig
   sig {generated.override.void}
   def already_overridable; end
 end
@@ -96,7 +96,7 @@ class DSLParent
 end
 
 class DSLChild < DSLParent
-  extend T::Helpers
+  extend T::Sig
   sig {generated.returns(T.nilable(String))}
   def opt_string; end
 end

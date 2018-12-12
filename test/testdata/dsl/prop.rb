@@ -14,7 +14,7 @@ class NotAODM
 end
 
 class SomeODM
-    extend T::Helpers
+    extend T::Sig
 
     prop :foo, String
 

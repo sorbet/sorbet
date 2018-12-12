@@ -1,12 +1,12 @@
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
   # <statTemp>$4: T.class_of(A)
   #
-  # <block-pre-call-temp>$5: Sorbet::Private::Builder
+  # <block-pre-call-temp>$5: RubyTyper::Void
   # dead=1
-  # <returnMethodTemp>$2: T.untyped
+  # <returnMethodTemp>$2: RubyTyper::Void
   #
   # <finalReturn>: T.noreturn
   # dead=1

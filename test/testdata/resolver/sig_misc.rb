@@ -3,7 +3,7 @@ class T1; end
 class T2; end
 
 class A
-  extend T::Helpers
+  extend T::Sig
   sig {returns(T.noreturn)}
   def noreturn
     raise "foo"
@@ -27,7 +27,9 @@ class A
     T1.new
   end
 
-  sig {params(x: T1).returns(T2)}.hithere # error: Method `params` does not exist on `T.class_of(A)`
+  sig do # error: Can not call method `hithere` on void type
+    params(x: T1).returns(T2) # error: MULTI
+  end.hithere # error: Can not call method `hithere` on void type
   def f2(x)
     T2.new
   end

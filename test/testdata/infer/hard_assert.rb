@@ -1,7 +1,7 @@
 # typed: true
 
 class Main
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(a: T.any(Integer, String)).returns(NilClass)}
     def basic(a)

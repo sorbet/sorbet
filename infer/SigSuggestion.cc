@@ -93,7 +93,7 @@ bool extendsTHelpers(core::Context ctx, core::SymbolRef enclosingClass) {
     ENFORCE(enclosingClass.exists());
     auto enclosingSingletonClass = enclosingClass.data(ctx)->lookupSingletonClass(ctx);
     ENFORCE(enclosingSingletonClass.exists());
-    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Helpers());
+    return enclosingSingletonClass.data(ctx)->derivesFrom(ctx, core::Symbols::T_Sig());
 }
 
 optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context ctx, core::SymbolRef methodSymbol) {
@@ -101,7 +101,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     auto enclosingClass = topAttachedClass(ctx, method->enclosingClass(ctx));
     if (extendsTHelpers(ctx, enclosingClass)) {
-        // No need to suggest here, because it already has 'extend T::Helpers'
+        // No need to suggest here, because it already has 'extend T::Sig'
         return nullopt;
     }
 
@@ -128,7 +128,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
 
     // Preserve the indentation of the line below us.
     string prefix(max(thisLinePadding + 2, nextLinePadding), ' ');
-    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Helpers\n", prefix)};
+    return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
 }
 
 shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,

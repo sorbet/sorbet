@@ -1,6 +1,6 @@
 # typed: strict
 
-extend T::Helpers
+extend T::Sig
 
 def foo(x)
   T::Array[Integer].new

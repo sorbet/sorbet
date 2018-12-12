@@ -1,6 +1,6 @@
 # typed: true
 class Foo
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(a: String).returns(NilClass)}
   def foo=(a)

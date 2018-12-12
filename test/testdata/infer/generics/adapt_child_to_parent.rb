@@ -14,7 +14,7 @@
  end
 
  module Foo
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(a: Integer).returns(Integer)}
     def bar(a)

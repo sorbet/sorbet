@@ -12,7 +12,7 @@ class ::<root> < ::Object () @ (test/testdata/namer/module_function.rb:2, https:
       argument ::Funcs#g#s<> -> Symbol @ test/testdata/namer/module_function.rb:10
     method ::Funcs#h (s) -> String @ test/testdata/namer/module_function.rb:16
       argument ::Funcs#h#s<> -> String @ test/testdata/namer/module_function.rb:15
-  class ::<Class:Funcs> < ::Module (<constant:Helpers>) @ test/testdata/namer/module_function.rb:2
+  class ::<Class:Funcs> < ::Module (<constant:Sig>) @ test/testdata/namer/module_function.rb:2
     method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:5
     method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:10
     method ::<Class:Funcs>#<block> () @ test/testdata/namer/module_function.rb:15

@@ -1,5 +1,5 @@
 # typed: strict
-extend T::Helpers
+extend T::Sig
 
 sig {returns(Integer)}
 def strict

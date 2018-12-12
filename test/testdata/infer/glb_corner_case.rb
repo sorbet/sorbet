@@ -4,7 +4,7 @@ class A; end;
 class B < A; end;
 class C; end;
 
-extend T::Helpers
+extend T::Sig
 
 sig {params(x: T.any(B, C)).void}
 def baz(x)

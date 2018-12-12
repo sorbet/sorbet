@@ -1,6 +1,6 @@
 # typed: true
 class Foo
-  extend T::Helpers
+  extend T::Sig
 
   A = T.type_alias(Integer)
   sig {params(a: A).returns(Integer)}

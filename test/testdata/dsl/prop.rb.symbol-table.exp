@@ -397,7 +397,7 @@ class ::<root> < ::Object () @ (test/testdata/dsl/prop.rb:2, https://git.corp.st
       argument ::SomeODM#foo2=#arg0<> -> String @ test/testdata/dsl/prop.rb:23
     method ::SomeODM#foo= (arg0) -> String @ test/testdata/dsl/prop.rb:19
       argument ::SomeODM#foo=#arg0<> -> String @ test/testdata/dsl/prop.rb:19
-  class ::<Class:SomeODM> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/dsl/prop.rb:16
+  class ::<Class:SomeODM> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/prop.rb:16
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:19
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:19
     method ::<Class:SomeODM>#<block> () @ test/testdata/dsl/prop.rb:21

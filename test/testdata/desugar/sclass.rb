@@ -50,7 +50,7 @@ class F
           @f = T.let(0, Integer)
         end
 
-        extend T::Helpers
+        extend T::Sig
 
         sig {params(f: Integer).returns(Integer)}
         attr_writer :f

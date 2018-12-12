@@ -42,7 +42,7 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_1" [shape = parallelogram];
 
     "bb::A#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(A) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(A).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(A) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(A).sig()\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_0" -> "bb::A#<static-init>_2" [style="bold"];
@@ -59,7 +59,7 @@ subgraph "cluster_::A#<static-init>" {
     "bb::A#<static-init>_2" -> "bb::A#<static-init>_3" [style="tapered"];
 
     "bb::A#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:A>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:A>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::A#<static-init>_3" -> "bb::A#<static-init>_1" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_::Bar#<static-init>" {
     "bb::Bar#<static-init>_1" [shape = parallelogram];
 
     "bb::Bar#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(Bar) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(Bar).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(Bar) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Bar).sig()\l<unconditional>\l"
     ];
 
     "bb::Bar#<static-init>_0" -> "bb::Bar#<static-init>_2" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_::Bar#<static-init>" {
     "bb::Bar#<static-init>_2" -> "bb::Bar#<static-init>_3" [style="tapered"];
 
     "bb::Bar#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Bar>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Bar>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::Bar#<static-init>_3" -> "bb::Bar#<static-init>_1" [style="bold"];

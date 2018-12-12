@@ -1,7 +1,7 @@
 # typed: true
 # MutableContext::permitOverloadDefinitions is aware of this file name. Don't rename this file.
 class HasOverloads
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     returns(T.untyped())

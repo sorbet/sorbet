@@ -36,7 +36,7 @@ class BoxChild < Box
 end
 
 class Generics0
-   extend T::Helpers
+   extend T::Sig
 
    sig {params().returns(NilClass)}
    def create()

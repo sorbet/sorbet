@@ -1,6 +1,6 @@
 # typed: strict
 
-extend T::Helpers
+extend T::Sig
 
 # This test will infinitely loop if we do not return equal references in glb.
 

@@ -1,7 +1,7 @@
 # typed: true
 
 class A
-  extend T::Helpers
+  extend T::Sig
 
   def self.foo
     yield

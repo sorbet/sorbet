@@ -335,7 +335,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_1" [shape = parallelogram];
 
     "bb::ControlFlow#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$6: Sorbet::Private::Builder = <statTemp>$5: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$6: RubyTyper::Void = <statTemp>$5: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_0" -> "bb::ControlFlow#<static-init>_2" [style="bold"];
@@ -352,7 +352,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_2" -> "bb::ControlFlow#<static-init>_3" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$4: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$22: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$23: Sorbet::Private::Builder = <statTemp>$22: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$4: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$22: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$23: RubyTyper::Void = <statTemp>$22: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_3" -> "bb::ControlFlow#<static-init>_5" [style="bold"];
@@ -369,7 +369,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_5" -> "bb::ControlFlow#<static-init>_6" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_6" [
-        label = "block[id=6]()\l<statTemp>$21: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$36: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$37: Sorbet::Private::Builder = <statTemp>$36: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=6]()\l<statTemp>$21: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$36: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$37: RubyTyper::Void = <statTemp>$36: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_6" -> "bb::ControlFlow#<static-init>_8" [style="bold"];
@@ -386,7 +386,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_8" -> "bb::ControlFlow#<static-init>_9" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_9" [
-        label = "block[id=9]()\l<statTemp>$35: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$53: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$54: Sorbet::Private::Builder = <statTemp>$53: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=9]()\l<statTemp>$35: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$53: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$54: RubyTyper::Void = <statTemp>$53: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_9" -> "bb::ControlFlow#<static-init>_11" [style="bold"];
@@ -403,7 +403,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_11" -> "bb::ControlFlow#<static-init>_12" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_12" [
-        label = "block[id=12]()\l<statTemp>$52: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$70: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$71: Sorbet::Private::Builder = <statTemp>$70: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=12]()\l<statTemp>$52: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$70: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$71: RubyTyper::Void = <statTemp>$70: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_12" -> "bb::ControlFlow#<static-init>_14" [style="bold"];
@@ -420,7 +420,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_14" -> "bb::ControlFlow#<static-init>_15" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_15" [
-        label = "block[id=15]()\l<statTemp>$69: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$87: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$88: Sorbet::Private::Builder = <statTemp>$87: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=15]()\l<statTemp>$69: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$87: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$88: RubyTyper::Void = <statTemp>$87: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_15" -> "bb::ControlFlow#<static-init>_17" [style="bold"];
@@ -437,7 +437,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_17" -> "bb::ControlFlow#<static-init>_18" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_18" [
-        label = "block[id=18]()\l<statTemp>$86: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$104: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$105: Sorbet::Private::Builder = <statTemp>$104: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=18]()\l<statTemp>$86: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$104: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$105: RubyTyper::Void = <statTemp>$104: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_18" -> "bb::ControlFlow#<static-init>_20" [style="bold"];
@@ -454,7 +454,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_20" -> "bb::ControlFlow#<static-init>_21" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_21" [
-        label = "block[id=21]()\l<statTemp>$103: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$121: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$122: Sorbet::Private::Builder = <statTemp>$121: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=21]()\l<statTemp>$103: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$121: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$122: RubyTyper::Void = <statTemp>$121: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_21" -> "bb::ControlFlow#<static-init>_23" [style="bold"];
@@ -471,7 +471,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_23" -> "bb::ControlFlow#<static-init>_24" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_24" [
-        label = "block[id=24]()\l<statTemp>$120: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$138: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$139: Sorbet::Private::Builder = <statTemp>$138: T.class_of(ControlFlow).sig()\l<unconditional>\l"
+        label = "block[id=24]()\l<statTemp>$120: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<statTemp>$138: T.class_of(ControlFlow) = self\l<block-pre-call-temp>$139: RubyTyper::Void = <statTemp>$138: T.class_of(ControlFlow).sig()\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_24" -> "bb::ControlFlow#<static-init>_26" [style="bold"];
@@ -488,7 +488,7 @@ subgraph "cluster_::ControlFlow#<static-init>" {
     "bb::ControlFlow#<static-init>_26" -> "bb::ControlFlow#<static-init>_27" [style="tapered"];
 
     "bb::ControlFlow#<static-init>_27" [
-        label = "block[id=27]()\l<statTemp>$137: T.untyped = Solve<::<Class:ControlFlow>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=27]()\l<statTemp>$137: RubyTyper::Void = Solve<::<Class:ControlFlow>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::ControlFlow#<static-init>_27" -> "bb::ControlFlow#<static-init>_1" [style="bold"];

@@ -1,6 +1,6 @@
 # typed: true
 
-extend T::Helpers
+extend T::Sig
 
 sig {returns(NilClass).generated}
 def generated

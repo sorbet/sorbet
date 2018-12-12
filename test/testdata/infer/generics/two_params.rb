@@ -15,7 +15,7 @@ class MyProc1
 end
 
 class UseProc1
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(NilClass)}
   def callit

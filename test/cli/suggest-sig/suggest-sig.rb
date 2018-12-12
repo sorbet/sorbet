@@ -1,6 +1,6 @@
 # typed: strict
 
-extend T::Helpers
+extend T::Sig
 
 def hazTwoArgs(a, b); 1; end;
 
@@ -36,7 +36,7 @@ private def root_private; end
 protected def root_protected; end
 
 class A
-  extend T::Helpers
+  extend T::Sig
 
   private def a_private; end
 
@@ -145,7 +145,7 @@ def fooCondGeneratedDo(a, cond)
 end
 
 class Abstract
-  extend T::Helpers
+  extend T::Sig
   abstract!
   sig {abstract.params(a: T.untyped).void}
   def abstract_foo(a); end

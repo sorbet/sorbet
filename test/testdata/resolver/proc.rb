@@ -1,7 +1,7 @@
 # typed: true
 
 class TestProc
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(blk: T.proc.params(i: Integer).returns(Integer))

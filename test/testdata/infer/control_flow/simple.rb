@@ -1,6 +1,6 @@
 # typed: true
 class ControlFlow
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(a: T.any(Integer, NilClass)).returns(Integer)}
   def orZero0(a)

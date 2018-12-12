@@ -1,7 +1,7 @@
 # typed: true
 
 class C
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(f: Fixed).returns(NilClass)}
   def test_it(f)

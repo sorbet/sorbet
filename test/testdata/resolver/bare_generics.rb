@@ -5,7 +5,7 @@ class Foo
 end
 
 module Test
-    extend T::Helpers
+    extend T::Sig
 
     sig do
       params(a: Foo) # error: Generic class without type arguments

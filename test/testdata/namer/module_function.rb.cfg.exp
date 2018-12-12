@@ -78,7 +78,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_1" [shape = parallelogram];
 
     "bb::Funcs#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: T.class_of(Funcs) = self\l<block-pre-call-temp>$6: Sorbet::Private::Builder = <statTemp>$5: T.class_of(Funcs).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: T.class_of(Funcs) = self\l<block-pre-call-temp>$6: RubyTyper::Void = <statTemp>$5: T.class_of(Funcs).sig()\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_0" -> "bb::Funcs#<static-init>_2" [style="bold"];
@@ -95,7 +95,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_2" -> "bb::Funcs#<static-init>_3" [style="tapered"];
 
     "bb::Funcs#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$4: T.untyped = Solve<::<Class:Funcs>#<block>>\l<statTemp>$19: T.class_of(Funcs) = self\l<statTemp>$20: Symbol(:\"f\") = :\"f\"\l<statTemp>$18: T.class_of(Funcs) = <statTemp>$19: T.class_of(Funcs).module_function(<statTemp>$20: Symbol(:\"f\"))\l<statTemp>$22: T.class_of(Funcs) = self\l<block-pre-call-temp>$23: Sorbet::Private::Builder = <statTemp>$22: T.class_of(Funcs).sig()\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$4: RubyTyper::Void = Solve<::<Class:Funcs>#<block>>\l<statTemp>$19: T.class_of(Funcs) = self\l<statTemp>$20: Symbol(:\"f\") = :\"f\"\l<statTemp>$18: T.class_of(Funcs) = <statTemp>$19: T.class_of(Funcs).module_function(<statTemp>$20: Symbol(:\"f\"))\l<statTemp>$22: T.class_of(Funcs) = self\l<block-pre-call-temp>$23: RubyTyper::Void = <statTemp>$22: T.class_of(Funcs).sig()\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_3" -> "bb::Funcs#<static-init>_5" [style="bold"];
@@ -112,7 +112,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_5" -> "bb::Funcs#<static-init>_6" [style="tapered"];
 
     "bb::Funcs#<static-init>_6" [
-        label = "block[id=6]()\l<statTemp>$21: T.untyped = Solve<::<Class:Funcs>#<block>>\l<statTemp>$36: T.class_of(Funcs) = self\l<statTemp>$35: T.class_of(Funcs) = <statTemp>$36: T.class_of(Funcs).module_function()\l<statTemp>$38: T.class_of(Funcs) = self\l<block-pre-call-temp>$39: Sorbet::Private::Builder = <statTemp>$38: T.class_of(Funcs).sig()\l<unconditional>\l"
+        label = "block[id=6]()\l<statTemp>$21: RubyTyper::Void = Solve<::<Class:Funcs>#<block>>\l<statTemp>$36: T.class_of(Funcs) = self\l<statTemp>$35: T.class_of(Funcs) = <statTemp>$36: T.class_of(Funcs).module_function()\l<statTemp>$38: T.class_of(Funcs) = self\l<block-pre-call-temp>$39: RubyTyper::Void = <statTemp>$38: T.class_of(Funcs).sig()\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_6" -> "bb::Funcs#<static-init>_8" [style="bold"];
@@ -129,7 +129,7 @@ subgraph "cluster_::Funcs#<static-init>" {
     "bb::Funcs#<static-init>_8" -> "bb::Funcs#<static-init>_9" [style="tapered"];
 
     "bb::Funcs#<static-init>_9" [
-        label = "block[id=9]()\l<statTemp>$37: T.untyped = Solve<::<Class:Funcs>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=9]()\l<statTemp>$37: RubyTyper::Void = Solve<::<Class:Funcs>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::Funcs#<static-init>_9" -> "bb::Funcs#<static-init>_1" [style="bold"];

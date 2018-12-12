@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 sig {params(x: Integer, y: Integer, z: Integer).returns(Integer)}
 def f(x, y, z)

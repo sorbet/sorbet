@@ -1,6 +1,6 @@
 # typed: true
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     returns(Integer)
@@ -10,7 +10,7 @@ class A
 end
 
 class Bar < A
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(

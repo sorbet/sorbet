@@ -4,7 +4,7 @@ end
 module B
 end
 
-extend T::Helpers
+extend T::Sig
 
 sig {params(log: T.all(A, B)).void}
 def consume(log)

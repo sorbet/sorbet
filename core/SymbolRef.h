@@ -321,7 +321,7 @@ public:
         return SymbolRef(nullptr, 63);
     }
 
-    static SymbolRef T_Helpers() {
+    static SymbolRef T_Sig() {
         return SymbolRef(nullptr, 64);
     }
 

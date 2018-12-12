@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 sig {params(a: T.nilable(Integer)).void}
 def foo1(a)

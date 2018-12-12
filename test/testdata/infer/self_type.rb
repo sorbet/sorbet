@@ -1,6 +1,6 @@
 # typed: true
 class Parent
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(T.self_type)}
   def returns_self
@@ -32,7 +32,7 @@ if a.is_a?(B)
 end
 
 class Array
-    extend T::Helpers
+    extend T::Sig
 
     sig {returns(T.self_type)}
     def returns_self
@@ -46,7 +46,7 @@ class A
 end
 
 module B
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(T.self_type)}
   def returns_self

@@ -1,6 +1,6 @@
 # typed: strict
 
-extend T::Helpers
+extend T::Sig
 
 # This test file aims to exhaustively cover the cases for suggesting a sig on a
 # child method, across all the possible builder methods that could be used on
@@ -14,7 +14,7 @@ extend T::Helpers
 # - implementation
 
 class ParentNoSig
-  extend T::Helpers
+  extend T::Sig
   def foo; end
 end
 class ChildNoSig < ParentNoSig
@@ -22,7 +22,7 @@ class ChildNoSig < ParentNoSig
 end
 
 class ParentStandardSig
-  extend T::Helpers
+  extend T::Sig
   sig {void}
   def foo; end
 end
@@ -31,7 +31,7 @@ class ChildStandardSig < ParentStandardSig
 end
 
 class ParentOverridable
-  extend T::Helpers
+  extend T::Sig
   sig {overridable.void}
   def foo; end
 end
@@ -40,7 +40,7 @@ class ChildOverridable < ParentOverridable
 end
 
 class ParentAbstract
-  extend T::Helpers
+  extend T::Sig
   abstract!
   sig {abstract.void}
   def foo; end
@@ -51,7 +51,7 @@ end
 
 class GrandParentOverride
   # Only need this class to allow `override` below.
-  extend T::Helpers
+  extend T::Sig
   sig {overridable.void}
   def foo; end
 end
@@ -65,7 +65,7 @@ end
 
 class GrandParentImplementation
   # Only need this class to allow `implementation` below.
-  extend T::Helpers
+  extend T::Sig
   abstract!
   sig {abstract.void}
   def foo; end

@@ -1,6 +1,6 @@
 # typed: true
 module A
-  extend T::Helpers
+  extend T::Sig
 
   class C1; end
   C2 = C1

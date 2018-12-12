@@ -1,6 +1,6 @@
 # typed: true
 class TestArray
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(Integer)}
   def an_int; 0; end

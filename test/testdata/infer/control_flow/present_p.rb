@@ -1,7 +1,7 @@
 # typed: true
 
 class NilClass
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(FalseClass)}
   def present?
@@ -16,7 +16,7 @@ class Object
 end
 
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(s: T.nilable(String)).returns(NilClass)}
   def test_return(s)

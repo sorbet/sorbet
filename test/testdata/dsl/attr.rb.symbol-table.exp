@@ -22,7 +22,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::TestAttr#v6 () -> String @ test/testdata/dsl/attr.rb:26
     method ::TestAttr#v6= (v6) -> String @ test/testdata/dsl/attr.rb:26
       argument ::TestAttr#v6=#v6<> -> String @ test/testdata/dsl/attr.rb:25
-  class ::<Class:TestAttr> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/dsl/attr.rb:2
+  class ::<Class:TestAttr> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/attr.rb:2
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:5
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:12
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:14

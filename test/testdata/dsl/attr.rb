@@ -1,6 +1,6 @@
 # typed: strict
 class TestAttr
-  extend T::Helpers
+  extend T::Sig
 
   sig {void}
   def initialize

@@ -1,6 +1,6 @@
 # typed: true
 class A
-  extend T::Helpers
+  extend T::Sig
 
   def _; end
 
@@ -47,7 +47,7 @@ class A
   end
 
   class ConstructorBlock
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(blk: T.proc.params(s: Symbol).returns(String)).returns(NilClass)}
     def initialize(&blk)

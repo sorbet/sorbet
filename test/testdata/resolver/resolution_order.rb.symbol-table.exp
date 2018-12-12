@@ -34,7 +34,7 @@ class ::<root> < ::Object () @ (test/testdata/resolver/resolution_order.rb:8, ht
       argument ::IsGood#foo1#a<> -> C @ test/testdata/resolver/resolution_order.rb:17
     method ::IsGood#foo2 (a) -> Integer @ test/testdata/resolver/resolution_order.rb:23
       argument ::IsGood#foo2#a<> -> A @ test/testdata/resolver/resolution_order.rb:22
-  class ::<Class:IsGood> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/resolution_order.rb:14
+  class ::<Class:IsGood> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/resolution_order.rb:14
     method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:17
     method ::<Class:IsGood>#<block> () @ test/testdata/resolver/resolution_order.rb:22
   class ::TestInheritace1 < ::B () @ test/testdata/resolver/resolution_order.rb:28

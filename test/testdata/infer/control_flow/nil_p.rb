@@ -1,6 +1,6 @@
 # typed: true
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(s: T.nilable(String)).returns(NilClass)}
   def test_return(s)

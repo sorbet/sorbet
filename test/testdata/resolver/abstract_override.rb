@@ -1,7 +1,7 @@
 # typed: true
 
 module Interface
-  extend T::Helpers
+  extend T::Sig
 
   interface!
 
@@ -14,7 +14,7 @@ module InterfaceBadChild # error: Missing definition for abstract method `Interf
 end
 
 module InterfaceChild
-  extend T::Helpers
+  extend T::Sig
 
   interface!
   include Interface
@@ -27,7 +27,7 @@ module ConcreteMixin
 end
 
 class Abstract
-  extend T::Helpers
+  extend T::Sig
 
   abstract!
   include InterfaceChild
@@ -37,7 +37,7 @@ class AbstractBadChild < Abstract # error: Missing definition for abstract metho
 end
 
 class AbstractChild < Abstract
-  extend T::Helpers
+  extend T::Sig
 
   abstract!
 end
@@ -56,7 +56,7 @@ class IndirectConcrete
 end
 
 class AbstractSingleton
-  extend T::Helpers
+  extend T::Sig
 
   abstract!
 

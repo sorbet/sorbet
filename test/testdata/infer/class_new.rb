@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 sig {returns(Class)}
 def foo

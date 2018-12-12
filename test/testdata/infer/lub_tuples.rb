@@ -1,6 +1,6 @@
 # typed: true
 class Opus::CIBot::Tasks::NotifySlackBuildComplete
-  extend T::Helpers
+  extend T::Sig
 
   def initialize()
     @determined_build_group_status_and_which = T.let(nil, T.nilable([T.any(TrueClass, FalseClass), T.nilable(String)]))

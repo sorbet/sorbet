@@ -1,5 +1,5 @@
 class <emptyTree>::<constant:Test><<constant:<todo sym>>> < (::<todo sym>)
-  self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Helpers>)
+  self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
 
   self(<constant:<todo sym>>).sig() do ||
     self(<constant:<todo sym>>).returns(<emptyTree>::<constant:T>.nilable(<emptyTree>::<constant:String>))

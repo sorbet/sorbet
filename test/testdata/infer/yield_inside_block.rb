@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 sig {params(blk: T.proc.params(x: Integer).returns(Integer)).void}
 def f(&blk)

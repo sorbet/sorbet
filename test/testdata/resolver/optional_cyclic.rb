@@ -1,7 +1,7 @@
 # typed: true
 
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: Integer, y: Integer).returns(Integer)}
   def foo(x: 0, y: x)

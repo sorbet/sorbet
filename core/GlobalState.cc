@@ -80,7 +80,7 @@ constexpr string_view implicit_module_superclass_str = "ImplicitModuleSuperclass
 constexpr string_view guessed_type_type_parameter_holder_str = "guessed_type_type_parameter_holder"sv;
 constexpr string_view private_str = "Private"sv;
 constexpr string_view builder_str = "Builder"sv;
-constexpr string_view helpers_str = "Helpers"sv;
+constexpr string_view sig_str = "Sig"sv;
 constexpr string_view utils_str = "Utils"sv;
 constexpr string_view runtime_profiled_str = "RuntimeProfiled"sv;
 
@@ -272,8 +272,8 @@ void GlobalState::initEmpty() {
     ENFORCE(id == Symbols::Sorbet_Private());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet_Private(), enterNameConstant(builder_str));
     ENFORCE(id == Symbols::Sorbet_Private_Builder());
-    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(helpers_str));
-    ENFORCE(id == Symbols::T_Helpers());
+    id = enterClassSymbol(Loc::none(), Symbols::T(), enterNameConstant(sig_str));
+    ENFORCE(id == Symbols::T_Sig());
 
     // Root members
     Symbols::root().data(*this, true)->members[enterNameConstant(no_symbol_str)] = Symbols::noSymbol();

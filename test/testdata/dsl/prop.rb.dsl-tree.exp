@@ -26,7 +26,7 @@ class <emptyTree><<constant:<root>>> < ()
   end
 
   class <emptyTree>::<constant:SomeODM><<constant:<todo sym>>> < (::<todo sym>)
-    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Helpers>)
+    self(<constant:<todo sym>>).extend(<emptyTree>::<constant:T>::<constant:Sig>)
 
     ::Sorbet.sig() do ||
       self(<constant:<todo sym>>).params({}).returns(::T.nilable(<emptyTree>::<constant:String>))

@@ -1,6 +1,6 @@
 # typed: true
 
-extend T::Helpers
+extend T::Sig
 
 sig {params(blk: T.nilable(Proc)).void}
 def f(&blk)

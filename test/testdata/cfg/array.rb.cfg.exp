@@ -60,7 +60,7 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_1" [shape = parallelogram];
 
     "bb::TestArray#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$5: T.class_of(TestArray) = self\l<block-pre-call-temp>$6: Sorbet::Private::Builder = <statTemp>$5: T.class_of(TestArray).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$5: T.class_of(TestArray) = self\l<block-pre-call-temp>$6: RubyTyper::Void = <statTemp>$5: T.class_of(TestArray).sig()\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_0" -> "bb::TestArray#<static-init>_2" [style="bold"];
@@ -77,7 +77,7 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_2" -> "bb::TestArray#<static-init>_3" [style="tapered"];
 
     "bb::TestArray#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$4: T.untyped = Solve<::<Class:TestArray>#<block>>\l<statTemp>$14: T.class_of(TestArray) = self\l<block-pre-call-temp>$15: Sorbet::Private::Builder = <statTemp>$14: T.class_of(TestArray).sig()\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$4: RubyTyper::Void = Solve<::<Class:TestArray>#<block>>\l<statTemp>$14: T.class_of(TestArray) = self\l<block-pre-call-temp>$15: RubyTyper::Void = <statTemp>$14: T.class_of(TestArray).sig()\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_3" -> "bb::TestArray#<static-init>_5" [style="bold"];
@@ -94,7 +94,7 @@ subgraph "cluster_::TestArray#<static-init>" {
     "bb::TestArray#<static-init>_5" -> "bb::TestArray#<static-init>_6" [style="tapered"];
 
     "bb::TestArray#<static-init>_6" [
-        label = "block[id=6]()\l<statTemp>$13: T.untyped = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=6]()\l<statTemp>$13: RubyTyper::Void = Solve<::<Class:TestArray>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb::TestArray#<static-init>_6" -> "bb::TestArray#<static-init>_1" [style="bold"];

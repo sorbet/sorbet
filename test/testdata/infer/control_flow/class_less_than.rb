@@ -5,7 +5,7 @@ end
 class A < S
 end
 
-extend T::Helpers
+extend T::Sig
 
 sig {params(a: Class).void}
 def simple(a)

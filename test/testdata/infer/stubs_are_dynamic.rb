@@ -1,6 +1,6 @@
 # typed: true
 class Main
-    extend T::Helpers
+    extend T::Sig
 
     sig {returns(Junk)} # error: Unable to resolve constant
     def foo

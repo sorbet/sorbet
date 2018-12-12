@@ -1,5 +1,5 @@
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: T.any(String, Integer), y: Integer).returns(Integer)}
   def a_method(x, y)

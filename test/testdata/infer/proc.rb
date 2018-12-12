@@ -1,6 +1,6 @@
 # typed: true
 class TestProcType
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(

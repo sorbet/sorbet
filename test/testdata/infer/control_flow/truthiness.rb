@@ -1,7 +1,7 @@
 # typed: true
 
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   # Simplest test case: We can remember that an `Object` variable is
   # known to be truthy

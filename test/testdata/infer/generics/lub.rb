@@ -1,7 +1,7 @@
 # typed: true
 
 class Generics
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(

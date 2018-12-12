@@ -1,6 +1,6 @@
 # typed: true
 
-extend T::Helpers
+extend T::Sig
 
 sig {params(cond: T.any(TrueClass, FalseClass)).returns(Integer)}
 def foo(cond)

@@ -1,6 +1,6 @@
 # typed: true
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   def required(x); end
   def optional(x, y=0, z=0); end

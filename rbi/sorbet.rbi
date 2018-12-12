@@ -2,15 +2,15 @@
 # in RBI files, so aren't present at runtime.
 
 class Sorbet
-  # Identical to `T::Helpers`'s `sig` in semantics, but couldn't work at
+  # Identical to `T::Sig`'s `sig` in semantics, but couldn't work at
   # runtime since it doesn't know `self`. Used in `rbi`s that don't `extend
-  # T::Helpers`.
+  # T::Sig`.
   def self.sig(*args)
   end
 end
 
 class Sorbet::Private::Builder
-  include T::Helpers
+  include T::Sig
 
   sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def type_parameters(*params); end

@@ -1,7 +1,7 @@
 # typed: true
 
 class TestSelf
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(s: self)

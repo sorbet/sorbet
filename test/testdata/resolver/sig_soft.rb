@@ -1,7 +1,7 @@
 # typed: true
 
 class Main
-    extend T::Helpers
+    extend T::Sig
 
     sig {returns(NilClass).soft(notify: 'pt')}
     def soft

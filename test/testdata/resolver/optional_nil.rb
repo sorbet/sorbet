@@ -1,7 +1,7 @@
 # typed: true
 
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: String).returns(String)}
   def foo(x = nil) # error: Argument does not have asserted type `String`

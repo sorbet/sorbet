@@ -1,6 +1,6 @@
 # typed: true
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig do
     params(failures: T::Array[T::Hash[String, String]])

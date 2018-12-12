@@ -12,7 +12,7 @@ class HasError
 end
 
 class IsGood
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(a: E::EC).returns(Integer)}
   def foo1(a)

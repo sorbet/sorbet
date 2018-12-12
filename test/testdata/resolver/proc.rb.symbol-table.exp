@@ -63,7 +63,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
             }
         ]
       } @ test/testdata/resolver/proc.rb:15
-  class ::<Class:TestProc> < ::<Class:Object> (<constant:Helpers>) @ test/testdata/resolver/proc.rb:3
+  class ::<Class:TestProc> < ::<Class:Object> (<constant:Sig>) @ test/testdata/resolver/proc.rb:3
     method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:6
     method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:14
     method ::<Class:TestProc>#<block> () @ test/testdata/resolver/proc.rb:22

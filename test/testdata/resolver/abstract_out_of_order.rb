@@ -5,7 +5,7 @@ class Impl # error: Missing definition for abstract method
 end
 
 module Interface
-  extend T::Helpers
+  extend T::Sig
 
   interface!
 

@@ -1,6 +1,6 @@
 # typed: true
 class Main
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(a: Integer).returns(Integer)}
     def foo(a)

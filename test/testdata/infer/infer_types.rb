@@ -21,7 +21,7 @@ T.assert_type!(
 
 class C; end
 
-extend T::Helpers
+extend T::Sig
 sig {returns(T::Array[T.class_of(C)])}
 def f
   [C]

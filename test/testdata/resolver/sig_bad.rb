@@ -3,7 +3,7 @@ class T1; end
 class T2; end
 
 class A
-  extend T::Helpers
+  extend T::Sig
 
   def self.unsupported; end
 

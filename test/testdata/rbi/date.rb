@@ -1,6 +1,6 @@
 # typed: true
 class A
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(t: Time).returns(Time)}
   def foo(t)

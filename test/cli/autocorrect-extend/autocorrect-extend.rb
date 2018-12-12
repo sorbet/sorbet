@@ -1,6 +1,6 @@
 # typed: strict
 
-# Don't extend T::Helpers for this one, because the class wasn't defined here.
+# Don't extend T::Sig for this one, because the class wasn't defined here.
 def top_level; end
 
 # Should only add one extend
@@ -14,7 +14,7 @@ end
 class SigAndExtendOneLine; def foo; end; end
 
 class DontSuggestExtend
-  extend T::Helpers
+  extend T::Sig
   def foo; end
 end
 

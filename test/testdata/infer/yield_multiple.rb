@@ -1,6 +1,6 @@
 # typed: true
 
-extend T::Helpers
+extend T::Sig
 sig do
   params(blk: T.proc.params(x: Integer, y: Symbol).returns(Integer))
     .void

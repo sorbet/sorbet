@@ -8,10 +8,10 @@ class O::B
   Document = O::D # error: Unable to resolve constant
   Doc1 = 1
 
-  extend T::Helpers
+  extend T::Sig
 
 
-  sig.params(arg: Document::J, # error: Unable to resolve constant `J`
-   arg1: Doc1::J).void  # error: Unable to resolve constant `J`
+  sig {params(arg: Document::J, # error: Unable to resolve constant `J`
+   arg1: Doc1::J).void}  # error: Unable to resolve constant `J`
   def self.foo(arg, arg1); end
 end

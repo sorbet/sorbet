@@ -96,7 +96,7 @@ subgraph "cluster_::Parent#<static-init>" {
     "bb::Parent#<static-init>_1" [shape = parallelogram];
 
     "bb::Parent#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(Parent) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(Parent).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(Parent) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Parent).sig()\l<unconditional>\l"
     ];
 
     "bb::Parent#<static-init>_0" -> "bb::Parent#<static-init>_2" [style="bold"];
@@ -113,7 +113,7 @@ subgraph "cluster_::Parent#<static-init>" {
     "bb::Parent#<static-init>_2" -> "bb::Parent#<static-init>_3" [style="tapered"];
 
     "bb::Parent#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Parent>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Parent>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::Parent#<static-init>_3" -> "bb::Parent#<static-init>_1" [style="bold"];
@@ -149,7 +149,7 @@ subgraph "cluster_::Generic#<static-init>" {
     "bb::Generic#<static-init>_1" [shape = parallelogram];
 
     "bb::Generic#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(Generic) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(Generic).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(Generic) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Generic).sig()\l<unconditional>\l"
     ];
 
     "bb::Generic#<static-init>_0" -> "bb::Generic#<static-init>_2" [style="bold"];
@@ -166,7 +166,7 @@ subgraph "cluster_::Generic#<static-init>" {
     "bb::Generic#<static-init>_2" -> "bb::Generic#<static-init>_3" [style="tapered"];
 
     "bb::Generic#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Generic>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Generic>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::Generic#<static-init>_3" -> "bb::Generic#<static-init>_1" [style="bold"];
@@ -202,7 +202,7 @@ subgraph "cluster_::Array#<static-init>" {
     "bb::Array#<static-init>_1" [shape = parallelogram];
 
     "bb::Array#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(Array) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(Array).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(Array) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(Array).sig()\l<unconditional>\l"
     ];
 
     "bb::Array#<static-init>_0" -> "bb::Array#<static-init>_2" [style="bold"];
@@ -219,7 +219,7 @@ subgraph "cluster_::Array#<static-init>" {
     "bb::Array#<static-init>_2" -> "bb::Array#<static-init>_3" [style="tapered"];
 
     "bb::Array#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:Array>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:Array>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::Array#<static-init>_3" -> "bb::Array#<static-init>_1" [style="bold"];
@@ -255,7 +255,7 @@ subgraph "cluster_::B#<static-init>" {
     "bb::B#<static-init>_1" [shape = parallelogram];
 
     "bb::B#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$4: T.class_of(B) = self\l<block-pre-call-temp>$5: Sorbet::Private::Builder = <statTemp>$4: T.class_of(B).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$4: T.class_of(B) = self\l<block-pre-call-temp>$5: RubyTyper::Void = <statTemp>$4: T.class_of(B).sig()\l<unconditional>\l"
     ];
 
     "bb::B#<static-init>_0" -> "bb::B#<static-init>_2" [style="bold"];
@@ -272,7 +272,7 @@ subgraph "cluster_::B#<static-init>" {
     "bb::B#<static-init>_2" -> "bb::B#<static-init>_3" [style="tapered"];
 
     "bb::B#<static-init>_3" [
-        label = "block[id=3]()\l<returnMethodTemp>$2: T.untyped = Solve<::<Class:B>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: T.untyped\l<unconditional>\l"
+        label = "block[id=3]()\l<returnMethodTemp>$2: RubyTyper::Void = Solve<::<Class:B>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: RubyTyper::Void\l<unconditional>\l"
     ];
 
     "bb::B#<static-init>_3" -> "bb::B#<static-init>_1" [style="bold"];

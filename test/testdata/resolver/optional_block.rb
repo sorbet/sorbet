@@ -2,8 +2,6 @@
 
 module M
   class C
-    # extend T::Helpers
-
     # sig {params(x: String).returns(String)}
     def self.id(x)
       x
@@ -12,8 +10,6 @@ module M
 end
 
 class Test
-  # extend T::Helpers
-
   foo = T.let(
     lambda {|x: nil| 'hello, ' + x.to_s},
     T.proc.params(x: T.nilable(String)).returns(String)

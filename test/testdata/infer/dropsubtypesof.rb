@@ -1,6 +1,6 @@
 # typed: true
 
-extend T::Helpers
+extend T::Sig
 
 # This test exercises some edge cases / bugs we found in dropSubtypesOf where
 # dropping NilClass from an OrType would cause the resulting type to not be a

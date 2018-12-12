@@ -2,7 +2,7 @@
 
 # initialize can be overriden without overridable/override
 class ParentInitialize
-  extend T::Helpers
+  extend T::Sig
   sig {void}
   def initialize; end
 end
@@ -13,7 +13,7 @@ end
 # Weird edge cases in string parsing for adding 'overridable.'
 class ParentNeedsOverridable
   # Every sig here should have `generated.overridable.` added to it.
-  extend T::Helpers
+  extend T::Sig
 
   sig {implementation.void}
   def just_void; end

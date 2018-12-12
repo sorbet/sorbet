@@ -1,6 +1,6 @@
 # typed: true
 class Gener
-  extend T::Helpers
+  extend T::Sig
 
   HydraResource = T.type_alias(DOES_NOT_EXIST) # error: Unable to resolve constant
 

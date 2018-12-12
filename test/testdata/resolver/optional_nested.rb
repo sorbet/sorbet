@@ -2,7 +2,7 @@
 
 module M
   class C
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(x: String).returns(String)}
     def self.id(x)
@@ -12,7 +12,7 @@ module M
 end
 
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: String).returns(String)}
   def foo(x = M::C.id(''))

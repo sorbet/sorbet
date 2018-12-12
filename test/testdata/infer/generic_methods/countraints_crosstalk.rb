@@ -1,6 +1,6 @@
 # typed: true
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(value: T.any(A, B)).returns(NilClass)}
   private def serialize_value(value)

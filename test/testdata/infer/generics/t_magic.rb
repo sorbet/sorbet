@@ -1,7 +1,7 @@
 # typed: true
 
 class Main
-    extend T::Helpers
+    extend T::Sig
 
     sig {params(val: T::Array[String]).returns(T.nilable(String))}
     def array(val)

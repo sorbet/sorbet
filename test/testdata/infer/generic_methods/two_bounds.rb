@@ -1,13 +1,13 @@
 # typed: true
 class A
   class Foo
-    extend T::Helpers
+    extend T::Sig
 
     sig {returns(T.any(String, NilClass))}
     def name;end
   end
 
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(repo: String, branch: String).returns(T::Array[T.nilable(String)])}
   def automatic_job_names(repo, branch)

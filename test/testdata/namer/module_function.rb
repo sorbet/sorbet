@@ -1,6 +1,6 @@
 # typed: true
 module Funcs
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: Integer).returns(Integer)}
   def f(x); x; end

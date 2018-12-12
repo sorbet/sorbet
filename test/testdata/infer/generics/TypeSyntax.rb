@@ -1,7 +1,7 @@
 # typed: true
 
 class Generics
- extend T::Helpers
+ extend T::Sig
 
  sig {params(arr: T::Array[String]).returns(T.nilable(String))}
  def read(arr)

@@ -1,7 +1,7 @@
 # typed: strict
 
 class Tempfile < File
-  extend T::Helpers
+  extend T::Sig
 
   extend T::Generic
   Elem = type_member(:out, fixed: String)

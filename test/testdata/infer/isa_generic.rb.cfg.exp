@@ -72,7 +72,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_1" [shape = parallelogram];
 
     "bb#<static-init>_0" [
-        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(Base)[T.untyped])\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Concrete)[String])\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(Base)[T.untyped])\l<statTemp>$17: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$18: T.class_of(Other) = alias <constant:Other>\l<statTemp>$16: RubyTyper::Void = <statTemp>$17: T.class_of(RubyTyper).keep_for_ide(<statTemp>$18: T.class_of(Other))\l<statTemp>$20: T.class_of(<root>) = self\l<block-pre-call-temp>$21: Sorbet::Private::Builder = <statTemp>$20: T.class_of(<root>).sig()\l<unconditional>\l"
+        label = "block[id=0]()\l<statTemp>$6: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$7: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$5: RubyTyper::Void = <statTemp>$6: T.class_of(RubyTyper).keep_for_ide(<statTemp>$7: T.class_of(Base)[T.untyped])\l<statTemp>$10: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$11: T.class_of(Concrete)[String] = alias <constant:Concrete>\l<statTemp>$9: RubyTyper::Void = <statTemp>$10: T.class_of(RubyTyper).keep_for_ide(<statTemp>$11: T.class_of(Concrete)[String])\l<statTemp>$13: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$14: T.class_of(Base)[T.untyped] = alias <constant:Base>\l<statTemp>$12: RubyTyper::Void = <statTemp>$13: T.class_of(RubyTyper).keep_for_ide(<statTemp>$14: T.class_of(Base)[T.untyped])\l<statTemp>$17: T.class_of(RubyTyper) = alias <constant:RubyTyper>\l<statTemp>$18: T.class_of(Other) = alias <constant:Other>\l<statTemp>$16: RubyTyper::Void = <statTemp>$17: T.class_of(RubyTyper).keep_for_ide(<statTemp>$18: T.class_of(Other))\l<statTemp>$20: T.class_of(<root>) = self\l<block-pre-call-temp>$21: RubyTyper::Void = <statTemp>$20: T.class_of(<root>).sig()\l<unconditional>\l"
     ];
 
     "bb#<static-init>_0" -> "bb#<static-init>_2" [style="bold"];
@@ -89,7 +89,7 @@ subgraph "cluster_#<static-init>" {
     "bb#<static-init>_2" -> "bb#<static-init>_3" [style="tapered"];
 
     "bb#<static-init>_3" [
-        label = "block[id=3]()\l<statTemp>$19: T.untyped = Solve<#<static-init>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
+        label = "block[id=3]()\l<statTemp>$19: RubyTyper::Void = Solve<#<static-init>#<block>>\l<finalReturn>: T.noreturn = return <returnMethodTemp>$2: NilClass\l<unconditional>\l"
     ];
 
     "bb#<static-init>_3" -> "bb#<static-init>_1" [style="bold"];

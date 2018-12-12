@@ -25,9 +25,9 @@ requires: []
  is_defining_ref=1
 [ref id=1]
  scope=[Gener]
- name=[T Helpers]
+ name=[T Sig]
  nesting=[[Gener]]
- resolved=[T Helpers]
+ resolved=[T Sig]
  loc=test/testdata/autogen/generator.rb:3
  is_defining_ref=0
 [ref id=2]

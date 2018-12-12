@@ -194,7 +194,7 @@ module RubyTyper::Void
 end
 
 class RubyTyper::ReturnTypeInference
-    extend T::Helpers
+    extend T::Sig
 
     sig do
         type_parameters(:INFERRED_RETURN_TYPE, :INFERRED_ARGUMENT_TYPE)

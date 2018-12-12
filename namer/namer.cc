@@ -568,7 +568,7 @@ public:
             if (redefinitionOk(ctx, sym)) {
                 sym.data(ctx)->addLoc(ctx, method->declLoc);
             } else {
-                if (!method->loc.file().data(ctx).isRBI()) {
+                if (!method->loc.file().data(ctx).isRBI() && !sym.data(ctx)->loc().file().data(ctx).isRBI()) {
                     if (auto e = ctx.state.beginError(method->declLoc, core::errors::Namer::RedefinitionOfMethod)) {
                         e.setHeader("`{}`: Method redefined", method->name.toString(ctx));
                         e.addErrorLine(sym.data(ctx)->loc(), "Previous definition");

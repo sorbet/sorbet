@@ -1,7 +1,7 @@
 # typed: true
 
 class Test
-  extend T::Helpers
+  extend T::Sig
 
   sig {returns(T.nilable(String))}
   attr_accessor :a

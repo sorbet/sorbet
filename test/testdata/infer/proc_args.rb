@@ -1,7 +1,7 @@
 # typed: true
 
 class Yielder
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(blk: T.proc.params(x: Integer, y: Integer).returns(T.untyped)).void}
   def yield_two_ints(&blk); end

@@ -7,7 +7,7 @@ test/cli/error-whitelist/error-whitelist.rb:6: This function does not have a `si
      6 | def foo
          ^
   Autocorrect: Use `-a` to autocorrect
-    test/cli/error-whitelist/error-whitelist.rb:6: Insert `  extend T::Helpers
+    test/cli/error-whitelist/error-whitelist.rb:6: Insert `  extend T::Sig
 `
      6 | def foo
         ^

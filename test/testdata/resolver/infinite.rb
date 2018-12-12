@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 
 S = S # error: Class alias aliases to itself
 sig {params(s: S).void}; # error: Constant `S` is not a class or type alias

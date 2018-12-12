@@ -1,7 +1,7 @@
 # typed: strict
 
 class A
-    extend T::Helpers
+    extend T::Sig
 
     abstract!
     sig {abstract.void}

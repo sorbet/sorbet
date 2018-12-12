@@ -6,7 +6,7 @@ class BasicError
 end
 
 class ComplexError
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(arg: Integer).returns(NilClass)}
   def foo(arg)
@@ -20,7 +20,7 @@ class ComplexError
 end
 
 class ErrorLines
-  extend T::Helpers
+  extend T::Sig
 
   def main(foo)
     a = case foo

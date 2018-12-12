@@ -1,6 +1,6 @@
 # typed: true
 class TestNext
-  extend T::Helpers
+  extend T::Sig
 
   def _; end
   def done?; end

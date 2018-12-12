@@ -1,5 +1,5 @@
 # typed: true
-extend T::Helpers
+extend T::Sig
 extend T::Generic
 
 sig do

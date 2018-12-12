@@ -12,7 +12,7 @@ class FalseClass
 end
 
 class TestBoolean
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(b: Boolean).returns(Boolean)}
   def test_boolean(b)

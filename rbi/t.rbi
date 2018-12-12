@@ -1,14 +1,14 @@
 # typed: strict
-module T::Helpers
+module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig {returns(Sorbet::Private::Builder)}
-  def sig; end
+  sig {params(args: T.untyped, blk: T.untyped).void}
+  def sig(*args, &blk); end
 end
 
 module T
-  extend T::Helpers
+  extend T::Sig
 
   sig {params(x: T.untyped).returns(T.untyped)}
   def self.unsafe(x); end
@@ -65,7 +65,7 @@ module T
 end
 
 module T::Generic
-  include T::Helpers
+  include T::Sig
 
   sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def type_parameters(*params); end

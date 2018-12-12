@@ -1,6 +1,6 @@
 # typed: true
 class TestArgs
-  extend T::Helpers
+  extend T::Sig
 
   def any; end
 

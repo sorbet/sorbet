@@ -244,7 +244,7 @@ ClassDef{
                 scope = EmptyTree
                 cnst = <constant:T>
               }
-              cnst = <constant:Helpers>
+              cnst = <constant:Sig>
             }
           ]
         }
