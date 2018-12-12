@@ -640,9 +640,6 @@ end
 class FalseClass < Object
 end
 
-class Fiber < Object
-end
-
 class FiberError < StandardError
 end
 
@@ -933,9 +930,6 @@ class SystemExit < Exception
 end
 
 class SystemStackError < Exception
-end
-
-class Thread < Object
 end
 
 class Thread::Backtrace < Object

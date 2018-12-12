@@ -7,9 +7,9 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Yieldr`
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/stdlib/ripper.rbi#L3: Did you mean: `Ripper`?
      3 |class Ripper
         ^^^^^^^^^^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/dir.rbi#L2: Did you mean: `Dir`?
-     2 |class Dir < Object
-        ^^^^^^^^^^^^^^^^^^
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fiber.rbi#L3: Did you mean: `Fiber`?
+     3 |class Fiber < Object
+        ^^^^^^^^^^^^^^^^^^^^
 
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
@@ -24,8 +24,8 @@ test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Intege`
 test/cli/constant-fuzzy/constant-fuzzy.rb:3: Unable to resolve constant `Int` http://go/e/5002
      3 |Yieldr.foo(Intege, Int)
                            ^^^
-    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L776: Did you mean: `IO`?
-     776 |class IO::EAGAINWaitReadable < Errno::EAGAIN
+    https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L773: Did you mean: `IO`?
+     773 |class IO::EAGAINWaitReadable < Errno::EAGAIN
                 ^^
     https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/set.rbi#L2: Did you mean: `Set`?
      2 |class Set < Object

@@ -58,7 +58,7 @@ ClassDef{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$76>()
+  def self.<static-init><<static-init>$78>()
     1
   end
 end
@@ -70,7 +70,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <static-init><<static-init>$76>
+      name = <static-init><<static-init>$78>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -213,6 +213,11 @@ ClassDef{
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/exception.rbi",
    "sigil": "Typed",
    "strict": "Typed"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/fiber.rbi",
+   "sigil": "Strict",
+   "strict": "Strict"
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/file.rbi",
@@ -376,6 +381,11 @@ ClassDef{
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/tempfile.rbi",
+   "sigil": "Strict",
+   "strict": "Strict"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/thread.rbi",
    "sigil": "Strict",
    "strict": "Strict"
   },
