@@ -119,11 +119,21 @@ struct ExceptionThrower {
     }
 };
 
-// N.B.: Also covers testing double fields.
+TEST(GenerateLSPMessagesTest, DoubleField) {
+    // Doubles can be ints or doubles.
+    parseTest<Color>("{\"red\": 0, \"green\": 1.1, \"blue\": 2.0, \"alpha\": 3}", [](auto &doc) -> void {
+        auto &color = doc->root;
+        ASSERT_EQ(0.0, color->red);
+        ASSERT_EQ(1.1, color->green);
+        ASSERT_EQ(2.0, color->blue);
+        ASSERT_EQ(3.0, color->alpha);
+    });
+}
+
 TEST(GenerateLSPMessagesTest, VariantField) {
     parseTest<CancelParams>("{\"id\": 4}", [](auto &docNumber) -> void {
         auto &cancelParamsNumber = docNumber->root;
-        auto numberId = std::get_if<double>(&cancelParamsNumber->id);
+        auto numberId = std::get_if<int>(&cancelParamsNumber->id);
         ASSERT_NE(numberId, nullptr);
         ASSERT_EQ(*numberId, 4);
         ASSERT_EQ(std::get_if<std::string>(&cancelParamsNumber->id), nullptr);
@@ -134,7 +144,7 @@ TEST(GenerateLSPMessagesTest, VariantField) {
         auto stringId = std::get_if<std::string>(&cancelParamsString->id);
         ASSERT_NE(stringId, nullptr);
         ASSERT_EQ(*stringId, "iamanid");
-        ASSERT_EQ(std::get_if<double>(&cancelParamsString->id), nullptr);
+        ASSERT_EQ(std::get_if<int>(&cancelParamsString->id), nullptr);
     });
 
     // Throws when missing.
@@ -143,14 +153,14 @@ TEST(GenerateLSPMessagesTest, VariantField) {
     // Throws when not the correct type.
     ASSERT_THROW(CancelParams::fromJSON("{\"id\": true}"), JSONTypeError);
 
-    // Double types can be ints, too.
-    ASSERT_NO_THROW(CancelParams::fromJSON("{\"id\": 4.1}"));
+    // Int types cannot be doubles.
+    ASSERT_THROW(CancelParams::fromJSON("{\"id\": 4.1}"), JSONTypeError);
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
     auto cancelParams = std::make_unique<CancelParams>();
     try {
-        cancelParams->id.emplace<double>(ExceptionThrower());
+        cancelParams->id.emplace<int>(ExceptionThrower());
     } catch (runtime_error e) {
     }
     ASSERT_THROW(cancelParams->toJSON(), MissingVariantValueError);

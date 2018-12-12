@@ -67,7 +67,7 @@ void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
         makeObject("RequestMessage",
                    {
                        makeField("jsonrpc", JSONRPCConstant),
-                       makeField("id", makeVariant({JSONDouble, JSONString})),
+                       makeField("id", makeVariant({JSONInt, JSONString})),
                        makeField("method", JSONString),
                        makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject}))),
                    },
@@ -82,7 +82,7 @@ void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
     auto ResponseMessage = makeObject("ResponseMessage",
                                       {
                                           makeField("jsonrpc", JSONRPCConstant),
-                                          makeField("id", makeVariant({JSONDouble, JSONString, JSONNull})),
+                                          makeField("id", makeVariant({JSONInt, JSONString, JSONNull})),
                                           makeField("result", makeOptional(JSONAny)),
                                           makeField("error", makeOptional(ResponseError)),
                                       },
@@ -98,7 +98,7 @@ void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
 
     auto CancelParams = makeObject("CancelParams",
                                    {
-                                       makeField("id", makeVariant({JSONDouble, JSONString})),
+                                       makeField("id", makeVariant({JSONInt, JSONString})),
                                    },
                                    classTypes);
 
@@ -412,12 +412,13 @@ void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
                                                },
                                                classTypes);
 
-    auto CodeActionCapabilities = makeObject("CodeActionCapabilities",
-                                             {
-                                                 makeField("dynamicRegistration", makeOptional(JSONBool)),
-                                                 makeField("codeActionLiteralSupport", CodeActionLiteralSupport),
-                                             },
-                                             classTypes);
+    auto CodeActionCapabilities =
+        makeObject("CodeActionCapabilities",
+                   {
+                       makeField("dynamicRegistration", makeOptional(JSONBool)),
+                       makeField("codeActionLiteralSupport", makeOptional(CodeActionLiteralSupport)),
+                   },
+                   classTypes);
 
     auto RenameCapabilities = makeObject("RenameCapabilities",
                                          {
@@ -572,36 +573,36 @@ void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
                                        },
                                        classTypes);
 
-    auto ServerCapabilities =
-        makeObject("ServerCapabilities",
-                   {
-                       makeField("textDocumentSync", makeOptional(makeVariant({TextDocumentSyncOptions, JSONInt}))),
-                       makeField("hoverProvider", makeOptional(JSONBool)),
-                       makeField("completionProvider", makeOptional(CompletionOptions)),
-                       makeField("signatureHelpProvider", makeOptional(SignatureHelpOptions)),
-                       makeField("definitionProvider", makeOptional(JSONBool)),
-                       makeField("typeDefinitionProvider",
-                                 makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
-                       makeField("implementationProvider",
-                                 makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
-                       makeField("referencesProvider", makeOptional(JSONBool)),
-                       makeField("documentHighlightProvider", makeOptional(JSONBool)),
-                       makeField("documentSymbolProvider", makeOptional(JSONBool)),
-                       makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
-                       makeField("codeActionProvider", makeOptional(makeVariant({JSONBool, CodeActionOptions}))),
-                       makeField("codeLensProvider", makeOptional(CodeLensOptions)),
-                       makeField("documentFormattingProvider", makeOptional(JSONBool)),
-                       makeField("documentRangeFormattingProvider", makeOptional(JSONBool)),
-                       makeField("documentOnTypeFormattingProvider", makeOptional(DocumentOnTypeFormattingOptions)),
-                       makeField("renameProvider", makeOptional(makeVariant({JSONBool, RenameOptions}))),
-                       makeField("documentLinkProvider", makeOptional(DocumentLinkOptions)),
-                       makeField("colorProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
-                       makeField("foldingRangeProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
-                       makeField("executeCommandProvider", makeOptional(ExecuteCommandOptions)),
-                       makeField("workspace", makeOptional(WorkspaceOptions)),
-                       makeField("experimental", makeOptional(JSONAny)),
-                   },
-                   classTypes);
+    auto ServerCapabilities = makeObject(
+        "ServerCapabilities",
+        {
+            makeField("textDocumentSync", makeOptional(makeVariant({TextDocumentSyncOptions, TextDocumentSyncKind}))),
+            makeField("hoverProvider", makeOptional(JSONBool)),
+            makeField("completionProvider", makeOptional(CompletionOptions)),
+            makeField("signatureHelpProvider", makeOptional(SignatureHelpOptions)),
+            makeField("definitionProvider", makeOptional(JSONBool)),
+            makeField("typeDefinitionProvider",
+                      makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
+            makeField("implementationProvider",
+                      makeOptional(makeVariant({JSONBool, TextDocumentAndStaticRegistrationOptions}))),
+            makeField("referencesProvider", makeOptional(JSONBool)),
+            makeField("documentHighlightProvider", makeOptional(JSONBool)),
+            makeField("documentSymbolProvider", makeOptional(JSONBool)),
+            makeField("workspaceSymbolProvider", makeOptional(JSONBool)),
+            makeField("codeActionProvider", makeOptional(makeVariant({JSONBool, CodeActionOptions}))),
+            makeField("codeLensProvider", makeOptional(CodeLensOptions)),
+            makeField("documentFormattingProvider", makeOptional(JSONBool)),
+            makeField("documentRangeFormattingProvider", makeOptional(JSONBool)),
+            makeField("documentOnTypeFormattingProvider", makeOptional(DocumentOnTypeFormattingOptions)),
+            makeField("renameProvider", makeOptional(makeVariant({JSONBool, RenameOptions}))),
+            makeField("documentLinkProvider", makeOptional(DocumentLinkOptions)),
+            makeField("colorProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
+            makeField("foldingRangeProvider", makeOptional(makeVariant({JSONBool, JSONAnyObject}))),
+            makeField("executeCommandProvider", makeOptional(ExecuteCommandOptions)),
+            makeField("workspace", makeOptional(WorkspaceOptions)),
+            makeField("experimental", makeOptional(JSONAny)),
+        },
+        classTypes);
 
     auto MessageType = makeIntEnum("MessageType",
                                    {
