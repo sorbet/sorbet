@@ -8,8 +8,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers) {
+                 WorkerPool &workers, std::istream &input, std::ostream &output)
+    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), istream(input), ostream(output) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
 }

@@ -191,6 +191,10 @@ class LSPLoop {
     std::shared_ptr<spdlog::logger> &logger;
     WorkerPool &workers;
     LSPClientCapabilities clientCapabilities;
+    /** Input stream; used by runLSP to receive LSP messages */
+    std::istream &istream;
+    /** Output stream; used by LSP to output messages */
+    std::ostream &ostream;
 
     /* Send the following document to client */
     void sendRaw(rapidjson::Document &raw);
@@ -279,7 +283,7 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
-            WorkerPool &workers);
+            WorkerPool &workers, std::istream &input, std::ostream &output);
     void runLSP();
     void processRequest(rapidjson::Document &d);
     void processRequest(const std::string &json);

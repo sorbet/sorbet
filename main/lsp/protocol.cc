@@ -39,11 +39,11 @@ bool safeGetline(istream &is, string &t) {
     }
 }
 
-bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger) {
+bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger, std::istream &istream) {
     int length = -1;
     {
         string line;
-        while (safeGetline(cin, line)) {
+        while (safeGetline(istream, line)) {
             logger->trace("raw read: {}", line);
             if (line == "") {
                 break;
@@ -58,7 +58,7 @@ bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger
     }
 
     string json(length, '\0');
-    cin.read(&json[0], length);
+    istream.read(&json[0], length);
     logger->debug("Read: {}", json);
     if (d.Parse(json.c_str()).HasParseError()) {
         logger->error("Last LSP request: `{}` is not a valid json object", json);
@@ -91,55 +91,56 @@ void LSPLoop::runLSP() {
     rapidjson::MemoryPoolAllocator<>
         inner_alloc; // we need objects created by inner thread to outlive the thread itself.
 
-    auto readerThread = runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc] {
-        // Thread that executes this lambda is called reader thread.
-        // This thread _intentionally_ does not capture `this`.
-        NotifyOnDestruction notify(mtx, guardedState.terminate);
-        while (true) {
-            rapidjson::Document d(&inner_alloc);
+    auto readerThread =
+        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc, &istream = this->istream] {
+            // Thread that executes this lambda is called reader thread.
+            // This thread _intentionally_ does not capture `this`.
+            NotifyOnDestruction notify(mtx, guardedState.terminate);
+            while (true) {
+                rapidjson::Document d(&inner_alloc);
 
-            if (!getNewRequest(d, logger)) {
-                break;
-            }
-            absl::MutexLock lck(&mtx); // guards pendingRequests & paused
-
-            const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
-
-            if (method == LSPMethod::Pause()) {
-                ENFORCE(!guardedState.paused);
-                logger->error("Pausing");
-                guardedState.paused = true;
-                continue;
-            } else if (method == LSPMethod::Resume()) {
-                logger->error("Resuming");
-                ENFORCE(guardedState.paused);
-                guardedState.paused = false;
-                continue;
-            }
-
-            if (method == LSPMethod::CancelRequest()) {
-                // see if they are cancelling request that we didn't yet even start processing.
-                rapidjson::Document canceledRequest;
-                auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
-                if (it != guardedState.pendingRequests.end()) {
-                    auto &requestToBeCancelled = *it;
-                    requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
-                    canceledRequest = move(requestToBeCancelled);
-                    guardedState.pendingRequests.erase(it);
-                    // move the cancelled request to the front
-                    auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
-                    guardedState.pendingRequests.insert(itFront, move(canceledRequest));
-                    LSPLoop::mergeDidChanges(guardedState.pendingRequests);
+                if (!getNewRequest(d, logger, istream)) {
+                    break;
                 }
-                // if we started processing it already, well... swallow the cancellation request and continue
-                // computing.
-                continue;
-            }
+                absl::MutexLock lck(&mtx); // guards pendingRequests & paused
 
-            guardedState.pendingRequests.emplace_back(move(d));
-            LSPLoop::mergeDidChanges(guardedState.pendingRequests);
-        }
-    });
+                const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
+
+                if (method == LSPMethod::Pause()) {
+                    ENFORCE(!guardedState.paused);
+                    logger->error("Pausing");
+                    guardedState.paused = true;
+                    continue;
+                } else if (method == LSPMethod::Resume()) {
+                    logger->error("Resuming");
+                    ENFORCE(guardedState.paused);
+                    guardedState.paused = false;
+                    continue;
+                }
+
+                if (method == LSPMethod::CancelRequest()) {
+                    // see if they are cancelling request that we didn't yet even start processing.
+                    rapidjson::Document canceledRequest;
+                    auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
+                    if (it != guardedState.pendingRequests.end()) {
+                        auto &requestToBeCancelled = *it;
+                        requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
+                        canceledRequest = move(requestToBeCancelled);
+                        guardedState.pendingRequests.erase(it);
+                        // move the cancelled request to the front
+                        auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
+                        guardedState.pendingRequests.insert(itFront, move(canceledRequest));
+                        LSPLoop::mergeDidChanges(guardedState.pendingRequests);
+                    }
+                    // if we started processing it already, well... swallow the cancellation request and continue
+                    // computing.
+                    continue;
+                }
+
+                guardedState.pendingRequests.emplace_back(move(d));
+                LSPLoop::mergeDidChanges(guardedState.pendingRequests);
+            }
+        });
 
     while (true) {
         rapidjson::Document doc;
@@ -311,7 +312,7 @@ void LSPLoop::sendRaw(rapidjson::Document &raw) {
     raw.Accept(writer);
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
     logger->debug("Write: {}\n", strbuf.GetString());
-    cout << outResult << flush;
+    ostream << outResult << flush;
 }
 
 void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {
