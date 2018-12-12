@@ -159,7 +159,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("error-white-list", "White list of errors to ever be reported",
                                cxxopts::value<vector<int>>(), "errorCodes");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
-                               cxxopts::value<string>()->default_value("auto"), "{ruby,typed,strict,strong,[auto]}");
+                               cxxopts::value<string>()->default_value("auto"), "{ruby,true,strict,strong,[auto]}");
     options.add_options("dev")("typed-override", "Yaml config that overrides strictness levels on files",
                                cxxopts::value<string>()->default_value(""), "filepath.yaml");
     options.add_options("dev")("store-state", "Store state into file", cxxopts::value<string>()->default_value(""),
