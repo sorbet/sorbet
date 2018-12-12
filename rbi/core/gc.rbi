@@ -21,13 +21,9 @@ module GC
   end
   def self.start(full_mark: T.unsafe(nil), immediate_sweep: T.unsafe(nil)); end
 
-  sig do
-    params(
-        arg0: T.any(Hash, Symbol),
-    )
-    .returns(T::Hash[Symbol, Integer])
-  end
-  def self.stat(arg0=T.unsafe(nil)); end
+  sig {params(arg0: T::Hash[Symbol, Integer]).returns(T::Hash[Symbol, Integer])}
+  sig {params(arg0: Symbol).returns(Integer)}
+  def self.stat(arg0={}); end
 
   sig {returns(T.any(Integer, TrueClass, FalseClass))}
   def self.stress(); end
