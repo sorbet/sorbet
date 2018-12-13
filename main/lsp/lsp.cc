@@ -34,7 +34,8 @@ public:
 
 } // namespace
 
-bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
+optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod,
+                                                            bool errorIfFileIsUntyped) {
     auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
                            d["params"]["textDocument"]["uri"].GetStringLength());
 
@@ -42,41 +43,37 @@ bool LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMet
     if (!fref.exists()) {
         sendError(d, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
-        return false;
+        return nullopt;
     }
 
     if (errorIfFileIsUntyped && fref.data(*finalGs).sigil == core::StrictLevel::Stripe) {
         sendError(d, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
             1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
-        return false;
+        return nullopt;
     }
     auto loc = lspPos2Loc(fref, d, *finalGs);
     if (!loc) {
         sendError(d, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find location at uri {} in {}", uri, forMethod.name));
-        return false;
+        return nullopt;
     }
 
-    {
-        LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
-        LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
-        vector<shared_ptr<core::File>> files;
-        files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
-        tryFastPath(files);
-    }
-
-    return true;
+    LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
+    LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
+    vector<shared_ptr<core::File>> files;
+    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
+    return tryFastPath(files);
 }
-bool LSPLoop::setupLSPQueryBySymbol(core::SymbolRef sym, const LSPMethod &forMethod) {
+optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryBySymbol(core::SymbolRef sym, const LSPMethod &forMethod) {
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
     {
         LSPQuerrySetup setup(*finalGs, core::Loc::none(), sym);
-        tryFastPath(files, true);
+        return tryFastPath(files, true);
     }
-    // this function currently always returns true, but we're keeping API symmetric to setupLSPQueryByLoc.
-    return true;
+    // this function currently always returns optional that is set, but we're keeping API symmetric to
+    // setupLSPQueryByLoc.
 }
 
 bool silenceError(core::ErrorClass what) {
@@ -86,29 +83,6 @@ bool silenceError(core::ErrorClass what) {
         return true;
     }
     return false;
-}
-
-void LSPLoop::drainDiagnostics() {
-    for (auto &e : errorQueue->drainAllErrors()) {
-        if (e->isSilenced || silenceError(e->what)) {
-            continue;
-        }
-        auto file = e->loc.file();
-        errorsAccumulated[file].emplace_back(std::move(e));
-
-        if (!updatedErrors.empty() && updatedErrors.back() == file) {
-            continue;
-        }
-        updatedErrors.emplace_back(file);
-    }
-    auto iter = errorsAccumulated.begin();
-    for (; iter != errorsAccumulated.end();) {
-        if (iter->first.exists() && iter->first.data(*initialGS).sourceType == core::File::TombStone) {
-            errorsAccumulated.erase(iter++);
-        } else {
-            ++iter;
-        }
-    }
 }
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
@@ -128,14 +102,50 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
     return false;
 }
 
-void LSPLoop::pushDiagnostics() {
-    drainDiagnostics();
+void LSPLoop::pushDiagnostics(TypecheckRun run) {
+    const auto &filesTypechecked = run.filesTypechecked;
+    std::vector<core::FileRef> errorFilesInNewRun;
+    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
-    // Dedup updates
-    fast_sort(updatedErrors);
-    updatedErrors.erase(unique(updatedErrors.begin(), updatedErrors.end()), updatedErrors.end());
+    for (auto &e : run.errors) {
+        if (e->isSilenced || silenceError(e->what)) {
+            continue;
+        }
+        auto file = e->loc.file();
+        errorsAccumulated[file].emplace_back(std::move(e));
+    }
 
-    for (auto file : updatedErrors) {
+    for (auto &accumulated : errorsAccumulated) {
+        errorFilesInNewRun.push_back(accumulated.first);
+    }
+
+    std::vector<core::FileRef> filesToUpdateErrorListFor = errorFilesInNewRun;
+
+    UnorderedSet<core::FileRef> filesTypecheckedAsSet;
+    filesTypecheckedAsSet.insert(filesTypechecked.begin(), filesTypechecked.end());
+
+    for (auto f : this->filesThatHaveErrors) {
+        if (filesTypecheckedAsSet.find(f) != filesTypecheckedAsSet.end()) {
+            // we've retypechecked this file. We can override the fact it has an error
+            // thus, we will update the error list for this file on client
+            filesToUpdateErrorListFor.push_back(f);
+        } else {
+            // we're not typecking this file, we need to remember that it had error
+            errorFilesInNewRun.push_back(f);
+        }
+    }
+
+    fast_sort(filesToUpdateErrorListFor);
+    filesToUpdateErrorListFor.erase(std::unique(filesToUpdateErrorListFor.begin(), filesToUpdateErrorListFor.end()),
+                                    filesToUpdateErrorListFor.end());
+
+    fast_sort(errorFilesInNewRun);
+    errorFilesInNewRun.erase(std::unique(errorFilesInNewRun.begin(), errorFilesInNewRun.end()),
+                             errorFilesInNewRun.end());
+
+    this->filesThatHaveErrors = errorFilesInNewRun;
+
+    for (auto file : filesToUpdateErrorListFor) {
         if (file.exists()) {
             rapidjson::Value publishDiagnosticsParams;
 
@@ -212,7 +222,6 @@ void LSPLoop::pushDiagnostics() {
             sendNotification(LSPMethod::PushDiagnostics(), publishDiagnosticsParams);
         }
     }
-    updatedErrors.clear();
 }
 
 const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),

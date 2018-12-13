@@ -9,22 +9,26 @@ using namespace std;
 ErrorQueue::ErrorQueue(spdlog::logger &logger, spdlog::logger &tracer, vector<int> errorCodeWhiteList)
     : errorFlusher(move(errorCodeWhiteList)), owner(this_thread::get_id()), logger(logger), tracer(tracer){};
 
-vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
+pair<vector<unique_ptr<core::Error>>, vector<unique_ptr<core::QueryResponse>>> ErrorQueue::drainWithQueryResponses() {
     checkOwned();
-    vector<unique_ptr<core::QueryResponse>> out;
+    vector<unique_ptr<core::QueryResponse>> outResponses;
+    vector<unique_ptr<core::Error>> out;
 
     auto collected = drainAll();
 
     out.reserve(collected.size());
     for (auto &msg : collected) {
         if (msg->kind == ErrorQueueMessage::Kind::QueryResponse) {
-            out.emplace_back(move(msg->queryResponse));
+            outResponses.emplace_back(move(msg->queryResponse));
+        }
+        if (msg->kind == ErrorQueueMessage::Kind::Error) {
+            out.emplace_back(move(msg->error));
         }
     }
 
-    stable_sort(out.begin(), out.end(), [](auto &left, auto &right) -> bool {
+    stable_sort(outResponses.begin(), outResponses.end(), [](auto &left, auto &right) -> bool {
         /* we want the most precise information to go first. Normally, they are computed in this order by construction,
-         * but threading artifact might reoder them, thus we'd like to sort them */
+         * but threading artifact might reorder them, thus we'd like to sort them */
         auto leftLength = left->termLoc.endPos() - left->termLoc.beginPos();
         auto rightLength = right->termLoc.endPos() - right->termLoc.beginPos();
         if (leftLength != rightLength) {
@@ -36,22 +40,11 @@ vector<unique_ptr<core::QueryResponse>> ErrorQueue::drainQueryResponses() {
         return left->termLoc.endPos() < right->termLoc.endPos();
     });
 
-    return out;
+    return make_pair(move(out), move(outResponses));
 }
 
 vector<unique_ptr<core::Error>> ErrorQueue::drainAllErrors() {
-    checkOwned();
-    vector<unique_ptr<core::Error>> out;
-    auto collected = drainAll();
-
-    out.reserve(collected.size());
-    for (auto &msg : collected) {
-        if (msg->kind == ErrorQueueMessage::Kind::Error) {
-            out.emplace_back(move(msg->error));
-        }
-    }
-
-    return out;
+    return move(drainWithQueryResponses().first);
 }
 
 void ErrorQueue::flushErrors(bool all) {
@@ -135,6 +128,10 @@ void ErrorQueue::checkOwned() {
     ENFORCE(owner == this_thread::get_id());
 }
 
+bool ErrorQueue::isEmpty() {
+    checkOwned();
+    return collected.empty();
+}
 vector<unique_ptr<core::ErrorQueueMessage>> ErrorQueue::drainAll() {
     checkOwned();
     auto out = drainFlushed();

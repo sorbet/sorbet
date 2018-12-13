@@ -8,8 +8,8 @@ void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Docum
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
     result.SetObject();
 
-    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
-        auto queryResponses = errorQueue->drainQueryResponses();
+    if (auto run = setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
+        auto &queryResponses = run->responses;
         if (queryResponses.empty()) {
             rapidjson::Value nullreply;
             sendResult(d, nullreply);

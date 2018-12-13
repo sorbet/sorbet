@@ -11,17 +11,17 @@ void LSPLoop::handleTextDocumentReferences(rapidjson::Value &result, rapidjson::
     // we're postponing setting the type of `result` because we want to return `null` in case we don't handle that
     // location yet.
 
-    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
-        auto queryResponses = errorQueue->drainQueryResponses();
+    if (auto run1 = setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
+        auto &queryResponses = run1->responses;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
 
             auto receiverType = resp->receiver.type;
             if (resp->kind == core::QueryResponse::Kind::CONSTANT && !resp->dispatchComponents.empty()) {
                 auto symRef = resp->dispatchComponents[0].method;
-                if (setupLSPQueryBySymbol(symRef, LSPMethod::TextDocumentRefernces())) {
+                if (auto run2 = setupLSPQueryBySymbol(symRef, LSPMethod::TextDocumentRefernces())) {
                     result.SetArray();
-                    auto queryResponses = errorQueue->drainQueryResponses();
+                    auto &queryResponses = run2->responses;
                     for (auto &q : queryResponses) {
                         result.PushBack(loc2Location(q->termLoc), alloc);
                     }

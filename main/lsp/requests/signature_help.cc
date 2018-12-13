@@ -59,8 +59,8 @@ void LSPLoop::handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Docum
     rapidjson::Value signatures;
     signatures.SetArray();
 
-    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentSignatureHelp(), false)) {
-        auto queryResponses = errorQueue->drainQueryResponses();
+    if (auto run = setupLSPQueryByLoc(d, LSPMethod::TextDocumentSignatureHelp(), false)) {
+        auto &queryResponses = run->responses;
         if (!queryResponses.empty()) {
             auto resp = move(queryResponses[0]);
             auto receiverType = resp->receiver.type;

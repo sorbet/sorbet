@@ -169,11 +169,8 @@ class LSPLoop {
     std::vector<std::unique_ptr<const ast::Expression>> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<unsigned int> globalStateHashes;
-    /** List of errors(or error clears) that have never yet been sent to LSP client */
-    std::vector<core::FileRef> updatedErrors;
-    /** LSP clients do not store errors on their side. We have to resend the entire list of errors
-     * every time we send a single new one */
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+    /** List of files that have had errors in last run*/
+    std::vector<core::FileRef> filesThatHaveErrors;
     /** Root of LSP client workspace */
     std::string rootUri;
 
@@ -212,8 +209,6 @@ class LSPLoop {
     void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
     void sendError(rapidjson::Document &forRequest, int errorCode, const std::string &errorStr);
 
-    void pushDiagnostics();
-    void drainDiagnostics();
     rapidjson::Value loc2Range(core::Loc loc);
     rapidjson::Value loc2Location(core::Loc loc);
     void addLocIfExists(rapidjson::Value &result, core::Loc loc);
@@ -226,13 +221,19 @@ class LSPLoop {
     /** Invalidate all currently cached trees and re-index them from file system.
      * This runs code that is not considered performance critical and this is expected to be slow */
     void reIndexFromFileSystem();
+    struct TypecheckRun {
+        std::vector<std::unique_ptr<core::Error>> errors;
+        std::vector<core::FileRef> filesTypechecked;
+        std::vector<std::unique_ptr<core::QueryResponse>> responses;
+    };
     /** Conservatively rerun entire pipeline without caching any trees */
-    void runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
+    TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    void tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
+    TypecheckRun tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
+
+    void pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
-    void invalidateErrorsFor(const std::vector<core::FileRef> &vec);
     bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d);
 
     core::FileRef uri2FileRef(std::string_view uri);
@@ -256,8 +257,9 @@ class LSPLoop {
     void symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out);
     std::unique_ptr<rapidjson::Value> symbolRef2DocumentSymbol(core::SymbolRef, core::FileRef filter);
     int symbolRef2SymbolKind(core::SymbolRef);
-    bool setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
-    bool setupLSPQueryBySymbol(core::SymbolRef symbol, const LSPMethod &forMethod);
+    std::optional<TypecheckRun> setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod,
+                                                   bool errorIfFileIsUntyped);
+    std::optional<TypecheckRun> setupLSPQueryBySymbol(core::SymbolRef symbol, const LSPMethod &forMethod);
     void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d);
     void handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d);
@@ -288,7 +290,6 @@ public:
     void processRequest(rapidjson::Document &d);
     void processRequest(const std::string &json);
 
-    void invalidateAllErrors();
     static std::unique_ptr<core::GlobalState> extractGlobalState(LSPLoop &&);
 };
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);

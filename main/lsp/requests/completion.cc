@@ -166,8 +166,8 @@ void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::
     rapidjson::Value items;
     items.SetArray();
 
-    if (setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
-        auto queryResponses = errorQueue->drainQueryResponses();
+    if (auto run = setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
+        auto &queryResponses = run->responses;
         if (!queryResponses.empty()) {
             auto resp = std::move(queryResponses[0]);
 

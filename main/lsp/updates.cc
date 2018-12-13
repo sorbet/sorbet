@@ -191,24 +191,6 @@ void LSPLoop::reIndexFromFileSystem() {
     }
 }
 
-void LSPLoop::invalidateAllErrors() {
-    updatedErrors.clear();
-    for (auto &e : errorsAccumulated) {
-        updatedErrors.emplace_back(e.first);
-    }
-    errorsAccumulated.clear();
-}
-
-void LSPLoop::invalidateErrorsFor(const vector<core::FileRef> &vec) {
-    for (auto f : vec) {
-        auto fnd = errorsAccumulated.find(f);
-        if (fnd != errorsAccumulated.end()) {
-            errorsAccumulated.erase(fnd);
-            updatedErrors.emplace_back(f);
-        }
-    }
-}
-
 void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
                                   vector<unique_ptr<ast::Expression>> &indexedCopies) {
     if (finalGs->lspInfoQueryLoc == core::Loc::none()) {
@@ -221,11 +203,10 @@ void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
     }
 }
 
-void LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
+LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
+    ENFORCE(initialGS->errorQueue->isEmpty());
     prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
-
-    invalidateAllErrors();
 
     vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
@@ -245,10 +226,17 @@ void LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> &changedFiles) {
     finalGs = initialGS->deepCopy(true);
     auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger);
     tryApplyDefLocSaver(finalGs, resolved);
+    vector<core::FileRef> affectedFiles;
+    for (auto &tree : resolved) {
+        ENFORCE(tree->loc.file().exists());
+        affectedFiles.push_back(tree->loc.file());
+    }
     pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
+    auto out = initialGS->errorQueue->drainWithQueryResponses();
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second)};
 }
 
-void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
@@ -296,10 +284,9 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
                 }
             }
         }
-        invalidateErrorsFor(subset);
         logger->debug("Taking happy path");
         prodCategoryCounterInc("lsp.updates", "fastpath");
-
+        ENFORCE(initialGS->errorQueue->isEmpty());
         vector<unique_ptr<ast::Expression>> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
@@ -311,8 +298,10 @@ void LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool all
         auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
         tryApplyDefLocSaver(finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
+        auto out = initialGS->errorQueue->drainWithQueryResponses();
+        return TypecheckRun{move(out.first), move(subset), move(out.second)};
     } else {
-        runSlowPath(changedFiles);
+        return runSlowPath(changedFiles);
     }
 }
 
