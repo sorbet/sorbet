@@ -23,7 +23,7 @@ class TestRescue
   def multiple_rescue_classes()
     begin
       meth
-    rescue Foo, Bar => baz # error: Unable to resolve constant
+    rescue Foo, Bar => baz # error: MULTI
       baz
     end
   end

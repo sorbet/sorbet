@@ -41,7 +41,7 @@ class Main
         with_type
         with_type(a: 1)
         with_type(a: "bad") # error: `String("bad")` doesn't match `Integer` for argument `args`
-        with_type(a: "bad", b: "bad") # error: MULTI
+        with_type(a: "bad", b: "bad2") # error: MULTI
 
         # This should assign `z`, instead of assigning `x={z: :foo}`,
         # which would happen with `y={}`

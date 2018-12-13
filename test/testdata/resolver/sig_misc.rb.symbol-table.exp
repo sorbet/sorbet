@@ -19,9 +19,8 @@ class ::<root> < ::Object () @ (test/testdata/resolver/sig_misc.rb:2, https://gi
       argument ::A#public#x<> -> T1 @ test/testdata/resolver/sig_misc.rb:52
     method ::A#test_abstract () -> T1 @ test/testdata/resolver/sig_misc.rb:76
     method ::A#test_abstract_untyped () @ test/testdata/resolver/sig_misc.rb:100
-    method ::A#test_implementation (x, y) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:81
+    method ::A#test_implementation (x) -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:81
       argument ::A#test_implementation#x<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:81
-      argument ::A#test_implementation#y<> -> T.untyped @ test/testdata/resolver/sig_misc.rb:81
     method ::A#test_junk_inside () -> RubyTyper::Void @ test/testdata/resolver/sig_misc.rb:105
     method ::A#test_kwargs (returns) -> T2 @ test/testdata/resolver/sig_misc.rb:21
       argument ::A#test_kwargs#returns<> -> T1 @ test/testdata/resolver/sig_misc.rb:18

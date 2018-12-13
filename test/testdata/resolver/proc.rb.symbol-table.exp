@@ -5,7 +5,7 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
       argument ::TestProc#bad#w<> -> AppliedType {
         klass = ::Proc1
         targs = [
-          <constant:Return> = T.untyped
+          <constant:Return> = Integer
           <constant:Arg0> = T.untyped
         ]
       } @ test/testdata/resolver/proc.rb:27

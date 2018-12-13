@@ -78,7 +78,7 @@ class A
   end
 
   sig { implementation.void }
-  def test_implementation(x, y) # error: Malformed `sig`. Type not specified for argument
+  def test_implementation(x) # error: Malformed `sig`. Type not specified for argument
   end
 
   sig {override.returns(T1)}

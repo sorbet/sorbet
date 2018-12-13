@@ -15,6 +15,6 @@ class Test
     optional(0, 1)
     optional(0, 1, 2, 3) # error: Expected: `1..3`, got: `4`
 
-    repeated() # # error: Expected: `1+`, got: `0`
+    repeated() # error: Expected: `1+`, got: `0`
   end
 end
