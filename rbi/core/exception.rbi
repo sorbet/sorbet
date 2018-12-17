@@ -14,7 +14,7 @@ class Exception < Object
   sig {returns(T::Array[Thread::Backtrace::Location])}
   def backtrace_locations(); end
 
-  sig {returns(NilClass)}
+  sig {returns(T.nilable(Exception))}
   def cause(); end
 
   sig do
