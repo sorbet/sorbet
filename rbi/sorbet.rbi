@@ -16,32 +16,32 @@ class Sorbet::Private::Builder
   def type_parameters(*params); end
 
   sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
-  def params(**params); end;
+  def params(**params); end
 
   sig {params(type: T.untyped).returns(Sorbet::Private::Builder)}
-  def returns(type); end;
+  def returns(type); end
 
   sig {returns(Sorbet::Private::Builder)}
-  def void; end;
+  def void; end
 
   sig {returns(Sorbet::Private::Builder)}
-  def generated; end;
+  def generated; end
 
   sig {params(arg: T.untyped).returns(Sorbet::Private::Builder)}
-  def checked(arg); end;
+  def checked(arg); end
 
   sig {params(params: T.untyped).returns(Sorbet::Private::Builder)}
   def soft(**params); end
 
   sig {returns(Sorbet::Private::Builder)}
-  def abstract; end;
+  def abstract; end
 
   sig {returns(Sorbet::Private::Builder)}
-  def override; end;
+  def override; end
 
   sig {returns(Sorbet::Private::Builder)}
-  def implementation; end;
+  def implementation; end
 
   sig {returns(Sorbet::Private::Builder)}
-  def overridable; end;
+  def overridable; end
 end
