@@ -192,6 +192,12 @@ class LSPLoop {
     std::istream &istream;
     /** Output stream; used by LSP to output messages */
     std::ostream &ostream;
+    /** If true, LSPLoop will typecheck test files */
+    const bool typecheckTestFiles;
+    /** If true, LSPLoop will skip configatron during type checking */
+    const bool skipConfigatron;
+    /** If true, all queries will hit the slow path. */
+    const bool disableFastPath;
 
     /* Send the following document to client */
     void sendRaw(rapidjson::Document &raw);
@@ -285,7 +291,8 @@ class LSPLoop {
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
-            WorkerPool &workers, std::istream &input, std::ostream &output);
+            WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles = false,
+            bool skipConfigatron = false, bool disableFastPath = false);
     void runLSP();
     void processRequest(rapidjson::Document &d);
     void processRequest(const std::string &json);

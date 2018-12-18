@@ -8,10 +8,14 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, std::istream &input, std::ostream &output)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), istream(input), ostream(output) {
+                 WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles,
+                 bool skipConfigatron, bool disableFastPath)
+    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), istream(input), ostream(output),
+      typecheckTestFiles(typecheckTestFiles), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
+    ENFORCE(errorQueue->ignoreFlushes,
+            "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
 }
 
 namespace {
@@ -76,7 +80,11 @@ optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryBySymbol(core::SymbolRef s
     // setupLSPQueryByLoc.
 }
 
-bool silenceError(core::ErrorClass what) {
+bool silenceError(bool disableFastPath, core::ErrorClass what) {
+    if (disableFastPath) {
+        // We only need to silence errors during the fast path.
+        return false;
+    }
     if (what == core::errors::Namer::RedefinitionOfMethod ||
         what == core::errors::Resolver::DuplicateVariableDeclaration ||
         what == core::errors::Resolver::RedefinitionOfParents) {
@@ -108,7 +116,7 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
     UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
     for (auto &e : run.errors) {
-        if (e->isSilenced || silenceError(e->what)) {
+        if (e->isSilenced || silenceError(disableFastPath, e->what)) {
             continue;
         }
         auto file = e->loc.file();

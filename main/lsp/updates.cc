@@ -21,7 +21,9 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 bool LSPLoop::isTestFile(const shared_ptr<core::File> &file) {
-    if (file->path().find("/test/") != file->path().npos) {
+    if (typecheckTestFiles) {
+        return false;
+    } else if (file->path().find("/test/") != file->path().npos) {
         return true;
     } else if (file->path().find_first_of("test/") == 0) {
         return true;
@@ -208,6 +210,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     prodCategoryCounterInc("lsp.updates", "slowpath");
     logger->debug("Taking slow path");
 
+    core::UnfreezeFileTable fileTableAccess(*initialGS);
     vector<core::FileRef> changedFileRefs;
     indexed.reserve(indexed.size() + changedFiles.size());
     for (auto &t : changedFiles) {
@@ -224,7 +227,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     }
 
     finalGs = initialGS->deepCopy(true);
-    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger);
+    auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger, skipConfigatron);
     tryApplyDefLocSaver(finalGs, resolved);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
@@ -237,6 +240,11 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
 }
 
 LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+    if (disableFastPath) {
+        logger->debug("Taking sad path because happy path is disabled.");
+        return runSlowPath(changedFiles);
+    }
+
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);

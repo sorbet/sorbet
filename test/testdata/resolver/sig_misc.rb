@@ -27,9 +27,9 @@ class A
     T1.new
   end
 
-  sig do # error: Can not call method `hithere` on void type
+  sig do
     params(x: T1).returns(T2) # error: MULTI
-  end.hithere # error: Can not call method `hithere` on void type
+  end.hithere
   def f2(x)
     T2.new
   end

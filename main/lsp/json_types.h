@@ -85,10 +85,26 @@ public:
 
     JSONDocument(std::unique_ptr<rapidjson::Document> &memoryOwner, std::unique_ptr<T> &root)
         : memoryOwner(std::move(memoryOwner)), root(std::move(root)){};
+
+    /**
+     * Casts the root object to the given type, and, if casting succeeds, moves owned items into a new
+     * JSONDocument with the given root type.
+     */
+    template <typename NEW_TYPE> optional<unique_ptr<JSONDocument<NEW_TYPE>>> dynamicCast() {
+        if (auto newRootPtr = dynamic_cast<NEW_TYPE *>(root.get())) {
+            unique_ptr<NEW_TYPE> newRoot(newRootPtr);
+            root.release();
+            return make_unique<JSONDocument<NEW_TYPE>>(memoryOwner, newRoot);
+        }
+        // Cast failed.
+        return nullopt;
+    };
 };
 
 class JSONBaseType {
 public:
+    virtual ~JSONBaseType() = default;
+
     /**
      * Converts C++ object into a string containing a stringified JSON object.
      */

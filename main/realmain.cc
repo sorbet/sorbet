@@ -44,8 +44,8 @@ shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderr_color_sink = make_stderr
 
 constexpr string_view GLOBAL_STATE_KEY = "GlobalState"sv;
 
-void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, const options::Options &options,
-                              unique_ptr<KeyValueStore> &kvstore) {
+void createInitialGlobalState(unique_ptr<core::GlobalState> &gs, shared_ptr<spd::logger> &logger,
+                              const options::Options &options, unique_ptr<KeyValueStore> &kvstore) {
     if (kvstore) {
         auto maybeGsBytes = kvstore->read(GLOBAL_STATE_KEY);
         if (maybeGsBytes) {
@@ -219,7 +219,7 @@ int realmain(int argc, char *argv[]) {
     if (!opts.cacheDir.empty()) {
         kvstore = make_unique<KeyValueStore>(Version::full_version_string, opts.cacheDir);
     }
-    createInitialGlobalState(gs, opts, kvstore);
+    createInitialGlobalState(gs, logger, opts, kvstore);
     if (opts.silenceErrors) {
         gs->silenceErrors = true;
     }

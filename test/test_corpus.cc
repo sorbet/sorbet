@@ -21,7 +21,10 @@
 #include "resolver/resolver.h"
 #include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
-#include "gtest/gtest.h"
+#include "test/LSPTest.h"
+#include "test/expectations.h"
+#include "test/lsp_test_helpers.h"
+#include "test/position_assertions.h"
 #include <algorithm>
 #include <cstdio>
 #include <dirent.h>
@@ -35,14 +38,6 @@
 
 namespace spd = spdlog;
 using namespace std;
-
-struct Expectations {
-    string folder;
-    string basename;
-    string testName;
-    vector<string> sourceFiles;
-    sorbet::UnorderedMap<string, string> expectations;
-};
 
 string singleTest;
 
@@ -537,11 +532,22 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
     for (auto &error : expectedErrors) {
         auto filePath = error.first.first.data(gs).path();
-        if (seenErrorLines.find(error.first) == seenErrorLines.end()) {
+        auto found = seenErrorLines.find(error.first);
+        if (found == seenErrorLines.end()) {
             ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected error did not happen.";
-        }
-        if (error.second.error.find("MULTI") != string::npos && seenErrorLines[error.first] == 1) {
-            ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected multiple errors, but only saw one.";
+        } else {
+            int count = found->second;
+            if (error.second.error.find("MULTI") != string::npos) {
+                if (count == 1) {
+                    ADD_FAILURE_AT(filePath.data(), error.first.second)
+                        << "Expected multiple errors, but only saw one.";
+                }
+            }
+            // TODO: Fail on duplicate errors. We currently tolerate them.
+            /* else if (count > 1) {
+                ADD_FAILURE_AT(filePath.data(), error.first.second)
+                    << "Expected error once, but found error multiple times.";
+            }*/
         }
     }
 
@@ -551,7 +557,277 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << '\n';
 }
 
+/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
+bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
+    return a != b && rangeComparison(a->range, b->range) == 0 && a->message == b->message;
+}
+
+/** Given a root URI and a URI, returns the file path relative to the repository root. */
+string filenameFromUri(const std::string &rootUri, const std::string &uri) {
+    if (uri.substr(0, rootUri.length()) != rootUri) {
+        ADD_FAILURE() << fmt::format(
+            "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
+            uri, rootUri);
+        return "";
+    }
+
+    // Remove rootUri + '/'
+    return uri.substr(rootUri.length() + 1);
+}
+
+TEST_P(LSPTest, PositionTests) {
+    string rootPath = "/Users/jvilk/stripe/pay-server";
+    string rootUri = fmt::format("file://{}", rootPath);
+
+    // filename => URI
+    sorbet::UnorderedMap<string, string> testFileUris;
+    for (auto &filename : filenames) {
+        testFileUris[filename] = fmt::format("{}/{}", rootUri, filename);
+    }
+
+    // Fake root document; used to allocate JSONAny values.
+    auto fakeRoot = make_unique<int>(0);
+    // Used to allocate JSONValues.
+    auto rapidjsonDoc = make_unique<rapidjson::Document>();
+    auto doc = make_unique<JSONDocument<int>>(rapidjsonDoc, fakeRoot);
+    int nextId = 0;
+
+    // Send 'initialize' message.
+    {
+        unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
+        auto responses = sendRequest(makeRequestMessage(doc, "initialize", nextId++, initializeParams));
+
+        // Should just have an 'initialize' response.
+        ASSERT_EQ(1, responses.size());
+        auto lspResponse = move(responses.at(0));
+
+        auto maybeDoc = assertResponseMessage(0, lspResponse);
+        if (maybeDoc.has_value()) {
+            auto &doc = *maybeDoc;
+            auto &respMsg = doc->root;
+            ASSERT_FALSE(respMsg->error.has_value());
+            ASSERT_TRUE(respMsg->result.has_value());
+
+            auto &result = *respMsg->result;
+            // TODO(jvilk): Need a better way to unwrap these.
+            auto initializeResult = InitializeResult::fromJSONValue(doc->memoryOwner->GetAllocator(), *result.get(),
+                                                                    "ResponseMessage.result");
+            checkServerCapabilities(initializeResult->capabilities);
+        }
+    }
+
+    // Complete initialization handshake with an 'initialized' message.
+    {
+        rapidjson::Value emptyObject(rapidjson::kObjectType);
+        auto initialized = make_unique<NotificationMessage>();
+        initialized->jsonrpc = "2.0";
+        initialized->method = "initialized";
+        initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
+        auto initializedResponses = sendNotification(initialized);
+        EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
+    }
+
+    // Tell LSP that we opened a bunch of brand new, empty files (the test files).
+    {
+        for (auto &filename : filenames) {
+            auto didOpenTextDocParams = make_unique<DidOpenTextDocumentParams>();
+
+            auto textDocument = make_unique<TextDocumentItem>();
+            textDocument->languageId = "ruby";
+            textDocument->version = 1;
+            textDocument->uri = testFileUris[filename];
+            textDocument->text = "";
+            didOpenTextDocParams->textDocument = move(textDocument);
+
+            unique_ptr<JSONBaseType> cast = move(didOpenTextDocParams);
+            auto responses = sendRequest(makeRequestMessage(doc, "textDocument/didOpen", nextId++, cast));
+            EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
+        }
+    }
+
+    // Tell LSP that the new files now have the contents from the test files on disk.
+    {
+        vector<unique_ptr<JSONDocument<JSONBaseType>>> allResponses;
+        for (auto &filename : filenames) {
+            auto didChangeParams = make_unique<DidChangeTextDocumentParams>();
+
+            auto textDocId = make_unique<VersionedTextDocumentIdentifier>();
+            textDocId->uri = testFileUris[filename];
+            textDocId->version = 2;
+            didChangeParams->textDocument = std::move(textDocId);
+
+            auto textDocChange = make_unique<TextDocumentContentChangeEvent>();
+            textDocChange->text = fileContents[filename];
+            didChangeParams->contentChanges.push_back(std::move(textDocChange));
+
+            auto didChangeNotif = make_unique<NotificationMessage>();
+            didChangeNotif->jsonrpc = "2.0";
+            didChangeNotif->method = "textDocument/didChange";
+            didChangeNotif->params = didChangeParams->toJSONValue(doc);
+
+            auto responses = sendNotification(didChangeNotif);
+            allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
+                                make_move_iterator(responses.end()));
+        }
+
+        // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens on
+        // the client side."
+        // Prune irrelevant diagnostics, and only keep the newest diagnostics for a file.
+        vector<unique_ptr<PublishDiagnosticsParams>> allDiagnosticsParams;
+        {
+            // filename => latest diagnostics for that file
+            sorbet::UnorderedMap<string, unique_ptr<PublishDiagnosticsParams>> latestDiagnosticParams;
+            for (auto &response : allResponses) {
+                auto maybeDoc = assertNotificationMessage("textDocument/publishDiagnostics", response);
+                if (!maybeDoc.has_value()) {
+                    continue;
+                }
+                auto &doc = *maybeDoc;
+                auto maybeDiagnosticParams = getPublishDiagnosticParams(doc);
+                ASSERT_TRUE(maybeDiagnosticParams.has_value());
+                auto &diagnosticParams = *maybeDiagnosticParams;
+                auto filename = filenameFromUri(rootUri, diagnosticParams->uri);
+                EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
+                    << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
+
+                // Will explicitly overwrite older diagnostics that are irrelevant.
+                latestDiagnosticParams[filename] = move(diagnosticParams);
+            }
+
+            // Push publishDiagnostics information into allDiagnosticsParams, and sort each's diagnostics vector.
+            for (auto &latestParam : latestDiagnosticParams) {
+                auto &filename = latestParam.first;
+                // Sort diagnostics in range, message order
+                fast_sort(latestParam.second->diagnostics,
+                          [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
+                              return errorComparison(filename, a->range, a->message, filename, b->range, b->message) ==
+                                     -1;
+                          });
+                allDiagnosticsParams.push_back(move(latestParam.second));
+            }
+        }
+
+        // Sort diagnostic messages in filename order. Now, iterating through these and their
+        // diagnostics should match the assertion sort order.
+        fast_sort(allDiagnosticsParams,
+                  [](const unique_ptr<PublishDiagnosticsParams> &a,
+                     const unique_ptr<PublishDiagnosticsParams> &b) -> bool { return a->uri.compare(b->uri) == -1; });
+
+        auto errorAssertions = getErrorAssertions();
+        auto assertionsIt = errorAssertions.begin();
+
+        for (auto &diagnosticParams : allDiagnosticsParams) {
+            auto &diagnostics = diagnosticParams->diagnostics;
+            auto diagnosticsIt = diagnostics.begin();
+            auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
+
+            // For asserting that MULTI assertions happen multiple times.
+            int multiCount = 0;
+
+            while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
+                // See if the ranges match.
+                auto &diagnostic = *diagnosticsIt;
+                auto &assertion = *assertionsIt;
+
+                // TODO: LSP tests currently remove duplicate diagnostics for parity
+                // with regular runner. Remove this check when ruby types team fixes
+                // duplicate diagnostics.
+                if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
+                    diagnosticsIt++;
+                    continue;
+                }
+                lastDiagnostic = diagnostic.get();
+
+                switch (assertion->compare(filenameFromUri(rootUri, diagnosticParams->uri), diagnostic->range)) {
+                    case 1: {
+                        // Diagnostic comes *before* this assertion, so we don't
+                        // have an assertion that matches the diagnostic.
+                        string filename = filenameFromUri(rootUri, diagnosticParams->uri);
+                        reportUnexpectedLSPError(filename, diagnostic,
+                                                 getSourceLine(filename, diagnostic->range->start->line));
+                        // We've 'consumed' the diagnostic -- nothing matches it.
+                        diagnosticsIt++;
+                        break;
+                    }
+                    case -1: {
+                        // Diagnostic comes *after* this assertion
+
+                        if (assertion->message == "MULTI") {
+                            // Assertion is a MULTI assertion; since it comes before the diagnostic,
+                            // we're done with this MULTI assertion.
+                            assertionsIt++;
+                            if (multiCount < 2) {
+                                ADD_FAILURE_AT(assertion->filename.c_str(), assertion->range->start->line)
+                                    << "MULTI assertion did not happen multiple times.";
+                            }
+                            multiCount = 0;
+                            // Re-run loop on diagnostic with next assertion.
+                            break;
+                        }
+
+                        // We don't have a diagnostic that matches the assertion.
+                        reportMissingError(assertion->filename, assertion,
+                                           getSourceLine(assertion->filename, assertion->range->start->line));
+                        // We've 'consumed' this error assertion -- nothing matches it.
+                        assertionsIt++;
+                        break;
+                    }
+                    default: {
+                        // Ranges match, so check the assertion.
+                        assertion->check(diagnostic, getSourceLine(assertion->filename, assertion->range->start->line));
+                        // We've 'consumed' the diagnostic.
+                        diagnosticsIt++;
+                        // Keep MULTI assertions around for another loop, but non-MULTI are done.
+                        // TODO(jvilk): Remove MULTI assertions in favor of multiple different assertions.
+                        if (assertion->message != "MULTI") {
+                            assertionsIt++;
+                        } else {
+                            multiCount++;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            while (diagnosticsIt != diagnostics.end()) {
+                // We had more diagnostics than error assertions.
+                // Drain dupes.
+                // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
+                if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
+                    auto &diagnostic = *diagnosticsIt;
+                    string filename = filenameFromUri(rootUri, diagnosticParams->uri);
+                    reportUnexpectedLSPError(filename, diagnostic,
+                                             getSourceLine(filename, diagnostic->range->start->line));
+                }
+                lastDiagnostic = (*diagnosticsIt).get();
+                diagnosticsIt++;
+            }
+
+            // We've finished processing diagnostics for a file. If assertionsIt still points to a
+            // MULTI assertion, process it.
+            // TODO: Remove when MULTI assertions are deprecated.
+            if (assertionsIt != errorAssertions.end() && (*assertionsIt)->message == "MULTI") {
+                if (multiCount < 2) {
+                    ADD_FAILURE_AT((*assertionsIt)->filename.c_str(), (*assertionsIt)->range->start->line)
+                        << "MULTI assertion did not happen multiple times.";
+                }
+                assertionsIt++;
+            }
+        }
+
+        while (assertionsIt != errorAssertions.end()) {
+            // Had more error assertions than diagnostics
+            reportMissingError((*assertionsIt)->filename, *assertionsIt,
+                               getSourceLine((*assertionsIt)->filename, (*assertionsIt)->range->start->line));
+            assertionsIt++;
+        }
+    }
+
+    // TODO(jvilk): Request/response assertions (like Find Def/Usages/Autocomplete)
+}
+
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(PositionTests, LSPTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
