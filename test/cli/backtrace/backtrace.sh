@@ -9,7 +9,7 @@ trap cleanup EXIT
 set -e
 
 
-main/sorbet --version &> "$outfile"
+main/sorbet --silence-dev-message --version &> "$outfile"
 if ! grep -q "with debug symbols" "$outfile"
 then
  # this is build without debug symbols. the test does not make sense for it. Let it pass
@@ -17,7 +17,7 @@ then
  exit 0;
 fi
 
-main/sorbet --simulate-crash  &> "$outfile" || true
+main/sorbet --silence-dev-message --simulate-crash  &> "$outfile" || true
 if grep -q "realmain" "$outfile"
 then
     echo "$PASS_TEXT"

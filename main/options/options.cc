@@ -156,6 +156,7 @@ cxxopts::Options buildOptions() {
     options.add_options("dev")("skip-dsl-passes", "Do not run DSL passess");
     options.add_options("dev")("wait-for-dbg", "Wait for debugger on start");
     options.add_options("dev")("simulate-crash", "Crash on start");
+    options.add_options("dev")("silence-dev-message", "Silence \"You are running a development build\" message");
     options.add_options("dev")("error-white-list", "White list of errors to ever be reported",
                                cxxopts::value<vector<int>>(), "errorCodes");
     options.add_options("dev")("typed", "Force all code to specified strictness level",
@@ -330,6 +331,7 @@ void readOptions(Options &opts, int argc, char *argv[],
         opts.silenceErrors = raw["q"].as<bool>();
         opts.suggestRuntimeProfiledType = raw["suggest-runtime-profiled"].as<bool>();
         opts.enableCounters = raw["counters"].as<bool>();
+        opts.silenceDevMessage = raw["silence-dev-message"].as<bool>();
         opts.statsdHost = raw["statsd-host"].as<string>();
         opts.statsdPort = raw["statsd-port"].as<int>();
         opts.statsdPrefix = raw["statsd-prefix"].as<string>();

@@ -202,6 +202,11 @@ int realmain(int argc, char *argv[]) {
             absl::StrAppend(&argsConcat, " ", argv[i]);
         }
         logger->debug("Running sorbet version {} with arguments: {}", Version::full_version_string, argsConcat);
+        if (!Version::isReleaseBuild && !opts.silenceDevMessage) {
+            logger->info("This is a non-release build that might be slower and do extra checks that are supposed to "
+                         "only run during development of Sorbet. Please build with `--config=release` or pass "
+                         "`--silence-dev-message` to silence this error");
+        }
     }
     WorkerPool workers(opts.threads, logger);
 

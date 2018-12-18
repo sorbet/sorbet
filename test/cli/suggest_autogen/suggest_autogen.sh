@@ -1,2 +1,2 @@
 #!/bin/bash
-main/sorbet test/cli/suggest_autogen/suggest_autogen.rb 2>&1
+main/sorbet --silence-dev-message test/cli/suggest_autogen/suggest_autogen.rb 2>&1

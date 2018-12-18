@@ -8,7 +8,7 @@ cwd="$(pwd)"
 cd "$(dirname "$tmp")" || exit 1
 cp "$tmp" suggest-sig-literal.rb
 
-"$cwd/main/sorbet" -a suggest-sig-literal.rb 2>&1
+"$cwd/main/sorbet" --silence-dev-message -a suggest-sig-literal.rb 2>&1
 
 echo
 echo --------------------------------------------------------------------------

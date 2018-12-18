@@ -1,2 +1,2 @@
 #!/bin/bash
-main/sorbet -e 'class Foo; end' -p symbol-table
+main/sorbet --silence-dev-message -e 'class Foo; end' -p symbol-table

@@ -1,2 +1,2 @@
 file=test/cli/print_generics/print_generics.rb
-main/sorbet "$file" 2>&1
+main/sorbet --silence-dev-message "$file" 2>&1

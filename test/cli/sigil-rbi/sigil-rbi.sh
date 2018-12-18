@@ -1,5 +1,5 @@
 #!/bin/bash
-main/sorbet \
+main/sorbet --silence-dev-message \
     test/cli/sigil-rbi/no_type.rbi \
     test/cli/sigil-rbi/typed.rbi \
     test/cli/sigil-rbi/strict.rbi \

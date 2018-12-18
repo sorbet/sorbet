@@ -10,6 +10,6 @@ mkdir "$dir/cache"
 cat >> "$dir/test.rb" <<EOF
 puts("hi")
 EOF
-main/sorbet --cache-dir "$dir/cache" "$dir/test.rb" 2>&1
+main/sorbet --silence-dev-message --cache-dir "$dir/cache" "$dir/test.rb" 2>&1
 echo "# typed: true" >> "$dir/test.rb"
-main/sorbet --cache-dir "$dir/cache" "$dir/test.rb" 2>&1
+main/sorbet --silence-dev-message --cache-dir "$dir/cache" "$dir/test.rb" 2>&1

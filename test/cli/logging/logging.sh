@@ -1,5 +1,5 @@
 LOG_FILE=$(mktemp)
-main/sorbet -e '1' -q --debug-log-file="$LOG_FILE"
+main/sorbet --silence-dev-message -e '1' -q --debug-log-file="$LOG_FILE"
 echo LOG BEGINS
 # only keep message parts, drop timings and the entire counter section
 sed -E "s/\\[[0-9]+\\-[0-9]+-[0-9]+ [0-9]+:[0-9]+:[0-9]+.[0-9]+\\]/TIMESTAMP/"< "$LOG_FILE" |  # replace timestamps

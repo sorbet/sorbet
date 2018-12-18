@@ -1,3 +1,3 @@
 #!/bin/bash
 
-main/sorbet test/cli/escaping/escaping.rb 2>&1
+main/sorbet --silence-dev-message test/cli/escaping/escaping.rb 2>&1

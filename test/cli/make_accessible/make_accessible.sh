@@ -1,2 +1,2 @@
 #!/bin/bash
-main/sorbet --suppress-non-critical test/cli/make_accessible/suit.rb 2>&1
+main/sorbet --silence-dev-message --suppress-non-critical test/cli/make_accessible/suit.rb 2>&1

@@ -1,3 +1,3 @@
 echo "Content-Length: 1
 
-" | main/sorbet --lsp 2>&1
+" | main/sorbet --silence-dev-message --lsp 2>&1

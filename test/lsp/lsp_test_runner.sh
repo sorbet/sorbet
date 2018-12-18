@@ -32,7 +32,7 @@ cleanup() {
 }
 trap cleanup exit
 
-main/sorbet --lsp < "$in_pipe" > "$out_pipe" &
+main/sorbet --silence-dev-message --lsp < "$in_pipe" > "$out_pipe" &
 
 # This should be
 # exec {IN_FD}>"$in_pipe"

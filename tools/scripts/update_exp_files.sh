@@ -34,7 +34,7 @@ for this_src in "${rb_src[@]}" DUMMY; do
                 args=("--stop-after=namer --skip-dsl-passes")
             fi
             if [ -e "$candidate" ]; then
-                echo bazel-bin/main/sorbet  --suppress-non-critical --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
+                echo bazel-bin/main/sorbet --silence-dev-message  --suppress-non-critical --print "$pass" --max-threads 0 "${args[@]}" "${srcs[@]}" \> "$candidate" 2\>/dev/null >> "$COMMAND_FILE"
             fi
         done
     fi

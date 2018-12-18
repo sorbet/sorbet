@@ -1,3 +1,3 @@
 #!/bin/bash
 
-main/sorbet test/cli/constant-fuzzy/constant-fuzzy.rb 2>&1
+main/sorbet --silence-dev-message test/cli/constant-fuzzy/constant-fuzzy.rb 2>&1

@@ -1,5 +1,5 @@
 #!/bin/bash
-main/sorbet -e '
+main/sorbet --silence-dev-message -e '
  foo(1 +
   2 +
   3 +

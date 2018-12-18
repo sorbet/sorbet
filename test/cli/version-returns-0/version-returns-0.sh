@@ -1,1 +1,1 @@
-main/sorbet --version &> /dev/null || echo "failed"
+main/sorbet --silence-dev-message --version &> /dev/null || echo "failed"

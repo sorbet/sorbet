@@ -1,2 +1,2 @@
 #!/bin/bash
-main/sorbet -e '1.to_' 2>&1
+main/sorbet --silence-dev-message -e '1.to_' 2>&1

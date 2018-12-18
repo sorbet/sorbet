@@ -8,7 +8,7 @@ cwd="$(pwd)"
 cd "$(dirname "$tmp")" || exit 1
 cp "$tmp" suggest-sig-garbage.rb
 
-"$cwd/main/sorbet" -a --suggest-runtime-profiled suggest-sig-garbage.rb 2>&1
+"$cwd/main/sorbet" --silence-dev-message -a --suggest-runtime-profiled suggest-sig-garbage.rb 2>&1
 
 echo
 echo --------------------------------------------------------------------------

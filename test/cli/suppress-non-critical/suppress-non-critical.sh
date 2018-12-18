@@ -1,3 +1,3 @@
 #!/bin/bash
-main/sorbet -e '!' --suppress-non-critical 2>&1
+main/sorbet --silence-dev-message -e '!' --suppress-non-critical 2>&1
 echo $?
