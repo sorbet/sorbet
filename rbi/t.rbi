@@ -3,8 +3,8 @@ module T::Sig
   # We could provide a more-complete signature, but these are already
   # parsed in C++, so there's no need to emit errors twice.
 
-  sig {params(args: T.untyped, blk: T.untyped).void}
-  def sig(*args, &blk); end
+  sig {params(blk: T.proc.void).void}
+  def sig(&blk); end
 end
 
 module T
