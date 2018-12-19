@@ -18,6 +18,7 @@ struct CounterImpl {
     const char *internKey(const char *str);
 
     void histogramAdd(const char *histogram, int key, unsigned long value);
+    void prodHistogramAdd(const char *histogram, int key, unsigned long value);
 
     void categoryCounterAdd(const char *category, const char *counter, unsigned long value);
     void prodCategoryCounterAdd(const char *category, const char *counter, unsigned long value);

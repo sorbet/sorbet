@@ -84,6 +84,8 @@ void prodCategoryCounterInc(ConstExprStr category, ConstExprStr counter);
 void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigned long value);
 void histogramInc(ConstExprStr histogram, int key);
 void histogramAdd(ConstExprStr histogram, int key, unsigned long value);
+void prodHistogramInc(ConstExprStr histogram, int key);
+void prodHistogramAdd(ConstExprStr histogram, int key, unsigned long value);
 /* Does not aggregate over measures, instead, reports them separately.
  * Use with care, as it can make us report a LOT of data. */
 void timingAdd(ConstExprStr measure, unsigned long nanos);
