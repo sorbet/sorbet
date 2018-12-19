@@ -635,23 +635,28 @@ SelfTypeParam::SelfTypeParam(const SymbolRef definition) : definition(definition
 }
 
 bool LambdaParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise(
+        "LambdaParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
-    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise(
+        "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 shared_ptr<Type> LambdaParam::getCallArguments(Context ctx, NameRef name) {
-    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise(
+        "LambdaParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 shared_ptr<Type> SelfTypeParam::getCallArguments(Context ctx, NameRef name) {
-    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise(
+        "SelfTypeParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult LambdaParam::dispatchCall(Context ctx, DispatchArgs args) {
-    Exception::raise("not implemented, not clear what it should do. Let's see this fire first.");
+    Exception::raise(
+        "LambdaParam::dispatchCall not implemented, not clear what it should do. Let's see this fire first.");
 }
 
 DispatchResult SelfTypeParam::dispatchCall(Context ctx, DispatchArgs args) {
