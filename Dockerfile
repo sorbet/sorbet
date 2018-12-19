@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y realpath time
 RUN apt-get update && apt-get install -y ragel bison ruby autoconf
 
 # Dependencies for pay-server gems
-RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev
+RUN apt-get update && apt-get install -y libpq-dev libicu-dev libsqlite3-dev libgsl0-dev
 
 RUN rbenv exec gem install bundler --no-rdoc --no-ri
 
