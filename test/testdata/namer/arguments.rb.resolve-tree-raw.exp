@@ -1,0 +1,146 @@
+InsSeq{
+  stats = [
+    Send{
+      recv = ConstantLit{
+        orig = nullptr
+        symbol = ::RubyTyper
+        typeAlias = nullptr
+      }
+      fun = keep_for_ide
+      block = nullptr
+      args = [
+        ConstantLit{
+          orig = UnresolvedConstantLit{
+            scope = EmptyTree
+            cnst = <constant:A>
+          }
+          symbol = ::A
+          typeAlias = nullptr
+        }
+      ]
+    }
+    ClassDef{
+      name = ConstantLit{
+        orig = UnresolvedConstantLit{
+          scope = EmptyTree
+          cnst = <constant:A>
+        }
+        symbol = ::A
+        typeAlias = nullptr
+      }<<constant:A>>
+      ancestors = [ConstantLit{
+          orig = nullptr
+          symbol = ::<todo sym>
+          typeAlias = nullptr
+        }]
+      rhs = [
+        MethodDef{
+          flags = 0
+          name = take_arguments<take_arguments>
+          args = [Local{
+              localVariable = a
+            }, OptionalArg{
+              expr = Local{
+                localVariable = b
+              }
+              default_ = Literal{ value = 1 }
+            }, RestArg{ expr = Local{
+              localVariable = c
+            } }, KeywordArg{ expr = Local{
+              localVariable = d
+            } }, OptionalArg{
+              expr = KeywordArg{ expr = Local{
+                localVariable = e
+              } }
+              default_ = Literal{ value = 2 }
+            }, RestArg{ expr = KeywordArg{ expr = Local{
+              localVariable = f
+            } } }, BlockArg{ expr = Local{
+              localVariable = g
+            } }]
+          rhs = InsSeq{
+            stats = [
+              Array{
+                elems = [
+                  Local{
+                    localVariable = a
+                  }
+                  Local{
+                    localVariable = b
+                  }
+                  Local{
+                    localVariable = c
+                  }
+                  Local{
+                    localVariable = d
+                  }
+                  Local{
+                    localVariable = e
+                  }
+                  Local{
+                    localVariable = f
+                  }
+                  Local{
+                    localVariable = g
+                  }
+                ]
+              }
+              Assign{
+                lhs = Local{
+                  localVariable = h
+                }
+                rhs = Literal{ value = 1 }
+              }
+            ],
+            expr = Send{
+              recv = Self{ claz = ::A }
+              fun = proc
+              block = Block {
+                args = [
+                  argument ::A#take_arguments#<block>#a<> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#b<optional> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#c<repeated> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#d<keyword> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#e<optional, keyword> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#f<keyword, repeated> @ test/testdata/namer/arguments.rb:6
+                  argument ::A#take_arguments#<block>#g<block> @ test/testdata/namer/arguments.rb:6
+                ]
+                body = Array{
+                  elems = [
+                    Local{
+                      localVariable = a$2
+                    }
+                    Local{
+                      localVariable = b$2
+                    }
+                    Local{
+                      localVariable = c$2
+                    }
+                    Local{
+                      localVariable = d$2
+                    }
+                    Local{
+                      localVariable = e$2
+                    }
+                    Local{
+                      localVariable = f$2
+                    }
+                    Local{
+                      localVariable = g$2
+                    }
+                    Local{
+                      localVariable = h$2
+                    }
+                  ]
+                }
+              }
+              args = [
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  expr = EmptyTree
+}

@@ -44,29 +44,29 @@ begin
     end
 
     def blockyield<blockyield>(<blk>)
-      self(<constant:Main>).yielder() do |i$5|
+      self(<constant:Main>).yielder() do |i|
         <blk>.call(i$5)
       end
     end
 
     def main<main>()
       begin
-        l = self(<constant:Main>).lambda() do |x$7|
+        l = self(<constant:Main>).lambda() do |x|
           begin
             self(<constant:Main>).puts(x$7)
             3
           end
         end
-        self(<constant:Main>).yielder() do |*<block-pass>$2$8|
+        self(<constant:Main>).yielder() do |*<block-pass>$2|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$2$8)
         end
-        self(<constant:Main>).blockpass() do |*<block-pass>$3$9|
+        self(<constant:Main>).blockpass() do |*<block-pass>$3|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$3$9)
         end
-        self(<constant:Main>).mixed() do |*<block-pass>$4$10|
+        self(<constant:Main>).mixed() do |*<block-pass>$4|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$4$10)
         end
-        self(<constant:Main>).blockyield() do |*<block-pass>$5$11|
+        self(<constant:Main>).blockyield() do |*<block-pass>$5|
           ::<Magic>.<call-with-splat>(l.to_proc(), :"call", <block-pass>$5$11)
         end
       end

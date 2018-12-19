@@ -457,12 +457,22 @@ string MethodDef::showRaw(const core::GlobalState &gs, int tabs) {
     printTabs(buf, tabs + 1);
     buf << "args = [";
     bool first = true;
-    for (auto &a : this->args) {
-        if (!first) {
-            buf << ", ";
+    if (this->symbol == core::Symbols::todo()) {
+        for (auto &a : this->args) {
+            if (!first) {
+                buf << ", ";
+            }
+            first = false;
+            buf << a->showRaw(gs, tabs + 2);
         }
-        first = false;
-        buf << a->showRaw(gs, tabs + 2);
+    } else {
+        for (auto &a : this->args) {
+            if (!first) {
+                buf << ", ";
+            }
+            first = false;
+            buf << a->showRaw(gs, tabs + 2);
+        }
     }
     buf << "]" << '\n';
     printTabs(buf, tabs + 1);
@@ -972,7 +982,28 @@ string Array::toString(const core::GlobalState &gs, int tabs) {
 string Block::toString(const core::GlobalState &gs, int tabs) {
     stringstream buf;
     buf << " do |";
-    printElems(gs, buf, this->args, tabs + 1);
+    if (!this->symbol.exists()) {
+        printElems(gs, buf, this->args, tabs + 1);
+    } else {
+        bool first = true;
+        for (auto &argSym : this->symbol.data(gs)->arguments()) {
+            auto &arg = argSym.data(gs);
+            if (!first) {
+                buf << ", ";
+            }
+            first = false;
+            if (arg->isBlockArgument()) {
+                buf << "&";
+            }
+            if (arg->isRepeated()) {
+                buf << "*";
+            }
+            buf << arg->name.toString(gs);
+            if (arg->isKeyword()) {
+                buf << ":";
+            }
+        }
+    }
     buf << "|" << '\n';
     printTabs(buf, tabs + 1);
     buf << this->body->toString(gs, tabs + 1) << '\n';
@@ -986,9 +1017,15 @@ string Block::showRaw(const core::GlobalState &gs, int tabs) {
     buf << nodeName() << " {" << '\n';
     printTabs(buf, tabs + 1);
     buf << "args = [" << '\n';
-    for (auto &a : this->args) {
-        printTabs(buf, tabs + 2);
-        buf << a->showRaw(gs, tabs + 2) << '\n';
+    if (!this->symbol.exists()) {
+        for (auto &a : this->args) {
+            printTabs(buf, tabs + 2);
+            buf << a->showRaw(gs, tabs + 2) << '\n';
+        }
+    } else {
+        for (auto &argSym : this->symbol.data(gs)->arguments()) {
+            buf << argSym.data(gs)->toString(gs, tabs + 2);
+        }
     }
     printTabs(buf, tabs + 1);
     buf << "]" << '\n';

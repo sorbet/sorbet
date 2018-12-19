@@ -15,7 +15,7 @@ begin
           end
         end
         b = 3
-        self(<constant:TestLocals>).proc() do |a$4, b$4|
+        self(<constant:TestLocals>).proc() do |a|
           a$4.+(b$4)
         end
       end
