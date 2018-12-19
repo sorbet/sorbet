@@ -483,9 +483,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (spec->isKeyword()) {
             break;
         }
-        if (ait + 1 == aend && hasKwargs &&
-            Types::approximate(ctx, arg->type, *constr)->derivesFrom(ctx, Symbols::Hash()) &&
-            (spec->isOptional() || spec->isRepeated())) {
+        if (ait + 1 == aend && hasKwargs && (spec->isOptional() || spec->isRepeated()) &&
+            Types::approximate(ctx, arg->type, *constr)->derivesFrom(ctx, Symbols::Hash())) {
             break;
         }
 
