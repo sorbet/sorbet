@@ -1,14 +1,14 @@
 test/cli/parallel-ordering/2.rb:3: `hi`: Method redefined http://go/e/4010
-     3 |    def hi
-            ^^^^^^
+     3 |    def hi(b)
+            ^^^^^^^^^
     test/cli/parallel-ordering/1.rb:3: Previous definition
-     3 |    def hi
-            ^^^^^^
+     3 |    def hi(a)
+            ^^^^^^^^^
 
 test/cli/parallel-ordering/3.rb:3: `hi`: Method redefined http://go/e/4010
-     3 |    def hi
-            ^^^^^^
+     3 |    def hi(c)
+            ^^^^^^^^^
     test/cli/parallel-ordering/2.rb:3: Previous definition
-     3 |    def hi
-            ^^^^^^
+     3 |    def hi(b)
+            ^^^^^^^^^
 Errors: 2

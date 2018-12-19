@@ -44,20 +44,20 @@ InsSeq{
                 localVariable = b
               }
               default_ = Literal{ value = 1 }
-            }, RestArg{ expr = Local{
+            }, Local{
               localVariable = c
-            } }, KeywordArg{ expr = Local{
+            }, Local{
               localVariable = d
-            } }, OptionalArg{
-              expr = KeywordArg{ expr = Local{
+            }, OptionalArg{
+              expr = Local{
                 localVariable = e
-              } }
+              }
               default_ = Literal{ value = 2 }
-            }, RestArg{ expr = KeywordArg{ expr = Local{
+            }, Local{
               localVariable = f
-            } } }, BlockArg{ expr = Local{
+            }, Local{
               localVariable = g
-            } }]
+            }]
           rhs = InsSeq{
             stats = [
               Array{

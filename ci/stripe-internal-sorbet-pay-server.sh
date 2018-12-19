@@ -50,6 +50,7 @@ if [ ! -f "../ci/stripe-internal-sorbet-pay-server-sha" ]; then
     exit 1
 fi
 PAY_SERVER_SHA="$(cat ../ci/stripe-internal-sorbet-pay-server-sha)"
+git fetch origin "$PAY_SERVER_SHA"
 git checkout "$PAY_SERVER_SHA"
 SORBET_MASQUERADE_SHA="$(cat sorbet/sorbet.sha)"
 (
