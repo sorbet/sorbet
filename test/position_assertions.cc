@@ -4,6 +4,7 @@
 #include "test/position_assertions.h"
 #include <regex>
 
+namespace sorbet::test {
 // Matches '    #    ^^^^^ label: dafhdsjfkhdsljkfh*&#&*%'
 // and '    # label: foobar'.
 regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z]+):[ ]+(.*)$");
@@ -11,11 +12,11 @@ regex rangeAssertionRegex("(#[ ]*)(\\^*)[ ]*([a-zA-Z]+):[ ]+(.*)$");
 regex whitespaceRegex("^[ ]*$");
 
 // Maps assertion comment names to their constructors.
-sorbet::UnorderedMap<string, function<shared_ptr<RangeAssertion>(string, unique_ptr<Range> &, int, string)>>
+UnorderedMap<string, function<shared_ptr<RangeAssertion>(string, unique_ptr<Range> &, int, string)>>
     assertionConstructors = {{"error", ErrorAssertion::make}};
 
 // Ignore any comments that have these labels (e.g. `# typed: true`).
-sorbet::UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization"};
+UnorderedSet<string> ignoredAssertionLabels = {"typed", "TODO", "linearization"};
 
 int positionComparison(const unique_ptr<Position> &a, const unique_ptr<Position> &b) {
     if (a->line < b->line) {
@@ -135,13 +136,21 @@ unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int e
     return rv;
 }
 
-vector<shared_ptr<RangeAssertion>> RangeAssertion::parseAssertions(const std::string filename,
-                                                                   const std::string &fileContents) {
+vector<shared_ptr<ErrorAssertion>>
+RangeAssertion::getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions) {
+    vector<shared_ptr<ErrorAssertion>> rv;
+    for (auto assertion : assertions) {
+        if (auto assertionOfType = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
+            rv.push_back(assertionOfType);
+        }
+    }
+    return rv;
+}
+
+vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core::File> &file) {
     vector<shared_ptr<RangeAssertion>> assertions;
 
-    // Scan file for info.
-    stringstream ss(fileContents);
-    string line;
+    int nextChar = 0;
     // 'line' is from line linenum
     int lineNum = 0;
     // The last non-comment-assertion line that we've encountered.
@@ -149,7 +158,19 @@ vector<shared_ptr<RangeAssertion>> RangeAssertion::parseAssertions(const std::st
     // line.
     int lastSourceLineNum = 0;
 
-    while (getline(ss, line, '\n')) {
+    auto source = file->source();
+    auto filename = string(file->path().begin(), file->path().end());
+    auto &lineBreaks = file->line_breaks();
+
+    for (auto lineBreak : lineBreaks) {
+        // Ignore first line break entry.
+        if (lineBreak == -1) {
+            continue;
+        }
+        string_view lineView = source.substr(nextChar, lineBreak - nextChar);
+        string line = string(lineView.begin(), lineView.end());
+        nextChar = lineBreak + 1;
+
         // Groups: Line up until first caret, carets, assertion type, assertion contents.
         smatch matches;
         if (regex_search(line, matches, rangeAssertionRegex)) {
@@ -213,3 +234,22 @@ vector<shared_ptr<RangeAssertion>> RangeAssertion::parseAssertions(const std::st
 
     return assertions;
 }
+
+vector<shared_ptr<RangeAssertion>>
+RangeAssertion::parseAssertions(const UnorderedMap<string, std::shared_ptr<core::File>> filesAndContents) {
+    vector<shared_ptr<RangeAssertion>> assertions;
+    for (auto &fileAndContents : filesAndContents) {
+        auto fileAssertions = parseAssertionsForFile(fileAndContents.second);
+        assertions.insert(assertions.end(), make_move_iterator(fileAssertions.begin()),
+                          make_move_iterator(fileAssertions.end()));
+    }
+
+    // Sort assertions in (filename, range, message) order
+    fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
+        return errorComparison(a->filename, a->range, a->toString(), b->filename, b->range, b->toString()) == -1;
+    });
+
+    return assertions;
+}
+
+} // namespace sorbet::test

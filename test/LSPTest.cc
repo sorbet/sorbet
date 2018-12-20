@@ -3,11 +3,11 @@
 #include <regex>
 #include <signal.h>
 
-#include "absl/strings/str_split.h"
 #include "main/lsp/json_types.h"
 #include "main/realmain.h"
 #include "spdlog/sinks/basic_file_sink.h"
 
+namespace sorbet::test {
 using namespace std;
 
 // Matches the Content-Length header on LSP messages.
@@ -27,10 +27,10 @@ void LSPTest::startLSP() {
     workers = make_unique<WorkerPool>(0, logger);
     typeErrorsConsole = make_shared<spd::logger>("typeDiagnostics", stderrColorSink);
     typeErrorsConsole->set_pattern("%v");
-    unique_ptr<sorbet::core::GlobalState> gs = make_unique<sorbet::core::GlobalState>(
-        (make_shared<sorbet::core::ErrorQueue>(*typeErrorsConsole, *logger, vector<int>({}))));
-    unique_ptr<sorbet::KeyValueStore> kvstore;
-    sorbet::realmain::createInitialGlobalState(gs, logger, opts, kvstore);
+    unique_ptr<core::GlobalState> gs =
+        make_unique<core::GlobalState>((make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, vector<int>({}))));
+    unique_ptr<KeyValueStore> kvstore;
+    realmain::createInitialGlobalState(gs, logger, opts, kvstore);
     // If we don't tell the errorQueue to ignore flushes, then we won't get diagnostic messages.
     gs->errorQueue->ignoreFlushes = true;
 
@@ -46,12 +46,7 @@ void LSPTest::parseTestFile() {
         filenames.insert(expectations.folder + sourceFile);
     }
 
-    for (const auto &filename : filenames) {
-        fileContents[filename] = sorbet::FileOps::read(filename);
-        auto fileAssertions = RangeAssertion::parseAssertions(filename, fileContents[filename]);
-        assertions.insert(assertions.end(), make_move_iterator(fileAssertions.begin()),
-                          make_move_iterator(fileAssertions.end()));
-    }
+    assertions = RangeAssertion::parseAssertions(expectations.sourceFileContents);
 
     if (expectations.expectations.find("autogen") != expectations.expectations.end()) {
         // When autogen is enabled, skip DSL passes...
@@ -60,17 +55,12 @@ void LSPTest::parseTestFile() {
         // won't run.
         if (assertions.size() > 0) {
             // ...and stop after the resolver phase if there are errors
-            opts.stopAfterPhase = sorbet::realmain::options::Phase::RESOLVER;
+            opts.stopAfterPhase = realmain::options::Phase::RESOLVER;
         } else {
             // ...and stop after the namer phase if there are no errors
-            opts.stopAfterPhase = sorbet::realmain::options::Phase::NAMER;
+            opts.stopAfterPhase = realmain::options::Phase::NAMER;
         }
     }
-
-    // Sort assertions in (filename, range, message) order
-    fast_sort(assertions, [](const shared_ptr<RangeAssertion> &a, const shared_ptr<RangeAssertion> &b) -> bool {
-        return errorComparison(a->filename, a->range, a->toString(), b->filename, b->range, b->toString()) == -1;
-    });
 }
 
 optional<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::parseLSPResponse(string message) {
@@ -172,34 +162,4 @@ LSPTest::sendNotification(const unique_ptr<NotificationMessage> &message) {
     return sendRaw(message->toJSON());
 }
 
-vector<shared_ptr<ErrorAssertion>> LSPTest::getErrorAssertions() {
-    vector<shared_ptr<ErrorAssertion>> rv;
-    for (auto assertion : assertions) {
-        if (auto errorAssertion = dynamic_pointer_cast<ErrorAssertion>(assertion)) {
-            rv.push_back(errorAssertion);
-        }
-    }
-    return rv;
-}
-
-string LSPTest::getSourceLine(const std::string &filename, int line) {
-    auto sourceLinesIt = sourceLines.find(filename);
-    if (sourceLinesIt == sourceLines.end()) {
-        // Lazily populate.
-        auto fileContentsIt = fileContents.find(filename);
-        if (fileContentsIt == fileContents.end()) {
-            ADD_FAILURE() << fmt::format("Server referenced invalid/unknown file `{}`", filename);
-            return "";
-        }
-        string contentsForFile = fileContentsIt->second;
-        sourceLines[filename] = absl::StrSplit(contentsForFile, "\n");
-        sourceLinesIt = sourceLines.find(filename);
-    }
-    vector<string> &sourceLines = sourceLinesIt->second;
-    if (line >= sourceLines.size()) {
-        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
-        return "";
-    } else {
-        return sourceLines.at(line);
-    }
-}
+} // namespace sorbet::test

@@ -5,6 +5,7 @@
 #include "main/lsp/json_types.h"
 #include "test/LSPTest.h"
 
+namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 /** Constructs a vector with all enum values from MIN to MAX. Assumes a contiguous enum and properly chosen min/max
@@ -49,16 +50,5 @@ assertNotificationMessage(std::string expectedMethod, unique_ptr<JSONDocument<JS
 optional<std::unique_ptr<PublishDiagnosticsParams>>
 getPublishDiagnosticParams(const std::unique_ptr<JSONDocument<NotificationMessage>> &doc);
 
-/** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
-void reportMissingError(const std::string &filename, const std::shared_ptr<ErrorAssertion> &assertion,
-                        const std::string &sourceLine);
-
-/** Adds a failure that Sorbet LSP reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedLSPError(const std::string &filename, const std::unique_ptr<Diagnostic> &diagnostic,
-                              const std::string &sourceLine);
-
-/** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedError(const std::string &filename, int lineNum, const std::string &errorMsg,
-                           const std::string &sourceLine);
-
+} // namespace sorbet::test
 #endif // TEST_LSP_TEST_HELPERS_H

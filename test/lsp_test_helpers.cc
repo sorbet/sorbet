@@ -6,8 +6,8 @@
 #include "spdlog/spdlog.h"
 #include "test/lsp_test_helpers.h"
 
+namespace sorbet::test {
 using namespace std;
-using sorbet::UnorderedSet;
 
 unique_ptr<SymbolConfiguration> makeSymbolConfiguration() {
     auto config = make_unique<SymbolConfiguration>();
@@ -243,24 +243,4 @@ getPublishDiagnosticParams(const unique_ptr<JSONDocument<NotificationMessage>> &
     return PublishDiagnosticsParams::fromJSONValue(doc->memoryOwner->GetAllocator(), *paramsValue.get(),
                                                    "NotificationMessage.params");
 }
-
-void reportMissingError(const std::string &filename, const shared_ptr<ErrorAssertion> &assertion,
-                        const string &sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), assertion->range->start->line + 1)
-        << fmt::format("Did not find expected error:\n{}",
-                       prettyPrintRangeComment(sourceLine, assertion->range, assertion->toString()));
-}
-
-void reportUnexpectedLSPError(const std::string &filename, const unique_ptr<Diagnostic> &diagnostic,
-                              const string &sourceLine) {
-    ADD_FAILURE_AT(filename.c_str(), diagnostic->range->start->line + 1) << fmt::format(
-        "Found unexpected error:\n{}",
-        prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
-}
-
-void reportUnexpectedError(const std::string &filename, int lineNum, const std::string &errorMsg,
-                           const std::string &sourceLine) {
-    auto range = RangeAssertion::makeRange(lineNum);
-    ADD_FAILURE_AT(filename.c_str(), lineNum + 1) << fmt::format(
-        "Found unexpected error:\n{}", prettyPrintRangeComment(sourceLine, range, fmt::format("error: {}", errorMsg)));
-}
+} // namespace sorbet::test

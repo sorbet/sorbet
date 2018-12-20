@@ -4,6 +4,7 @@
 #include "main/lsp/json_types.h"
 #include "main/lsp/lsp.h"
 
+namespace sorbet::test {
 using namespace std;
 using namespace sorbet::realmain::lsp;
 
@@ -27,6 +28,8 @@ int errorComparison(const std::string &aFilename, const unique_ptr<Range> &a, co
  */
 std::string prettyPrintRangeComment(const string &sourceLine, const unique_ptr<Range> &range, const string &comment);
 
+class ErrorAssertion;
+
 /**
  * An assertion that is relevant to a specific set of characters on a line.
  * If Range is set such that the start character is 0 and end character is END_OF_LINE_POS, then the assertion
@@ -37,16 +40,21 @@ public:
     static constexpr int END_OF_LINE_POS = 0xffffff;
 
     /**
-     * Returns all of the RangeAssertions contained in the file in order by range, followed by their string contents.
-     * Also sanity checks the assertion comment format.
+     * Returns all of the RangeAssertions contained in all of the files in order by filename, range, and string
+     * contents. Also sanity checks the assertion comment format. Input is a map from filename => file contents.
      */
-    static std::vector<std::shared_ptr<RangeAssertion>> parseAssertions(const std::string filename,
-                                                                        const std::string &fileContents);
+    static std::vector<std::shared_ptr<RangeAssertion>>
+    parseAssertions(const UnorderedMap<string, std::shared_ptr<core::File>> filesAndContents);
 
     // Creates a Range object for a source line and character range. Matches arbitrary subset of line if only sourceLine
     // is provided.
     static std::unique_ptr<Range> makeRange(int sourceLine, int startChar = 0,
                                             int endChar = RangeAssertion::END_OF_LINE_POS);
+
+    /**
+     * Filters a vector of assertions and returns only ErrorAssertions.
+     */
+    static vector<shared_ptr<ErrorAssertion>> getErrorAssertions(const vector<shared_ptr<RangeAssertion>> &assertions);
 
     string filename;
     unique_ptr<Range> range;
@@ -78,4 +86,5 @@ public:
     void check(const unique_ptr<Diagnostic> &diagnostic, const string &sourceLine);
 };
 
+} // namespace sorbet::test
 #endif // TEST_POSITION_ASSERTIONS_H

@@ -3,6 +3,7 @@
 // has to go first as it violates are requirements
 
 #include "absl/strings/match.h"
+#include "absl/strings/str_split.h"
 #include "ast/ast.h"
 #include "ast/desugar/Desugar.h"
 #include "ast/treemap/treemap.h"
@@ -36,6 +37,14 @@
 #include <sys/types.h>
 #include <vector>
 
+// taken from https://stackoverflow.com/questions/16491675/how-to-send-custom-message-in-google-c-testing-framework
+namespace testing::internal {
+enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
+
+extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
+} // namespace testing::internal
+
+namespace sorbet::test {
 namespace spd = spdlog;
 using namespace std;
 
@@ -45,7 +54,7 @@ vector<Expectations> getInputs(string singleTest);
 
 string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
     string res = arg.param.folder + arg.param.basename;
-    auto ext = sorbet::FileOps::getExtension(res);
+    auto ext = FileOps::getExtension(res);
     if (ext == "rb") {
         res.erase(res.end() - ext.size() - 1, res.end());
     }
@@ -56,21 +65,9 @@ string prettyPrintTest(testing::TestParamInfo<Expectations> arg) {
 class ExpectationTest : public testing::TestWithParam<Expectations> {
 public:
     ~ExpectationTest() override = default;
-    void SetUp() override {
-        exp_ = GetParam();
-    }
+    void SetUp() override {}
     void TearDown() override {}
-
-protected:
-    Expectations exp_;
 };
-
-// taken from https://stackoverflow.com/questions/16491675/how-to-send-custom-message-in-google-c-testing-framework
-namespace testing::internal {
-enum GTestColor { COLOR_DEFAULT, COLOR_RED, COLOR_GREEN, COLOR_YELLOW };
-
-extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
-} // namespace testing::internal
 
 #define PRINTF(...)                                                                        \
     do {                                                                                   \
@@ -95,16 +92,15 @@ class CFG_Collector_and_Typer {
 public:
     CFG_Collector_and_Typer(bool raw = false, bool typedSource = false) : raw(raw), typedSource(typedSource){};
     vector<string> cfgs;
-    unique_ptr<sorbet::ast::MethodDef> preTransformMethodDef(sorbet::core::Context ctx,
-                                                             unique_ptr<sorbet::ast::MethodDef> m) {
+    unique_ptr<ast::MethodDef> preTransformMethodDef(core::Context ctx, unique_ptr<ast::MethodDef> m) {
         if (m->symbol.data(ctx)->isOverloaded()) {
             return m;
         }
-        auto cfg = sorbet::cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
+        auto cfg = cfg::CFGBuilder::buildFor(ctx.withOwner(m->symbol), *m);
         if (raw || typedSource) {
-            cfg = sorbet::cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
+            cfg = cfg::CFGBuilder::addDebugEnvironment(ctx.withOwner(m->symbol), move(cfg));
         }
-        cfg = sorbet::infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
+        cfg = infer::Inference::run(ctx.withOwner(m->symbol), move(cfg));
         if (typedSource) {
             cfg->recordAnnotations(ctx);
         }
@@ -114,27 +110,210 @@ public:
     }
 };
 
-class ErrorAndPos {
-public:
-    string error;
-    int beginPos = -1;
-    int endPos = -1;
-};
-
-sorbet::UnorderedSet<string> knownPasses = {
+UnorderedSet<string> knownPasses = {
     "parse-tree",   "parse-tree-json", "ast",           "ast-raw",      "dsl-tree",         "dsl-tree-raw",
     "symbol-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
     "cfg-raw",      "typed-source",    "autogen"};
 
-unique_ptr<sorbet::ast::Expression> testSerialize(sorbet::core::GlobalState &gs,
-                                                  unique_ptr<sorbet::ast::Expression> expr) {
-    auto saved = sorbet::core::serialize::Serializer::storeExpression(gs, expr);
-    auto restored = sorbet::core::serialize::Serializer::loadExpression(gs, saved.data());
+unique_ptr<ast::Expression> testSerialize(core::GlobalState &gs, unique_ptr<ast::Expression> expr) {
+    auto saved = core::serialize::Serializer::storeExpression(gs, expr);
+    auto restored = core::serialize::Serializer::loadExpression(gs, saved.data());
     return restored;
 }
 
+/** Converts a Sorbet Detail object into an equivalent LSP Position object. */
+unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
+    auto position = make_unique<Position>();
+    // 1-indexed => 0-indexed
+    position->line = detail.line - 1;
+    position->character = detail.column - 1;
+    return position;
+}
+
+/** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
+unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const unique_ptr<core::Error> &error) {
+    auto position = error->loc.position(gs);
+    auto diagnostic = make_unique<Diagnostic>();
+    diagnostic->range = make_unique<Range>();
+    diagnostic->range->start = detailToPosition(position.first);
+    diagnostic->range->end = detailToPosition(position.second);
+    diagnostic->message = error->header;
+    return diagnostic;
+}
+
+/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
+bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
+    return a != b && rangeComparison(a->range, b->range) == 0 && a->message == b->message;
+}
+
+/**
+ * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
+ */
+string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+                     const std::string &filename, int line) {
+    auto it = sourceFileContents.find(filename);
+    if (it == sourceFileContents.end()) {
+        ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
+        return "";
+    }
+
+    auto &file = it->second;
+    if (line >= file->lineCount()) {
+        ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
+        return "";
+    } else {
+        auto &lineBreaks = file->line_breaks();
+        // Note: line is a 0-indexed line number, but lineBreak is 1-indexed.
+        auto start = lineBreaks[line] + 1;
+        auto end = lineBreaks[line + 1];
+        auto line = file->source().substr(start, end - start);
+        return string(line.begin(), line.end());
+    }
+}
+
+/** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
+void reportMissingError(const std::string &filename, const shared_ptr<ErrorAssertion> &assertion,
+                        const string &sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), assertion->range->start->line + 1)
+        << fmt::format("Did not find expected error:\n{}",
+                       prettyPrintRangeComment(sourceLine, assertion->range, assertion->toString()));
+}
+
+/** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
+void reportUnexpectedError(const std::string &filename, const unique_ptr<Diagnostic> &diagnostic,
+                           const string &sourceLine) {
+    ADD_FAILURE_AT(filename.c_str(), diagnostic->range->start->line + 1) << fmt::format(
+        "Found unexpected error:\n{}",
+        prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
+}
+
+/**
+ * Given a set of position-based assertions and Sorbet-generated diagnostics, check that the assertions pass.
+ * NOTE: filenamesAndDiagnostics should use default sort order, which sorts the map in filename order.
+ */
+void checkErrors(const Expectations &expectations, const vector<shared_ptr<RangeAssertion>> &assertions,
+                 map<string, vector<unique_ptr<Diagnostic>>> &filenamesAndDiagnostics) {
+    auto errorAssertions = RangeAssertion::getErrorAssertions(assertions);
+    auto assertionsIt = errorAssertions.begin();
+    auto &files = expectations.sourceFileContents;
+
+    // Due to map's default sort order, this loop iterates over diagnostics in filename order.
+    for (auto &filenameAndDiagnostics : filenamesAndDiagnostics) {
+        auto &filename = filenameAndDiagnostics.first;
+        auto &diagnostics = filenameAndDiagnostics.second;
+
+        // Sort diagnostics within file in range, message order.
+        // This explicit sort, combined w/ the map's implicit sort order, ensures that this loop iterates over
+        // diagnostics in (filename, range, message) order -- matching the sort order of errorAssertions.
+        fast_sort(diagnostics, [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
+            return errorComparison(filename, a->range, a->message, filename, b->range, b->message) == -1;
+        });
+
+        auto diagnosticsIt = diagnostics.begin();
+        auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
+
+        // For asserting that MULTI assertions happen multiple times.
+        int multiCount = 0;
+
+        while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
+            // See if the ranges match.
+            auto &diagnostic = *diagnosticsIt;
+            auto &assertion = *assertionsIt;
+
+            // TODO: Remove duplicate diagnostics for parity with old runner.
+            // Remove this check when ruby types team fixes duplicate diagnostics.
+            if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
+                diagnosticsIt++;
+                continue;
+            }
+            lastDiagnostic = diagnostic.get();
+
+            switch (assertion->compare(filename, diagnostic->range)) {
+                case 1: {
+                    // Diagnostic comes *before* this assertion, so we don't
+                    // have an assertion that matches the diagnostic.
+                    reportUnexpectedError(filename, diagnostic,
+                                          getSourceLine(files, filename, diagnostic->range->start->line));
+                    // We've 'consumed' the diagnostic -- nothing matches it.
+                    diagnosticsIt++;
+                    break;
+                }
+                case -1: {
+                    // Diagnostic comes *after* this assertion
+
+                    if (assertion->message == "MULTI") {
+                        // Assertion is a MULTI assertion; since it comes before the diagnostic,
+                        // we're done with this MULTI assertion.
+                        assertionsIt++;
+                        if (multiCount < 2) {
+                            ADD_FAILURE_AT(assertion->filename.c_str(), assertion->range->start->line)
+                                << "MULTI assertion did not happen multiple times.";
+                        }
+                        multiCount = 0;
+                        // Re-run loop on diagnostic with next assertion.
+                        break;
+                    }
+
+                    // We don't have a diagnostic that matches the assertion.
+                    reportMissingError(assertion->filename, assertion,
+                                       getSourceLine(files, assertion->filename, assertion->range->start->line));
+                    // We've 'consumed' this error assertion -- nothing matches it.
+                    assertionsIt++;
+                    break;
+                }
+                default: {
+                    // Ranges match, so check the assertion.
+                    assertion->check(diagnostic,
+                                     getSourceLine(files, assertion->filename, assertion->range->start->line));
+                    // We've 'consumed' the diagnostic.
+                    diagnosticsIt++;
+                    // Keep MULTI assertions around for another loop, but non-MULTI are done.
+                    // TODO(jvilk): Remove MULTI assertions in favor of multiple different assertions.
+                    if (assertion->message != "MULTI") {
+                        assertionsIt++;
+                    } else {
+                        multiCount++;
+                    }
+                    break;
+                }
+            }
+        }
+
+        while (diagnosticsIt != diagnostics.end()) {
+            // We had more diagnostics than error assertions.
+            // Drain dupes.
+            // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
+            if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
+                auto &diagnostic = *diagnosticsIt;
+                reportUnexpectedError(filename, diagnostic,
+                                      getSourceLine(files, filename, diagnostic->range->start->line));
+            }
+            lastDiagnostic = (*diagnosticsIt).get();
+            diagnosticsIt++;
+        }
+
+        // We've finished processing diagnostics for a file. If assertionsIt still points to a
+        // MULTI assertion, process it.
+        // TODO: Remove when MULTI assertions are deprecated.
+        if (assertionsIt != errorAssertions.end() && (*assertionsIt)->message == "MULTI") {
+            if (multiCount < 2) {
+                ADD_FAILURE_AT((*assertionsIt)->filename.c_str(), (*assertionsIt)->range->start->line)
+                    << "MULTI assertion did not happen multiple times.";
+            }
+            assertionsIt++;
+        }
+    }
+
+    while (assertionsIt != errorAssertions.end()) {
+        // Had more error assertions than diagnostics
+        reportMissingError((*assertionsIt)->filename, *assertionsIt,
+                           getSourceLine(files, (*assertionsIt)->filename, (*assertionsIt)->range->start->line));
+        assertionsIt++;
+    }
+}
+
 TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
-    vector<unique_ptr<sorbet::core::Error>> errors;
+    vector<unique_ptr<core::Error>> errors;
     Expectations test = GetParam();
     auto inputPath = test.folder + test.basename;
     auto rbName = test.basename + ".rb";
@@ -148,37 +327,35 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     auto logger = spd::stderr_color_mt("fixtures: " + inputPath);
-    auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
-    sorbet::core::GlobalState gs(errorQueue);
-    sorbet::core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
-    sorbet::core::MutableContext ctx(gs, sorbet::core::Symbols::root());
+    auto errorQueue = make_shared<core::ErrorQueue>(*logger, *logger);
+    core::GlobalState gs(errorQueue);
+    core::serialize::Serializer::loadGlobalState(gs, getNameTablePayload);
+    core::MutableContext ctx(gs, core::Symbols::root());
 
     // Parser
-    vector<sorbet::core::FileRef> files;
+    vector<core::FileRef> files;
     {
-        sorbet::core::UnfreezeFileTable fileTableAccess(gs);
+        core::UnfreezeFileTable fileTableAccess(gs);
 
-        for (auto &srcPath : test.sourceFiles) {
-            auto path = test.folder + srcPath;
-            auto src = sorbet::FileOps::read(path.c_str());
-            files.emplace_back(gs.enterFile(path, src));
+        for (auto &sourceFile : test.sourceFiles) {
+            files.emplace_back(gs.enterFile(test.sourceFileContents[test.folder + sourceFile]));
         }
     }
-    vector<unique_ptr<sorbet::ast::Expression>> trees;
+    vector<unique_ptr<ast::Expression>> trees;
     map<string, string> got;
 
-    vector<sorbet::core::ErrorRegion> errs;
+    vector<core::ErrorRegion> errs;
     for (auto file : files) {
         errs.emplace_back(gs, file);
         if (file.data(ctx).source().find("# typed:") == string::npos) {
             ADD_FAILURE_AT(file.data(gs).path().data(), 1) << "Add a `# typed: strict` line to the top of this file";
         }
 
-        unique_ptr<sorbet::parser::Node> nodes;
+        unique_ptr<parser::Node> nodes;
         {
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            nodes = sorbet::parser::Parser::run(gs, file);
+            nodes = parser::Parser::run(gs, file);
         }
         {
             auto newErrors = errorQueue->drainAllErrors();
@@ -200,11 +377,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Desugarer
-        unique_ptr<sorbet::ast::Expression> desugared;
+        unique_ptr<ast::Expression> desugared;
         {
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+            core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-            desugared = testSerialize(gs, sorbet::ast::desugar::node2Tree(ctx, move(nodes)));
+            desugared = testSerialize(gs, ast::desugar::node2Tree(ctx, move(nodes)));
         }
 
         expectation = test.expectations.find("ast");
@@ -220,14 +397,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
-        unique_ptr<sorbet::ast::Expression> dslUnwound;
+        unique_ptr<ast::Expression> dslUnwound;
 
         if (test.expectations.find("autogen") == test.expectations.end()) {
             // DSL
             {
-                sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
+                core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                dslUnwound = testSerialize(gs, sorbet::dsl::DSL::run(ctx, move(desugared)));
+                dslUnwound = testSerialize(gs, dsl::DSL::run(ctx, move(desugared)));
             }
 
             expectation = test.expectations.find("dsl-tree");
@@ -253,11 +430,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Namer
-        unique_ptr<sorbet::ast::Expression> namedTree;
+        unique_ptr<ast::Expression> namedTree;
         {
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
-            sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
-            namedTree = testSerialize(gs, sorbet::namer::Namer::run(ctx, move(dslUnwound)));
+            core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
+            core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
+            namedTree = testSerialize(gs, namer::Namer::run(ctx, move(dslUnwound)));
         }
 
         expectation = test.expectations.find("name-tree");
@@ -280,14 +457,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     auto expectation = test.expectations.find("autogen");
     if (expectation != test.expectations.end()) {
         {
-            sorbet::core::UnfreezeNameTable nameTableAccess(gs);
-            sorbet::core::UnfreezeSymbolTable symbolAccess(gs);
+            core::UnfreezeNameTable nameTableAccess(gs);
+            core::UnfreezeSymbolTable symbolAccess(gs);
 
-            trees = sorbet::resolver::Resolver::runConstantResolution(ctx, move(trees));
+            trees = resolver::Resolver::runConstantResolution(ctx, move(trees));
         }
 
         for (auto &tree : trees) {
-            auto pf = sorbet::autogen::Autogen::generate(ctx, move(tree));
+            auto pf = autogen::Autogen::generate(ctx, move(tree));
             tree = move(pf.tree);
             got["autogen"].append(pf.toString(ctx));
         }
@@ -295,9 +472,9 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     } else {
-        sorbet::core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
-        sorbet::core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
-        trees = sorbet::resolver::Resolver::run(ctx, move(trees));
+        core::UnfreezeNameTable nameTableAccess(gs);     // Resolver::defineAttr
+        core::UnfreezeSymbolTable symbolTableAccess(gs); // enters stubs
+        trees = resolver::Resolver::run(ctx, move(trees));
         auto newErrors = errorQueue->drainAllErrors();
         errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
     }
@@ -334,7 +511,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             }
         };
         auto checkPragma = [&](string ext) {
-            if (file.data(ctx).sigil == sorbet::core::StrictLevel::Stripe) {
+            if (file.data(ctx).sigil == core::StrictLevel::Stripe) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1)
                     << "Missing `# typed:` pragma. Sources with ." << ext << ".exp files must specify # typed:";
@@ -347,7 +524,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
-            auto cfg = sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             stringstream dot;
@@ -367,7 +544,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
-            auto cfg = sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             stringstream dot;
@@ -387,7 +564,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
-            sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
@@ -397,10 +574,10 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree != nullptr && file.data(ctx).sigil != sorbet::core::StrictLevel::Stripe) {
+        if (resolvedTree != nullptr && file.data(ctx).sigil != core::StrictLevel::Stripe) {
             checkTree();
             CFG_Collector_and_Typer collector;
-            sorbet::ast::TreeMap::apply(ctx, collector, move(resolvedTree));
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree));
             resolvedTree.reset();
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
@@ -411,7 +588,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         auto expectation = test.expectations.find(gotPhase.first);
         ASSERT_TRUE(expectation != test.expectations.end()) << "missing expectation for " << gotPhase.first;
         auto checker = test.folder + expectation->second;
-        auto expect = sorbet::FileOps::read(checker.c_str());
+        auto expect = FileOps::read(checker.c_str());
         EXPECT_EQ(expect, gotPhase.second) << "Mismatch on: " << checker;
         if (expect == gotPhase.second) {
             TEST_COUT << gotPhase.first << " OK" << '\n';
@@ -425,141 +602,24 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     }
 
     // Check warnings and errors
+    {
+        auto assertions = RangeAssertion::parseAssertions(test.sourceFileContents);
 
-    map<pair<sorbet::core::FileRef, int>, ErrorAndPos> expectedErrors;
-    regex errorRegex("# error: ?(.*)");           // something like 'foo   # error: Badness'
-    regex errorPosRegex("([ ]*#[ ]+)(\\^+)[ ]*"); // someting like '   #    ^^^^^  '
-    regex commendOut("^[ ]*#");
-
-    for (auto file : files) {
-        string src(file.data(gs).source().begin(), file.data(gs).source().end());
-        stringstream ss(src);
-        string line;
-        int linenum = 1;
-
-        while (getline(ss, line, '\n')) {
-            smatch matches;
-            if (regex_search(line, matches, errorRegex)) {
-                if (regex_search(line, commendOut)) {
-                    continue;
-                }
-                string match = matches[1].str();
-                int len = match.size();
-                if (len < 10 && match.find("MULTI") == string::npos) {
-                    ADD_FAILURE_AT(file.data(gs).path().data(), linenum)
-                        << "Too short of a error message at " << len
-                        << " characters. Use MULTI or write something longer than: " << match;
-                }
-                expectedErrors[make_pair(file, linenum)].error = match;
-            } else if (regex_match(line, matches, errorPosRegex)) {
-                auto expectedError = expectedErrors.find(make_pair(file, linenum - 1));
-                if (expectedError == expectedErrors.end()) {
-                    ADD_FAILURE_AT(file.data(gs).path().data(), linenum)
-                        << "Position comment must come right after a line with a `error:` comment. Found position "
-                           "comment on line "
-                        << linenum << " matching " << matches[0].str();
-                }
-                expectedError->second.beginPos = matches[1].str().size() + 1; // We start our columns at 1
-                expectedError->second.endPos = expectedError->second.beginPos + matches[2].str().size();
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
+        for (auto &error : errors) {
+            if (error->isSilenced) {
+                continue;
             }
-            linenum += 1;
+            auto path = error->loc.file().data(gs).path();
+            diagnostics[string(path.begin(), path.end())].push_back(errorToDiagnostic(gs, error));
         }
-    }
-
-    map<pair<sorbet::core::FileRef, int>, int> seenErrorLines;
-    int unknownLocErrorLine = 1;
-    for (auto &error : errors) {
-        if (error->isSilenced) {
-            continue;
-        }
-        auto filePath = error->loc.file().data(gs).path();
-        if (!error->loc.exists()) {
-            // The convention is to put `error: Unknown Location Error` at
-            // the top of the file for each of these so that they are eaten
-            // first when reporting mismatched errors.
-            int line = unknownLocErrorLine++;
-            auto expectedError = expectedErrors.find(make_pair(files.front(), line));
-            if (expectedError == expectedErrors.end()) {
-                ADD_FAILURE_AT(filePath.data(), line) << "Unknown location error thrown but not annotated." << '\n'
-                                                      << "Reported error: " << error->header;
-            } else if (error->header.find(expectedError->second.error) == string::npos) {
-                ADD_FAILURE_AT(filePath.data(), line) << "Error string mismatch." << '\n'
-                                                      << " Expectation: " << expectedError->second.error << '\n'
-                                                      << " Reported error: " << error->header;
-            } else {
-                seenErrorLines[make_pair(files.front(), line)]++;
-            }
-            continue;
-        }
-
-        auto pos = error->loc.position(gs);
-        bool found = false;
-        for (int i = pos.first.line; i <= pos.second.line; i++) {
-            auto expectedErrorIt = expectedErrors.find(make_pair(error->loc.file(), i));
-            if (expectedErrorIt != expectedErrors.end()) {
-                string expectedError = expectedErrorIt->second.error;
-                found = true;
-                seenErrorLines[make_pair(error->loc.file(), i)]++;
-                if (expectedError.empty()) {
-                    ADD_FAILURE_AT(filePath.data(), i) << "Error occurred, but no expected text found. Please put (a "
-                                                          "substring of) the expected error after `# error:` "
-                                                       << '\n'
-                                                       << "The message was: '" << error->header << "'";
-                } else if (expectedError.find("MULTI") != string::npos) { // multiple errors. Ignore message and pos
-                    continue;
-                } else if (error->header.find(expectedError) == string::npos) {
-                    ADD_FAILURE_AT(filePath.data(), i) << "Error string mismatch." << '\n'
-                                                       << " Expectation: " << expectedError << '\n'
-                                                       << " Reported error: " << error->header;
-                } else if (expectedErrorIt->second.beginPos != -1 &&
-                           pos.first.column != expectedErrorIt->second.beginPos) {
-                    ADD_FAILURE_AT(filePath.data(), i)
-                        << "Wrong starting error position. Expected error starting at position "
-                        << expectedErrorIt->second.beginPos << " but found one starting at position "
-                        << pos.first.column;
-                } else if (expectedErrorIt->second.endPos != -1 &&
-                           pos.second.column != expectedErrorIt->second.endPos) {
-                    ADD_FAILURE_AT(filePath.data(), i)
-                        << "Wrong ending error position. Expected error ending at position "
-                        << expectedErrorIt->second.endPos << " but found one ending at position " << pos.second.column;
-                }
-            }
-        }
-        if (!found) {
-            ADD_FAILURE_AT(filePath.data(), pos.first.line) << "Unexpected error:\n " << error->toString(gs);
-        }
-    }
-
-    for (auto &error : expectedErrors) {
-        auto filePath = error.first.first.data(gs).path();
-        auto found = seenErrorLines.find(error.first);
-        if (found == seenErrorLines.end()) {
-            ADD_FAILURE_AT(filePath.data(), error.first.second) << "Expected error did not happen.";
-        } else {
-            int count = found->second;
-            if (error.second.error.find("MULTI") != string::npos) {
-                if (count == 1) {
-                    ADD_FAILURE_AT(filePath.data(), error.first.second)
-                        << "Expected multiple errors, but only saw one.";
-                }
-            }
-            // TODO: Fail on duplicate errors. We currently tolerate them.
-            /* else if (count > 1) {
-                ADD_FAILURE_AT(filePath.data(), error.first.second)
-                    << "Expected error once, but found error multiple times.";
-            }*/
-        }
+        checkErrors(test, assertions, diagnostics);
     }
 
     // Allow later phases to have errors that we didn't test for
     errorQueue->drainAllErrors();
 
     TEST_COUT << "errors OK" << '\n';
-}
-
-/** Returns true if a and b are different Diagnostic objects but have the same range and message. */
-bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
-    return a != b && rangeComparison(a->range, b->range) == 0 && a->message == b->message;
 }
 
 /** Given a root URI and a URI, returns the file path relative to the repository root. */
@@ -578,9 +638,10 @@ string filenameFromUri(const std::string &rootUri, const std::string &uri) {
 TEST_P(LSPTest, PositionTests) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
+    Expectations test = GetParam();
 
     // filename => URI
-    sorbet::UnorderedMap<string, string> testFileUris;
+    UnorderedMap<string, string> testFileUris;
     for (auto &filename : filenames) {
         testFileUris[filename] = fmt::format("{}/{}", rootUri, filename);
     }
@@ -657,7 +718,8 @@ TEST_P(LSPTest, PositionTests) {
             didChangeParams->textDocument = std::move(textDocId);
 
             auto textDocChange = make_unique<TextDocumentContentChangeEvent>();
-            textDocChange->text = fileContents[filename];
+            auto textDocContents = test.sourceFileContents[filename]->source();
+            textDocChange->text = string(textDocContents.begin(), textDocContents.end());
             didChangeParams->contentChanges.push_back(std::move(textDocChange));
 
             auto didChangeNotif = make_unique<NotificationMessage>();
@@ -673,10 +735,9 @@ TEST_P(LSPTest, PositionTests) {
         // "Newly pushed diagnostics always replace previously pushed diagnostics. There is no merging that happens on
         // the client side."
         // Prune irrelevant diagnostics, and only keep the newest diagnostics for a file.
-        vector<unique_ptr<PublishDiagnosticsParams>> allDiagnosticsParams;
+        // filename => diagnostics for file
+        map<string, vector<unique_ptr<Diagnostic>>> diagnostics;
         {
-            // filename => latest diagnostics for that file
-            sorbet::UnorderedMap<string, unique_ptr<PublishDiagnosticsParams>> latestDiagnosticParams;
             for (auto &response : allResponses) {
                 auto maybeDoc = assertNotificationMessage("textDocument/publishDiagnostics", response);
                 if (!maybeDoc.has_value()) {
@@ -691,143 +752,17 @@ TEST_P(LSPTest, PositionTests) {
                     << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
                 // Will explicitly overwrite older diagnostics that are irrelevant.
-                latestDiagnosticParams[filename] = move(diagnosticParams);
-            }
-
-            // Push publishDiagnostics information into allDiagnosticsParams, and sort each's diagnostics vector.
-            for (auto &latestParam : latestDiagnosticParams) {
-                auto &filename = latestParam.first;
-                // Sort diagnostics in range, message order
-                fast_sort(latestParam.second->diagnostics,
-                          [&filename](const unique_ptr<Diagnostic> &a, const unique_ptr<Diagnostic> &b) -> bool {
-                              return errorComparison(filename, a->range, a->message, filename, b->range, b->message) ==
-                                     -1;
-                          });
-                allDiagnosticsParams.push_back(move(latestParam.second));
+                diagnostics[filename] = move(diagnosticParams->diagnostics);
             }
         }
-
-        // Sort diagnostic messages in filename order. Now, iterating through these and their
-        // diagnostics should match the assertion sort order.
-        fast_sort(allDiagnosticsParams,
-                  [](const unique_ptr<PublishDiagnosticsParams> &a,
-                     const unique_ptr<PublishDiagnosticsParams> &b) -> bool { return a->uri.compare(b->uri) == -1; });
-
-        auto errorAssertions = getErrorAssertions();
-        auto assertionsIt = errorAssertions.begin();
-
-        for (auto &diagnosticParams : allDiagnosticsParams) {
-            auto &diagnostics = diagnosticParams->diagnostics;
-            auto diagnosticsIt = diagnostics.begin();
-            auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
-
-            // For asserting that MULTI assertions happen multiple times.
-            int multiCount = 0;
-
-            while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
-                // See if the ranges match.
-                auto &diagnostic = *diagnosticsIt;
-                auto &assertion = *assertionsIt;
-
-                // TODO: LSP tests currently remove duplicate diagnostics for parity
-                // with regular runner. Remove this check when ruby types team fixes
-                // duplicate diagnostics.
-                if (isDuplicateDiagnostic(lastDiagnostic, diagnostic.get())) {
-                    diagnosticsIt++;
-                    continue;
-                }
-                lastDiagnostic = diagnostic.get();
-
-                switch (assertion->compare(filenameFromUri(rootUri, diagnosticParams->uri), diagnostic->range)) {
-                    case 1: {
-                        // Diagnostic comes *before* this assertion, so we don't
-                        // have an assertion that matches the diagnostic.
-                        string filename = filenameFromUri(rootUri, diagnosticParams->uri);
-                        reportUnexpectedLSPError(filename, diagnostic,
-                                                 getSourceLine(filename, diagnostic->range->start->line));
-                        // We've 'consumed' the diagnostic -- nothing matches it.
-                        diagnosticsIt++;
-                        break;
-                    }
-                    case -1: {
-                        // Diagnostic comes *after* this assertion
-
-                        if (assertion->message == "MULTI") {
-                            // Assertion is a MULTI assertion; since it comes before the diagnostic,
-                            // we're done with this MULTI assertion.
-                            assertionsIt++;
-                            if (multiCount < 2) {
-                                ADD_FAILURE_AT(assertion->filename.c_str(), assertion->range->start->line)
-                                    << "MULTI assertion did not happen multiple times.";
-                            }
-                            multiCount = 0;
-                            // Re-run loop on diagnostic with next assertion.
-                            break;
-                        }
-
-                        // We don't have a diagnostic that matches the assertion.
-                        reportMissingError(assertion->filename, assertion,
-                                           getSourceLine(assertion->filename, assertion->range->start->line));
-                        // We've 'consumed' this error assertion -- nothing matches it.
-                        assertionsIt++;
-                        break;
-                    }
-                    default: {
-                        // Ranges match, so check the assertion.
-                        assertion->check(diagnostic, getSourceLine(assertion->filename, assertion->range->start->line));
-                        // We've 'consumed' the diagnostic.
-                        diagnosticsIt++;
-                        // Keep MULTI assertions around for another loop, but non-MULTI are done.
-                        // TODO(jvilk): Remove MULTI assertions in favor of multiple different assertions.
-                        if (assertion->message != "MULTI") {
-                            assertionsIt++;
-                        } else {
-                            multiCount++;
-                        }
-                        break;
-                    }
-                }
-            }
-
-            while (diagnosticsIt != diagnostics.end()) {
-                // We had more diagnostics than error assertions.
-                // Drain dupes.
-                // TODO: Remove when ruby types team fixes duplicate diagnostics; see note above.
-                if (!isDuplicateDiagnostic(lastDiagnostic, (*diagnosticsIt).get())) {
-                    auto &diagnostic = *diagnosticsIt;
-                    string filename = filenameFromUri(rootUri, diagnosticParams->uri);
-                    reportUnexpectedLSPError(filename, diagnostic,
-                                             getSourceLine(filename, diagnostic->range->start->line));
-                }
-                lastDiagnostic = (*diagnosticsIt).get();
-                diagnosticsIt++;
-            }
-
-            // We've finished processing diagnostics for a file. If assertionsIt still points to a
-            // MULTI assertion, process it.
-            // TODO: Remove when MULTI assertions are deprecated.
-            if (assertionsIt != errorAssertions.end() && (*assertionsIt)->message == "MULTI") {
-                if (multiCount < 2) {
-                    ADD_FAILURE_AT((*assertionsIt)->filename.c_str(), (*assertionsIt)->range->start->line)
-                        << "MULTI assertion did not happen multiple times.";
-                }
-                assertionsIt++;
-            }
-        }
-
-        while (assertionsIt != errorAssertions.end()) {
-            // Had more error assertions than diagnostics
-            reportMissingError((*assertionsIt)->filename, *assertionsIt,
-                               getSourceLine((*assertionsIt)->filename, (*assertionsIt)->range->start->line));
-            assertionsIt++;
-        }
+        checkErrors(test, assertions, diagnostics);
     }
 
     // TODO(jvilk): Request/response assertions (like Find Def/Usages/Autocomplete)
 }
 
-INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
-INSTANTIATE_TEST_CASE_P(PositionTests, LSPTest, testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
+INSTANTIATE_TEST_CASE_P(PositionTests, LSPTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);
 
 bool compareNames(string_view left, string_view right) {
     auto lsplit = left.find("__");
@@ -846,8 +781,8 @@ bool compareNames(string_view left, string_view right) {
 
     // If the base names match, compare by reverse order on extension, so that
     // .exp comes after .rb.
-    auto lext = sorbet::FileOps::getExtension(left);
-    auto rext = sorbet::FileOps::getExtension(right);
+    auto lext = FileOps::getExtension(left);
+    auto rext = FileOps::getExtension(right);
     if (lext != rext) {
         return rext < lext;
     }
@@ -937,7 +872,7 @@ vector<Expectations> listDir(const char *name) {
 vector<Expectations> getInputs(string singleTest) {
     vector<Expectations> result;
     if (singleTest.empty()) {
-        sorbet::Exception::raise("No test specified. Pass one with --single_test=<test_path>");
+        Exception::raise("No test specified. Pass one with --single_test=<test_path>");
     }
 
     string parentDir;
@@ -954,22 +889,29 @@ vector<Expectations> getInputs(string singleTest) {
     cout << lookingFor;
     for (Expectations &f : scan) {
         if (f.testName == lookingFor) {
+            for (auto &file : f.sourceFiles) {
+                string filename = f.folder + file;
+                string fileContents = FileOps::read(filename);
+                f.sourceFileContents[filename] =
+                    make_shared<core::File>(move(filename), move(fileContents), core::File::Type::Normal);
+            }
             result.emplace_back(f);
         }
     }
 
     if (result.empty()) {
-        sorbet::Exception::raise("None tests found!");
+        Exception::raise("None tests found!");
     }
     return result;
 }
+} // namespace sorbet::test
 
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
     options.add_options()("single_test", "run over single test.", cxxopts::value<string>()->default_value(""),
                           "testpath");
     auto res = options.parse(argc, argv);
-    singleTest = res["single_test"].as<string>();
+    sorbet::test::singleTest = res["single_test"].as<string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);
     return RUN_ALL_TESTS();

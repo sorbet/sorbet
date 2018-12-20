@@ -10,6 +10,7 @@
 
 #include <sstream>
 
+namespace sorbet::test {
 using namespace sorbet::realmain::lsp;
 
 /**
@@ -28,7 +29,7 @@ private:
      */
     std::shared_ptr<spd::logger> logger;
     std::shared_ptr<spd::logger> typeErrorsConsole;
-    sorbet::realmain::options::Options opts;
+    realmain::options::Options opts;
     std::shared_ptr<spd::sinks::ansicolor_stderr_sink_mt> stderrColorSink;
     std::unique_ptr<WorkerPool> workers;
 
@@ -41,12 +42,6 @@ private:
 
     /** Sends the given string directly to Sorbet's LSP component, and returns any response messages. */
     std::vector<unique_ptr<JSONDocument<JSONBaseType>>> sendRaw(std::string json);
-
-    /**
-     * filename -> contents of a test file split by line.
-     * Used to pretty print error messages. Lazily populated.
-     */
-    sorbet::UnorderedMap<string, std::vector<std::string>> sourceLines;
 
     /** Parses the test file and its assertions. */
     void parseTestFile();
@@ -61,11 +56,8 @@ protected:
     void TearDown() override {}
 
 public:
-    /** filename -> raw contents of a test file */
-    sorbet::UnorderedMap<string, string> fileContents;
-
     /** The path to the test Ruby files on disk */
-    sorbet::UnorderedSet<string> filenames;
+    UnorderedSet<string> filenames;
 
     /** All test assertions ordered by (filename, range, message). */
     std::vector<std::shared_ptr<RangeAssertion>> assertions;
@@ -79,17 +71,6 @@ public:
      * Send a Notification to LSP, and returns any responses.
      */
     vector<unique_ptr<JSONDocument<JSONBaseType>>> sendNotification(const unique_ptr<NotificationMessage> &message);
-
-    /**
-     * Returns all error assertions, which are expected to match diagnostic messages.
-     * Ordered in (filename, range, message) order.
-     */
-    vector<shared_ptr<ErrorAssertion>> getErrorAssertions();
-
-    /**
-     * Given a filename and a 0-indexed line number, returns the source line.
-     */
-    std::string getSourceLine(const std::string &filename, int line);
 };
-
+} // namespace sorbet::test
 #endif // TEST_LSPTEST_H
