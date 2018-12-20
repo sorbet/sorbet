@@ -177,6 +177,8 @@ public:
         return (flags & Symbol::Flags::CLASS) != 0;
     }
 
+    bool isSingletonClass(const GlobalState &gs) const;
+
     inline bool isStaticField() const {
         return (flags & Symbol::Flags::STATIC_FIELD) != 0;
     }

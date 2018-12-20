@@ -424,7 +424,8 @@ public:
         core::SymbolRef klass = original->symbol;
 
         for (auto &ancst : original->ancestors) {
-            bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front());
+            bool isSuperclass = (original->kind == ast::Class && &ancst == &original->ancestors.front() &&
+                                 !klass.data(ctx)->isSingletonClass(ctx));
             transformAncestor(ctx, klass, ancst, isSuperclass);
         }
 
