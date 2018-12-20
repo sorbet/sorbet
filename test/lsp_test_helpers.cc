@@ -2,8 +2,9 @@
 #include <cxxopts.hpp>
 // has to go first as it violates requirements
 
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+// has to come before the next one. This comment stops formatter from reordering them
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include "test/lsp_test_helpers.h"
 
 namespace sorbet::test {

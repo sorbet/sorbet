@@ -25,7 +25,7 @@ def externals():
     new_git_repository(
         name="spdlog",
         remote="https://github.com/gabime/spdlog.git",
-        commit="f4c5c5a36755685028c8148b456a4d7909e3d7dd", # v0.17.0
+        commit="0955ea5b8510fdc1784f4f5684728011f129f60d",
         build_file = "//third_party:spdlog.BUILD",
     )
 
@@ -50,14 +50,14 @@ def externals():
     new_git_repository(
         name="rapidjson",
         remote="https://github.com/Tencent/rapidjson.git",
-        commit="a63216054dfcd37ec94ff48b51d44615f588e425",
+        commit="b56eb28575626104922d77f6d74a116c5dbd611e",
         build_file = "//third_party:rapidjson.BUILD",
     )
 
     new_git_repository(
         name="lizard",
         remote="https://github.com/inikep/lizard.git",
-        commit="6a1ed71450148c8aed57de3179b1bdd81800bada",
+        commit="02491c71c2e6fd5c10997404df2f18d0fc7afadb",
         build_file = "//third_party:lizard.BUILD",
     )
 
@@ -114,7 +114,7 @@ def externals():
     git_repository(
         name="com_google_absl",
         remote="https://github.com/abseil/abseil-cpp.git",
-        commit="13327debebc5c2d1d4991b69fe50450e340e50e4"
+        commit="111ca7060a6ff50115ca85b59f6b5d8c8c5e9105"
     )
 
     new_git_repository(
@@ -171,7 +171,7 @@ package(default_visibility = ["//visibility:public"])
 
     new_git_repository(
         name = "com_github_msgpack_msgpack",
-        commit = "8792f42f8dbd5edc0f0cf975ccc8ea5c846667f4",
+        commit = "daa78b46062d49bc192a921f7192637f58b334cc",
         remote = "https://github.com/msgpack/msgpack-c",
         build_file = "//third_party:msgpack.BUILD",
     )
@@ -185,26 +185,26 @@ package(default_visibility = ["//visibility:public"])
 
     native.new_http_archive(
       name = "emscripten_toolchain",
-      url = "https://github.com/kripken/emscripten/archive/1.38.14.tar.gz",
+      url = "https://github.com/kripken/emscripten/archive/1.38.21.tar.gz",
       build_file = "//third_party:emscripten-toolchain.BUILD",
-      sha256 = "c8dd08fcdda7c4efaba30f983ab252d3bdc78e1232b736ffbaf6ce9b6b96f62a",
-      strip_prefix = "emscripten-1.38.14"
+      sha256 = "f3e6f1e6039256968131bc491ea8c2e1bfc31c41c1ec1370e2f1fae9a8e56faa",
+      strip_prefix = "emscripten-1.38.21"
     )
 
     native.new_http_archive(
       name = "emscripten_clang_linux",
-      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.14.tar.gz",
+      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/linux_64bit/emscripten-llvm-e1.38.21.tar.gz",
       build_file = "//third_party:emscripten-clang.BUILD",
-      strip_prefix = "emscripten-llvm-e1.38.14",
-      sha256 = "11480580900b7166720b1c06033aa8928052384abc7e4bd3fbaab7272b2e3f22",
+      sha256 = "355d64048529b77e076de84e5aa842773afbb672ccad1308f4cc734afe581a35",
+      strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
     native.new_http_archive(
       name = "emscripten_clang_darwin",
-      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.14.tar.gz",
+      url = "https://s3.amazonaws.com/mozilla-games/emscripten/packages/llvm/tag/osx_64bit/emscripten-llvm-e1.38.21.tar.gz",
       build_file = "//third_party:emscripten-clang.BUILD",
-      strip_prefix = "emscripten-llvm-e1.38.14",
-      sha256 = "f362e19ad637978bb7456fd00439e7574452fd00c28c145accb74a1e49639d08",
+      sha256 = "ce473d2bf88dda0ec313c1899caaa586d69a4336cbc4bd2c6da1f5be217680cd",
+      strip_prefix = "emscripten-llvm-e1.38.21",
     )
 
 

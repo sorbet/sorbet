@@ -6,8 +6,9 @@
 #include "core/Error.h"
 #include "core/Unfreeze.h"
 #include "parser/parser.h"
-#include "spdlog/sinks/stdout_color_sinks.h"
 #include "spdlog/spdlog.h"
+// has to come before the next one. This comment stops formatter from reordering them
+#include "spdlog/sinks/stdout_color_sinks.h"
 #include <fstream>
 #include <memory>
 #include <string>
