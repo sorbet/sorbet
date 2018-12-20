@@ -37,11 +37,13 @@ class Main
 
         one_kwarg(foo: "bad", a: "bad") # error: `String("bad")` doesn't match `Integer` for argument `foo`
         one_kwarg(foo: 1, a: 1) # error: `Integer(1)` doesn't match `String` for argument `args`
-        one_kwarg(foo: "bad", a: 1) # error: MULTI
+        one_kwarg(foo: "bad", a: 1) # error: `String("bad")` doesn't match `Integer` for argument `foo`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `Integer(1)` doesn't match `String` for argument `args`
         with_type
         with_type(a: 1)
         with_type(a: "bad") # error: `String("bad")` doesn't match `Integer` for argument `args`
-        with_type(a: "bad", b: "bad2") # error: MULTI
+        with_type(a: "bad", b: "bad2") # error: `String("bad")` doesn't match `Integer` for argument `args`
+      # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ error: `String("bad2")` doesn't match `Integer` for argument `args`
 
         # This should assign `z`, instead of assigning `x={z: :foo}`,
         # which would happen with `y={}`

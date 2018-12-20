@@ -1,5 +1,5 @@
 # typed: true
 class Object
-  include(E) # error: MULTI
-             # We error both about it being a stub, and then about the circular include.
+  include(E) # error: Unable to resolve constant `E`
+        # ^ error: Circular dependency
 end

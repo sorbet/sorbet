@@ -27,9 +27,8 @@ class A
     T1.new
   end
 
-  sig do
-    params(x: T1).returns(T2) # error: MULTI
-  end.hithere
+  sig do params(x: T1).returns(T2) end.hithere # error: Can not call method `hithere` on void type
+       # ^^^^^^^^^^^^^ error: Method `params` does not exist on `T.class_of(A)`
   def f2(x)
     T2.new
   end

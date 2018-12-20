@@ -7,9 +7,14 @@ class NotAODM
     prop :foo, String, "not_a_hash"
     prop "too", String, {}, "many"
     optional :company_name, String, :nonempty_string # error: Method `optional` does not exist
-    optional :day, IntegerParam.new(min: 1, max: 31) # error: MULTI
-    optional :name, StringParam.alphanumeric # error: MULTI
-    optional :how_many, Opus::Param::CaseParam.new(self.how_many_cases, Opus::Param::ParamSpecsParam.new(Default)) # error: MULTI
+    optional :day, IntegerParam.new(min: 1, max: 31) # error: Method `optional` does not exist on `T.class_of(NotAODM)`
+                 # ^^^^^^^^^^^^ error: Unable to resolve constant `IntegerParam`
+    optional :name, StringParam.alphanumeric # error: Method `optional` does not exist on `T.class_of(NotAODM)`
+                  # ^^^^^^^^^^^ error: Unable to resolve constant `StringParam`
+    optional :how_many, Opus::Param::CaseParam.new(self.how_many_cases, Opus::Param::ParamSpecsParam.new(Default)) # error: Method `optional` does not exist on `T.class_of(NotAODM)`
+                      # ^^^^^^^^^^^ error: Unable to resolve constant `Param`
+                                                 # ^^^^^^^^^^^^^^^^^^^ error: Method `how_many_cases` does not exist on `T.class_of(NotAODM)`
+                                                                                                       # ^^^^^^^ error: Unable to resolve constant `Default`
     optional :optional_param, IntegerParam.new # error: Method `optional` does not exist
 end
 

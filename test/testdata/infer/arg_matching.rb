@@ -37,8 +37,8 @@ class TestArgs
 
   def call_kwarg
     # "too many arguments" and "missing keyword argument b"
-    kwarg(1, 2) # error: MULTI
-
+    kwarg(1, 2) # error: Missing required keyword argument `b` for method `TestArgs#kwarg`
+  # ^^^^^^^^^^^ error: Too many arguments provided for method `TestArgs#kwarg`. Expected: `1`, got: `2`
     kwarg(1) # error: Missing required keyword argument `b`
 
     kwarg(1, b: 2)
@@ -64,7 +64,8 @@ class TestArgs
     repeated(1, "hi") # error: `String("hi")` doesn't match `Integer` for argument `x`
 
     # We error on each incorrect argument
-    repeated("hi", "there") # error: MULTI
+    repeated("hi", "there") # error: `String("hi")` doesn't match `Integer` for argument `x`
+  # ^^^^^^^^^^^^^^^^^^^^^^^ error: `String("there")` doesn't match `Integer` for argument `x`
   end
 
   sig do
@@ -95,6 +96,7 @@ class TestArgs
     # There's ambiguity here about whether to report `u` or `x` as
     # missing; We follow Ruby in complaining about `u`.
     optkw(u: 1) # error: Missing required keyword argument `u`
-    optkw(1, 2, 3) # error: MULTI
+    optkw(1, 2, 3) # error: Missing required keyword argument `u` for method `TestArgs#optkw`
+  # ^^^^^^^^^^^^^^ error: Too many arguments provided for method `TestArgs#optkw`. Expected: `1..2`, got: `3`
   end
 end

@@ -38,7 +38,9 @@ class Main
         end
         puts "main"
         # You can put all sorts of things on the left
-        for @a,@@b,$c,d,E.e in A do # error: MULTI
+        for @a,@@b,$c,d,E.e in A do
+          # ^^ error: Use of undeclared variable `@a`
+             # ^^^ error: Use of undeclared variable `@@b`
             puts @a.inspect
             puts @@b.inspect
             puts $c.inspect

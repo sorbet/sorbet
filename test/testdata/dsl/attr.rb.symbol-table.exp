@@ -19,9 +19,9 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
       argument ::TestAttr#v4=#v4<> @ test/testdata/dsl/attr.rb:23
     method ::TestAttr#v5= (v5) @ test/testdata/dsl/attr.rb:23
       argument ::TestAttr#v5=#v5<> @ test/testdata/dsl/attr.rb:23
-    method ::TestAttr#v6 () -> String @ test/testdata/dsl/attr.rb:26
-    method ::TestAttr#v6= (v6) -> String @ test/testdata/dsl/attr.rb:26
-      argument ::TestAttr#v6=#v6<> -> String @ test/testdata/dsl/attr.rb:25
+    method ::TestAttr#v6 () -> String @ test/testdata/dsl/attr.rb:28
+    method ::TestAttr#v6= (v6) -> String @ test/testdata/dsl/attr.rb:28
+      argument ::TestAttr#v6=#v6<> -> String @ test/testdata/dsl/attr.rb:27
   class ::<Class:TestAttr> < ::<Class:Object> (<constant:Sig>) @ test/testdata/dsl/attr.rb:2
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:5
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:12
@@ -29,6 +29,6 @@ class ::<root> < ::Object () @ (https://git.corp.stripe.com/stripe-internal/sorb
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:17
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:17
     method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:20
-    method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:25
-    method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:25
+    method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:27
+    method ::<Class:TestAttr>#<block> () @ test/testdata/dsl/attr.rb:27
 

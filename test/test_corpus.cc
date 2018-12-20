@@ -212,9 +212,6 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
         auto diagnosticsIt = diagnostics.begin();
         auto *lastDiagnostic = diagnosticsIt == diagnostics.end() ? nullptr : (*diagnosticsIt).get();
 
-        // For asserting that MULTI assertions happen multiple times.
-        int multiCount = 0;
-
         while (diagnosticsIt != diagnostics.end() && assertionsIt != errorAssertions.end()) {
             // See if the ranges match.
             auto &diagnostic = *diagnosticsIt;
@@ -240,20 +237,6 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
                 }
                 case -1: {
                     // Diagnostic comes *after* this assertion
-
-                    if (assertion->message == "MULTI") {
-                        // Assertion is a MULTI assertion; since it comes before the diagnostic,
-                        // we're done with this MULTI assertion.
-                        assertionsIt++;
-                        if (multiCount < 2) {
-                            ADD_FAILURE_AT(assertion->filename.c_str(), assertion->range->start->line)
-                                << "MULTI assertion did not happen multiple times.";
-                        }
-                        multiCount = 0;
-                        // Re-run loop on diagnostic with next assertion.
-                        break;
-                    }
-
                     // We don't have a diagnostic that matches the assertion.
                     reportMissingError(assertion->filename, assertion,
                                        getSourceLine(files, assertion->filename, assertion->range->start->line));
@@ -265,15 +248,9 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
                     // Ranges match, so check the assertion.
                     assertion->check(diagnostic,
                                      getSourceLine(files, assertion->filename, assertion->range->start->line));
-                    // We've 'consumed' the diagnostic.
+                    // We've 'consumed' the diagnostic and assertion.
                     diagnosticsIt++;
-                    // Keep MULTI assertions around for another loop, but non-MULTI are done.
-                    // TODO(jvilk): Remove MULTI assertions in favor of multiple different assertions.
-                    if (assertion->message != "MULTI") {
-                        assertionsIt++;
-                    } else {
-                        multiCount++;
-                    }
+                    assertionsIt++;
                     break;
                 }
             }
@@ -290,17 +267,6 @@ void checkErrors(const Expectations &expectations, const vector<shared_ptr<Range
             }
             lastDiagnostic = (*diagnosticsIt).get();
             diagnosticsIt++;
-        }
-
-        // We've finished processing diagnostics for a file. If assertionsIt still points to a
-        // MULTI assertion, process it.
-        // TODO: Remove when MULTI assertions are deprecated.
-        if (assertionsIt != errorAssertions.end() && (*assertionsIt)->message == "MULTI") {
-            if (multiCount < 2) {
-                ADD_FAILURE_AT((*assertionsIt)->filename.c_str(), (*assertionsIt)->range->start->line)
-                    << "MULTI assertion did not happen multiple times.";
-            }
-            assertionsIt++;
         }
     }
 

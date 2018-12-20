@@ -19,7 +19,8 @@ class TestCasts
     s = T.cast(6, Integer) # error: Useless cast
     s = T.cast(6, T.untyped) # error: Please use `T.unsafe(...)`
 
-    s = T.cast(6, 7) # error: MULTI
+    s = T.cast(6, 7) # error: Please use `T.unsafe(...)` to cast to T.untyped
+                # ^ error: Unsupported type syntax
 
     # s ends up as `untyped`, so these are all OK
     s + "hi"

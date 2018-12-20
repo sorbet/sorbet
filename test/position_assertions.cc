@@ -116,9 +116,8 @@ string ErrorAssertion::toString() {
 }
 
 void ErrorAssertion::check(const unique_ptr<Diagnostic> &diagnostic, const string &sourceLine) {
-    // The error message must contain `message`. If message is MULTI, ignore.
-    // TODO(jvilk): Migrate MULTI to actual multiple assertions.
-    if (diagnostic->message.find(message) == std::string::npos && message != "MULTI") {
+    // The error message must contain `message`.
+    if (diagnostic->message.find(message) == std::string::npos) {
         ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
             "Expected error of form:\n{}\nFound error:\n{}", prettyPrintRangeComment(sourceLine, range, toString()),
             prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));

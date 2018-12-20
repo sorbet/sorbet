@@ -20,7 +20,9 @@ class TestAttr
   sig {returns(String)}
   attr_reader :v3 # error: Use of undeclared variable
 
-  attr_writer :v4, :v5 # error: MULTI
+  attr_writer :v4, :v5 # error: This function does not have a `sig`
+# ^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@v4`
+# ^^^^^^^^^^^^^^^^^^^^ error: Use of undeclared variable `@v5`
 
   Sorbet.sig {returns(String)}
   attr_accessor :v6

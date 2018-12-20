@@ -279,7 +279,15 @@ must either:
 
 Mark that a line should have errors with `# error: <message>` (the `<message>`
 must match the raised error message). In case there are multiple errors on this
-line, use `MULTI` for your `<message>`.
+line, add an `# error: <message>` on its own line just below.
+
+Error checks can optionally point to a range of characters rather than a line:
+
+```ruby
+    rescue Foo, Bar => baz
+         # ^^^ error: Unable to resolve constant `Foo`
+              # ^^^ error: Unable to resolve constant `Bar`
+```
 
 You can optionally create `<name>.rb.<phase>.exp` files that contain pretty
 printed internal state after phase `<phase>`. The tests will ensure that the

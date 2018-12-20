@@ -22,7 +22,8 @@ class Main
   def metatype_pin
     a = 1
     while foo
-        a = T::Array[Integer] # error: MULTI
+        a = T::Array[Integer] # error: Unsupported usage of bare type
+          # ^^^^^^^^^^^^^^^^^ error: Changing the type of a variable in a loop is not permitted
     end
     a
   end
