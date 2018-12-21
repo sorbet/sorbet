@@ -41,6 +41,10 @@ void CounterImpl::histogramAdd(const char *histogram, int key, unsigned long val
     if (!enable_counters) {
         return;
     }
+    prodHistogramAdd(histogram, key, value);
+}
+
+void CounterImpl::prodHistogramAdd(const char *histogram, int key, unsigned long value) {
     this->histograms[histogram][key] += value;
 }
 
@@ -48,7 +52,6 @@ void CounterImpl::categoryCounterAdd(const char *category, const char *counter, 
     if (!enable_counters) {
         return;
     }
-
     prodCategoryCounterAdd(category, counter, value);
 }
 
@@ -111,7 +114,7 @@ void counterConsume(CounterState cs) {
 
     for (auto &hist : cs.counters->histograms) {
         for (auto &e : hist.second) {
-            counterState.histogramAdd(hist.first, e.first, e.second);
+            counterState.prodHistogramAdd(hist.first, e.first, e.second);
         }
     }
 
@@ -157,11 +160,19 @@ void prodCategoryCounterAdd(ConstExprStr category, ConstExprStr counter, unsigne
 }
 
 void histogramInc(ConstExprStr histogram, int key) {
-    counterState.histogramAdd(histogram.str, key, 1);
+    histogramAdd(histogram, key, 1);
 }
 
 void histogramAdd(ConstExprStr histogram, int key, unsigned long value) {
     counterState.histogramAdd(histogram.str, key, value);
+}
+
+void prodHistogramInc(ConstExprStr histogram, int key) {
+    prodHistogramAdd(histogram, key, 1);
+}
+
+void prodHistogramAdd(ConstExprStr histogram, int key, unsigned long value) {
+    counterState.prodHistogramAdd(histogram.str, key, value);
 }
 
 const int MAX_WIDTH = 100;
@@ -180,7 +191,7 @@ void CounterImpl::canonicalize() {
 
     for (auto &hist : this->histograms) {
         for (auto &e : hist.second) {
-            out.histogramAdd(internKey(hist.first), e.first, e.second);
+            out.prodHistogramAdd(internKey(hist.first), e.first, e.second);
         }
     }
 

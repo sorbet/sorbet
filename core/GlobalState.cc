@@ -1121,7 +1121,7 @@ bool GlobalState::hadCriticalError() const {
 ErrorBuilder GlobalState::beginError(Loc loc, ErrorClass what) const {
     bool reportForFile = shouldReportErrorOn(loc, what);
     if (reportForFile) {
-        histogramAdd("error", what.code, 1);
+        prodHistogramAdd("error", what.code, 1);
     }
     bool report = (what == errors::Internal::InternalError) || (reportForFile && !this->silenceErrors);
     return ErrorBuilder(*this, report, loc, what);
