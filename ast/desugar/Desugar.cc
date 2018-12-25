@@ -726,7 +726,6 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
 
                 // TODO the send->block's loc is too big and includes the whole send
                 send->block = make_unique<Block>(loc, std::move(argsAndBody.first), std::move(argsAndBody.second));
-                send->loc = loc;
                 result.swap(res);
             },
             [&](parser::While *wl) {
