@@ -367,9 +367,7 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
                 case LiteralType::LiteralTypeKind::False:
                     return make_shared<LiteralType>(false);
             }
-            shared_ptr<LiteralType> result = make_shared<LiteralType>(true);
-
-            return result;
+            Exception::notImplemented();
         }
         case 4:
             return AndType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
