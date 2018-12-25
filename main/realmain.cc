@@ -212,7 +212,7 @@ int realmain(int argc, char *argv[]) {
 
     unique_ptr<core::GlobalState> gs = make_unique<core::GlobalState>(
         (make_shared<core::ErrorQueue>(*typeErrorsConsole, *logger, opts.errorCodeWhiteList)));
-    vector<unique_ptr<ast::Expression>> indexed;
+    vector<ast::ParsedFile> indexed;
 
     logger->trace("building initial global state");
     unique_ptr<KeyValueStore> kvstore;
@@ -291,7 +291,7 @@ int realmain(int argc, char *argv[]) {
 
                 vector<core::ErrorRegion> errs;
                 for (auto &tree : indexed) {
-                    auto file = tree->loc.file();
+                    auto file = tree.file;
                     errs.emplace_back(*gs, file);
                 }
                 indexed = resolver::Resolver::runConstantResolution(ctx, move(indexed));
@@ -299,7 +299,7 @@ int realmain(int argc, char *argv[]) {
 
             Timer timeit(logger, "autogen");
             for (auto &tree : indexed) {
-                if (tree->loc.file().data(ctx).isRBI()) {
+                if (tree.file.data(ctx).isRBI()) {
                     continue;
                 }
                 auto pf = autogen::Autogen::generate(ctx, move(tree));
@@ -321,7 +321,7 @@ int realmain(int argc, char *argv[]) {
 
         if (opts.print.ErrorFiles) {
             for (auto &tree : indexed) {
-                auto f = tree->loc.file();
+                auto f = tree.file;
                 if (f.data(*gs).hadErrors()) {
                     fmt::print("{}\n", f.data(*gs).path());
                 }
@@ -336,7 +336,7 @@ int realmain(int argc, char *argv[]) {
 
         if (opts.suggestTyped) {
             for (auto &tree : indexed) {
-                auto f = tree->loc.file();
+                auto f = tree.file;
                 if (!f.data(*gs).hadErrors() && f.data(*gs).sigil == core::StrictLevel::Stripe) {
                     counterInc("types.input.files.suggest_typed");
                     logger->error("You could add `# typed: true` to: `{}`", f.data(*gs).path());
@@ -405,7 +405,7 @@ int realmain(int argc, char *argv[]) {
 
         if (opts.suggestTyped) {
             for (auto &tree : indexed) {
-                auto f = tree->loc.file();
+                auto f = tree.file;
                 if (f.data(*gs).sigil == core::StrictLevel::Stripe) {
                     auto *metric = metrics.add_metrics();
                     metric->set_name(absl::StrCat(opts.metricsPrefix, ".suggest.", f.data(*gs).path()));
@@ -431,7 +431,7 @@ int realmain(int argc, char *argv[]) {
     if (!sorbet::emscripten_build) {
         // Let it go: leak memory so that we don't need to call destructors
         for (auto &e : indexed) {
-            intentionallyLeakMemory(e.release());
+            intentionallyLeakMemory(e.tree.release());
         }
         intentionallyLeakMemory(gs.release());
     }

@@ -7,7 +7,7 @@ namespace sorbet::namer {
 
 class Namer final {
 public:
-    static std::unique_ptr<ast::Expression> run(core::MutableContext ctx, std::unique_ptr<ast::Expression> tree);
+    static ast::ParsedFile run(core::MutableContext ctx, ast::ParsedFile tree);
 
     Namer() = delete;
 };

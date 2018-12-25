@@ -15,7 +15,7 @@ namespace sorbet::dsl {
 unique_ptr<ast::Expression> dupName(ast::Expression *node) {
     auto empty = ast::cast_tree<ast::EmptyTree>(node);
     if (empty) {
-        return ast::MK::EmptyTree(node->loc);
+        return ast::MK::EmptyTree();
     }
     auto cnst = ast::cast_tree<ast::UnresolvedConstantLit>(node);
     ENFORCE(cnst);
@@ -65,7 +65,7 @@ vector<unique_ptr<ast::Expression>> Struct::replaceDSL(core::MutableContext ctx,
         sigValues.emplace_back(ast::MK::Constant(loc, core::Symbols::BasicObject()));
         newArgs.emplace_back(make_unique<ast::OptionalArg>(loc, ast::MK::Local(loc, name), ast::MK::Nil(loc)));
 
-        body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(loc), ast::MethodDef::DSLSynthesized));
+        body.emplace_back(ast::MK::Method0(loc, loc, name, ast::MK::EmptyTree(), ast::MethodDef::DSLSynthesized));
         body.emplace_back(ast::MK::Method1(loc, loc, name.addEq(ctx), ast::MK::Local(loc, core::Names::arg0()),
                                            ast::MK::Local(loc, core::Names::arg0()), ast::MethodDef::DSLSynthesized));
     }

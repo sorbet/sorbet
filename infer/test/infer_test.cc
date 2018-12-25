@@ -44,10 +44,11 @@ void processSource(core::GlobalState &cb, string str) {
     sorbet::core::UnfreezeFileTable ft(cb);
     auto ast = parser::Parser::run(cb, "<test>", str);
     sorbet::core::MutableContext ctx(cb, core::Symbols::root());
-    auto tree = ast::desugar::node2Tree(ctx, move(ast));
-    tree = dsl::DSL::run(ctx, move(tree));
+    auto fileId = ast->loc.file();
+    auto tree = ast::ParsedFile{ast::desugar::node2Tree(ctx, move(ast)), fileId};
+    tree.tree = dsl::DSL::run(ctx, move(tree.tree));
     tree = namer::Namer::run(ctx, move(tree));
-    vector<unique_ptr<ast::Expression>> trees;
+    vector<ast::ParsedFile> trees;
     trees.emplace_back(move(tree));
     resolver::Resolver::run(ctx, move(trees));
 }

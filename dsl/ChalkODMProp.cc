@@ -260,7 +260,7 @@ vector<unique_ptr<ast::Expression>> ChalkODMProp::replaceDSL(core::MutableContex
 
             ast::ClassDef::ANCESTORS_store ancestors;
             auto name = ctx.state.enterNameConstant(core::Names::Mutator());
-            stats.emplace_back(ast::MK::Class(loc, loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), name),
+            stats.emplace_back(ast::MK::Class(loc, loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), name),
                                               std::move(ancestors), std::move(rhs), ast::ClassDefKind::Class));
         }
     }

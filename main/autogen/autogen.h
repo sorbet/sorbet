@@ -72,7 +72,7 @@ struct Reference {
 };
 
 struct ParsedFile {
-    std::unique_ptr<ast::Expression> tree;
+    ast::ParsedFile tree;
     u4 cksum;
     std::string path;
     std::vector<Definition> defs;
@@ -89,7 +89,7 @@ private:
 
 class Autogen final {
 public:
-    static ParsedFile generate(core::Context ctx, std::unique_ptr<ast::Expression> tree);
+    static ParsedFile generate(core::Context ctx, ast::ParsedFile tree);
     Autogen() = delete;
 };
 } // namespace sorbet::autogen

@@ -9,31 +9,27 @@
 
 namespace sorbet::realmain::pipeline {
 constexpr std::chrono::milliseconds PROGRESS_REFRESH_TIME_MILLIS = ProgressIndicator::REPORTING_INTERVAL();
+ast::ParsedFile indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
+                         std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
 
-std::unique_ptr<ast::Expression> indexOne(const options::Options &opts, core::GlobalState &lgs, core::FileRef file,
-                                          std::unique_ptr<KeyValueStore> &kvstore,
-                                          std::shared_ptr<spdlog::logger> logger);
+std::vector<ast::ParsedFile> index(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &frs,
+                                   std::vector<core::FileRef> mainThreadFiles, const options::Options &opts,
+                                   WorkerPool &workers, std::unique_ptr<KeyValueStore> &kvstore,
+                                   std::shared_ptr<spdlog::logger> logger);
 
-std::vector<std::unique_ptr<ast::Expression>>
-index(std::unique_ptr<core::GlobalState> &gs, const std::vector<std::string> &frs,
-      std::vector<core::FileRef> mainThreadFiles, const options::Options &opts, WorkerPool &workers,
-      std::unique_ptr<KeyValueStore> &kvstore, std::shared_ptr<spdlog::logger> logger);
+std::vector<ast::ParsedFile> resolve(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                     const options::Options &opts, std::shared_ptr<spdlog::logger> logger,
+                                     bool skipConfigatron = false);
 
-std::vector<std::unique_ptr<ast::Expression>>
-resolve(core::GlobalState &gs, std::vector<std::unique_ptr<ast::Expression>> what, const options::Options &opts,
-        std::shared_ptr<spdlog::logger> logger, bool skipConfigatron = false);
+std::vector<ast::ParsedFile> name(core::GlobalState &gs, std::vector<ast::ParsedFile> what,
+                                  const options::Options &opts, std::shared_ptr<spdlog::logger> logger,
+                                  bool skipConfigatron = false);
 
-std::vector<std::unique_ptr<ast::Expression>> name(core::GlobalState &gs,
-                                                   std::vector<std::unique_ptr<ast::Expression>> what,
-                                                   const options::Options &opts, std::shared_ptr<spdlog::logger> logger,
-                                                   bool skipConfigatron = false);
+std::vector<ast::ParsedFile> typecheck(std::unique_ptr<core::GlobalState> &gs, std::vector<ast::ParsedFile> what,
+                                       const options::Options &opts, WorkerPool &workers,
+                                       std::shared_ptr<spdlog::logger> logger);
 
-std::vector<std::unique_ptr<ast::Expression>> typecheck(std::unique_ptr<core::GlobalState> &gs,
-                                                        std::vector<std::unique_ptr<ast::Expression>> what,
-                                                        const options::Options &opts, WorkerPool &workers,
-                                                        std::shared_ptr<spdlog::logger> logger);
-
-std::unique_ptr<ast::Expression> typecheckOne(core::Context ctx, std::unique_ptr<ast::Expression> resolved,
-                                              const options::Options &opts, std::shared_ptr<spdlog::logger> logger);
+ast::ParsedFile typecheckOne(core::Context ctx, ast::ParsedFile resolved, const options::Options &opts,
+                             std::shared_ptr<spdlog::logger> logger);
 } // namespace sorbet::realmain::pipeline
 #endif // RUBY_TYPER_PIPELINE_H

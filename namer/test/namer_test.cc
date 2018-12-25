@@ -36,18 +36,19 @@ private:
 
 static string_view testClass_str = "Test"sv;
 
-unique_ptr<ast::Expression> getTree(core::GlobalState &gs, string str) {
+ast::ParsedFile getTree(core::GlobalState &gs, string str) {
     sorbet::core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
     sorbet::core::UnfreezeFileTable ft(gs);              // enters original strings
     auto tree = parser::Parser::run(gs, "<test>", str);
-    tree->loc.file().data(gs).strict = core::StrictLevel::Strict;
+    auto file = tree->loc.file();
+    file.data(gs).strict = core::StrictLevel::Strict;
     sorbet::core::MutableContext ctx(gs, core::Symbols::root());
     auto ast = ast::desugar::node2Tree(ctx, move(tree));
     ast = dsl::DSL::run(ctx, move(ast));
-    return ast;
+    return ast::ParsedFile{move(ast), file};
 }
 
-unique_ptr<ast::Expression> hello_world(core::GlobalState &gs) {
+ast::ParsedFile hello_world(core::GlobalState &gs) {
     return getTree(gs, "def hello_world; end");
 }
 
@@ -76,7 +77,7 @@ TEST_F(NamerFixture, Idempotent) { // NOLINT
     auto baseNames = ctx.state.namesUsed();
 
     auto tree = hello_world(ctx);
-    unique_ptr<sorbet::ast::Expression> newtree;
+    ast::ParsedFile newtree;
     {
         sorbet::core::UnfreezeNameTable nameTableAccess(ctx);     // creates singletons and class names
         sorbet::core::UnfreezeSymbolTable symbolTableAccess(ctx); // enters symbols

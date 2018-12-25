@@ -33,7 +33,7 @@ class NameInserter {
             } else {
                 ENFORCE(ast::isa_tree<ast::EmptyTree>(node.get()), "scope is a ", node->nodeName());
             }
-            node = ast::MK::EmptyTree(node->loc);
+            node = ast::MK::EmptyTree();
             return owner;
         }
 
@@ -759,7 +759,7 @@ public:
                 if (auto e = ctx.state.beginError(send->loc, core::errors::Namer::InvalidTypeDefinition)) {
                     e.setHeader("Too many args in type definition");
                 }
-                return make_unique<ast::EmptyTree>(asgn->loc);
+                return make_unique<ast::EmptyTree>();
             }
 
             auto lit = ast::cast_tree<ast::Literal>(send->args[0].get());
@@ -794,7 +794,7 @@ public:
             if (auto e = ctx.state.beginError(typeName->loc, core::errors::Namer::InvalidTypeDefinition)) {
                 e.setHeader("Duplicate type member `{}`", typeName->cnst.data(ctx)->show(ctx));
             }
-            return make_unique<ast::EmptyTree>(asgn->loc);
+            return make_unique<ast::EmptyTree>();
         }
         auto sym = ctx.state.enterTypeMember(asgn->loc, onSymbol, typeName->cnst, variance);
         if (makeAlias) {
@@ -828,7 +828,7 @@ public:
                 }
             }
         }
-        return make_unique<ast::EmptyTree>(asgn->loc);
+        return make_unique<ast::EmptyTree>();
     }
 
     unique_ptr<ast::Expression> postTransformAssign(core::MutableContext ctx, unique_ptr<ast::Assign> asgn) {
@@ -891,9 +891,10 @@ private:
     }
 }; // namespace namer
 
-unique_ptr<ast::Expression> Namer::run(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
+ast::ParsedFile Namer::run(core::MutableContext ctx, ast::ParsedFile tree) {
     NameInserter nameInserter;
-    return ast::TreeMap::apply(ctx, nameInserter, std::move(tree));
+    tree.tree = ast::TreeMap::apply(ctx, nameInserter, std::move(tree.tree));
+    return tree;
 }
 
 }; // namespace sorbet::namer

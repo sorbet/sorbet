@@ -264,6 +264,6 @@ unique_ptr<Expression> EmptyTree::_deepCopy(const Expression *avoid, bool root) 
     if (!root && this == avoid) {
         throw DeepCopyError();
     }
-    return make_unique<EmptyTree>(loc);
+    return make_unique<EmptyTree>();
 }
 } // namespace sorbet::ast

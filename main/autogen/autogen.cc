@@ -302,12 +302,12 @@ public:
     }
 };
 
-ParsedFile Autogen::generate(core::Context ctx, unique_ptr<ast::Expression> tree) {
+ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     AutogenWalk walk;
-    tree = ast::TreeMap::apply(ctx, walk, move(tree));
+    tree.tree = ast::TreeMap::apply(ctx, walk, move(tree.tree));
     auto pf = walk.parsedFile();
-    pf.path = string(tree->loc.file().data(ctx).path());
-    auto src = tree->loc.file().data(ctx).source();
+    pf.path = string(tree.file.data(ctx).path());
+    auto src = tree.file.data(ctx).source();
     pf.cksum = CRC::Calculate(src.data(), src.size(), CRC::CRC_32());
     pf.tree = move(tree);
     return pf;

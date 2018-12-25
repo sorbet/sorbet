@@ -77,7 +77,7 @@ vector<unique_ptr<ast::Expression>> DSLBuilder::replaceDSL(core::MutableContext 
         auto default_ = ast::MK::Send0(loc, ast::MK::T(loc), core::Names::untyped());
         arg = make_unique<ast::OptionalArg>(loc, move(arg), move(default_));
     }
-    stats.emplace_back(ast::MK::Method1(loc, loc, name, move(arg), ast::MK::EmptyTree(loc),
+    stats.emplace_back(ast::MK::Method1(loc, loc, name, move(arg), ast::MK::EmptyTree(),
                                         ast::MethodDef::SelfMethod | ast::MethodDef::DSLSynthesized));
 
     if (!skipGetter) {

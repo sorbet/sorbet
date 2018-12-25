@@ -1004,7 +1004,7 @@ unique_ptr<ast::Expression> SerializerImpl::unpickleExpr(serialize::UnPickler &p
             return make_unique<ast::Cast>(loc, std::move(type), std::move(arg), kind);
         }
         case 20: {
-            return ast::MK::EmptyTree(loc);
+            return ast::MK::EmptyTree();
         }
         case 21: {
             auto declLoc = unpickleLoc(p, file);

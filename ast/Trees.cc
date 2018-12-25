@@ -276,7 +276,7 @@ InsSeq::InsSeq(core::Loc loc, STATS_store stats, unique_ptr<Expression> expr)
     _sanityCheck();
 }
 
-EmptyTree::EmptyTree(core::Loc loc) : Expression(loc) {
+EmptyTree::EmptyTree() : Expression(core::Loc::none()) {
     categoryCounterInc("trees", "emptytree");
     _sanityCheck();
 }

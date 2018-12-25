@@ -37,7 +37,7 @@ public:
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0) = 0;
     std::unique_ptr<Expression> deepCopy() const;
     virtual void _sanityCheck() = 0;
-    core::Loc loc;
+    const core::Loc loc;
 
     class DeepCopyError {};
 
@@ -45,6 +45,11 @@ public:
     virtual std::unique_ptr<Expression> _deepCopy(const Expression *avoid, bool root = false) const = 0;
 };
 // CheckSize(Expression, 16, 8);
+
+struct ParsedFile {
+    std::unique_ptr<ast::Expression> tree;
+    core::FileRef file;
+};
 
 template <class To> To *cast_tree(Expression *what) {
     static_assert(!std::is_pointer<To>::value, "To has to be a pointer");
@@ -681,7 +686,7 @@ private:
 
 class EmptyTree final : public Expression {
 public:
-    EmptyTree(core::Loc loc);
+    EmptyTree();
     virtual std::string toString(const core::GlobalState &gs, int tabs = 0);
     virtual std::string showRaw(const core::GlobalState &gs, int tabs = 0);
     virtual std::string nodeName();

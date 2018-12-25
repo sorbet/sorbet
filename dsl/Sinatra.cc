@@ -30,7 +30,7 @@ vector<unique_ptr<ast::Expression>> Sinatra::replaceDSL(core::MutableContext ctx
     ret.emplace_back(ast::MK::Send1(
         loc, ast::MK::Self(loc), core::Names::include(),
         ast::MK::UnresolvedConstant(
-            loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), core::Symbols::Sinatra().data(ctx)->name),
+            loc, ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), core::Symbols::Sinatra().data(ctx)->name),
             core::Symbols::SinatraBase().data(ctx)->name)));
 
     auto inseq = ast::cast_tree<ast::InsSeq>(mdef->rhs.get());

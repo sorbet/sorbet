@@ -516,13 +516,12 @@ public:
         return depth;
     }
 
-    static vector<unique_ptr<ast::Expression>> resolveConstants(core::MutableContext ctx,
-                                                                vector<unique_ptr<ast::Expression>> trees) {
+    static vector<ast::ParsedFile> resolveConstants(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.resolve_constants");
         ResolveConstantsWalk constants(ctx);
 
         for (auto &tree : trees) {
-            tree = ast::TreeMap::apply(ctx, constants, std::move(tree));
+            tree.tree = ast::TreeMap::apply(ctx, constants, std::move(tree.tree));
         }
 
         auto todo = std::move(constants.todo_);
@@ -940,7 +939,7 @@ private:
                             e.setHeader("Abstract methods must not contain any code in their body");
                         }
 
-                        mdef->rhs = ast::MK::EmptyTree(mdef->rhs->loc);
+                        mdef->rhs = ast::MK::EmptyTree();
                     }
                     if (!mdef->symbol.data(ctx)->enclosingClass(ctx).data(ctx)->isClassAbstract()) {
                         if (auto e = ctx.state.beginError(mdef->loc,
@@ -1191,8 +1190,7 @@ private:
         if (inits.size() == 1) {
             return std::move(inits.front());
         }
-        return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits),
-                                        make_unique<ast::EmptyTree>(core::Loc::none()));
+        return make_unique<ast::InsSeq>(klass->declLoc, std::move(inits), make_unique<ast::EmptyTree>());
     }
 
 public:
@@ -1245,11 +1243,10 @@ public:
         ENFORCE(classes.size() > classStack.back());
         ENFORCE(classes[classStack.back()] == nullptr);
 
-        auto loc = classDef->loc;
         classDef->rhs = addMethods(ctx, std::move(classDef->rhs));
         classes[classStack.back()] = std::move(classDef);
         classStack.pop_back();
-        return make_unique<ast::EmptyTree>(loc);
+        return make_unique<ast::EmptyTree>();
     };
 
     unique_ptr<ast::Expression> postTransformMethodDef(core::MutableContext ctx, unique_ptr<ast::MethodDef> methodDef) {
@@ -1258,10 +1255,9 @@ public:
         ENFORCE(methods.methods.size() > methods.stack.back());
         ENFORCE(methods.methods[methods.stack.back()] == nullptr);
 
-        auto loc = methodDef->loc;
         methods.methods[methods.stack.back()] = std::move(methodDef);
         methods.stack.pop_back();
-        return make_unique<ast::EmptyTree>(loc);
+        return make_unique<ast::EmptyTree>();
     };
 
     unique_ptr<ast::Expression> addClasses(core::MutableContext ctx, unique_ptr<ast::Expression> tree) {
@@ -1453,7 +1449,7 @@ public:
 };
 }; // namespace
 
-vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> trees) {
+vector<ast::ParsedFile> Resolver::run(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     finalizeAncestors(ctx.state);
     trees = resolveSigs(ctx, std::move(trees));
@@ -1463,37 +1459,35 @@ vector<unique_ptr<ast::Expression>> Resolver::run(core::MutableContext ctx, vect
     return trees;
 }
 
-vector<unique_ptr<ast::Expression>> Resolver::resolveSigs(core::MutableContext ctx,
-                                                          vector<unique_ptr<ast::Expression>> trees) {
+vector<ast::ParsedFile> Resolver::resolveSigs(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     ResolveSignaturesWalk sigs;
     ResolveVariablesWalk vars;
     Timer timeit(ctx.state.errorQueue->logger, "resolver.sigs_vars_and_flatten");
     for (auto &tree : trees) {
-        tree = ast::TreeMap::apply(ctx, sigs, std::move(tree));
-        tree = ast::TreeMap::apply(ctx, vars, std::move(tree));
+        tree.tree = ast::TreeMap::apply(ctx, sigs, std::move(tree.tree));
+        tree.tree = ast::TreeMap::apply(ctx, vars, std::move(tree.tree));
 
         // declared in here since it holds onto state
         FlattenWalk flatten;
-        tree = ast::TreeMap::apply(ctx, flatten, std::move(tree));
-        tree = flatten.addClasses(ctx, std::move(tree));
-        tree = flatten.addMethods(ctx, std::move(tree));
+        tree.tree = ast::TreeMap::apply(ctx, flatten, std::move(tree.tree));
+        tree.tree = flatten.addClasses(ctx, std::move(tree.tree));
+        tree.tree = flatten.addMethods(ctx, std::move(tree.tree));
     }
 
     return trees;
 }
 
-void Resolver::sanityCheck(core::MutableContext ctx, vector<unique_ptr<ast::Expression>> &trees) {
+void Resolver::sanityCheck(core::MutableContext ctx, vector<ast::ParsedFile> &trees) {
     if (debug_mode) {
         Timer timeit(ctx.state.errorQueue->logger, "resolver.sanity_check");
         ResolveSanityCheckWalk sanity;
         for (auto &tree : trees) {
-            tree = ast::TreeMap::apply(ctx, sanity, std::move(tree));
+            tree.tree = ast::TreeMap::apply(ctx, sanity, std::move(tree.tree));
         }
     }
 }
 
-vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext ctx,
-                                                            vector<unique_ptr<ast::Expression>> trees) {
+vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     trees = resolveSigs(ctx, std::move(trees));
     sanityCheck(ctx, trees);
@@ -1501,8 +1495,8 @@ vector<unique_ptr<ast::Expression>> Resolver::runTreePasses(core::MutableContext
     return trees;
 }
 
-std::vector<std::unique_ptr<ast::Expression>>
-Resolver::runConstantResolution(core::MutableContext ctx, std::vector<std::unique_ptr<ast::Expression>> trees) {
+std::vector<ast::ParsedFile> Resolver::runConstantResolution(core::MutableContext ctx,
+                                                             std::vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     sanityCheck(ctx, trees);
 

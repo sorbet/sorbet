@@ -115,10 +115,10 @@ UnorderedSet<string> knownPasses = {
     "symbol-table", "name-tree",       "name-tree-raw", "resolve-tree", "resolve-tree-raw", "cfg",
     "cfg-raw",      "typed-source",    "autogen"};
 
-unique_ptr<ast::Expression> testSerialize(core::GlobalState &gs, unique_ptr<ast::Expression> expr) {
-    auto saved = core::serialize::Serializer::storeExpression(gs, expr);
+ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
+    auto saved = core::serialize::Serializer::storeExpression(gs, expr.tree);
     auto restored = core::serialize::Serializer::loadExpression(gs, saved.data());
-    return restored;
+    return {move(restored), expr.file};
 }
 
 /** Converts a Sorbet Detail object into an equivalent LSP Position object. */
@@ -307,7 +307,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             files.emplace_back(gs.enterFile(test.sourceFileContents[test.folder + sourceFile]));
         }
     }
-    vector<unique_ptr<ast::Expression>> trees;
+    vector<ast::ParsedFile> trees;
     map<string, string> got;
 
     vector<core::ErrorRegion> errs;
@@ -343,46 +343,47 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Desugarer
-        unique_ptr<ast::Expression> desugared;
+        ast::ParsedFile desugared;
         {
             core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
-
-            desugared = testSerialize(gs, ast::desugar::node2Tree(ctx, move(nodes)));
+            auto file = nodes->loc.file();
+            desugared = testSerialize(gs, ast::ParsedFile{ast::desugar::node2Tree(ctx, move(nodes)), file});
         }
 
         expectation = test.expectations.find("ast");
         if (expectation != test.expectations.end()) {
-            got["ast"].append(desugared->toString(gs)).append("\n");
+            got["ast"].append(desugared.tree->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("ast-raw");
         if (expectation != test.expectations.end()) {
-            got["ast-raw"].append(desugared->showRaw(gs)).append("\n");
+            got["ast-raw"].append(desugared.tree->showRaw(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
-        unique_ptr<ast::Expression> dslUnwound;
+        ast::ParsedFile dslUnwound;
 
         if (test.expectations.find("autogen") == test.expectations.end()) {
             // DSL
             {
                 core::UnfreezeNameTable nameTableAccess(gs); // enters original strings
 
-                dslUnwound = testSerialize(gs, dsl::DSL::run(ctx, move(desugared)));
+                dslUnwound =
+                    testSerialize(gs, ast::ParsedFile{dsl::DSL::run(ctx, move(desugared.tree)), desugared.file});
             }
 
             expectation = test.expectations.find("dsl-tree");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree"].append(dslUnwound->toString(gs)).append("\n");
+                got["dsl-tree"].append(dslUnwound.tree->toString(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
 
             expectation = test.expectations.find("dsl-tree-raw");
             if (expectation != test.expectations.end()) {
-                got["dsl-tree-raw"].append(dslUnwound->showRaw(gs)).append("\n");
+                got["dsl-tree-raw"].append(dslUnwound.tree->showRaw(gs)).append("\n");
                 auto newErrors = errorQueue->drainAllErrors();
                 errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
             }
@@ -396,7 +397,7 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // Namer
-        unique_ptr<ast::Expression> namedTree;
+        ast::ParsedFile namedTree;
         {
             core::UnfreezeNameTable nameTableAccess(gs);     // creates singletons and class names
             core::UnfreezeSymbolTable symbolTableAccess(gs); // enters symbols
@@ -405,14 +406,14 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
 
         expectation = test.expectations.find("name-tree");
         if (expectation != test.expectations.end()) {
-            got["name-tree"].append(namedTree->toString(gs)).append("\n");
+            got["name-tree"].append(namedTree.tree->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("name-tree-raw");
         if (expectation != test.expectations.end()) {
-            got["name-tree-raw"].append(namedTree->showRaw(gs));
+            got["name-tree-raw"].append(namedTree.tree->showRaw(gs));
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
@@ -455,23 +456,23 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     for (auto &resolvedTree : trees) {
         expectation = test.expectations.find("resolve-tree");
         if (expectation != test.expectations.end()) {
-            got["resolve-tree"].append(resolvedTree->toString(gs)).append("\n");
+            got["resolve-tree"].append(resolvedTree.tree->toString(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
 
         expectation = test.expectations.find("resolve-tree-raw");
         if (expectation != test.expectations.end()) {
-            got["resolve-tree-raw"].append(resolvedTree->showRaw(gs)).append("\n");
+            got["resolve-tree-raw"].append(resolvedTree.tree->showRaw(gs)).append("\n");
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }
     }
 
     for (auto &resolvedTree : trees) {
-        auto file = resolvedTree->loc.file();
+        auto file = resolvedTree.file;
         auto checkTree = [&]() {
-            if (resolvedTree == nullptr) {
+            if (resolvedTree.tree == nullptr) {
                 auto path = file.data(ctx).path();
                 ADD_FAILURE_AT(path.begin(), 1) << "Already used tree. You can only have 1 CFG-ish .exp file";
             }
@@ -490,8 +491,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg");
             CFG_Collector_and_Typer collector;
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree));
-            resolvedTree.reset();
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
 
             stringstream dot;
             dot << "digraph \"" << rbName << "\" {" << '\n';
@@ -510,8 +511,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("cfg-raw");
             CFG_Collector_and_Typer collector(true);
-            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree));
-            resolvedTree.reset();
+            auto cfg = ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
 
             stringstream dot;
             dot << "digraph \"" << rbName << "\" {" << '\n';
@@ -530,8 +531,8 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
             checkTree();
             checkPragma("typed-source");
             CFG_Collector_and_Typer collector(false, true);
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree));
-            resolvedTree.reset();
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
 
             got["typed-source"].append(gs.showAnnotatedSource(file));
 
@@ -540,11 +541,11 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
         }
 
         // If there is a tree left with a typed: pragma, run the inferencer
-        if (resolvedTree != nullptr && file.data(ctx).sigil != core::StrictLevel::Stripe) {
+        if (resolvedTree.tree != nullptr && file.data(ctx).sigil != core::StrictLevel::Stripe) {
             checkTree();
             CFG_Collector_and_Typer collector;
-            ast::TreeMap::apply(ctx, collector, move(resolvedTree));
-            resolvedTree.reset();
+            ast::TreeMap::apply(ctx, collector, move(resolvedTree.tree));
+            resolvedTree.tree.reset();
             auto newErrors = errorQueue->drainAllErrors();
             errors.insert(errors.end(), make_move_iterator(newErrors.begin()), make_move_iterator(newErrors.end()));
         }

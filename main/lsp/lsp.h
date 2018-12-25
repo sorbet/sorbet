@@ -166,7 +166,7 @@ class LSPLoop {
     /** LSP loop reuses a single arena for all json allocations. We never free memory used for JSON */
     rapidjson::MemoryPoolAllocator<> alloc;
     /** Trees that have been indexed and can be reused between different runs */
-    std::vector<std::unique_ptr<const ast::Expression>> indexed;
+    std::vector<ast::ParsedFile> indexed;
     /** Hashes of global states obtained by resolving every file in isolation. Used for fastpath. */
     std::vector<unsigned int> globalStateHashes;
     /** List of files that have had errors in last run*/
@@ -275,8 +275,6 @@ class LSPLoop {
     UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(std::shared_ptr<core::Type> receiver,
                                                                                    std::string_view name);
     void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
-    void tryApplyDefLocSaver(std::unique_ptr<core::GlobalState> &finalGs,
-                             std::vector<std::unique_ptr<ast::Expression>> &indexedCopies);
     void sendShowMessageNotification(int messageType, const std::string &message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);

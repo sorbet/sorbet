@@ -56,7 +56,7 @@ unique_ptr<ast::Expression> ASTUtil::dupType(ast::Expression *orig) {
     auto scopeCnst = ast::cast_tree<ast::UnresolvedConstantLit>(cons->scope.get());
     if (!scopeCnst) {
         if (ast::isa_tree<ast::EmptyTree>(cons->scope.get())) {
-            return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(cons->loc), cons->cnst);
+            return ast::MK::UnresolvedConstant(cons->loc, ast::MK::EmptyTree(), cons->cnst);
         }
         auto *id = ast::cast_tree<ast::ConstantLit>(cons->scope.get());
         ENFORCE(id != nullptr);

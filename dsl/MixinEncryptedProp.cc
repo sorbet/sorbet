@@ -12,7 +12,7 @@ namespace sorbet::dsl {
 
 unique_ptr<ast::Expression> mkNilableEncryptedValue(core::MutableContext ctx, core::Loc loc) {
     auto opus =
-        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(loc), ctx.state.enterNameConstant(core::Names::Opus()));
+        ast::MK::UnresolvedConstant(loc, ast::MK::EmptyTree(), ctx.state.enterNameConstant(core::Names::Opus()));
     auto db = ast::MK::UnresolvedConstant(loc, move(opus), ctx.state.enterNameConstant(core::Names::DB()));
     auto model = ast::MK::UnresolvedConstant(loc, move(db), ctx.state.enterNameConstant(core::Names::Model()));
     auto mixins = ast::MK::UnresolvedConstant(loc, move(model), ctx.state.enterNameConstant(core::Names::Mixins()));

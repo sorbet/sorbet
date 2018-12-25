@@ -45,7 +45,7 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
 
     vector<string> emptyInputNames;
     auto t = pipeline::indexOne(opts, *initialGS, fref, kvstore, logger);
-    int id = t->loc.file().id();
+    int id = t.file.id();
     if (id >= indexed.size()) {
         indexed.resize(id + 1);
     }
@@ -53,13 +53,12 @@ core::FileRef LSPLoop::addNewFile(const shared_ptr<core::File> &file) {
     return fref;
 }
 
-vector<unique_ptr<ast::Expression>> incrementalResolve(core::GlobalState &gs, vector<unique_ptr<ast::Expression>> what,
-                                                       const options::Options &opts,
-                                                       shared_ptr<spdlog::logger> logger) {
+vector<ast::ParsedFile> incrementalResolve(core::GlobalState &gs, vector<ast::ParsedFile> what,
+                                           const options::Options &opts, shared_ptr<spdlog::logger> logger) {
     try {
         int i = 0;
         for (auto &tree : what) {
-            auto file = tree->loc.file();
+            auto file = tree.file;
             try {
                 unique_ptr<ast::Expression> ast;
                 core::MutableContext ctx(gs, core::Symbols::root());
@@ -135,7 +134,7 @@ vector<unsigned int> LSPLoop::computeStateHashes(const vector<shared_ptr<core::F
                         core::UnfreezeFileTable fileTableAccess(*lgs);
                         fref = lgs->enterFile(files[job]);
                     }
-                    vector<unique_ptr<ast::Expression>> single;
+                    vector<ast::ParsedFile> single;
                     unique_ptr<KeyValueStore> kvstore;
 
                     single.emplace_back(pipeline::indexOne(emptyOpts, *lgs, fref, kvstore, logger));
@@ -185,7 +184,7 @@ void LSPLoop::reIndexFromFileSystem() {
     vector<string> fileNames(make_move_iterator(fileNamesDedup.begin()), make_move_iterator(fileNamesDedup.end()));
     vector<core::FileRef> emptyInputFiles;
     for (auto &t : pipeline::index(initialGS, fileNames, emptyInputFiles, opts, workers, kvstore, logger)) {
-        int id = t->loc.file().id();
+        int id = t.file.id();
         if (id >= indexed.size()) {
             indexed.resize(id + 1);
         }
@@ -193,15 +192,14 @@ void LSPLoop::reIndexFromFileSystem() {
     }
 }
 
-void LSPLoop::tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs,
-                                  vector<unique_ptr<ast::Expression>> &indexedCopies) {
+void tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs, vector<ast::ParsedFile> &indexedCopies) {
     if (finalGs->lspInfoQueryLoc == core::Loc::none()) {
         return;
     }
     for (auto &t : indexedCopies) {
         DefLocSaver defLocSaver;
         core::Context ctx(*finalGs, core::Symbols::root());
-        t = ast::TreeMap::apply(ctx, defLocSaver, move(t));
+        t.tree = ast::TreeMap::apply(ctx, defLocSaver, move(t.tree));
     }
 }
 
@@ -219,10 +217,10 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
         }
     }
 
-    vector<unique_ptr<ast::Expression>> indexedCopies;
+    vector<ast::ParsedFile> indexedCopies;
     for (const auto &tree : indexed) {
-        if (tree) {
-            indexedCopies.emplace_back(tree->deepCopy());
+        if (tree.tree) {
+            indexedCopies.emplace_back(ast::ParsedFile{tree.tree->deepCopy(), tree.file});
         }
     }
 
@@ -231,8 +229,8 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     tryApplyDefLocSaver(finalGs, resolved);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
-        ENFORCE(tree->loc.file().exists());
-        affectedFiles.push_back(tree->loc.file());
+        ENFORCE(tree.file.exists());
+        affectedFiles.push_back(tree.file);
     }
     pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
@@ -295,12 +293,12 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &chang
         logger->debug("Taking happy path");
         prodCategoryCounterInc("lsp.updates", "fastpath");
         ENFORCE(initialGS->errorQueue->isEmpty());
-        vector<unique_ptr<ast::Expression>> updatedIndexed;
+        vector<ast::ParsedFile> updatedIndexed;
         for (auto &f : subset) {
             auto t = pipeline::indexOne(opts, *finalGs, f, kvstore, logger);
-            int id = t->loc.file().id();
+            int id = t.file.id();
             indexed[id] = move(t);
-            updatedIndexed.emplace_back(indexed[id]->deepCopy());
+            updatedIndexed.emplace_back(ast::ParsedFile{indexed[id].tree->deepCopy(), t.file});
         }
 
         auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);

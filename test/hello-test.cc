@@ -161,7 +161,7 @@ TEST(PreOrderTreeMap, CountTrees) { // NOLINT
 
     unique_ptr<ast::Expression> methodDef =
         make_unique<ast::MethodDef>(loc, loc, methodSym, name, std::move(args), std::move(rhs), false);
-    unique_ptr<ast::Expression> emptyTree = make_unique<ast::EmptyTree>(loc);
+    unique_ptr<ast::Expression> emptyTree = make_unique<ast::EmptyTree>();
     unique_ptr<ast::Expression> cnst = make_unique<ast::UnresolvedConstantLit>(loc, std::move(emptyTree), name);
 
     ast::ClassDef::RHS_store classrhs;
