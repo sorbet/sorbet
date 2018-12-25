@@ -332,12 +332,12 @@ AndType::AndType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : 
     categoryCounterInc("types.allocated", "andtype");
 }
 
-bool LiteralType::equals(const shared_ptr<LiteralType> &rhs) const {
-    if (this->value != rhs->value) {
+bool LiteralType::equals(const LiteralType &rhs) const {
+    if (this->value != rhs.value) {
         return false;
     }
     auto *lklass = cast_type<ClassType>(this->underlying().get());
-    auto *rklass = cast_type<ClassType>(rhs->underlying().get());
+    auto *rklass = cast_type<ClassType>(rhs.underlying().get());
     if (!lklass || !rklass) {
         return false;
     }
@@ -359,9 +359,9 @@ ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-ShapeType::ShapeType(const shared_ptr<Type> &underlying, vector<shared_ptr<LiteralType>> keys,
-                     vector<shared_ptr<Type>> values)
+ShapeType::ShapeType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> keys, vector<shared_ptr<Type>> values)
     : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
+    DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(cast_type<LiteralType>(k.get()) != nullptr); };);
     categoryCounterInc("types.allocated", "shapetype");
 }
 

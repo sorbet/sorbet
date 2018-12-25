@@ -255,103 +255,105 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
             categoryCounterInc("lub", "proxy>");
             // both are proxy
             shared_ptr<Type> result;
-            typecase(
-                p1,
-                [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
-                    if (auto *a2 = cast_type<TupleType>(p2)) {
-                        if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                            vector<shared_ptr<Type>> elemLubs;
-                            int i = -1;
-                            bool differ1 = false;
-                            bool differ2 = false;
-                            for (auto &el2 : a2->elems) {
-                                ++i;
-                                auto &inserted = elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
-                                differ1 = differ1 || inserted != a1->elems[i];
-                                differ2 = differ2 || inserted != el2;
-                            }
-                            if (!differ1) {
-                                result = t1;
-                            } else if (!differ2) {
-                                result = t2;
-                            } else {
-                                result = TupleType::build(ctx, elemLubs);
-                            }
-                        } else {
-                            result = Types::arrayOfUntyped();
-                        }
-                    } else {
-                        result = lub(ctx, p1->underlying(), p2->underlying());
-                    }
-                },
-                [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
-                    if (auto *h2 = cast_type<ShapeType>(p2)) {
-                        if (h2->keys.size() == h1->keys.size()) {
-                            // have enough keys.
-                            int i = -1;
-                            vector<shared_ptr<Type>> valueLubs;
-                            valueLubs.reserve(h2->keys.size());
-                            bool differ1 = false;
-                            bool differ2 = false;
-                            for (auto &el2 : h2->keys) {
-                                ++i;
-                                auto *u2 = cast_type<ClassType>(el2->underlying().get());
-                                ENFORCE(u2 != nullptr);
-                                auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                    ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
-                                    return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
-                                });
-                                if (fnd != h1->keys.end()) {
-                                    auto &inserted = valueLubs.emplace_back(
-                                        lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
-                                    differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
-                                    differ2 = differ2 || inserted != h2->values[i];
-                                } else {
-                                    result = Types::hashOfUntyped();
-                                    return;
-                                }
-                            }
-                            if (!differ1) {
-                                result = t1;
-                            } else if (!differ2) {
-                                result = t2;
-                            } else {
-                                result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
-                            }
-                        } else {
-                            result = Types::hashOfUntyped();
-                        }
-                    } else {
-                        result = lub(ctx, p1->underlying(), p2->underlying());
-                    }
-                },
-                [&](LiteralType *l1) {
-                    if (auto *l2 = cast_type<LiteralType>(p2)) {
-                        auto *u1 = cast_type<ClassType>(l1->underlying().get());
-                        auto *u2 = cast_type<ClassType>(l2->underlying().get());
-                        ENFORCE(u1 != nullptr && u2 != nullptr);
-                        if (u1->symbol == u2->symbol) {
-                            if (l1->value == l2->value) {
-                                result = t1;
-                            } else {
-                                result = l1->underlying();
-                            }
-                        } else {
-                            result = lubGround(ctx, l1->underlying(), l2->underlying());
-                        }
-                    } else {
-                        result = lub(ctx, p1->underlying(), p2->underlying());
-                    }
-                },
-                [&](MetaType *m1) {
-                    if (auto *m2 = cast_type<MetaType>(p2)) {
-                        if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
-                            result = t1;
-                            return;
-                        }
-                    }
-                    result = lub(ctx, p1->underlying(), p2->underlying());
-                });
+            typecase(p1,
+                     [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
+                         if (auto *a2 = cast_type<TupleType>(p2)) {
+                             if (a1->elems.size() ==
+                                 a2->elems.size()) { // lub arrays only if they have same element count
+                                 vector<shared_ptr<Type>> elemLubs;
+                                 int i = -1;
+                                 bool differ1 = false;
+                                 bool differ2 = false;
+                                 for (auto &el2 : a2->elems) {
+                                     ++i;
+                                     auto &inserted = elemLubs.emplace_back(lub(ctx, a1->elems[i], el2));
+                                     differ1 = differ1 || inserted != a1->elems[i];
+                                     differ2 = differ2 || inserted != el2;
+                                 }
+                                 if (!differ1) {
+                                     result = t1;
+                                 } else if (!differ2) {
+                                     result = t2;
+                                 } else {
+                                     result = TupleType::build(ctx, elemLubs);
+                                 }
+                             } else {
+                                 result = Types::arrayOfUntyped();
+                             }
+                         } else {
+                             result = lub(ctx, p1->underlying(), p2->underlying());
+                         }
+                     },
+                     [&](ShapeType *h1) { // Warning: this implements COVARIANT hashes
+                         if (auto *h2 = cast_type<ShapeType>(p2)) {
+                             if (h2->keys.size() == h1->keys.size()) {
+                                 // have enough keys.
+                                 int i = -1;
+                                 vector<shared_ptr<Type>> valueLubs;
+                                 valueLubs.reserve(h2->keys.size());
+                                 bool differ1 = false;
+                                 bool differ2 = false;
+                                 for (auto &el2 : h2->keys) {
+                                     ++i;
+                                     auto el2l = cast_type<LiteralType>(el2.get());
+                                     auto *u2 = cast_type<ClassType>(el2l->underlying().get());
+                                     ENFORCE(u2 != nullptr);
+                                     auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
+                                         auto el1l = cast_type<LiteralType>(candidate.get());
+                                         ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                                         return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
+                                     });
+                                     if (fnd != h1->keys.end()) {
+                                         auto &inserted = valueLubs.emplace_back(
+                                             lub(ctx, h1->values[fnd - h1->keys.begin()], h2->values[i]));
+                                         differ1 = differ1 || inserted != h1->values[fnd - h1->keys.begin()];
+                                         differ2 = differ2 || inserted != h2->values[i];
+                                     } else {
+                                         result = Types::hashOfUntyped();
+                                         return;
+                                     }
+                                 }
+                                 if (!differ1) {
+                                     result = t1;
+                                 } else if (!differ2) {
+                                     result = t2;
+                                 } else {
+                                     result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                                 }
+                             } else {
+                                 result = Types::hashOfUntyped();
+                             }
+                         } else {
+                             result = lub(ctx, p1->underlying(), p2->underlying());
+                         }
+                     },
+                     [&](LiteralType *l1) {
+                         if (auto *l2 = cast_type<LiteralType>(p2)) {
+                             auto *u1 = cast_type<ClassType>(l1->underlying().get());
+                             auto *u2 = cast_type<ClassType>(l2->underlying().get());
+                             ENFORCE(u1 != nullptr && u2 != nullptr);
+                             if (u1->symbol == u2->symbol) {
+                                 if (l1->value == l2->value) {
+                                     result = t1;
+                                 } else {
+                                     result = l1->underlying();
+                                 }
+                             } else {
+                                 result = lubGround(ctx, l1->underlying(), l2->underlying());
+                             }
+                         } else {
+                             result = lub(ctx, p1->underlying(), p2->underlying());
+                         }
+                     },
+                     [&](MetaType *m1) {
+                         if (auto *m2 = cast_type<MetaType>(p2)) {
+                             if (Types::equiv(ctx, m1->wrapped, m2->wrapped)) {
+                                 result = t1;
+                                 return;
+                             }
+                         }
+                         result = lub(ctx, p1->underlying(), p2->underlying());
+                     });
             ENFORCE(result.get() != nullptr);
             return result;
         } else {
@@ -638,11 +640,13 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              bool canReuseT2 = true;
                              for (auto &el2 : h2->keys) {
                                  ++i;
-                                 auto *u2 = cast_type<ClassType>(el2->underlying().get());
+                                 auto el2l = cast_type<LiteralType>(el2.get());
+                                 auto *u2 = cast_type<ClassType>(el2l->underlying().get());
                                  ENFORCE(u2 != nullptr);
                                  auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                     ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
-                                     return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
+                                     auto el1l = cast_type<LiteralType>(candidate.get());
+                                     ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                                     return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
                                  });
                                  if (fnd != h1->keys.end()) {
                                      auto left = h1->values[fnd - h1->keys.begin()];
@@ -1083,11 +1087,13 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
                          int i = -1;
                          for (auto &el2 : h2->keys) {
                              ++i;
-                             auto *u2 = cast_type<ClassType>(el2->underlying().get());
+                             auto el2l = cast_type<LiteralType>(el2.get());
+                             auto *u2 = cast_type<ClassType>(el2l->underlying().get());
                              ENFORCE(u2 != nullptr);
                              auto fnd = absl::c_find_if(h1->keys, [&](auto &candidate) -> bool {
-                                 ClassType *u1 = cast_type<ClassType>(candidate->underlying().get());
-                                 return candidate->value == el2->value && u1->symbol == u2->symbol; // from lambda
+                                 auto el1l = cast_type<LiteralType>(candidate.get());
+                                 ClassType *u1 = cast_type<ClassType>(el1l->underlying().get());
+                                 return el1l->value == el2l->value && u1->symbol == u2->symbol; // from lambda
                              });
                              result = fnd != h1->keys.end() &&
                                       Types::isSubTypeUnderConstraint(ctx, constr, h1->values[fnd - h1->keys.begin()],

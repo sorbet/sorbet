@@ -392,7 +392,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             result = core::TupleType::build(ctx, elems);
         },
         [&](ast::Hash *hash) {
-            vector<shared_ptr<core::LiteralType>> keys;
+            vector<shared_ptr<core::Type>> keys;
             vector<shared_ptr<core::Type>> values;
 
             for (auto &ktree : hash->keys) {

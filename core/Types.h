@@ -313,7 +313,7 @@ public:
     virtual std::string typeName() const override;
     virtual bool isFullyDefined() final;
 
-    bool equals(const std::shared_ptr<LiteralType> &rhs) const;
+    bool equals(const LiteralType &rhs) const;
 
     virtual std::shared_ptr<Type> _instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
                                                const std::vector<std::shared_ptr<Type>> &targs) override;
@@ -443,11 +443,11 @@ CheckSize(AndType, 40, 8);
 
 class ShapeType final : public ProxyType {
 public:
-    std::vector<std::shared_ptr<LiteralType>> keys; // TODO: store sorted by whatever
+    std::vector<std::shared_ptr<Type>> keys; // TODO: store sorted by whatever
     std::vector<std::shared_ptr<Type>> values;
     const std::shared_ptr<Type> underlying_;
     ShapeType();
-    ShapeType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<LiteralType>> keys,
+    ShapeType(const std::shared_ptr<Type> &underlying, std::vector<std::shared_ptr<Type>> keys,
               std::vector<std::shared_ptr<Type>> values);
 
     virtual std::string toString(const GlobalState &gs, int tabs = 0) const final;

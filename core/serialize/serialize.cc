@@ -384,13 +384,10 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
         case 6: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
-            vector<shared_ptr<LiteralType>> keys(sz);
+            vector<shared_ptr<Type>> keys(sz);
             vector<shared_ptr<Type>> values(sz);
             for (auto &key : keys) {
-                auto tmp = unpickleType(p, gs);
-                if (auto *lit = cast_type<LiteralType>(tmp.get())) {
-                    key = shared_ptr<LiteralType>(tmp, lit);
-                }
+                key = unpickleType(p, gs);
             }
             for (auto &value : values) {
                 value = unpickleType(p, gs);

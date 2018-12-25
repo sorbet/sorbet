@@ -544,7 +544,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     break;
                 } else if (spec->isRepeated()) {
                     for (auto it = hash->keys.begin(); it != hash->keys.end(); ++it) {
-                        auto key = *it;
+                        auto key = cast_type<LiteralType>(it->get());
                         SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
                         if (klass != Symbols::Symbol()) {
                             continue;
@@ -569,7 +569,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 }
                 ++kwit;
 
-                auto arg = absl::c_find_if(hash->keys, [&](shared_ptr<LiteralType> lit) {
+                auto arg = absl::c_find_if(hash->keys, [&](const shared_ptr<Type> &litType) {
+                    auto lit = cast_type<LiteralType>(litType.get());
                     return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
                            lit->value == spec->name._id;
                 });
@@ -591,7 +592,8 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                     result.components.front().errors.emplace_back(std::move(e));
                 }
             }
-            for (auto &key : hash->keys) {
+            for (auto &keyType : hash->keys) {
+                auto key = cast_type<LiteralType>(keyType.get());
                 SymbolRef klass = cast_type<ClassType>(key->underlying().get())->symbol;
                 if (klass == Symbols::Symbol() && consumed.find(NameRef(ctx.state, key->value)) != consumed.end()) {
                     continue;
@@ -985,7 +987,7 @@ public:
     shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
-        vector<shared_ptr<LiteralType>> keys;
+        vector<shared_ptr<Type>> keys;
         vector<shared_ptr<Type>> values;
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
@@ -1244,11 +1246,13 @@ public:
 
         auto keys = shape->keys;
         auto values = shape->values;
-        for (auto &key : rhs->keys) {
-            auto &value = rhs->values[&key - &rhs->keys.front()];
-            auto fnd = absl::c_find_if(keys, [&key](auto &lit) { return key->equals(lit); });
+        for (auto &keyType : rhs->keys) {
+            auto key = cast_type<LiteralType>(keyType.get());
+            auto &value = rhs->values[&keyType - &rhs->keys.front()];
+            auto fnd =
+                absl::c_find_if(keys, [&key](auto &lit) { return key->equals(*cast_type<LiteralType>(lit.get())); });
             if (fnd == keys.end()) {
-                keys.emplace_back(key);
+                keys.emplace_back(keyType);
                 values.emplace_back(value);
             } else {
                 values[fnd - keys.begin()] = value;
