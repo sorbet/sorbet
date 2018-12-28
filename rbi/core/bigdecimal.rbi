@@ -624,11 +624,12 @@ class BigDecimal < Numeric
   sig {returns(Integer)}
   sig do
     params(
-        arg0: Integer,
+        n: Integer,
+        mode: T.any(Integer, Symbol),
     )
     .returns(BigDecimal)
   end
-  def round(arg0=T.unsafe(nil)); end
+  def round(n=0, mode=T.unsafe(nil)); end
 
   sig {returns(Integer)}
   def sign(); end
