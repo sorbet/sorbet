@@ -51,7 +51,7 @@ class Array < Object
 
   sig do
     params(
-        arg0: T::Array[Elem],
+        arg0: T::Array[T.untyped],
     )
     .returns(T::Array[Elem])
   end
