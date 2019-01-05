@@ -71,10 +71,12 @@ public:
     File(File &&other) = default;
     File(const File &other) = delete;
     File() = delete;
-    File deepCopy();
     std::vector<int> &line_breaks() const;
     int lineCount() const;
     bool hadErrors() const;
+
+    /** Given a 1-based line number, returns a string view of the line. */
+    std::string_view getLine(int i);
 
 private:
     const std::string path_;

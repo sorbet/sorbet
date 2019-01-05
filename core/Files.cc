@@ -130,4 +130,13 @@ int File::lineCount() const {
     return line_breaks().size() - 1;
 }
 
+std::string_view File::getLine(int i) {
+    auto lineBreaks = line_breaks();
+    ENFORCE(i < lineBreaks.size());
+    ENFORCE(i > 0);
+    auto start = lineBreaks.at(i - 1) + 1;
+    auto end = lineBreaks.at(i);
+    return source().substr(start, end - start);
+}
+
 } // namespace sorbet::core

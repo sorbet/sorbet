@@ -20,19 +20,20 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
 
 namespace {
 class LSPQuerrySetup {
-    core::GlobalState &gs;
+    std::unique_ptr<core::GlobalState> &gs;
 
 public:
-    LSPQuerrySetup(core::GlobalState &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
-        ENFORCE(!gs.lspInfoQueryLoc.exists());
-        ENFORCE(!gs.lspQuerySymbol.exists());
+    LSPQuerrySetup(std::unique_ptr<core::GlobalState> &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
+        // Might return 'true' if GS was copied with flags set before they were unset.
+        // ENFORCE(!gs.lspInfoQueryLoc.exists());
+        // ENFORCE(!gs.lspQuerySymbol.exists());
         ENFORCE(loc.exists() || symbol.exists());
-        gs.lspInfoQueryLoc = loc;
-        gs.lspQuerySymbol = symbol;
+        gs->lspInfoQueryLoc = loc;
+        gs->lspQuerySymbol = symbol;
     }
     ~LSPQuerrySetup() {
-        gs.lspInfoQueryLoc = core::Loc::none();
-        gs.lspQuerySymbol = core::Symbols::noSymbol();
+        gs->lspInfoQueryLoc = core::Loc::none();
+        gs->lspQuerySymbol = core::Symbols::noSymbol();
     }
 };
 
@@ -63,8 +64,8 @@ optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryByLoc(rapidjson::Document 
         return nullopt;
     }
 
-    LSPQuerrySetup setup1(*initialGS, *loc, core::Symbols::noSymbol());
-    LSPQuerrySetup setup2(*finalGs, *loc, core::Symbols::noSymbol());
+    LSPQuerrySetup setup1(initialGS, *loc.get(), core::Symbols::noSymbol());
+    LSPQuerrySetup setup2(finalGs, *loc.get(), core::Symbols::noSymbol());
     vector<shared_ptr<core::File>> files;
     files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
     return tryFastPath(files);
@@ -73,7 +74,8 @@ optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryBySymbol(core::SymbolRef s
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
     {
-        LSPQuerrySetup setup(*finalGs, core::Loc::none(), sym);
+        LSPQuerrySetup setup1(initialGS, core::Loc::none(), sym);
+        LSPQuerrySetup setup2(finalGs, core::Loc::none(), sym);
         return tryFastPath(files, true);
     }
     // this function currently always returns optional that is set, but we're keeping API symmetric to

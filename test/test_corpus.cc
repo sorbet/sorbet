@@ -150,7 +150,7 @@ bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
  * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
  */
 string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                     const std::string &filename, int line) {
+                     const string &filename, int line) {
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
         ADD_FAILURE() << fmt::format("Unable to find referenced source file `{}`", filename);
@@ -162,18 +162,15 @@ string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>
         ADD_FAILURE_AT(filename.c_str(), line + 1) << "Invalid line number for range.";
         return "";
     } else {
-        auto &lineBreaks = file->line_breaks();
-        // Note: line is a 0-indexed line number, but lineBreak is 1-indexed.
-        auto start = lineBreaks[line] + 1;
-        auto end = lineBreaks[line + 1];
-        auto line = file->source().substr(start, end - start);
-        return string(line.begin(), line.end());
+        // Note: line is a 0-indexed line number, but file uses 1-indexed line numbers.
+        auto lineView = file->getLine(line + 1);
+        return string(lineView.begin(), lineView.end());
     }
 }
 
 /** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
 void reportMissingError(const std::string &filename, const shared_ptr<ErrorAssertion> &assertion,
-                        const string &sourceLine) {
+                        string_view sourceLine) {
     ADD_FAILURE_AT(filename.c_str(), assertion->range->start->line + 1)
         << fmt::format("Did not find expected error:\n{}",
                        prettyPrintRangeComment(sourceLine, assertion->range, assertion->toString()));
@@ -181,7 +178,7 @@ void reportMissingError(const std::string &filename, const shared_ptr<ErrorAsser
 
 /** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
 void reportUnexpectedError(const std::string &filename, const unique_ptr<Diagnostic> &diagnostic,
-                           const string &sourceLine) {
+                           string_view sourceLine) {
     ADD_FAILURE_AT(filename.c_str(), diagnostic->range->start->line + 1) << fmt::format(
         "Found unexpected error:\n{}",
         prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
@@ -589,19 +586,6 @@ TEST_P(ExpectationTest, PerPhaseTest) { // NOLINT
     TEST_COUT << "errors OK" << '\n';
 }
 
-/** Given a root URI and a URI, returns the file path relative to the repository root. */
-string filenameFromUri(const std::string &rootUri, const std::string &uri) {
-    if (uri.substr(0, rootUri.length()) != rootUri) {
-        ADD_FAILURE() << fmt::format(
-            "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
-            uri, rootUri);
-        return "";
-    }
-
-    // Remove rootUri + '/'
-    return uri.substr(rootUri.length() + 1);
-}
-
 TEST_P(LSPTest, PositionTests) {
     string rootPath = "/Users/jvilk/stripe/pay-server";
     string rootUri = fmt::format("file://{}", rootPath);
@@ -610,7 +594,7 @@ TEST_P(LSPTest, PositionTests) {
     // filename => URI
     UnorderedMap<string, string> testFileUris;
     for (auto &filename : filenames) {
-        testFileUris[filename] = fmt::format("{}/{}", rootUri, filename);
+        testFileUris[filename] = filePathToUri(rootUri, filename);
     }
 
     // Fake root document; used to allocate JSONAny values.
@@ -623,7 +607,7 @@ TEST_P(LSPTest, PositionTests) {
     // Send 'initialize' message.
     {
         unique_ptr<JSONBaseType> initializeParams = makeInitializeParams(rootPath, rootUri);
-        auto responses = sendRequest(makeRequestMessage(doc, "initialize", nextId++, initializeParams));
+        auto responses = getLSPResponsesFor(makeRequestMessage(doc, "initialize", nextId++, initializeParams));
 
         // Should just have an 'initialize' response.
         ASSERT_EQ(1, responses.size());
@@ -651,7 +635,7 @@ TEST_P(LSPTest, PositionTests) {
         initialized->jsonrpc = "2.0";
         initialized->method = "initialized";
         initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
-        auto initializedResponses = sendNotification(initialized);
+        auto initializedResponses = getLSPResponsesFor(move(initialized));
         EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
     }
 
@@ -668,7 +652,7 @@ TEST_P(LSPTest, PositionTests) {
             didOpenTextDocParams->textDocument = move(textDocument);
 
             unique_ptr<JSONBaseType> cast = move(didOpenTextDocParams);
-            auto responses = sendRequest(makeRequestMessage(doc, "textDocument/didOpen", nextId++, cast));
+            auto responses = getLSPResponsesFor(makeRequestMessage(doc, "textDocument/didOpen", nextId++, cast));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
@@ -694,7 +678,7 @@ TEST_P(LSPTest, PositionTests) {
             didChangeNotif->method = "textDocument/didChange";
             didChangeNotif->params = didChangeParams->toJSONValue(doc);
 
-            auto responses = sendNotification(didChangeNotif);
+            auto responses = getLSPResponsesFor(move(didChangeNotif));
             allResponses.insert(allResponses.end(), make_move_iterator(responses.begin()),
                                 make_move_iterator(responses.end()));
         }
@@ -714,7 +698,7 @@ TEST_P(LSPTest, PositionTests) {
                 auto maybeDiagnosticParams = getPublishDiagnosticParams(doc);
                 ASSERT_TRUE(maybeDiagnosticParams.has_value());
                 auto &diagnosticParams = *maybeDiagnosticParams;
-                auto filename = filenameFromUri(rootUri, diagnosticParams->uri);
+                auto filename = uriToFilePath(rootUri, diagnosticParams->uri);
                 EXPECT_NE(testFileUris.end(), testFileUris.find(filename))
                     << fmt::format("Diagnostic URI is not a test file URI: {}", diagnosticParams->uri);
 
@@ -725,7 +709,12 @@ TEST_P(LSPTest, PositionTests) {
         checkErrors(test, assertions, diagnostics);
     }
 
-    // TODO(jvilk): Request/response assertions (like Find Def/Usages/Autocomplete)
+    {
+        auto requestResponseAssertions = RangeAssertion::getRequestResponseAssertions(assertions);
+        for (auto &requestResponseAssertion : requestResponseAssertions) {
+            requestResponseAssertion->check(test, *this, doc, rootUri, nextId);
+        }
+    }
 }
 
 INSTANTIATE_TEST_CASE_P(PosTests, ExpectationTest, ::testing::ValuesIn(getInputs(singleTest)), prettyPrintTest);

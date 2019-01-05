@@ -87,7 +87,7 @@ optional<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::parseLSPResponse(strin
     return nullopt;
 }
 
-vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::sendRaw(string json) {
+vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(string json) {
     // TODO(jvilk): Share parsing code with main LSP codebase.
     // processRequest does not require Content-Length or other headers.
     lspLoop->processRequest(json);
@@ -153,13 +153,8 @@ vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::sendRaw(string json) {
     return rv;
 }
 
-vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::sendRequest(const unique_ptr<RequestMessage> &message) {
-    return sendRaw(message->toJSON());
-}
-
-vector<unique_ptr<JSONDocument<JSONBaseType>>>
-LSPTest::sendNotification(const unique_ptr<NotificationMessage> &message) {
-    return sendRaw(message->toJSON());
+vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesFor(const unique_ptr<JSONBaseType> &message) {
+    return getLSPResponsesForRaw(message->toJSON());
 }
 
 } // namespace sorbet::test

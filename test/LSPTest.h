@@ -43,7 +43,7 @@ private:
     std::optional<unique_ptr<JSONDocument<JSONBaseType>>> parseLSPResponse(std::string raw);
 
     /** Sends the given string directly to Sorbet's LSP component, and returns any response messages. */
-    std::vector<unique_ptr<JSONDocument<JSONBaseType>>> sendRaw(std::string json);
+    std::vector<unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesForRaw(std::string json);
 
     /** Parses the test file and its assertions. */
     void parseTestFile();
@@ -65,14 +65,9 @@ public:
     std::vector<std::shared_ptr<RangeAssertion>> assertions;
 
     /**
-     * Send a RequestMessage to LSP, and returns any responses.
+     * Send a message to LSP, and returns any responses.
      */
-    vector<unique_ptr<JSONDocument<JSONBaseType>>> sendRequest(const unique_ptr<RequestMessage> &message);
-
-    /**
-     * Send a Notification to LSP, and returns any responses.
-     */
-    vector<unique_ptr<JSONDocument<JSONBaseType>>> sendNotification(const unique_ptr<NotificationMessage> &message);
+    vector<unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesFor(const unique_ptr<JSONBaseType> &message);
 };
 } // namespace sorbet::test
 #endif // TEST_LSPTEST_H
