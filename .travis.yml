@@ -1,6 +1,7 @@
 language: cpp
 dist: trusty
 compiler: gcc
+if: tag IS blank
 addons:
   apt:
     sources:
