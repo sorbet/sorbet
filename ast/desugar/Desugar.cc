@@ -126,7 +126,8 @@ unique_ptr<Block> node2Proc(core::MutableContext ctx, unique_ptr<parser::Node> n
     unique_ptr<Expression> rest = make_unique<RestArg>(loc, MK::Local(loc, temp));
     args.emplace_back(std::move(rest));
     auto magic = MK::Constant(loc, core::Symbols::Magic());
-    auto callLiteral = MK::Literal(loc, make_unique<core::LiteralType>(core::Symbols::Symbol(), core::Names::call()));
+    auto callLiteral =
+        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), core::Names::call()));
     unique_ptr<Expression> body = MK::Send3(loc, std::move(magic), core::Names::callWithSplat(), std::move(proc),
                                             std::move(callLiteral), MK::Local(loc, temp));
     return make_unique<Block>(loc, std::move(args), std::move(body));
@@ -257,7 +258,7 @@ unique_ptr<Expression> node2TreeImpl(core::MutableContext ctx, unique_ptr<parser
                     auto array = make_unique<parser::Array>(loc, std::move(argnodes));
                     auto args = node2TreeImpl(ctx, std::move(array), uniqueCounter);
                     auto method =
-                        MK::Literal(loc, make_shared<core::LiteralType>(core::Symbols::Symbol(), send->method));
+                        MK::Literal(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), send->method));
 
                     Send::ARGS_store sendargs;
                     sendargs.emplace_back(std::move(rec));

@@ -55,14 +55,14 @@ void processSource(core::GlobalState &cb, string str) {
 
 TEST_F(InferFixture, LiteralsSubtyping) { // NOLINT
     auto ctx = getCtx();
-    auto intLit = make_shared<core::LiteralType>(int64_t(1));
-    auto intClass = make_shared<core::ClassType>(core::Symbols::Integer());
-    auto floatLit = make_shared<core::LiteralType>(1.0f);
-    auto floatClass = make_shared<core::ClassType>(core::Symbols::Float());
-    auto trueLit = make_shared<core::LiteralType>(true);
-    auto trueClass = make_shared<core::ClassType>(core::Symbols::TrueClass());
-    auto stringLit = make_shared<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
-    auto stringClass = make_shared<core::ClassType>(core::Symbols::String());
+    auto intLit = core::make_type<core::LiteralType>(int64_t(1));
+    auto intClass = core::make_type<core::ClassType>(core::Symbols::Integer());
+    auto floatLit = core::make_type<core::LiteralType>(1.0f);
+    auto floatClass = core::make_type<core::ClassType>(core::Symbols::Float());
+    auto trueLit = core::make_type<core::LiteralType>(true);
+    auto trueClass = core::make_type<core::ClassType>(core::Symbols::TrueClass());
+    auto stringLit = core::make_type<core::LiteralType>(core::Symbols::String(), core::Names::assignTemp());
+    auto stringClass = core::make_type<core::ClassType>(core::Symbols::String());
     EXPECT_TRUE(core::Types::isSubType(ctx, intLit, intClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, floatLit, floatClass));
     EXPECT_TRUE(core::Types::isSubType(ctx, trueLit, trueClass));
@@ -88,8 +88,8 @@ TEST_F(InferFixture, ClassesSubtyping) { // NOLINT
     ASSERT_EQ("<constant:Bar>", barSymbol.data(ctx)->name.data(ctx)->toString(ctx));
     ASSERT_EQ("<constant:Foo>", fooSymbol.data(ctx)->name.data(ctx)->toString(ctx));
 
-    auto barType = make_shared<core::ClassType>(barSymbol);
-    auto fooType = make_shared<core::ClassType>(fooSymbol);
+    auto barType = core::make_type<core::ClassType>(barSymbol);
+    auto fooType = core::make_type<core::ClassType>(fooSymbol);
 
     ASSERT_TRUE(core::Types::isSubType(ctx, fooType, barType));
     ASSERT_TRUE(core::Types::isSubType(ctx, fooType, fooType));
@@ -109,9 +109,9 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
     ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
 
-    auto barType = make_shared<core::ClassType>(barSymbol);
-    auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
-    auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
+    auto barType = core::make_type<core::ClassType>(barSymbol);
+    auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
+    auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
 
     auto barNfoo1 = core::Types::any(ctx, barType, foo1Type);
     auto foo1Nbar = core::Types::any(ctx, foo1Type, barType);
@@ -137,7 +137,7 @@ TEST_F(InferFixture, ClassesLubs) { // NOLINT
     ASSERT_TRUE(core::Types::equiv(ctx, barNfoo1, foo1Nbar));
     ASSERT_TRUE(core::Types::equiv(ctx, foo1Nfoo2, foo2Nfoo1));
 
-    auto intType = make_shared<core::ClassType>(core::Symbols::Integer());
+    auto intType = core::make_type<core::ClassType>(core::Symbols::Integer());
     auto intNfoo1 = core::Types::any(ctx, foo1Type, intType);
     auto intNbar = core::Types::any(ctx, barType, intType);
     auto intNfoo1Nbar = core::Types::any(ctx, intNfoo1, barType);
@@ -159,9 +159,9 @@ TEST_F(InferFixture, ClassesGlbs) { // NOLINT
     ASSERT_EQ("<constant:Foo1>", foo1Symbol.data(ctx)->name.data(ctx)->toString(ctx));
     ASSERT_EQ("<constant:Foo2>", foo2Symbol.data(ctx)->name.data(ctx)->toString(ctx));
 
-    auto barType = make_shared<core::ClassType>(barSymbol);
-    auto foo1Type = make_shared<core::ClassType>(foo1Symbol);
-    auto foo2Type = make_shared<core::ClassType>(foo2Symbol);
+    auto barType = core::make_type<core::ClassType>(barSymbol);
+    auto foo1Type = core::make_type<core::ClassType>(foo1Symbol);
+    auto foo2Type = core::make_type<core::ClassType>(foo2Symbol);
 
     auto barOrfoo1 = core::Types::all(ctx, barType, foo1Type);
     auto foo1Orbar = core::Types::all(ctx, foo1Type, barType);

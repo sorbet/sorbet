@@ -9,7 +9,7 @@ using namespace std;
 
 namespace sorbet::infer {
 
-shared_ptr<core::Type> dropConstructor(core::Context ctx, core::Loc loc, shared_ptr<core::Type> tp) {
+core::TypePtr dropConstructor(core::Context ctx, core::Loc loc, core::TypePtr tp) {
     if (auto *mt = core::cast_type<core::MetaType>(tp.get())) {
         if (!mt->wrapped->isUntyped()) {
             if (auto e = ctx.state.beginError(loc, core::errors::Infer::BareTypeUsage)) {
@@ -339,7 +339,7 @@ bool isSingleton(core::Context ctx, core::SymbolRef sym) {
 
 // Given a type, return a SymbolRef for the Ruby class that has that type, or no
 // symbol if no such class exists
-static core::SymbolRef getRepresentedClass(core::Context ctx, shared_ptr<core::Type> ty) {
+static core::SymbolRef getRepresentedClass(core::Context ctx, core::TypePtr ty) {
     if (!ty->derivesFrom(ctx, core::Symbols::Module())) {
         return core::Symbols::noSymbol();
     }
@@ -713,7 +713,7 @@ void Environment::populateFrom(core::Context ctx, const Environment &other) {
     this->pinnedTypes = other.pinnedTypes;
 }
 
-shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<core::Type> procType) {
+core::TypePtr Environment::getReturnType(core::Context ctx, core::TypePtr procType) {
     if (!procType->derivesFrom(ctx, core::Symbols::Proc())) {
         return core::Types::untypedUntracked();
     }
@@ -725,8 +725,8 @@ shared_ptr<core::Type> Environment::getReturnType(core::Context ctx, shared_ptr<
     return applied->targs.front();
 }
 
-shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> type) {
-    shared_ptr<core::Type> result;
+core::TypePtr flattenArrays(core::Context ctx, core::TypePtr type) {
+    core::TypePtr result;
 
     typecase(type.get(),
 
@@ -749,8 +749,7 @@ shared_ptr<core::Type> flattenArrays(core::Context ctx, shared_ptr<core::Type> t
     return result;
 }
 
-shared_ptr<core::Type> flatmapHack(core::Context ctx, const shared_ptr<core::SendAndBlockLink> &link,
-                                   shared_ptr<core::Type> returnType) {
+core::TypePtr flatmapHack(core::Context ctx, const shared_ptr<core::SendAndBlockLink> &link, core::TypePtr returnType) {
     if (link->fun != core::Names::flatMap()) {
         return returnType;
     }
@@ -761,10 +760,9 @@ shared_ptr<core::Type> flatmapHack(core::Context ctx, const shared_ptr<core::Sen
     return core::Types::arrayOf(ctx, flattenArrays(ctx, returnType));
 }
 
-shared_ptr<core::Type> Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount,
-                                                   int bindMinLoops, KnowledgeFilter &knowledgeFilter,
-                                                   core::TypeConstraint &constr,
-                                                   shared_ptr<core::Type> &methodReturnType) {
+core::TypePtr Environment::processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
+                                          KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                                          core::TypePtr &methodReturnType) {
     try {
         core::TypeAndOrigins tp;
         bool noLoopChecking =

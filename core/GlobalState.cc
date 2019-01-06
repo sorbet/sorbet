@@ -260,13 +260,13 @@ void GlobalState::initEmpty() {
         Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_return_type_str), 1),
         core::Variance::ContraVariant);
-    id.data(*this)->resultType = make_shared<core::TypeVar>(id);
+    id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_contravariant());
     id = enterTypeArgument(
         Loc::none(), Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder(),
         freshNameUnique(core::UniqueNameKind::TypeVarName, enterNameUTF8(inferred_argument_type_str), 1),
         core::Variance::CoVariant);
-    id.data(*this)->resultType = make_shared<core::TypeVar>(id);
+    id.data(*this)->resultType = make_type<core::TypeVar>(id);
     ENFORCE(id == Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant());
     id = enterClassSymbol(Loc::none(), Symbols::Sorbet(), enterNameConstant(private_str));
     ENFORCE(id == Symbols::Sorbet_Private());
@@ -285,7 +285,7 @@ void GlobalState::initEmpty() {
     Symbols::untyped().data(*this)->resultType = Types::untyped(*this, Symbols::untyped());
 
     // <Magic> has its own type
-    Symbols::Magic().data(*this)->resultType = make_shared<ClassType>(Symbols::Magic());
+    Symbols::Magic().data(*this)->resultType = make_type<ClassType>(Symbols::Magic());
 
     // Synthesize <Magic>#build_hash(*vs : T.untyped) => Hash
     SymbolRef method = enterMethodSymbol(Loc::none(), Symbols::Magic(), Names::buildHash());
@@ -352,7 +352,7 @@ void GlobalState::initEmpty() {
 
     // Synthesize T::Utils::RuntimeProfiled
     id = enterStaticFieldSymbol(Loc::none(), id, enterNameConstant(runtime_profiled_str));
-    id.data(*this)->resultType = make_shared<core::AliasType>(Symbols::untyped());
+    id.data(*this)->resultType = make_type<core::AliasType>(Symbols::untyped());
 
     int reservedCount = 0;
 

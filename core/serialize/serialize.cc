@@ -35,7 +35,7 @@ public:
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);
-    static shared_ptr<Type> unpickleType(UnPickler &p, GlobalState *gs);
+    static TypePtr unpickleType(UnPickler &p, GlobalState *gs);
     static Symbol unpickleSymbol(UnPickler &p, GlobalState *gs);
     static void unpickleGS(UnPickler &p, GlobalState &result);
     static Loc unpickleLoc(UnPickler &p, FileRef file);
@@ -338,16 +338,16 @@ void SerializerImpl::pickle(Pickler &p, Type *what) {
     }
 }
 
-shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
+TypePtr SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
     auto tag = p.getU4(); // though we formally need only u1 here, benchmarks suggest that size difference after
                           // compression is small and u4 is 10% faster
     switch (tag) {
         case 0: {
-            shared_ptr<Type> empty;
+            TypePtr empty;
             return empty;
         }
         case 1:
-            return make_shared<ClassType>(SymbolRef(gs, p.getU4()));
+            return make_type<ClassType>(SymbolRef(gs, p.getU4()));
         case 2:
             return OrType::make_shared(unpickleType(p, gs), unpickleType(p, gs));
         case 3: {
@@ -355,17 +355,17 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
             auto value = p.getS8();
             switch (kind) {
                 case LiteralType::LiteralTypeKind::Integer:
-                    return make_shared<LiteralType>(value);
+                    return make_type<LiteralType>(value);
                 case LiteralType::LiteralTypeKind::Float:
-                    return make_shared<LiteralType>(absl::bit_cast<double>(value));
+                    return make_type<LiteralType>(absl::bit_cast<double>(value));
                 case LiteralType::LiteralTypeKind::String:
-                    return make_shared<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
+                    return make_type<LiteralType>(Symbols::String(), core::NameRef(NameRef::WellKnown{}, value));
                 case LiteralType::LiteralTypeKind::Symbol:
-                    return make_shared<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
+                    return make_type<LiteralType>(Symbols::Symbol(), core::NameRef(NameRef::WellKnown{}, value));
                 case LiteralType::LiteralTypeKind::True:
-                    return make_shared<LiteralType>(true);
+                    return make_type<LiteralType>(true);
                 case LiteralType::LiteralTypeKind::False:
-                    return make_shared<LiteralType>(false);
+                    return make_type<LiteralType>(false);
             }
             Exception::notImplemented();
         }
@@ -374,47 +374,47 @@ shared_ptr<Type> SerializerImpl::unpickleType(UnPickler &p, GlobalState *gs) {
         case 5: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
-            vector<shared_ptr<Type>> elems(sz);
+            vector<TypePtr> elems(sz);
             for (auto &elem : elems) {
                 elem = unpickleType(p, gs);
             }
-            auto result = make_shared<TupleType>(underlying, std::move(elems));
+            auto result = make_type<TupleType>(underlying, std::move(elems));
             return result;
         }
         case 6: {
             auto underlying = unpickleType(p, gs);
             int sz = p.getU4();
-            vector<shared_ptr<Type>> keys(sz);
-            vector<shared_ptr<Type>> values(sz);
+            vector<TypePtr> keys(sz);
+            vector<TypePtr> values(sz);
             for (auto &key : keys) {
                 key = unpickleType(p, gs);
             }
             for (auto &value : values) {
                 value = unpickleType(p, gs);
             }
-            auto result = make_shared<ShapeType>(underlying, keys, values);
+            auto result = make_type<ShapeType>(underlying, keys, values);
             return result;
         }
         case 7:
-            return make_shared<AliasType>(SymbolRef(gs, p.getU4()));
+            return make_type<AliasType>(SymbolRef(gs, p.getU4()));
         case 8: {
-            return make_shared<LambdaParam>(SymbolRef(gs, p.getU4()));
+            return make_type<LambdaParam>(SymbolRef(gs, p.getU4()));
         }
         case 9: {
             SymbolRef klass(gs, p.getU4());
             int sz = p.getU4();
-            vector<shared_ptr<Type>> targs(sz);
+            vector<TypePtr> targs(sz);
             for (auto &t : targs) {
                 t = unpickleType(p, gs);
             }
-            return make_shared<AppliedType>(klass, targs);
+            return make_type<AppliedType>(klass, targs);
         }
         case 10: {
             SymbolRef sym(gs, p.getU4());
-            return make_shared<TypeVar>(sym);
+            return make_type<TypeVar>(sym);
         }
         case 11: {
-            return make_shared<SelfType>();
+            return make_type<SelfType>();
         }
         default:
             Exception::raise("Uknown type tag {}", tag);

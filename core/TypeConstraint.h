@@ -6,14 +6,14 @@ namespace sorbet::core {
 
 class TypeConstraint {
     static TypeConstraint makeEmptyFrozenConstraint();
-    std::vector<std::pair<SymbolRef, std::shared_ptr<Type>>> upperBounds;
-    std::vector<std::pair<SymbolRef, std::shared_ptr<Type>>> lowerBounds;
-    std::vector<std::pair<SymbolRef, std::shared_ptr<Type>>> solution;
+    std::vector<std::pair<SymbolRef, TypePtr>> upperBounds;
+    std::vector<std::pair<SymbolRef, TypePtr>> lowerBounds;
+    std::vector<std::pair<SymbolRef, TypePtr>> solution;
     bool wasSolved = false;
     bool cantSolve = false;
-    std::shared_ptr<Type> &findUpperBound(SymbolRef forWhat);
-    std::shared_ptr<Type> &findLowerBound(SymbolRef forWhat);
-    std::shared_ptr<Type> &findSolution(SymbolRef forWhat);
+    TypePtr &findUpperBound(SymbolRef forWhat);
+    TypePtr &findLowerBound(SymbolRef forWhat);
+    TypePtr &findSolution(SymbolRef forWhat);
 
 public:
     TypeConstraint() = default;
@@ -22,9 +22,9 @@ public:
     void defineDomain(Context ctx, const InlinedVector<SymbolRef, 4> &typeParams);
     bool hasUpperBound(SymbolRef forWhat) const;
     bool hasLowerBound(SymbolRef forWhat) const;
-    std::shared_ptr<Type> findSolution(SymbolRef forWhat) const;
-    std::shared_ptr<Type> findUpperBound(SymbolRef forWhat) const;
-    std::shared_ptr<Type> findLowerBound(SymbolRef forWhat) const;
+    TypePtr findSolution(SymbolRef forWhat) const;
+    TypePtr findUpperBound(SymbolRef forWhat) const;
+    TypePtr findLowerBound(SymbolRef forWhat) const;
 
     bool isEmpty() const;
     inline bool isSolved() const {
@@ -32,13 +32,13 @@ public:
     }
 
     // At least one of arguments has to be a typevar
-    bool rememberIsSubtype(Context ctx, const std::shared_ptr<Type> &, const std::shared_ptr<Type> &);
+    bool rememberIsSubtype(Context ctx, const TypePtr &, const TypePtr &);
 
     // At least one of arguments has to be a typevar
-    bool isAlreadyASubType(Context ctx, const std::shared_ptr<Type> &, const std::shared_ptr<Type> &) const;
+    bool isAlreadyASubType(Context ctx, const TypePtr &, const TypePtr &) const;
     // returns true if was successfully solved
     bool solve(Context ctx);
-    std::shared_ptr<Type> getInstantiation(SymbolRef) const;
+    TypePtr getInstantiation(SymbolRef) const;
     std::shared_ptr<TypeConstraint> deepCopy() const;
     InlinedVector<SymbolRef, 4> getDomain() const;
     static TypeConstraint EmptyFrozenConstraint;

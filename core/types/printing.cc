@@ -171,14 +171,14 @@ string OrType::toString(const GlobalState &gs, int tabs) const {
                        rightBrace ? ")" : "");
 }
 
-string showOrs(const GlobalState &gs, shared_ptr<Type> left, shared_ptr<Type> right) {
+string showOrs(const GlobalState &gs, TypePtr left, TypePtr right) {
     auto *lt = cast_type<OrType>(left.get());
     auto *rt = cast_type<OrType>(right.get());
     return fmt::format("{}, {}", lt != nullptr ? showOrs(gs, lt->left, lt->right) : left->show(gs),
                        rt != nullptr ? showOrs(gs, rt->left, rt->right) : right->show(gs));
 }
 
-string showOrSpecialCase(const GlobalState &gs, shared_ptr<Type> type, shared_ptr<Type> rest) {
+string showOrSpecialCase(const GlobalState &gs, TypePtr type, TypePtr rest) {
     auto *ct = cast_type<ClassType>(type.get());
     if (ct != nullptr && ct->symbol == Symbols::NilClass()) {
         return fmt::format("T.nilable({})", rest->show(gs));

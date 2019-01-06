@@ -8,8 +8,8 @@ using namespace std;
 
 namespace sorbet::resolver {
 
-shared_ptr<core::Type> getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
-    shared_ptr<core::Type> result;
+core::TypePtr getResultLiteral(core::MutableContext ctx, unique_ptr<ast::Expression> &expr) {
+    core::TypePtr result;
     typecase(expr.get(), [&](ast::Literal *lit) { result = lit->value; },
              [&](ast::Expression *expr) {
                  if (auto e = ctx.state.beginError(expr->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -103,7 +103,7 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
                                                 name.toString(ctx));
                                 }
                             }
-                            typeArgSpec.type = make_shared<core::TypeVar>(core::Symbols::todo());
+                            typeArgSpec.type = core::make_type<core::TypeVar>(core::Symbols::todo());
                             typeArgSpec.loc = arg->loc;
                         } else {
                             if (auto e =
@@ -245,8 +245,8 @@ ParsedSig TypeSyntax::parseSig(core::MutableContext ctx, ast::Send *sigSend, con
     return sig;
 }
 
-shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig,
-                                            bool allowSelfType, core::SymbolRef untypedBlame) {
+core::TypePtr interpretTCombinator(core::MutableContext ctx, ast::Send *send, const ParsedSig &sig, bool allowSelfType,
+                                   core::SymbolRef untypedBlame) {
     switch (send->fun._id) {
         case core::Names::nilable()._id:
             if (send->args.size() != 1) {
@@ -355,13 +355,13 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
                 }
                 return core::Types::untypedUntracked();
             }
-            return make_shared<core::ClassType>(singleton);
+            return core::make_type<core::ClassType>(singleton);
         }
         case core::Names::untyped()._id:
             return core::Types::untyped(ctx, untypedBlame);
         case core::Names::selfType()._id:
             if (allowSelfType) {
-                return make_shared<core::SelfType>();
+                return core::make_type<core::SelfType>();
             }
             if (auto e = ctx.state.beginError(send->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                 e.setHeader("Only top-level T.self_type is supported");
@@ -378,31 +378,30 @@ shared_ptr<core::Type> interpretTCombinator(core::MutableContext ctx, ast::Send 
     }
 }
 
-shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
-                                                 const ParsedSig &sigBeingParsed, bool allowSelfType,
-                                                 core::SymbolRef untypedBlame) {
-    shared_ptr<core::Type> result;
+core::TypePtr TypeSyntax::getResultType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+                                        const ParsedSig &sigBeingParsed, bool allowSelfType,
+                                        core::SymbolRef untypedBlame) {
+    core::TypePtr result;
     typecase(
         expr.get(),
         [&](ast::Array *arr) {
-            vector<shared_ptr<core::Type>> elems;
+            vector<core::TypePtr> elems;
             for (auto &el : arr->elems) {
                 elems.emplace_back(getResultType(ctx, el, sigBeingParsed, false, untypedBlame));
             }
             result = core::TupleType::build(ctx, elems);
         },
         [&](ast::Hash *hash) {
-            vector<shared_ptr<core::Type>> keys;
-            vector<shared_ptr<core::Type>> values;
+            vector<core::TypePtr> keys;
+            vector<core::TypePtr> values;
 
             for (auto &ktree : hash->keys) {
                 auto &vtree = hash->values[&ktree - &hash->keys.front()];
                 auto val = getResultType(ctx, vtree, sigBeingParsed, false, untypedBlame);
                 auto lit = ast::cast_tree<ast::Literal>(ktree.get());
                 if (lit && (lit->isSymbol(ctx) || lit->isString(ctx))) {
-                    auto keytype = dynamic_pointer_cast<core::LiteralType>(lit->value);
-                    ENFORCE(keytype);
-                    keys.emplace_back(keytype);
+                    ENFORCE(core::cast_type<core::LiteralType>(lit->value.get()));
+                    keys.emplace_back(lit->value);
                     values.emplace_back(val);
                 } else {
                     if (auto e = ctx.state.beginError(ktree->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -410,7 +409,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                     }
                 }
             }
-            result = make_shared<core::ShapeType>(core::Types::hashOfUntyped(), keys, values);
+            result = core::make_type<core::ShapeType>(core::Types::hashOfUntyped(), keys, values);
         },
         [&](ast::ConstantLit *i) {
             if (i->typeAlias) {
@@ -433,7 +432,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
                 result = sym.data(ctx)->externalType(ctx);
             } else if (sym.data(ctx)->isTypeMember()) {
-                result = make_shared<core::LambdaParam>(sym);
+                result = core::make_type<core::LambdaParam>(sym);
             } else if (sym.data(ctx)->isStaticField()) {
                 if (auto e = ctx.state.beginError(i->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
                     e.setHeader("Constant `{}` is not a class or type alias", i->constantSymbol().show(ctx));
@@ -453,7 +452,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             if (isTProc(ctx, s)) {
                 auto sig = parseSig(ctx, s, &sigBeingParsed, false, untypedBlame);
 
-                vector<shared_ptr<core::Type>> targs;
+                vector<core::TypePtr> targs;
 
                 if (sig.returns == nullptr) {
                     if (auto e = ctx.state.beginError(s->loc, core::errors::Resolver::InvalidTypeDeclaration)) {
@@ -478,7 +477,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 }
                 auto sym = core::Symbols::Proc(arity);
 
-                result = make_shared<core::AppliedType>(sym, targs);
+                result = core::make_type<core::AppliedType>(sym, targs);
                 return;
             }
             auto recv = s->recv.get();
@@ -521,7 +520,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
             for (auto &arg : s->args) {
                 core::TypeAndOrigins ty;
                 ty.origins.emplace_back(arg->loc);
-                ty.type = make_shared<core::MetaType>(
+                ty.type = core::make_type<core::MetaType>(
                     TypeSyntax::getResultType(ctx, arg, sigBeingParsed, false, untypedBlame));
                 holders.emplace_back(make_unique<core::TypeAndOrigins>(move(ty)));
                 targs.emplace_back(holders.back().get());
@@ -553,7 +552,7 @@ shared_ptr<core::Type> TypeSyntax::getResultType(core::MutableContext ctx, uniqu
                 corrected = recvi->constantSymbol();
             }
 
-            auto ctype = make_shared<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
+            auto ctype = core::make_type<core::ClassType>(corrected.data(ctx)->singletonClass(ctx));
             core::CallLocs locs{
                 s->loc,
                 recvi->loc,

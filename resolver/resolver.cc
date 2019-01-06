@@ -291,7 +291,7 @@ private:
     static bool resolveAliasJob(core::MutableContext ctx, ClassAliasResolutionItem &it) {
         if (it.rhs->constantSymbol().exists()) {
             if (it.rhs->constantSymbol().data(ctx)->dealias(ctx) != it.lhs) {
-                it.lhs.data(ctx)->resultType = make_unique<core::AliasType>(it.rhs->constantSymbol());
+                it.lhs.data(ctx)->resultType = core::make_type<core::AliasType>(it.rhs->constantSymbol());
             } else {
                 if (auto e =
                         ctx.state.beginError(it.lhs.data(ctx)->loc(), core::errors::Resolver::RecursiveClassAlias)) {
@@ -653,7 +653,9 @@ private:
                 if (typeSpec.type) {
                     auto name = ctx.state.freshNameUnique(core::UniqueNameKind::TypeVarName, typeSpec.name, 1);
                     auto sym = ctx.state.enterTypeArgument(typeSpec.loc, method, name, core::Variance::CoVariant);
-                    typeSpec.type->sym = sym;
+                    auto asTypeVar = core::cast_type<core::TypeVar>(typeSpec.type.get());
+                    ENFORCE(asTypeVar != nullptr);
+                    asTypeVar->sym = sym;
                     sym.data(ctx)->resultType = typeSpec.type;
                 }
             }
@@ -968,9 +970,9 @@ private:
     //
     // We don't handle array or hash literals, because intuiting the element
     // type (once we have generics) will be nontrivial.
-    shared_ptr<core::Type> resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
-                                               core::SymbolRef ofSym) {
-        shared_ptr<core::Type> result;
+    core::TypePtr resolveConstantType(core::MutableContext ctx, unique_ptr<ast::Expression> &expr,
+                                      core::SymbolRef ofSym) {
+        core::TypePtr result;
         typecase(
             expr.get(), [&](ast::Literal *a) { result = a->value; },
             [&](ast::Cast *cast) {

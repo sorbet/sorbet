@@ -140,7 +140,7 @@ bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, string_v
     return fnd != string_view::npos;
 }
 
-string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> receiver, shared_ptr<core::Type> retType,
+string LSPLoop::methodDetail(core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
                              shared_ptr<core::TypeConstraint> constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
@@ -165,8 +165,8 @@ string LSPLoop::methodDetail(core::SymbolRef method, shared_ptr<core::Type> rece
     return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
 }
 
-shared_ptr<core::Type> LSPLoop::getResultType(core::SymbolRef ofWhat, shared_ptr<core::Type> receiver,
-                                              shared_ptr<core::TypeConstraint> constr) {
+core::TypePtr LSPLoop::getResultType(core::SymbolRef ofWhat, core::TypePtr receiver,
+                                     shared_ptr<core::TypeConstraint> constr) {
     core::Context ctx(*finalGs, core::Symbols::root());
     auto resultType = ofWhat.data(*finalGs)->resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {

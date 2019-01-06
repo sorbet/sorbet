@@ -250,10 +250,10 @@ class LSPLoop {
     bool hasSimilarName(core::GlobalState &gs, core::NameRef name, std::string_view pattern);
     bool hideSymbol(core::SymbolRef sym);
 
-    std::string methodDetail(core::SymbolRef method, std::shared_ptr<core::Type> receiver,
-                             std::shared_ptr<core::Type> retType, std::shared_ptr<core::TypeConstraint> constraint);
-    std::shared_ptr<core::Type> getResultType(core::SymbolRef ofWhat, std::shared_ptr<core::Type> receiver,
-                                              std::shared_ptr<core::TypeConstraint> constr);
+    std::string methodDetail(core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
+                             std::shared_ptr<core::TypeConstraint> constraint);
+    core::TypePtr getResultType(core::SymbolRef ofWhat, core::TypePtr receiver,
+                                std::shared_ptr<core::TypeConstraint> constr);
     std::string methodSnippet(core::GlobalState &gs, core::SymbolRef method);
 
     /** Used to implement textDocument/documentSymbol
@@ -272,7 +272,7 @@ class LSPLoop {
     void handleTextDocumentReferences(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
     void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
-    UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(std::shared_ptr<core::Type> receiver,
+    UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(core::TypePtr receiver,
                                                                                    std::string_view name);
     void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
     void sendShowMessageNotification(int messageType, const std::string &message);

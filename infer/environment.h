@@ -41,9 +41,9 @@ class KnowledgeRef;
 struct KnowledgeFact {
     bool isDead = false;
     /* the following type tests are known to be true */
-    InlinedVector<std::pair<core::LocalVariable, std::shared_ptr<core::Type>>, 1> yesTypeTests;
+    InlinedVector<std::pair<core::LocalVariable, core::TypePtr>, 1> yesTypeTests;
     /* the following type tests are known to be false */
-    InlinedVector<std::pair<core::LocalVariable, std::shared_ptr<core::Type>>, 1> noTypeTests;
+    InlinedVector<std::pair<core::LocalVariable, core::TypePtr>, 1> noTypeTests;
 
     /* this is a "merge" of two knowledges - computes a "lub" of knowledges */
     void min(core::Context ctx, const KnowledgeFact &other);
@@ -184,11 +184,11 @@ public:
 
     // Extract the return value type from a proc. This should potentially be a
     // method on `Type` or otherwise handled there.
-    std::shared_ptr<core::Type> getReturnType(core::Context ctx, std::shared_ptr<core::Type> procType);
+    core::TypePtr getReturnType(core::Context ctx, core::TypePtr procType);
 
-    std::shared_ptr<core::Type> processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
-                                               KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
-                                               std::shared_ptr<core::Type> &methodReturnType);
+    core::TypePtr processBinding(core::Context ctx, cfg::Binding &bind, int loopCount, int bindMinLoops,
+                                 KnowledgeFilter &knowledgeFilter, core::TypeConstraint &constr,
+                                 core::TypePtr &methodReturnType);
 
     void ensureGoodCondition(core::Context ctx, core::LocalVariable cond) {}
     void ensureGoodAssignTarget(core::Context ctx, core::LocalVariable target) {}

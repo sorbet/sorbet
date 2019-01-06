@@ -230,7 +230,7 @@ class NameInserter {
 
     void aliasMethod(core::MutableContext ctx, core::SymbolRef owner, core::NameRef newName, core::SymbolRef method) {
         core::SymbolRef alias = ctx.state.enterMethodSymbol(method.data(ctx)->loc(), owner, newName);
-        alias.data(ctx)->resultType = make_shared<core::AliasType>(method);
+        alias.data(ctx)->resultType = core::make_type<core::AliasType>(method);
     }
 
     void aliasModuleFunction(core::MutableContext ctx, core::SymbolRef method) {
@@ -800,7 +800,7 @@ public:
         if (makeAlias) {
             auto alias =
                 ctx.state.enterStaticFieldSymbol(asgn->loc, ctx.owner.data(ctx)->enclosingClass(ctx), typeName->cnst);
-            alias.data(ctx)->resultType = make_shared<core::AliasType>(sym);
+            alias.data(ctx)->resultType = core::make_type<core::AliasType>(sym);
         }
 
         if (!send->args.empty()) {

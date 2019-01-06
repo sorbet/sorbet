@@ -131,8 +131,7 @@ optional<core::AutocorrectSuggestion> maybeSuggestExtendTHelpers(core::Context c
     return core::AutocorrectSuggestion{nextLineLoc, fmt::format("{}extend T::Sig\n", prefix)};
 }
 
-shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component,
-                                      int argId) {
+core::TypePtr extractArgType(core::Context ctx, cfg::Send &send, core::DispatchComponent &component, int argId) {
     // The high level idea is the following: we will use a covariant type parameter to extract the type from dispatch
     // logic
     auto constr = make_shared<core::TypeConstraint>();
@@ -142,7 +141,7 @@ shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::
     auto probeTypeSym =
         core::Symbols::RubyTyper_ReturnTypeInference_guessed_type_type_parameter_holder_tparam_covariant();
     InlinedVector<core::SymbolRef, 4> domainTemp;
-    InlinedVector<pair<core::SymbolRef, shared_ptr<core::Type>>, 4> solutions;
+    InlinedVector<pair<core::SymbolRef, core::TypePtr>, 4> solutions;
     domainTemp.emplace_back(probeTypeSym);
     if (send.link && send.link->constr) {
         for (auto domainSym : send.link->constr->getDomain()) {
@@ -173,7 +172,7 @@ shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::
     int i = -1;
     for (cfg::VariableUseSite &arg : send.args) {
         i++;
-        shared_ptr<core::Type> type;
+        core::TypePtr type;
         if (i != argId) {
             type = arg.type;
         } else {
@@ -199,7 +198,7 @@ shared_ptr<core::Type> extractArgType(core::Context ctx, cfg::Send &send, core::
 void extractSendArgumentKnowledge(
     core::Context ctx, core::Loc bindLoc, cfg::Send *snd,
     const UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>> &blockLocals,
-    UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> &blockArgRequirements) {
+    UnorderedMap<core::SymbolRef, core::TypePtr> &blockArgRequirements) {
     InlinedVector<unique_ptr<core::TypeAndOrigins>, 2> typeAndOriginsOwner;
     InlinedVector<const core::TypeAndOrigins *, 2> args;
 
@@ -228,7 +227,7 @@ void extractSendArgumentKnowledge(
         if (fnd == blockLocals.end()) {
             continue;
         }
-        shared_ptr<core::Type> thisType;
+        core::TypePtr thisType;
         for (auto &component : dispatchInfo.components) {
             auto argType = extractArgType(ctx, *snd, component, i);
             if (argType && !argType->isUntyped()) {
@@ -255,8 +254,8 @@ void extractSendArgumentKnowledge(
     }
 }
 
-UnorderedMap<core::SymbolRef, shared_ptr<core::Type>>
-guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<cfg::CFG> &cfg) {
+UnorderedMap<core::SymbolRef, core::TypePtr> guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol,
+                                                                unique_ptr<cfg::CFG> &cfg) {
     // What variables by the end of basic block could plausibly contain what arguments.
     vector<UnorderedMap<core::LocalVariable, InlinedVector<core::SymbolRef, 1>>> localsStoringArguments;
     localsStoringArguments.resize(cfg->maxBasicBlockId);
@@ -266,7 +265,7 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
     methodsCalledOnArguments.resize(cfg->maxBasicBlockId);
 
     // indicates what type should an argument have for basic block to execute
-    vector<UnorderedMap<core::SymbolRef, shared_ptr<core::Type>>> argTypesForBBToPass;
+    vector<UnorderedMap<core::SymbolRef, core::TypePtr>> argTypesForBBToPass;
     argTypesForBBToPass.resize(cfg->maxBasicBlockId);
 
     // This loop computes per-block requirements... Should be a method on its own
@@ -279,7 +278,7 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
             localsStoringArguments[bb->id];
         UnorderedMap<core::SymbolRef, InlinedVector<core::NameRef, 1>> &blockMethodsCalledOnArguments =
             methodsCalledOnArguments[bb->id];
-        UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> &blockArgRequirements = argTypesForBBToPass[bb->id];
+        UnorderedMap<core::SymbolRef, core::TypePtr> &blockArgRequirements = argTypesForBBToPass[bb->id];
 
         for (auto bbparent : bb->backEdges) {
             for (auto kv : localsStoringArguments[bbparent->id]) {
@@ -348,7 +347,7 @@ guessArgumentTypes(core::Context ctx, core::SymbolRef methodSymbol, unique_ptr<c
         changed = false;
         for (auto it = cfg->forwardsTopoSort.rbegin(); it != cfg->forwardsTopoSort.rend(); ++it) {
             cfg::BasicBlock *bb = *it;
-            UnorderedMap<core::SymbolRef, shared_ptr<core::Type>> entryRequirements;
+            UnorderedMap<core::SymbolRef, core::TypePtr> entryRequirements;
             for (auto bbparent : bb->backEdges) {
                 if (bbparent->firstDeadInstructionIdx >= 0 && bb != cfg->deadBlock()) {
                     continue;
@@ -452,7 +451,7 @@ bool parentNeedsOverridable(core::Context ctx, core::SymbolRef childSymbol, core
 } // namespace
 
 bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, unique_ptr<cfg::CFG> &cfg,
-                                    const shared_ptr<core::Type> &methodReturnType, core::TypeConstraint &constr) {
+                                    const core::TypePtr &methodReturnType, core::TypeConstraint &constr) {
     core::SymbolRef methodSymbol = cfg->symbol;
 
     bool guessedSomethingUseful = false;
@@ -460,7 +459,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
         guessedSomethingUseful = true;
     }
 
-    shared_ptr<core::Type> guessedReturnType;
+    core::TypePtr guessedReturnType;
     if (!constr.isEmpty()) {
         if (!constr.solve(ctx)) {
             return false;
@@ -530,7 +529,7 @@ bool SigSuggestion::maybeSuggestSig(core::Context ctx, core::ErrorBuilder &e, un
             }
             first = false;
             auto argType = guessedArgumentTypes[argSym];
-            shared_ptr<core::Type> chosenType;
+            core::TypePtr chosenType;
 
             auto oldType = argSym.data(ctx)->resultType;
             if (!oldType || oldType->isUntyped()) {

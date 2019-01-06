@@ -9,9 +9,9 @@ namespace sorbet::core {
 
 using namespace std;
 
-shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2);
+TypePtr lubGround(Context ctx, const TypePtr &t1, const TypePtr &t2);
 
-shared_ptr<Type> Types::any(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr Types::any(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto ret = lub(ctx, t1, t2);
     ENFORCE(Types::isSubType(ctx, t1, ret), "\n" + ret->toString(ctx) + "\n is not a super type of \n" +
                                                 t1->toString(ctx) + "\n was lubbing with " + t2->toString(ctx));
@@ -36,22 +36,22 @@ shared_ptr<Type> Types::any(Context ctx, const shared_ptr<Type> &t1, const share
     return ret;
 }
 
-const shared_ptr<Type> underlying(const shared_ptr<Type> &t1) {
+const TypePtr underlying(const TypePtr &t1) {
     if (auto *f = cast_type<ProxyType>(t1.get())) {
         return f->underlying();
     }
     return t1;
 }
 
-shared_ptr<Type> lubDistributeOr(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr lubDistributeOr(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto *o1 = cast_type<OrType>(t1.get());
     ENFORCE(o1 != nullptr);
-    shared_ptr<Type> n1 = Types::any(ctx, o1->left, t2);
+    TypePtr n1 = Types::any(ctx, o1->left, t2);
     if (n1.get() == o1->left.get()) {
         categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<Type> n2 = Types::any(ctx, o1->right, t2);
+    TypePtr n2 = Types::any(ctx, o1->right, t2);
     if (n1.get() == t2.get()) {
         categoryCounterInc("lubDistributeOr.outcome", "n2'");
         return n2;
@@ -75,15 +75,15 @@ shared_ptr<Type> lubDistributeOr(Context ctx, const shared_ptr<Type> &t1, const 
     return OrType::make_shared(t1, underlying(t2)); // order matters for perf
 }
 
-shared_ptr<Type> glbDistributeAnd(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr glbDistributeAnd(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto *a1 = cast_type<AndType>(t1.get());
     ENFORCE(t1 != nullptr);
-    shared_ptr<Type> n1 = Types::all(ctx, a1->left, t2);
+    TypePtr n1 = Types::all(ctx, a1->left, t2);
     if (n1.get() == a1->left.get()) {
         categoryCounterInc("lubDistributeOr.outcome", "t1");
         return t1;
     }
-    shared_ptr<Type> n2 = Types::all(ctx, a1->right, t2);
+    TypePtr n2 = Types::all(ctx, a1->right, t2);
     if (n1.get() == t2.get()) {
         categoryCounterInc("glbDistributeAnd.outcome", "Zn2");
         return n2;
@@ -109,7 +109,7 @@ shared_ptr<Type> glbDistributeAnd(Context ctx, const shared_ptr<Type> &t1, const
 }
 
 // only keep knowledge in t1 that is not already present in t2. Return the same reference if unchaged
-shared_ptr<Type> dropLubComponents(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr dropLubComponents(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     if (auto *a1 = cast_type<AndType>(t1.get())) {
         auto a1a = dropLubComponents(ctx, a1->left, t2);
         auto a1b = dropLubComponents(ctx, a1->right, t2);
@@ -135,7 +135,7 @@ shared_ptr<Type> dropLubComponents(Context ctx, const shared_ptr<Type> &t1, cons
     return t1;
 }
 
-shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr Types::lub(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("lub", "ref-eq");
         return t1;
@@ -208,12 +208,12 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         if (ltr) {
             swap(a1, a2);
         }
-        const shared_ptr<Type> &t1s = ltr ? t2 : t1;
-        const shared_ptr<Type> &t2s = ltr ? t1 : t2;
+        const TypePtr &t1s = ltr ? t2 : t1;
+        const TypePtr &t2s = ltr ? t1 : t2;
         // now a1 <: a2
 
         InlinedVector<SymbolRef, 4> indexes = Types::alignBaseTypeArgs(ctx, a1->klass, a1->targs, a2->klass);
-        vector<shared_ptr<Type>> newTargs;
+        vector<TypePtr> newTargs;
         newTargs.reserve(indexes.size());
         // code below inverts permutation of type params
         int j = 0;
@@ -243,7 +243,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
             j++;
         }
         if (changed) {
-            return make_shared<AppliedType>(a2->klass, newTargs);
+            return make_type<AppliedType>(a2->klass, newTargs);
         } else {
             return t2s;
         }
@@ -254,13 +254,13 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         if (auto *p2 = cast_type<ProxyType>(t2.get())) {
             categoryCounterInc("lub", "proxy>");
             // both are proxy
-            shared_ptr<Type> result;
+            TypePtr result;
             typecase(p1,
                      [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                          if (auto *a2 = cast_type<TupleType>(p2)) {
                              if (a1->elems.size() ==
                                  a2->elems.size()) { // lub arrays only if they have same element count
-                                 vector<shared_ptr<Type>> elemLubs;
+                                 vector<TypePtr> elemLubs;
                                  int i = -1;
                                  bool differ1 = false;
                                  bool differ2 = false;
@@ -289,7 +289,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                              if (h2->keys.size() == h1->keys.size()) {
                                  // have enough keys.
                                  int i = -1;
-                                 vector<shared_ptr<Type>> valueLubs;
+                                 vector<TypePtr> valueLubs;
                                  valueLubs.reserve(h2->keys.size());
                                  bool differ1 = false;
                                  bool differ2 = false;
@@ -318,7 +318,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
                                  } else if (!differ2) {
                                      result = t2;
                                  } else {
-                                     result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                                     result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
                                  }
                              } else {
                                  result = Types::hashOfUntyped();
@@ -359,7 +359,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         } else {
             bool allowProxyInLub = isa_type<TupleType>(p1) || isa_type<ShapeType>(p1);
             // only 1st is proxy
-            shared_ptr<Type> und = p1->underlying();
+            TypePtr und = p1->underlying();
             if (isSubType(ctx, und, t2)) {
                 return t2;
             } else if (allowProxyInLub) {
@@ -372,7 +372,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
         // only 2nd is proxy
         bool allowProxyInLub = isa_type<TupleType>(p2) || isa_type<ShapeType>(p2);
         // only 1st is proxy
-        shared_ptr<Type> und = p2->underlying();
+        TypePtr und = p2->underlying();
         if (isSubType(ctx, und, t1)) {
             return t1;
         } else if (allowProxyInLub) {
@@ -424,7 +424,7 @@ shared_ptr<Type> Types::lub(Context ctx, const shared_ptr<Type> &t1, const share
     return lubGround(ctx, t1, t2);
 }
 
-shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr lubGround(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -449,7 +449,7 @@ shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<Type> result;
+    TypePtr result;
 
     // 1 :-)
     auto *c1 = cast_type<ClassType>(t1.get());
@@ -471,7 +471,7 @@ shared_ptr<Type> lubGround(Context ctx, const shared_ptr<Type> &t1, const shared
     }
 }
 
-shared_ptr<Type> glbGround(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr glbGround(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto *g1 = cast_type<GroundType>(t1.get());
     auto *g2 = cast_type<GroundType>(t2.get());
     ENFORCE(g1 != nullptr);
@@ -496,7 +496,7 @@ shared_ptr<Type> glbGround(Context ctx, const shared_ptr<Type> &t1, const shared
     //                 5  (And, Or)
     //                 6  (Or, Or)
 
-    shared_ptr<Type> result;
+    TypePtr result;
     // 1 :-)
     auto *c1 = cast_type<ClassType>(t1.get());
     auto *c2 = cast_type<ClassType>(t2.get());
@@ -520,7 +520,7 @@ shared_ptr<Type> glbGround(Context ctx, const shared_ptr<Type> &t1, const shared
         return AndType::make_shared(t1, t2);
     }
 }
-shared_ptr<Type> Types::all(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr Types::all(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     auto ret = glb(ctx, t1, t2);
     ret->sanityCheck(ctx);
 
@@ -545,7 +545,7 @@ shared_ptr<Type> Types::all(Context ctx, const shared_ptr<Type> &t1, const share
     return ret;
 }
 
-shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+TypePtr Types::glb(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     if (t1.get() == t2.get()) {
         categoryCounterInc("glb", "ref-eq");
         return t1;
@@ -597,13 +597,13 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
             if (typeid(*p1) != typeid(*p2)) {
                 return Types::bottom();
             }
-            shared_ptr<Type> result;
+            TypePtr result;
             typecase(p1,
                      [&](TupleType *a1) { // Warning: this implements COVARIANT arrays
                          auto *a2 = cast_type<TupleType>(p2);
                          ENFORCE(a2 != nullptr);
                          if (a1->elems.size() == a2->elems.size()) { // lub arrays only if they have same element count
-                             vector<shared_ptr<Type>> elemGlbs;
+                             vector<TypePtr> elemGlbs;
                              elemGlbs.reserve(a2->elems.size());
 
                              int i = -1;
@@ -634,7 +634,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                          if (h2->keys.size() == h1->keys.size()) {
                              // have enough keys.
                              int i = -1;
-                             vector<shared_ptr<Type>> valueLubs;
+                             vector<TypePtr> valueLubs;
                              valueLubs.reserve(h2->keys.size());
                              bool canReuseT1 = true;
                              bool canReuseT2 = true;
@@ -669,7 +669,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
                              } else if (canReuseT2) {
                                  result = t2;
                              } else {
-                                 result = make_shared<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
+                                 result = make_type<ShapeType>(Types::hashOfUntyped(), h2->keys, valueLubs);
                              }
                          } else {
                              result = Types::bottom();
@@ -815,7 +815,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
 
         // code below inverts permutation of type params
 
-        vector<shared_ptr<Type>> newTargs;
+        vector<TypePtr> newTargs;
         newTargs.reserve(a1->klass.data(ctx)->typeMembers().size());
         int j = 0;
         for (SymbolRef idx : a1->klass.data(ctx)->typeMembers()) {
@@ -852,7 +852,7 @@ shared_ptr<Type> Types::glb(Context ctx, const shared_ptr<Type> &t1, const share
         } else if (absl::c_equal(a2->targs, newTargs) && a1->klass == a2->klass) {
             return ltr ? t1 : t2;
         } else {
-            return make_shared<AppliedType>(a1->klass, newTargs);
+            return make_type<AppliedType>(a1->klass, newTargs);
         }
     }
     {
@@ -894,7 +894,7 @@ bool classSymbolIsAsGoodAs(Context ctx, SymbolRef c1, SymbolRef c2) {
     return c1 == c2 || c1.data(ctx)->derivesFrom(ctx, c2);
 }
 
-void compareToUntyped(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &ty, const shared_ptr<Type> &blame) {
+void compareToUntyped(Context ctx, TypeConstraint &constr, const TypePtr &ty, const TypePtr &blame) {
     ENFORCE(blame->isUntyped());
     if (auto *p = cast_type<ProxyType>(ty.get())) {
         compareToUntyped(ctx, constr, p->underlying(), blame);
@@ -925,8 +925,7 @@ void compareToUntyped(Context ctx, TypeConstraint &constr, const shared_ptr<Type
 
 // "Single" means "ClassType or ProxyType"; since ProxyTypes are constrained to
 // be proxies over class types, this means "class or class-like"
-bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &t1,
-                                    const shared_ptr<Type> &t2) {
+bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
     ENFORCE(t1 != nullptr);
     ENFORCE(t2 != nullptr);
 
@@ -1129,7 +1128,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
             // both are proxy
         } else {
             // only 1st is proxy
-            shared_ptr<Type> und = p1->underlying();
+            TypePtr und = p1->underlying();
             return isSubTypeUnderConstraintSingle(ctx, constr, und, t2);
         }
     } else if (isa_type<ProxyType>(t2.get())) {
@@ -1145,8 +1144,7 @@ bool isSubTypeUnderConstraintSingle(Context ctx, TypeConstraint &constr, const s
     }
 }
 
-bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const shared_ptr<Type> &t1,
-                                     const shared_ptr<Type> &t2) {
+bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const TypePtr &t1, const TypePtr &t2) {
     if (t1.get() == t2.get()) {
         return true;
     }
@@ -1220,7 +1218,7 @@ bool Types::isSubTypeUnderConstraint(Context ctx, TypeConstraint &constr, const 
     return isSubTypeUnderConstraintSingle(ctx, constr, t1, t2); // 1
 }
 
-bool Types::equiv(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+bool Types::equiv(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     return isSubType(ctx, t1, t2) && isSubType(ctx, t2, t1);
 }
 
@@ -1251,8 +1249,7 @@ void AliasType::_sanityCheck(Context ctx) {
     ENFORCE(this->symbol.exists());
 }
 
-shared_ptr<Type> AliasType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                         const vector<shared_ptr<Type>> &targs) {
+TypePtr AliasType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params, const vector<TypePtr> &targs) {
     Exception::raise("should never happen");
 }
 
@@ -1281,21 +1278,20 @@ bool MetaType::derivesFrom(const GlobalState &gs, SymbolRef klass) {
     return false;
 }
 
-shared_ptr<Type> MetaType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params,
-                                        const vector<shared_ptr<Type>> &targs) {
+TypePtr MetaType::_instantiate(Context ctx, const InlinedVector<SymbolRef, 4> &params, const vector<TypePtr> &targs) {
     Exception::raise("should never happen");
 }
 
-MetaType::MetaType(const shared_ptr<Type> &wrapped) : ProxyType(), wrapped(move(wrapped)) {
+MetaType::MetaType(const TypePtr &wrapped) : ProxyType(), wrapped(move(wrapped)) {
     categoryCounterInc("types.allocated", "metattype");
 }
 
-shared_ptr<Type> MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
+TypePtr MetaType::_approximate(Context ctx, const TypeConstraint &tc) {
     // dispatchCall is invoked on them in resolver
     return nullptr;
 }
 
-std::shared_ptr<Type> MetaType::underlying() const {
+TypePtr MetaType::underlying() const {
     return Types::Object();
 }
 

@@ -14,7 +14,7 @@ namespace sorbet::cfg {
 class VariableUseSite {
 public:
     core::LocalVariable variable;
-    std::shared_ptr<core::Type> type;
+    core::TypePtr type;
     VariableUseSite() = default;
     VariableUseSite(core::LocalVariable local) : variable(local){};
     VariableUseSite(const VariableUseSite &) = delete;
@@ -113,9 +113,9 @@ CheckSize(BlockReturn, 56, 8);
 
 class Literal final : public Instruction {
 public:
-    std::shared_ptr<core::Type> value;
+    core::TypePtr value;
 
-    Literal(const std::shared_ptr<core::Type> &value);
+    Literal(const core::TypePtr &value);
     virtual std::string toString(core::Context ctx);
 };
 CheckSize(Literal, 32, 8);
@@ -178,10 +178,10 @@ CheckSize(LoadYieldParams, 40, 8);
 class Cast final : public Instruction {
 public:
     VariableUseSite value;
-    std::shared_ptr<core::Type> type;
+    core::TypePtr type;
     core::NameRef cast;
 
-    Cast(core::LocalVariable value, const std::shared_ptr<core::Type> &type, core::NameRef cast)
+    Cast(core::LocalVariable value, const core::TypePtr &type, core::NameRef cast)
         : value(value), type(type), cast(cast) {}
 
     virtual std::string toString(core::Context ctx);

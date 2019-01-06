@@ -17,47 +17,48 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
     return std::move(first);
 };
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(shared_ptr<core::Type> receiver,
+UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(core::TypePtr receiver,
                                                                                    string_view name) {
     UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
-    typecase(receiver.get(),
-             [&](core::ClassType *c) {
-                 const auto &owner = c->symbol.data(*finalGs);
-                 for (auto member : owner->membersStableOrderSlow(*finalGs)) {
-                     auto sym = member.second;
-                     if (sym.data(*finalGs)->isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs)->name, name)) {
-                         result[sym.data(*finalGs)->name].emplace_back(sym);
-                     }
-                 }
-                 for (auto mixin : owner->mixins()) {
-                     result =
-                         mergeMaps(std::move(result), findSimilarMethodsIn(make_shared<core::ClassType>(mixin), name));
-                 }
-                 if (owner->superClass.exists()) {
-                     result = mergeMaps(std::move(result),
-                                        findSimilarMethodsIn(make_shared<core::ClassType>(owner->superClass), name));
-                 }
-             },
-             [&](core::AndType *c) {
-                 result = mergeMaps(findSimilarMethodsIn(c->left, name), findSimilarMethodsIn(c->right, name));
-             },
-             [&](core::OrType *c) {
-                 auto lhs = findSimilarMethodsIn(c->left, name);
-                 auto rhs = findSimilarMethodsIn(c->right, name);
-                 for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
-                     auto &other = *it;
-                     auto fnd = lhs.find(other.first);
-                     if (fnd == lhs.end()) {
-                         rhs.erase(it++);
-                     } else {
-                         it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
-                                           make_move_iterator(fnd->second.end()));
-                         ++it;
-                     }
-                 }
-             },
-             [&](core::AppliedType *c) { result = findSimilarMethodsIn(make_shared<core::ClassType>(c->klass), name); },
-             [&](core::ProxyType *c) { result = findSimilarMethodsIn(c->underlying(), name); }, [&](core::Type *c) {});
+    typecase(
+        receiver.get(),
+        [&](core::ClassType *c) {
+            const auto &owner = c->symbol.data(*finalGs);
+            for (auto member : owner->membersStableOrderSlow(*finalGs)) {
+                auto sym = member.second;
+                if (sym.data(*finalGs)->isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs)->name, name)) {
+                    result[sym.data(*finalGs)->name].emplace_back(sym);
+                }
+            }
+            for (auto mixin : owner->mixins()) {
+                result =
+                    mergeMaps(std::move(result), findSimilarMethodsIn(core::make_type<core::ClassType>(mixin), name));
+            }
+            if (owner->superClass.exists()) {
+                result = mergeMaps(std::move(result),
+                                   findSimilarMethodsIn(core::make_type<core::ClassType>(owner->superClass), name));
+            }
+        },
+        [&](core::AndType *c) {
+            result = mergeMaps(findSimilarMethodsIn(c->left, name), findSimilarMethodsIn(c->right, name));
+        },
+        [&](core::OrType *c) {
+            auto lhs = findSimilarMethodsIn(c->left, name);
+            auto rhs = findSimilarMethodsIn(c->right, name);
+            for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
+                auto &other = *it;
+                auto fnd = lhs.find(other.first);
+                if (fnd == lhs.end()) {
+                    rhs.erase(it++);
+                } else {
+                    it->second.insert(it->second.end(), make_move_iterator(fnd->second.begin()),
+                                      make_move_iterator(fnd->second.end()));
+                    ++it;
+                }
+            }
+        },
+        [&](core::AppliedType *c) { result = findSimilarMethodsIn(core::make_type<core::ClassType>(c->klass), name); },
+        [&](core::ProxyType *c) { result = findSimilarMethodsIn(c->underlying(), name); }, [&](core::Type *c) {});
     return result;
 }
 

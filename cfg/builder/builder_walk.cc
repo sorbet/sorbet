@@ -250,8 +250,8 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                             continue;
                         }
 
-                        bodyBlock->exprs.emplace_back(idxTmp, id->loc,
-                                                      make_unique<Literal>(make_shared<core::LiteralType>(int64_t(i))));
+                        bodyBlock->exprs.emplace_back(
+                            idxTmp, id->loc, make_unique<Literal>(core::make_type<core::LiteralType>(int64_t(i))));
                         InlinedVector<core::LocalVariable, 2> idxVec{idxTmp};
                         InlinedVector<core::Loc, 2> locs{id->loc};
                         bodyBlock->exprs.emplace_back(
@@ -424,7 +424,7 @@ BasicBlock *CFGBuilder::walk(CFGContext cctx, ast::Expression *what, BasicBlock 
                 // since in Ruby the exception would propagate up the statck.
                 auto gotoDeadTemp = cctx.newTemporary(core::Names::gotoDeadTemp());
                 synthesizeExpr(rescueHandlersBlock, gotoDeadTemp, a->loc,
-                               make_unique<Literal>(make_shared<core::LiteralType>(true)));
+                               make_unique<Literal>(core::make_type<core::LiteralType>(true)));
                 unconditionalJump(rescueHandlersBlock, ensureBody, cctx.inWhat, a->loc);
 
                 auto throwAway = cctx.newTemporary(core::Names::throwAwayTemp());

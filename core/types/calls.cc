@@ -21,7 +21,7 @@ DispatchResult ProxyType::dispatchCall(Context ctx, DispatchArgs args) {
     return und->dispatchCall(ctx, args);
 }
 
-shared_ptr<Type> ProxyType::getCallArguments(Context ctx, NameRef name) {
+TypePtr ProxyType::getCallArguments(Context ctx, NameRef name) {
     return underlying()->getCallArguments(ctx, name);
 }
 
@@ -39,7 +39,7 @@ DispatchResult OrType::dispatchCall(Context ctx, DispatchArgs args) {
     return ret;
 }
 
-shared_ptr<Type> OrType::getCallArguments(Context ctx, NameRef name) {
+TypePtr OrType::getCallArguments(Context ctx, NameRef name) {
     return left->getCallArguments(ctx, name); // TODO: should glb with right
 }
 
@@ -72,7 +72,7 @@ DispatchResult AndType::dispatchCall(Context ctx, DispatchArgs args) {
     return ret;
 }
 
-shared_ptr<Type> AndType::getCallArguments(Context ctx, NameRef name) {
+TypePtr AndType::getCallArguments(Context ctx, NameRef name) {
     auto l = left->getCallArguments(ctx, name);
     auto r = right->getCallArguments(ctx, name);
     if (l == nullptr) {
@@ -124,10 +124,9 @@ bool isSetter(Context ctx, NameRef fun) {
 
 unique_ptr<Error> matchArgType(Context ctx, TypeConstraint &constr, Loc callLoc, Loc receiverLoc, SymbolRef inClass,
                                SymbolRef method, const TypeAndOrigins &argTpe, const SymbolData argSym,
-                               const shared_ptr<Type> &selfType, vector<shared_ptr<Type>> &targs, Loc loc,
-                               bool mayBeSetter = false) {
+                               const TypePtr &selfType, vector<TypePtr> &targs, Loc loc, bool mayBeSetter = false) {
     auto ref = argSym->ref(ctx);
-    shared_ptr<Type> expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
+    TypePtr expectedType = Types::resultTypeAsSeenFrom(ctx, ref, inClass, targs);
     if (!expectedType) {
         expectedType = Types::untyped(ctx, ref);
     }
@@ -186,8 +185,8 @@ int getArity(Context ctx, SymbolRef method) {
 // Guess overload. The way we guess is only arity based - we will return the overload that has the smallest number of
 // arguments that is >= args.size()
 SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
-                        InlinedVector<const TypeAndOrigins *, 2> &args, const shared_ptr<Type> &fullType,
-                        vector<shared_ptr<Type>> &targs, bool hasBlock) {
+                        InlinedVector<const TypeAndOrigins *, 2> &args, const TypePtr &fullType, vector<TypePtr> &targs,
+                        bool hasBlock) {
     counterInc("calls.overloaded_invocations");
     ENFORCE(ctx.permitOverloadDefinitions(), "overload not permitted here");
     SymbolRef fallback = primary;
@@ -296,7 +295,7 @@ SymbolRef guessOverload(Context ctx, SymbolRef inClass, SymbolRef primary,
     return fallback;
 }
 
-shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
+TypePtr unwrapType(Context ctx, Loc loc, const TypePtr &tp) {
     if (auto *metaType = cast_type<MetaType>(tp.get())) {
         return metaType->wrapped;
     }
@@ -313,14 +312,14 @@ shared_ptr<Type> unwrapType(Context ctx, Loc loc, const shared_ptr<Type> &tp) {
     }
 
     if (auto *shapeType = cast_type<ShapeType>(tp.get())) {
-        vector<shared_ptr<Type>> unwrappedValues;
+        vector<TypePtr> unwrappedValues;
         unwrappedValues.reserve(shapeType->values.size());
         for (auto value : shapeType->values) {
             unwrappedValues.emplace_back(unwrapType(ctx, loc, value));
         }
-        return make_shared<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
+        return make_type<ShapeType>(Types::hashOfUntyped(), shapeType->keys, unwrappedValues);
     } else if (auto *tupleType = cast_type<TupleType>(tp.get())) {
-        vector<shared_ptr<Type>> unwrappedElems;
+        vector<TypePtr> unwrappedElems;
         unwrappedElems.reserve(tupleType->elems.size());
         for (auto elem : tupleType->elems) {
             unwrappedElems.emplace_back(unwrapType(ctx, loc, elem));
@@ -368,7 +367,7 @@ string prettyArity(Context ctx, SymbolRef method) {
 //    (with a subtype check on the key type, once we have generics)
 DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
-                                  const Type *thisType, core::SymbolRef symbol, vector<shared_ptr<Type>> &targs) {
+                                  const Type *thisType, core::SymbolRef symbol, vector<TypePtr> &targs) {
     if (symbol == core::Symbols::untyped()) {
         return DispatchResult(Types::untyped(ctx, thisType->untypedBlame()), std::move(args.selfType),
                               Symbols::untyped());
@@ -569,7 +568,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
                 }
                 ++kwit;
 
-                auto arg = absl::c_find_if(hash->keys, [&](const shared_ptr<Type> &litType) {
+                auto arg = absl::c_find_if(hash->keys, [&](const TypePtr &litType) {
                     auto lit = cast_type<LiteralType>(litType.get());
                     return cast_type<ClassType>(lit->underlying().get())->symbol == Symbols::Symbol() &&
                            lit->value == spec->name._id;
@@ -638,7 +637,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         }
     }
 
-    shared_ptr<Type> resultType = nullptr;
+    TypePtr resultType = nullptr;
 
     if (method.data(ctx)->intrinsic != nullptr) {
         resultType = method.data(ctx)->intrinsic->apply(ctx, args, thisType);
@@ -673,7 +672,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
         if (!bspec.exists() || !bspec.data(ctx)->isBlockArgument()) {
             // TODO(nelhage): passing a block to a function that does not accept one
         } else {
-            shared_ptr<Type> blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
+            TypePtr blockType = Types::resultTypeAsSeenFrom(ctx, bspec, symbol, targs);
             if (!blockType) {
                 blockType = Types::untyped(ctx, bspec);
             }
@@ -692,7 +691,7 @@ DispatchResult dispatchCallSymbol(Context ctx, DispatchArgs args,
 
 DispatchResult ClassType::dispatchCall(Context ctx, DispatchArgs args) {
     categoryCounterInc("dispatch_call", "classtype");
-    vector<shared_ptr<Type>> empty;
+    vector<TypePtr> empty;
     return dispatchCallSymbol(ctx, args, this, symbol, empty);
 }
 
@@ -701,7 +700,7 @@ DispatchResult AppliedType::dispatchCall(Context ctx, DispatchArgs args) {
     return dispatchCallSymbol(ctx, args, this, this->klass, this->targs);
 }
 
-shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vector<shared_ptr<Type>> &targs) {
+TypePtr getMethodArguments(Context ctx, SymbolRef klass, NameRef name, const vector<TypePtr> &targs) {
     SymbolRef method = klass.data(ctx)->findMemberTransitive(ctx, name);
 
     if (!method.exists()) {
@@ -709,7 +708,7 @@ shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, 
     }
     const SymbolData data = method.data(ctx);
 
-    vector<shared_ptr<Type>> args;
+    vector<TypePtr> args;
     args.reserve(data->arguments().size());
     for (auto arg : data->arguments()) {
         if (arg.data(ctx)->isRepeated()) {
@@ -726,14 +725,14 @@ shared_ptr<Type> getMethodArguments(Context ctx, SymbolRef klass, NameRef name, 
     return TupleType::build(ctx, args);
 }
 
-shared_ptr<Type> ClassType::getCallArguments(Context ctx, NameRef name) {
+TypePtr ClassType::getCallArguments(Context ctx, NameRef name) {
     if (isUntyped()) {
         return Types::untyped(ctx, untypedBlame());
     }
-    return getMethodArguments(ctx, symbol, name, vector<shared_ptr<Type>>{});
+    return getMethodArguments(ctx, symbol, name, vector<TypePtr>{});
 }
 
-shared_ptr<Type> AppliedType::getCallArguments(Context ctx, NameRef name) {
+TypePtr AppliedType::getCallArguments(Context ctx, NameRef name) {
     return getMethodArguments(ctx, klass, name, targs);
 }
 
@@ -741,7 +740,7 @@ DispatchResult AliasType::dispatchCall(Context ctx, DispatchArgs args) {
     Exception::raise("AliasType::dispatchCall");
 }
 
-shared_ptr<Type> AliasType::getCallArguments(Context ctx, NameRef name) {
+TypePtr AliasType::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("AliasType::getCallArgumentType");
 }
 
@@ -780,14 +779,14 @@ namespace {
 
 class T_untyped : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         return Types::untypedUntracked();
     }
 } T_untyped;
 
 class T_must : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.empty()) {
             return nullptr;
         }
@@ -809,12 +808,12 @@ public:
 
 class T_any : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.empty()) {
             return Types::untypedUntracked();
         }
 
-        shared_ptr<Type> res = Types::bottom();
+        TypePtr res = Types::bottom();
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
@@ -822,18 +821,18 @@ public:
             res = Types::any(ctx, res, ty);
         }
 
-        return make_shared<MetaType>(res);
+        return make_type<MetaType>(res);
     }
 } T_any;
 
 class T_all : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.empty()) {
             return Types::untypedUntracked();
         }
 
-        shared_ptr<Type> res = Types::top();
+        TypePtr res = Types::top();
         auto i = -1;
         for (auto &arg : args.args) {
             i++;
@@ -841,13 +840,13 @@ public:
             res = Types::all(ctx, res, ty);
         }
 
-        return make_shared<MetaType>(res);
+        return make_type<MetaType>(res);
     }
 } T_all;
 
 class T_revealType : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.size() != 1) {
             return Types::untypedUntracked();
         }
@@ -862,23 +861,23 @@ public:
 
 class T_nilable : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.size() != 1) {
             return Types::untypedUntracked();
         }
 
-        return make_shared<MetaType>(
+        return make_type<MetaType>(
             Types::any(ctx, unwrapType(ctx, args.locs.args[0], args.args[0]->type), Types::nilClass()));
     }
 } T_nilable;
 
 class Object_class : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         SymbolRef self = unwrapSymbol(thisType);
         auto singleton = self.data(ctx)->lookupSingletonClass(ctx);
         if (singleton.exists()) {
-            return make_shared<ClassType>(singleton);
+            return make_type<ClassType>(singleton);
         }
         return Types::classClass();
     }
@@ -886,7 +885,7 @@ public:
 
 class Class_new : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         SymbolRef self = unwrapSymbol(thisType);
 
         auto attachedClass = self.data(ctx)->attachedClass(ctx);
@@ -922,7 +921,7 @@ public:
 
 class T_Generic_squareBrackets : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         SymbolRef attachedClass;
 
         SymbolRef self = unwrapSymbol(thisType);
@@ -959,7 +958,7 @@ public:
             }
         }
 
-        vector<shared_ptr<Type>> targs;
+        vector<TypePtr> targs;
         auto it = args.args.begin();
         int i = -1;
         targs.reserve(attachedClass.data(ctx)->typeMembers().size());
@@ -978,17 +977,17 @@ public:
             }
         }
 
-        return make_shared<MetaType>(make_shared<AppliedType>(attachedClass, targs));
+        return make_type<MetaType>(make_type<AppliedType>(attachedClass, targs));
     }
 } T_Generic_squareBrackets;
 
 class Magic_buildHash : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         ENFORCE(args.args.size() % 2 == 0);
 
-        vector<shared_ptr<Type>> keys;
-        vector<shared_ptr<Type>> values;
+        vector<TypePtr> keys;
+        vector<TypePtr> values;
         keys.reserve(args.args.size() / 2);
         values.reserve(args.args.size() / 2);
         for (int i = 0; i < args.args.size(); i += 2) {
@@ -997,20 +996,20 @@ public:
                 return Types::hashOfUntyped();
             }
 
-            keys.emplace_back(shared_ptr<LiteralType>(args.args[i]->type, key));
+            keys.emplace_back(args.args[i]->type);
             values.emplace_back(args.args[i + 1]->type);
         }
-        return make_unique<ShapeType>(Types::hashOfUntyped(), keys, values);
+        return make_type<ShapeType>(Types::hashOfUntyped(), keys, values);
     }
 } Magic_buildHash;
 
 class Magic_buildArray : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.empty()) {
             return Types::arrayOfUntyped();
         }
-        vector<shared_ptr<Type>> elems;
+        vector<TypePtr> elems;
         elems.reserve(args.args.size());
         bool isType = absl::c_any_of(args.args, [ctx](auto ty) { return isa_type<MetaType>(ty->type.get()); });
         int i = -1;
@@ -1025,7 +1024,7 @@ public:
 
         auto tuple = TupleType::build(ctx, elems);
         if (isType) {
-            return make_shared<MetaType>(tuple);
+            return make_type<MetaType>(tuple);
         } else {
             return tuple;
         }
@@ -1033,8 +1032,7 @@ public:
 } Magic_buildArray;
 
 class Magic_expandSplat : public IntrinsicMethod {
-    static shared_ptr<Type> expandArray(Context ctx, const shared_ptr<Type> &type, int expandTo,
-                                        core::TypeConstraint &constr) {
+    static TypePtr expandArray(Context ctx, const TypePtr &type, int expandTo, core::TypeConstraint &constr) {
         if (auto *ot = cast_type<OrType>(type.get())) {
             return Types::any(ctx, expandArray(ctx, ot->left, expandTo, constr),
                               expandArray(ctx, ot->right, expandTo, constr));
@@ -1046,7 +1044,7 @@ class Magic_expandSplat : public IntrinsicMethod {
             // can't say anything about the elements.
             return type;
         }
-        vector<shared_ptr<Type>> types;
+        vector<TypePtr> types;
         if (tuple) {
             types.insert(types.end(), tuple->elems.begin(), tuple->elems.end());
         } else {
@@ -1060,7 +1058,7 @@ class Magic_expandSplat : public IntrinsicMethod {
     }
 
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.size() != 3) {
             return Types::arrayOfUntyped();
         }
@@ -1079,7 +1077,7 @@ public:
 
 class Magic_callWithSplat : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.args.size() != 3) {
             return core::Types::untypedUntracked();
         }
@@ -1136,7 +1134,7 @@ public:
 
 class Tuple_squareBrackets : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
         LiteralType *lit = nullptr;
@@ -1160,7 +1158,7 @@ public:
 
 class Tuple_last : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
@@ -1176,7 +1174,7 @@ public:
 
 class Tuple_first : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
@@ -1192,7 +1190,7 @@ public:
 
 class Tuple_minMax : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
 
@@ -1208,15 +1206,15 @@ public:
 
 class Tuple_to_a : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         return args.selfType;
     }
 } Tuple_to_a;
 
 class Tuple_concat : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        std::vector<std::shared_ptr<Type>> elems;
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        std::vector<TypePtr> elems;
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
         elems = tuple->elems;
@@ -1233,7 +1231,7 @@ public:
 
 class Shape_merge : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         auto *shape = cast_type<ShapeType>(thisType);
         ENFORCE(shape);
         ShapeType *rhs = nullptr;
@@ -1259,13 +1257,13 @@ public:
             }
         }
 
-        return make_shared<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
+        return make_type<ShapeType>(Types::hashOfUntyped(), std::move(keys), std::move(values));
     }
 } Shape_merge;
 
 class Array_flatten : public IntrinsicMethod {
     // Flattens a (nested) array all way down to its (inner) element type, stopping if we hit the depth limit first.
-    static shared_ptr<Type> recursivelyFlattenArrays(Context ctx, const shared_ptr<Type> &type, const int64_t depth) {
+    static TypePtr recursivelyFlattenArrays(Context ctx, const TypePtr &type, const int64_t depth) {
         ENFORCE(type != nullptr);
 
         if (depth == 0) {
@@ -1273,7 +1271,7 @@ class Array_flatten : public IntrinsicMethod {
         }
         const int newDepth = depth - 1;
 
-        shared_ptr<Type> result;
+        TypePtr result;
         typecase(type.get(),
 
                  // This only shows up because t->elementType() for tuples returns an OrType of all its elements.
@@ -1299,9 +1297,9 @@ class Array_flatten : public IntrinsicMethod {
     }
 
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         // Unwrap the array one time to get the element type (we'll rewrap it down at the bottom)
-        shared_ptr<Type> element;
+        TypePtr element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
@@ -1344,8 +1342,8 @@ public:
 
 class Array_compact : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        shared_ptr<Type> element;
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        TypePtr element;
         if (auto *ap = cast_type<AppliedType>(thisType)) {
             ENFORCE(ap->klass == Symbols::Array() || ap->klass.data(ctx)->derivesFrom(ctx, Symbols::Array()));
             ENFORCE(!ap->targs.empty());
@@ -1362,7 +1360,7 @@ public:
 
 class Kernel_proc : public IntrinsicMethod {
 public:
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
         if (args.block == nullptr) {
             return core::Types::untypedUntracked();
         }
@@ -1378,17 +1376,17 @@ public:
         if (arity > core::Symbols::MAX_PROC_ARITY) {
             return core::Types::procClass();
         }
-        vector<shared_ptr<core::Type>> targs(arity + 1, core::Types::untypedUntracked());
+        vector<core::TypePtr> targs(arity + 1, core::Types::untypedUntracked());
         auto procClass = core::Symbols::Proc(arity);
-        return make_shared<core::AppliedType>(procClass, targs);
+        return make_type<core::AppliedType>(procClass, targs);
     }
 } Kernel_proc;
 
 class Enumerable_to_h : public IntrinsicMethod {
 public:
     // Forward Enumerable.to_h to RubyType.Enumerable_to_h[self]
-    shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        auto hash = make_shared<ClassType>(core::Symbols::RubyTyper().data(ctx)->lookupSingletonClass(ctx));
+    TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
+        auto hash = make_type<ClassType>(core::Symbols::RubyTyper().data(ctx)->lookupSingletonClass(ctx));
         InlinedVector<Loc, 2> argLocs{args.locs.receiver};
         CallLocs locs{
             args.locs.call,

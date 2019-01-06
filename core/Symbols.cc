@@ -24,36 +24,36 @@ bool SymbolRef::operator!=(const SymbolRef &rhs) const {
     return !(rhs == *this);
 }
 
-vector<shared_ptr<Type>> Symbol::selfTypeArgs(const GlobalState &gs) const {
+vector<TypePtr> Symbol::selfTypeArgs(const GlobalState &gs) const {
     ENFORCE(isClass()); // should be removed when we have generic methods
-    vector<shared_ptr<Type>> targs;
+    vector<TypePtr> targs;
     for (auto tm : typeMembers()) {
         if (tm.data(gs)->isFixed()) {
             targs.emplace_back(tm.data(gs)->resultType);
         } else {
-            targs.emplace_back(make_shared<SelfTypeParam>(tm));
+            targs.emplace_back(make_type<SelfTypeParam>(tm));
         }
     }
     return targs;
 }
-shared_ptr<Type> Symbol::selfType(const GlobalState &gs) const {
+TypePtr Symbol::selfType(const GlobalState &gs) const {
     ENFORCE(isClass());
     // todo: in dotty it made sense to cache those.
     if (typeMembers().empty()) {
-        return make_shared<ClassType>(ref(gs));
+        return make_type<ClassType>(ref(gs));
     } else {
-        return make_shared<AppliedType>(ref(gs), selfTypeArgs(gs));
+        return make_type<AppliedType>(ref(gs), selfTypeArgs(gs));
     }
 }
 
-shared_ptr<Type> Symbol::externalType(const GlobalState &gs) const {
+TypePtr Symbol::externalType(const GlobalState &gs) const {
     ENFORCE(isClass());
     auto ref = this->ref(gs);
     // todo: also cache these?
     if (typeMembers().empty()) {
-        return make_shared<ClassType>(ref);
+        return make_type<ClassType>(ref);
     } else {
-        vector<shared_ptr<Type>> targs;
+        vector<TypePtr> targs;
         for (auto tm : typeMembers()) {
             if (tm.data(gs)->isFixed()) {
                 targs.emplace_back(tm.data(gs)->resultType);
@@ -61,7 +61,7 @@ shared_ptr<Type> Symbol::externalType(const GlobalState &gs) const {
                 targs.emplace_back(Types::untyped(gs, ref));
             }
         }
-        return make_shared<AppliedType>(ref, targs);
+        return make_type<AppliedType>(ref, targs);
     }
 }
 
@@ -127,7 +127,7 @@ string SymbolRef::show(const GlobalState &gs) const {
     return data(gs, true)->show(gs);
 }
 
-shared_ptr<Type> Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
+TypePtr Symbol::argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const {
     ENFORCE(isMethodArgument());
     auto klass = owner.data(ctx)->owner;
     ENFORCE(klass.data(ctx)->isClass());

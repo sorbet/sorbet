@@ -66,7 +66,7 @@ StringKind classifyString(string_view str) {
     }
 }
 
-shared_ptr<core::Type> getType(core::GlobalState &gs, const YAML::Node &node) {
+core::TypePtr getType(core::GlobalState &gs, const YAML::Node &node) {
     ENFORCE(node.IsScalar());
     string value = node.as<string>();
     if (value == "true" || value == "false") {
@@ -87,7 +87,7 @@ shared_ptr<core::Type> getType(core::GlobalState &gs, const YAML::Node &node) {
 struct Path {
     Path *parent;
     string selector;
-    shared_ptr<core::Type> myType;
+    core::TypePtr myType;
 
     Path(Path *parent, string selector) : parent(parent), selector(move(selector)){};
 
@@ -123,7 +123,7 @@ struct Path {
         return children.emplace_back(make_shared<Path>(this, string(name)));
     }
 
-    void setType(core::GlobalState &gs, shared_ptr<core::Type> tp) {
+    void setType(core::GlobalState &gs, core::TypePtr tp) {
         if (myType) {
             myType = core::Types::any(core::MutableContext(gs, core::Symbols::root()), myType, tp);
         } else {
@@ -143,7 +143,7 @@ struct Path {
             } else {
                 classSym.data(gs)->superClass = core::Symbols::Configatron_Store();
             }
-            parent.data(gs)->resultType = make_shared<core::ClassType>(classSym);
+            parent.data(gs)->resultType = core::make_type<core::ClassType>(classSym);
             // DO NOT ADD METHODS HERE. add them to Configatron::Store shim
 
             for (auto &child : children) {
@@ -164,7 +164,7 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
             prefix->setType(gs, getType(gs, node));
             break;
         case YAML::NodeType::Sequence: {
-            shared_ptr<core::Type> elemType;
+            core::TypePtr elemType;
             for (const auto &child : node) {
                 auto thisElemType = child.IsScalar() ? getType(gs, child) : core::Types::untypedUntracked();
                 if (elemType) {
@@ -177,8 +177,8 @@ void recurse(core::GlobalState &gs, const YAML::Node &node, shared_ptr<Path> pre
             if (!elemType) {
                 elemType = core::Types::bottom();
             }
-            vector<shared_ptr<core::Type>> elems{elemType};
-            prefix->setType(gs, make_shared<core::AppliedType>(core::Symbols::Array(), elems));
+            vector<core::TypePtr> elems{elemType};
+            prefix->setType(gs, core::make_type<core::AppliedType>(core::Symbols::Array(), elems));
             break;
         }
         case YAML::NodeType::Map:

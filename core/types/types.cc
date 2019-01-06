@@ -19,119 +19,118 @@ namespace sorbet::core {
 
 using namespace std;
 
-shared_ptr<Type> Types::top() {
-    static auto res = make_shared<ClassType>(Symbols::top());
+TypePtr Types::top() {
+    static auto res = make_type<ClassType>(Symbols::top());
     return res;
 }
 
-shared_ptr<Type> Types::bottom() {
-    static auto res = make_shared<ClassType>(Symbols::bottom());
+TypePtr Types::bottom() {
+    static auto res = make_type<ClassType>(Symbols::bottom());
     return res;
 }
 
-shared_ptr<Type> Types::nilClass() {
-    static auto res = make_shared<ClassType>(Symbols::NilClass());
+TypePtr Types::nilClass() {
+    static auto res = make_type<ClassType>(Symbols::NilClass());
     return res;
 }
 
-shared_ptr<Type> Types::untypedUntracked() {
-    static auto res = make_shared<ClassType>(Symbols::untyped());
+TypePtr Types::untypedUntracked() {
+    static auto res = make_type<ClassType>(Symbols::untyped());
     return res;
 }
 
-shared_ptr<Type> Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
+TypePtr Types::untyped(const sorbet::core::GlobalState &gs, sorbet::core::SymbolRef blame) {
     if (sorbet::debug_mode) {
-        return make_shared<BlamedUntyped>(blame);
+        return make_type<BlamedUntyped>(blame);
     } else {
         return untypedUntracked();
     }
 }
 
-shared_ptr<Type> Types::void_() {
-    static auto res = make_shared<ClassType>(Symbols::void_());
+TypePtr Types::void_() {
+    static auto res = make_type<ClassType>(Symbols::void_());
     return res;
 }
 
-shared_ptr<Type> Types::trueClass() {
-    static auto res = make_shared<ClassType>(Symbols::TrueClass());
+TypePtr Types::trueClass() {
+    static auto res = make_type<ClassType>(Symbols::TrueClass());
     return res;
 }
 
-shared_ptr<Type> Types::falseClass() {
-    static auto res = make_shared<ClassType>(Symbols::FalseClass());
+TypePtr Types::falseClass() {
+    static auto res = make_type<ClassType>(Symbols::FalseClass());
     return res;
 }
 
-shared_ptr<Type> Types::Boolean() {
+TypePtr Types::Boolean() {
     static auto res = OrType::make_shared(trueClass(), falseClass());
     return res;
 }
 
-shared_ptr<Type> Types::Integer() {
-    static auto res = make_shared<ClassType>(Symbols::Integer());
+TypePtr Types::Integer() {
+    static auto res = make_type<ClassType>(Symbols::Integer());
     return res;
 }
 
-shared_ptr<Type> Types::Float() {
-    static auto res = make_shared<ClassType>(Symbols::Float());
+TypePtr Types::Float() {
+    static auto res = make_type<ClassType>(Symbols::Float());
     return res;
 }
 
-shared_ptr<Type> Types::arrayClass() {
-    static auto res = make_shared<ClassType>(Symbols::Array());
+TypePtr Types::arrayClass() {
+    static auto res = make_type<ClassType>(Symbols::Array());
     return res;
 }
 
-shared_ptr<Type> Types::hashClass() {
-    static auto res = make_shared<ClassType>(Symbols::Hash());
+TypePtr Types::hashClass() {
+    static auto res = make_type<ClassType>(Symbols::Hash());
     return res;
 }
 
-shared_ptr<Type> Types::arrayOfUntyped() {
-    static vector<shared_ptr<Type>> targs{Types::untypedUntracked()};
-    static auto res = make_shared<AppliedType>(Symbols::Array(), targs);
+TypePtr Types::arrayOfUntyped() {
+    static vector<TypePtr> targs{Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Array(), targs);
     return res;
 }
 
-shared_ptr<Type> Types::hashOfUntyped() {
-    static vector<shared_ptr<Type>> targs{Types::untypedUntracked(), Types::untypedUntracked(),
-                                          Types::untypedUntracked()};
-    static auto res = make_shared<AppliedType>(Symbols::Hash(), targs);
+TypePtr Types::hashOfUntyped() {
+    static vector<TypePtr> targs{Types::untypedUntracked(), Types::untypedUntracked(), Types::untypedUntracked()};
+    static auto res = make_type<AppliedType>(Symbols::Hash(), targs);
     return res;
 }
 
-shared_ptr<Type> Types::procClass() {
-    static auto res = make_shared<ClassType>(Symbols::Proc());
+TypePtr Types::procClass() {
+    static auto res = make_type<ClassType>(Symbols::Proc());
     return res;
 }
 
-shared_ptr<Type> Types::classClass() {
-    static auto res = make_shared<ClassType>(Symbols::Class());
+TypePtr Types::classClass() {
+    static auto res = make_type<ClassType>(Symbols::Class());
     return res;
 }
 
-shared_ptr<Type> Types::String() {
-    static auto res = make_shared<ClassType>(Symbols::String());
+TypePtr Types::String() {
+    static auto res = make_type<ClassType>(Symbols::String());
     return res;
 }
 
-shared_ptr<Type> Types::Symbol() {
-    static auto res = make_shared<ClassType>(Symbols::Symbol());
+TypePtr Types::Symbol() {
+    static auto res = make_type<ClassType>(Symbols::Symbol());
     return res;
 }
 
-shared_ptr<Type> Types::Object() {
-    static auto res = make_shared<ClassType>(Symbols::Object());
+TypePtr Types::Object() {
+    static auto res = make_type<ClassType>(Symbols::Object());
     return res;
 }
 
-shared_ptr<Type> Types::falsyTypes() {
+TypePtr Types::falsyTypes() {
     static auto res = OrType::make_shared(Types::nilClass(), Types::falseClass());
     return res;
 }
 
-shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from, SymbolRef klass) {
-    shared_ptr<Type> result;
+TypePtr Types::dropSubtypesOf(Context ctx, const TypePtr &from, SymbolRef klass) {
+    TypePtr result;
 
     if (from->isUntyped()) {
         return from;
@@ -190,7 +189,7 @@ shared_ptr<Type> Types::dropSubtypesOf(Context ctx, const shared_ptr<Type> &from
     return result;
 }
 
-bool Types::canBeTruthy(Context ctx, const shared_ptr<Type> &what) {
+bool Types::canBeTruthy(Context ctx, const TypePtr &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -199,7 +198,7 @@ bool Types::canBeTruthy(Context ctx, const shared_ptr<Type> &what) {
     return !truthyPart->isBottom(); // check if truthyPart is empty
 }
 
-bool Types::canBeFalsy(Context ctx, const shared_ptr<Type> &what) {
+bool Types::canBeFalsy(Context ctx, const TypePtr &what) {
     if (what->isUntyped()) {
         return true;
     }
@@ -208,8 +207,8 @@ bool Types::canBeFalsy(Context ctx, const shared_ptr<Type> &what) {
                             what); // check if inhabited by falsy values
 }
 
-shared_ptr<Type> Types::approximateSubtract(Context ctx, const shared_ptr<Type> &from, const shared_ptr<Type> &what) {
-    shared_ptr<Type> result;
+TypePtr Types::approximateSubtract(Context ctx, const TypePtr &from, const TypePtr &what) {
+    TypePtr result;
     typecase(what.get(), [&](ClassType *c) { result = Types::dropSubtypesOf(ctx, from, c->symbol); },
              [&](AppliedType *c) { result = Types::dropSubtypesOf(ctx, from, c->klass); },
              [&](OrType *o) {
@@ -219,30 +218,30 @@ shared_ptr<Type> Types::approximateSubtract(Context ctx, const shared_ptr<Type> 
     return result;
 }
 
-shared_ptr<Type> Types::dropLiteral(const shared_ptr<Type> &tp) {
+TypePtr Types::dropLiteral(const TypePtr &tp) {
     if (auto *a = cast_type<LiteralType>(tp.get())) {
         return a->underlying();
     }
     return tp;
 }
 
-shared_ptr<Type> Types::lubAll(Context ctx, vector<shared_ptr<Type>> &elements) {
-    shared_ptr<Type> acc = Types::bottom();
+TypePtr Types::lubAll(Context ctx, vector<TypePtr> &elements) {
+    TypePtr acc = Types::bottom();
     for (auto &el : elements) {
         acc = Types::lub(ctx, acc, el);
     }
     return acc;
 }
 
-shared_ptr<Type> Types::arrayOf(Context ctx, const shared_ptr<Type> &elem) {
-    vector<shared_ptr<Type>> targs{move(elem)};
-    return make_shared<AppliedType>(Symbols::Array(), targs);
+TypePtr Types::arrayOf(Context ctx, const TypePtr &elem) {
+    vector<TypePtr> targs{move(elem)};
+    return make_type<AppliedType>(Symbols::Array(), targs);
 }
 
-shared_ptr<Type> Types::hashOf(Context ctx, const shared_ptr<Type> &elem) {
-    vector<shared_ptr<Type>> tupleArgs{Types::Symbol(), elem};
-    vector<shared_ptr<Type>> targs{Types::Symbol(), elem, TupleType::build(ctx, tupleArgs)};
-    return make_shared<AppliedType>(Symbols::Hash(), targs);
+TypePtr Types::hashOf(Context ctx, const TypePtr &elem) {
+    vector<TypePtr> tupleArgs{Types::Symbol(), elem};
+    vector<TypePtr> targs{Types::Symbol(), elem, TupleType::build(ctx, tupleArgs)};
+    return make_type<AppliedType>(Symbols::Hash(), targs);
 }
 
 ClassType::ClassType(SymbolRef symbol) : symbol(symbol) {
@@ -300,7 +299,7 @@ LiteralType::LiteralType(bool val)
     categoryCounterInc("types.allocated", "literaltype");
 }
 
-shared_ptr<Type> LiteralType::underlying() const {
+TypePtr LiteralType::underlying() const {
     switch (literalKind) {
         case LiteralTypeKind::Integer:
             return Types::Integer();
@@ -318,17 +317,17 @@ shared_ptr<Type> LiteralType::underlying() const {
     Exception::raise("should never be reached");
 }
 
-TupleType::TupleType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> elements)
+TupleType::TupleType(const TypePtr &underlying, vector<TypePtr> elements)
     : ProxyType(), elems(move(elements)), underlying_(underlying) {
     categoryCounterInc("types.allocated", "tupletype");
 }
 
-shared_ptr<Type> TupleType::build(Context ctx, vector<shared_ptr<Type>> elements) {
-    shared_ptr<Type> underlying = Types::arrayOf(ctx, Types::dropLiteral(Types::lubAll(ctx, elements)));
-    return make_shared<TupleType>(move(underlying), move(elements));
+TypePtr TupleType::build(Context ctx, vector<TypePtr> elements) {
+    TypePtr underlying = Types::arrayOf(ctx, Types::dropLiteral(Types::lubAll(ctx, elements)));
+    return make_type<TupleType>(move(underlying), move(elements));
 }
 
-AndType::AndType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
+AndType::AndType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
     categoryCounterInc("types.allocated", "andtype");
 }
 
@@ -344,7 +343,7 @@ bool LiteralType::equals(const LiteralType &rhs) const {
     return lklass->symbol == rklass->symbol;
 }
 
-OrType::OrType(const shared_ptr<Type> &left, const shared_ptr<Type> &right) : left(move(left)), right(move(right)) {
+OrType::OrType(const TypePtr &left, const TypePtr &right) : left(move(left)), right(move(right)) {
     categoryCounterInc("types.allocated", "ortype");
 }
 
@@ -359,17 +358,17 @@ ShapeType::ShapeType() : ProxyType(), underlying_(Types::hashOfUntyped()) {
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-ShapeType::ShapeType(const shared_ptr<Type> &underlying, vector<shared_ptr<Type>> keys, vector<shared_ptr<Type>> values)
+ShapeType::ShapeType(const TypePtr &underlying, vector<TypePtr> keys, vector<TypePtr> values)
     : ProxyType(), keys(move(keys)), values(move(values)), underlying_(underlying) {
     DEBUG_ONLY(for (auto &k : this->keys) { ENFORCE(cast_type<LiteralType>(k.get()) != nullptr); };);
     categoryCounterInc("types.allocated", "shapetype");
 }
 
-shared_ptr<Type> ShapeType::underlying() const {
+TypePtr ShapeType::underlying() const {
     return this->underlying_;
 }
 
-shared_ptr<Type> TupleType::underlying() const {
+TypePtr TupleType::underlying() const {
     return this->underlying_;
 }
 
@@ -513,7 +512,7 @@ bool OrType::isFullyDefined() {
 /** Returns type parameters of what reordered in the order of type parameters of asIf
  * If some typeArgs are not present, return NoSymbol
  * */
-InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<shared_ptr<Type>> &targs,
+InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what, const vector<TypePtr> &targs,
                                                      SymbolRef asIf) {
     ENFORCE(asIf.data(ctx)->isClass());
     ENFORCE(what.data(ctx)->isClass());
@@ -548,8 +547,7 @@ InlinedVector<SymbolRef, 4> Types::alignBaseTypeArgs(Context ctx, SymbolRef what
     return currentAlignment;
 }
 
-shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat,
-                                             const vector<shared_ptr<Type>> &targs) {
+TypePtr Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, SymbolRef inWhat, const vector<TypePtr> &targs) {
     const sorbet::core::SymbolData original = what.data(ctx);
     SymbolRef originalOwner = what.data(ctx)->enclosingClass(ctx);
 
@@ -562,7 +560,7 @@ shared_ptr<Type> Types::resultTypeAsSeenFrom(Context ctx, SymbolRef what, Symbol
     return instantiate(ctx, original->resultType, currentAlignment, targs);
 }
 
-shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &procType) {
+TypePtr Types::getProcReturnType(Context ctx, const TypePtr &procType) {
     if (!procType->derivesFrom(ctx, Symbols::Proc())) {
         return Types::untypedUntracked();
     }
@@ -574,7 +572,7 @@ shared_ptr<Type> Types::getProcReturnType(Context ctx, const shared_ptr<Type> &p
     return applied->targs.front();
 }
 
-bool Types::isSubType(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+bool Types::isSubType(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     return isSubTypeUnderConstraint(ctx, TypeConstraint::EmptyFrozenConstraint, t1, t2);
 }
 
@@ -582,7 +580,7 @@ bool TypeVar::isFullyDefined() {
     return false;
 }
 
-shared_ptr<Type> TypeVar::getCallArguments(Context ctx, NameRef name) {
+TypePtr TypeVar::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
@@ -644,12 +642,12 @@ bool SelfTypeParam::derivesFrom(const GlobalState &gs, SymbolRef klass) {
         "SelfTypeParam::derivesFrom not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> LambdaParam::getCallArguments(Context ctx, NameRef name) {
+TypePtr LambdaParam::getCallArguments(Context ctx, NameRef name) {
     Exception::raise(
         "LambdaParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
 }
 
-shared_ptr<Type> SelfTypeParam::getCallArguments(Context ctx, NameRef name) {
+TypePtr SelfTypeParam::getCallArguments(Context ctx, NameRef name) {
     Exception::raise(
         "SelfTypeParam::getCallArguments not implemented, not clear what it should do. Let's see this fire first.");
 }
@@ -686,8 +684,8 @@ bool OrType::hasUntyped() {
     return left->hasUntyped() || right->hasUntyped();
 }
 
-shared_ptr<Type> OrType::make_shared(const shared_ptr<Type> &left, const shared_ptr<Type> &right) {
-    shared_ptr<Type> res(new OrType(left, right));
+TypePtr OrType::make_shared(const TypePtr &left, const TypePtr &right) {
+    TypePtr res(new OrType(left, right));
     return res;
 }
 
@@ -695,8 +693,8 @@ bool AndType::hasUntyped() {
     return left->hasUntyped() || right->hasUntyped();
 }
 
-shared_ptr<Type> AndType::make_shared(const shared_ptr<Type> &left, const shared_ptr<Type> &right) {
-    shared_ptr<Type> res(new AndType(left, right));
+TypePtr AndType::make_shared(const TypePtr &left, const TypePtr &right) {
+    TypePtr res(new AndType(left, right));
     return res;
 }
 
@@ -734,7 +732,7 @@ std::shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     return make_shared<SendAndBlockLink>(move(copy));
 }
 
-shared_ptr<Type> TupleType::elementType() const {
+TypePtr TupleType::elementType() const {
     auto *ap = cast_type<AppliedType>(this->underlying().get());
     ENFORCE(ap);
     ENFORCE(ap->klass == Symbols::Array());
@@ -745,7 +743,7 @@ shared_ptr<Type> TupleType::elementType() const {
 SelfType::SelfType() {
     categoryCounterInc("types.allocated", "selftype");
 };
-AppliedType::AppliedType(SymbolRef klass, vector<shared_ptr<Type>> targs) : klass(klass), targs(targs) {
+AppliedType::AppliedType(SymbolRef klass, vector<TypePtr> targs) : klass(klass), targs(targs) {
     categoryCounterInc("types.allocated", "appliedtype");
 }
 
@@ -757,7 +755,7 @@ bool SelfType::isFullyDefined() {
     return false;
 }
 
-shared_ptr<Type> SelfType::getCallArguments(Context ctx, NameRef name) {
+TypePtr SelfType::getCallArguments(Context ctx, NameRef name) {
     Exception::raise("should never happen");
 }
 
@@ -771,27 +769,27 @@ DispatchResult SelfType::dispatchCall(Context ctx, DispatchArgs args) {
 
 void SelfType::_sanityCheck(Context ctx) {}
 
-std::shared_ptr<Type> Types::widen(Context ctx, const std::shared_ptr<Type> &type) {
+TypePtr Types::widen(Context ctx, const TypePtr &type) {
     ENFORCE(type != nullptr);
-    std::shared_ptr<Type> ret;
+    TypePtr ret;
     typecase(type.get(),
              [&](AndType *andType) { ret = all(ctx, widen(ctx, andType->left), widen(ctx, andType->right)); },
              [&](OrType *orType) { ret = any(ctx, widen(ctx, orType->left), widen(ctx, orType->right)); },
              [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
              [&](AppliedType *appliedType) {
-                 std::vector<std::shared_ptr<Type>> newTargs;
+                 std::vector<TypePtr> newTargs;
                  newTargs.reserve(appliedType->targs.size());
                  for (const auto &t : appliedType->targs) {
                      newTargs.emplace_back(widen(ctx, t));
                  }
-                 ret = make_shared<AppliedType>(appliedType->klass, newTargs);
+                 ret = make_type<AppliedType>(appliedType->klass, newTargs);
              },
              [&](Type *tp) { ret = type; });
     ENFORCE(ret);
     return ret;
 }
 
-DispatchArgs DispatchArgs::withSelfRef(const std::shared_ptr<Type> &newSelfRef) {
+DispatchArgs DispatchArgs::withSelfRef(const TypePtr &newSelfRef) {
     return DispatchArgs{name, locs, args, newSelfRef, fullType, block};
 }
 

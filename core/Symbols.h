@@ -26,7 +26,7 @@ class SerializerImpl;
 }
 class IntrinsicMethod {
 public:
-    virtual std::shared_ptr<Type> apply(Context ctx, DispatchArgs args, const Type *thisType) const = 0;
+    virtual TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const = 0;
 };
 
 enum class Variance { CoVariant = 1, ContraVariant = -1, Invariant = 0 };
@@ -120,13 +120,13 @@ public:
         return argumentsOrMixins;
     }
 
-    std::vector<std::shared_ptr<Type>> selfTypeArgs(const GlobalState &gs) const;
+    std::vector<TypePtr> selfTypeArgs(const GlobalState &gs) const;
 
     // selfType and externalType return the type of an instance of this Symbol
     // (which must be isClass()), if instantiated without specific type
     // parameters, as seen from inside or outside of the class, respectively.
-    std::shared_ptr<Type> selfType(const GlobalState &gs) const;
-    std::shared_ptr<Type> externalType(const GlobalState &gs) const;
+    TypePtr selfType(const GlobalState &gs) const;
+    TypePtr externalType(const GlobalState &gs) const;
 
     inline InlinedVector<SymbolRef, 4> &mixins() {
         ENFORCE(isClass());
@@ -518,7 +518,7 @@ public:
      * Given a METHOD_ARGUMENT symbol, return its type as observed by the method
      * body that defined that argument
      */
-    std::shared_ptr<Type> argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
+    TypePtr argumentTypeAsSeenByImplementation(Context ctx, core::TypeConstraint &constr) const;
 
     SymbolRef findMember(const GlobalState &gs, NameRef name) const;
     SymbolRef findMemberNoDealias(const GlobalState &gs, NameRef name) const;
@@ -563,7 +563,7 @@ public:
     u4 flags = Flags::NONE;
     u4 uniqueCounter = 1; // used as a counter inside the namer
     NameRef name;         // todo: move out? it should not matter but it's important for name resolution
-    std::shared_ptr<Type> resultType;
+    TypePtr resultType;
 
     UnorderedMap<NameRef, SymbolRef>
         members; // TODO: replace with https://github.com/greg7mdp/sparsepp . Should be only in ClassSymbol

@@ -10,15 +10,15 @@ struct ParsedSig {
     struct ArgSpec {
         core::Loc loc;
         core::NameRef name;
-        std::shared_ptr<core::Type> type;
+        core::TypePtr type;
     };
     std::vector<ArgSpec> argTypes;
-    std::shared_ptr<core::Type> returns;
+    core::TypePtr returns;
 
     struct TypeArgSpec {
         core::Loc loc;
         core::NameRef name;
-        std::shared_ptr<core::TypeVar> type;
+        core::TypePtr type;
     };
     std::vector<TypeArgSpec> typeArgs;
 
@@ -46,9 +46,8 @@ public:
     static bool isSig(core::MutableContext ctx, ast::Send *send);
     static ParsedSig parseSig(core::MutableContext ctx, ast::Send *send, const ParsedSig *parent, bool allowSelfType,
                               core::SymbolRef untypedBlame);
-    static std::shared_ptr<core::Type> getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr,
-                                                     const ParsedSig &, bool allowSelfType,
-                                                     core::SymbolRef untypedBlame);
+    static core::TypePtr getResultType(core::MutableContext ctx, std::unique_ptr<ast::Expression> &expr,
+                                       const ParsedSig &, bool allowSelfType, core::SymbolRef untypedBlame);
 
     TypeSyntax() = delete;
 };

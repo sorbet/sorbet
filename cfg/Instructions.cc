@@ -45,7 +45,7 @@ Send::Send(core::LocalVariable recv, core::NameRef fun, core::Loc receiverLoc,
     histogramInc("cfg.send.args", this->args.size());
 }
 
-Literal::Literal(const shared_ptr<core::Type> &value) : value(move(value)) {
+Literal::Literal(const core::TypePtr &value) : value(move(value)) {
     categoryCounterInc("cfg", "literal");
 }
 

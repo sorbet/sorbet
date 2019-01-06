@@ -91,7 +91,7 @@ bool TypeConstraint::solve(Context ctx) {
     return true;
 }
 
-bool TypeConstraint::rememberIsSubtype(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) {
+bool TypeConstraint::rememberIsSubtype(Context ctx, const TypePtr &t1, const TypePtr &t2) {
     ENFORCE(!wasSolved);
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         auto &entry = findUpperBound(t1p->sym);
@@ -117,7 +117,7 @@ bool TypeConstraint::rememberIsSubtype(Context ctx, const shared_ptr<Type> &t1, 
     return true;
 }
 
-bool TypeConstraint::isAlreadyASubType(Context ctx, const shared_ptr<Type> &t1, const shared_ptr<Type> &t2) const {
+bool TypeConstraint::isAlreadyASubType(Context ctx, const TypePtr &t1, const TypePtr &t2) const {
     if (auto t1p = cast_type<TypeVar>(t1.get())) {
         if (!hasLowerBound(t1p->sym)) {
             return Types::isSubType(ctx, Types::top(), t2);
@@ -133,7 +133,7 @@ bool TypeConstraint::isAlreadyASubType(Context ctx, const shared_ptr<Type> &t1, 
     }
 }
 
-shared_ptr<Type> TypeConstraint::getInstantiation(SymbolRef sym) const {
+TypePtr TypeConstraint::getInstantiation(SymbolRef sym) const {
     ENFORCE(wasSolved);
     return findSolution(sym);
 }
@@ -171,7 +171,7 @@ bool TypeConstraint::hasLowerBound(SymbolRef forWhat) const {
     return false;
 }
 
-shared_ptr<Type> &TypeConstraint::findUpperBound(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findUpperBound(SymbolRef forWhat) {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -182,7 +182,7 @@ shared_ptr<Type> &TypeConstraint::findUpperBound(SymbolRef forWhat) {
     return inserted.second;
 }
 
-shared_ptr<Type> &TypeConstraint::findLowerBound(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findLowerBound(SymbolRef forWhat) {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -193,7 +193,7 @@ shared_ptr<Type> &TypeConstraint::findLowerBound(SymbolRef forWhat) {
     return inserted.second;
 }
 
-shared_ptr<Type> &TypeConstraint::findSolution(SymbolRef forWhat) {
+TypePtr &TypeConstraint::findSolution(SymbolRef forWhat) {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -204,7 +204,7 @@ shared_ptr<Type> &TypeConstraint::findSolution(SymbolRef forWhat) {
     return inserted.second;
 }
 
-shared_ptr<Type> TypeConstraint::findUpperBound(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findUpperBound(SymbolRef forWhat) const {
     for (auto &entry : this->upperBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -213,7 +213,7 @@ shared_ptr<Type> TypeConstraint::findUpperBound(SymbolRef forWhat) const {
     Exception::raise("should never happen");
 }
 
-shared_ptr<Type> TypeConstraint::findLowerBound(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findLowerBound(SymbolRef forWhat) const {
     for (auto &entry : this->lowerBounds) {
         if (entry.first == forWhat) {
             return entry.second;
@@ -222,7 +222,7 @@ shared_ptr<Type> TypeConstraint::findLowerBound(SymbolRef forWhat) const {
     Exception::raise("should never happen");
 }
 
-shared_ptr<Type> TypeConstraint::findSolution(SymbolRef forWhat) const {
+TypePtr TypeConstraint::findSolution(SymbolRef forWhat) const {
     for (auto &entry : this->solution) {
         if (entry.first == forWhat) {
             return entry.second;

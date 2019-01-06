@@ -32,7 +32,7 @@ public:
         return send;
     }
 
-    static std::unique_ptr<Literal> Literal(core::Loc loc, const std::shared_ptr<core::Type> &tpe) {
+    static std::unique_ptr<Literal> Literal(core::Loc loc, const core::TypePtr &tpe) {
         auto lit = std::make_unique<ast::Literal>(loc, tpe);
         return lit;
     }
@@ -177,19 +177,19 @@ public:
     }
 
     static std::unique_ptr<Expression> Int(core::Loc loc, int64_t val) {
-        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(val));
+        return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
     static std::unique_ptr<Expression> Float(core::Loc loc, double val) {
-        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(val));
+        return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(val));
     }
 
     static std::unique_ptr<Expression> Symbol(core::Loc loc, core::NameRef name) {
-        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::Symbol(), name));
+        return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::Symbol(), name));
     }
 
     static std::unique_ptr<Expression> String(core::Loc loc, core::NameRef value) {
-        return std::make_unique<ast::Literal>(loc, std::make_shared<core::LiteralType>(core::Symbols::String(), value));
+        return std::make_unique<ast::Literal>(loc, core::make_type<core::LiteralType>(core::Symbols::String(), value));
     }
 
     static std::unique_ptr<MethodDef> Method(core::Loc loc, core::Loc declLoc, core::NameRef name,
