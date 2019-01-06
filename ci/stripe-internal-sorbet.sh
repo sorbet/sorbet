@@ -10,13 +10,7 @@ local_repository(
 )
 ' >> WORKSPACE
 
-./tools/scripts/format_build_files.sh -t
-./tools/scripts/format_cxx.sh -t
-./tools/scripts/lint_sh.sh -t
-./tools/scripts/generate_compdb_targets.sh -t
-./tools/scripts/build_compilation_db.sh
-rbenv exec bundle install
-rbenv exec bundle exec rubocop
+./tools/scripts/ci_checks.sh
 
 err=0
 

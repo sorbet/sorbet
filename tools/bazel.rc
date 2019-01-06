@@ -58,6 +58,19 @@ build:ci --cxxopt=-O2
 build:ci --define jemalloc=true
 build:ci --config=debugsymbols
 
+build:travis --config=ci
+build:travis --config=dbg
+build:travis --crosstool_top=@llvm_toolchain//:toolchain
+build:travis --spawn_strategy=standalone
+build:travis --genrule_strategy=standalone
+build:travis --noshow_progress
+test:travis --ram_utilization_factor=10
+test:travis --test_strategy=standalone
+test:travis --test_output=errors
+test:travis --noshow_progress
+test:travis --test_env="ASAN_OPTIONS=detect_leaks=0"
+test:travis --test_env="UBSAN_OPTIONS=print_stacktrace=1"
+
 # DEBUG_MODE is set by default for all builds except --config=release.
 # Use this flag to set DEBUG_MODE even for --config=release.
 build:forcedebug --copt=-DFORCE_DEBUG

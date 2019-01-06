@@ -1,0 +1,34 @@
+language: cpp
+dist: trusty
+compiler: gcc
+addons:
+  apt:
+    sources:
+    - sourceline: deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable
+        jdk1.8
+      key_url: https://storage.googleapis.com/bazel-apt/doc/apt-key.pub.gpg
+    - ubuntu-toolchain-r-test
+    packages:
+    - bazel
+before_script:
+- cp bazelrc-jenkins .bazelrc
+- sed -i 's/ --jobs 30//g' .bazelrc
+- sed -i 's/startup --output_base.*//' .bazelrc
+script:
+- bazel version
+- "./tools/scripts/ci_checks.sh"
+- travis_wait 180 bazel test --config=travis //...
+- travis_wait 180 bazel build main:sorbet --config=release
+before_deploy:
+  # Set up git user name and tag this commit
+  - git config --local user.name "Sorbet"
+  - git config --local user.email "sorbet@stripe.com"
+  - export TRAVIS_TAG=${TRAVIS_TAG:-$(date +'%Y%m%d%H%M%S')-$(git log --format=%h -1)}
+  - git tag $TRAVIS_TAG
+deploy:
+  provider: releases
+  api_key:
+    secure: sz0i/YiOnapNYFhN4HRm+slz7yVvOStdHPrUtRBs6YhdQ6ltd0rdjf3kz9Pad1UgXYC6hbODZMj/d9L49o42IVC8lcwp4Z1x2H0l348fiMutnOM1BokptRa+ifSOgop3ew51Oqj85wevP9MbSC3H6h9YyDYiqagVryeNB3UtIbKcW3GNnE9hHXu/gqjmWxVxWu6jbnid0skg0bY3he95CM+5Y7x65KZ2wQhr7d7CyRoow5oFPiCTIZ3gEDGL+uSLG+hd++AMW3qfzYHfktFJ2Z2c7bKJUFcVcsPhKJ13hxd3DWY2FnZUDduLRFv1TDggmKn4s/Zni2Afs+gFjOSnCxI3erqrW3Vr18pvb6MgjTHvyWpxODC3aJXNIpvGshKdCQ9gHoW8WTpbjGWv+lC223NEgveWv9OO1TZ7H0NDY+EJRDXIlOjSsXsDgPGn91GwlowwstikgXJvKTkF5/Ny54a4Wc+hEZOrVrSMUYcaLzEPA/U9f/nuA6Ds7Ht8zdEVJhaj8f1sf7UyB95+S+SFoQpT0t8ILHWqeSb/mI99sDyKLTa+yA7Pig7m4UN7K6BpZST/NYcURn5xuZCP4crHVRxWy5hoEbeNx6eLE37muAEWV8bX4xcS6Qsvi5hXpF3BGsqKthZcntKyCcZiDU3yy0Hxih/mPIWCNpqZq8sR+gI=
+  file: bazel-bin/main/sorbet
+  on:
+    repo: stripe/sorbet
