@@ -17,6 +17,7 @@ before_script:
 script:
 - bazel version
 - "./tools/scripts/ci_checks.sh"
+- travis_wait 180 bazel build --config=travis //...
 - travis_wait 180 bazel test --config=travis //...
 - travis_wait 180 bazel build main:sorbet --config=release
 before_deploy:
