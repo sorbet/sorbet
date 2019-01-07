@@ -1214,7 +1214,7 @@ public:
 class Tuple_concat : public IntrinsicMethod {
 public:
     TypePtr apply(Context ctx, DispatchArgs args, const Type *thisType) const override {
-        std::vector<TypePtr> elems;
+        vector<TypePtr> elems;
         auto *tuple = cast_type<TupleType>(thisType);
         ENFORCE(tuple);
         elems = tuple->elems;

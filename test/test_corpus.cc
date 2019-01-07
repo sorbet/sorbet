@@ -149,7 +149,7 @@ bool isDuplicateDiagnostic(const Diagnostic *a, const Diagnostic *b) {
 /**
  * Given a filename, a 0-indexed line number, and the contents of all test files, returns the source line.
  */
-string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
+string getSourceLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents,
                      const string &filename, int line) {
     auto it = sourceFileContents.find(filename);
     if (it == sourceFileContents.end()) {
@@ -169,16 +169,14 @@ string getSourceLine(const UnorderedMap<std::string, std::shared_ptr<core::File>
 }
 
 /** Adds a failure that reports that an error indicated in a test file is missing from Sorbet's output. */
-void reportMissingError(const std::string &filename, const shared_ptr<ErrorAssertion> &assertion,
-                        string_view sourceLine) {
+void reportMissingError(const string &filename, const shared_ptr<ErrorAssertion> &assertion, string_view sourceLine) {
     ADD_FAILURE_AT(filename.c_str(), assertion->range->start->line + 1)
         << fmt::format("Did not find expected error:\n{}",
                        prettyPrintRangeComment(sourceLine, assertion->range, assertion->toString()));
 }
 
 /** Adds a failure that Sorbet reported an error that was not covered by an ErrorAssertion. */
-void reportUnexpectedError(const std::string &filename, const unique_ptr<Diagnostic> &diagnostic,
-                           string_view sourceLine) {
+void reportUnexpectedError(const string &filename, const unique_ptr<Diagnostic> &diagnostic, string_view sourceLine) {
     ADD_FAILURE_AT(filename.c_str(), diagnostic->range->start->line + 1) << fmt::format(
         "Found unexpected error:\n{}",
         prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
@@ -864,10 +862,10 @@ vector<Expectations> getInputs(string singleTest) {
 
 int main(int argc, char *argv[]) {
     cxxopts::Options options("test_corpus", "Test corpus for Ruby Typer");
-    options.add_options()("single_test", "run over single test.", cxxopts::value<string>()->default_value(""),
+    options.add_options()("single_test", "run over single test.", cxxopts::value<std::string>()->default_value(""),
                           "testpath");
     auto res = options.parse(argc, argv);
-    sorbet::test::singleTest = res["single_test"].as<string>();
+    sorbet::test::singleTest = res["single_test"].as<std::string>();
 
     ::testing::InitGoogleTest(&argc, (char **)argv);
     return RUN_ALL_TESTS();

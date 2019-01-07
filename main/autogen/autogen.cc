@@ -313,7 +313,7 @@ ParsedFile Autogen::generate(core::Context ctx, ast::ParsedFile tree) {
     return pf;
 }
 
-std::vector<core::NameRef> ParsedFile::fullName(core::Context ctx, DefinitionRef id) {
+vector<core::NameRef> ParsedFile::fullName(core::Context ctx, DefinitionRef id) {
     auto &def = id.data(*this);
     if (!def.defining_ref.exists()) {
         return {};
@@ -324,7 +324,7 @@ std::vector<core::NameRef> ParsedFile::fullName(core::Context ctx, DefinitionRef
     return scope;
 }
 
-std::string ParsedFile::toString(core::Context ctx) {
+string ParsedFile::toString(core::Context ctx) {
     fmt::memory_buffer out;
     auto nameToString = [&](const auto &nm) -> string { return nm.data(ctx)->show(ctx); };
 
@@ -545,7 +545,7 @@ public:
     // symbols[0..3] are reserved for the Type aliases
     MsgpackWriter() : packer(payload), symbols(4) {}
 
-    std::string pack(core::Context ctx, ParsedFile &pf) {
+    string pack(core::Context ctx, ParsedFile &pf) {
         packer.pack_array(6);
 
         packer.pack_true(); // did_resolution
@@ -645,7 +645,7 @@ const vector<string> MsgpackWriter::def_attrs{
     "raw_full_name", "type", "defines_behavior", "is_empty", "parent_ref", "aliased_ref", "defining_ref",
 };
 
-std::string ParsedFile::toMsgpack(core::Context ctx) {
+string ParsedFile::toMsgpack(core::Context ctx) {
     MsgpackWriter write;
     return write.pack(ctx, *this);
 }

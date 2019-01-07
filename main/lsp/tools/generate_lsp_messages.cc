@@ -1,7 +1,9 @@
 #include "main/lsp/tools/generate_lsp_messages.h"
 #include "main/lsp/tools/make_lsp_types.h"
 
-const std::string JSONArrayType::arrayVar = "a";
+using namespace std;
+
+const string JSONArrayType::arrayVar = "a";
 
 int main(int argc, char **argv) {
     fmt::memory_buffer headerBuffer;
@@ -11,8 +13,8 @@ int main(int argc, char **argv) {
     fmt::format_to(classFileBuffer, "#include \"main/lsp/lsp_messages_gen_helpers.h\"\n");
     fmt::format_to(classFileBuffer, "namespace sorbet::realmain::lsp {{\n");
 
-    std::vector<std::shared_ptr<JSONClassType>> enumTypes;
-    std::vector<std::shared_ptr<JSONObjectType>> classTypes;
+    vector<std::shared_ptr<JSONClassType>> enumTypes;
+    vector<std::shared_ptr<JSONObjectType>> classTypes;
     makeLSPTypes(enumTypes, classTypes);
 
     // Emits enums before class forward decls before class definitions themselves.

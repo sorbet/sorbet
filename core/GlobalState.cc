@@ -1020,7 +1020,7 @@ void GlobalState::addAnnotation(Loc loc, string str, u4 blockId, AnnotationPos p
 }
 
 string GlobalState::showAnnotatedSource(FileRef file) const {
-    std::vector<Annotation> sorted;
+    vector<Annotation> sorted;
     {
         absl::MutexLock lk(&annotations_mtx);
         if (annotations.empty()) {
@@ -1161,7 +1161,7 @@ bool GlobalState::wasModified() const {
     return wasModified_;
 }
 
-void GlobalState::trace(std::string_view msg) const {
+void GlobalState::trace(string_view msg) const {
     errorQueue->tracer.trace(msg);
 }
 

@@ -53,11 +53,11 @@ SymbolRef Context::contextClass() const {
 
 Context::Context(const MutableContext &other) noexcept : state(other.state), owner(other.owner) {}
 
-void Context::trace(std::string_view msg) const {
+void Context::trace(string_view msg) const {
     state.trace(msg);
 }
 
-void MutableContext::trace(std::string_view msg) const {
+void MutableContext::trace(string_view msg) const {
     state.trace(msg);
 }
 

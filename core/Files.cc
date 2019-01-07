@@ -11,7 +11,7 @@ using namespace std;
 
 namespace sorbet::core {
 
-vector<int> findLineBreaks(std::string_view s) {
+vector<int> findLineBreaks(string_view s) {
     vector<int> res;
     int i = -1;
     res.emplace_back(-1);
@@ -114,7 +114,7 @@ bool File::isRBI() const {
     return absl::EndsWith(path(), ".rbi");
 }
 
-std::vector<int> &File::line_breaks() const {
+vector<int> &File::line_breaks() const {
     ENFORCE(this->sourceType != Type::TombStone);
     auto ptr = atomic_load(&line_breaks_);
     if (ptr) {
@@ -130,7 +130,7 @@ int File::lineCount() const {
     return line_breaks().size() - 1;
 }
 
-std::string_view File::getLine(int i) {
+string_view File::getLine(int i) {
     auto lineBreaks = line_breaks();
     ENFORCE(i < lineBreaks.size());
     ENFORCE(i > 0);

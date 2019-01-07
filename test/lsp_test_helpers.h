@@ -37,17 +37,17 @@ void checkServerCapabilities(const std::unique_ptr<ServerCapabilities> &capabili
 
 /** Asserts that the JSONBaseType is a ResponseMessage with the given id. Returns the response message on success, fails
  * the test otherwise. */
-optional<std::unique_ptr<JSONDocument<ResponseMessage>>>
-assertResponseMessage(int expectedId, unique_ptr<JSONDocument<JSONBaseType>> &response);
+std::optional<std::unique_ptr<JSONDocument<ResponseMessage>>>
+assertResponseMessage(int expectedId, std::unique_ptr<JSONDocument<JSONBaseType>> &response);
 
 /** Asserts that the JSONBaseType is a NotificationMessage with the given method. Returns the notification message on
  * success, fails the test otherwise. */
-optional<std::unique_ptr<JSONDocument<NotificationMessage>>>
-assertNotificationMessage(std::string expectedMethod, unique_ptr<JSONDocument<JSONBaseType>> &response);
+std::optional<std::unique_ptr<JSONDocument<NotificationMessage>>>
+assertNotificationMessage(std::string expectedMethod, std::unique_ptr<JSONDocument<JSONBaseType>> &response);
 
 /** Retrieves the PublishDiagnosticsParam from a publishDiagnostics message, if applicable. Non-fatal fails and returns
  * an empty optional if it cannot be found. */
-optional<std::unique_ptr<PublishDiagnosticsParams>>
+std::optional<std::unique_ptr<PublishDiagnosticsParams>>
 getPublishDiagnosticParams(const std::unique_ptr<JSONDocument<NotificationMessage>> &doc);
 
 } // namespace sorbet::test

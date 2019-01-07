@@ -727,7 +727,7 @@ bool ShapeType::hasUntyped() {
 SendAndBlockLink::SendAndBlockLink(SymbolRef block, NameRef fun)
     : block(block), fun(fun), constr(make_shared<TypeConstraint>()) {}
 
-std::shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
+shared_ptr<SendAndBlockLink> SendAndBlockLink::duplicate() {
     auto copy = *this;
     return make_shared<SendAndBlockLink>(move(copy));
 }
@@ -777,7 +777,7 @@ TypePtr Types::widen(Context ctx, const TypePtr &type) {
              [&](OrType *orType) { ret = any(ctx, widen(ctx, orType->left), widen(ctx, orType->right)); },
              [&](ProxyType *proxy) { ret = Types::widen(ctx, proxy->underlying()); },
              [&](AppliedType *appliedType) {
-                 std::vector<TypePtr> newTargs;
+                 vector<TypePtr> newTargs;
                  newTargs.reserve(appliedType->targs.size());
                  for (const auto &t : appliedType->targs) {
                      newTargs.emplace_back(widen(ctx, t));

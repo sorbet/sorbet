@@ -10,7 +10,6 @@
 
 #include "core/core.h"
 
-using namespace std;
 using namespace sorbet;
 
 // rapidjson::Document variable, which is assumed to be available in serialization methods.
@@ -441,14 +440,14 @@ public:
 
 class JSONIntEnumType final : public JSONClassType {
 private:
-    vector<std::pair<const std::string, int>> enumValues;
+    std::vector<std::pair<const std::string, int>> enumValues;
 
     std::string enumVar(const std::string &value) {
         return fmt::format("{}::{}", typeName, value);
     }
 
 public:
-    JSONIntEnumType(const std::string typeName, vector<std::pair<const std::string, int>> enumValues)
+    JSONIntEnumType(const std::string typeName, std::vector<std::pair<const std::string, int>> enumValues)
         : JSONClassType(typeName), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
@@ -465,7 +464,7 @@ public:
 
     std::string getJSONType() const {
         return fmt::format("{}", fmt::map_join(enumValues, " | ", [](auto enumValue) -> std::string {
-                               return to_string(enumValue.second);
+                               return std::to_string(enumValue.second);
                            }));
     }
 
@@ -505,12 +504,12 @@ public:
 
 class JSONStringEnumType final : public JSONClassType {
 private:
-    vector<const std::string> enumValues;
+    std::vector<const std::string> enumValues;
 
     // Capitalizes the first character of the input string (e.g., foo => Foo)
     // and replaces periods.
     static std::string toIdentifier(const std::string &val) {
-        return fmt::format("{}{}", string(1, toupper(val[0])), absl::StrReplaceAll(val.substr(1), {{".", "_"}}));
+        return fmt::format("{}{}", std::string(1, toupper(val[0])), absl::StrReplaceAll(val.substr(1), {{".", "_"}}));
     }
 
     std::string enumStrVar(const std::string &value) {
@@ -522,7 +521,7 @@ private:
     }
 
 public:
-    JSONStringEnumType(const std::string typeName, vector<const std::string> enumValues)
+    JSONStringEnumType(const std::string typeName, std::vector<const std::string> enumValues)
         : JSONClassType(typeName), enumValues(enumValues) {}
 
     BaseKind getCPPBaseKind() const {
@@ -650,10 +649,10 @@ public:
 
 class JSONObjectType final : public JSONClassType {
 private:
-    vector<std::shared_ptr<FieldDef>> fieldDefs;
+    std::vector<std::shared_ptr<FieldDef>> fieldDefs;
 
 public:
-    JSONObjectType(const std::string typeName, vector<std::shared_ptr<FieldDef>> fieldDefs)
+    JSONObjectType(const std::string typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
         : JSONClassType(typeName), fieldDefs(fieldDefs) {}
 
     BaseKind getCPPBaseKind() const {
@@ -700,7 +699,7 @@ public:
                        "static {} fromJSONValue(rapidjson::MemoryPoolAllocator<> &{}, const "
                        "rapidjson::Value &val, const std::string &fieldName);\n",
                        getCPPType(), ALLOCATOR_VAR);
-        for (shared_ptr<FieldDef> &fieldDef : fieldDefs) {
+        for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             fieldDef->emitDeclaration(out);
         }
         fmt::format_to(
@@ -770,25 +769,25 @@ public:
 
 class JSONVariantType final : public JSONType {
 private:
-    vector<std::shared_ptr<JSONType>> variants;
+    std::vector<std::shared_ptr<JSONType>> variants;
 
 public:
-    JSONVariantType(vector<std::shared_ptr<JSONType>> variants) : variants(variants) {
+    JSONVariantType(std::vector<std::shared_ptr<JSONType>> variants) : variants(variants) {
         // Check that we have at most one of every kind & do not have any complex types.
         UnorderedSet<BaseKind> cppKindSeen;
         UnorderedSet<BaseKind> jsonKindSeen;
         for (std::shared_ptr<JSONType> variant : variants) {
             if (variant->getCPPBaseKind() == BaseKind::ComplexKind ||
                 variant->getJSONBaseKind() == BaseKind::ComplexKind) {
-                throw invalid_argument("Invalid variant type: Complex are not supported.");
+                throw std::invalid_argument("Invalid variant type: Complex are not supported.");
             }
             if (cppKindSeen.find(variant->getCPPBaseKind()) != cppKindSeen.end()) {
-                throw invalid_argument(
+                throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base C++ kind.");
             }
             cppKindSeen.insert(variant->getCPPBaseKind());
             if (jsonKindSeen.find(variant->getJSONBaseKind()) != jsonKindSeen.end()) {
-                throw invalid_argument(
+                throw std::invalid_argument(
                     "Invalid variant type: Cannot discriminate between multiple types with same base JSON kind.");
             }
             jsonKindSeen.insert(variant->getJSONBaseKind());
@@ -844,7 +843,7 @@ public:
                     checkMethod = "IsArray";
                     break;
                 default:
-                    throw invalid_argument("Invalid kind for variant type.");
+                    throw std::invalid_argument("Invalid kind for variant type.");
             }
             auto condition = fmt::format("{}.{}()", from, checkMethod);
             if (first) {

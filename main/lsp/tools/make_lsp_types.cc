@@ -1,56 +1,57 @@
 #include "main/lsp/tools/make_lsp_types.h"
 
-std::shared_ptr<JSONType> makeStrEnum(const std::string name, vector<const std::string> values,
-                                      std::vector<std::shared_ptr<JSONClassType>> &enumTypes) {
-    std::shared_ptr<JSONStringEnumType> ct = std::make_shared<JSONStringEnumType>(name, values);
+using namespace std;
+
+shared_ptr<JSONType> makeStrEnum(const string name, vector<const string> values,
+                                 vector<shared_ptr<JSONClassType>> &enumTypes) {
+    shared_ptr<JSONStringEnumType> ct = make_shared<JSONStringEnumType>(name, values);
     enumTypes.push_back(ct);
     return ct;
 }
 
-std::shared_ptr<JSONType> makeIntEnum(const std::string name, vector<std::pair<const std::string, int>> values,
-                                      std::vector<std::shared_ptr<JSONClassType>> &enumTypes) {
-    auto et = std::make_shared<JSONIntEnumType>(name, values);
+shared_ptr<JSONType> makeIntEnum(const string name, vector<pair<const string, int>> values,
+                                 vector<shared_ptr<JSONClassType>> &enumTypes) {
+    auto et = make_shared<JSONIntEnumType>(name, values);
     enumTypes.push_back(et);
     return et;
 }
 
-std::shared_ptr<JSONType> makeStringConstant(const std::string name) {
-    return std::make_shared<JSONStringConstantType>(name);
+shared_ptr<JSONType> makeStringConstant(const string name) {
+    return make_shared<JSONStringConstantType>(name);
 }
 
-std::shared_ptr<FieldDef> makeField(const std::string name, std::shared_ptr<JSONType> type) {
-    return std::make_shared<FieldDef>(name, type);
+shared_ptr<FieldDef> makeField(const string name, shared_ptr<JSONType> type) {
+    return make_shared<FieldDef>(name, type);
 }
 
-std::shared_ptr<JSONObjectType> makeObject(const std::string name, vector<std::shared_ptr<FieldDef>> fields,
-                                           std::vector<std::shared_ptr<JSONObjectType>> &classTypes) {
-    std::shared_ptr<JSONObjectType> ct = std::make_shared<JSONObjectType>(name, fields);
+shared_ptr<JSONObjectType> makeObject(const string name, vector<shared_ptr<FieldDef>> fields,
+                                      vector<shared_ptr<JSONObjectType>> &classTypes) {
+    shared_ptr<JSONObjectType> ct = make_shared<JSONObjectType>(name, fields);
     classTypes.push_back(ct);
     return ct;
 }
 
-std::shared_ptr<JSONType> makeOptional(std::shared_ptr<JSONType> type) {
-    return std::make_shared<JSONOptionalType>(type);
+shared_ptr<JSONType> makeOptional(shared_ptr<JSONType> type) {
+    return make_shared<JSONOptionalType>(type);
 }
 
-std::shared_ptr<JSONType> makeVariant(std::vector<std::shared_ptr<JSONType>> variants) {
-    return std::make_shared<JSONVariantType>(variants);
+shared_ptr<JSONType> makeVariant(vector<shared_ptr<JSONType>> variants) {
+    return make_shared<JSONVariantType>(variants);
 }
 
-std::shared_ptr<JSONType> makeArray(std::shared_ptr<JSONType> type) {
-    return std::make_shared<JSONArrayType>(type);
+shared_ptr<JSONType> makeArray(shared_ptr<JSONType> type) {
+    return make_shared<JSONArrayType>(type);
 }
 
-void makeLSPTypes(std::vector<std::shared_ptr<JSONClassType>> &enumTypes,
-                  std::vector<std::shared_ptr<JSONObjectType>> &classTypes) {
+void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_ptr<JSONObjectType>> &classTypes) {
     // Singletons
-    std::shared_ptr<JSONType> JSONAny = std::make_shared<JSONAnyType>();
-    std::shared_ptr<JSONType> JSONAnyObject = std::make_shared<JSONAnyObjectType>();
-    std::shared_ptr<JSONType> JSONNull = std::make_shared<JSONNullType>();
-    std::shared_ptr<JSONType> JSONBool = std::make_shared<JSONBooleanType>();
-    std::shared_ptr<JSONType> JSONInt = std::make_shared<JSONIntType>();
-    std::shared_ptr<JSONType> JSONDouble = std::make_shared<JSONDoubleType>();
-    std::shared_ptr<JSONType> JSONString = std::make_shared<JSONStringType>();
+    shared_ptr<JSONType> JSONAny = make_shared<JSONAnyType>();
+    shared_ptr<JSONType> JSONAnyObject = make_shared<JSONAnyObjectType>();
+    shared_ptr<JSONType> JSONNull = make_shared<JSONNullType>();
+    shared_ptr<JSONType> JSONBool = make_shared<JSONBooleanType>();
+    shared_ptr<JSONType> JSONInt = make_shared<JSONIntType>();
+    shared_ptr<JSONType> JSONDouble = make_shared<JSONDoubleType>();
+    shared_ptr<JSONType> JSONString = make_shared<JSONStringType>();
 
     // Converted from https://microsoft.github.io/language-server-protocol/specification
     // Last updated on 11/14/18.

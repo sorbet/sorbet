@@ -50,7 +50,7 @@ string makeScmRevision() {
 const string Version::build_scm_revision = makeScmRevision();
 
 int makeScmCommitCount() {
-    return std::stoi(string(build_scm_commit_count));
+    return stoi(string(build_scm_commit_count));
 }
 const int Version::build_scm_commit_count = makeScmCommitCount();
 

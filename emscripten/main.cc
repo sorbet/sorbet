@@ -13,7 +13,7 @@ using namespace sorbet;
 extern "C" {
 void EMSCRIPTEN_KEEPALIVE typecheck(const char *rubySrc) {
     const char *argv[] = {"sorbet", "--color=always", "--silence-dev-message", "-e", rubySrc};
-    sorbet::realmain::realmain(std::size(argv), const_cast<char **>(argv));
+    sorbet::realmain::realmain(size(argv), const_cast<char **>(argv));
 }
 
 int main(int argc, char **argv) {}

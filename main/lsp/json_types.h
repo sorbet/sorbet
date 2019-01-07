@@ -7,8 +7,6 @@
 #include <optional>
 #include <variant>
 
-using namespace std;
-
 namespace sorbet::realmain::lsp {
 
 class DeserializationError : public std::runtime_error {
@@ -90,14 +88,14 @@ public:
      * Casts the root object to the given type, and, if casting succeeds, moves owned items into a new
      * JSONDocument with the given root type.
      */
-    template <typename NEW_TYPE> optional<unique_ptr<JSONDocument<NEW_TYPE>>> dynamicCast() {
+    template <typename NEW_TYPE> std::optional<std::unique_ptr<JSONDocument<NEW_TYPE>>> dynamicCast() {
         if (auto newRootPtr = dynamic_cast<NEW_TYPE *>(root.get())) {
-            unique_ptr<NEW_TYPE> newRoot(newRootPtr);
+            std::unique_ptr<NEW_TYPE> newRoot(newRootPtr);
             root.release();
-            return make_unique<JSONDocument<NEW_TYPE>>(memoryOwner, newRoot);
+            return std::make_unique<JSONDocument<NEW_TYPE>>(memoryOwner, newRoot);
         }
         // Cast failed.
-        return nullopt;
+        return std::nullopt;
     };
 };
 

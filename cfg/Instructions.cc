@@ -120,7 +120,7 @@ DebugEnvironment::DebugEnvironment(core::GlobalState::AnnotationPos pos) : pos(p
     isSynthetic = true;
 }
 
-std::string VariableUseSite::toString(core::Context ctx) const {
+string VariableUseSite::toString(core::Context ctx) const {
     if (this->type) {
         return fmt::format("{}: {}", this->variable.toString(ctx), this->type->show(ctx));
     }

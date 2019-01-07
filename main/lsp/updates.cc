@@ -311,7 +311,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &chang
     }
 }
 
-std::unique_ptr<core::GlobalState> LSPLoop::extractGlobalState(LSPLoop &&loop) {
+unique_ptr<core::GlobalState> LSPLoop::extractGlobalState(LSPLoop &&loop) {
     if (loop.finalGs) {
         return move(loop.finalGs);
     }

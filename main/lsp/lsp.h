@@ -189,9 +189,9 @@ class LSPLoop {
     WorkerPool &workers;
     LSPClientCapabilities clientCapabilities;
     /** Input stream; used by runLSP to receive LSP messages */
-    std::istream &istream;
+    std::istream &inputStream;
     /** Output stream; used by LSP to output messages */
-    std::ostream &ostream;
+    std::ostream &outputStream;
     /** If true, LSPLoop will typecheck test files */
     const bool typecheckTestFiles;
     /** If true, LSPLoop will skip configatron during type checking */

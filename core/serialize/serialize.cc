@@ -31,7 +31,7 @@ public:
     static void pickle(Pickler &p, FileRef file, const unique_ptr<ast::Expression> &what);
     static void pickle(Pickler &p, core::Loc loc);
 
-    template <class T> static void pickleTree(Pickler &p, FileRef file, std::unique_ptr<T> &t);
+    template <class T> static void pickleTree(Pickler &p, FileRef file, unique_ptr<T> &t);
 
     static shared_ptr<File> unpickleFile(UnPickler &p);
     static Name unpickleName(UnPickler &p, GlobalState &gs);

@@ -15,10 +15,10 @@ int tryConvertToInt(const rapidjson::Value &value, const std::string &name);
 
 double tryConvertToDouble(const rapidjson::Value &value, const std::string &name);
 
-string tryConvertToString(const rapidjson::Value &value, const std::string &name);
+std::string tryConvertToString(const rapidjson::Value &value, const std::string &name);
 
-string tryConvertToStringConstant(const rapidjson::Value &value, const std::string &constantValue,
-                                  const std::string &name);
+std::string tryConvertToStringConstant(const rapidjson::Value &value, const std::string &constantValue,
+                                       const std::string &name);
 
 std::unique_ptr<rapidjson::Value> tryConvertToAny(rapidjson::MemoryPoolAllocator<> &alloc,
                                                   const rapidjson::Value &value, const std::string &name = "");
@@ -27,7 +27,8 @@ std::unique_ptr<rapidjson::Value> tryConvertToAnyObject(rapidjson::MemoryPoolAll
                                                         const rapidjson::Value &value, const std::string &name);
 
 template <typename Representation, typename Extractor>
-inline Representation tryConvertToEnum(const rapidjson::Value &value, string name, Extractor tryConvertToEnumFunction) {
+inline Representation tryConvertToEnum(const rapidjson::Value &value, std::string name,
+                                       Extractor tryConvertToEnumFunction) {
     return tryConvertToEnumFunction(tryConvertToString(value, name));
 };
 

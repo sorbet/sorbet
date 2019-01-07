@@ -1497,8 +1497,7 @@ vector<ast::ParsedFile> Resolver::runTreePasses(core::MutableContext ctx, vector
     return trees;
 }
 
-std::vector<ast::ParsedFile> Resolver::runConstantResolution(core::MutableContext ctx,
-                                                             std::vector<ast::ParsedFile> trees) {
+vector<ast::ParsedFile> Resolver::runConstantResolution(core::MutableContext ctx, vector<ast::ParsedFile> trees) {
     trees = ResolveConstantsWalk::resolveConstants(ctx, std::move(trees));
     sanityCheck(ctx, trees);
 

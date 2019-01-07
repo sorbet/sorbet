@@ -13,7 +13,7 @@ namespace sorbet::core {
 
 namespace {
 
-std::string buildTabs(int count) {
+string buildTabs(int count) {
     string res(count * 2, ' ');
     return res;
 }

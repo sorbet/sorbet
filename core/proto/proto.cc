@@ -140,12 +140,12 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
 
     for (auto &hist : counters.counters->histograms) {
         CounterImpl::CounterType sum = 0;
-        int min = hist.second.begin()->first;
-        int max = hist.second.begin()->first;
+        int histMin = hist.second.begin()->first;
+        int histMax = hist.second.begin()->first;
         for (auto &e : hist.second) {
             sum += e.second;
-            min = std::min(min, e.first);
-            max = std::max(min, e.first);
+            histMin = min(histMin, e.first);
+            histMax = max(histMin, e.first);
         }
         CounterImpl::CounterType running = 0;
         vector<pair<int, bool>> percentiles = {{25, false}, {50, false}, {75, false}, {90, false}};
@@ -166,11 +166,11 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
         }
         com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".min"));
-        metric->set_value(min);
+        metric->set_value(histMin);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".max"));
-        metric->set_value(max);
+        metric->set_value(histMax);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".", hist.first, ".total"));
@@ -190,16 +190,16 @@ com::stripe::payserver::events::cibot::SourceMetrics Proto::toProto(const Counte
             metric->set_value(e.second[0]);
             continue;
         }
-        auto min = *absl::c_min_element(e.second);
-        auto max = *absl::c_max_element(e.second);
+        auto histMin = *absl::c_min_element(e.second);
+        auto histMax = *absl::c_max_element(e.second);
         auto avg = absl::c_accumulate(e.second, 0) / e.second.size();
         com::stripe::payserver::events::cibot::SourceMetrics_SourceMetricEntry *metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".min"));
-        metric->set_value(min);
+        metric->set_value(histMin);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".max"));
-        metric->set_value(max);
+        metric->set_value(histMax);
 
         metric = metrics.add_metrics();
         metric->set_name(absl::StrCat(prefix, ".timings.", e.first, ".avg"));

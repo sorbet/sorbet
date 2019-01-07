@@ -3,11 +3,12 @@
 #include "common/common.h"
 #include "main/lsp/json_types.h"
 
+using namespace std;
 using namespace sorbet::realmain::lsp;
 
 namespace sorbet::realmain::lsp::test {
 
-template <typename T> using ParseTestLambda = std::function<void(std::unique_ptr<JSONDocument<T>> &)>;
+template <typename T> using ParseTestLambda = function<void(std::unique_ptr<JSONDocument<T>> &)>;
 
 /**
  * Using jsonStr, creates two versions of the same document:
@@ -16,15 +17,14 @@ template <typename T> using ParseTestLambda = std::function<void(std::unique_ptr
  * It then calls lambda with each, ensuring that any assertions it makes
  * passes on the parsed and re-parsed document.
  */
-template <typename T> void parseTest(const std::string &jsonStr, ParseTestLambda<T> lambda) {
+template <typename T> void parseTest(const string &jsonStr, ParseTestLambda<T> lambda) {
     auto originalDoc = T::fromJSON(jsonStr);
     lambda(originalDoc);
     auto reparsedDoc = T::fromJSON(originalDoc->root->toJSON());
     lambda(reparsedDoc);
 };
 
-const std::string SAMPLE_RANGE =
-    "{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2, \"character\": 3}}";
+const string SAMPLE_RANGE = "{\"start\": {\"line\": 0, \"character\": 1}, \"end\": {\"line\": 2, \"character\": 3}}";
 
 // N.B.: Also tests integer fields.
 TEST(GenerateLSPMessagesTest, Object) {
@@ -51,12 +51,12 @@ TEST(GenerateLSPMessagesTest, Object) {
         JSONTypeError);
 
     // Serialization: Throws if sub-objects are not initialized.
-    auto badRange = std::make_unique<Range>();
+    auto badRange = make_unique<Range>();
     ASSERT_THROW(badRange->toJSON(), NullPtrError);
 }
 
 TEST(GenerateLSPMessagesTest, StringField) {
-    const std::string expectedText = "Hello World!";
+    const string expectedText = "Hello World!";
     parseTest<TextEdit>(fmt::format("{{\"range\": {}, \"newText\": \"{}\"}}", SAMPLE_RANGE, expectedText),
                         [&expectedText](auto &doc) -> void {
                             auto &textEdit = doc->root;
@@ -68,7 +68,7 @@ TEST(GenerateLSPMessagesTest, StringField) {
 }
 
 TEST(GenerateLSPMessagesTest, StringEnumField) {
-    const std::string markupKind = "markdown";
+    const string markupKind = "markdown";
     parseTest<MarkupContent>(fmt::format("{{\"kind\": \"{}\", \"value\": \"Markup stuff\"}}", markupKind),
                              [](auto &doc) -> void {
                                  auto &markupContent = doc->root;
@@ -81,7 +81,7 @@ TEST(GenerateLSPMessagesTest, StringEnumField) {
     ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
 
     // Create a C++ object with an invalid enum value and try to serialize.
-    auto markupContent = std::make_unique<MarkupContent>();
+    auto markupContent = make_unique<MarkupContent>();
     markupContent->kind = (MarkupKind)1000;
     ASSERT_THROW(markupContent->toJSON(), InvalidEnumValueError);
 }
@@ -89,7 +89,7 @@ TEST(GenerateLSPMessagesTest, StringEnumField) {
 TEST(GenerateLSPMessagesTest, NullField) {
     parseTest<VersionedTextDocumentIdentifier>("{\"uri\": \"file://foo\", \"version\": null}", [](auto &doc) -> void {
         auto &versionedTextDocumentIdentifier = doc->root;
-        auto nullValue = std::get_if<JSONNullObject>(&(versionedTextDocumentIdentifier->version));
+        auto nullValue = get_if<JSONNullObject>(&(versionedTextDocumentIdentifier->version));
         // Should not be null; should point to an instance of JSONNullObject.
         ASSERT_NE(nullValue, nullptr);
     });
@@ -133,18 +133,18 @@ TEST(GenerateLSPMessagesTest, DoubleField) {
 TEST(GenerateLSPMessagesTest, VariantField) {
     parseTest<CancelParams>("{\"id\": 4}", [](auto &docNumber) -> void {
         auto &cancelParamsNumber = docNumber->root;
-        auto numberId = std::get_if<int>(&cancelParamsNumber->id);
+        auto numberId = get_if<int>(&cancelParamsNumber->id);
         ASSERT_NE(numberId, nullptr);
         ASSERT_EQ(*numberId, 4);
-        ASSERT_EQ(std::get_if<std::string>(&cancelParamsNumber->id), nullptr);
+        ASSERT_EQ(get_if<std::string>(&cancelParamsNumber->id), nullptr);
     });
 
     parseTest<CancelParams>("{\"id\": \"iamanid\"}", [](auto &docString) -> void {
         auto &cancelParamsString = docString->root;
-        auto stringId = std::get_if<std::string>(&cancelParamsString->id);
+        auto stringId = get_if<std::string>(&cancelParamsString->id);
         ASSERT_NE(stringId, nullptr);
         ASSERT_EQ(*stringId, "iamanid");
-        ASSERT_EQ(std::get_if<int>(&cancelParamsString->id), nullptr);
+        ASSERT_EQ(get_if<int>(&cancelParamsString->id), nullptr);
     });
 
     // Throws when missing.
@@ -158,7 +158,7 @@ TEST(GenerateLSPMessagesTest, VariantField) {
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
-    auto cancelParams = std::make_unique<CancelParams>();
+    auto cancelParams = make_unique<CancelParams>();
     try {
         cancelParams->id.emplace<int>(ExceptionThrower());
     } catch (runtime_error e) {
@@ -183,7 +183,7 @@ TEST(GenerateLSPMessagesTest, AnyArray) {
     ASSERT_THROW(Command::fromJSON("{\"title\": \"\", \"command\": \"\", \"arguments\": {}}"), JSONTypeError);
 }
 
-std::string makeNotificationMessage(const std::string &params) {
+string makeNotificationMessage(const std::string &params) {
     return fmt::format("{{\"jsonrpc\": \"2.0\", \"method\": \"blah\", \"params\": {}}}", params);
 }
 
@@ -193,7 +193,7 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
         auto &paramsOptional = msg->params;
         ASSERT_TRUE(paramsOptional.has_value());
         auto &paramsVariant = *paramsOptional;
-        auto paramsPtr = std::get_if<std::unique_ptr<rapidjson::Value>>(&paramsVariant);
+        auto paramsPtr = get_if<std::unique_ptr<rapidjson::Value>>(&paramsVariant);
         ASSERT_NE(paramsPtr, nullptr);
         auto &params = *paramsPtr;
         ASSERT_TRUE(params->IsObject());
@@ -204,18 +204,18 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
 
     // Serialization: Must be an object.
     // Null pointer case
-    auto notificationMessage = std::make_unique<NotificationMessage>();
+    auto notificationMessage = make_unique<NotificationMessage>();
     notificationMessage->jsonrpc = "2.0";
     notificationMessage->params = nullptr;
     ASSERT_THROW(notificationMessage->toJSON(), NullPtrError);
 
     // Non-object case
-    notificationMessage->params = std::make_unique<rapidjson::Value>(rapidjson::kNullType);
+    notificationMessage->params = make_unique<rapidjson::Value>(rapidjson::kNullType);
     ASSERT_THROW(notificationMessage->toJSON(), InvalidTypeError);
 
     // New object case -- doesn't throw and stresses supported APIs for making values.
     auto doc = NotificationMessage::fromJSON(makeNotificationMessage("{}"));
-    auto range = std::make_unique<Position>();
+    auto range = make_unique<Position>();
     doc->root->params = range->toJSONValue(doc);
     ASSERT_NO_THROW(doc->root->toJSON());
 }
@@ -232,7 +232,7 @@ TEST(GenerateLSPMessagesTest, StringConstant) {
     ASSERT_THROW(CreateFile::fromJSON("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
 
     // Throws during serialization if not set to proper constant value.
-    auto createFile = std::make_unique<CreateFile>();
+    auto createFile = make_unique<CreateFile>();
     createFile->kind = "delete";
     ASSERT_THROW(createFile->toJSON(), InvalidConstantValueError);
 }
@@ -277,11 +277,11 @@ TEST(GenerateLSPMessagesTest, IntEnums) {
     ASSERT_THROW(SymbolKindOptions::fromJSON("{\"valueSet\": [1,2.1]}"), JSONTypeError);
 
     // Throws during serialization if enum is out of valid range.
-    auto symbolKind = std::make_unique<SymbolKindOptions>();
-    auto symbols = std::vector<SymbolKind>();
+    auto symbolKind = make_unique<SymbolKindOptions>();
+    auto symbols = vector<SymbolKind>();
     symbols.push_back(SymbolKind::Namespace);
     symbols.push_back((SymbolKind)-1);
-    symbolKind->valueSet = std::make_optional<std::vector<SymbolKind>>(std::move(symbols));
+    symbolKind->valueSet = make_optional<std::vector<SymbolKind>>(std::move(symbols));
     ASSERT_THROW(symbolKind->toJSON(), InvalidEnumValueError);
 }
 

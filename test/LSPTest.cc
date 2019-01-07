@@ -37,7 +37,7 @@ void LSPTest::startLSP() {
     // N.B.: cin will not actually be used the way we are driving LSP.
     // Configure LSPLoop to run on test files (as all test input files are "test" files), disable configatron, and
     // disable the fast path.
-    lspLoop = make_unique<LSPLoop>(move(gs), opts, logger, *workers.get(), std::cin, lspOstream, true, true, true);
+    lspLoop = make_unique<LSPLoop>(std::move(gs), opts, logger, *workers.get(), cin, lspOstream, true, true, true);
 }
 
 void LSPTest::parseTestFile() {
@@ -96,7 +96,7 @@ vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(st
     string responses = lspOstream.str();
     // Reset error flags and change contents of stream to the empty string.
     lspOstream.clear();
-    lspOstream.str(std::string());
+    lspOstream.str(string());
 
     if (responses.length() == 0) {
         // No response.

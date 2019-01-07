@@ -40,10 +40,10 @@ private:
 
     /** Parses the given LSP message string into a NotificationMessage or ResponseMessage. If parsing fails, adds an
      * error to the currently running test. */
-    std::optional<unique_ptr<JSONDocument<JSONBaseType>>> parseLSPResponse(std::string raw);
+    std::optional<std::unique_ptr<JSONDocument<JSONBaseType>>> parseLSPResponse(std::string raw);
 
     /** Sends the given string directly to Sorbet's LSP component, and returns any response messages. */
-    std::vector<unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesForRaw(std::string json);
+    std::vector<std::unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesForRaw(std::string json);
 
     /** Parses the test file and its assertions. */
     void parseTestFile();
@@ -59,7 +59,7 @@ protected:
 
 public:
     /** The path to the test Ruby files on disk */
-    UnorderedSet<string> filenames;
+    UnorderedSet<std::string> filenames;
 
     /** All test assertions ordered by (filename, range, message). */
     std::vector<std::shared_ptr<RangeAssertion>> assertions;
@@ -67,7 +67,8 @@ public:
     /**
      * Send a message to LSP, and returns any responses.
      */
-    vector<unique_ptr<JSONDocument<JSONBaseType>>> getLSPResponsesFor(const unique_ptr<JSONBaseType> &message);
+    std::vector<std::unique_ptr<JSONDocument<JSONBaseType>>>
+    getLSPResponsesFor(const std::unique_ptr<JSONBaseType> &message);
 };
 } // namespace sorbet::test
 #endif // TEST_LSPTEST_H

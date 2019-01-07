@@ -64,7 +64,7 @@ core::LocalVariable global2Local(CFGContext cctx, core::SymbolRef what, CFG &inW
     return alias;
 }
 
-void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, std::unique_ptr<Instruction> inst) {
+void synthesizeExpr(BasicBlock *bb, core::LocalVariable var, core::Loc loc, unique_ptr<Instruction> inst) {
     auto &inserted = bb->exprs.emplace_back(var, loc, move(inst));
     inserted.value->isSynthetic = true;
 }

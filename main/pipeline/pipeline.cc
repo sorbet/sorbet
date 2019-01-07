@@ -79,7 +79,7 @@ string fileKey(core::GlobalState &gs, core::FileRef file) {
     string key(path.begin(), path.end());
     key += "//";
     auto hashBytes = sorbet::crypto_hashing::hash64(file.data(gs).source());
-    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), std::size(hashBytes)});
+    key += absl::BytesToHexString(string_view{(char *)hashBytes.data(), size(hashBytes)});
     return key;
 }
 

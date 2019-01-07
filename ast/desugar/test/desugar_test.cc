@@ -14,9 +14,11 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 namespace spd = spdlog;
 auto logger = spd::stderr_color_mt("desugar_test");
-auto errorQueue = std::make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
+auto errorQueue = make_shared<sorbet::core::ErrorQueue>(*logger, *logger);
 
 TEST(DesugarTest, SimpleDesugar) { // NOLINT
     sorbet::core::GlobalState gs(errorQueue);

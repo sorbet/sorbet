@@ -6,19 +6,17 @@
 #include "core/core.h"
 #include "dsl/util.h"
 
-using namespace std;
-
 namespace sorbet::dsl {
 
-unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs);
+std::unique_ptr<ast::Expression> mkGet(core::Loc loc, core::NameRef name, std::unique_ptr<ast::Expression> rhs);
 
-unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, unique_ptr<ast::Expression> rhs);
+std::unique_ptr<ast::Expression> mkSet(core::Loc loc, core::NameRef name, std::unique_ptr<ast::Expression> rhs);
 
-unique_ptr<ast::Expression> mkNilable(core::Loc loc, unique_ptr<ast::Expression> type);
+std::unique_ptr<ast::Expression> mkNilable(core::Loc loc, std::unique_ptr<ast::Expression> type);
 
-unique_ptr<ast::Expression> mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className);
+std::unique_ptr<ast::Expression> mkMutator(core::MutableContext ctx, core::Loc loc, core::NameRef className);
 
-unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node);
+std::unique_ptr<ast::Expression> thunkBody(core::MutableContext ctx, ast::Expression *node);
 
 bool isProbablySymbol(core::MutableContext ctx, ast::Expression *type, core::SymbolRef sym);
 

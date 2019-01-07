@@ -781,7 +781,7 @@ void Symbol::addLoc(const core::GlobalState &gs, core::Loc loc) {
     }
 }
 
-std::vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
+vector<std::pair<NameRef, SymbolRef>> Symbol::membersStableOrderSlow(const GlobalState &gs) const {
     vector<pair<NameRef, SymbolRef>> result;
     result.reserve(members.size());
     for (const auto &e : members) {

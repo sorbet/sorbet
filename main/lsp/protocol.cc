@@ -10,8 +10,8 @@ namespace sorbet::realmain::lsp {
 bool safeGetline(istream &is, string &t) {
     t.clear();
 
-    // The characters in the stream are read one-by-one using a std::streambuf.
-    // That is faster than reading them one-by-one using the std::istream.
+    // The characters in the stream are read one-by-one using a streambuf.
+    // That is faster than reading them one-by-one using the istream.
     // Code that uses streambuf this way must be guarded by a sentry object.
     // The sentry object performs various tasks,
     // such as thread synchronization and updating the stream state.
@@ -39,11 +39,11 @@ bool safeGetline(istream &is, string &t) {
     }
 }
 
-bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger, std::istream &istream) {
+bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger, istream &inputStream) {
     int length = -1;
     {
         string line;
-        while (safeGetline(istream, line)) {
+        while (safeGetline(inputStream, line)) {
             logger->trace("raw read: {}", line);
             if (line == "") {
                 break;
@@ -58,7 +58,7 @@ bool getNewRequest(rapidjson::Document &d, const shared_ptr<spd::logger> &logger
     }
 
     string json(length, '\0');
-    istream.read(&json[0], length);
+    inputStream.read(&json[0], length);
     logger->debug("Read: {}", json);
     if (d.Parse(json.c_str()).HasParseError()) {
         logger->error("Last LSP request: `{}` is not a valid json object", json);
@@ -91,15 +91,15 @@ void LSPLoop::runLSP() {
     rapidjson::MemoryPoolAllocator<>
         inner_alloc; // we need objects created by inner thread to outlive the thread itself.
 
-    auto readerThread =
-        runInAThread("lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc, &istream = this->istream] {
+    auto readerThread = runInAThread(
+        "lspReader", [&guardedState, &mtx, logger = this->logger, &inner_alloc, &inputStream = this->inputStream] {
             // Thread that executes this lambda is called reader thread.
             // This thread _intentionally_ does not capture `this`.
             NotifyOnDestruction notify(mtx, guardedState.terminate);
             while (true) {
                 rapidjson::Document d(&inner_alloc);
 
-                if (!getNewRequest(d, logger, istream)) {
+                if (!getNewRequest(d, logger, inputStream)) {
                     break;
                 }
                 absl::MutexLock lck(&mtx); // guards pendingRequests & paused
@@ -196,8 +196,8 @@ void LSPLoop::mergeDidChanges(deque<rapidjson::Document> &pendingRequests) {
     }
 }
 
-std::deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(deque<rapidjson::Document> &pendingRequests,
-                                                                            rapidjson::Document &cancellationRequest) {
+deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(deque<rapidjson::Document> &pendingRequests,
+                                                                       rapidjson::Document &cancellationRequest) {
     for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
         auto &current = *it;
         auto fnd = current.FindMember("id");
@@ -219,7 +219,7 @@ std::deque<rapidjson::Document>::iterator LSPLoop::findRequestToBeCancelled(dequ
     return pendingRequests.end();
 }
 
-std::deque<rapidjson::Document>::iterator
+deque<rapidjson::Document>::iterator
 LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pendingRequests) {
     for (auto it = pendingRequests.begin(); it != pendingRequests.end(); ++it) {
         auto &current = *it;
@@ -312,7 +312,7 @@ void LSPLoop::sendRaw(rapidjson::Document &raw) {
     raw.Accept(writer);
     string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
     logger->debug("Write: {}\n", strbuf.GetString());
-    ostream << outResult << flush;
+    outputStream << outResult << flush;
 }
 
 void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {

@@ -11,7 +11,7 @@ string getProgramName() {
     return "sorbet";
 }
 
-bool setCurrentThreadName(std::string_view name) {
+bool setCurrentThreadName(string_view name) {
     return false;
 }
 

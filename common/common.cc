@@ -25,14 +25,14 @@ shared_ptr<spdlog::logger> makeFatalLogger() {
 shared_ptr<spdlog::logger> sorbet::fatalLogger = makeFatalLogger();
 
 string sorbet::FileOps::read(string_view filename) {
-    std::FILE *fp = std::fopen((string(filename)).c_str(), "rb");
+    FILE *fp = std::fopen((string(filename)).c_str(), "rb");
     if (fp) {
-        std::string contents;
-        std::fseek(fp, 0, SEEK_END);
-        contents.resize(std::ftell(fp));
-        std::rewind(fp);
-        auto readBytes = std::fread(&contents[0], 1, contents.size(), fp);
-        std::fclose(fp);
+        string contents;
+        fseek(fp, 0, SEEK_END);
+        contents.resize(ftell(fp));
+        rewind(fp);
+        auto readBytes = fread(&contents[0], 1, contents.size(), fp);
+        fclose(fp);
         if (readBytes != contents.size()) {
             // Error reading file?
             throw sorbet::FileNotFoundException();
@@ -43,20 +43,20 @@ string sorbet::FileOps::read(string_view filename) {
 }
 
 void sorbet::FileOps::write(string_view filename, const vector<sorbet::u1> &data) {
-    std::FILE *fp = std::fopen(string(filename).c_str(), "wb");
+    FILE *fp = std::fopen(string(filename).c_str(), "wb");
     if (fp) {
-        std::fwrite(data.data(), sizeof(sorbet::u1), data.size(), fp);
-        std::fclose(fp);
+        fwrite(data.data(), sizeof(sorbet::u1), data.size(), fp);
+        fclose(fp);
         return;
     }
     throw sorbet::FileNotFoundException();
 }
 
 void sorbet::FileOps::write(string_view filename, string_view text) {
-    std::FILE *fp = std::fopen(string(filename).c_str(), "w");
+    FILE *fp = std::fopen(string(filename).c_str(), "w");
     if (fp) {
-        std::fwrite(text.data(), sizeof(char), text.size(), fp);
-        std::fclose(fp);
+        fwrite(text.data(), sizeof(char), text.size(), fp);
+        fclose(fp);
         return;
     }
     throw sorbet::FileNotFoundException();

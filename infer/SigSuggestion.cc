@@ -23,7 +23,7 @@ struct LocAndColumn {
 LocAndColumn findStartOfLine(core::Context ctx, core::Loc loc) {
     core::Loc::Detail startDetail = loc.position(ctx).first;
     u4 lineStart = core::Loc::pos2Offset(loc.file().data(ctx), {startDetail.line, 1});
-    std::string_view lineView = loc.file().data(ctx).source().substr(lineStart);
+    string_view lineView = loc.file().data(ctx).source().substr(lineStart);
 
     u4 padding = lineView.find_first_not_of(" \t");
     u4 startOffset = lineStart + padding;

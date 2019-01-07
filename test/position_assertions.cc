@@ -100,8 +100,8 @@ string prettyPrintRangeComment(string_view sourceLine, const unique_ptr<Range> &
                        string(numLeadingSpaces + sourceLineNumber.length(), ' '), string(numCarets, '^'), comment);
 }
 
-string_view getLine(const UnorderedMap<std::string, std::shared_ptr<core::File>> &sourceFileContents,
-                    string_view uriPrefix, const unique_ptr<Location> &loc) {
+string_view getLine(const UnorderedMap<string, std::shared_ptr<core::File>> &sourceFileContents, string_view uriPrefix,
+                    const unique_ptr<Location> &loc) {
     auto filename = uriToFilePath(uriPrefix, loc->uri);
     auto foundFile = sourceFileContents.find(filename);
     EXPECT_NE(sourceFileContents.end(), foundFile) << fmt::format("Unable to find file `{}`", filename);
@@ -109,24 +109,24 @@ string_view getLine(const UnorderedMap<std::string, std::shared_ptr<core::File>>
     return file->getLine(loc->range->start->line + 1);
 }
 
-std::string filePathToUri(string_view prefixUrl, string_view filePath) {
+string filePathToUri(string_view prefixUrl, string_view filePath) {
     return fmt::format("{}/{}", prefixUrl, filePath);
 }
 
-std::string uriToFilePath(string_view prefixUrl, string_view uri) {
+string uriToFilePath(string_view prefixUrl, string_view uri) {
     if (uri.substr(0, prefixUrl.length()) != prefixUrl) {
         ADD_FAILURE() << fmt::format(
             "Unrecognized URI: `{}` is not contained in root URI `{}`, and thus does not correspond to a test file.",
             uri, prefixUrl);
         return "";
     }
-    return std::string(uri.substr(prefixUrl.length() + 1));
+    return string(uri.substr(prefixUrl.length() + 1));
 }
 
 RangeAssertion::RangeAssertion(string_view filename, unique_ptr<Range> &range, int assertionLine)
     : filename(filename), range(move(range)), assertionLine(assertionLine) {}
 
-int RangeAssertion::compare(string_view otherFilename, const std::unique_ptr<Range> &otherRange) {
+int RangeAssertion::compare(string_view otherFilename, const unique_ptr<Range> &otherRange) {
     int filenamecmp = filename.compare(otherFilename);
     if (filenamecmp != 0) {
         return filenamecmp;
@@ -160,7 +160,7 @@ string ErrorAssertion::toString() {
 
 void ErrorAssertion::check(const unique_ptr<Diagnostic> &diagnostic, const string_view sourceLine) {
     // The error message must contain `message`.
-    if (diagnostic->message.find(message) == std::string::npos) {
+    if (diagnostic->message.find(message) == string::npos) {
         ADD_FAILURE_AT(filename.c_str(), range->start->line + 1) << fmt::format(
             "Expected error of form:\n{}\nFound error:\n{}", prettyPrintRangeComment(sourceLine, range, toString()),
             prettyPrintRangeComment(sourceLine, diagnostic->range, fmt::format("error: {}", diagnostic->message)));
@@ -277,7 +277,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
                                    "can add the label to `ignoredAssertionLabels`.",
                                    assertionType,
                                    fmt::map_join(assertionConstructors.begin(), assertionConstructors.end(), ", ",
-                                                 [](const auto &entry) -> std::string { return entry.first; }));
+                                                 [](const auto &entry) -> string { return entry.first; }));
             }
         } else {
             lastSourceLineNum = lineNum;
@@ -333,7 +333,7 @@ vector<shared_ptr<RangeAssertion>> parseAssertionsForFile(const shared_ptr<core:
 }
 
 vector<shared_ptr<RangeAssertion>>
-RangeAssertion::parseAssertions(const UnorderedMap<string, std::shared_ptr<core::File>> filesAndContents) {
+RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File>> filesAndContents) {
     vector<shared_ptr<RangeAssertion>> assertions;
     for (auto &fileAndContents : filesAndContents) {
         auto fileAssertions = parseAssertionsForFile(fileAndContents.second);

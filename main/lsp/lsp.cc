@@ -8,10 +8,11 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
-                 WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles,
+                 WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool typecheckTestFiles,
                  bool skipConfigatron, bool disableFastPath)
-    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), istream(input), ostream(output),
-      typecheckTestFiles(typecheckTestFiles), skipConfigatron(skipConfigatron), disableFastPath(disableFastPath) {
+    : initialGS(std::move(gs)), opts(opts), logger(logger), workers(workers), inputStream(inputStream),
+      outputStream(outputStream), typecheckTestFiles(typecheckTestFiles), skipConfigatron(skipConfigatron),
+      disableFastPath(disableFastPath) {
     errorQueue = dynamic_pointer_cast<core::ErrorQueue>(initialGS->errorQueue);
     ENFORCE(errorQueue, "LSPLoop got an unexpected error queue");
     ENFORCE(errorQueue->ignoreFlushes,
@@ -20,10 +21,10 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
 
 namespace {
 class LSPQuerrySetup {
-    std::unique_ptr<core::GlobalState> &gs;
+    unique_ptr<core::GlobalState> &gs;
 
 public:
-    LSPQuerrySetup(std::unique_ptr<core::GlobalState> &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
+    LSPQuerrySetup(unique_ptr<core::GlobalState> &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
         // Might return 'true' if GS was copied with flags set before they were unset.
         // ENFORCE(!gs.lspInfoQueryLoc.exists());
         // ENFORCE(!gs.lspQuerySymbol.exists());
@@ -114,8 +115,8 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
 
 void LSPLoop::pushDiagnostics(TypecheckRun run) {
     const auto &filesTypechecked = run.filesTypechecked;
-    std::vector<core::FileRef> errorFilesInNewRun;
-    UnorderedMap<core::FileRef, std::vector<std::unique_ptr<core::Error>>> errorsAccumulated;
+    vector<core::FileRef> errorFilesInNewRun;
+    UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
 
     for (auto &e : run.errors) {
         if (e->isSilenced || silenceError(disableFastPath, e->what)) {
@@ -129,7 +130,7 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
         errorFilesInNewRun.push_back(accumulated.first);
     }
 
-    std::vector<core::FileRef> filesToUpdateErrorListFor = errorFilesInNewRun;
+    vector<core::FileRef> filesToUpdateErrorListFor = errorFilesInNewRun;
 
     UnorderedSet<core::FileRef> filesTypecheckedAsSet;
     filesTypecheckedAsSet.insert(filesTypechecked.begin(), filesTypechecked.end());
@@ -146,12 +147,11 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
     }
 
     fast_sort(filesToUpdateErrorListFor);
-    filesToUpdateErrorListFor.erase(std::unique(filesToUpdateErrorListFor.begin(), filesToUpdateErrorListFor.end()),
+    filesToUpdateErrorListFor.erase(unique(filesToUpdateErrorListFor.begin(), filesToUpdateErrorListFor.end()),
                                     filesToUpdateErrorListFor.end());
 
     fast_sort(errorFilesInNewRun);
-    errorFilesInNewRun.erase(std::unique(errorFilesInNewRun.begin(), errorFilesInNewRun.end()),
-                             errorFilesInNewRun.end());
+    errorFilesInNewRun.erase(unique(errorFilesInNewRun.begin(), errorFilesInNewRun.end()), errorFilesInNewRun.end());
 
     this->filesThatHaveErrors = errorFilesInNewRun;
 
