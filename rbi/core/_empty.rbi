@@ -637,9 +637,6 @@ end
 class Etc::Passwd < Struct
 end
 
-class FalseClass < Object
-end
-
 class FiberError < StandardError
 end
 
@@ -957,9 +954,6 @@ class ThreadGroup < Object
 end
 
 class TracePoint < Object
-end
-
-class TrueClass < Object
 end
 
 class TypeError < StandardError

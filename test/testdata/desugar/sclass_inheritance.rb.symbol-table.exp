@@ -14,6 +14,6 @@ class ::<root> < ::Object () @ (test/testdata/desugar/sclass_inheritance.rb:2, h
   class ::<Class:<Class:C>> < ::<Class:<Class:A>> () @ test/testdata/desugar/sclass_inheritance.rb:23
   class ::MM < ::RubyTyper::ImplicitModuleSuperclass () @ test/testdata/desugar/sclass_inheritance.rb:2
   class ::<Class:MM> < ::Module () @ test/testdata/desugar/sclass_inheritance.rb:2
-  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L848
+  class ::Object < ::BasicObject (<constant:Kernel>) @ https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/_empty.rbi#L845
     method ::Object#main () @ test/testdata/desugar/sclass_inheritance.rb:30
 
