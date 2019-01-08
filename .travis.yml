@@ -15,12 +15,13 @@ before_script:
 - cp bazelrc-jenkins .bazelrc
 - sed -i 's/ --jobs 30//g' .bazelrc
 - sed -i 's/startup --output_base.*//' .bazelrc
+- sed -i '1s/^/common --curses no\n/' .bazelrc
 script:
 - bazel version
 - "./tools/scripts/ci_checks.sh"
-- travis_wait 180 bazel build --config=travis //...
-- travis_wait 180 bazel test --config=travis //...
-- travis_wait 180 bazel build main:sorbet --config=release
+- bazel build --config=travis //...
+- bazel test --config=travis //...
+- bazel build main:sorbet --config=release
 before_deploy:
   # Set up git user name and tag this commit
   - git config --local user.name "Sorbet"
