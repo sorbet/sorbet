@@ -1,3 +1,0 @@
-#!/bin/bash
-set -e
-exec nvim -d <(cargo run --example astprint $1) <($(dirname $0)/rbparse $1)

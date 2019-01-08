@@ -1,8 +1,0 @@
-#!/bin/sh
-# Exit nonzero if the code is bad.
-
-set -eu
-cd "$(dirname "$0")/.."
-
-cargo build
-cargo test

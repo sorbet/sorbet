@@ -1,4 +1,0 @@
-#!/bin/bash -e
-cd "$(dirname "$0")/.."
-make clean all
-cargo package --allow-dirty
