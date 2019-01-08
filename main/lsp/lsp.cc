@@ -91,7 +91,7 @@ bool silenceError(bool disableFastPath, core::ErrorClass what) {
 
 bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
                                 const unique_ptr<core::GlobalState> &currentGs) {
-    if (currentGs && currentGs->lspTypecheckCount > 0) {
+    if (currentGs) {
         return true;
     }
     if (forMethod == LSPMethod::Initialize() || forMethod == LSPMethod::Initialized() ||

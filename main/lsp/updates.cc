@@ -224,7 +224,6 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
         }
     }
 
-    initialGS->lspTypecheckCount++;
     auto finalGs = initialGS->deepCopy(true);
     auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger, skipConfigatron);
     tryApplyDefLocSaver(*finalGs, resolved);
@@ -235,6 +234,7 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     }
     pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
+    finalGs->lspTypecheckCount++;
     return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs)};
 }
 
@@ -311,6 +311,7 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
         tryApplyDefLocSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
+        finalGs->lspTypecheckCount++;
         return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs)};
     } else {
         return runSlowPath(changedFiles);

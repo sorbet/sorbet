@@ -176,8 +176,13 @@ class LSPLoop {
 
     /** Concrete error queue shared by all global states */
     std::shared_ptr<core::ErrorQueue> errorQueue;
-    /** GlobalState that is used for indexing. It effectively accumulates a huge nametable.
-     * It is never discarded. */
+    /**
+     * `initialGS` is used for indexing. It accumulates a huge nametable of all global things,
+     * and is updated as global things are added/removed/updated. It is never discarded.
+     *
+     * Typechecking is never run on `initialGS` directly. Instead, LSPLoop clones `initialGS` and runs type checking on
+     * the clone. This clone is what LSPLoop returns within a `TypecheckRun`.
+     */
     std::unique_ptr<core::GlobalState> initialGS;
     const options::Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
@@ -227,6 +232,7 @@ class LSPLoop {
         std::vector<std::unique_ptr<core::Error>> errors;
         std::vector<core::FileRef> filesTypechecked;
         std::vector<std::unique_ptr<core::QueryResponse>> responses;
+        // The global state, post-typechecking.
         std::unique_ptr<core::GlobalState> gs;
     };
     /** Conservatively rerun entire pipeline without caching any trees */

@@ -637,6 +637,9 @@ TEST_P(LSPTest, PositionTests) {
         EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
     }
 
+    // LSPLoop is now initialized.
+    initialized = true;
+
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
         for (auto &filename : filenames) {

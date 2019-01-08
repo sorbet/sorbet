@@ -91,6 +91,8 @@ vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(st
     // TODO(jvilk): Share parsing code with main LSP codebase.
     // processRequest does not require Content-Length or other headers.
     gs = lspLoop->processRequest(move(gs), json);
+    // Should always run typechecking at least once for each request post-initialization.
+    ENFORCE(!initialized || gs->lspTypecheckCount > 0, "Fatal error: LSPLoop did not typecheck GlobalState.");
 
     vector<unique_ptr<JSONDocument<JSONBaseType>>> rv;
     string responses = lspOstream.str();

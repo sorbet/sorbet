@@ -67,6 +67,9 @@ public:
     /** All test assertions ordered by (filename, range, message). */
     std::vector<std::shared_ptr<RangeAssertion>> assertions;
 
+    /** If true, then LSPLoop is initialized and is ready to receive requests. */
+    bool initialized = false;
+
     /**
      * Send a message to LSP, and returns any responses.
      */
