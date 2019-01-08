@@ -6,24 +6,24 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-void LSPLoop::processRequest(const string &json) {
+unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, const string &json) {
     rapidjson::Document d(&alloc);
     if (d.Parse(json.c_str()).HasParseError()) {
         Exception::raise("Last LSP request: `{}` is not a valid json object", json);
     }
-    LSPLoop::processRequest(d);
+    return LSPLoop::processRequest(move(gs), d);
 }
 
-void LSPLoop::processRequest(rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, rapidjson::Document &d) {
     if (handleReplies(d)) {
-        return;
+        return gs;
     }
     const LSPMethod method = LSPMethod::getByName({d["method"].GetString(), d["method"].GetStringLength()});
 
     ENFORCE(method.kind == LSPMethod::Kind::ClientInitiated || method.kind == LSPMethod::Kind::Both);
 
-    if (!ensureInitialized(method, d)) {
-        return;
+    if (!ensureInitialized(method, d, gs)) {
+        return gs;
     }
     if (method.isNotification) {
         logger->debug("Processing notification {} ", method.name);
@@ -79,7 +79,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
 
                 files.emplace_back(move(file));
 
-                pushDiagnostics(tryFastPath(files));
+                return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
@@ -99,7 +99,7 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 files.emplace_back(
                     make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
 
-                pushDiagnostics(tryFastPath(files));
+                return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::Initialized()) {
@@ -109,13 +109,14 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
                 Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
-                pushDiagnostics(runSlowPath(move(changedFiles)));
-                ENFORCE(finalGs);
-                this->globalStateHashes = computeStateHashes(finalGs->getFiles());
+                auto newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
+                ENFORCE(newGs);
+                this->globalStateHashes = computeStateHashes(newGs->getFiles());
+                return newGs;
             }
         }
         if (method == LSPMethod::Exit()) {
-            return;
+            return gs;
         }
     } else {
         logger->debug("Processing request {}", method.name);
@@ -174,19 +175,19 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             // return default value: null
             sendResult(d, result);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
-            handleTextDocumentDocumentSymbol(result, d);
+            return handleTextDocumentDocumentSymbol(move(gs), result, d);
         } else if (method == LSPMethod::WorkspaceSymbols()) {
-            handleWorkspaceSymbols(result, d);
+            return handleWorkspaceSymbols(move(gs), result, d);
         } else if (method == LSPMethod::TextDocumentDefinition()) {
-            handleTextDocumentDefinition(result, d);
+            return handleTextDocumentDefinition(move(gs), result, d);
         } else if (method == LSPMethod::TextDocumentHover()) {
-            handleTextDocumentHover(result, d);
+            return handleTextDocumentHover(move(gs), result, d);
         } else if (method == LSPMethod::TextDocumentCompletion()) {
-            handleTextDocumentCompletion(result, d);
+            return handleTextDocumentCompletion(move(gs), result, d);
         } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
-            handleTextSignatureHelp(result, d);
+            return handleTextSignatureHelp(move(gs), result, d);
         } else if (method == LSPMethod::TextDocumentRefernces()) {
-            handleTextDocumentReferences(result, d);
+            return handleTextDocumentReferences(move(gs), result, d);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
             errorCode = (int)LSPErrorCodes::MethodNotFound;
@@ -194,5 +195,6 @@ void LSPLoop::processRequest(rapidjson::Document &d) {
             sendError(d, errorCode, errorString);
         }
     }
+    return gs;
 }
 } // namespace sorbet::realmain::lsp

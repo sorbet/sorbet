@@ -17,34 +17,34 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
     return std::move(first);
 };
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethodsIn(core::TypePtr receiver,
-                                                                                   string_view name) {
+UnorderedMap<core::NameRef, vector<core::SymbolRef>>
+LSPLoop::findSimilarMethodsIn(const core::GlobalState &gs, core::TypePtr receiver, string_view name) {
     UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
     typecase(
         receiver.get(),
         [&](core::ClassType *c) {
-            const auto &owner = c->symbol.data(*finalGs);
-            for (auto member : owner->membersStableOrderSlow(*finalGs)) {
+            const auto &owner = c->symbol.data(gs);
+            for (auto member : owner->membersStableOrderSlow(gs)) {
                 auto sym = member.second;
-                if (sym.data(*finalGs)->isMethod() && hasSimilarName(*finalGs, sym.data(*finalGs)->name, name)) {
-                    result[sym.data(*finalGs)->name].emplace_back(sym);
+                if (sym.data(gs)->isMethod() && hasSimilarName(gs, sym.data(gs)->name, name)) {
+                    result[sym.data(gs)->name].emplace_back(sym);
                 }
             }
             for (auto mixin : owner->mixins()) {
-                result =
-                    mergeMaps(std::move(result), findSimilarMethodsIn(core::make_type<core::ClassType>(mixin), name));
+                result = mergeMaps(std::move(result),
+                                   findSimilarMethodsIn(gs, core::make_type<core::ClassType>(mixin), name));
             }
             if (owner->superClass.exists()) {
                 result = mergeMaps(std::move(result),
-                                   findSimilarMethodsIn(core::make_type<core::ClassType>(owner->superClass), name));
+                                   findSimilarMethodsIn(gs, core::make_type<core::ClassType>(owner->superClass), name));
             }
         },
         [&](core::AndType *c) {
-            result = mergeMaps(findSimilarMethodsIn(c->left, name), findSimilarMethodsIn(c->right, name));
+            result = mergeMaps(findSimilarMethodsIn(gs, c->left, name), findSimilarMethodsIn(gs, c->right, name));
         },
         [&](core::OrType *c) {
-            auto lhs = findSimilarMethodsIn(c->left, name);
-            auto rhs = findSimilarMethodsIn(c->right, name);
+            auto lhs = findSimilarMethodsIn(gs, c->left, name);
+            auto rhs = findSimilarMethodsIn(gs, c->right, name);
             for (auto it = rhs.begin(); it != rhs.end(); /*nothing*/) {
                 auto &other = *it;
                 auto fnd = lhs.find(other.first);
@@ -57,12 +57,14 @@ UnorderedMap<core::NameRef, vector<core::SymbolRef>> LSPLoop::findSimilarMethods
                 }
             }
         },
-        [&](core::AppliedType *c) { result = findSimilarMethodsIn(core::make_type<core::ClassType>(c->klass), name); },
-        [&](core::ProxyType *c) { result = findSimilarMethodsIn(c->underlying(), name); }, [&](core::Type *c) {});
+        [&](core::AppliedType *c) {
+            result = findSimilarMethodsIn(gs, core::make_type<core::ClassType>(c->klass), name);
+        },
+        [&](core::ProxyType *c) { result = findSimilarMethodsIn(gs, c->underlying(), name); }, [&](core::Type *c) {});
     return result;
 }
 
-string LSPLoop::methodSnippet(core::GlobalState &gs, core::SymbolRef method) {
+string LSPLoop::methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 
@@ -117,32 +119,33 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     return documentation;
 }
 
-void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp) {
+void LSPLoop::addCompletionItem(const core::GlobalState &gs, rapidjson::Value &items, core::SymbolRef what,
+                                const core::QueryResponse &resp) {
     ENFORCE(what.exists());
     rapidjson::Value item;
     item.SetObject();
-    item.AddMember("label", string(what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs)), alloc);
-    auto resultType = what.data(*finalGs)->resultType;
+    item.AddMember("label", string(what.data(gs)->name.data(gs)->shortName(gs)), alloc);
+    auto resultType = what.data(gs)->resultType;
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
-    if (what.data(*finalGs)->isMethod()) {
+    if (what.data(gs)->isMethod()) {
         item.AddMember("kind", 3, alloc); // Function
         if (what.exists()) {
-            item.AddMember("detail", methodDetail(what, resp.receiver.type, nullptr, resp.constraint), alloc);
+            item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
         }
         if (clientCapabilities.textDocument.completion.completionItem.snippetSupport) {
             item.AddMember("insertTextFormat", 2, alloc); // Snippet
-            item.AddMember("insertText", methodSnippet(*finalGs, what), alloc);
+            item.AddMember("insertText", methodSnippet(gs, what), alloc);
         } else {
             item.AddMember("insertTextFormat", 1, alloc); // PlainText
-            item.AddMember("insertText", string(what.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs)), alloc);
+            item.AddMember("insertText", string(what.data(gs)->name.data(gs)->shortName(gs)), alloc);
         }
 
         optional<string> documentation = nullopt;
-        if (what.data(*finalGs)->loc().file().exists()) {
-            documentation = findDocumentation(what.data(*finalGs)->loc().file().data(*finalGs).source(),
-                                              what.data(*finalGs)->loc().beginPos());
+        if (what.data(gs)->loc().file().exists()) {
+            documentation =
+                findDocumentation(what.data(gs)->loc().file().data(gs).source(), what.data(gs)->loc().beginPos());
         }
         if (documentation) {
             if (documentation->find("@deprecated") != documentation->npos) {
@@ -151,77 +154,79 @@ void LSPLoop::addCompletionItem(rapidjson::Value &items, core::SymbolRef what, c
             item.AddMember("documentation", std::move(*documentation), alloc);
         }
 
-    } else if (what.data(*finalGs)->isStaticField()) {
+    } else if (what.data(gs)->isStaticField()) {
         item.AddMember("kind", 21, alloc); // Constant
-        item.AddMember("detail", resultType->show(*finalGs), alloc);
-    } else if (what.data(*finalGs)->isClass()) {
+        item.AddMember("detail", resultType->show(gs), alloc);
+    } else if (what.data(gs)->isClass()) {
         item.AddMember("kind", 7, alloc); // Class
     }
     items.PushBack(std::move(item), alloc);
 }
 
-void LSPLoop::handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
+                                                                    rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
     result.SetObject();
     result.AddMember("isIncomplete", "false", alloc);
     rapidjson::Value items;
     items.SetArray();
 
-    if (auto run = setupLSPQueryByLoc(d, LSPMethod::TextDocumentCompletion(), false)) {
-        auto &queryResponses = run->responses;
-        if (!queryResponses.empty()) {
-            auto resp = std::move(queryResponses[0]);
+    auto finalGs = move(gs);
+    auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentCompletion(), false);
+    finalGs = move(run.gs);
+    auto &queryResponses = run.responses;
+    if (!queryResponses.empty()) {
+        auto resp = std::move(queryResponses[0]);
 
-            auto receiverType = resp->receiver.type;
-            if (resp->kind == core::QueryResponse::Kind::SEND) {
-                auto pattern = resp->name.data(*finalGs)->shortName(*finalGs);
-                logger->debug("Looking for method similar to {}", pattern);
-                UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
-                    findSimilarMethodsIn(receiverType, pattern);
-                vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
-                methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
-                                     make_move_iterator(methods.end()));
-                fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
-                    auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
-                    auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
-                    if (leftShortName != rightShortName) {
-                        return leftShortName < rightShortName;
-                    }
-                    return leftPair.first._id < rightPair.first._id;
-                });
-                for (auto &entry : methodsSorted) {
-                    if (entry.second[0].exists()) {
-                        fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                        addCompletionItem(items, entry.second[0], *resp);
-                    }
+        auto receiverType = resp->receiver.type;
+        if (resp->kind == core::QueryResponse::Kind::SEND) {
+            auto pattern = resp->name.data(*finalGs)->shortName(*finalGs);
+            logger->debug("Looking for method similar to {}", pattern);
+            UnorderedMap<core::NameRef, vector<core::SymbolRef>> methods =
+                findSimilarMethodsIn(*finalGs, receiverType, pattern);
+            vector<pair<core::NameRef, vector<core::SymbolRef>>> methodsSorted;
+            methodsSorted.insert(methodsSorted.begin(), make_move_iterator(methods.begin()),
+                                 make_move_iterator(methods.end()));
+            fast_sort(methodsSorted, [&](auto leftPair, auto rightPair) -> bool {
+                auto leftShortName = leftPair.first.data(*finalGs)->shortName(*finalGs);
+                auto rightShortName = rightPair.first.data(*finalGs)->shortName(*finalGs);
+                if (leftShortName != rightShortName) {
+                    return leftShortName < rightShortName;
                 }
-            } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
-                       resp->kind == core::QueryResponse::Kind::CONSTANT) {
-                if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
-                    auto pattern = c->symbol.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs);
-                    logger->debug("Looking for constant similar to {}", pattern);
-                    core::SymbolRef owner = c->symbol;
-                    do {
-                        owner = owner.data(*finalGs)->owner;
-                        for (auto member : owner.data(*finalGs)->membersStableOrderSlow(*finalGs)) {
-                            auto sym = member.second;
-                            if (sym.exists() &&
-                                (sym.data(*finalGs)->isClass() || sym.data(*finalGs)->isStaticField()) &&
-                                sym.data(*finalGs)->name.data(*finalGs)->kind == core::NameKind::CONSTANT &&
-                                // hide singletons
-                                hasSimilarName(*finalGs, sym.data(*finalGs)->name, pattern) &&
-                                !sym.data(*finalGs)->derivesFrom(*finalGs, core::Symbols::StubClass())) {
-                                addCompletionItem(items, sym, *resp);
-                            }
-                        }
-                    } while (owner != core::Symbols::root());
+                return leftPair.first._id < rightPair.first._id;
+            });
+            for (auto &entry : methodsSorted) {
+                if (entry.second[0].exists()) {
+                    fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
+                    addCompletionItem(*finalGs, items, entry.second[0], *resp);
                 }
-            } else {
             }
+        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
+                   resp->kind == core::QueryResponse::Kind::CONSTANT) {
+            if (auto c = core::cast_type<core::ClassType>(receiverType.get())) {
+                auto pattern = c->symbol.data(*finalGs)->name.data(*finalGs)->shortName(*finalGs);
+                logger->debug("Looking for constant similar to {}", pattern);
+                core::SymbolRef owner = c->symbol;
+                do {
+                    owner = owner.data(*finalGs)->owner;
+                    for (auto member : owner.data(*finalGs)->membersStableOrderSlow(*finalGs)) {
+                        auto sym = member.second;
+                        if (sym.exists() && (sym.data(*finalGs)->isClass() || sym.data(*finalGs)->isStaticField()) &&
+                            sym.data(*finalGs)->name.data(*finalGs)->kind == core::NameKind::CONSTANT &&
+                            // hide singletons
+                            hasSimilarName(*finalGs, sym.data(*finalGs)->name, pattern) &&
+                            !sym.data(*finalGs)->derivesFrom(*finalGs, core::Symbols::StubClass())) {
+                            addCompletionItem(*finalGs, items, sym, *resp);
+                        }
+                    }
+                } while (owner != core::Symbols::root());
+            }
+        } else {
         }
-        result.AddMember("items", std::move(items), alloc);
     }
+    result.AddMember("items", std::move(items), alloc);
     sendResult(d, result);
+    return finalGs;
 }
 
 } // namespace sorbet::realmain::lsp

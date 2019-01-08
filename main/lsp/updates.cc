@@ -192,13 +192,13 @@ void LSPLoop::reIndexFromFileSystem() {
     }
 }
 
-void tryApplyDefLocSaver(unique_ptr<core::GlobalState> &finalGs, vector<ast::ParsedFile> &indexedCopies) {
-    if (finalGs->lspInfoQueryLoc == core::Loc::none()) {
+void tryApplyDefLocSaver(const core::GlobalState &gs, vector<ast::ParsedFile> &indexedCopies) {
+    if (gs.lspInfoQueryLoc == core::Loc::none()) {
         return;
     }
     for (auto &t : indexedCopies) {
         DefLocSaver defLocSaver;
-        core::Context ctx(*finalGs, core::Symbols::root());
+        core::Context ctx(gs, core::Symbols::root());
         t.tree = ast::TreeMap::apply(ctx, defLocSaver, move(t.tree));
     }
 }
@@ -224,9 +224,10 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
         }
     }
 
-    finalGs = initialGS->deepCopy(true);
+    initialGS->lspTypecheckCount++;
+    auto finalGs = initialGS->deepCopy(true);
     auto resolved = pipeline::resolve(*finalGs, move(indexedCopies), opts, logger, skipConfigatron);
-    tryApplyDefLocSaver(finalGs, resolved);
+    tryApplyDefLocSaver(*finalGs, resolved);
     vector<core::FileRef> affectedFiles;
     for (auto &tree : resolved) {
         ENFORCE(tree.file.exists());
@@ -234,15 +235,20 @@ LSPLoop::TypecheckRun LSPLoop::runSlowPath(const vector<shared_ptr<core::File>> 
     }
     pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
     auto out = initialGS->errorQueue->drainWithQueryResponses();
-    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second)};
+    return TypecheckRun{move(out.first), move(affectedFiles), move(out.second), move(finalGs)};
 }
 
-LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+LSPLoop::TypecheckRun LSPLoop::tryFastPath(unique_ptr<core::GlobalState> gs,
+                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     if (disableFastPath) {
         logger->debug("Taking sad path because happy path is disabled.");
         return runSlowPath(changedFiles);
     }
 
+    auto finalGs = move(gs);
+    // We assume finalGs is a copy of initialGS, which has had the inferencer & resolver run.
+    ENFORCE(finalGs->lspTypecheckCount > 0,
+            "Tried to run fast path with a GlobalState object that never had inferencer and resolver runs.");
     logger->debug("Trying to see if happy path is available after {} file changes", changedFiles.size());
     bool good = true;
     auto hashes = computeStateHashes(changedFiles);
@@ -302,19 +308,12 @@ LSPLoop::TypecheckRun LSPLoop::tryFastPath(vector<shared_ptr<core::File>> &chang
         }
 
         auto resolved = incrementalResolve(*finalGs, move(updatedIndexed), opts, logger);
-        tryApplyDefLocSaver(finalGs, resolved);
+        tryApplyDefLocSaver(*finalGs, resolved);
         pipeline::typecheck(finalGs, move(resolved), opts, workers, logger);
         auto out = initialGS->errorQueue->drainWithQueryResponses();
-        return TypecheckRun{move(out.first), move(subset), move(out.second)};
+        return TypecheckRun{move(out.first), move(subset), move(out.second), move(finalGs)};
     } else {
         return runSlowPath(changedFiles);
     }
-}
-
-unique_ptr<core::GlobalState> LSPLoop::extractGlobalState(LSPLoop &&loop) {
-    if (loop.finalGs) {
-        return move(loop.finalGs);
-    }
-    return move(loop.initialGS);
 }
 } // namespace sorbet::realmain::lsp

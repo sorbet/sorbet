@@ -24,6 +24,9 @@ private:
     /** The LSP 'server', which runs in the same thread as the tests. */
     std::unique_ptr<LSPLoop> lspLoop;
 
+    /** The global state of type checking, as calculated by LSP. */
+    std::unique_ptr<core::GlobalState> gs;
+
     /**
      * Required objects that Sorbet assumes we 'own'. Not having these here would result in memory errors, as Sorbet
      * captures references to them. Normally these are stack allocated, but we cannot do that with gtests which

@@ -179,10 +179,6 @@ class LSPLoop {
     /** GlobalState that is used for indexing. It effectively accumulates a huge nametable.
      * It is never discarded. */
     std::unique_ptr<core::GlobalState> initialGS;
-    /** A clone of `initialGs` that is used for typechecking.
-     * Discarded on every clean run.
-     */
-    std::unique_ptr<core::GlobalState> finalGs;
     const options::Options &opts;
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> &logger;
@@ -215,9 +211,9 @@ class LSPLoop {
     void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
     void sendError(rapidjson::Document &forRequest, int errorCode, const std::string &errorStr);
 
-    rapidjson::Value loc2Range(core::Loc loc);
-    rapidjson::Value loc2Location(core::Loc loc);
-    void addLocIfExists(rapidjson::Value &result, core::Loc loc);
+    rapidjson::Value loc2Range(const core::GlobalState &gs, core::Loc loc);
+    rapidjson::Value loc2Location(const core::GlobalState &gs, core::Loc loc);
+    void addLocIfExists(const core::GlobalState &gs, rapidjson::Value &result, core::Loc loc);
 
     /** Returns true if there is no need to continue processing this document as it is a reply to
      * already registered request*/
@@ -231,55 +227,73 @@ class LSPLoop {
         std::vector<std::unique_ptr<core::Error>> errors;
         std::vector<core::FileRef> filesTypechecked;
         std::vector<std::unique_ptr<core::QueryResponse>> responses;
+        std::unique_ptr<core::GlobalState> gs;
     };
     /** Conservatively rerun entire pipeline without caching any trees */
     TypecheckRun runSlowPath(const std::vector<std::shared_ptr<core::File>> &changedFiles);
     /** Apply conservative heuristics to see if we can run a fast path, if not, bail out and run slowPath */
-    TypecheckRun tryFastPath(std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
+    TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
+                             std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
 
-    void pushDiagnostics(TypecheckRun filesTypechecked);
+    std::unique_ptr<core::GlobalState> pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
-    bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d);
+    bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
+                           const std::unique_ptr<core::GlobalState> &currentGs);
 
     core::FileRef uri2FileRef(std::string_view uri);
-    std::string fileRef2Uri(core::FileRef);
+    std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
     std::string remoteName2Local(std::string_view uri);
     std::string localName2Remote(std::string_view uri);
     std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
-    bool hasSimilarName(core::GlobalState &gs, core::NameRef name, std::string_view pattern);
-    bool hideSymbol(core::SymbolRef sym);
+    bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, std::string_view pattern);
+    bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym);
 
-    std::string methodDetail(core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                             std::shared_ptr<core::TypeConstraint> constraint);
-    core::TypePtr getResultType(core::SymbolRef ofWhat, core::TypePtr receiver,
+    std::string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                             core::TypePtr retType, std::shared_ptr<core::TypeConstraint> constraint);
+    core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
                                 std::shared_ptr<core::TypeConstraint> constr);
-    std::string methodSnippet(core::GlobalState &gs, core::SymbolRef method);
+    std::string methodSnippet(const core::GlobalState &gs, core::SymbolRef method);
 
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
      * */
-    std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(core::SymbolRef);
-    void symbolRef2DocumentSymbolWalkMembers(core::SymbolRef sym, core::FileRef filter, rapidjson::Value &out);
-    std::unique_ptr<rapidjson::Value> symbolRef2DocumentSymbol(core::SymbolRef, core::FileRef filter);
-    int symbolRef2SymbolKind(core::SymbolRef);
-    std::optional<TypecheckRun> setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod,
-                                                   bool errorIfFileIsUntyped);
-    std::optional<TypecheckRun> setupLSPQueryBySymbol(core::SymbolRef symbol, const LSPMethod &forMethod);
-    void handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d);
-    void handleTextDocumentDocumentSymbol(rapidjson::Value &result, rapidjson::Document &d);
-    void handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d);
-    void handleTextDocumentReferences(rapidjson::Value &result, rapidjson::Document &d);
-    void handleTextDocumentDefinition(rapidjson::Value &result, rapidjson::Document &d);
-    void handleTextDocumentCompletion(rapidjson::Value &result, rapidjson::Document &d);
-    UnorderedMap<core::NameRef, std::vector<core::SymbolRef>> findSimilarMethodsIn(core::TypePtr receiver,
-                                                                                   std::string_view name);
-    void addCompletionItem(rapidjson::Value &items, core::SymbolRef what, const core::QueryResponse &resp);
+    std::unique_ptr<rapidjson::Value> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
+    void symbolRef2DocumentSymbolWalkMembers(const core::GlobalState &gs, core::SymbolRef sym, core::FileRef filter,
+                                             rapidjson::Value &out);
+    std::unique_ptr<rapidjson::Value> symbolRef2DocumentSymbol(const core::GlobalState &gs, core::SymbolRef,
+                                                               core::FileRef filter);
+    int symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef);
+    TypecheckRun runLSPQuery(core::GlobalState &initialGS, std::unique_ptr<core::GlobalState> gs, core::Loc loc,
+                             core::SymbolRef symbol, std::vector<std::shared_ptr<core::File>> &changedFiles,
+                             bool allFiles = false);
+    TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, rapidjson::Document &d,
+                                    const LSPMethod &forMethod, bool errorIfFileIsUntyped);
+    TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
+                                       const LSPMethod &forMethod);
+    std::unique_ptr<core::GlobalState> handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs,
+                                                               rapidjson::Value &result, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs,
+                                                                        rapidjson::Value &result,
+                                                                        rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs,
+                                                              rapidjson::Value &result, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs,
+                                                                    rapidjson::Value &result, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs,
+                                                                    rapidjson::Value &result, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs,
+                                                                    rapidjson::Value &result, rapidjson::Document &d);
+    UnorderedMap<core::NameRef, std::vector<core::SymbolRef>>
+    findSimilarMethodsIn(const core::GlobalState &gs, core::TypePtr receiver, std::string_view name);
+    void addCompletionItem(const core::GlobalState &gs, rapidjson::Value &items, core::SymbolRef what,
+                           const core::QueryResponse &resp);
     void sendShowMessageNotification(int messageType, const std::string &message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
-    void handleTextSignatureHelp(rapidjson::Value &result, rapidjson::Document &d);
-    void addSignatureHelpItem(rapidjson::Value &signatures, core::SymbolRef method, const core::QueryResponse &resp,
-                              int activeParameter);
+    std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
+                                                               rapidjson::Value &result, rapidjson::Document &d);
+    void addSignatureHelpItem(const core::GlobalState &gs, rapidjson::Value &signatures, core::SymbolRef method,
+                              const core::QueryResponse &resp, int activeParameter);
     static void mergeDidChanges(std::deque<rapidjson::Document> &pendingRequests);
     static std::deque<rapidjson::Document>::iterator
     findRequestToBeCancelled(std::deque<rapidjson::Document> &pendingRequests,
@@ -291,11 +305,9 @@ public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,
             WorkerPool &workers, std::istream &input, std::ostream &output, bool typecheckTestFiles = false,
             bool skipConfigatron = false, bool disableFastPath = false);
-    void runLSP();
-    void processRequest(rapidjson::Document &d);
-    void processRequest(const std::string &json);
-
-    static std::unique_ptr<core::GlobalState> extractGlobalState(LSPLoop &&);
+    std::unique_ptr<core::GlobalState> runLSP();
+    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, rapidjson::Document &d);
+    std::unique_ptr<core::GlobalState> processRequest(std::unique_ptr<core::GlobalState> gs, const std::string &json);
 };
 std::optional<std::string> findDocumentation(std::string_view sourceCode, int beginIndex);
 

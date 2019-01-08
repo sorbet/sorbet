@@ -997,6 +997,7 @@ unique_ptr<GlobalState> GlobalState::deepCopy(bool keepId) const {
     result->fileRefByPath = this->fileRefByPath;
     result->lspInfoQueryLoc = this->lspInfoQueryLoc;
     result->lspQuerySymbol = this->lspQuerySymbol;
+    result->lspTypecheckCount = this->lspTypecheckCount;
 
     result->names.reserve(this->names.capacity());
     for (auto &nm : this->names) {

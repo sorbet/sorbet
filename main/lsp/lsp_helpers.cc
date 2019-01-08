@@ -28,14 +28,14 @@ core::FileRef LSPLoop::uri2FileRef(string_view uri) {
     return initialGS->findFileByPath(needle);
 }
 
-string LSPLoop::fileRef2Uri(core::FileRef file) {
-    if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
-        return string(file.data(*finalGs).path());
+string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
+    if (file.data(gs).sourceType == core::File::Type::Payload) {
+        return string(file.data(gs).path());
     } else {
-        return localName2Remote(string(file.data(*finalGs).path()));
+        return localName2Remote(string(file.data(gs).path()));
     }
 }
-rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
+rapidjson::Value LSPLoop::loc2Range(const core::GlobalState &gs, core::Loc loc) {
     /**
        {
         start: { line: 5, character: 23 }
@@ -59,7 +59,7 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
         return ret;
     }
 
-    auto pair = loc.position(*finalGs);
+    auto pair = loc.position(gs);
     // All LSP numbers are zero-based, ours are 1-based.
     start.AddMember("line", pair.first.line - 1, alloc);
     start.AddMember("character", pair.first.column - 1, alloc);
@@ -71,7 +71,7 @@ rapidjson::Value LSPLoop::loc2Range(core::Loc loc) {
     return ret;
 }
 
-rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
+rapidjson::Value LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
     string uri;
     //  interface Location {
     //      uri: DocumentUri;
@@ -83,7 +83,7 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
     if (!loc.file().exists()) {
         uri = localName2Remote("???");
     } else {
-        auto &messageFile = loc.file().data(*finalGs);
+        auto &messageFile = loc.file().data(gs);
         if (messageFile.sourceType == core::File::Type::Payload) {
             // This is hacky because VSCode appends #4,3 (or whatever the position is of the
             // error) to the uri before it shows it in the UI since this is the format that
@@ -98,23 +98,23 @@ rapidjson::Value LSPLoop::loc2Location(core::Loc loc) {
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18%2318,7
             // but shows you the same thing as
             // https://git.corp.stripe.com/stripe-internal/ruby-typer/tree/master/rbi/core/string.rbi#L18
-            uri = fmt::format("{}#L{}", messageFile.path(), loc.position(*finalGs).first.line);
+            uri = fmt::format("{}#L{}", messageFile.path(), loc.position(gs).first.line);
         } else {
-            uri = fileRef2Uri(loc.file());
+            uri = fileRef2Uri(gs, loc.file());
         }
     }
 
     ret.AddMember("uri", uri, alloc);
-    ret.AddMember("range", loc2Range(loc), alloc);
+    ret.AddMember("range", loc2Range(gs, loc), alloc);
 
     return ret;
 }
-bool LSPLoop::hideSymbol(core::SymbolRef sym) {
+bool LSPLoop::hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
     }
-    auto data = sym.data(*finalGs);
-    if (data->isClass() && data->attachedClass(*finalGs).exists()) {
+    auto data = sym.data(gs);
+    if (data->isClass() && data->attachedClass(gs).exists()) {
         return true;
     }
     if (data->isClass() && data->superClass == core::Symbols::StubClass()) {
@@ -123,25 +123,25 @@ bool LSPLoop::hideSymbol(core::SymbolRef sym) {
     if (data->isMethodArgument() && data->isBlockArgument()) {
         return true;
     }
-    if (data->name.data(*finalGs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(*finalGs)->unique.original == core::Names::staticInit()) {
+    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
+        data->name.data(gs)->unique.original == core::Names::staticInit()) {
         return true;
     }
-    if (data->name.data(*finalGs)->kind == core::NameKind::UNIQUE &&
-        data->name.data(*finalGs)->unique.original == core::Names::blockTemp()) {
+    if (data->name.data(gs)->kind == core::NameKind::UNIQUE &&
+        data->name.data(gs)->unique.original == core::Names::blockTemp()) {
         return true;
     }
     return false;
 }
 
-bool LSPLoop::hasSimilarName(core::GlobalState &gs, core::NameRef name, string_view pattern) {
+bool LSPLoop::hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
     string_view view = name.data(gs)->shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;
 }
 
-string LSPLoop::methodDetail(core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
-                             shared_ptr<core::TypeConstraint> constraint) {
+string LSPLoop::methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
+                             core::TypePtr retType, shared_ptr<core::TypeConstraint> constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -149,26 +149,26 @@ string LSPLoop::methodDetail(core::SymbolRef method, core::TypePtr receiver, cor
     }
 
     if (!retType) {
-        retType = getResultType(method, receiver, constraint);
+        retType = getResultType(gs, method, receiver, constraint);
     }
     string methodReturnType =
-        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(*finalGs), ")");
+        (retType == core::Types::void_()) ? "void" : absl::StrCat("returns(", retType->show(gs), ")");
     vector<string> typeAndArgNames;
 
-    if (method.data(*finalGs)->isMethod()) {
-        for (auto &argSym : method.data(*finalGs)->arguments()) {
-            typeAndArgNames.emplace_back(absl::StrCat(argSym.data(*finalGs)->name.show(*finalGs), ": ",
-                                                      getResultType(argSym, receiver, constraint)->show(*finalGs)));
+    if (method.data(gs)->isMethod()) {
+        for (auto &argSym : method.data(gs)->arguments()) {
+            typeAndArgNames.emplace_back(absl::StrCat(argSym.data(gs)->name.show(gs), ": ",
+                                                      getResultType(gs, argSym, receiver, constraint)->show(gs)));
         }
     }
 
     return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
 }
 
-core::TypePtr LSPLoop::getResultType(core::SymbolRef ofWhat, core::TypePtr receiver,
+core::TypePtr LSPLoop::getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
                                      shared_ptr<core::TypeConstraint> constr) {
-    core::Context ctx(*finalGs, core::Symbols::root());
-    auto resultType = ofWhat.data(*finalGs)->resultType;
+    core::Context ctx(gs, core::Symbols::root());
+    auto resultType = ofWhat.data(gs)->resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
         receiver = proxy->underlying();
     }
@@ -187,8 +187,8 @@ core::TypePtr LSPLoop::getResultType(core::SymbolRef ofWhat, core::TypePtr recei
     return resultType;
 }
 
-int LSPLoop::symbolRef2SymbolKind(core::SymbolRef symbol) {
-    auto sym = symbol.data(*finalGs);
+int LSPLoop::symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
+    auto sym = symbol.data(gs);
     /**
      * A symbol kind.
      *

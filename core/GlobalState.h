@@ -129,6 +129,10 @@ public:
     Loc lspInfoQueryLoc;
     SymbolRef lspQuerySymbol;
 
+    // Indicates the number of times LSP has run the type checker with this global state.
+    // Used to ensure GlobalState is in the correct state to process requests.
+    unsigned int lspTypecheckCount;
+
     void trace(std::string_view msg) const;
 
     static constexpr int HASH_STATE_INVALID = 0;

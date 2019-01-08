@@ -79,7 +79,7 @@ public:
     }
 };
 
-void LSPLoop::runLSP() {
+unique_ptr<core::GlobalState> LSPLoop::runLSP() {
     // Naming convention: thread that executes this function is called coordinator thread
     struct GuardedState {
         deque<rapidjson::Document> pendingRequests;
@@ -142,6 +142,7 @@ void LSPLoop::runLSP() {
             }
         });
 
+    unique_ptr<core::GlobalState> gs;
     while (true) {
         rapidjson::Document doc;
         {
@@ -159,7 +160,12 @@ void LSPLoop::runLSP() {
             guardedState.pendingRequests.pop_front();
         }
         prodCounterInc("lsp.requests.received");
-        processRequest(doc);
+        gs = processRequest(move(gs), doc);
+    }
+    if (gs) {
+        return gs;
+    } else {
+        return move(initialGS);
     }
 }
 
@@ -270,7 +276,7 @@ unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, rapidjson::Documen
     core::Loc::Detail reqPos;
     reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
     reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
-    auto offset = core::Loc::pos2Offset(fref.data(*finalGs), reqPos);
+    auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
 

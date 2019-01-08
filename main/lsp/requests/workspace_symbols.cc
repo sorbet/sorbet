@@ -40,35 +40,38 @@ namespace sorbet::realmain::lsp {
  *                containerName?: string;
  *        }
  **/
-unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(core::SymbolRef symRef) {
-    auto sym = symRef.data(*finalGs);
-    if (!sym->loc().file().exists() || hideSymbol(symRef)) {
+unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef symRef) {
+    auto sym = symRef.data(gs);
+    if (!sym->loc().file().exists() || hideSymbol(gs, symRef)) {
         return nullptr;
     }
     rapidjson::Value result;
     result.SetObject();
-    result.AddMember("name", sym->name.show(*finalGs), alloc);
-    result.AddMember("location", loc2Location(sym->loc()), alloc);
-    result.AddMember("containerName", sym->owner.data(*finalGs)->fullName(*finalGs), alloc);
-    result.AddMember("kind", symbolRef2SymbolKind(symRef), alloc);
+    result.AddMember("name", sym->name.show(gs), alloc);
+    result.AddMember("location", loc2Location(gs, sym->loc()), alloc);
+    result.AddMember("containerName", sym->owner.data(gs)->fullName(gs), alloc);
+    result.AddMember("kind", symbolRef2SymbolKind(gs, symRef), alloc);
 
     return make_unique<rapidjson::Value>(move(result));
 }
 
-void LSPLoop::handleWorkspaceSymbols(rapidjson::Value &result, rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs,
+                                                              rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
     result.SetArray();
     string searchString = d["params"]["query"].GetString();
 
+    auto finalGs = move(gs);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
         core::SymbolRef ref(finalGs.get(), idx);
         if (hasSimilarName(*finalGs, ref.data(*finalGs)->name, searchString)) {
-            auto data = symbolRef2SymbolInformation(ref);
+            auto data = symbolRef2SymbolInformation(*finalGs, ref);
             if (data) {
                 result.PushBack(move(*data), alloc);
             }
         }
     }
     sendResult(d, result);
+    return finalGs;
 }
 } // namespace sorbet::realmain::lsp

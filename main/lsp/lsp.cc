@@ -19,29 +19,27 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
             "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
 }
 
-namespace {
-class LSPQuerrySetup {
-    unique_ptr<core::GlobalState> &gs;
+LSPLoop::TypecheckRun LSPLoop::runLSPQuery(core::GlobalState &initialGS, unique_ptr<core::GlobalState> gs,
+                                           core::Loc loc, core::SymbolRef symbol,
+                                           vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
+    ENFORCE(!gs->lspInfoQueryLoc.exists());
+    ENFORCE(!initialGS.lspInfoQueryLoc.exists());
+    ENFORCE(!gs->lspQuerySymbol.exists());
+    ENFORCE(!initialGS.lspQuerySymbol.exists());
+    ENFORCE(loc.exists() || symbol.exists());
+    initialGS.lspInfoQueryLoc = gs->lspInfoQueryLoc = loc;
+    initialGS.lspQuerySymbol = gs->lspQuerySymbol = symbol;
 
-public:
-    LSPQuerrySetup(unique_ptr<core::GlobalState> &gs, core::Loc loc, core::SymbolRef symbol) : gs(gs) {
-        // Might return 'true' if GS was copied with flags set before they were unset.
-        // ENFORCE(!gs.lspInfoQueryLoc.exists());
-        // ENFORCE(!gs.lspQuerySymbol.exists());
-        ENFORCE(loc.exists() || symbol.exists());
-        gs->lspInfoQueryLoc = loc;
-        gs->lspQuerySymbol = symbol;
-    }
-    ~LSPQuerrySetup() {
-        gs->lspInfoQueryLoc = core::Loc::none();
-        gs->lspQuerySymbol = core::Symbols::noSymbol();
-    }
-};
+    // TODO(jvilk): If this throws, then we'll want to unset `lspInfoQueryLoc` and `lspQuerySymbol` on `initialGS`.
+    // If throwing is common, then we need some way to *not* throw away `gs`.
+    auto rv = tryFastPath(move(gs), changedFiles, allFiles);
+    rv.gs->lspInfoQueryLoc = initialGS.lspInfoQueryLoc = core::Loc::none();
+    rv.gs->lspQuerySymbol = initialGS.lspQuerySymbol = core::Symbols::noSymbol();
+    return rv;
+}
 
-} // namespace
-
-optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryByLoc(rapidjson::Document &d, const LSPMethod &forMethod,
-                                                            bool errorIfFileIsUntyped) {
+LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, rapidjson::Document &d,
+                                                  const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
     auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
                            d["params"]["textDocument"]["uri"].GetStringLength());
 
@@ -49,38 +47,33 @@ optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryByLoc(rapidjson::Document 
     if (!fref.exists()) {
         sendError(d, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
-        return nullopt;
+        return TypecheckRun{{}, {}, {}, move(gs)};
     }
 
-    if (errorIfFileIsUntyped && fref.data(*finalGs).sigil == core::StrictLevel::Stripe) {
+    if (errorIfFileIsUntyped && fref.data(*gs).sigil == core::StrictLevel::Stripe) {
         sendError(d, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
             1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
-        return nullopt;
+        return TypecheckRun{{}, {}, {}, move(gs)};
     }
-    auto loc = lspPos2Loc(fref, d, *finalGs);
+    auto loc = lspPos2Loc(fref, d, *gs);
     if (!loc) {
         sendError(d, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find location at uri {} in {}", uri, forMethod.name));
-        return nullopt;
+        return TypecheckRun{{}, {}, {}, move(gs)};
     }
 
-    LSPQuerrySetup setup1(initialGS, *loc.get(), core::Symbols::noSymbol());
-    LSPQuerrySetup setup2(finalGs, *loc.get(), core::Symbols::noSymbol());
     vector<shared_ptr<core::File>> files;
-    files.emplace_back(make_shared<core::File>((std::move(fref.data(*finalGs)))));
-    return tryFastPath(files);
+    files.emplace_back(make_shared<core::File>(std::move(fref.data(*gs))));
+    return runLSPQuery(*initialGS, move(gs), *loc.get(), core::Symbols::noSymbol(), files);
 }
-optional<LSPLoop::TypecheckRun> LSPLoop::setupLSPQueryBySymbol(core::SymbolRef sym, const LSPMethod &forMethod) {
+LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,
+                                                     const LSPMethod &forMethod) {
     ENFORCE(sym.exists());
     vector<shared_ptr<core::File>> files;
-    {
-        LSPQuerrySetup setup1(initialGS, core::Loc::none(), sym);
-        LSPQuerrySetup setup2(finalGs, core::Loc::none(), sym);
-        return tryFastPath(files, true);
-    }
     // this function currently always returns optional that is set, but we're keeping API symmetric to
     // setupLSPQueryByLoc.
+    return runLSPQuery(*initialGS, move(gs), core::Loc::none(), sym, files, true);
 }
 
 bool silenceError(bool disableFastPath, core::ErrorClass what) {
@@ -96,8 +89,9 @@ bool silenceError(bool disableFastPath, core::ErrorClass what) {
     return false;
 }
 
-bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
-    if (finalGs) {
+bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
+                                const unique_ptr<core::GlobalState> &currentGs) {
+    if (currentGs && currentGs->lspTypecheckCount > 0) {
         return true;
     }
     if (forMethod == LSPMethod::Initialize() || forMethod == LSPMethod::Initialized() ||
@@ -113,7 +107,8 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d) {
     return false;
 }
 
-void LSPLoop::pushDiagnostics(TypecheckRun run) {
+unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
+    const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
     UnorderedMap<core::FileRef, vector<std::unique_ptr<core::Error>>> errorsAccumulated;
@@ -179,10 +174,10 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
             publishDiagnosticsParams.SetObject();
             { // uri
                 string uriStr;
-                if (file.data(*finalGs).sourceType == core::File::Type::Payload) {
-                    uriStr = string(file.data(*finalGs).path());
+                if (file.data(gs).sourceType == core::File::Type::Payload) {
+                    uriStr = string(file.data(gs).path());
                 } else {
-                    uriStr = fmt::format("{}/{}", rootUri, file.data(*finalGs).path());
+                    uriStr = fmt::format("{}/{}", rootUri, file.data(gs).path());
                 }
                 publishDiagnosticsParams.AddMember("uri", uriStr, alloc);
             }
@@ -196,7 +191,7 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
                         rapidjson::Value diagnostic;
                         diagnostic.SetObject();
 
-                        diagnostic.AddMember("range", loc2Range(e->loc), alloc);
+                        diagnostic.AddMember("range", loc2Range(gs, e->loc), alloc);
                         diagnostic.AddMember("code", e->what.code, alloc);
                         diagnostic.AddMember("message", e->header, alloc);
 
@@ -209,7 +204,7 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
                                 for (auto &errorLine : section.messages) {
                                     rapidjson::Value relatedInfo;
                                     relatedInfo.SetObject();
-                                    relatedInfo.AddMember("location", loc2Location(errorLine.loc), alloc);
+                                    relatedInfo.AddMember("location", loc2Location(gs, errorLine.loc), alloc);
 
                                     string relatedInfoMessage;
                                     if (errorLine.formattedMessage.length() > 0) {
@@ -232,6 +227,7 @@ void LSPLoop::pushDiagnostics(TypecheckRun run) {
             sendNotification(LSPMethod::PushDiagnostics(), publishDiagnosticsParams);
         }
     }
+    return move(run.gs);
 }
 
 const vector<LSPMethod> LSPMethod::ALL_METHODS{CancelRequest(),

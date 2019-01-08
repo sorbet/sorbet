@@ -90,7 +90,7 @@ optional<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::parseLSPResponse(strin
 vector<unique_ptr<JSONDocument<JSONBaseType>>> LSPTest::getLSPResponsesForRaw(string json) {
     // TODO(jvilk): Share parsing code with main LSP codebase.
     // processRequest does not require Content-Length or other headers.
-    lspLoop->processRequest(json);
+    gs = lspLoop->processRequest(move(gs), json);
 
     vector<unique_ptr<JSONDocument<JSONBaseType>>> rv;
     string responses = lspOstream.str();

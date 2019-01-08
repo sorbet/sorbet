@@ -4,68 +4,70 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::handleTextDocumentHover(rapidjson::Value &result, rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs,
+                                                               rapidjson::Value &result, rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
     result.SetObject();
 
-    if (auto run = setupLSPQueryByLoc(d, LSPMethod::TextDocumentHover(), false)) {
-        auto &queryResponses = run->responses;
-        if (queryResponses.empty()) {
-            rapidjson::Value nullreply;
-            sendResult(d, nullreply);
-            return;
-        }
-
-        auto resp = move(queryResponses[0]);
-        if (resp->kind == core::QueryResponse::Kind::SEND) {
-            if (resp->dispatchComponents.empty()) {
-                sendError(d, (int)LSPErrorCodes::InvalidParams,
-                          "Did not find any dispatchComponents for a SEND QueryResponse in "
-                          "textDocument/hover");
-                return;
-            }
-            string contents = "";
-            for (auto &dispatchComponent : resp->dispatchComponents) {
-                auto retType = resp->retType.type;
-                if (resp->constraint) {
-                    retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
-                                                       *resp->constraint);
-                }
-                if (dispatchComponent.method.exists()) {
-                    if (contents.size() > 0) {
-                        contents += " ";
-                    }
-                    contents +=
-                        methodDetail(dispatchComponent.method, dispatchComponent.receiver, retType, resp->constraint);
-                }
-            }
-            rapidjson::Value markupContents;
-            markupContents.SetObject();
-            // We use markdown here because if we just use a string, VSCode tries to interpret
-            // things like <Class:Foo> as html tags and make them clickable (but the click takes
-            // you somewhere nonsensical)
-            markupContents.AddMember("kind", "markdown", alloc);
-            markupContents.AddMember("value", contents, alloc);
-            result.AddMember("contents", markupContents, alloc);
-            sendResult(d, result);
-        } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
-                   resp->kind == core::QueryResponse::Kind::CONSTANT ||
-                   resp->kind == core::QueryResponse::Kind::LITERAL) {
-            rapidjson::Value markupContents;
-            markupContents.SetObject();
-            markupContents.AddMember("kind", "markdown", alloc);
-            markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
-            result.AddMember("contents", markupContents, alloc);
-            sendResult(d, result);
-        } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
-            result.SetNull();
-            // TODO: Actually send the type signature here. I'm skipping this for now
-            // since it's not a very useful feature for the end user (i.e., they should
-            // be able to see this right above the definition in ruby)
-            sendResult(d, result);
-        } else {
-            sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
-        }
+    auto finalGs = move(gs);
+    auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentHover(), false);
+    finalGs = move(run.gs);
+    auto &queryResponses = run.responses;
+    if (queryResponses.empty()) {
+        rapidjson::Value nullreply;
+        sendResult(d, nullreply);
+        return finalGs;
     }
+
+    auto resp = move(queryResponses[0]);
+    if (resp->kind == core::QueryResponse::Kind::SEND) {
+        if (resp->dispatchComponents.empty()) {
+            sendError(d, (int)LSPErrorCodes::InvalidParams,
+                      "Did not find any dispatchComponents for a SEND QueryResponse in "
+                      "textDocument/hover");
+            return finalGs;
+        }
+        string contents = "";
+        for (auto &dispatchComponent : resp->dispatchComponents) {
+            auto retType = resp->retType.type;
+            if (resp->constraint) {
+                retType = core::Types::instantiate(core::Context(*finalGs, core::Symbols::root()), retType,
+                                                   *resp->constraint);
+            }
+            if (dispatchComponent.method.exists()) {
+                if (contents.size() > 0) {
+                    contents += " ";
+                }
+                contents += methodDetail(*finalGs, dispatchComponent.method, dispatchComponent.receiver, retType,
+                                         resp->constraint);
+            }
+        }
+        rapidjson::Value markupContents;
+        markupContents.SetObject();
+        // We use markdown here because if we just use a string, VSCode tries to interpret
+        // things like <Class:Foo> as html tags and make them clickable (but the click takes
+        // you somewhere nonsensical)
+        markupContents.AddMember("kind", "markdown", alloc);
+        markupContents.AddMember("value", contents, alloc);
+        result.AddMember("contents", markupContents, alloc);
+        sendResult(d, result);
+    } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
+               resp->kind == core::QueryResponse::Kind::LITERAL) {
+        rapidjson::Value markupContents;
+        markupContents.SetObject();
+        markupContents.AddMember("kind", "markdown", alloc);
+        markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
+        result.AddMember("contents", markupContents, alloc);
+        sendResult(d, result);
+    } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
+        result.SetNull();
+        // TODO: Actually send the type signature here. I'm skipping this for now
+        // since it's not a very useful feature for the end user (i.e., they should
+        // be able to see this right above the definition in ruby)
+        sendResult(d, result);
+    } else {
+        sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
+    }
+    return finalGs;
 }
 } // namespace sorbet::realmain::lsp
