@@ -1058,6 +1058,17 @@ public:
 
     unique_ptr<Node> unary_op(const token *oper, unique_ptr<Node> receiver) {
         Loc loc = tok_loc(oper).join(receiver->loc);
+
+        if (auto *num = parser::cast_node<Integer>(receiver.get())) {
+            return make_unique<Integer>(loc, oper->string() + num->val);
+        }
+        if (auto *num = parser::cast_node<Float>(receiver.get())) {
+            return make_unique<Float>(loc, oper->string() + num->val);
+        }
+        if (auto *num = parser::cast_node<Rational>(receiver.get())) {
+            return make_unique<Float>(loc, oper->string() + num->val);
+        }
+
         NameRef op;
         if (oper->string() == "+") {
             op = core::Names::unaryPlus();

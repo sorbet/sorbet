@@ -159,11 +159,11 @@ public:
 	}
 };
 
-class typedruby24 : public base_driver {
+class typedruby25 : public base_driver {
 public:
-	typedruby24(const std::string& source, const struct builder& builder);
+	typedruby25(const std::string& source, const struct builder& builder);
 	virtual foreign_ptr parse(self_ptr self);
-	~typedruby24() {}
+	~typedruby25() {}
 };
 
 }

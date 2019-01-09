@@ -20,10 +20,10 @@ using namespace std::string_literals;
 #endif
 }
 
-%param { ruby_parser::typedruby24& driver }
+%param { ruby_parser::typedruby25& driver }
 %parse-param { ruby_parser::self_ptr self }
-%define api.namespace {ruby_parser::bison::typedruby24}
-%define api.prefix {typedruby24}
+%define api.namespace {ruby_parser::bison::typedruby25}
+%define api.prefix {typedruby25}
 %define api.value.type { union parser_value }
 %define api.token.constructor false
 %define parse.assert
@@ -95,7 +95,7 @@ using namespace std::string_literals;
   tFLOAT              1061
   tUPLUS              1062
   tUMINUS             1063
-  tUMINUS_NUM         1064
+  tUNARY_OP           1064
   tPOW                1065
   tCMP                1066
   tEQ                 1067
@@ -371,7 +371,7 @@ using namespace std::string_literals;
 %left     tLSHFT tRSHFT
 %left     tPLUS tMINUS
 %left     tSTAR2 tDIVIDE tPERCENT
-%right    tUMINUS_NUM tUMINUS
+%right    tUNARY_OP tUMINUS
 %right    tPOW
 %right    tBANG tTILDE tUPLUS
 
@@ -395,7 +395,7 @@ union parser_value {
 %code {
 namespace ruby_parser {
 namespace bison {
-namespace typedruby24 {
+namespace typedruby25 {
 
 #define DIAGCHECK() do { \
 	if (driver.pending_error) { \
@@ -411,7 +411,7 @@ void parser::error(const std::string &msg) {
 		msg);
 }
 
-int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
+int yylex(parser::semantic_type *lval, ruby_parser::typedruby25 &driver) {
 	auto token = driver.lex.advance();
 	int token_type = static_cast<int>(token->type());
 	assert(token_type >= 0);
@@ -1068,7 +1068,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     {
                       $$ = driver.build.binary_op(self, $1, $2, $3);
                     }
-                | tUMINUS_NUM simple_numeric tPOW arg
+                | tUNARY_OP simple_numeric tPOW arg
                     {
                       $$ = driver.build.unary_op(self, $1, driver.build.binary_op(self, $2, $3, $4));
                     }
@@ -1520,6 +1520,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                 | kCLASS cpath superclass
                     {
                       driver.lex.extend_static();
+                      driver.lex.cond.push(false);
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
@@ -1539,6 +1540,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
 
                       $$ = driver.build.def_class(self, class_tok, $2, lt_t, superclass, $5, end_tok);
                       driver.replace_stack($<stack>4);
+                      driver.lex.cond.pop();
                       driver.lex.unextend();
                     }
                 | kCLASS tLSHFT expr term
@@ -1548,6 +1550,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     }
                     {
                       driver.lex.extend_static();
+                      driver.lex.cond.push(false);
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
@@ -1556,6 +1559,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                       $$ = driver.build.def_sclass(self, $1, $2, $3, $7, $8);
                       driver.def_level = $<size>5;
                       driver.replace_stack($<stack>6);
+                      driver.lex.cond.pop();
                       driver.lex.unextend();
                     }
                 | kMODULE cpath
@@ -1582,6 +1586,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     {
                       driver.def_level++;
                       driver.lex.extend_static();
+                      driver.lex.cond.push(false);
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
@@ -1589,6 +1594,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     {
                       $$ = driver.build.def_method(self, $1, $2, $4, $5, $6);
                       driver.replace_stack($<stack>3);
+                      driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.def_level--;
                     }
@@ -1600,6 +1606,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                     {
                       driver.def_level++;
                       driver.lex.extend_static();
+                      driver.lex.cond.push(false);
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
@@ -1609,6 +1616,7 @@ int yylex(parser::semantic_type *lval, ruby_parser::typedruby24 &driver) {
                       DIAGCHECK();
 
                       driver.replace_stack($<stack>6);
+                      driver.lex.cond.pop();
                       driver.lex.unextend();
                       driver.def_level--;
                     }
@@ -2116,7 +2124,7 @@ opt_block_args_tail:
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
-                    opt_block_param compstmt
+                    opt_block_param bodystmt
                     {
                       $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
 
@@ -2132,13 +2140,12 @@ opt_block_args_tail:
                       $<stack>$ = driver.copy_stack();
                       driver.lex.cmdarg.clear();
                     }
-                    opt_block_param compstmt
+                    opt_block_param bodystmt
                     {
                       $$ = driver.alloc.delimited_block(nullptr, $3, $4, nullptr);
                       driver.lex.unextend();
 
                       driver.replace_stack($<stack>2);
-                      driver.lex.cmdarg.pop();
                     }
 
        case_body: kWHEN args then compstmt cases
@@ -2408,9 +2415,9 @@ regexp_contents: // nothing
                     {
                       $$ = $1;
                     }
-                | tUMINUS_NUM simple_numeric %prec tLOWEST
+                | tUNARY_OP simple_numeric %prec tLOWEST
                     {
-                      $$ = driver.build.negate(self, $1, $2);
+                      $$ = driver.build.unary_op(self, $1, $2);
                     }
 
   simple_numeric: tINTEGER
@@ -3190,11 +3197,7 @@ tr_methodgenargs: tLBRACK2 tr_gendeclargs tr_constraints rbracket
                       $$ = nullptr;
                     }
 
-   tr_constraint: tr_type tEQL tr_type
-                    {
-                      $$ = driver.build.tr_conunify(self, $1, $3);
-                    }
-                | tr_type tCOLON tr_type
+   tr_constraint: tr_type tCOLON tr_type
                     {
                       $$ = driver.build.tr_consubtype(self, $1, $3);
                     }

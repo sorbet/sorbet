@@ -1838,16 +1838,11 @@ void lexer::set_state_expr_value() {
   # explodes.
   #
   expr_beg := |*
-      # Numeric processing. Converts:
-      #   +5 to [tINTEGER, 5]
-      #   -5 to [tUMINUS_NUM] [tINTEGER, 5]
+      # +5, -5
       [+\-][0-9]
       => {
-        fhold;
-        if (*ts == '-') {
-          emit(token_type::tUMINUS_NUM, "-", ts, ts + 1);
-          fnext expr_end; fbreak;
-        }
+        emit(token_type::tUNARY_OP, tok(ts, ts + 1), ts, ts + 1);
+        fhold; fnext expr_end; fbreak;
       };
 
       # splat *a

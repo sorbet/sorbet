@@ -1,0 +1,74 @@
+Begin {
+  stmts = [
+    Class {
+      name = Const {
+        scope = NULL
+        name = <constant:Toto>
+      }
+      superclass = NULL
+      body = DefMethod {
+        name = toto
+        args = NULL
+        body = Block {
+          send = Send {
+            receiver = Array {
+              elts = [
+                Integer {
+                  val = "1"
+                }
+              ]
+            }
+            method = each
+            args = [
+            ]
+          }
+          args = Args {
+            args = [
+              Arg {
+                name = n
+              }
+            ]
+          }
+          body = Ensure {
+            body = Rescue {
+              body = NULL
+              rescue = [
+                Resbody {
+                  exception = NULL
+                  var = NULL
+                  body = NULL
+                }
+              ]
+              else_ = NULL
+            }
+            ensure = NULL
+          }
+        }
+      }
+    }
+    DefMethod {
+      name = main
+      args = NULL
+      body = Send {
+        receiver = Send {
+          receiver = Const {
+            scope = NULL
+            name = <constant:Toto>
+          }
+          method = new
+          args = [
+          ]
+        }
+        method = toto
+        args = [
+        ]
+      }
+    }
+    Send {
+      receiver = NULL
+      method = main
+      args = [
+      ]
+    }
+  ]
+}

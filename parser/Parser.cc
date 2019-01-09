@@ -59,7 +59,7 @@ public:
 unique_ptr<Node> Parser::run(sorbet::core::GlobalState &gs, core::FileRef file) {
     Builder builder(gs, file);
     auto source = file.data(gs).source();
-    ruby_parser::typedruby24 driver(string(source.begin(), source.end()), Builder::interface);
+    ruby_parser::typedruby25 driver(string(source.begin(), source.end()), Builder::interface);
     auto ast = unique_ptr<Node>(builder.build(&driver));
     ErrorToError::run(gs, file, driver.diagnostics);
 
