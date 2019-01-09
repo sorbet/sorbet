@@ -8,3 +8,6 @@
 /pay-server
 
 .vscode/
+
+sorbet-wasm.js
+sorbet-wasm.wasm
