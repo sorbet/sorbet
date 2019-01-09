@@ -58,7 +58,7 @@ ClassDef{
 --- name-tree-raw end ---
 --- resolve-tree start ---
 class <emptyTree><<constant:<root>>> < ()
-  def self.<static-init><<static-init>$80>()
+  def self.<static-init><<static-init>$82>()
     1
   end
 end
@@ -70,7 +70,7 @@ ClassDef{
   rhs = [
     MethodDef{
       flags = self
-      name = <static-init><<static-init>$80>
+      name = <static-init><<static-init>$82>
       args = []
       rhs = Literal{ value = 1 }
     }
@@ -315,6 +315,11 @@ ClassDef{
    "strict": "Typed"
   },
   {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/object_space.rbi",
+   "sigil": "Strict",
+   "strict": "Strict"
+  },
+  {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/pathname.rbi",
    "sigil": "Typed",
    "strict": "Typed"
@@ -401,6 +406,11 @@ ClassDef{
   },
   {
    "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/trueclass.rbi",
+   "sigil": "Strict",
+   "strict": "Strict"
+  },
+  {
+   "path": "https://git.corp.stripe.com/stripe-internal/sorbet/tree/master/rbi/core/unbound_method.rbi",
    "sigil": "Strict",
    "strict": "Strict"
   },

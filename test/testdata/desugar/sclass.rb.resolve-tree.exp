@@ -17,7 +17,7 @@ begin
       end
     end
 
-    def self.<static-init><<static-init>$80>()
+    def self.<static-init><<static-init>$82>()
       begin
         begin
           ::RubyTyper.keep_for_ide(::A)

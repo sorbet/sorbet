@@ -846,9 +846,6 @@ class Object < BasicObject
   include Kernel
 end
 
-module ObjectSpace
-end
-
 class ObjectSpace::WeakMap < Object
   include Enumerable
 
@@ -982,9 +979,6 @@ module URI::RFC2396_REGEXP
 end
 
 module URI::Util
-end
-
-class UnboundMethod < Object
 end
 
 class UncaughtThrowError < ArgumentError
