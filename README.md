@@ -1,17 +1,3 @@
-Here's how to deploy this to try out the Sourcegraph extension https://sourcegraph.com/extensions/sourcegraph/lang-ruby
-
-```
-make build
-npm install -g http-server
-http-server --cors -p 5000 .
-```
-
-This will write `sorbet-wasm.wasm` to disk and serve it on port 5000. The lang-ruby Sourcegraph extension fetches the WebAssembly module from `http://localhost:5000/sorbet-wasm.wasm` (hard-coded for now).
-
-Then open https://github.com/sourcegraph/lang-ruby/blob/master/sample.rb and you should see hover tooltips:
-
-![](sample.gif)
-
 # Sorbet
 
 This repository contains Sorbet, a static typechecker for a subset of Ruby. It
@@ -53,6 +39,7 @@ also want to see:
   - [Debugging](#debugging)
   - [Profiling](#profiling)
 - [Updating sorbet.run](#updating-sorbetrun)
+- [GitHub integration via Sourcegraph](./docs/sourcegraph.md)
 - [Editor and environment](#editor-and-environment)
   - [Bazel](#bazel)
   - [Shell](#shell)
