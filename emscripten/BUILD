@@ -21,12 +21,7 @@ cc_binary(
             # This let's us allocate 1 JavaScript function (the callback for
             # JSON-RPC responses) as a function pointer for use in C++
             # (see addFunction above).
-            "RESERVED_FUNCTION_POINTERS=1",
-            "-s",
-            "ASSERTIONS=1",
-            "-s",
-            "SAFE_HEAP=1",
-            "-g"
+            "RESERVED_FUNCTION_POINTERS=1"
         ],
         "//conditions:default": [],
     }),
