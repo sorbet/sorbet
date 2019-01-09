@@ -35,51 +35,23 @@ string LSPLoop::fileRef2Uri(const core::GlobalState &gs, core::FileRef file) {
         return localName2Remote(string(file.data(gs).path()));
     }
 }
-rapidjson::Value LSPLoop::loc2Range(const core::GlobalState &gs, core::Loc loc) {
-    /**
-       {
-        start: { line: 5, character: 23 }
-        end : { line 6, character : 0 }
-        }
-     */
-    rapidjson::Value ret;
-    ret.SetObject();
-    rapidjson::Value start;
-    start.SetObject();
-    rapidjson::Value end;
-    end.SetObject();
+unique_ptr<Range> loc2Range(const core::GlobalState &gs, core::Loc loc) {
+    unique_ptr<Position> start;
+    unique_ptr<Position> end;
     if (!loc.file().exists()) {
-        start.AddMember("line", 1, alloc);
-        start.AddMember("character", 1, alloc);
-        end.AddMember("line", 2, alloc);
-        end.AddMember("character", 0, alloc);
-
-        ret.AddMember("start", start, alloc);
-        ret.AddMember("end", end, alloc);
-        return ret;
+        start = make_unique<Position>(1, 1);
+        end = make_unique<Position>(2, 0);
+    } else {
+        auto pair = loc.position(gs);
+        // All LSP numbers are zero-based, ours are 1-based.
+        start = make_unique<Position>(pair.first.line - 1, pair.first.column - 1);
+        end = make_unique<Position>(pair.second.line - 1, pair.second.column - 1);
     }
-
-    auto pair = loc.position(gs);
-    // All LSP numbers are zero-based, ours are 1-based.
-    start.AddMember("line", pair.first.line - 1, alloc);
-    start.AddMember("character", pair.first.column - 1, alloc);
-    end.AddMember("line", pair.second.line - 1, alloc);
-    end.AddMember("character", pair.second.column - 1, alloc);
-
-    ret.AddMember("start", start, alloc);
-    ret.AddMember("end", end, alloc);
-    return ret;
+    return make_unique<Range>(move(start), move(end));
 }
 
-rapidjson::Value LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
+unique_ptr<Location> LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc loc) {
     string uri;
-    //  interface Location {
-    //      uri: DocumentUri;
-    //      range: Range;
-    //  }
-    rapidjson::Value ret;
-    ret.SetObject();
-
     if (!loc.file().exists()) {
         uri = localName2Remote("???");
     } else {
@@ -103,13 +75,9 @@ rapidjson::Value LSPLoop::loc2Location(const core::GlobalState &gs, core::Loc lo
             uri = fileRef2Uri(gs, loc.file());
         }
     }
-
-    ret.AddMember("uri", uri, alloc);
-    ret.AddMember("range", loc2Range(gs, loc), alloc);
-
-    return ret;
+    return make_unique<Location>(uri, loc2Range(gs, loc));
 }
-bool LSPLoop::hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
+bool hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     if (!sym.exists() || sym == core::Symbols::root()) {
         return true;
     }
@@ -134,14 +102,14 @@ bool LSPLoop::hideSymbol(const core::GlobalState &gs, core::SymbolRef sym) {
     return false;
 }
 
-bool LSPLoop::hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
+bool hasSimilarName(const core::GlobalState &gs, core::NameRef name, string_view pattern) {
     string_view view = name.data(gs)->shortName(gs);
     auto fnd = view.find(pattern);
     return fnd != string_view::npos;
 }
 
-string LSPLoop::methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver,
-                             core::TypePtr retType, shared_ptr<core::TypeConstraint> constraint) {
+string methodDetail(const core::GlobalState &gs, core::SymbolRef method, core::TypePtr receiver, core::TypePtr retType,
+                    shared_ptr<core::TypeConstraint> constraint) {
     ENFORCE(method.exists());
     // handle this case anyways so that we don't crash in prod when this method is mis-used
     if (!method.exists()) {
@@ -165,8 +133,8 @@ string LSPLoop::methodDetail(const core::GlobalState &gs, core::SymbolRef method
     return fmt::format("sig {{params({}).{}}}", fmt::join(typeAndArgNames, ", "), methodReturnType);
 }
 
-core::TypePtr LSPLoop::getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
-                                     shared_ptr<core::TypeConstraint> constr) {
+core::TypePtr getResultType(const core::GlobalState &gs, core::SymbolRef ofWhat, core::TypePtr receiver,
+                            shared_ptr<core::TypeConstraint> constr) {
     core::Context ctx(gs, core::Symbols::root());
     auto resultType = ofWhat.data(gs)->resultType;
     if (auto *proxy = core::cast_type<core::ProxyType>(receiver.get())) {
@@ -187,64 +155,32 @@ core::TypePtr LSPLoop::getResultType(const core::GlobalState &gs, core::SymbolRe
     return resultType;
 }
 
-int LSPLoop::symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
+SymbolKind symbolRef2SymbolKind(const core::GlobalState &gs, core::SymbolRef symbol) {
     auto sym = symbol.data(gs);
-    /**
-     * A symbol kind.
-     *
-     *      export namespace SymbolKind {
-     *          export const File = 1;
-     *          export const Module = 2;
-     *          export const Namespace = 3;
-     *          export const Package = 4;
-     *          export const Class = 5;
-     *          export const Method = 6;
-     *          export const Property = 7;
-     *          export const Field = 8;
-     *          export const Constructor = 9;
-     *          export const Enum = 10;
-     *          export const Interface = 11;
-     *          export const Function = 12;
-     *          export const Variable = 13;
-     *          export const Constant = 14;
-     *          export const String = 15;
-     *          export const Number = 16;
-     *          export const Boolean = 17;
-     *          export const Array = 18;
-     *          export const Object = 19;
-     *          export const Key = 20;
-     *          export const Null = 21;
-     *          export const EnumMember = 22;
-     *          export const Struct = 23;
-     *          export const Event = 24;
-     *          export const Operator = 25;
-     *          export const TypeParameter = 26;
-     *      }
-     **/
     if (sym->isClass()) {
         if (sym->isClassModule()) {
-            return 2;
+            return SymbolKind::Module;
         }
         if (sym->isClassClass()) {
-            return 5;
+            return SymbolKind::Class;
         }
     } else if (sym->isMethod()) {
         if (sym->name == core::Names::initialize()) {
-            return 9;
+            return SymbolKind::Constructor;
         } else {
-            return 6;
+            return SymbolKind::Method;
         }
     } else if (sym->isField()) {
-        return 8;
+        return SymbolKind::Field;
     } else if (sym->isStaticField()) {
-        return 14;
+        return SymbolKind::Constant;
     } else if (sym->isMethodArgument()) {
-        return 13;
+        return SymbolKind::Variable;
     } else if (sym->isTypeMember()) {
-        return 26;
+        return SymbolKind::TypeParameter;
     } else if (sym->isTypeArgument()) {
-        return 26;
+        return SymbolKind::TypeParameter;
     }
-    return 0;
+    return SymbolKind::Unknown;
 }
 } // namespace sorbet::realmain::lsp

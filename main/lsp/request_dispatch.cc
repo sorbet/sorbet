@@ -79,7 +79,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 
                 files.emplace_back(move(file));
 
-                return pushDiagnostics(tryFastPath(move(gs), files));
+                return pushDiagnostics(d, tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
@@ -99,7 +99,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
                 files.emplace_back(
                     make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
 
-                return pushDiagnostics(tryFastPath(move(gs), files));
+                return pushDiagnostics(d, tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::Initialized()) {
@@ -109,7 +109,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
                 Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
-                auto newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
+                auto newGs = pushDiagnostics(d, runSlowPath(move(changedFiles)));
                 ENFORCE(newGs);
                 this->globalStateHashes = computeStateHashes(newGs->getFiles());
                 return newGs;
@@ -120,8 +120,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
         }
     } else {
         logger->debug("Processing request {}", method.name);
-        // is request
-        rapidjson::Value result;
         int errorCode = 0;
         string errorString;
         if (d.FindMember("cancelled") != d.MemberEnd()) {
@@ -131,7 +129,6 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
             sendError(d, errorCode, errorString);
         } else if (method == LSPMethod::Initialize()) {
             prodCategoryCounterInc("lsp.requests.processed", "initialize");
-            result.SetObject();
             rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
             auto &clientCaps = d["params"]["capabilities"];
             auto tddCaps = clientCaps.FindMember("textDocument");
@@ -149,45 +146,42 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
                 }
             }
 
-            string serverCap = "{\"capabilities\": "
-                               "   {"
-                               "       \"textDocumentSync\": 2, "
-                               "       \"documentSymbolProvider\": true, "
-                               "       \"workspaceSymbolProvider\": true, "
-                               "       \"definitionProvider\": true, "
-                               "       \"hoverProvider\":true,"
-                               "       \"referencesProvider\":true,"
-                               "       \"signatureHelpProvider\": { "
-                               "           \"triggerCharacters\": [\"(\", \",\"]"
-                               "       },"
-                               "       \"completionProvider\": { "
-                               "           \"triggerCharacters\": [\".\"]"
-                               "       }"
-                               "   }"
-                               "}";
-            rapidjson::Document temp;
-            auto &r = temp.Parse(serverCap.c_str());
-            ENFORCE(!r.HasParseError());
-            result.CopyFrom(temp, alloc);
-            sendResult(d, result);
+            auto serverCap = make_unique<ServerCapabilities>();
+            serverCap->textDocumentSync = TextDocumentSyncKind::Incremental;
+            serverCap->definitionProvider = true;
+            serverCap->documentSymbolProvider = true;
+            serverCap->workspaceSymbolProvider = true;
+            serverCap->hoverProvider = true;
+            serverCap->referencesProvider = true;
+
+            auto sigHelpProvider = make_unique<SignatureHelpOptions>();
+            sigHelpProvider->triggerCharacters = {"(", ","};
+            serverCap->signatureHelpProvider = move(sigHelpProvider);
+
+            auto completionProvider = make_unique<CompletionOptions>();
+            completionProvider->triggerCharacters = {"."};
+            serverCap->completionProvider = move(completionProvider);
+
+            sendResult(d, InitializeResult(move(serverCap)));
         } else if (method == LSPMethod::Shutdown()) {
             prodCategoryCounterInc("lsp.requests.processed", "shutdown");
             // return default value: null
+            rapidjson::Value result;
             sendResult(d, result);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
-            return handleTextDocumentDocumentSymbol(move(gs), result, d);
+            return handleTextDocumentDocumentSymbol(move(gs), d);
         } else if (method == LSPMethod::WorkspaceSymbols()) {
-            return handleWorkspaceSymbols(move(gs), result, d);
+            return handleWorkspaceSymbols(move(gs), d);
         } else if (method == LSPMethod::TextDocumentDefinition()) {
-            return handleTextDocumentDefinition(move(gs), result, d);
+            return handleTextDocumentDefinition(move(gs), d);
         } else if (method == LSPMethod::TextDocumentHover()) {
-            return handleTextDocumentHover(move(gs), result, d);
+            return handleTextDocumentHover(move(gs), d);
         } else if (method == LSPMethod::TextDocumentCompletion()) {
-            return handleTextDocumentCompletion(move(gs), result, d);
+            return handleTextDocumentCompletion(move(gs), d);
         } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
-            return handleTextSignatureHelp(move(gs), result, d);
+            return handleTextSignatureHelp(move(gs), d);
         } else if (method == LSPMethod::TextDocumentRefernces()) {
-            return handleTextDocumentReferences(move(gs), result, d);
+            return handleTextDocumentReferences(move(gs), d);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
             errorCode = (int)LSPErrorCodes::MethodNotFound;

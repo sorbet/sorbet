@@ -17,8 +17,8 @@ mergeMaps(UnorderedMap<core::NameRef, vector<core::SymbolRef>> &&first,
     return std::move(first);
 };
 
-UnorderedMap<core::NameRef, vector<core::SymbolRef>>
-LSPLoop::findSimilarMethodsIn(const core::GlobalState &gs, core::TypePtr receiver, string_view name) {
+UnorderedMap<core::NameRef, vector<core::SymbolRef>> findSimilarMethodsIn(const core::GlobalState &gs,
+                                                                          core::TypePtr receiver, string_view name) {
     UnorderedMap<core::NameRef, vector<core::SymbolRef>> result;
     typecase(
         receiver.get(),
@@ -64,7 +64,7 @@ LSPLoop::findSimilarMethodsIn(const core::GlobalState &gs, core::TypePtr receive
     return result;
 }
 
-string LSPLoop::methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
+string methodSnippet(const core::GlobalState &gs, core::SymbolRef method) {
     auto shortName = method.data(gs)->name.data(gs)->shortName(gs);
     vector<string> typeAndArgNames;
 
@@ -119,27 +119,25 @@ optional<string> findDocumentation(string_view sourceCode, int beginIndex) {
     return documentation;
 }
 
-void LSPLoop::addCompletionItem(const core::GlobalState &gs, rapidjson::Value &items, core::SymbolRef what,
-                                const core::QueryResponse &resp) {
+unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
+                                                      const core::QueryResponse &resp) {
     ENFORCE(what.exists());
-    rapidjson::Value item;
-    item.SetObject();
-    item.AddMember("label", string(what.data(gs)->name.data(gs)->shortName(gs)), alloc);
+    auto item = make_unique<CompletionItem>(string(what.data(gs)->name.data(gs)->shortName(gs)));
     auto resultType = what.data(gs)->resultType;
     if (!resultType) {
         resultType = core::Types::untypedUntracked();
     }
     if (what.data(gs)->isMethod()) {
-        item.AddMember("kind", 3, alloc); // Function
+        item->kind = CompletionItemKind::Function;
         if (what.exists()) {
-            item.AddMember("detail", methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint), alloc);
+            item->detail = methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint);
         }
         if (clientCapabilities.textDocument.completion.completionItem.snippetSupport) {
-            item.AddMember("insertTextFormat", 2, alloc); // Snippet
-            item.AddMember("insertText", methodSnippet(gs, what), alloc);
+            item->insertTextFormat = InsertTextFormat::Snippet;
+            item->insertText = methodSnippet(gs, what);
         } else {
-            item.AddMember("insertTextFormat", 1, alloc); // PlainText
-            item.AddMember("insertText", string(what.data(gs)->name.data(gs)->shortName(gs)), alloc);
+            item->insertTextFormat = InsertTextFormat::PlainText;
+            item->insertText = string(what.data(gs)->name.data(gs)->shortName(gs));
         }
 
         optional<string> documentation = nullopt;
@@ -149,32 +147,28 @@ void LSPLoop::addCompletionItem(const core::GlobalState &gs, rapidjson::Value &i
         }
         if (documentation) {
             if (documentation->find("@deprecated") != documentation->npos) {
-                item.AddMember("deprecated", true, alloc);
+                item->deprecated = true;
             }
-            item.AddMember("documentation", std::move(*documentation), alloc);
+            item->documentation = documentation;
         }
-
     } else if (what.data(gs)->isStaticField()) {
-        item.AddMember("kind", 21, alloc); // Constant
-        item.AddMember("detail", resultType->show(gs), alloc);
+        item->kind = CompletionItemKind::Constant;
+        item->detail = resultType->show(gs);
     } else if (what.data(gs)->isClass()) {
-        item.AddMember("kind", 7, alloc); // Class
+        item->kind = CompletionItemKind::Class;
     }
-    items.PushBack(std::move(item), alloc);
+    return item;
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Value &result, rapidjson::Document &d) {
+                                                                    rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
-    result.SetObject();
-    result.AddMember("isIncomplete", "false", alloc);
-    rapidjson::Value items;
-    items.SetArray();
 
     auto finalGs = move(gs);
     auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentCompletion(), false);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
+    vector<unique_ptr<CompletionItem>> items;
     if (!queryResponses.empty()) {
         auto resp = std::move(queryResponses[0]);
 
@@ -198,7 +192,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
             for (auto &entry : methodsSorted) {
                 if (entry.second[0].exists()) {
                     fast_sort(entry.second, [&](auto lhs, auto rhs) -> bool { return lhs._id < rhs._id; });
-                    addCompletionItem(*finalGs, items, entry.second[0], *resp);
+                    items.push_back(getCompletionItem(*finalGs, entry.second[0], *resp));
                 }
             }
         } else if (resp->kind == core::QueryResponse::Kind::IDENT ||
@@ -216,7 +210,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
                             // hide singletons
                             hasSimilarName(*finalGs, sym.data(*finalGs)->name, pattern) &&
                             !sym.data(*finalGs)->derivesFrom(*finalGs, core::Symbols::StubClass())) {
-                            addCompletionItem(*finalGs, items, sym, *resp);
+                            items.push_back(getCompletionItem(*finalGs, sym, *resp));
                         }
                     }
                 } while (owner != core::Symbols::root());
@@ -224,8 +218,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
         } else {
         }
     }
-    result.AddMember("items", std::move(items), alloc);
-    sendResult(d, result);
+    sendResult(d, CompletionList(false, move(items)));
     return finalGs;
 }
 

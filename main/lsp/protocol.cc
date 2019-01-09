@@ -237,12 +237,8 @@ LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pen
     return pendingRequests.end();
 }
 
-void LSPLoop::sendShowMessageNotification(int messageType, const string &message) {
-    rapidjson::Value result;
-    result.SetObject();
-    result.AddMember("type", messageType, alloc);
-    result.AddMember("message", message, alloc);
-    sendNotification(LSPMethod::WindowShowMessage(), result);
+void LSPLoop::sendShowMessageNotification(MessageType messageType, rapidjson::Document &d, const string &message) {
+    sendNotification(LSPMethod::WindowShowMessage(), d, ShowMessageParams(messageType, message));
 }
 
 void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &result) {
@@ -250,6 +246,19 @@ void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &resu
     forRequest.RemoveMember("method");
     forRequest.RemoveMember("params");
     sendRaw(forRequest);
+}
+
+void LSPLoop::sendResult(rapidjson::Document &forRequest, const JSONBaseType &result) {
+    sendResult(forRequest, *result.toJSONValueInternal(forRequest));
+}
+
+void LSPLoop::sendResult(rapidjson::Document &forRequest, const std::vector<std::unique_ptr<JSONBaseType>> &result) {
+    rapidjson::Value finalResult;
+    finalResult.SetArray();
+    for (auto &item : result) {
+        finalResult.PushBack(*item->toJSONValueInternal(forRequest), alloc);
+    }
+    sendResult(forRequest, finalResult);
 }
 
 void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, const string &errorStr) {
@@ -321,15 +330,16 @@ void LSPLoop::sendRaw(rapidjson::Document &raw) {
     outputStream << outResult << flush;
 }
 
-void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Value &data) {
+void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Document &d, const JSONBaseType &data) {
     ENFORCE(meth.isNotification);
     ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
+
     rapidjson::Document request(&alloc);
     request.SetObject();
     string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
 
     request.AddMember("method", meth.name, alloc);
-    request.AddMember("params", data, alloc);
+    request.AddMember("params", *data.toJSONValueInternal(d), alloc);
 
     sendRaw(request);
 }

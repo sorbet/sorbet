@@ -123,22 +123,15 @@ ast::ParsedFile testSerialize(core::GlobalState &gs, ast::ParsedFile expr) {
 
 /** Converts a Sorbet Detail object into an equivalent LSP Position object. */
 unique_ptr<Position> detailToPosition(const core::Loc::Detail &detail) {
-    auto position = make_unique<Position>();
     // 1-indexed => 0-indexed
-    position->line = detail.line - 1;
-    position->character = detail.column - 1;
-    return position;
+    return make_unique<Position>(detail.line - 1, detail.column - 1);
 }
 
 /** Converts a Sorbet Error object into an equivalent LSP Diagnostic object. */
 unique_ptr<Diagnostic> errorToDiagnostic(core::GlobalState &gs, const unique_ptr<core::Error> &error) {
     auto position = error->loc.position(gs);
-    auto diagnostic = make_unique<Diagnostic>();
-    diagnostic->range = make_unique<Range>();
-    diagnostic->range->start = detailToPosition(position.first);
-    diagnostic->range->end = detailToPosition(position.second);
-    diagnostic->message = error->header;
-    return diagnostic;
+    auto range = make_unique<Range>(detailToPosition(position.first), detailToPosition(position.second));
+    return make_unique<Diagnostic>(move(range), error->header);
 }
 
 /** Returns true if a and b are different Diagnostic objects but have the same range and message. */
@@ -629,9 +622,7 @@ TEST_P(LSPTest, PositionTests) {
     // Complete initialization handshake with an 'initialized' message.
     {
         rapidjson::Value emptyObject(rapidjson::kObjectType);
-        auto initialized = make_unique<NotificationMessage>();
-        initialized->jsonrpc = "2.0";
-        initialized->method = "initialized";
+        auto initialized = make_unique<NotificationMessage>("2.0", "initialized");
         initialized->params = make_unique<rapidjson::Value>(rapidjson::kObjectType);
         auto initializedResponses = getLSPResponsesFor(move(initialized));
         EXPECT_EQ(0, initializedResponses.size()) << "Should not receive any response to 'initialized' message.";
@@ -643,17 +634,9 @@ TEST_P(LSPTest, PositionTests) {
     // Tell LSP that we opened a bunch of brand new, empty files (the test files).
     {
         for (auto &filename : filenames) {
-            auto didOpenTextDocParams = make_unique<DidOpenTextDocumentParams>();
-
-            auto textDocument = make_unique<TextDocumentItem>();
-            textDocument->languageId = "ruby";
-            textDocument->version = 1;
-            textDocument->uri = testFileUris[filename];
-            textDocument->text = "";
-            didOpenTextDocParams->textDocument = move(textDocument);
-
-            unique_ptr<JSONBaseType> cast = move(didOpenTextDocParams);
-            auto responses = getLSPResponsesFor(makeRequestMessage(doc, "textDocument/didOpen", nextId++, cast));
+            unique_ptr<JSONBaseType> params = make_unique<DidOpenTextDocumentParams>(
+                make_unique<TextDocumentItem>(testFileUris[filename], "ruby", 1, ""));
+            auto responses = getLSPResponsesFor(makeRequestMessage(doc, "textDocument/didOpen", nextId++, params));
             EXPECT_EQ(0, responses.size()) << "Should not receive any response to opening an empty file.";
         }
     }
@@ -662,21 +645,16 @@ TEST_P(LSPTest, PositionTests) {
     {
         vector<unique_ptr<JSONDocument<JSONBaseType>>> allResponses;
         for (auto &filename : filenames) {
-            auto didChangeParams = make_unique<DidChangeTextDocumentParams>();
-
-            auto textDocId = make_unique<VersionedTextDocumentIdentifier>();
-            textDocId->uri = testFileUris[filename];
-            textDocId->version = 2;
-            didChangeParams->textDocument = std::move(textDocId);
-
-            auto textDocChange = make_unique<TextDocumentContentChangeEvent>();
+            auto textDoc = make_unique<VersionedTextDocumentIdentifier>(testFileUris[filename], 2);
             auto textDocContents = test.sourceFileContents[filename]->source();
-            textDocChange->text = string(textDocContents.begin(), textDocContents.end());
-            didChangeParams->contentChanges.push_back(std::move(textDocChange));
+            auto text = string(textDocContents.begin(), textDocContents.end());
 
-            auto didChangeNotif = make_unique<NotificationMessage>();
-            didChangeNotif->jsonrpc = "2.0";
-            didChangeNotif->method = "textDocument/didChange";
+            auto textDocChange = make_unique<TextDocumentContentChangeEvent>(text);
+            vector<unique_ptr<TextDocumentContentChangeEvent>> textChanges;
+            textChanges.push_back(move(textDocChange));
+
+            auto didChangeParams = make_unique<DidChangeTextDocumentParams>(move(textDoc), move(textChanges));
+            auto didChangeNotif = make_unique<NotificationMessage>("2.0", "textDocument/didChange");
             didChangeNotif->params = didChangeParams->toJSONValue(doc);
 
             auto responses = getLSPResponsesFor(move(didChangeNotif));

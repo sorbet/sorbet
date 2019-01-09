@@ -5,17 +5,16 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::GlobalState> gs,
-                                                               rapidjson::Value &result, rapidjson::Document &d) {
+                                                               rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.hover");
-    result.SetObject();
 
     auto finalGs = move(gs);
     auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentHover(), false);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
     if (queryResponses.empty()) {
-        rapidjson::Value nullreply;
-        sendResult(d, nullreply);
+        rapidjson::Value nullValue;
+        sendResult(d, nullValue);
         return finalGs;
     }
 
@@ -42,29 +41,21 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentHover(unique_ptr<core::
                                          resp->constraint);
             }
         }
-        rapidjson::Value markupContents;
-        markupContents.SetObject();
         // We use markdown here because if we just use a string, VSCode tries to interpret
         // things like <Class:Foo> as html tags and make them clickable (but the click takes
         // you somewhere nonsensical)
-        markupContents.AddMember("kind", "markdown", alloc);
-        markupContents.AddMember("value", contents, alloc);
-        result.AddMember("contents", markupContents, alloc);
-        sendResult(d, result);
+        auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, contents);
+        sendResult(d, Hover(markupContents->toJSONValueInternal(d)));
     } else if (resp->kind == core::QueryResponse::Kind::IDENT || resp->kind == core::QueryResponse::Kind::CONSTANT ||
                resp->kind == core::QueryResponse::Kind::LITERAL) {
-        rapidjson::Value markupContents;
-        markupContents.SetObject();
-        markupContents.AddMember("kind", "markdown", alloc);
-        markupContents.AddMember("value", resp->retType.type->show(*finalGs), alloc);
-        result.AddMember("contents", markupContents, alloc);
-        sendResult(d, result);
+        auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, resp->retType.type->show(*finalGs));
+        sendResult(d, Hover(markupContents->toJSONValueInternal(d)));
     } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
-        result.SetNull();
         // TODO: Actually send the type signature here. I'm skipping this for now
         // since it's not a very useful feature for the end user (i.e., they should
         // be able to see this right above the definition in ruby)
-        sendResult(d, result);
+        rapidjson::Value nullValue;
+        sendResult(d, nullValue);
     } else {
         sendError(d, (int)LSPErrorCodes::InvalidParams, "Unhandled QueryResponse kind in textDocument/hover");
     }

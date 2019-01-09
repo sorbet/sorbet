@@ -7,10 +7,8 @@ using namespace std;
 namespace sorbet::realmain::lsp {
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Value &result, rapidjson::Document &d) {
+                                                                    rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.references");
-    // we're postponing setting the type of `result` because we want to return `null` in case we don't handle that
-    // location yet.
 
     auto finalGs = move(gs);
     auto run1 = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentCompletion(), false);
@@ -24,16 +22,20 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentReferences(unique_ptr<c
             auto symRef = resp->dispatchComponents[0].method;
             auto run2 = setupLSPQueryBySymbol(move(finalGs), symRef, LSPMethod::TextDocumentRefernces());
             finalGs = move(run2.gs);
-            result.SetArray();
+            vector<unique_ptr<JSONBaseType>> result;
             auto &queryResponses = run2.responses;
             for (auto &q : queryResponses) {
-                result.PushBack(loc2Location(*finalGs, q->termLoc), alloc);
+                result.push_back(loc2Location(*finalGs, q->termLoc));
             }
+            sendResult(d, result);
+            return finalGs;
         } else if (resp->kind == core::QueryResponse::Kind::IDENT) {
             // TODO: find them in tree
         }
     }
-    sendResult(d, result);
+    // An explicit null indicates that we don't support this request (or that nothing was at the location).
+    rapidjson::Value nullValue;
+    sendResult(d, nullValue);
     return finalGs;
 }
 

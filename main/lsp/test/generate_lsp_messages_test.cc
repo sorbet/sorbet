@@ -51,7 +51,7 @@ TEST(GenerateLSPMessagesTest, Object) {
         JSONTypeError);
 
     // Serialization: Throws if sub-objects are not initialized.
-    auto badRange = make_unique<Range>();
+    auto badRange = make_unique<Range>(nullptr, nullptr);
     ASSERT_THROW(badRange->toJSON(), NullPtrError);
 }
 
@@ -81,8 +81,7 @@ TEST(GenerateLSPMessagesTest, StringEnumField) {
     ASSERT_THROW(MarkupContent::fromJSON("{\"kind\": 4, \"value\": \"Hello\"}"), JSONTypeError);
 
     // Create a C++ object with an invalid enum value and try to serialize.
-    auto markupContent = make_unique<MarkupContent>();
-    markupContent->kind = (MarkupKind)1000;
+    auto markupContent = make_unique<MarkupContent>((MarkupKind)1000, "hello");
     ASSERT_THROW(markupContent->toJSON(), InvalidEnumValueError);
 }
 
@@ -158,7 +157,7 @@ TEST(GenerateLSPMessagesTest, VariantField) {
 
     // Create CancelParams with a variant field in an erroneous state.
     // See https://en.cppreference.com/w/cpp/utility/variant/valueless_by_exception
-    auto cancelParams = make_unique<CancelParams>();
+    auto cancelParams = make_unique<CancelParams>(variant<int, std::string>());
     try {
         cancelParams->id.emplace<int>(ExceptionThrower());
     } catch (runtime_error e) {
@@ -204,8 +203,7 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
 
     // Serialization: Must be an object.
     // Null pointer case
-    auto notificationMessage = make_unique<NotificationMessage>();
-    notificationMessage->jsonrpc = "2.0";
+    auto notificationMessage = make_unique<NotificationMessage>("2.0", "foo");
     notificationMessage->params = nullptr;
     ASSERT_THROW(notificationMessage->toJSON(), NullPtrError);
 
@@ -215,7 +213,7 @@ TEST(GenerateLSPMessagesTest, AnyObject) {
 
     // New object case -- doesn't throw and stresses supported APIs for making values.
     auto doc = NotificationMessage::fromJSON(makeNotificationMessage("{}"));
-    auto range = make_unique<Position>();
+    auto range = make_unique<Position>(0, 0);
     doc->root->params = range->toJSONValue(doc);
     ASSERT_NO_THROW(doc->root->toJSON());
 }
@@ -232,8 +230,7 @@ TEST(GenerateLSPMessagesTest, StringConstant) {
     ASSERT_THROW(CreateFile::fromJSON("{\"kind\": 4, \"uri\": \"file://foo\"}"), JSONTypeError);
 
     // Throws during serialization if not set to proper constant value.
-    auto createFile = make_unique<CreateFile>();
-    createFile->kind = "delete";
+    auto createFile = make_unique<CreateFile>("delete", "file://foo");
     ASSERT_THROW(createFile->toJSON(), InvalidConstantValueError);
 }
 

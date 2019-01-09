@@ -59,6 +59,13 @@ public:
     virtual BaseKind getJSONBaseKind() const = 0;
 
     /**
+     * Returns `true` if the underlying C++ type cannot be copied and must be moved.
+     */
+    virtual bool cannotBeCopied() const {
+        return false;
+    }
+
+    /**
      * Writes the C++ statements needed to sanity check and retrieve a value
      * of this type from a rapidjson::Value object stored in `from` into
      * the struct. Call `assign` with the C++ code that returns the
@@ -240,7 +247,7 @@ public:
         // Create new scope for temp var.
         fmt::format_to(out, "{{\n");
         fmt::format_to(out, "rapidjson::Value strCopy;\n");
-        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1}->GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "strCopy.SetString({0}.c_str(), {0}.length(), {1}.GetAllocator());\n", from, DOCUMENT_VAR);
         assign(out, "strCopy");
         fmt::format_to(out, "}}\n");
     }
@@ -328,6 +335,10 @@ public:
         return "any";
     }
 
+    bool cannotBeCopied() const {
+        return true;
+    }
+
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
                            const std::string &fieldName) {
         assign(out, fmt::format("tryConvertToAny({}, {}, \"{}\")", ALLOCATOR_VAR, from, fieldName));
@@ -338,7 +349,7 @@ public:
         fmt::format_to(out, "if ({} == nullptr) {{\n", from);
         fmt::format_to(out, "throw NullPtrError(\"{}\");\n", fieldName);
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}->GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}.GetAllocator());\n", from, DOCUMENT_VAR);
         simpleSerialization(out, "valueCopy", assign);
     }
 };
@@ -360,6 +371,10 @@ class JSONAnyObjectType final : public JSONType {
         return "object";
     }
 
+    bool cannotBeCopied() const {
+        return true;
+    }
+
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
                            const std::string &fieldName) {
         assign(out, fmt::format("tryConvertToAnyObject({}, {}, \"{}\")", ALLOCATOR_VAR, from, fieldName));
@@ -372,7 +387,7 @@ class JSONAnyObjectType final : public JSONType {
         fmt::format_to(out, "}} else if (!{}->IsObject()) {{\n", from);
         fmt::format_to(out, "throw InvalidTypeError(\"{}\", \"object\", {});\n", fieldName, from);
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}->GetAllocator());\n", from, DOCUMENT_VAR);
+        fmt::format_to(out, "rapidjson::Value valueCopy(*{}, {}.GetAllocator());\n", from, DOCUMENT_VAR);
         simpleSerialization(out, "valueCopy", assign);
     }
 };
@@ -388,7 +403,7 @@ private:
     }
 
     static void AssignSerializedElementValue(fmt::memory_buffer &out, const std::string &from) {
-        fmt::format_to(out, "{}.PushBack({}, {}->GetAllocator());", arrayVar, from, DOCUMENT_VAR);
+        fmt::format_to(out, "{}.PushBack({}, {}.GetAllocator());", arrayVar, from, DOCUMENT_VAR);
     }
 
 public:
@@ -408,6 +423,10 @@ public:
 
     std::string getJSONType() const {
         return fmt::format("Array<{}>", componentType->getJSONType());
+    }
+
+    bool cannotBeCopied() const {
+        return componentType->cannotBeCopied();
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
@@ -625,6 +644,10 @@ public:
         return fmt::format("({})?", innerType->getJSONType());
     }
 
+    bool cannotBeCopied() const {
+        return innerType->cannotBeCopied();
+    }
+
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
                            const std::string &fieldName) {
         const std::string innerCPPType = innerType->getCPPType();
@@ -650,6 +673,13 @@ public:
 class JSONObjectType final : public JSONClassType {
 private:
     std::vector<std::shared_ptr<FieldDef>> fieldDefs;
+    std::vector<std::shared_ptr<FieldDef>> getRequiredFields() {
+        std::vector<std::shared_ptr<FieldDef>> reqFields;
+        // Filter out optional fields.
+        std::copy_if(fieldDefs.begin(), fieldDefs.end(), std::back_inserter(reqFields),
+                     [](auto &fieldDef) { return !dynamic_cast<JSONOptionalType *>(fieldDef->type.get()); });
+        return reqFields;
+    }
 
 public:
     JSONObjectType(const std::string typeName, std::vector<std::shared_ptr<FieldDef>> fieldDefs)
@@ -669,6 +699,10 @@ public:
 
     std::string getJSONType() const {
         return typeName;
+    }
+
+    bool cannotBeCopied() const {
+        return true;
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,
@@ -702,13 +736,34 @@ public:
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             fieldDef->emitDeclaration(out);
         }
-        fmt::format_to(
-            out,
-            "std::unique_ptr<rapidjson::Value> toJSONValueInternal(const std::unique_ptr<rapidjson::Document> &d);\n");
+        auto reqFields = getRequiredFields();
+        if (reqFields.size() > 0) {
+            // Constructor. Only accepts non-optional fields as arguments
+            fmt::format_to(out, "{}({});\n", typeName,
+                           fmt::map_join(getRequiredFields(), ", ", [](auto field) -> std::string {
+                               return fmt::format("{} {}", field->type->getCPPType(), field->name);
+                           }));
+        }
+        fmt::format_to(out, "std::unique_ptr<rapidjson::Value> toJSONValueInternal(rapidjson::Document &d) const;\n");
         fmt::format_to(out, "}};\n");
     }
 
     void emitDefinition(fmt::memory_buffer &out) {
+        auto reqFields = getRequiredFields();
+        if (reqFields.size() > 0) {
+            fmt::format_to(out, "{}::{}({}): {} {{\n", typeName, typeName,
+                           fmt::map_join(reqFields, ", ",
+                                         [](auto field) -> std::string {
+                                             return fmt::format("{} {}", field->type->getCPPType(), field->name);
+                                         }),
+                           fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
+                               if (field->type->cannotBeCopied()) {
+                                   return fmt::format("{}(move({}))", field->name, field->name);
+                               }
+                               return fmt::format("{}({})", field->name, field->name);
+                           }));
+            fmt::format_to(out, "}}\n");
+        }
         fmt::format_to(out, "std::unique_ptr<JSONDocument<{0}>> {0}::fromJSON(const std::string &json) {{\n", typeName);
         fmt::format_to(out, "return fromJSONInternal<{}>(json);", typeName);
         fmt::format_to(out, "}}\n");
@@ -719,22 +774,38 @@ public:
         fmt::format_to(out, "if (!val.IsObject()) {{\n");
         fmt::format_to(out, "throw JSONTypeError(fieldName, \"object\", val);\n");
         fmt::format_to(out, "}}\n");
-        fmt::format_to(out, "{} rv = std::make_unique<{}>();\n", getCPPType(), typeName);
-        for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
+
+        // Process required fields first.
+        for (std::shared_ptr<FieldDef> &fieldDef : reqFields) {
             std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
-            fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->name);
-            fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->name);
+            fmt::format_to(out, "if (!val.HasMember(\"{}\")) {{\n", fieldDef->name);
+            fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->name);
+            fmt::format_to(out, "}}\n");
+            fmt::format_to(out, "{} {};\n", fieldDef->type->getCPPType(), fieldDef->name);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
-                fmt::format_to(out, "rv->{} = {};\n", fieldDef->name, from);
+                fmt::format_to(out, "{} = {};\n", fieldDef->name, from);
             };
-            fieldDef->type->emitFromJSONValue(out, "fieldVal", assign, fieldName);
+            fieldDef->type->emitFromJSONValue(out, fmt::format("val[\"{}\"]", fieldDef->name), assign, fieldName);
+        }
+        fmt::format_to(out, "{} rv = std::make_unique<{}>({});\n", getCPPType(), typeName,
+                       fmt::map_join(reqFields, ", ", [](auto field) -> std::string {
+                           if (field->type->cannotBeCopied()) {
+                               return fmt::format("move({})", field->name);
+                           } else {
+                               return field->name;
+                           }
+                       }));
+
+        // Assign optionally specified fields.
+        for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             if (dynamic_cast<JSONOptionalType *>(fieldDef->type.get())) {
-                // Optional type. OK if missing.
-                fmt::format_to(out, "}}\n");
-            } else {
-                // Non-optional type. Throw if missing.
-                fmt::format_to(out, "}} else {{\n");
-                fmt::format_to(out, "throw MissingFieldError(\"{}\", \"{}\");\n", typeName, fieldDef->name);
+                std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
+                fmt::format_to(out, "if (val.HasMember(\"{}\")) {{\n", fieldDef->name);
+                fmt::format_to(out, "const rapidjson::Value &fieldVal = val[\"{}\"];\n", fieldDef->name);
+                AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
+                    fmt::format_to(out, "rv->{} = {};\n", fieldDef->name, from);
+                };
+                fieldDef->type->emitFromJSONValue(out, "fieldVal", assign, fieldName);
                 fmt::format_to(out, "}}\n");
             }
         }
@@ -742,14 +813,13 @@ public:
         fmt::format_to(out, "}}\n");
 
         fmt::format_to(out,
-                       "std::unique_ptr<rapidjson::Value> {}::toJSONValueInternal(const "
-                       "std::unique_ptr<rapidjson::Document> &{}) {{\n",
+                       "std::unique_ptr<rapidjson::Value> {}::toJSONValueInternal(rapidjson::Document &{}) const {{\n",
                        typeName, DOCUMENT_VAR);
         fmt::format_to(out, "auto rv = std::make_unique<rapidjson::Value>(rapidjson::kObjectType);\n");
         for (std::shared_ptr<FieldDef> &fieldDef : fieldDefs) {
             std::string fieldName = fmt::format("{}.{}", typeName, fieldDef->name);
             AssignLambda assign = [&fieldDef](fmt::memory_buffer &out, const std::string &from) -> void {
-                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {}->GetAllocator());\n", fieldDef->name, from,
+                fmt::format_to(out, "rv->AddMember(\"{}\", {}, {}.GetAllocator());\n", fieldDef->name, from,
                                DOCUMENT_VAR);
             };
             fieldDef->type->emitToJSONValue(out, fieldDef->name, assign, fieldName);
@@ -811,6 +881,15 @@ public:
     std::string getJSONType() const {
         return fmt::format(
             "{}", fmt::map_join(variants, " | ", [](auto variant) -> std::string { return variant->getJSONType(); }));
+    }
+
+    bool cannotBeCopied() const {
+        for (auto &variant : variants) {
+            if (variant->cannotBeCopied()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void emitFromJSONValue(fmt::memory_buffer &out, const std::string &from, AssignLambda assign,

@@ -112,13 +112,13 @@ public:
      * (For internal use only; public because it is used by codegen'd static methods.)
      * Converts C++ object into a RapidJSON JSON value owned by the given rapidjson document.
      */
-    virtual std::unique_ptr<rapidjson::Value> toJSONValueInternal(const std::unique_ptr<rapidjson::Document> &d) = 0;
+    virtual std::unique_ptr<rapidjson::Value> toJSONValueInternal(rapidjson::Document &d) const = 0;
 
     /**
      * Converts C++ object into a rapidjson JSON object owned by the given JSONDocument.
      */
     template <typename T> std::unique_ptr<rapidjson::Value> toJSONValue(const std::unique_ptr<JSONDocument<T>> &doc) {
-        return toJSONValueInternal(doc->memoryOwner);
+        return toJSONValueInternal(*doc->memoryOwner.get());
     };
 };
 

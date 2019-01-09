@@ -96,19 +96,12 @@ unique_ptr<TextDocumentClientCapabilities> makeTextDocumentClientCapabilities() 
 }
 
 unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
-    auto initializeParams = make_unique<InitializeParams>();
-    initializeParams->processId = 12345;
-    initializeParams->rootPath = rootPath;
-    initializeParams->rootUri = rootUri;
-    initializeParams->capabilities = make_unique<ClientCapabilities>();
+    auto initializeParams = make_unique<InitializeParams>(12345, rootPath, rootUri, make_unique<ClientCapabilities>());
     initializeParams->capabilities->workspace = makeWorkspaceClientCapabilities();
     initializeParams->capabilities->textDocument = makeTextDocumentClientCapabilities();
     initializeParams->trace = TraceKind::Off;
 
-    auto workspaceFolder = make_unique<WorkspaceFolder>();
-    workspaceFolder->uri = rootUri;
-    workspaceFolder->name = "pay-server";
-
+    auto workspaceFolder = make_unique<WorkspaceFolder>(rootUri, "pay-server");
     vector<unique_ptr<WorkspaceFolder>> workspaceFolders;
     workspaceFolders.push_back(move(workspaceFolder));
     initializeParams->workspaceFolders =
@@ -118,10 +111,7 @@ unique_ptr<JSONBaseType> makeInitializeParams(string rootPath, string rootUri) {
 
 unique_ptr<RequestMessage> makeRequestMessage(unique_ptr<JSONDocument<int>> &doc, string method, int id,
                                               unique_ptr<JSONBaseType> &params) {
-    auto initialize = make_unique<RequestMessage>();
-    initialize->jsonrpc = "2.0";
-    initialize->method = method;
-    initialize->id = id;
+    auto initialize = make_unique<RequestMessage>("2.0", id, method);
     initialize->params = params->toJSONValue(doc);
     return initialize;
 }

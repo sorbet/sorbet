@@ -19,22 +19,21 @@ LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts,
             "LSPLoop's error queue is not ignoring flushes, which will prevent LSP from sending diagnostics");
 }
 
-LSPLoop::TypecheckRun LSPLoop::runLSPQuery(core::GlobalState &initialGS, unique_ptr<core::GlobalState> gs,
-                                           core::Loc loc, core::SymbolRef symbol,
+LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, core::Loc loc, core::SymbolRef symbol,
                                            vector<shared_ptr<core::File>> &changedFiles, bool allFiles) {
     ENFORCE(!gs->lspInfoQueryLoc.exists());
-    ENFORCE(!initialGS.lspInfoQueryLoc.exists());
+    ENFORCE(!initialGS->lspInfoQueryLoc.exists());
     ENFORCE(!gs->lspQuerySymbol.exists());
-    ENFORCE(!initialGS.lspQuerySymbol.exists());
+    ENFORCE(!initialGS->lspQuerySymbol.exists());
     ENFORCE(loc.exists() || symbol.exists());
-    initialGS.lspInfoQueryLoc = gs->lspInfoQueryLoc = loc;
-    initialGS.lspQuerySymbol = gs->lspQuerySymbol = symbol;
+    initialGS->lspInfoQueryLoc = gs->lspInfoQueryLoc = loc;
+    initialGS->lspQuerySymbol = gs->lspQuerySymbol = symbol;
 
     // TODO(jvilk): If this throws, then we'll want to unset `lspInfoQueryLoc` and `lspQuerySymbol` on `initialGS`.
     // If throwing is common, then we need some way to *not* throw away `gs`.
     auto rv = tryFastPath(move(gs), changedFiles, allFiles);
-    rv.gs->lspInfoQueryLoc = initialGS.lspInfoQueryLoc = core::Loc::none();
-    rv.gs->lspQuerySymbol = initialGS.lspQuerySymbol = core::Symbols::noSymbol();
+    rv.gs->lspInfoQueryLoc = initialGS->lspInfoQueryLoc = core::Loc::none();
+    rv.gs->lspQuerySymbol = initialGS->lspQuerySymbol = core::Symbols::noSymbol();
     return rv;
 }
 
@@ -53,7 +52,8 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> 
     if (errorIfFileIsUntyped && fref.data(*gs).sigil == core::StrictLevel::Stripe) {
         sendError(d, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
-            1, "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
+            MessageType::Error, d,
+            "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
         return TypecheckRun{{}, {}, {}, move(gs)};
     }
     auto loc = lspPos2Loc(fref, d, *gs);
@@ -65,7 +65,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> 
 
     vector<shared_ptr<core::File>> files;
     files.emplace_back(make_shared<core::File>(std::move(fref.data(*gs))));
-    return runLSPQuery(*initialGS, move(gs), *loc.get(), core::Symbols::noSymbol(), files);
+    return runLSPQuery(move(gs), *loc.get(), core::Symbols::noSymbol(), files);
 }
 LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalState> gs, core::SymbolRef sym,
                                                      const LSPMethod &forMethod) {
@@ -73,7 +73,7 @@ LSPLoop::TypecheckRun LSPLoop::setupLSPQueryBySymbol(unique_ptr<core::GlobalStat
     vector<shared_ptr<core::File>> files;
     // this function currently always returns optional that is set, but we're keeping API symmetric to
     // setupLSPQueryByLoc.
-    return runLSPQuery(*initialGS, move(gs), core::Loc::none(), sym, files, true);
+    return runLSPQuery(move(gs), core::Loc::none(), sym, files, true);
 }
 
 bool silenceError(bool disableFastPath, core::ErrorClass what) {
@@ -107,7 +107,7 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
     return false;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
+unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(rapidjson::Document &d, TypecheckRun run) {
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
@@ -152,79 +152,47 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
 
     for (auto file : filesToUpdateErrorListFor) {
         if (file.exists()) {
-            rapidjson::Value publishDiagnosticsParams;
-
-            /**
-             * interface PublishDiagnosticsParams {
-             *      uri: DocumentUri; // The URI for which diagnostic information is reported.
-             *      diagnostics: Diagnostic[]; // An array of diagnostic information items.
-             * }
-             **/
-            /** interface Diagnostic {
-             *      range: Range; // The range at which the message applies.
-             *      severity?: number; // The diagnostic's severity.
-             *      code?: number | string; // The diagnostic's code
-             *      source?: string; // A human-readable string describing the source of this diagnostic, e.g.
-             *                       // 'typescript' or 'super lint'.
-             *      message: string; // The diagnostic's message. relatedInformation?:
-             *      DiagnosticRelatedInformation[]; // An array of related diagnostic information
-             * }
-             **/
-
-            publishDiagnosticsParams.SetObject();
+            string uri;
             { // uri
-                string uriStr;
                 if (file.data(gs).sourceType == core::File::Type::Payload) {
-                    uriStr = string(file.data(gs).path());
+                    uri = string(file.data(gs).path());
                 } else {
-                    uriStr = fmt::format("{}/{}", rootUri, file.data(gs).path());
+                    uri = fmt::format("{}/{}", rootUri, file.data(gs).path());
                 }
-                publishDiagnosticsParams.AddMember("uri", uriStr, alloc);
             }
 
+            vector<unique_ptr<Diagnostic>> diagnostics;
             {
                 // diagnostics
-                rapidjson::Value diagnostics;
-                diagnostics.SetArray();
                 if (errorsAccumulated.find(file) != errorsAccumulated.end()) {
                     for (auto &e : errorsAccumulated[file]) {
-                        rapidjson::Value diagnostic;
-                        diagnostic.SetObject();
-
-                        diagnostic.AddMember("range", loc2Range(gs, e->loc), alloc);
-                        diagnostic.AddMember("code", e->what.code, alloc);
-                        diagnostic.AddMember("message", e->header, alloc);
+                        auto diagnostic = make_unique<Diagnostic>(loc2Range(gs, e->loc), e->header);
+                        diagnostic->code = e->what.code;
 
                         typecase(e.get(), [&](core::Error *ce) {
-                            rapidjson::Value relatedInformation;
-                            relatedInformation.SetArray();
+                            vector<unique_ptr<DiagnosticRelatedInformation>> relatedInformation;
                             for (auto &section : ce->sections) {
                                 string sectionHeader = section.header;
 
                                 for (auto &errorLine : section.messages) {
-                                    rapidjson::Value relatedInfo;
-                                    relatedInfo.SetObject();
-                                    relatedInfo.AddMember("location", loc2Location(gs, errorLine.loc), alloc);
-
-                                    string relatedInfoMessage;
+                                    string message;
                                     if (errorLine.formattedMessage.length() > 0) {
-                                        relatedInfoMessage = errorLine.formattedMessage;
+                                        message = errorLine.formattedMessage;
                                     } else {
-                                        relatedInfoMessage = sectionHeader;
+                                        message = sectionHeader;
                                     }
-                                    relatedInfo.AddMember("message", relatedInfoMessage, alloc);
-                                    relatedInformation.PushBack(relatedInfo, alloc);
+                                    relatedInformation.push_back(make_unique<DiagnosticRelatedInformation>(
+                                        loc2Location(gs, errorLine.loc), message));
                                 }
                             }
-                            diagnostic.AddMember("relatedInformation", relatedInformation, alloc);
+                            diagnostic->relatedInformation = move(relatedInformation);
                         });
-                        diagnostics.PushBack(diagnostic, alloc);
+                        diagnostics.push_back(move(diagnostic));
                     }
                 }
-                publishDiagnosticsParams.AddMember("diagnostics", diagnostics, alloc);
             }
 
-            sendNotification(LSPMethod::PushDiagnostics(), publishDiagnosticsParams);
+            sendNotification(LSPMethod::PushDiagnostics(), d, PublishDiagnosticsParams(uri, move(diagnostics)));
         }
     }
     return move(run.gs);

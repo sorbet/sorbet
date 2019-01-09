@@ -4,16 +4,16 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addLocIfExists(const core::GlobalState &gs, rapidjson::Value &result, core::Loc loc) {
+void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<JSONBaseType>> &locs, core::Loc loc) {
     if (loc.file().exists()) {
-        result.PushBack(loc2Location(gs, loc), alloc);
+        locs.push_back(loc2Location(gs, loc));
     }
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Value &result, rapidjson::Document &d) {
+                                                                    rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.definition");
-    result.SetArray();
+    vector<unique_ptr<JSONBaseType>> result;
     auto finalGs = move(gs);
     auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentDefinition(), true);
     finalGs = move(run.gs);
@@ -26,7 +26,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
                 addLocIfExists(*finalGs, result, originLoc);
             }
         } else if (resp->kind == core::QueryResponse::Kind::DEFINITION) {
-            result.PushBack(loc2Location(*finalGs, resp->termLoc), alloc);
+            result.push_back(loc2Location(*finalGs, resp->termLoc));
         } else {
             for (auto &component : resp->dispatchComponents) {
                 if (component.method.exists()) {

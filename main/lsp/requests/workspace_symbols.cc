@@ -5,60 +5,24 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
-/**
- * Represents information about programming constructs like variables, classes,
- * interfaces etc.
- *
- *        interface SymbolInformation {
- *                 // The name of this symbol.
- *                name: string;
- *                 // The kind of this symbol.
- *                kind: number;
- *
- *                 // Indicates if this symbol is deprecated.
- *                deprecated?: boolean;
- *
- *                 *
- *                 * The location of this symbol. The location's range is used by a tool
- *                 * to reveal the location in the editor. If the symbol is selected in the
- *                 * tool the range's start information is used to position the cursor. So
- *                 * the range usually spans more then the actual symbol's name and does
- *                 * normally include things like visibility modifiers.
- *                 *
- *                 * The range doesn't have to denote a node range in the sense of a abstract
- *                 * syntax tree. It can therefore not be used to re-construct a hierarchy of
- *                 * the symbols.
- *                 *
- *                location: Location;
- *
- *                 *
- *                 * The name of the symbol containing this symbol. This information is for
- *                 * user interface purposes (e.g. to render a qualifier in the user interface
- *                 * if necessary). It can't be used to re-infer a hierarchy for the document
- *                 * symbols.
- *
- *                containerName?: string;
- *        }
- **/
-unique_ptr<rapidjson::Value> LSPLoop::symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef symRef) {
+unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::GlobalState &gs,
+                                                                   core::SymbolRef symRef) {
     auto sym = symRef.data(gs);
     if (!sym->loc().file().exists() || hideSymbol(gs, symRef)) {
         return nullptr;
     }
-    rapidjson::Value result;
-    result.SetObject();
-    result.AddMember("name", sym->name.show(gs), alloc);
-    result.AddMember("location", loc2Location(gs, sym->loc()), alloc);
-    result.AddMember("containerName", sym->owner.data(gs)->fullName(gs), alloc);
-    result.AddMember("kind", symbolRef2SymbolKind(gs, symRef), alloc);
 
-    return make_unique<rapidjson::Value>(move(result));
+    auto result = make_unique<SymbolInformation>(sym->name.show(gs), symbolRef2SymbolKind(gs, symRef),
+                                                 loc2Location(gs, sym->loc()));
+    result->containerName = sym->owner.data(gs)->fullName(gs);
+    return result;
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs,
-                                                              rapidjson::Value &result, rapidjson::Document &d) {
+                                                              rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
-    result.SetArray();
+
+    vector<unique_ptr<JSONBaseType>> result;
     string searchString = d["params"]["query"].GetString();
 
     auto finalGs = move(gs);
@@ -67,7 +31,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::G
         if (hasSimilarName(*finalGs, ref.data(*finalGs)->name, searchString)) {
             auto data = symbolRef2SymbolInformation(*finalGs, ref);
             if (data) {
-                result.PushBack(move(*data), alloc);
+                result.push_back(move(data));
             }
         }
     }

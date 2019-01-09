@@ -168,14 +168,7 @@ void ErrorAssertion::check(const unique_ptr<Diagnostic> &diagnostic, const strin
 }
 
 unique_ptr<Range> RangeAssertion::makeRange(int sourceLine, int startChar, int endChar) {
-    auto rv = make_unique<Range>();
-    rv->start = make_unique<Position>();
-    rv->end = make_unique<Position>();
-    rv->start->line = sourceLine;
-    rv->start->character = startChar;
-    rv->end->line = sourceLine;
-    rv->end->character = endChar;
-    return rv;
+    return make_unique<Range>(make_unique<Position>(sourceLine, startChar), make_unique<Position>(sourceLine, endChar));
 }
 
 vector<shared_ptr<ErrorAssertion>>
@@ -350,16 +343,10 @@ RangeAssertion::parseAssertions(const UnorderedMap<string, shared_ptr<core::File
 }
 
 unique_ptr<Location> RangeAssertion::getLocation(string_view uriPrefix) {
-    unique_ptr<Location> loc = make_unique<Location>();
-    loc->range = make_unique<Range>();
-    loc->range->start = make_unique<Position>();
-    loc->range->start->line = range->start->line;
-    loc->range->start->character = range->start->character;
-    loc->range->end = make_unique<Position>();
-    loc->range->end->line = range->end->line;
-    loc->range->end->character = range->end->character;
-    loc->uri = filePathToUri(uriPrefix, filename);
-    return loc;
+    auto newRange = make_unique<Range>(make_unique<Position>(range->start->line, range->start->character),
+                                       make_unique<Position>(range->end->line, range->end->character));
+    auto uri = filePathToUri(uriPrefix, filename);
+    return make_unique<Location>(uri, move(newRange));
 }
 
 LSPRequestResponseAssertion::LSPRequestResponseAssertion(string_view filename, unique_ptr<Range> &range,
@@ -397,15 +384,10 @@ void DefAssertion::checkDefinition(const Expectations &expectations, LSPTest &te
     string locFilename = uriToFilePath(uriPrefix, loc->uri);
     string defUri = filePathToUri(uriPrefix, filename);
 
-    auto textDocumentPositionParams = make_unique<TextDocumentPositionParams>();
-    textDocumentPositionParams->textDocument = make_unique<TextDocumentIdentifier>();
-    textDocumentPositionParams->textDocument->uri = loc->uri;
-    textDocumentPositionParams->position = make_unique<Position>();
-    textDocumentPositionParams->position->line = line;
-    textDocumentPositionParams->position->character = character;
-
-    unique_ptr<JSONBaseType> cast = move(textDocumentPositionParams);
-    auto responses = test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/definition", id, cast));
+    unique_ptr<JSONBaseType> textDocumentPositionParams = make_unique<TextDocumentPositionParams>(
+        make_unique<TextDocumentIdentifier>(loc->uri), make_unique<Position>(line, character));
+    auto responses =
+        test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/definition", id, textDocumentPositionParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/definition` request.";
         return;
@@ -466,18 +448,11 @@ void DefAssertion::checkReferences(const Expectations &expectations, LSPTest &te
     string locFilename = uriToFilePath(uriPrefix, loc->uri);
     string defUri = filePathToUri(uriPrefix, filename);
 
-    auto referenceParams = make_unique<ReferenceParams>();
-    referenceParams->textDocument = make_unique<TextDocumentIdentifier>();
-    referenceParams->textDocument->uri = loc->uri;
-    referenceParams->position = make_unique<Position>();
-    referenceParams->position->line = line;
-    referenceParams->position->character = character;
-    referenceParams->context = make_unique<ReferenceContext>();
-    // TODO: Try with this false, too.
-    referenceParams->context->includeDeclaration = true;
-
-    unique_ptr<JSONBaseType> cast = move(referenceParams);
-    auto responses = test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/references", id, cast));
+    unique_ptr<JSONBaseType> referenceParams =
+        make_unique<ReferenceParams>(make_unique<TextDocumentIdentifier>(loc->uri),
+                                     // TODO: Try with this false, too.
+                                     make_unique<Position>(line, character), make_unique<ReferenceContext>(true));
+    auto responses = test.getLSPResponsesFor(makeRequestMessage(doc, "textDocument/references", id, referenceParams));
     if (responses.size() != 1) {
         EXPECT_EQ(1, responses.size()) << "Unexpected number of responses to a `textDocument/references` request.";
         return;

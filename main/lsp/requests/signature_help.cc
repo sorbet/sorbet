@@ -4,30 +4,27 @@
 using namespace std;
 
 namespace sorbet::realmain::lsp {
-void LSPLoop::addSignatureHelpItem(const core::GlobalState &gs, rapidjson::Value &signatures, core::SymbolRef method,
-                                   const core::QueryResponse &resp, int activeParameter) {
+void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
+                          vector<unique_ptr<SignatureInformation>> &sigs, const core::QueryResponse &resp,
+                          int activeParameter) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     // signature helps only exist for methods.
     if (!method.exists() || !method.data(gs)->isMethod() || hideSymbol(gs, method)) {
         return;
     }
-    rapidjson::Value sig;
-    sig.SetObject();
     // Label is mandatory, so method name (i.e B#add) is shown for now. Might want to add markup highlighting
     // wtih respect to activeParameter here.
-    sig.AddMember("label", method.data(gs)->show(gs), alloc);
-    rapidjson::Value parameters;
-    parameters.SetArray();
+    auto sig = make_unique<SignatureInformation>(method.data(gs)->show(gs));
+
+    vector<unique_ptr<ParameterInformation>> parameters;
     // Documentation is set to be a markdown element that highlights which parameter you are currently typing in.
     string methodDocumentation = "(";
     auto args = method.data(gs)->arguments();
     int i = 0;
     for (auto arg : args) {
-        rapidjson::Value parameter;
-        parameter.SetObject();
         // label field is populated with the name of the variable.
         // Not sure why VSCode does not display this for now.
-        parameter.AddMember("label", arg.data(gs)->name.show(gs), alloc);
+        auto parameter = make_unique<ParameterInformation>(arg.data(gs)->name.show(gs));
         if (i == activeParameter) {
             // this bolds the active parameter in markdown
             methodDocumentation += "**_" + arg.data(gs)->name.show(gs) + "_**";
@@ -37,33 +34,27 @@ void LSPLoop::addSignatureHelpItem(const core::GlobalState &gs, rapidjson::Value
         if (i != args.size() - 1) {
             methodDocumentation += ", ";
         }
-        parameter.AddMember("documentation", getResultType(gs, arg, resp.receiver.type, resp.constraint)->show(gs),
-                            alloc);
-        parameters.PushBack(move(parameter), alloc);
+        parameter->documentation = getResultType(gs, arg, resp.receiver.type, resp.constraint)->show(gs);
+        parameters.push_back(move(parameter));
         i += 1;
     }
     methodDocumentation += ")";
-    rapidjson::Value markupContents;
-    markupContents.SetObject();
-    markupContents.AddMember("kind", "markdown", alloc);
-    markupContents.AddMember("value", methodDocumentation, alloc);
-    sig.AddMember("documentation", markupContents, alloc);
 
-    sig.AddMember("parameters", move(parameters), alloc);
-    signatures.PushBack(move(sig), alloc);
+    auto markupContents = make_unique<MarkupContent>(MarkupKind::Markdown, methodDocumentation);
+    sig->documentation = move(markupContents);
+    sig->parameters = move(parameters);
+    sigs.push_back(move(sig));
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs,
-                                                               rapidjson::Value &result, rapidjson::Document &d) {
+                                                               rapidjson::Document &d) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
-    result.SetObject();
-    rapidjson::Value signatures;
-    signatures.SetArray();
-
     auto finalGs = move(gs);
     auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentSignatureHelp(), false);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
+    int activeParameter = -1;
+    vector<unique_ptr<SignatureInformation>> signatures;
     if (!queryResponses.empty()) {
         auto resp = move(queryResponses[0]);
         auto receiverType = resp->receiver.type;
@@ -86,15 +77,19 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
             int numberCommas = absl::c_count(call_str, ',');
             // Active parameter depends on number of ,'s in the current string being typed. (0 , = first arg, 1 , =
             // 2nd arg)
-            result.AddMember("activeParameter", numberCommas, alloc);
+            activeParameter = numberCommas;
 
             auto firstDispatchComponentMethod = resp->dispatchComponents.front().method;
-            addSignatureHelpItem(*finalGs, signatures, firstDispatchComponentMethod, *resp, numberCommas);
+
+            addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *resp, numberCommas);
         }
     }
+    auto result = make_unique<SignatureHelp>(move(signatures));
+    if (activeParameter != -1) {
+        result->activeParameter = activeParameter;
+    }
 
-    result.AddMember("signatures", move(signatures), alloc);
-    sendResult(d, result);
+    sendResult(d, *result);
     return finalGs;
 }
 } // namespace sorbet::realmain::lsp
