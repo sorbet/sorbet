@@ -9,8 +9,18 @@ cc_binary(
             "-s",
             "EXPORTED_FUNCTIONS=[\"_typecheck\",\"_lsp_initialize\",\"_lsp_send\"]",
             "-s",
+            # - `addFunction` converts a JavaScript function to a C++ function
+            #    pointer. It is used in the Sourcegraph extension
+            #    https://sourcegraph.com/extensions/sourcegraph/lang-ruby
+            #    to enable Sorbet to push JSON-RPC responses to JavaScript and
+            #    avoid polling. This requires 1 reserved function pointer
+            #    (see RESERVED_FUNCTION_POINTERS below).
+            # - `Pointer_stringify` converts a C++ char* to a JavaScript string.
             "EXTRA_EXPORTED_RUNTIME_METHODS=[\"ccall\",\"cwrap\",\"addFunction\",\"Pointer_stringify\"]",
             "-s",
+            # This let's us allocate 1 JavaScript function (the callback for
+            # JSON-RPC responses) as a function pointer for use in C++
+            # (see addFunction above).
             "RESERVED_FUNCTION_POINTERS=1",
             "-s",
             "ASSERTIONS=1",
