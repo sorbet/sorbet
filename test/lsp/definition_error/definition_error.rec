@@ -5,4 +5,4 @@ Read: {"jsonrpc":"2.0","method":"workspace/didChangeConfiguration","params":{"se
 Read: {"jsonrpc":"2.0","method":"textDocument/didOpen","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/commands/foobar.rb","languageId":"ruby","version":1,"text":"class Foobar\n  sig {returns(Integer)}\n  def bar\n    1\n  end\nend\n\nbar\n"}}}
 Read: {"jsonrpc":"2.0","id":3,"method":"textDocument/definition","params":{"textDocument":{"uri":"file:///Users/sctu/stripe/pay-server/cibot/lib/cibot/commands/foobar.rb"},"position":{"line":7,"character":1}}}
 Write: {"jsonrpc":"2.0","id":3,"error":{"code":-32602,"message":"This feature only works correctly on typed ruby files."}}
-Write: {"method":"window/showMessage","params":{"type":1,"message":"This feature only works correctly on typed ruby files. Results you see may be heuristic results."},"jsonrpc":"2.0"}
+Write: {"jsonrpc":"2.0","method":"window/showMessage","params":{"type":1,"message":"This feature only works correctly on typed ruby files. Results you see may be heuristic results."}}

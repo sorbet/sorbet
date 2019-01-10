@@ -132,7 +132,7 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
         if (what.exists()) {
             item->detail = methodDetail(gs, what, resp.receiver.type, nullptr, resp.constraint);
         }
-        if (clientCapabilities.textDocument.completion.completionItem.snippetSupport) {
+        if (clientCompletionItemSnippetSupport) {
             item->insertTextFormat = InsertTextFormat::Snippet;
             item->insertText = methodSnippet(gs, what);
         } else {
@@ -161,11 +161,13 @@ unique_ptr<CompletionItem> LSPLoop::getCompletionItem(const core::GlobalState &g
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Document &d) {
+                                                                    const MessageId &id,
+                                                                    const CompletionParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.completion");
 
     auto finalGs = move(gs);
-    auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentCompletion(), false);
+    auto run = setupLSPQueryByLoc(move(finalGs), id, params.textDocument->uri, *params.position,
+                                  LSPMethod::TextDocumentCompletion(), false);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
     vector<unique_ptr<CompletionItem>> items;
@@ -218,7 +220,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentCompletion(unique_ptr<c
         } else {
         }
     }
-    sendResult(d, CompletionList(false, move(items)));
+    sendResponse(id, CompletionList(false, move(items)));
     return finalGs;
 }
 

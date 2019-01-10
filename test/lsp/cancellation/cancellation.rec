@@ -11,6 +11,6 @@ Read: {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":6}}
 Read: {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":7}}
 Read: {"jsonrpc":"2.0","method":"$/cancelRequest","params":{"id":8}}
 Read: {"jsonrpc":"2.0","method":"__RESUME__","params":{}}
-Write: {"jsonrpc":"2.0","id":8,"error":{"code":-32800,"message":"Request was cancelled"}}
-Write: {"jsonrpc":"2.0","id":7,"error":{"code":-32800,"message":"Request was cancelled"}}
-Write: {"jsonrpc":"2.0","id":6,"error":{"code":-32800,"message":"Request was cancelled"}}
+Write: {"jsonrpc":"2.0","id":8,"error":{"code":-32800,"message":"Request was canceled"}}
+Write: {"jsonrpc":"2.0","id":7,"error":{"code":-32800,"message":"Request was canceled"}}
+Write: {"jsonrpc":"2.0","id":6,"error":{"code":-32800,"message":"Request was canceled"}}

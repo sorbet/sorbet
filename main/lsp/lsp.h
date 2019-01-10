@@ -141,20 +141,17 @@ enum class LSPErrorCodes {
     RequestCancelled = -32800,
 };
 
-/*
- * The LSP*Capabilities structs are transcriptions from the specification, but
- * for now we're only encoding the fields we actually look at.
- */
-struct LSPTextDocumentClientCapabilities {
-    struct {
-        struct {
-            bool snippetSupport = false;
-        } completionItem;
-    } completion;
-};
+class MessageId {
+private:
+    const std::variant<int, std::string> id;
 
-struct LSPClientCapabilities {
-    LSPTextDocumentClientCapabilities textDocument;
+public:
+    MessageId(int id);
+    MessageId(const std::variant<int, std::string> id);
+
+    // Responses can have a null id, but requests cannot. C++ doesn't let you implicitly
+    // widen a variant, hence this function.
+    operator std::variant<int, std::string, JSONNullObject>() const;
 };
 
 class LSPLoop {
@@ -189,7 +186,12 @@ class LSPLoop {
     std::unique_ptr<KeyValueStore> kvstore; // always null for now.
     std::shared_ptr<spdlog::logger> &logger;
     WorkerPool &workers;
-    LSPClientCapabilities clientCapabilities;
+    /**
+     * Whether or not the active client has support for snippets in CompletionItems.
+     * Note: There is a generated ClientCapabilities class, but it is cumbersome to work with as most fields are
+     * optional.
+     */
+    bool clientCompletionItemSnippetSupport = false;
     /** Input stream; used by runLSP to receive LSP messages */
     std::istream &inputStream;
     /** Output stream; used by LSP to output messages */
@@ -202,22 +204,15 @@ class LSPLoop {
     const bool disableFastPath;
 
     /* Send the following document to client */
-    void sendRaw(rapidjson::Document &raw);
+    void sendRaw(std::string_view json);
 
     /* Send `data` as payload of notification 'meth' */
-    void sendNotification(LSPMethod meth, rapidjson::Document &d, const JSONBaseType &data);
-    /* Send `data` as payload of request `meth`. Execute `onComplete` when Client replies, execute
-     * `onFail` if client reports failure.
-     * TODO(dmitry): misbehaving clients may drop requests on floor without reporting either success or
-     * error. We will currently leak lambdas&their captures in such case.
-     */
-    void sendRequest(LSPMethod meth, rapidjson::Value &data, std::function<void(rapidjson::Value &)> onComplete,
-                     std::function<void(rapidjson::Value &)> onFail);
+    void sendNotification(LSPMethod meth, const JSONBaseType &data);
 
-    void sendResult(rapidjson::Document &forRequest, rapidjson::Value &result);
-    void sendResult(rapidjson::Document &forRequest, const JSONBaseType &result);
-    void sendResult(rapidjson::Document &forRequest, const std::vector<std::unique_ptr<JSONBaseType>> &result);
-    void sendError(rapidjson::Document &forRequest, int errorCode, const std::string &errorStr);
+    void sendNullResponse(const MessageId &id);
+    void sendResponse(const MessageId &id, const JSONBaseType &result);
+    void sendResponse(const MessageId &id, const std::vector<std::unique_ptr<JSONBaseType>> &result);
+    void sendError(const MessageId &id, int errorCode, std::string_view errorMsg);
 
     std::unique_ptr<Location> loc2Location(const core::GlobalState &gs, core::Loc loc);
     void addLocIfExists(const core::GlobalState &gs, std::vector<std::unique_ptr<JSONBaseType>> &locs, core::Loc loc);
@@ -243,7 +238,7 @@ class LSPLoop {
     TypecheckRun tryFastPath(std::unique_ptr<core::GlobalState> gs,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
 
-    std::unique_ptr<core::GlobalState> pushDiagnostics(rapidjson::Document &d, TypecheckRun filesTypechecked);
+    std::unique_ptr<core::GlobalState> pushDiagnostics(TypecheckRun filesTypechecked);
 
     std::vector<unsigned int> computeStateHashes(const std::vector<std::shared_ptr<core::File>> &files);
     bool ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
@@ -253,7 +248,7 @@ class LSPLoop {
     std::string fileRef2Uri(const core::GlobalState &gs, core::FileRef);
     std::string remoteName2Local(std::string_view uri);
     std::string localName2Remote(std::string_view uri);
-    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, rapidjson::Document &d, const core::GlobalState &gs);
+    std::unique_ptr<core::Loc> lspPos2Loc(core::FileRef source, const Position &pos, const core::GlobalState &gs);
 
     /** Used to implement textDocument/documentSymbol
      * Returns `nullptr` if symbol kind is not supported by LSP
@@ -261,34 +256,41 @@ class LSPLoop {
     std::unique_ptr<SymbolInformation> symbolRef2SymbolInformation(const core::GlobalState &gs, core::SymbolRef);
     TypecheckRun runLSPQuery(std::unique_ptr<core::GlobalState> gs, core::Loc loc, core::SymbolRef symbol,
                              std::vector<std::shared_ptr<core::File>> &changedFiles, bool allFiles = false);
-    TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, rapidjson::Document &d,
-                                    const LSPMethod &forMethod, bool errorIfFileIsUntyped);
+    TypecheckRun setupLSPQueryByLoc(std::unique_ptr<core::GlobalState> gs, const MessageId &id, std::string_view uri,
+                                    const Position &pos, const LSPMethod &forMethod, bool errorIfFileIsUntyped);
     TypecheckRun setupLSPQueryBySymbol(std::unique_ptr<core::GlobalState> gs, core::SymbolRef symbol,
                                        const LSPMethod &forMethod);
     std::unique_ptr<core::GlobalState> handleTextDocumentHover(std::unique_ptr<core::GlobalState> gs,
-                                                               rapidjson::Document &d);
+                                                               const MessageId &id,
+                                                               const TextDocumentPositionParams &params);
     std::unique_ptr<core::GlobalState> handleTextDocumentDocumentSymbol(std::unique_ptr<core::GlobalState> gs,
-                                                                        rapidjson::Document &d);
+                                                                        const MessageId &id,
+                                                                        const DocumentSymbolParams &d);
     std::unique_ptr<core::GlobalState> handleWorkspaceSymbols(std::unique_ptr<core::GlobalState> gs,
-                                                              rapidjson::Document &d);
+                                                              const MessageId &id, const WorkspaceSymbolParams &params);
     std::unique_ptr<core::GlobalState> handleTextDocumentReferences(std::unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Document &d);
+                                                                    const MessageId &id, const ReferenceParams &params);
     std::unique_ptr<core::GlobalState> handleTextDocumentDefinition(std::unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Document &d);
+                                                                    const MessageId &id,
+                                                                    const TextDocumentPositionParams &params);
     std::unique_ptr<core::GlobalState> handleTextDocumentCompletion(std::unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Document &d);
+                                                                    const MessageId &id,
+                                                                    const CompletionParams &params);
     std::unique_ptr<CompletionItem> getCompletionItem(const core::GlobalState &gs, core::SymbolRef what,
                                                       const core::QueryResponse &resp);
-    void sendShowMessageNotification(MessageType messageType, rapidjson::Document &d, const std::string &message);
+    void sendShowMessageNotification(MessageType messageType, const std::string &message);
     bool isTestFile(const std::shared_ptr<core::File> &file);
     std::unique_ptr<core::GlobalState> handleTextSignatureHelp(std::unique_ptr<core::GlobalState> gs,
-                                                               rapidjson::Document &d);
+                                                               const MessageId &id,
+                                                               const TextDocumentPositionParams &params);
     static void mergeDidChanges(std::deque<rapidjson::Document> &pendingRequests);
     static std::deque<rapidjson::Document>::iterator
     findRequestToBeCancelled(std::deque<rapidjson::Document> &pendingRequests,
                              rapidjson::Document &cancellationRequest);
     static std::deque<rapidjson::Document>::iterator
     findFirstPositionAfterLSPInitialization(std::deque<rapidjson::Document> &pendingRequests);
+    std::unique_ptr<core::GlobalState> processRequestInternal(std::unique_ptr<core::GlobalState> gs,
+                                                              rapidjson::Document &d);
 
 public:
     LSPLoop(std::unique_ptr<core::GlobalState> gs, const options::Options &opts, std::shared_ptr<spd::logger> &logger,

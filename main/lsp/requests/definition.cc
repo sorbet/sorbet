@@ -11,11 +11,13 @@ void LSPLoop::addLocIfExists(const core::GlobalState &gs, vector<unique_ptr<JSON
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<core::GlobalState> gs,
-                                                                    rapidjson::Document &d) {
+                                                                    const MessageId &id,
+                                                                    const TextDocumentPositionParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.definition");
     vector<unique_ptr<JSONBaseType>> result;
     auto finalGs = move(gs);
-    auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentDefinition(), true);
+    auto run = setupLSPQueryByLoc(move(finalGs), id, params.textDocument->uri, *params.position,
+                                  LSPMethod::TextDocumentDefinition(), true);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
     if (!queryResponses.empty()) {
@@ -36,7 +38,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDefinition(unique_ptr<c
         }
     }
 
-    sendResult(d, result);
+    sendResponse(id, result);
     return finalGs;
 }
 

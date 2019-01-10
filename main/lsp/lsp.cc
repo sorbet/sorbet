@@ -7,6 +7,21 @@ using namespace std;
 
 namespace sorbet::realmain::lsp {
 
+MessageId::MessageId(int id) : id(id) {}
+MessageId::MessageId(const std::variant<int, string> id) : id(id) {}
+
+MessageId::operator variant<int, string, JSONNullObject>() const {
+    variant<int, string, JSONNullObject> newId;
+    if (auto intId = get_if<int>(&id)) {
+        newId = *intId;
+    } else if (auto stringId = get_if<string>(&id)) {
+        newId = *stringId;
+    } else {
+        throw invalid_argument("LSP request message ID must be a number or a string!");
+    }
+    return newId;
+}
+
 LSPLoop::LSPLoop(unique_ptr<core::GlobalState> gs, const options::Options &opts, shared_ptr<spd::logger> &logger,
                  WorkerPool &workers, istream &inputStream, std::ostream &outputStream, bool typecheckTestFiles,
                  bool skipConfigatron, bool disableFastPath)
@@ -37,28 +52,26 @@ LSPLoop::TypecheckRun LSPLoop::runLSPQuery(unique_ptr<core::GlobalState> gs, cor
     return rv;
 }
 
-LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, rapidjson::Document &d,
-                                                  const LSPMethod &forMethod, bool errorIfFileIsUntyped) {
-    auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
-                           d["params"]["textDocument"]["uri"].GetStringLength());
-
+LSPLoop::TypecheckRun LSPLoop::setupLSPQueryByLoc(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                  std::string_view uri, const Position &pos, const LSPMethod &forMethod,
+                                                  bool errorIfFileIsUntyped) {
     auto fref = uri2FileRef(uri);
     if (!fref.exists()) {
-        sendError(d, (int)LSPErrorCodes::InvalidParams,
+        sendError(id, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find file at uri {} in {}", uri, forMethod.name));
         return TypecheckRun{{}, {}, {}, move(gs)};
     }
 
     if (errorIfFileIsUntyped && fref.data(*gs).sigil == core::StrictLevel::Stripe) {
-        sendError(d, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
+        sendError(id, (int)LSPErrorCodes::InvalidParams, "This feature only works correctly on typed ruby files.");
         sendShowMessageNotification(
-            MessageType::Error, d,
+            MessageType::Error,
             "This feature only works correctly on typed ruby files. Results you see may be heuristic results.");
         return TypecheckRun{{}, {}, {}, move(gs)};
     }
-    auto loc = lspPos2Loc(fref, d, *gs);
+    auto loc = lspPos2Loc(fref, pos, *gs);
     if (!loc) {
-        sendError(d, (int)LSPErrorCodes::InvalidParams,
+        sendError(id, (int)LSPErrorCodes::InvalidParams,
                   fmt::format("Did not find location at uri {} in {}", uri, forMethod.name));
         return TypecheckRun{{}, {}, {}, move(gs)};
     }
@@ -100,14 +113,15 @@ bool LSPLoop::ensureInitialized(LSPMethod forMethod, rapidjson::Document &d,
     }
     logger->error("Serving request before got an Initialize & Initialized handshake from IDE");
     if (!forMethod.isNotification) {
-        sendError(d, (int)LSPErrorCodes::ServerNotInitialized,
+        int id = d.HasMember("id") && d["id"].IsInt() ? d["id"].GetInt() : 0;
+        sendError(id, (int)LSPErrorCodes::ServerNotInitialized,
                   "IDE did not initialize Sorbet correctly. No requests should be made before Initialize&Initialized "
                   "have been completed");
     }
     return false;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(rapidjson::Document &d, TypecheckRun run) {
+unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(TypecheckRun run) {
     const core::GlobalState &gs = *run.gs;
     const auto &filesTypechecked = run.filesTypechecked;
     vector<core::FileRef> errorFilesInNewRun;
@@ -192,7 +206,7 @@ unique_ptr<core::GlobalState> LSPLoop::pushDiagnostics(rapidjson::Document &d, T
                 }
             }
 
-            sendNotification(LSPMethod::PushDiagnostics(), d, PublishDiagnosticsParams(uri, move(diagnostics)));
+            sendNotification(LSPMethod::PushDiagnostics(), PublishDiagnosticsParams(uri, move(diagnostics)));
         }
     }
     return move(run.gs);

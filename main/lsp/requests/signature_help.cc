@@ -46,11 +46,12 @@ void addSignatureHelpItem(const core::GlobalState &gs, core::SymbolRef method,
     sigs.push_back(move(sig));
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs,
-                                                               rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                               const TextDocumentPositionParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.signatureHelp");
     auto finalGs = move(gs);
-    auto run = setupLSPQueryByLoc(move(finalGs), d, LSPMethod::TextDocumentSignatureHelp(), false);
+    auto run = setupLSPQueryByLoc(move(finalGs), id, params.textDocument->uri, *params.position,
+                                  LSPMethod::TextDocumentSignatureHelp(), false);
     finalGs = move(run.gs);
     auto &queryResponses = run.responses;
     int activeParameter = -1;
@@ -62,14 +63,12 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
         if (resp->kind == core::QueryResponse::Kind::SEND) {
             auto sendLocIndex = resp->termLoc.beginPos();
 
-            auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
-                                   d["params"]["textDocument"]["uri"].GetStringLength());
-            auto fref = uri2FileRef(uri);
+            auto fref = uri2FileRef(params.textDocument->uri);
             if (!fref.exists()) {
                 return finalGs;
             }
             auto src = fref.data(*finalGs).source();
-            auto loc = lspPos2Loc(fref, d, *finalGs);
+            auto loc = lspPos2Loc(fref, *params.position, *finalGs);
             if (!loc) {
                 return finalGs;
             }
@@ -84,12 +83,11 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextSignatureHelp(unique_ptr<core::
             addSignatureHelpItem(*finalGs, firstDispatchComponentMethod, signatures, *resp, numberCommas);
         }
     }
-    auto result = make_unique<SignatureHelp>(move(signatures));
+    auto result = SignatureHelp(move(signatures));
     if (activeParameter != -1) {
-        result->activeParameter = activeParameter;
+        result.activeParameter = activeParameter;
     }
-
-    sendResult(d, *result);
+    sendResponse(id, result);
     return finalGs;
 }
 } // namespace sorbet::realmain::lsp

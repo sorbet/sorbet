@@ -15,6 +15,21 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 }
 
 unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalState> gs, rapidjson::Document &d) {
+    // Recover from parsing errors.
+    int id = d.HasMember("id") && d["id"].IsInt() ? d["id"].GetInt() : -1;
+    try {
+        return processRequestInternal(move(gs), d);
+    } catch (const DeserializationError &e) {
+        if (id != -1) {
+            sendError(id, (int)LSPErrorCodes::InvalidParams, e.what());
+        }
+        // Run the slow path so that the caller still has a GlobalState.
+        return runSlowPath({}).gs;
+    }
+}
+
+unique_ptr<core::GlobalState> LSPLoop::processRequestInternal(unique_ptr<core::GlobalState> gs,
+                                                              rapidjson::Document &d) {
     if (handleReplies(d)) {
         return gs;
     }
@@ -32,14 +47,9 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
             prodCategoryCounterInc("lsp.requests.processed", "textDocument.didChange");
             Timer timeit(logger, "text_document_did_change");
             vector<shared_ptr<core::File>> files;
-            auto &edits = d["params"];
-            ENFORCE(edits.IsObject());
-            /*
-              {
-              "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
-                "contentChanges":[{"text":"..."}]
-                */
-            string_view uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
+            auto edits = DidChangeTextDocumentParams::fromJSONValue(alloc, d["params"], "root.params");
+
+            string_view uri = edits->textDocument->uri;
             // TODO: if this is ever updated to support diffs, be aware that the coordinator thread should be
             // taught about it too: it merges consecutive TextDocumentDidChange
             if (absl::StartsWith(uri, rootUri)) {
@@ -53,26 +63,26 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
                     file = make_unique<core::File>(remoteName2Local(uri), "", core::File::Type::Normal);
                 }
 
-                for (auto &change : edits["contentChanges"].GetArray()) {
-                    if (change.HasMember("range") && !change["range"].IsNull()) {
+                for (auto &change : edits->contentChanges) {
+                    if (change->range) {
+                        auto &range = *change->range;
                         // incremental update
                         auto old = move(file);
                         string oldContent = string(old->source());
                         core::Loc::Detail start, end;
-                        start.line = change["range"]["start"]["line"].GetInt() + 1;
-                        start.column = change["range"]["start"]["character"].GetInt() + 1;
-                        end.line = change["range"]["end"]["line"].GetInt() + 1;
-                        end.column = change["range"]["end"]["character"].GetInt() + 1;
+                        start.line = range->start->line + 1;
+                        start.column = range->start->character + 1;
+                        end.line = range->end->line + 1;
+                        end.column = range->end->character + 1;
                         auto startOffset = core::Loc::pos2Offset(*old, start);
                         auto endOffset = core::Loc::pos2Offset(*old, end);
-                        string delta(change["text"].GetString(), change["text"].GetStringLength());
-                        string newContent = oldContent.replace(startOffset, endOffset - startOffset, delta);
+                        string newContent = oldContent.replace(startOffset, endOffset - startOffset, change->text);
                         file = make_unique<core::File>(string(old->path()), move(newContent), core::File::Type::Normal);
                     } else {
                         // replace
                         auto old = move(file);
-                        string newContent(change["text"].GetString(), change["text"].GetStringLength());
-                        file = make_unique<core::File>(string(old->path()), move(newContent), core::File::Type::Normal);
+                        file =
+                            make_unique<core::File>(string(old->path()), move(change->text), core::File::Type::Normal);
                     }
                 }
 
@@ -80,27 +90,20 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
 
                 files.emplace_back(move(file));
 
-                return pushDiagnostics(d, tryFastPath(move(gs), files));
+                return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::TextDocumentDidOpen()) {
             prodCategoryCounterInc("requests.processed", "textDocument.didOpen");
             Timer timeit(logger, "text_document_did_open");
             vector<shared_ptr<core::File>> files;
-            auto &edits = d["params"];
-            ENFORCE(edits.IsObject());
-            /*
-              {
-              "textDocument":{"uri":"file:///Users/dmitry/stripe/pay-server/cibot/lib/cibot/gerald.rb","version":2},
-                "contentChanges":[{"text":"..."}]
-                */
-            string_view uri(edits["textDocument"]["uri"].GetString(), edits["textDocument"]["uri"].GetStringLength());
-            string content(edits["textDocument"]["text"].GetString(), edits["textDocument"]["text"].GetStringLength());
+            auto edits = DidOpenTextDocumentParams::fromJSONValue(alloc, d["params"], "root.params");
+            string_view uri = edits->textDocument->uri;
             if (absl::StartsWith(uri, rootUri)) {
-                files.emplace_back(
-                    make_shared<core::File>(remoteName2Local(uri), move(content), core::File::Type::Normal));
+                files.emplace_back(make_shared<core::File>(remoteName2Local(uri), move(edits->textDocument->text),
+                                                           core::File::Type::Normal));
 
-                return pushDiagnostics(d, tryFastPath(move(gs), files));
+                return pushDiagnostics(tryFastPath(move(gs), files));
             }
         }
         if (method == LSPMethod::Initialized()) {
@@ -110,7 +113,7 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
                 Timer timeit(logger, "initial_index");
                 reIndexFromFileSystem();
                 vector<shared_ptr<core::File>> changedFiles;
-                auto newGs = pushDiagnostics(d, runSlowPath(move(changedFiles)));
+                auto newGs = pushDiagnostics(runSlowPath(move(changedFiles)));
                 ENFORCE(newGs);
                 this->globalStateHashes = computeStateHashes(newGs->getFiles());
                 return newGs;
@@ -121,28 +124,37 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
         }
     } else {
         logger->debug("Processing request {}", method.name);
-        int errorCode = 0;
-        string errorString;
-        if (d.FindMember("cancelled") != d.MemberEnd()) {
-            prodCounterInc("lsp.requests.cancelled");
-            errorCode = (int)LSPErrorCodes::RequestCancelled;
-            errorString = "Request was cancelled";
-            sendError(d, errorCode, errorString);
-        } else if (method == LSPMethod::Initialize()) {
+        auto requestMessage = RequestMessage::fromJSONValue(alloc, d.GetObject());
+        auto id = requestMessage->id;
+
+        // LSP hack: We add the property 'canceled' to requests that were canceled before
+        // they hit processRequest.
+        if (requestMessage->canceled.value_or(false)) {
+            prodCounterInc("lsp.requests.canceled");
+            sendError(id, (int)LSPErrorCodes::RequestCancelled, "Request was canceled");
+            return gs;
+        }
+
+        if (!requestMessage->params) {
+            sendError(id, (int)LSPErrorCodes::InternalError, "Expected parameters, but found none.");
+            return gs;
+        }
+        auto &rawParams = *requestMessage->params;
+
+        if (method == LSPMethod::Initialize()) {
             prodCategoryCounterInc("lsp.requests.processed", "initialize");
-            rootUri = string(d["params"]["rootUri"].GetString(), d["params"]["rootUri"].GetStringLength());
-            auto &clientCaps = d["params"]["capabilities"];
-            auto tddCaps = clientCaps.FindMember("textDocument");
-            if (tddCaps != clientCaps.MemberEnd()) {
-                auto completionCaps = tddCaps->value.FindMember("completion");
-                if (completionCaps != tddCaps->value.MemberEnd()) {
-                    auto itemCaps = completionCaps->value.FindMember("completionItem");
-                    if (itemCaps != completionCaps->value.MemberEnd()) {
-                        auto snippetSupport = itemCaps->value.FindMember("snippetSupport");
-                        if (snippetSupport != itemCaps->value.MemberEnd() && snippetSupport->value.IsBool()) {
-                            clientCapabilities.textDocument.completion.completionItem.snippetSupport =
-                                snippetSupport->value.GetBool();
-                        }
+            auto params = InitializeParams::fromJSONValue(alloc, *rawParams, "root.params");
+            if (auto rootUriString = get_if<string>(&params->rootUri)) {
+                rootUri = *rootUriString;
+            }
+            clientCompletionItemSnippetSupport = false;
+            if (params->capabilities->textDocument) {
+                auto &textDocument = *params->capabilities->textDocument;
+                if (textDocument->completion) {
+                    auto &completion = *textDocument->completion;
+                    if (completion->completionItem) {
+                        clientCompletionItemSnippetSupport =
+                            (*completion->completionItem)->snippetSupport.value_or(false);
                     }
                 }
             }
@@ -163,31 +175,34 @@ unique_ptr<core::GlobalState> LSPLoop::processRequest(unique_ptr<core::GlobalSta
             completionProvider->triggerCharacters = {"."};
             serverCap->completionProvider = move(completionProvider);
 
-            sendResult(d, InitializeResult(move(serverCap)));
+            sendResponse(id, InitializeResult(move(serverCap)));
         } else if (method == LSPMethod::Shutdown()) {
             prodCategoryCounterInc("lsp.requests.processed", "shutdown");
-            // return default value: null
-            rapidjson::Value result;
-            sendResult(d, result);
+            sendNullResponse(id);
         } else if (method == LSPMethod::TextDocumentDocumentSymbol()) {
-            return handleTextDocumentDocumentSymbol(move(gs), d);
+            auto params = DocumentSymbolParams::fromJSONValue(alloc, *rawParams);
+            return handleTextDocumentDocumentSymbol(move(gs), id, *params);
         } else if (method == LSPMethod::WorkspaceSymbols()) {
-            return handleWorkspaceSymbols(move(gs), d);
+            auto params = WorkspaceSymbolParams::fromJSONValue(alloc, *rawParams);
+            return handleWorkspaceSymbols(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentDefinition()) {
-            return handleTextDocumentDefinition(move(gs), d);
+            auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
+            return handleTextDocumentDefinition(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentHover()) {
-            return handleTextDocumentHover(move(gs), d);
+            auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
+            return handleTextDocumentHover(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentCompletion()) {
-            return handleTextDocumentCompletion(move(gs), d);
+            auto params = CompletionParams::fromJSONValue(alloc, *rawParams);
+            return handleTextDocumentCompletion(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentSignatureHelp()) {
-            return handleTextSignatureHelp(move(gs), d);
+            auto params = TextDocumentPositionParams::fromJSONValue(alloc, *rawParams);
+            return handleTextSignatureHelp(move(gs), id, *params);
         } else if (method == LSPMethod::TextDocumentRefernces()) {
-            return handleTextDocumentReferences(move(gs), d);
+            auto params = ReferenceParams::fromJSONValue(alloc, *rawParams);
+            return handleTextDocumentReferences(move(gs), id, *params);
         } else {
             ENFORCE(!method.isSupported, "failing a supported method");
-            errorCode = (int)LSPErrorCodes::MethodNotFound;
-            errorString = fmt::format("Unknown method: {}", method.name);
-            sendError(d, errorCode, errorString);
+            sendError(id, (int)LSPErrorCodes::MethodNotFound, fmt::format("Unknown method: {}", method.name));
         }
     }
     return gs;

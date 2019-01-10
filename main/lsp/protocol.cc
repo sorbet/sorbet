@@ -119,15 +119,16 @@ unique_ptr<core::GlobalState> LSPLoop::runLSP() {
                 }
 
                 if (method == LSPMethod::CancelRequest()) {
-                    // see if they are cancelling request that we didn't yet even start processing.
+                    // see if they are canceling request that we didn't yet even start processing.
                     rapidjson::Document canceledRequest;
                     auto it = findRequestToBeCancelled(guardedState.pendingRequests, d);
                     if (it != guardedState.pendingRequests.end()) {
                         auto &requestToBeCancelled = *it;
-                        requestToBeCancelled.AddMember("cancelled", move(d), requestToBeCancelled.GetAllocator());
+                        requestToBeCancelled.AddMember("canceled", rapidjson::Value(true),
+                                                       requestToBeCancelled.GetAllocator());
                         canceledRequest = move(requestToBeCancelled);
                         guardedState.pendingRequests.erase(it);
-                        // move the cancelled request to the front
+                        // move the canceled request to the front
                         auto itFront = findFirstPositionAfterLSPInitialization(guardedState.pendingRequests);
                         guardedState.pendingRequests.insert(itFront, move(canceledRequest));
                         LSPLoop::mergeDidChanges(guardedState.pendingRequests);
@@ -237,54 +238,44 @@ LSPLoop::findFirstPositionAfterLSPInitialization(deque<rapidjson::Document> &pen
     return pendingRequests.end();
 }
 
-void LSPLoop::sendShowMessageNotification(MessageType messageType, rapidjson::Document &d, const string &message) {
-    sendNotification(LSPMethod::WindowShowMessage(), d, ShowMessageParams(messageType, message));
+void LSPLoop::sendShowMessageNotification(MessageType messageType, const string &message) {
+    sendNotification(LSPMethod::WindowShowMessage(), ShowMessageParams(messageType, message));
 }
 
-void LSPLoop::sendResult(rapidjson::Document &forRequest, rapidjson::Value &result) {
-    forRequest.AddMember("result", result, alloc);
-    forRequest.RemoveMember("method");
-    forRequest.RemoveMember("params");
-    sendRaw(forRequest);
+void LSPLoop::sendNullResponse(const MessageId &id) {
+    auto resp = ResponseMessage("2.0", id);
+    // rapidjson values default to null.
+    resp.result = make_unique<rapidjson::Value>();
+    sendRaw(resp.toJSON());
 }
 
-void LSPLoop::sendResult(rapidjson::Document &forRequest, const JSONBaseType &result) {
-    sendResult(forRequest, *result.toJSONValue(alloc));
+void LSPLoop::sendResponse(const MessageId &id, const JSONBaseType &result) {
+    auto resp = ResponseMessage("2.0", id);
+    resp.result = result.toJSONValue(alloc);
+    sendRaw(resp.toJSON());
 }
 
-void LSPLoop::sendResult(rapidjson::Document &forRequest, const std::vector<std::unique_ptr<JSONBaseType>> &result) {
-    rapidjson::Value finalResult;
-    finalResult.SetArray();
+void LSPLoop::sendResponse(const MessageId &id, const vector<unique_ptr<JSONBaseType>> &result) {
+    auto finalResult = make_unique<rapidjson::Value>();
+    finalResult->SetArray();
     for (auto &item : result) {
-        finalResult.PushBack(*item->toJSONValue(alloc), alloc);
+        finalResult->PushBack(*item->toJSONValue(alloc), alloc);
     }
-    sendResult(forRequest, finalResult);
+    auto resp = ResponseMessage("2.0", id);
+    resp.result = move(finalResult);
+    sendRaw(resp.toJSON());
 }
 
-void LSPLoop::sendError(rapidjson::Document &forRequest, int errorCode, const string &errorStr) {
-    forRequest.RemoveMember("method");
-    forRequest.RemoveMember("params");
-    forRequest.RemoveMember("cancelled");
-    rapidjson::Value error;
-    error.SetObject();
-    error.AddMember("code", errorCode, alloc);
-    rapidjson::Value message(errorStr.c_str(), alloc);
-    error.AddMember("message", message, alloc);
-    forRequest.AddMember("error", error, alloc);
-    sendRaw(forRequest);
+void LSPLoop::sendError(const MessageId &id, int errorCode, string_view errorMsg) {
+    auto resp = ResponseMessage("2.0", id);
+    resp.error = make_unique<ResponseError>(errorCode, string(errorMsg));
+    sendRaw(resp.toJSON());
 }
 
-unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, rapidjson::Document &d, const core::GlobalState &gs) {
-    if (!d.HasMember("params") || !d["params"].HasMember("position") ||
-        !d["params"]["position"].HasMember("character") || !d["params"]["position"].HasMember("line")) {
-        sendError(d, (int)LSPErrorCodes::InvalidRequest,
-                  "Request must have a \"params\" field that has a nested \"position\", with nested \"line\" and "
-                  "\"character\"");
-        return nullptr;
-    }
+unique_ptr<core::Loc> LSPLoop::lspPos2Loc(core::FileRef fref, const Position &pos, const core::GlobalState &gs) {
     core::Loc::Detail reqPos;
-    reqPos.line = d["params"]["position"]["line"].GetInt() + 1;
-    reqPos.column = d["params"]["position"]["character"].GetInt() + 1;
+    reqPos.line = pos.line + 1;
+    reqPos.column = pos.character + 1;
     auto offset = core::Loc::pos2Offset(fref.data(gs), reqPos);
     return make_unique<core::Loc>(core::Loc(fref, offset, offset));
 }
@@ -318,47 +309,20 @@ bool LSPLoop::handleReplies(rapidjson::Document &d) {
     return false;
 }
 
-void LSPLoop::sendRaw(rapidjson::Document &raw) {
-    if (raw.FindMember("jsonrpc") == raw.MemberEnd()) {
-        raw.AddMember("jsonrpc", "2.0", alloc);
-    }
-    rapidjson::StringBuffer strbuf;
-    rapidjson::Writer<rapidjson::StringBuffer> writer(strbuf);
-    raw.Accept(writer);
-    string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", strbuf.GetLength(), strbuf.GetString());
-    logger->debug("Write: {}\n", strbuf.GetString());
+void LSPLoop::sendRaw(string_view json) {
+    string outResult = fmt::format("Content-Length: {}\r\n\r\n{}", json.length(), json);
+    logger->debug("Write: {}\n", json);
     outputStream << outResult << flush;
 }
 
-void LSPLoop::sendNotification(LSPMethod meth, rapidjson::Document &d, const JSONBaseType &data) {
+void LSPLoop::sendNotification(LSPMethod meth, const JSONBaseType &data) {
     ENFORCE(meth.isNotification);
     ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
 
-    rapidjson::Document request(&alloc);
-    request.SetObject();
-    string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
+    auto notif = NotificationMessage("2.0", meth.name);
+    notif.params = data.toJSONValue(alloc);
 
-    request.AddMember("method", meth.name, alloc);
-    request.AddMember("params", *data.toJSONValue(alloc), alloc);
-
-    sendRaw(request);
-}
-
-void LSPLoop::sendRequest(LSPMethod meth, rapidjson::Value &data, function<void(rapidjson::Value &)> onComplete,
-                          function<void(rapidjson::Value &)> onFail) {
-    ENFORCE(!meth.isNotification);
-    ENFORCE(meth.kind == LSPMethod::Kind::ServerInitiated || meth.kind == LSPMethod::Kind::Both);
-    rapidjson::Document request(&alloc);
-    request.SetObject();
-    string idStr = fmt::format("ruby-typer-req-{}", ++requestCounter);
-
-    request.AddMember("id", idStr, alloc);
-    request.AddMember("method", meth.name, alloc);
-    request.AddMember("params", data, alloc);
-
-    awaitingResponse[idStr] = ResponseHandler{move(onComplete), move(onFail)};
-
-    sendRaw(request);
+    sendRaw(notif.toJSON());
 }
 
 } // namespace sorbet::realmain::lsp

@@ -18,12 +18,12 @@ unique_ptr<SymbolInformation> LSPLoop::symbolRef2SymbolInformation(const core::G
     return result;
 }
 
-unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs,
-                                                              rapidjson::Document &d) {
+unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::GlobalState> gs, const MessageId &id,
+                                                              const WorkspaceSymbolParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "workspace.symbols");
 
     vector<unique_ptr<JSONBaseType>> result;
-    string searchString = d["params"]["query"].GetString();
+    string_view searchString = params.query;
 
     auto finalGs = move(gs);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
@@ -35,7 +35,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleWorkspaceSymbols(unique_ptr<core::G
             }
         }
     }
-    sendResult(d, result);
+    sendResponse(id, result);
     return finalGs;
 }
 } // namespace sorbet::realmain::lsp

@@ -65,11 +65,11 @@ std::unique_ptr<DocumentSymbol> symbolRef2DocumentSymbol(const core::GlobalState
 }
 
 unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_ptr<core::GlobalState> gs,
-                                                                        rapidjson::Document &d) {
+                                                                        const MessageId &id,
+                                                                        const DocumentSymbolParams &params) {
     prodCategoryCounterInc("lsp.requests.processed", "textDocument.documentSymbol");
     vector<unique_ptr<JSONBaseType>> result;
-    auto uri = string_view(d["params"]["textDocument"]["uri"].GetString(),
-                           d["params"]["textDocument"]["uri"].GetStringLength());
+    string_view uri = params.textDocument->uri;
     auto fref = uri2FileRef(uri);
     auto finalGs = move(gs);
     for (u4 idx = 1; idx < finalGs->symbolsUsed(); idx++) {
@@ -87,7 +87,7 @@ unique_ptr<core::GlobalState> LSPLoop::handleTextDocumentDocumentSymbol(unique_p
             }
         }
     }
-    sendResult(d, result);
+    sendResponse(id, result);
     return finalGs;
 }
 

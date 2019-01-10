@@ -66,12 +66,10 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
 
     auto RequestMessage =
         makeObject("RequestMessage",
-                   {
-                       makeField("jsonrpc", JSONRPCConstant),
-                       makeField("id", makeVariant({JSONInt, JSONString})),
-                       makeField("method", JSONString),
-                       makeField("params", makeOptional(makeVariant({makeArray(JSONAny), JSONAnyObject}))),
-                   },
+                   {makeField("jsonrpc", JSONRPCConstant), makeField("id", makeVariant({JSONInt, JSONString})),
+                    makeField("method", JSONString), makeField("params", makeOptional(JSONAny)),
+                    // Sorbet-custom property added to requests that have been canceled.
+                    makeField("canceled", makeOptional(JSONBool))},
                    classTypes);
     auto ResponseError = makeObject("ResponseError",
                                     {
@@ -401,11 +399,13 @@ void makeLSPTypes(vector<shared_ptr<JSONClassType>> &enumTypes, vector<shared_pt
                                        "refactor.rewrite", "source", "source.organizeImports"},
                                       enumTypes);
 
-    auto CodeActionKindSupport = makeObject("CodeActionKindSupport",
-                                            {
-                                                makeField("valueSet", makeArray(CodeActionKind)),
-                                            },
-                                            classTypes);
+    auto CodeActionKindSupport =
+        makeObject("CodeActionKindSupport",
+                   {
+                       // Note: The set of code actions is open, so these could be arbitrary strings.
+                       makeField("valueSet", makeArray(JSONString)),
+                   },
+                   classTypes);
 
     auto CodeActionLiteralSupport = makeObject("CodeActionLiteralSupport",
                                                {
